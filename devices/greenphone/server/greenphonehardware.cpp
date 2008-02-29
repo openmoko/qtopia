@@ -33,6 +33,7 @@
 #include <QLabel>
 #include <QDesktopWidget>
 #include <QProcess>
+#include <QFile>
 
 #include <qcontentset.h>
 #include <qtopiaapplication.h>
@@ -82,7 +83,8 @@ GreenphoneHardware::GreenphoneHardware()
     bootSource = new QBootSourceAccessoryProvider( "greenphone", this );
 
     readDetectData(1 << CHARGER_DETECT |
-                   1 << BOOTSRC_DETECT);
+                   1 << BOOTSRC_DETECT |
+                   1 << LOWPOWER_DETECT);
 
     QTimer::singleShot(30*1000, this, SLOT(delayedRead()));
 }
@@ -272,24 +274,6 @@ void GreenphoneHardware::setLeds()
         ::close(ledFd);
 }
 
-void GreenphoneHardware::forceShutdown()
-{
-    QPixmap pix;
-    pix = QPixmap(QLatin1String(":image/splash-shutdown-low-power"));
-
-    QLabel *lblWait = new QLabel(0);
-    lblWait->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | 
-                            Qt::WindowStaysOnTopHint);
-    lblWait->setAttribute(Qt::WA_DeleteOnClose);
-    lblWait->setPixmap(pix);
-    lblWait->setAlignment(Qt::AlignCenter);
-    QDesktopWidget *desktop = QApplication::desktop();
-    lblWait->setGeometry(desktop->screenGeometry(desktop->primaryScreen()));
-    lblWait->show();
-
-    shutdownRequested();
-}
-
 void GreenphoneHardware::shutdownRequested()
 {
     QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);
@@ -310,8 +294,7 @@ void GreenphoneHardware::timerEvent(QTimerEvent *e)
 void GreenphoneHardware::delayedRead()
 {
     readDetectData(1 << SDCARD_DETECT |
-                   1 << AVHEADSET_DETECT |
-                   1 << LOWPOWER_DETECT);
+                   1 << AVHEADSET_DETECT);
 }
 
 void GreenphoneHardware::readDetectData(quint32 devices)
@@ -463,7 +446,12 @@ void GreenphoneHardware::readDetectData(quint32 devices)
                 } else if (device.status == TOOLOW_POWER) {
                     qLog(Hardware) << "Too low power - level" << device.extra;
                     if (detectData[CHARGER_DETECT].status == DEV_OFF) {
-                        forceShutdown();
+                        QFile splashHeading("/tmp/splash-heading");
+                        if (splashHeading.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                            splashHeading.write("Low Battery");
+                            splashHeading.close();
+                        }
+                        shutdownRequested();
                     }
                 } else {
                     qLog(Hardware) << "Unknown low power event";

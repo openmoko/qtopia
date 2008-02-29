@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Tutorial: Writing Qtopia Phone Applications</title>
+  <title>Tutorial: Writing Qtopia Phone Applications</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Writing Qtopia Phone Applications<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Writing Qtopia Phone Applications<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#user-interface-changes">User Interface Changes</a></li>
 <li><a href="#keypad-navigation">Keypad Navigation</a></li>
@@ -26,7 +29,7 @@
 <li>select key - used to select a widget for editing or an item from a list, etc.</li>
 <li>back key - used to cancel the current operation, or go back to the previous screen.</li>
 <li>arrow keys</li>
-<li>keypad - used for numeric and text input (via <a href="inputmethods.html">Input Methods</a>).</li>
+<li>keypad - used for numeric and text input (via <a href="inputmethods-description.html">Input Methods</a>).</li>
 </ul>
 <p>Applications written for Qtopia and Qtopia Phone edition usually share 99% of their code, however, it is necessary to make some allowances for phone usage.</p>
 <a name="user-interface-changes"></a>
@@ -38,8 +41,8 @@
 </ul>
 <p>In addition, phones usually have lower resolution screens, but higher visibility requirements than PDAs. This often requires changes to the user interface to permit usage of larger fonts on less-available screen real-estate.</p>
 <p>Note: Code that is specific to the Qtopia phone edition can be included or excluded using the QTOPIA_PHONE macro.</p>
-<pre>&nbsp;   #ifdef QTOPIA_PHONE
-        // phone specific code
+<pre>    #ifdef QTOPIA_PHONE
+        <span class="comment">// phone specific code</span>
     #endif</pre>
 <a name="keypad-navigation"></a>
 <h2>Keypad Navigation</h2>
@@ -54,43 +57,43 @@
 <li>enter modal editing state so that further editing can be performed. In this case, either <tt>Qt::Key_Back</tt> or <tt>Qt::Key_Select</tt> is used to end modal editing.</li>
 </ul>
 <p>The navigation state of a widget is set using:</p>
-<pre>&nbsp;       QWidget::setEditFocus(bool)</pre>
+<pre>        QWidget::setEditFocus(bool)</pre>
 <p>and accessed using:</p>
-<pre>&nbsp;       bool QWidget::hasEditFocus().</pre>
+<pre>        bool QWidget::hasEditFocus().</pre>
 <a name="the-soft-menu-bar"></a>
 <h2>The Soft Menu Bar</h2>
 <p>Some phones have soft keys with different meanings in different contexts. On these phones the Qtopia phone edition server displays a Soft Menu Bar at the bottom of the screen. This bar displays the actions that the corresponding button on the phone will perform. The label to be displayed in the context bar is set using the <a href="qsoftmenubar.html">QSoftMenuBar</a> class.</p>
 <p>For example, to set the <tt>Qt::Key_Context1</tt> label of a widget to the standard Edit label when it is in edit focus state:</p>
-<pre>&nbsp;       QSoftMenuBar::setLabel(widget, Qt::Key_Context1, QSoftMenuBar::Edit, QSoftMenuBar::EditFocus);</pre>
+<pre>        QSoftMenuBar::setLabel(widget, Qt::Key_Context1, QSoftMenuBar::Edit, QSoftMenuBar::EditFocus);</pre>
 <p>It is also possible to set custom labels using:</p>
-<pre>&nbsp;       QSoftMenuBar::setLabel(QWidget *, int key, const QString &amp;pixmap, const QString &amp;text, FocusState state);</pre>
+<pre>        QSoftMenuBar::setLabel(QWidget *, int key, const QString &amp;pixmap, const QString &amp;text, FocusState state);</pre>
 <p>In this case the pixmap name and a short text label are specified. The pixmap must always be provided so that themes with limited space can display a pixmap rather than longer text. The text is optional, but recommended. In future versions of Qtopia Phone Edition the user may have a choice of preference for text over icons.</p>
 <a name="menus"></a>
 <h2>Menus</h2>
 <p>The <tt>Qt::Key_Menu</tt> button displays a menu of possible actions for the current application state. You can bind a <a href="qmenu.html">QMenu</a> to the menu button using:</p>
-<pre>&nbsp;       QSoftMenuBar::addMenuTo(QWidget *w, QMenu *menu, int state);</pre>
+<pre>        QSoftMenuBar::addMenuTo(QWidget *w, QMenu *menu, int state);</pre>
 <p>When the <tt>Menu</tt> button is pressed, the menu for the currently focused widget will be displayed. It follows the same rules as <a href="qsoftmenubar.html">QSoftMenuBar</a>, so if the current focus widget does not claim the <tt>Menu</tt> key or have a menu, then the menu or label of an ancestor will be active.</p>
 <p>You can also get the menu for any widget using the <a href="qsoftmenubar.html#menuFor">QSoftMenuBar::menuFor</a>() function. This will return the menu already associated with the widget if available, otherwise it will create a new menu.</p>
-<pre>&nbsp;       QMenu *menu = QSoftMenuBar::menuFor(this);
+<pre>        QMenu *menu = QSoftMenuBar::menuFor(this);
         menu-&gt;addAction(tr(&quot;Open&quot;), this, SLOT(open()));</pre>
 <a name="supporting-qtopia-pda-and-qtopia-phone"></a>
 <h2>Supporting Qtopia PDA and Qtopia Phone</h2>
 <p>This section shows the recommended method for writing an application which can be deployed on both PDAs and phones. For simple applications this usually means supporting a menu bar and toolbars on the PDA and a soft menu on the phone. More complex applications may consider different data views and dialog layouts.</p>
 <p>Consider the code commonly used to construct the user interface:</p>
-<pre>&nbsp;   MainWindow::MainWindow(QWidget *parent, Qt::WFlags f)
+<pre>    MainWindow::MainWindow(QWidget *parent, Qt::WFlags f)
         : QMainWindow(parent, f)
     {
-        // Create menu
+        <span class="comment">// Create menu</span>
         QMenuBar *menubar = menuBar();
         QToolBar *bar = new QToolBar(this);
         bar-&gt;setMovable(false);
         addToolBar(Qt::TopToolBarArea, bar);
         QMenu *fileMenu = new QMenu(menubar);
 
-        // Create toolbar
+        <span class="comment">// Create toolbar</span>
         fileTools = new QToolBar(this);
 
-        // Create actions and add to the menu/toolbar
+        <span class="comment">// Create actions and add to the menu/toolbar</span>
         newAction = new QAction(QIcon(&quot;:image/filenew&quot;), tr(&quot;New&quot;), this);
         connect(newAction, SIGNAL(triggered()), this, SLOT(new()));
         fileMenu-&gt;addAction(newAction);
@@ -101,17 +104,17 @@
         fileMenu-&gt;addAction(openAction);
         fileTools-&gt;addAction(openAction);
 
-        // Create central widget
+        <span class="comment">// Create central widget</span>
         view = new View(this);
         setCentralWidget(view);
 
-        // Other initialization
+        <span class="comment">// Other initialization</span>
     }</pre>
 <p>The same application on a phone will have no menubar or toolbar. It will instead have a menu activated by a context key. The above code can be modified to support both PDA and phone as follows:</p>
-<pre>&nbsp;   MainWindow::MainWindow(QWidget *parent, Qt::WFlags f)
+<pre>    MainWindow::MainWindow(QWidget *parent, Qt::WFlags f)
         : QMainWindow(parent, f)
     {
-        // Create actions
+        <span class="comment">// Create actions</span>
         newAction = new QAction(tr(&quot;New&quot;), QIcon(&quot;:image/filenew&quot;), this);
         connect(newAction, SIGNAL(triggered()), this, SLOT(new()));
 
@@ -119,17 +122,17 @@
         connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
 
     #ifndef QTOPIA_PHONE
-        // Create menu
+        <span class="comment">// Create menu</span>
         QMenuBar *menubar = menuBar();
         QToolBar *bar = new QToolBar(this);
         bar-&gt;setMovable(false);
         addToolBar(Qt::TopToolBarArea, bar);
         QMenu *fileMenu = new QMenu(menubar);
 
-        // Create toolbar
+        <span class="comment">// Create toolbar</span>
         fileTools = new QToolBar(this);
 
-        // Add actions to menu and toolbar
+        <span class="comment">// Add actions to menu and toolbar</span>
         fileMenu-&gt;addAction(newAction);
         fileTools-&gt;addAction(newAction);
         fileMenu-&gt;addAction(openAction);
@@ -137,16 +140,16 @@
     #else
         QMenu *menu = QSoftMenuBar::menuFor(this);
 
-        // Add actions to the menu.
+        <span class="comment">// Add actions to the menu.</span>
         menu-&gt;addAction(newAction);
         menu-&gt;addAction(openAction);
     #endif
 
-        // Create central widget
+        <span class="comment">// Create central widget</span>
         view = new View(this);
         setCentralWidget(view);
 
-        // Other initialization
+        <span class="comment">// Other initialization</span>
     }</pre>
 <p>In the above code, all actions are created and either the menu and toolbar are created and populated, or a context menu is populated and created.</p>
 <p>In larger applications some of the actions available in the PDA version may be handled in other ways, for example, by assigning them to key presses (see <a href="qshortcut.html">QShortcut</a>) rather than tool buttons/menu items, or they may be disabled completely if they are unsuitable for use on a phone.</p>
@@ -166,11 +169,11 @@
 <li>text - the standard key text associations are used, with multiple presses by the user and used to choose the desired letter.</li>
 <li><i>null hint</i> - no method is used - keys are passed unchanged.</li>
 </ul>
-<p>See also <a href="inputmethods.html">Input Methods Documentation</a>.</p>
+<p>See also <a href="inputmethods-description.html">Input Methods Documentation</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

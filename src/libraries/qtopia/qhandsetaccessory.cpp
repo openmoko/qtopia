@@ -36,10 +36,11 @@ static const char* const QHANDSETACCESSORY_TTY          = "tty";
 
 /*!
     \class QHandsetAccessory
+    \mainclass
+
     \brief The QHandsetAccessory class provides access to a handset accessory on the device.
 
-    The QHandsetAccessory class provides access to a handset accessory
-    on the device. Handset device implementations should inherit from
+    Handset device implementations should inherit from
     QHandsetAccessoryProvider.
 
     \sa QHandsetAccessoryProvider, QHardwareInterface
@@ -49,24 +50,24 @@ static const char* const QHANDSETACCESSORY_TTY          = "tty";
 
 /*!
     \enum QHandsetAccessory::Mode
-    Defines the mode for a hanset accessory
+    Defines the mode for a handset accessory
 
     \value Internal The handset is internal to the device
     \value External The handset is external to the device
 */
 
 /*!
-    Construct a new handset acessory object for \a id and attach
+    Construct a new handset accessory object for provider \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the default
-    accessory that supports the handset interface.  If there is more
+    accessory provider that supports the handset interface.  If there is more
     than one service that supports the handset interface, the caller
-    should enumerate them with QHardwareManager::supports()
+    should enumerate them with QHardwareManager::providers()
     and create separate QHandsetAccessory objects for each.
 
-    \sa QHardwareManager::supports()
+    \sa QHardwareManager::providers()
 */
 QHandsetAccessory::QHandsetAccessory(
     const QString& id,
@@ -77,7 +78,7 @@ QHandsetAccessory::QHandsetAccessory(
 }
 
 /*!
-    Destroy this handset accessory.
+    Destroys the handset accessory.
 */
 QHandsetAccessory::~QHandsetAccessory()
 {
@@ -94,7 +95,7 @@ QHandsetAccessory::Mode QHandsetAccessory::mode() const
 }
 
 /*!
-    Determines if the handset accessory is a speaker phone.
+    Returns true if the handset accessory is a speaker phone; otherwise returns false.
 */
 bool QHandsetAccessory::speakerPhone() const
 {
@@ -102,7 +103,7 @@ bool QHandsetAccessory::speakerPhone() const
 }
 
 /*!
-    Determines if the handset accessory is a TTY handset.
+    Returns true if the handset accessory is a TTY handset; otherwise returns false.
 */
 bool QHandsetAccessory::tty() const
 {
@@ -117,12 +118,12 @@ bool QHandsetAccessory::tty() const
 
 /*!
     \class QHandsetAccessoryProvider
+    \mainclass
+
     \brief The QHandsetAccessoryProvider class provides an interface for handset devices to integrate into Qtopia.
 
-    The QHandsetAccessoryProvider class provides an interface for
-    handset devices to integrate into Qtopia.  Handset devices inherit from
-    this and call setMode(), setSpeakerPhone() and setTty() to
-    indicate the level of functionality that is supported.
+    Handset devices inherit from this and call setMode(), setSpeakerPhone()
+    and setTty() to indicate the level of functionality that is supported.
 
     \sa QHandsetAccessory
 
@@ -130,7 +131,7 @@ bool QHandsetAccessory::tty() const
 */
 
 /*!
-    Create a handset device called \a id and attach it to \a parent.
+    Create a handset accessory provider called \a id and attaches it to \a parent.
 */
 QHandsetAccessoryProvider::QHandsetAccessoryProvider(
     const QString& id,
@@ -140,7 +141,7 @@ QHandsetAccessoryProvider::QHandsetAccessoryProvider(
 }
 
 /*!
-    Destroy this handset accessory provider.
+    Destroys the handset accessory provider.
 */
 QHandsetAccessoryProvider::~QHandsetAccessoryProvider()
 {

@@ -69,10 +69,17 @@ AlertService::~AlertService()
   \ingroup QtopiaServer::Task
   \brief The AlertServiceTask class provides a WAV file implementation of the Alert service.
 
-  On reception of the \c {Alert::soundAlert()} service message, the
-  AlertServiceTask class will play the \c {:sound/alarm} system sound.
+  The AlertServiceTask provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
 
-  The AlertServiceTask class provides the \c {AlertService} task.
+  \table
+  \row \o Task Name \o AlertService
+  \row \o Interfaces \o None
+  \row \o Services \o Alert
+  \endtable
+
+  On reception of the Alert::soundAlert() service message the \c {:sound/alarm} system sound 
+  is played using the QSoundControl API.
 
   \sa AlertService
  */

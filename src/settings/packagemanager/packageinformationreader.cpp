@@ -49,7 +49,7 @@ PackageInformationReader::PackageInformationReader( QTextStream &ts )
     , hasContent( false )
     , accumulatingFullDesc( false )
 {
-    PackageInformationReader();
+    reset();
     while (!ts.atEnd())
     {
         QString line = ts.readLine();

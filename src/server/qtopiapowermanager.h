@@ -33,7 +33,6 @@
 
 class QSettings;
 
-void qpe_setBrightness(int bright);
 class QtopiaPowerManager : public PowerManagerTask, public QWSScreenSaver
 {
 public:
@@ -70,7 +69,7 @@ class QtopiaPowerConstraintManager : public QObject
 public:
     QtopiaPowerConstraintManager(QObject *parent = 0);
 
-    void setConstraint(int mode,const QString &app);
+    void setConstraint( QtopiaApplication::PowerConstraint ,const QString &app);
 
     static QtopiaPowerConstraintManager *instance();
 

@@ -22,11 +22,13 @@
 #ifndef __QTOPIA_MEDIALIBRARY_QMEDIADEVICEREP_H
 #define __QTOPIA_MEDIALIBRARY_QMEDIADEVICEREP_H
 
-#include <qstring.h>
-#include <qvariant.h>
-#include <qmap.h>
+
+#include <QString>
+#include <QVariant>
+#include <QMap>
 
 #include <qtopiaglobal.h>
+
 #include "qmediadeviceinfo.h"
 
 

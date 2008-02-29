@@ -25,13 +25,13 @@
 #include <QObject>
 
 class QBluetoothHandsfreeService;
-class BtHandsfreeService : public QObject
+class BtHandsfreeServiceTask : public QObject
 {
     Q_OBJECT
 
 public:
-    BtHandsfreeService( QObject* parent = 0 );
-    ~BtHandsfreeService();
+    BtHandsfreeServiceTask( QObject* parent = 0 );
+    ~BtHandsfreeServiceTask();
 
 private:
     QBluetoothHandsfreeService *m_hfService;

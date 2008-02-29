@@ -43,6 +43,9 @@ my @CONFIG;
 if ( @ARGV && $ARGV[0] =~ /-(release|debug)/ ) {
     shift(@ARGV);
     push(@CONFIG, "CONFIG+=$1");
+    if ( $1 eq "debug" ) {
+        push(@CONFIG, "CONFIG+=nostrip");
+    }
 }
 
 if ( @ARGV && $ARGV[0] eq "-makemakefile" ) {
@@ -459,6 +462,9 @@ sub makeMakefile
     # not to require re-configuring just because a Makefile.target was rebuilt.
     my @targets = qw(all install install_target packages lupdate sdk cleaninstall cinstall syncqtopia
                      first_syncqtopia test checkp4 remove_target relink printdependrules qmake_check);
+    if ( configopt("depot") ) {
+        push(@targets, "auto_docs");
+    }
     # Ignore these targets becase we have our own implementation for them
     my @extra_targets = qw(qmake qmake-debug regenerate regenerate_all nodeps);
     # This list must match the list in src/build/subdirs.prf
@@ -589,7 +595,7 @@ sub makeMakefile
         } elsif ( $$PROJECT_TYPE{subdirs} && grep { $_ eq $target } @qmake_targets ) {
             $contents .= $WRAPPER;
         } elsif ( $target eq "sdk" ) {
-            my $sdk = $BUILD;
+            my $sdk = '@'.&$build('check_$@');
             $sdk =~ s/(INSTALL_ROOT=\$\()[^)]+(\))/$1SDKROOT$2/g;
             $contents .= $sdk;
         } else {

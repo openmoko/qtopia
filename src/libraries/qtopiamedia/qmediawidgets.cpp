@@ -21,10 +21,11 @@
 
 #include "qmediawidgets.h"
 
-#include <mediastyle.h>
+#include <private/mediastyle_p.h>
 
 /*!
     \class QMediaStateLabel
+    \mainclass
 
     \brief The QMediaStateLabel class displays icons for the various states of
     media playback.
@@ -36,6 +37,13 @@
 
     The display type can be set either by the constructor or by the
     setState() slot.
+
+    \code
+        QMediaStateLabel *label = new QMediaStateLabel;
+        label->setState( QtopiaMedia::Playing );
+    \endcode
+
+    \image qmediastatelabel.jpg "QMediaStateLabel"
 */
 
 class QMediaStateLabelPrivate
@@ -209,6 +217,7 @@ void SimpleLabel::paintEvent( QPaintEvent* e )
 
 /*!
     \class QMediaProgressLabel
+    \mainclass
 
     \brief The QMediaProgressLabel class displays the current progress of a
     playing media content as a text label.
@@ -249,6 +258,8 @@ void SimpleLabel::paintEvent( QPaintEvent* e )
     The progress display type can be set either by the constructor or by the
     setProgressType() method.
 
+    \image qmediaprogresslabel.jpg "QMediaProgressLabel"
+
     QMediaProgressLabel is a \l {player object}.
 */
 
@@ -274,7 +285,8 @@ public:
 /*!
     \fn QMediaProgressLabel::QMediaProgressLabel( Type type, QWidget* parent )
 
-    Constructs a progress label with the format \a type. Elapsed and total time are initialized to \tt {0:00}.
+    Constructs a progress label with the format \a type. Elapsed and total time
+    are initialized to \tt {0:00}.
 
     The \a parent argument is passed to the QWidget constructor.
 */
@@ -527,6 +539,7 @@ SlimlineProgress::SlimlineProgress( QWidget* parent )
 
 /*!
     \class QMediaProgressWidget
+    \mainclass
 
     \brief The QMediaProgressWidget class displays the current progress of a
     playing media content as a progress bar.
@@ -543,6 +556,8 @@ SlimlineProgress::SlimlineProgress( QWidget* parent )
         QMediaContent *content = new QMediaContent( url, this );
         progress->setMediaContent( content );
     \endcode
+
+    \image qmediaprogresswidget.jpg "QMediaProgressWidget"
 
     QMediaProgressWidget is a \l {player object}.
 */
@@ -640,6 +655,7 @@ void QMediaProgressWidget::deactivate()
 
 /*!
     \class QMediaVolumeLabel
+    \mainclass
 
     \brief The QMediaVolumeLabel class displays icons for the various levels of
     volume.
@@ -651,6 +667,13 @@ void QMediaProgressWidget::deactivate()
 
     The display type can be set either by the constructor or by the
     setVolumeType() method.
+
+    \code
+        QMediaVolumeLabel *label = new QMediaVolumeLabel;
+        label->setVolumeType( QMediaVolumeLabel::MuteVolume );
+    \endcode
+
+    \image qmediavolumelabel.jpg "QMediaVolumeLabel"
 */
 
 /*!
@@ -832,6 +855,7 @@ void VolumeTask::execute()
 
 /*!
     \class QMediaVolumeWidget
+    \mainclass
 
     \brief The QMediaVolumeWidget class displays the current volume level of a
     media content object as a progress bar.
@@ -852,6 +876,8 @@ void VolumeTask::execute()
     In addition the user is able to control the volume by holding down the left
     and right arrow keys. A hold of Qt::Key_Left decreases the volume while a
     hold of Qt::Key_Right increases the volume.
+
+    \image qmediavolumewidget.jpg "QMediaVolumeWidget"
 
     QMediaVolumeWidget is a \l {player object}.
 */
@@ -1284,8 +1310,10 @@ void SeekMonitor::deactivate()
 
 /*!
     \class QMediaSeekWidget
+    \mainclass
 
-    \brief The QMediaSeekWidget class allows the user to seek within a media content
+    \brief The QMediaSeekWidget class allows the user to seek within a media
+content
     object.
 
     \ingroup multimedia
@@ -1310,6 +1338,8 @@ void SeekMonitor::deactivate()
     with the current seek position. While the user is not seeking the
     positionChanged() and lengthChanged() signals will be emitted when position
     and length have changed in the media content object.
+
+    \image qmediaseekwidget.jpg "QMediaSeekWidget"
 
     QMediaSeekWidget is a \l {player object}.
 */

@@ -37,6 +37,7 @@ static const char* const QBATTERYACCESSORY_TIME     = "timeRemaining";
 
 /*!
     \class QBatteryAccessory
+    \mainclass
     \brief The QBatteryAccessory class provides access to a battery on the device.
 
     The QBatteryAccessory class provides access to a battery on the device.
@@ -73,17 +74,16 @@ static const char* const QBATTERYACCESSORY_TIME     = "timeRemaining";
 */
 
 /*!
-    Construct a new battery acessory object for \a id and attach
+    Construct a new battery acessory object for provider \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the default
-    accessory that supports the battery interface.  If there is more
-    than one service that supports the battery interface, the caller
-    should enumerate them with QHardwareManager::supports()
+    accessory provider that supports the battery interface.  If there is more
+    than one provider that supports the battery interface, the caller
+    should enumerate them with QHardwareManager::providers()
     and create separate QBatteryAccessory objects for each.
 
-    \sa QHardwareManager::supports()
 */
 QBatteryAccessory::QBatteryAccessory
         ( const QString& id, QObject *parent, QAbstractIpcInterface::Mode mode )
@@ -103,7 +103,7 @@ QBatteryAccessory::~QBatteryAccessory()
 }
 
 /*!
-    Determines if the battery is currently charging.
+    Returns true if the battery is currently charging; otherwise returns false.
 */
 bool QBatteryAccessory::charging() const
 {
@@ -111,7 +111,7 @@ bool QBatteryAccessory::charging() const
 }
 
 /*!
-    Determines if the battery is in good working condition.
+    Returns true if the battery is in good working condition; otherwise returns false.
 */
 bool QBatteryAccessory::good() const
 {
@@ -144,6 +144,7 @@ int QBatteryAccessory::timeRemaining() const
 
 /*!
     \class QBatteryAccessoryProvider
+    \mainclass
     \brief The QBatteryAccessoryProvider class provides an interface for battery devices to integrate into Qtopia.
 
     The QBatteryAccessoryProvider class provides an interface for
@@ -157,7 +158,7 @@ int QBatteryAccessory::timeRemaining() const
 */
 
 /*!
-    Create a battey accessory called \a id and attach it to \a parent.
+    Create a battey accessory provider called \a id and attaches it to \a parent.
 */
 QBatteryAccessoryProvider::QBatteryAccessoryProvider
         ( const QString& id, QObject *parent )

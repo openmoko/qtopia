@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QBluetoothScoServer Class Reference</title>
+  <title>QBluetoothScoServer Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothScoServer Class Reference</h1>
 <p>The QBluetoothScoServer class represents a SCO server socket. <a href="#details">More...</a></p>
-<pre>#include &lt;QBluetoothScoServer&gt;</pre><p>Inherits <a href="qbluetoothabstractserver.html">QBluetoothAbstractServer</a>.</p>
+<pre>    #include &lt;QBluetoothScoServer&gt;</pre><p>Inherits <a href="qbluetoothabstractserver.html">QBluetoothAbstractServer</a>.</p>
 <ul>
 <li><a href="qbluetoothscoserver-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -35,7 +37,6 @@
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>3 protected functions inherited from <a href="qbluetoothabstractserver.html#protected-functions">QBluetoothAbstractServer</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
@@ -44,13 +45,18 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QBluetoothScoServer class represents a SCO server socket.</p>
-<p>This class makes it possible to accept incoming SCO connections.</p>
+<p>This class makes it possible to accept incoming SCO connections. Synchronous Connection Oriented connections are used to transfer audio data over a Bluetooth link. The audio data is usually compressed by a lossy codec and should not be used to transfer bulk data.</p>
+<p>Call <a href="qbluetoothscoserver.html#listen">listen</a>() to make the server listen for new connections. The <a href="qbluetoothabstractserver.html#newConnection">newConnection</a>() signal will be emmited each time a client connects to the server.</p>
+<p>Call <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>() to accept the pending client connection.</p>
+<p>When listening for connections, server address is available by calling <a href="qbluetoothscoserver.html#serverAddress">serverAddress</a>().</p>
+<p>Calling <a href="qbluetoothabstractserver.html#close">close</a>() will make the QBluetoothScoServer stop listening for connections and delete all pending connections.</p>
+<p>See also <a href="qbluetoothscosocket.html">QBluetoothScoSocket</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QBluetoothScoServer"></a>QBluetoothScoServer::QBluetoothScoServer ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new <a href="qbluetoothscoserver.html">QBluetoothScoServer</a> with parent <i>parent</i>. The server is in the UnconnectedState.</p>
 <h3 class="fn"><a name="dtor.QBluetoothScoServer"></a>QBluetoothScoServer::~QBluetoothScoServer ()</h3>
-<p>Destructor.</p>
+<p>Destroys the server.</p>
 <h3 class="fn"><a name="listen"></a>bool QBluetoothScoServer::listen ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>local</i> )</h3>
 <p>Tells the server to listen for incoming connections on address <i>local</i>.</p>
 <p>Returns true on success; otherwise returns false.</p>
@@ -59,8 +65,8 @@
 <p>Returns the address the server is currently listening on. If the server is not listening, returns <a href="qbluetoothaddress.html#invalid-var">QBluetoothAddress::invalid</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

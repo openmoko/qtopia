@@ -53,7 +53,7 @@ public:
 
     QtopiaInputMethod *current() const;
 
-    void showInputMethod(bool);
+    //    void showInputMethod(bool);
     void setInputMethod(const QString &);
     void setInputMethod(QtopiaInputMethod *);
     void setNextInputMethod();
@@ -62,7 +62,7 @@ public:
     uint count() const { return list.count(); }
 
     // filters current list against libname l
-    void filterAgainst(const QString &l);
+    //void filterAgainst(const QString &l);
 public slots:
     // doesn't affect 'always on' IM's.
     void activateCurrent( bool );
@@ -74,7 +74,7 @@ signals:
     // some are auto activated, dep on type.
     void activated(QtopiaInputMethod *);
 
-    void inputWidgetShown(bool);
+    void inputWidgetShown(bool shown);
 
 private slots:
     void focusChanged(QWidget* old, QWidget* now);
@@ -124,7 +124,7 @@ public slots:
     void changeInputMethod();
 signals:
     void inputToggled( bool on );
-    void visibilityChanged();
+    void visibilityChanged( bool visible);
 
 private slots:
     //void chooseKbd();
@@ -173,6 +173,8 @@ public slots:
     void setInputMethod(const QString &inputMethodName);
     void setNextInputMethod();
     void changeInputMethod();
+    void loadInputMethods();
+    void unloadInputMethods();
 
 private:
     InputMethods *parent;

@@ -33,22 +33,53 @@
 
 /*!
   \class QtopiaNetwork
+  \mainclass
   \brief The QtopiaNetwork class provides functions for starting/stopping of network devices/interfaces.
-
-  This class provides functions for starting/stopping of network devices/interfaces.
 
   In general it allows the managing of existing network configurations.
   The management functions include the starting and stopping of interfaces and
   other functions which may be useful for applications which want to influence the
   connectivity state of Qtopia. 
 
-  Monitoring functionality is provided by:
+  The QtopiaNetworkServer synchronizes network interface operations across all Qtopia 
+  applications. Client applications can request network operations via the static methods 
+  provided by this class. The following functions are thin wrapper functions encapsulating
+  IPC calls to the QtopiaNetworkServer which then acts on behalf of the caller:
+
+  \list
+    \o startInterface()
+    \o stopInterface() 
+    \o setDefaultGateway()
+    \o unsetDefaultGateway()
+    \o shutdown()
+  \endlist
+  
+  The second set of static functions relates to the management of network configuration 
+  files. By default Qtopia saves network configurations in the directory returned by 
+  settingsDir(). Network interfaces are identified via a handle which is the absolute path 
+  and name of the network configuration file containing the parameters
+  for that interface. The network server will choose and load the appropriate network plug-in 
+  based on the configuration handle. QNetworkState::deviceType() can be used to 
+  determine the type of a network handle. In order to obtain a list of network handles of 
+  a particular type availableNetworkConfigs() should be used.
+
+  loadPlugin() finds and loads the Qtopia network plug-in that is suitable for a given 
+  network handle. However to avoid multiple access to the same network interface the returned
+  QtopiaNetworkInterface instance should be carefully managed. The most common reason
+  for instanciating a QtopiaNetworkInterface from outside of the network server would be
+  the need to allow the user to configure the interface via 
+  QtopiaNetworkInterface::configuration(). The internet application would be an example 
+  for such a use case.
+
+  QtopiaNetwork only provides a minimum level of monitoring functionality via online(). 
+  If more detailed monitoring is required one of the following classes should be used:
   
   \list
     \o QNetworkState - very generic connectivity information related to Qtopia
     \o QNetworkDevice - specific information about the state of a particular hardware device
   \endlist
 
+  \sa QtopiaNetworkServer
   \ingroup io
 */
 
@@ -62,10 +93,7 @@
   \value Dialup The connection is established via a dial-up connection.
   \value GPRS The connection is established via GPRS/UMTS/EDGE.
   \value Bluetooth The network is based on Bluetooth.
-  \value Hidden This interface is hidden from the user. It usually represents a
-                network interface that offers a network service implemented by a network plugin.
-                Such an interface is automatically started/stopped by the network server. An example
-                of such an interface would be the Qtopia Bluetooth DUN service.
+  \value Hidden This interface is hidden from the user.
   \value Any A place holder for any arbitrary network type.
 
   These sub types are used in conjunction with QtopiaNetwork::GPRS and
@@ -93,8 +121,8 @@
   Starts that the network interface identified by \a handle. If the interface is running already
   this function does nothing.
 
-  \a options is used internally by some network plugins.
-  It allows to specify additional parameters which are specific to particular network plugins.
+  \a options is used internally by some network plug-ins.
+  It allows to specify additional parameters which are specific to particular network plug-ins.
   Otherwise this parameter can safely be ignored.
 */
 void QtopiaNetwork::startInterface( const QString& handle, const QVariant& options )
@@ -141,7 +169,7 @@ void QtopiaNetwork::shutdown()
 }
 
 /*!
-  Sets the network interface identified by \a handle as default gateway. If the
+  The network interface identified by \a handle becomes the new default gateway. If the
   device is connected to more than one network at a time this can be used to
   choose a preferred network for data transfers.
 */
@@ -153,8 +181,8 @@ void QtopiaNetwork::setDefaultGateway( const QString& handle )
 
 /*!
   Qtopia will set the default gateway to an interface that
-  is not equal to \a handle. This is useful if the interface identified by \a handle goes offline and the caller doesn't care
-  what interface should become the new default gateway.
+  is not equal to \a handle. This is useful if \a handle goes offline and the 
+  caller doesn't care what interface should become the new default gateway.
   */
 void QtopiaNetwork::unsetDefaultGateway( const QString& handle )
 {
@@ -195,7 +223,8 @@ void QtopiaNetwork::extendInterfaceLifetime( const QString& handle, bool isExten
 }
 
 /*!
-  Returns the default directory for network interface configurations.
+  Returns the default directory for network interface configurations; 
+  \c{$HOME/Applications/Network/config}.
 */
 QString QtopiaNetwork::settingsDir()
 {
@@ -235,18 +264,21 @@ QtopiaNetwork::Type QtopiaNetwork::toType(const QString& handle)
     }
     else if ( tp == "lan" )
     {
-        if ( cfg.value("Properties/DeviceType").toString() == "wlan" )
-            t |= QtopiaNetwork::WirelessLAN;
-        else if ( cfg.value("Properties/DeviceType").toString() == "eth" )
-            t |= QtopiaNetwork::LAN;
+        t |= QtopiaNetwork::LAN;
+    }
+    else if ( tp == "wlan" )
+    {
+        t |= QtopiaNetwork::WirelessLAN;
     }
     else if ( tp == "pcmcialan" )
     {
         t |= QtopiaNetwork::PCMCIA;
-        if ( cfg.value("Properties/DeviceType").toString() == "wlan" )
-            t |= QtopiaNetwork::WirelessLAN;
-        else if ( cfg.value("Properties/DeviceType").toString() == "eth" )
-            t |= QtopiaNetwork::LAN;
+        t |= QtopiaNetwork::LAN;
+    }
+    else if ( tp == "pcmciawlan" )
+    {
+        t |= QtopiaNetwork::PCMCIA;
+        t |= QtopiaNetwork::WirelessLAN;
     }
     else if ( tp == "bluetooth" )
     {
@@ -264,18 +296,18 @@ QtopiaNetwork::Type QtopiaNetwork::toType(const QString& handle)
 }
 
 /*!
-  Returns a list of all known Qtopia network interface handles which match type \a t. A handle uniquely identifies all
-  Qtopia network interfaces. A handle is the absolute path to the configuration file
-  that contains the settings for the particular QtopiaNetworkInterfaces.
-  \a path specifies the directory where the lookup takes place.
+  Returns a list of all known Qtopia network interface handles which match \a type. 
+  A handle uniquely identifies a Qtopia network interfaces and is the absolute 
+  path to the configuration file that contains the settings for a particular 
+  QtopiaNetworkInterface. \a path specifies the directory where the lookup takes place.
 
   Note that the lookup is independent of the state of an interface. It always returns all
   Qtopia network interfaces which are online and offline.
 
-  If \a t is \c{Any} it returns all known NetworkInterfaces. If \a path is
+  If \a type is set to \c{QtopiaNetwork::Any} it returns all known NetworkInterfaces. If \a path is
   empty the lookup will take place in settingsDir().
 */
-QStringList QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::Type t,
+QStringList QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::Type type,
         const QString& path)
 {
     QStringList resultList;
@@ -293,7 +325,7 @@ QStringList QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::Type t,
     {
         entry = configDir.filePath(entry);
         QtopiaNetwork::Type configType = toType( entry );
-        if ( ( configType & t) == t )
+        if ( ( configType & type) == type )
             resultList.append( entry );
     }
 
@@ -323,7 +355,8 @@ static void cleanup()
 
 
 /*!
-     Loads the appropriate network plug-in for the interface with \a handle.
+     Loads the appropriate network plug-in for the interface with \a handle; or 
+     0 if no suitable plug-in can be found.
 */
 QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handle)
 {
@@ -410,7 +443,8 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
 /*!
     Returns true if any known network interface is online/connected.
     This can be used to check the general connectivity status of the Qtopia environment.
-    A device is considered to be online if it is either Up, Demand or Pending.
+    A device is considered to be online if it is in the state \c QtopiaNetwork::Up, 
+    \c QtopiaNetwork::Demand or \c QtopiaNetwork::Pending.
 
     More detailed state updates on a per device base can be obtained by using QNetworkDevice
     and overal state change notifications across all network devices are provided by QNetworkState.

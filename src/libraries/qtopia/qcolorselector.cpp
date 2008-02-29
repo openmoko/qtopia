@@ -46,39 +46,94 @@ public:
     QColorSelector *picker;
 };
 
-QColorSelectorDialog::QColorSelectorDialog( const QColor &c, QWidget *parent,
-                                        Qt::WFlags f )
-    : QDialog( parent, f )
+/*!
+    \class QColorSelectorDialog
+    \mainclass
+
+    \brief The QColorSelectorDialog class allows users to select a color.
+
+    The user may select from a number of pre-defined colors displayed in
+    a grid.  A default color is displayed at the bottom of the grid.
+
+    The easiest way to create a QColorSelectorDialog is to use the static
+    function getColor().
+
+    \code
+      QColor color = QColorSelectorDialog::getColor(Qt::red);
+    \endcode
+
+    \ingroup dialogs
+*/
+
+/*!
+    \fn void QColorSelectorDialog::selected(const QColor &color)
+
+    When the selected color changes, this signal is emitted with the
+    \a color parameter containing the new color.
+*/
+
+/*!
+    Constructs a color selector dialog with the given \a parent and \a flags
+    that initially has the specifed \a color selected.
+*/
+QColorSelectorDialog::QColorSelectorDialog( const QColor &color, QWidget *parent,
+                                        Qt::WindowFlags flags )
+    : QDialog( parent, flags )
 {
     init();
-    setDefaultColor( c );
+    setDefaultColor( color );
 }
 
-QColorSelectorDialog::QColorSelectorDialog( QWidget *parent, Qt::WFlags f )
-    : QDialog( parent, f )
+/*!
+    Constructs a color selector dialog with the given \a parent and \a flags.
+*/
+QColorSelectorDialog::QColorSelectorDialog( QWidget *parent, Qt::WindowFlags flags )
+    : QDialog( parent, flags )
 {
     init();
 }
 
+/*!
+    Returns the currently highlighted color.
+
+    \sa setColor()
+*/
 QColor QColorSelectorDialog::color() const
 {
     return d->picker->color();
 }
 
-void QColorSelectorDialog::setDefaultColor( const QColor &c )
+/*!
+    Sets the default \a color.
+
+    \sa setColor(), defaultColor()
+*/
+void QColorSelectorDialog::setDefaultColor( const QColor &color )
 {
-    d->picker->setDefaultColor( c );
+    d->picker->setDefaultColor( color );
+
 }
 
+/*!
+    Returns the default color.
+
+    \sa setDefaultColor(), color()
+*/
 const QColor &QColorSelectorDialog::defaultColor() const
 {
     return d->picker->defaultColor();
 }
 
-QColor QColorSelectorDialog::getColor( const QColor &c, QWidget *parent ) // static
+/*!
+    This is a convenience static function that returns a color selected
+    by the user.  The default color is specified by \a color.
+
+    The function creates a modal file dialog with the given \a parent widget.
+*/
+QColor QColorSelectorDialog::getColor( const QColor &color, QWidget *parent ) // static
 {
     QColor fetchedColor;
-    QColorSelectorDialog *dialog = new QColorSelectorDialog( c, parent );
+    QColorSelectorDialog *dialog = new QColorSelectorDialog( color, parent );
     dialog->setModal(true);
     dialog->setWindowTitle( tr("Select color") );
     if( QtopiaApplication::execDialog( dialog ) == QDialog::Accepted )
@@ -87,18 +142,21 @@ QColor QColorSelectorDialog::getColor( const QColor &c, QWidget *parent ) // sta
     return fetchedColor;
 }
 
-void QColorSelectorDialog::setColor( const QColor &c )
+/*!
+    Sets the currently highlighted color to \a color.
+
+    \sa color()
+*/
+void QColorSelectorDialog::setColor( const QColor &color )
 {
-    d->picker->setColor( c );
+    d->picker->setColor( color );
 }
 
-void QColorSelectorDialog::colorSelected( const QColor &c )
+void QColorSelectorDialog::colorSelected( const QColor &color )
 {
     if( isModal() )
         accept();
-    else
-        hide();
-    emit selected( c );
+    emit selected( color );
 }
 
 void QColorSelectorDialog::init()
@@ -114,6 +172,15 @@ void QColorSelectorDialog::init()
 #endif
 }
 
+/*!
+    \class QColorSelector
+    \brief The QColorSelector class allows users to select a color.
+
+    The user may select from a number of pre-defined colors displayed in
+    a grid.  A default color is displayed at the bottom of the grid.
+
+    \internal
+*/
 QColorSelector::QColorSelector( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )
 {
@@ -404,24 +471,59 @@ public:
     QColor col;
 };
 
+/*!
+    \class QColorButton
+    \brief The QColorButton class allows users to select a color.
+    \mainclass
+
+    The QColorButton class presents a push button with the current color
+    displayed as the label.  Clicking the button pops up a color
+    selection grid for the user to choose from a number of pre-defined
+    colors.  A default color is displayed at the bottom of the grid.
+
+    \ingroup advanced
+*/
+
+/*!
+    \fn void QColorButton::selected(const QColor &color)
+
+    When the selected color changes, this signal is emitted with the
+    \a color parameter containing the new color.
+*/
+
+/*!
+    Constructs a QColorButton with the given \a parent.
+*/
 QColorButton::QColorButton( QWidget *parent )
     : QPushButton( parent )
 {
     init();
 }
 
-QColorButton::QColorButton( const QColor &c, QWidget *parent )
+/*!
+    Constructs a QColorButton with the given \a parent and the default
+    color set to \a color.
+*/
+QColorButton::QColorButton( const QColor &color, QWidget *parent )
     : QPushButton(parent)
 {
     init();
-    d->col = c;
+    d->col = color;
 }
 
+/*!
+    Destroys the QColorButton.
+*/
 QColorButton::~QColorButton()
 {
     delete d;
 }
 
+/*!
+    Returns the currently selected color.
+
+    \sa setColor()
+*/
 QColor QColorButton::color() const
 {
     return d->col;
@@ -454,18 +556,34 @@ void QColorButton::showSelector()
     d->popup->show();
 }
 
-void QColorButton::setColor( const QColor &c )
+/*!
+    Sets the currently selected \a color.
+
+    \sa color()
+*/
+void QColorButton::setColor( const QColor &color )
 {
-    d->col = c;
-    d->picker->setColor( c );
+    d->col = color;
+    d->picker->setColor( color );
     update();
 }
 
-void QColorButton::setDefaultColor( const QColor &c )
+/*!
+    Sets the default \a color.
+
+    \sa defaultColor(), setColor()
+*/
+void QColorButton::setDefaultColor( const QColor &color )
 {
-    d->picker->setDefaultColor( c );
+    d->picker->setDefaultColor( color );
 }
 
+
+/*!
+    Returns the default color.
+
+    \sa setDefaultColor(), color()
+*/
 const QColor &QColorButton::defaultColor() const
 {
      return d->picker->defaultColor();
@@ -477,6 +595,9 @@ void QColorButton::colorSelected( const QColor &c )
     d->col = c;
 }
 
+/*!
+    \reimp
+*/
 void QColorButton::paintEvent( QPaintEvent *e )
 {
     QPushButton::paintEvent( e );
@@ -484,7 +605,10 @@ void QColorButton::paintEvent( QPaintEvent *e )
     drawButtonLabel( &p );
 }
 
-void QColorButton::drawButtonLabel( QPainter *p )
+/*!
+    Paints the color label using painter \a painter.
+*/
+void QColorButton::drawButtonLabel( QPainter *painter )
 {
     QStyleOptionButton sob;
     sob.init( this );
@@ -499,11 +623,11 @@ void QColorButton::drawButtonLabel( QPainter *p )
     int dx = style()->pixelMetric( QStyle::PM_MenuButtonIndicator, &sob );
     QStyleOptionButton arrowStyle = sob;
     arrowStyle.rect.setLeft( x + (w - h) );
-    style()->drawPrimitive( QStyle::PE_IndicatorArrowDown, &arrowStyle, p );
+    style()->drawPrimitive( QStyle::PE_IndicatorArrowDown, &arrowStyle, painter );
     w -= dx;
     if ( d->col.isValid() )
-        p->fillRect( x+2, y+2, w-6, h-4 , d->col );
+        painter->fillRect( x+2, y+2, w-6, h-4 , d->col );
     else if ( defaultColor().isValid() )
-        p->fillRect( x+2, y+2, w-6, h-4 , defaultColor() );
+        painter->fillRect( x+2, y+2, w-6, h-4 , defaultColor() );
 }
 

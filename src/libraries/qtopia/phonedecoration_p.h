@@ -29,7 +29,7 @@
 class PhoneDecorationPrivate;
 class DecorationBorderData;
 
-class QTOPIA_EXPORT PhoneDecoration : public QWindowDecorationInterface
+class PhoneDecoration : public QWindowDecorationInterface
 {
 public:
     PhoneDecoration();

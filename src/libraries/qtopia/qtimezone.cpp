@@ -33,6 +33,7 @@
 #include <QRegExp>
 #include <QSettings>
 #include <QTranslator>
+#include <QtGlobal>
 #include "qconstcstring.h"
 
 #include <stdlib.h>
@@ -484,7 +485,7 @@ public:
     QString countryCode() const;
     QByteArray id() const;
     int distance( const TimeZoneLocation &e ) const
-        { return latitude() - e.latitude() + longitude() - e.longitude(); }
+        { return qAbs(latitude() - e.latitude()) + qAbs(longitude() - e.longitude()); }
 
     //void dump() const;
 
@@ -680,8 +681,7 @@ void TimeZoneLocation::load( QHash<QByteArray,TimeZoneLocation*> &store )
     QFile file( TimeZonePrivate::zoneFile() );
     if ( !file.open( QIODevice::ReadOnly ) ) {
         qWarning( "Unable to open %s", (const char *)file.fileName().toLatin1() );
-        qWarning( "Fatal: Timezone data must be installed at %s", (const char *)TimeZonePrivate::zonePath().toLatin1() );
-        qApp->exit(1);
+        qFatal( "Fatal: Timezone data must be installed at %s, exiting", (const char *)TimeZonePrivate::zonePath().toLatin1() );
         return;
     }
 
@@ -787,12 +787,35 @@ QStringList TzCache::ids()
 
 /*!
   \class QTimeZone
+  \mainclass
   \brief The QTimeZone class provides access to time zone data.
 
   QTimeZone provides access to timezone data and conversion between
-  times in different time zones and formats.
+  dates and times in different time zones.
+
+  A time zone is a region of the world that has adopted the same standard time,
+  including conventions on Daylight Saving or Summer time adjustments.
+
+  Each time zone is specified by a unique identifier. A set of such identifiers is known
+  to the system, and can be found using ids().
+
+  Conversions between time zones can either be done via UTC, using fromUtc() and toUtc(),
+  or directly with convert(), fromCurrent(), or toCurrent().
+
+  Each time zone is in a greater area() and has an associated city() that observes
+  the standard. This city is not necessarily the capital, just a well-known city
+  in the area. More than one city in an area may observe identical standards, yet
+  they will appear as distinct time zones. The countyCode() of the country containing
+  the time zone is also available.
+
+  A QTimeZone either isValid() or is not valid. The default constructor creates an
+  invalid QTimeZone.
+
+  Note that some features of QTimeZone may not be available on non-POSIX platforms.
 
   \ingroup time
+
+  \sa QtopiaApplication::timeChanged()
 */
 
 /*!
@@ -803,7 +826,8 @@ QTimeZone::QTimeZone() : d( new TimeZonePrivate( 0 ) )
 }
 
 /*!
-  Construct a QTimeZone for location \a locId.
+  Construct a QTimeZone for location \a locId. The time zone isValid() if
+  \a locId is a valid time zone identifier in the list of ids().
 */
 QTimeZone::QTimeZone( const char * locId ) : d( new TimeZonePrivate( locId ) )
 {
@@ -826,7 +850,7 @@ QTimeZone::~QTimeZone()
 }
 
 /*!
-  Sets the current time zone id to \a id.
+  Sets the time zone id of this QTimeZone to \a id.
 */
 void QTimeZone::setId( const char *id )
 {
@@ -834,7 +858,7 @@ void QTimeZone::setId( const char *id )
 }
 
 /*!
-  Assign \a from to this.
+  Assign time zone \a from to this time zone.
 */
 QTimeZone &QTimeZone::operator=( const QTimeZone &from)
 {
@@ -875,7 +899,7 @@ QTimeZone QTimeZone::utc()
 }
 
 /*!
-  Return the UTC date and time.
+  Return the current system UTC date and time.
 */
 QDateTime QTimeZone::utcDateTime()
 {
@@ -893,26 +917,27 @@ QDateTime QTimeZone::fromTime_t( time_t secs ) const
 }
 
 /*!
-  Returns the date and time \a thisT as the number of seconds
-  since 1 January 1970.
+  Returns the date and time \a dt in this time zone,
+  as the number of seconds since 1 January 1970.
 */
-uint QTimeZone::toTime_t( const QDateTime &thisT ) const
+uint QTimeZone::toTime_t( const QDateTime &dt ) const
 {
-    QDateTime utc = toUtc( thisT );
+    QDateTime utc = toUtc( dt );
     return TimeZonePrivate::toTime_t( utc );
 }
 
 /*!
-  Returns the date and time \a thisT in this time zone as UTC.
+  Returns the date and time \a dt in this time zone as
+  a date and time in UTC.
 */
-QDateTime QTimeZone::toUtc( const QDateTime &thisT ) const
+QDateTime QTimeZone::toUtc( const QDateTime &dt ) const
 {
     TimeZoneData *data = TzCache::instance().data( d->id );
-    return data->toUtc( thisT );
+    return data->toUtc( dt );
 }
 
 /*!
-  Returns the UTC date and time \a utc as the date and time in this time zone.
+  Returns the UTC date and time \a utc as a date and time in this time zone.
 */
 QDateTime QTimeZone::fromUtc( const QDateTime &utc ) const
 {
@@ -921,18 +946,22 @@ QDateTime QTimeZone::fromUtc( const QDateTime &utc ) const
 }
 
 /*!
-  Returns the date and time \a thisT in this time zone as the date and time
-  in the current time zone.
+  Returns the date and time \a dt in this time zone as the date and time
+  in the current system time zone.
+
+  \sa current()
 */
-QDateTime QTimeZone::toCurrent( const QDateTime &thisT ) const
+QDateTime QTimeZone::toCurrent( const QDateTime &dt ) const
 {
     QTimeZone curTz = current();
-    return curTz.convert( thisT, *this );
+    return curTz.convert( dt, *this );
 }
 
 /*!
   Returns the date and time \a curT in the current time zone as the
   date and time in this time zone.
+
+  \sa current()
 */
 QDateTime QTimeZone::fromCurrent( const QDateTime &curT ) const
 {
@@ -942,7 +971,7 @@ QDateTime QTimeZone::fromCurrent( const QDateTime &curT ) const
 
 /*!
   Return the date and time \a dt in time zone \a dtTz as the date and time
-  int this time zone.
+  in this time zone.
 */
 QDateTime QTimeZone::convert( const QDateTime &dt, const QTimeZone &dtTz ) const
 {
@@ -1065,7 +1094,7 @@ QString QTimeZone::standardAbbreviation() const
 }
 
 /*!
-  Returns a list of the time zone ids.
+  Returns a list of all time zone ids known to the system.
 */
 QStringList QTimeZone::ids()
 {
@@ -1073,7 +1102,7 @@ QStringList QTimeZone::ids()
 }
 
 /*!
-  Returns the latitude in seconds.
+  Returns the latitude of the city() of this timezone, in seconds of a degree.
 */
 int QTimeZone::latitude() const
 {
@@ -1085,7 +1114,7 @@ int QTimeZone::latitude() const
 
 
 /*!
-  Returns the longitude in seconds.
+  Returns the longitude of the city() of this timezone, in seconds of a degree.
 */
 int QTimeZone::longitude() const
 {
@@ -1107,7 +1136,7 @@ QString QTimeZone::description() const
 }
 
 /*!
-  Returns the translated area of this time zone, e.g. Europe.
+  Returns the translated greater area of this time zone, e.g. Europe.
 */
 QString QTimeZone::area() const
 {
@@ -1141,6 +1170,8 @@ QString QTimeZone::countryCode()
 
 /*!
   \internal
+  Returns the sum of the differences in longitude and latitude between
+  points in this and another timezone.
 */
 int QTimeZone::distance( const QTimeZone &e ) const
 {

@@ -22,7 +22,7 @@
 #include "statewidget.h"
 
 #include <media.h>
-#include <keyhold.h>
+#include <private/keyhold_p.h>
 
 static const int KEY_SELECT_HOLD = Qt::Key_unknown + Qt::Key_Select;
 

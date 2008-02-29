@@ -37,9 +37,42 @@
 #include <Qtopia>
 #include <qconstcstring.h>
 #include <qtopialog.h>
+#include "qperformancelog.h"
 
 #ifndef Q_OS_WIN32
 #include <unistd.h>
+#endif
+
+#ifdef QTOPIA_TEST
+# include <QtopiaServerTestSlave>
+class QtopiaTestServerSocket : public QTcpServer
+{
+public:
+    QtopiaTestServerSocket();
+    virtual ~QtopiaTestServerSocket();
+
+private:
+    virtual void incomingConnection( int socket );
+};
+
+class TestEventFilter : public QtopiaServerApplication::QWSEventFilter
+{
+public:
+    TestEventFilter(QtopiaServerApplication *parent) {
+        parent->installQWSEventFilter(this);
+        m_parent = parent;
+    }
+    ~TestEventFilter() {
+        m_parent->removeQWSEventFilter(this);
+    }
+    bool qwsEventFilter(QWSEvent *e) {
+        m_parent->m_serverSlave->mouseFilter(e);
+        return false;
+    }
+private:
+    QtopiaServerApplication *m_parent;
+};
+
 #endif
 
 class TaskStartupInfo;
@@ -138,28 +171,26 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
 
   The QtopiaServerApplication class acts as a QtopiaApplication instance in
   Qtopia Server.  QtopiaServerApplication is primarily responsible for bringing
-  up and shutting down the Qtopia server and acts as the "core" contoller in
+  up and shutting down the Qtopia server and acts as the "core" controller in
   the system.
 
   The Qtopia server is structured as a collection of largely independent
-  \i tasks.  Tasks are responsible for performing a small, well defined portion
-  of work or functionality.  Often tasks form the "backend" to other system
+  \i tasks that are responsible for performing a small, well defined portion
+  of work or functionality which often form the "backend" to other system
   capabilities.  For example, Qtopia's network management APIs ultimately
-  communicate with the QtopiaNetworkServer task.  Other tasks operate more
-  independently.  Tasks can be thought of as the building blocks that, when
-  arranged appropriately, form the Qtopia server.
+  communicate with the QtopiaNetworkServer task, other tasks may operate more
+  independently.  Tasks can be thought of as the building blocks that form the Qtopia server, when arranged appropriately.
 
-  Tasks are QObjects.  Tasks may work together by exporting C++ interfaces.
+  Tasks are QObjects and may work together by exporting C++ interfaces.
   Other tasks or modules within the server may request tasks that support a
   particular interface.  For example, when the system is shutting down, all the
   tasks that provide the SystemShutdownHandler interface are invoked to perform
   all the necessary cleanup.
 
   The order in which the task objects are instantiated is configurable.  Both
-  the configurator and the task developer has a degree of control over the
-  instantiation order.  The configurator controls the start up order through
-  the \c {$QPEDIR/etc/Tasks.cfg} file.  The \c {Tasks.cfg} file has the
-  following simple syntax:
+  the \i configurator and the task developer has a degree of control over the
+  instantiation order.  The \i configurator controls the start up order through
+  the \c {$QPEDIR/etc/Tasks.cfg} file which has the following simple syntax:
 
   \code
   # Sample comment for TaskGroup1.  Comments may appear anywhere, as long as
@@ -176,12 +207,11 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
 
   \endcode
 
-  Task groups are free form descriptors used to collect related classes
-  together.  Task group names may only contain alphanumeric characters.  In
-  particular, they may \i {not} contain spaces.  A task's name is the name given
-  to the task when it is declared in code.  Much like task group names, task
-  names consist only of alphanumeric characters and, again, cannot contain
-  spaces.  Groups may be nested heirarchally as shown in the example.  Nesting
+  Task groups are free-form descriptors used to collect related classes.
+  Task group names may only contain alphanumeric characters and must not
+  \i {not} contain spaces.  A task name is the name given
+  to the task when it is declared in code. It consists of alphanumeric characters and cannot contain
+  spaces.  Groups may be nested hierarchically as shown in the example.  Nesting
   one group in another is \i {exactly} the same as pasting the body of the
   nested group into the parent group.  The above \c {Tasks.cfg} file is
   equivalent to:
@@ -197,26 +227,59 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
   TaskName3
   \endcode
 
-  There are three reserved group names.  The \c {startup} group contains tasks
-  to be launched at startup.  The \c {exclude} group contains tasks that, while
-  present in the server, will \i {never} be created.  Adding a task to the
-  \c {exclude} list is equivalent to removing it from the server.  Finally, the
-  \c {All} group is a catch all tasks whose startup preference is not otherwise
-  specified.  How these groups interact will be covered shortly.
+\section2 Reserved task Group Names
+The following group names are reserved and have a special purpose:
+\table
+  \header \o Group Name \o Description
+\row
+    \o prestartup  \o  The \c {prestartup} contains tasks that will be started immediately after Qtopia is executed.
+\row
+    \o startup \o The \c {startup} group contains tasks to be launched at startup.
+\row
+    \o exclude \o The \c {exclude} group contains tasks that, while present in the
+            server, will \c {never} be created.  Adding a task to the \c {exclude}
+            group  is equivalent to removing it from the server.
+\row
+    \o All \o  The \c {All} group is a catch all tasks whose startup preference is not
+            otherwise specified.
+\endtable
 
-  Tasks are constructed in one of two ways: preemptively or on-demand.
-  Preemptive tasks are those started by the system during startup, regardless of
-  whether or not any other task has asked for it.  On-demand tasks are those
-  whose creation is deferred until another task requests it be started.  Tasks
-  in the \c {startup} group in \c {Tasks.cfg} are the only tasks that are
-  created preemptively.  All other tasks (with the exception of those in the
-  \c {exclude} group which are never started) are started on-demand.
+How these groups interact will be covered shortly.
+
+
+\section2 Supported Task Types
+
+Tasks are constructed in one of two ways: preemptively or on-demand.
+\table
+\header \o Type \o Description
+\row
+    \o Preemptive Tasks \o  Preemptive tasks are those started by the system
+        during startup, regardless of whether or not any other task has asked for it.
+\row
+    \o On-demand Tasks \o On-demand tasks are those whose creation is deferred
+        until another task requests it be started.  Tasks in the \i {startup}
+        group in \c {Tasks.cfg} are the only tasks that are created preemptively.
+        All other tasks (with the exception of those in the \i {exclude} group
+        are started on demand.
+\endtable
 
   While it is possible to instantiate an on-demand task by name, it is generally
   not advisable as doing so often creates unnecessary coupling within the
-  system.  Instead, requestors ask the system to return to them a task that
-  supports a given interface.  Doing so allows the particular implementation to
+  system.  Instead, requesters ask the system to return a task that
+  supports a given interface.  Doing so allows a particular implementation to
   be switched out without any code changes to the requestor.
+
+
+  \section2 Marking Tasks to be Started on Demand
+
+  Tasks in the \c {Tasks.cfg} file can be marked as demand started tasks by appending the
+  \c {:demand} to their task name.  Similarly, group names can have \c {:demand}
+  appended, which is equivalent to adding the designator to each of their
+  containing task or sub-group names.  Demand tasks will never be picked by the
+  \c {All} catch all task, but are otherwise subject to all ordering primatives.
+
+
+  \section2 Tasks Startup Order
 
   The qtopiaTask() and qtopiaTasks() templates are used to request a task
   interface.  qtopiaTask() returns the first task that implements the interface
@@ -227,32 +290,28 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
 
   The order of tasks returned by qtopiaTask() and qtopiaTasks() is controllable
   through the order in which they appear in the \c {Tasks.cfg} file.  Consider
-  the \c {Tasks.cfg} flattened so that it consists of all groups in the order
-  in which they appear in the \c {Tasks.cfg} file.  Each task in this imaginary
+  the \c {Tasks.cfg} flattened so that it consists of a list of all groups in the order
+  in which they appear.  Each task in this imaginary
   task list implements zero or more interfaces.  The order tasks will be
   returned when requested by interface is the same order as those tasks appear
   in this list, with duplicates removed.
 
-  As a special "catch all", primarily to prevent misconfiguration, the special
-  \c {All} "task" can be added to the \c {startup} group.  This has the effect
+  As a special "catch-all", primarily to prevent incorrect configuration, the special
+  \c {All} task can be added to the \c {startup} group.  This has the effect
   of inserting all tasks not otherwise in the \c {startup} or \c {exclude}
-  groups or explicitly marked as demand started tasks.  Tasks in the
-  \c {Tasks.cfg} file can be marked as demand started tasks by appending the
-  \c {:demand} to their task name.  Likewise, group names can have \c {:demand}
-  appended, which is equivalent to adding the designator to each of their
-  containing task or sub-group names.  Demand tasks will never be picked by the
-  \c {All} catch all task, but are otherwise subject to all ordering primatives.
+  groups or explicitly marked as demand started tasks.
+
 
   While the QtopiaServerApplication class itself is not strictly a task,
   it is instantiated during startup by the task system in the same way as other
   tasks under the special task name \c {QtopiaApplication}.  The
   \c {QtopiaApplication} task should be instantiated immediately after any
   environment setup or cleanup type tasks as many other tasks have an implicit
-  reliance on its existance.
+  reliance on its existence.
 
   The order that the system will try and start preemptive tasks and the order
   in which tasks will be given interface preference can be read from the value
-  space immediately followign the \c {QtopiaApplication} task executing.  The
+  space immediately following the \c {QtopiaApplication} task executing.  The
   exact schema is:
 
   \table
@@ -267,7 +326,7 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
 
   There are many cases of Qt widgets being used throughout the Qtopia server
   that may need to be customized to achieve a desired look and feel.  For
-  example, while it supports customization through themeing, a customer that
+  example, while it supports customization through theming, a customer that
   wants to replace the Qtopia phone dialer with a "rotary dial" style dialer
   would need to replace the entire dialer widget.
 
@@ -285,8 +344,8 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
   widgets replacement system to look up the ConcreteWidget instance type it
   should return.
 
-  Developers use the QTOPIA_REPLACE_WIDGET(), QTOPIA_REPLACE_WIDGET_WHEN() and
-  QTOPIA_REPLACE_WIDGET_OVERRIDE() macros to provide ConcreteWidget for a
+  Developers use the  QTOPIA_REPLACE_WIDGET(),  QTOPIA_REPLACE_WIDGET_WHEN() and
+   QTOPIA_REPLACE_WIDGET_OVERRIDE() macros to provide ConcreteWidget for a
   particular AbstractWidget.  The server widget replacement system then resolves
   which ConcreteWidget to return by executing the following set of rules in
   order until a ConcreteWidget is determined.
@@ -305,18 +364,18 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
   DialerScreen=Rotary
   \endcode
 
-  Unless the specified widget does not exist, the mapping is always honoured.
-  That is, using QTOPIA_REPLACE_WIDGET_WHEN() can not override explicitly
+  Unless the specified widget does not exist, the mapping is always honored.
+  That is, using  QTOPIA_REPLACE_WIDGET_WHEN() can not override explicitly
   specified widgets.  The special name \c None will disable the widget, causing
   qtopiaWidget() to always return null.
 
   \row \o Primary Default \o The primary default is the value of the
   \c {Mapping/Default} key, or \c Default if not specified. The primary default
-  name is tried as the \i {ConcreteName}.  Feature dependencies are honoured.
+  name is tried as the \i {ConcreteName}.  Feature dependencies are honored.
   \row \o Other Defaults \o All \i {ConcreteName}'s beginning with the primary
-  default name are tried.  Feature dependencies are honoured.
+  default name are tried.  Feature dependencies are honored.
   \row \o All Replacements \o All available ConcreteWidgets are tried.  Feature
-  dependencies are honoured.
+  dependencies are honored.
   \endtable
 
   The \i {AbstractName} and \i {ConcreteName} names used to identify a server
@@ -330,6 +389,13 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
   writing mapping files - a class \c WheelBrowserScreen replacing
   \c QAbstractBrowserScreen is written as \c {BrowserScreen=Wheel} rather than
   \c {QAbstractBrowserScreen=WheelBrowserScreen}.
+
+  The following image also demonstrates the widget selection process:
+
+  \image WidgetSelectionRules.png "Selecting the correct Server Widget"
+
+  A tutorial on how to develop new server widgets can be found in the QAbstractServerInterface
+  class documentation and the \l{integration-guide.html#server-widgets}{Device Integration guide}.
  */
 
 /*!
@@ -339,7 +405,7 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
   Mark the \a Object as task \a TaskName.  Only QObject derived types may be
   tasks.
 
-  As the QTOPIA_TASK() macro defines symbols, it should appear only in the
+  As the  QTOPIA_TASK() macro defines symbols, it should appear only in the
   implementation file of a task, and not in the header file.
  */
 
@@ -348,7 +414,7 @@ Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
   \relates QtopiaServerApplication
 
   Mark the \a Object as task \a TaskName.  Only QObject derived types may be
-  tasks.  QTOPIA_DEMAND_TASK() differs from QTOPIA_TASK() in that tasks
+  tasks.   QTOPIA_DEMAND_TASK() differs from  QTOPIA_TASK() in that tasks
   installed using this macro are automatically marked as "demand" tasks, unless
   specifically overridden in the \c {Tasks.cfg} file.  That is, tasks installed
   like this will only be instantiated on request, not during server startup.
@@ -565,7 +631,8 @@ QtopiaServerApplication::QtopiaServerApplication(int& argc, char **argv)
     qtopiaServerTasks()->enableTaskReporting();
 
 #ifdef QTOPIA_TEST
-    m_serverSocket = new QtopiaTestServerSocket();
+    m_serverSlave = new QtopiaServerTestSlave;
+    m_serverSocket = new QtopiaTestServerSocket;
     m_testFilter = new TestEventFilter(this);
 #endif
 }
@@ -580,6 +647,7 @@ QtopiaServerApplication::~QtopiaServerApplication()
 #ifdef QTOPIA_TEST
     delete m_serverSocket;
     delete m_testFilter;
+    delete m_serverSlave;
 #endif
 }
 
@@ -1093,6 +1161,7 @@ QByteArray QtopiaServerApplication::taskValueSpaceObject(const QByteArray &taskN
   a convenience method to simplify the usage of the value space for a task.
   For more complex usage, tasks should use the taskValueSpaceObject() to request
   a path, and manually create a QValueSpaceObject for their own use.
+  Returns true upon success; otherwise returns false.
 
   The value remains in the value space until the task is unloaded.
   */
@@ -1138,8 +1207,7 @@ bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteA
     Q_ASSERT(qst);
 
     qLog(QtopiaServer) << "Starting tasks...";
-    qLog(Performance) << "QtopiaServer : " << "Starting tasks... : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Starting tasks...";
     qst->argc = &argc;
     qst->argv = argv;
 
@@ -1151,8 +1219,7 @@ bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteA
     // Actually start the tasks
     for(int ii = 0; ii < startupOrder.count(); ++ii) {
         qLog(QtopiaServer) << "Starting task" << startupOrder.at(ii)->name.toByteArray();
-        qLog(Performance) << "QtopiaServer : " << "Starting task" << startupOrder.at(ii)->name.toByteArray()
-                          << " : " << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+        QPerformanceLog("QtopiaServer") << "Starting task" << startupOrder.at(ii)->name.toByteArray();
         qst->startTask(startupOrder.at(ii), false);
     }
 
@@ -1629,17 +1696,27 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
   \ingroup QtopiaServer::Task::Interfaces
   \brief The SystemShutdownHandler class notifies tasks when the system is shutting down or restarting.
 
+  The SystemShutdownHandler provides a Qtopia Server Task interface.  Qtopia 
+  Server Tasks are documented in full in the QtopiaServerApplication class 
+  documentation.
+
+  Server components can use the SystemShutdownHandler to integrate into Qtopia's
+  shutdown mechanism.
+
   Tasks that provide the SystemShutdownHandler interface are called when the
   system is shutting down or restarting.  By providing this interface, tasks
-  can ensure that they clean up appropriately before the shutdown or restart.
+  can ensure that they clean up appropriately before a shutdown or restart.
 
-  If a task cannot complete its cleanup synchronously in the systemRestart()
-  or systemShutdown() methods, it may return false which indicates that it has
+  During shutdown or restart, the systemShutdown() or systemRestart() methods
+  are invoked respectively.  If a task cannot complete its cleanup synchronously
+  in this invocation, it may return false which indicates that it has
   not completed.  Other handlers will continue to be invoked, but the final
   shutdown or restart will not occur until all such incomplete handlers have
   emitted the proceed() signal.
 
   Shutdown is controlled through the QtopiaServerApplication::shutdown() method.
+
+  \sa QtopiaServerApplication
  */
 
 /*!
@@ -1724,8 +1801,8 @@ void QtopiaTestServerSocket::incomingConnection( int socket )
     QtopiaServerApplication *app = QtopiaServerApplication::instance();
     if (app) {
         // hook up our internal system test slave to an incoming test connection
-        app->m_serverSlave.close();
-        app->m_serverSlave.setSocket( socket );
+        app->m_serverSlave->close();
+        app->m_serverSlave->setSocket( socket );
     }
 }
 #endif //ifdef QTOPIA_TEST

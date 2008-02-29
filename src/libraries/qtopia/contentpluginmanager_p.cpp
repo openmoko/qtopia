@@ -153,25 +153,9 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
             //QString id = QString("_apps_%1").arg(ts.value("Name[]").toString());
             QString id = ts.value("Name[]").toString();  // Don't format the id.
             // Ensure the category id exists
-            if( !catMan.exists( id ) )
-            {
-                catMan.addCategory( id, ts.value("Name[]").toString(), ts.value("Icon").toString(), false, true );
-                if(!catMan.isSystem(id))
-                    catMan.setSystem(id);
-            }
-            categories.append( id );
-        }
-        else
-        {
-            // No .directory file exists, just use the Applications category
-            QString id = QLatin1String("Applications");
-            // Ensure the category id exists
-            if( !catMan.exists( id ) )
-            {
-                catMan.addCategory( id, id, QLatin1String( "qpe/AppsIcon" ), false, true );
-                if(!catMan.isSystem(id))
-                    catMan.setSystem(id);
-            }
+            // For new code a more unique id should be used instead of using the untranslated text
+            // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
+            catMan.ensureSystemCategory( id, ts.value("Name[]").toString(), ts.value("Icon").toString() );
             categories.append( id );
         }
     }
@@ -221,9 +205,9 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
                 // It's a "system" category but we don't know about it. Add it anyway and hope for a translation.
                 QString text = id;
                 text.replace(QRegExp("^_"), "");
-                catMan.addCategory( id, text, QString(), false, true );
-                if(!catMan.isSystem( id ))
-                    catMan.setSystem( id );
+                // For new code a more unique id should be used instead of using the untranslated text
+                // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
+                catMan.ensureSystemCategory( id, text, QString() );
             } else {
                 // It's a translated string. Do a (dodgy) check for the string
                 if ( catMan.containsLabel(id) ) {
@@ -235,6 +219,17 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
                 }
             }
         }
+        categories.append( id );
+    }
+
+    if( categories.isEmpty() && content->role() == QContent::Application )
+    {
+        // No .directory file exists, just use the Applications category
+        QString id = QLatin1String("Applications");
+        // Ensure the category id exists
+        // For new code a more unique id should be used instead of using the untranslated text
+        // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
+        catMan.ensureSystemCategory( id, id, QLatin1String( "qpe/AppsIcon" ) );
         categories.append( id );
     }
 
@@ -265,6 +260,7 @@ bool DotDesktopContentPlugin::updateContent( QContent *content )
 
 /*!
     \class ContentPluginManager
+    \mainclass
     \internal
 
     Loader of QContentPlugins.
@@ -307,3 +303,50 @@ QList< QContentPlugin * > ContentPluginManager::findPlugins( const QString &file
 {
     return typePluginMap.values( QFileInfo( filePath ).suffix().toLower() );
 }
+
+/*!
+    \class QContentFactory
+    \brief The QContentFactory class manages instances of QContentPlugin.
+
+    \internal
+*/
+
+
+Q_GLOBAL_STATIC( ContentPluginManager, pluginManager );
+
+/*!
+    Populates \a content with data from the file with the file name \a fileName.  Returns true if the content
+    plug-in successfully populated the QContent.
+
+    Installation is only performed when the content is first identified by the content system, if the file changes
+    after installation updateContent() will be called to ensure the content data is up to date; otherwise returns
+    false
+*/
+bool QContentFactory::installContent( const QString &fileName, QContent *content )
+{
+    QList< QContentPlugin * > plugins = pluginManager()->findPlugins( fileName );
+
+    foreach( QContentPlugin *p, plugins )
+        if( p->installContent( fileName, content ) )
+            return true;
+
+    return false;
+}
+
+/*!
+    Refreshes the content data of \a content following a change to the file it references.
+
+    Returns true if the content data has been ensured to be up to date; otherwise returns false.
+*/
+bool QContentFactory::updateContent( QContent *content )
+{
+    QList< QContentPlugin * > plugins = pluginManager()->findPlugins( content->file() );
+
+    foreach( QContentPlugin *p, plugins )
+        if( p->updateContent( content ) )
+            return true;
+
+    return false;
+}
+
+

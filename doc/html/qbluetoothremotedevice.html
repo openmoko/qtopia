@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QBluetoothRemoteDevice Class Reference</title>
+  <title>QBluetoothRemoteDevice Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothRemoteDevice Class Reference</h1>
 <p>The QBluetoothRemoteDevice class represents a remote bluetooth device. <a href="#details">More...</a></p>
-<pre>#include &lt;QBluetoothRemoteDevice&gt;</pre><ul>
+<pre>    #include &lt;QBluetoothRemoteDevice&gt;</pre><ul>
 <li><a href="qbluetoothremotedevice-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -49,7 +51,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QBluetoothRemoteDevice class represents a remote bluetooth device.</p>
-<p>The QBluetoothRemoteDevice class encapsulates a remote Bluetooth device. This class holds various device attributes of the remote device. These attributes are device address, device class, manufacturer, etc.</p>
+<p>This class holds various device attributes of the remote device. These attributes are device address, device class, manufacturer, etc. The most common source of all remote device information is the discovery process. This process must be initiated by using the QBluetoothLocalDevice::discoverDevices() method and hooking onto the appropriate signals.</p>
+<p>Please note that depending on the source that provided the QBluetoothRemoteDevice instance, some or all of the information might not be available. In general, address, device major, device minor and service class attributes should always be available. Other attributes might require a connection be established to the remote device, and thus might not be available. In this case, default constructed values will be returned.</p>
 <p>See also <a href="qbluetoothaddress.html">QBluetoothAddress</a> and <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -88,14 +91,15 @@
 <p>Returns the minor device number of the remote device.</p>
 <p>See also <a href="qbluetoothremotedevice.html#deviceMinorAsString">deviceMinorAsString</a>() and <a href="qbluetoothremotedevice.html#setDeviceMinor">setDeviceMinor</a>().</p>
 <h3 class="fn"><a name="deviceMinorAsString"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::deviceMinorAsString () const</h3>
-<p>Returns the minor device number of the remote device.</p>
+<p>Returns the minor device number of the remote device as a human readable string.</p>
 <p>See also <a href="qbluetoothremotedevice.html#deviceMinor">deviceMinor</a>() and <a href="qbluetoothremotedevice.html#setDeviceMinor">setDeviceMinor</a>().</p>
 <h3 class="fn"><a name="manufacturer"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::manufacturer () const</h3>
 <p>Returns the manufacturer of the remote bluetooth device. If the manufacturer is unknown, returns a null string.</p>
 <p>See also <a href="qbluetoothremotedevice.html#setManufacturer">setManufacturer</a>().</p>
 <h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::name () const</h3>
 <p>Returns the human readable name of the remote device. If the name is unknown, an empty string is returned. For display purposes, it is best to display the address of the device in this case.</p>
-<p>See also <a href="qbluetoothremotedevice.html#setName">setName</a>().</p>
+<p>Each local Bluetooth adapter might have an alias associated with the remote device.</p>
+<p>See also <a href="qbluetoothremotedevice.html#setName">setName</a>() and <a href="qbluetoothlocaldevice.html#remoteAlias">QBluetoothLocalDevice::remoteAlias</a>().</p>
 <h3 class="fn"><a name="revision"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::revision () const</h3>
 <p>Returns the revision of the remote bluetooth device. This is generally manufacturer specific information. If the revision is unknown, a null string is returned.</p>
 <p>See also <a href="qbluetoothremotedevice.html#setRevision">setRevision</a>().</p>
@@ -107,27 +111,33 @@
 <p>See also <a href="qbluetoothremotedevice.html#serviceClasses">serviceClasses</a>() and <a href="qbluetoothremotedevice.html#setServiceClasses">setServiceClasses</a>().</p>
 <h3 class="fn"><a name="setCompany"></a>void QBluetoothRemoteDevice::setCompany ( const <a href="qstring.html">QString</a> &amp; <i>company</i> )</h3>
 <p>Sets the company attribute of the remote device to <i>company</i>.</p>
+<p>In general, you should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#company">company</a>().</p>
 <h3 class="fn"><a name="setDeviceMajor"></a>void QBluetoothRemoteDevice::setDeviceMajor ( <a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a> <i>deviceMajor</i> )</h3>
 <p>Sets the major device attribute of the remote device to <i>deviceMajor</i>.</p>
+<p>In general, you should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#deviceMajor">deviceMajor</a>() and <a href="qbluetoothremotedevice.html#deviceMajorAsString">deviceMajorAsString</a>().</p>
 <h3 class="fn"><a name="setDeviceMinor"></a>void QBluetoothRemoteDevice::setDeviceMinor ( quint8 <i>deviceMinor</i> )</h3>
 <p>Sets the minor device attribute of the remote device to <i>deviceMinor</i>.</p>
 <p>See also <a href="qbluetoothremotedevice.html#deviceMinor">deviceMinor</a>() and <a href="qbluetoothremotedevice.html#deviceMinorAsString">deviceMinorAsString</a>().</p>
 <h3 class="fn"><a name="setManufacturer"></a>void QBluetoothRemoteDevice::setManufacturer ( const <a href="qstring.html">QString</a> &amp; <i>manufacturer</i> )</h3>
 <p>Sets the manufacturer attribute of the remote device to <i>manufacturer</i>.</p>
+<p>In general, you should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#manufacturer">manufacturer</a>().</p>
 <h3 class="fn"><a name="setName"></a>void QBluetoothRemoteDevice::setName ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
-<p>Sets the name attribute of the remote device to <i>name</i>. In general clients do not need to use this function.</p>
+<p>Sets the name attribute of the remote device to <i>name</i>.</p>
+<p>In general, you should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#name">name</a>().</p>
 <h3 class="fn"><a name="setRevision"></a>void QBluetoothRemoteDevice::setRevision ( const <a href="qstring.html">QString</a> &amp; <i>revision</i> )</h3>
-<p>Sets the revision attribute of the remote device to <i>revision</i>.</p>
+<p>Sets the revision attribute of the remote device to <i>revision</i>. Clients should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#revision">revision</a>().</p>
 <h3 class="fn"><a name="setServiceClasses"></a>void QBluetoothRemoteDevice::setServiceClasses ( <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> <i>serviceClasses</i> )</h3>
 <p>Sets the service classes attribute of the remote device to <i>serviceClasses</i>.</p>
+<p>In general, you should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#serviceClasses">serviceClasses</a>() and <a href="qbluetoothremotedevice.html#serviceClassesAsString">serviceClassesAsString</a>().</p>
 <h3 class="fn"><a name="setVersion"></a>void QBluetoothRemoteDevice::setVersion ( const <a href="qstring.html">QString</a> &amp; <i>version</i> )</h3>
 <p>Sets the version attribute of the remote device to <i>version</i>.</p>
+<p>In general, you should not need to use this function.</p>
 <p>See also <a href="qbluetoothremotedevice.html#version">version</a>().</p>
 <h3 class="fn"><a name="version"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::version () const</h3>
 <p>Returns the Bluetooth protocol version the remote device supports. This can be for instance, 1.0, 1.1, 1.2, etc.</p>
@@ -142,8 +152,8 @@
 <p>Returns true if the devices are the same.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

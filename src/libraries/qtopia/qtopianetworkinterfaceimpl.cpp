@@ -24,12 +24,39 @@
 
 /*!
     \class QtopiaNetworkInterface
+    \mainclass
     \brief The QtopiaNetworkInterface class describes the minimum interface that
     a network plug-in must provide.
 
-    There is no default implementation available for this interface.
+    The QtopiaNetworkServer interacts with Linux network devices via Qtopia's network
+    plug-ins. Each plug-in implements this interface. It allows to start() and stop() 
+    network devices, changes to the routing table via setDefaultGateway() and provides 
+    access to the status() and Linux device() name.
 
-  \ingroup io
+    Each instance publishes various internal states to the network value space.
+    The network value space can be found under \c{/Network/Interfaces/<config hash>}.
+    The hash value uniquely identifies each interface and is generated via:
+
+    \code
+        QtopiaNetworkInterface* iface = ...
+        QString hash = qHash( iface->configuration()->configFile() );
+
+    \endcode
+
+    Each QtopiaNetworkInterface instance must publish the following values:
+
+    \list
+        \o \c Config - the configuration file associated to this interface
+        \o \c Error - the last QtopiaNetworkInterface::Error value converted to an integer
+        \o \c ErrorString - the human-readable string describing the last error
+        \o \c NetDevice - the Linux network interface that this interface is managing e.g., eth0
+        \o \c State - the current state (QtopiaNetworkInterface::Status enum converted to integer)
+    \endlist
+
+    There is no default implementation available for this interface.
+    
+    \sa QtopiaNetworkServer, QtopiaNetworkConfiguration
+    \ingroup io
 */
 
 /*!
@@ -107,23 +134,24 @@
 /*!
   \fn void QtopiaNetworkInterface::cleanup()
 
-  Cleans up all system and config files (e.g. the dialup plug-in deletes
+  Removes all system and config files (e.g., the dialup plug-in deletes
   the peer and connect/disconnect chat file) created for this interface. However this function must not remove the
   network configuration file associated with this plug-in instance as this will be
   done by the network server.
  */
 
 /*!
-  \fn void QtopiaNetworkInterface::setDefaultGateway()
+  \fn bool QtopiaNetworkInterface::setDefaultGateway()
 
   This interface becomes the default gateway for the device.
+  Returns true upon success; otherwise returns false.
  */
 
 /*!
   \fn QString QtopiaNetworkInterface::device() const
 
   Returns the name of the network device that is used for connections.
-  (e.g. eth0, wlan1, ppp0). This name is only valid if the interface
+  (e.g., eth0, wlan1, ppp0). This name is only valid if the interface
   status is not QtopiaNetworkInterface::Unknown or QtopiaNetworkInterface::Unavailable
  */
 
@@ -136,7 +164,7 @@
 /*!
   \fn QtopiaNetworkConfiguration *QtopiaNetworkInterface::configuration()
 
-  Allows access to the configuration for this interface.
+  Returns a pointer to allow access to the configuration for this interface.
  */
 
 /*!
@@ -150,7 +178,7 @@
 
   \fn QtopiaNetworkMonitor QtopiaNetworkInterface::monitor()
 
-  This function call is a placeholder for future releases of Qtopia. A Qtopia network monitor
+  This function call is a placeholder for future releases of Qtopia. The returned Qtopia network monitor
   will perform operations such as traffic and cost monitoring.
  */
 
@@ -160,6 +188,7 @@
 /*!
   \internal
   \class QtopiaNetworkMonitor
+  \mainclass
   \brief The QtopiaNetworkMonitor class allows the monitoring of
   data traffic and can calculate the associated costs
 
@@ -172,14 +201,21 @@
 
 /*!
   \class QtopiaNetworkConfiguration
+  \mainclass
   \brief The QtopiaNetworkConfiguration class defines the interface to
   network interface configurations.
 
-  Network interface properties can either changed via writeProperties()
-  or by calling configure() which returns a user dialog.
-
+  Network interface parameter are stored in configFile(). They can be edited via a 
+  combination of writeProperties(),  getProperties() and property() or by calling configure()
+  which returns one or more  user interface dialogs. The dialogs depend on 
+  the various configuration types() supported by the interface.
+  The WLAN plug-in e.g., provides two configuration dialogs. The first dialog supports
+  general interface parameter whereas the second dialog allows the configuration through 
+  an WLAN scanner interface.
+ 
   There is no default implementation available for this interface.
 
+  \sa QtopiaNetworkInterface
   \ingroup io
  */
 
@@ -193,16 +229,24 @@
 /*!
   \fn QVariant QtopiaNetworkConfiguration::property(const QString& key) const
 
-  This is a quick way of accessing the configuration value for
-  \a key.
+  This is a quick way of accessing the configuration value for \a key. The following example
+  quickly determines the human-readable name of this interface/configuration:
+  \code
+    QtopiaNetworkConfiguration* config = ...
+    QString value = config->property( "Info/Name" ).toString();
+  \endcode
  */
 
 /*!
   \fn QStringList QtopiaNetworkConfiguration::types() const
 
-  Returns a list all user interfaces. Each list entry is a localised string and can by used as a
-  short description for the interface. The first entry in the list is the default configuration interface.
+  Returns a list of all user interfaces. Each list entries are localised strings and can by used as a
+  short description for the interface dialogs. The same strings are also used as identifiers 
+  for configure() to request the user interface.
+ 
+  The first entry in the list is the default configuration interface.
   The returned list must contain at least one entry (being the default interface).
+
  */
 
 /*!
@@ -222,7 +266,7 @@
  */
 
 /*!
-  Deconstructor.
+  Destroys the QtopaNetworkConfiguration instance.
   */
 QtopiaNetworkConfiguration::~QtopiaNetworkConfiguration()
 {
@@ -232,7 +276,7 @@ QtopiaNetworkConfiguration::~QtopiaNetworkConfiguration()
   \fn QtopiaNetworkProperties QtopiaNetworkConfiguration::getProperties() const
 
   Returns all properties of this interface. If only a single property is needed
-  QtopiaNetworkConfiguration::property() should be used.
+  property() should be used.
 
   \sa property()
  */
@@ -240,7 +284,7 @@ QtopiaNetworkConfiguration::~QtopiaNetworkConfiguration()
 /*!
   \fn void QtopiaNetworkConfiguration::writeProperties( const QtopiaNetworkProperties& properties)
 
-  Write \a properties out to the network configuration file.
+  Writes \a properties out to the network configuration file.
  */
 
 /*----------------------------------------------------------*/
@@ -248,11 +292,27 @@ QtopiaNetworkConfiguration::~QtopiaNetworkConfiguration()
 
 /*!
   \class QtopiaNetworkProperties
-  \brief The QtopiaNetworkProperties class reflects the content of a network interface configuration file.
+  \mainclass
+  \brief The QtopiaNetworkProperties class reflects the content of a network interface configuration.
 
-  It is used as a generic way to access settingsfiles by mapping keys to
-  values.
+  This helper class is used to access network configurations sourced from 
+  settings files by mapping keys to values. The following example demonstrates the mapping:
 
+  \code
+    QtopiaNetworkProperties prop;
+    //populate with content of Configuration.conf
+    ...
+
+    QSettings s("Configuration", QSettings::IniFormat);
+    s.beginGroup( "Group" );
+    QString value = s.value("Key").toString();
+    ...
+
+    //Is true
+    value == prop.value("Group/Key").toString();
+  \endcode
+
+  \sa QMap, QSettings
   \ingroup io
 */
 
@@ -290,13 +350,14 @@ QtopiaNetworkProperties::~QtopiaNetworkProperties()
 
 
 /*!
-  This function dumps the content to the debug stream.
+  This function dumps the content to the Network log stream if
+  Qtopia is build in debug mode; otherwise does nothing.
 */
 void QtopiaNetworkProperties::debugDump() const
 {
+#ifdef QT_DEBUG
     QString key;
     QString value;
-
 
     QtopiaNetworkProperties::const_iterator i = constBegin();
     qLog(Network) << "Dumping network settings";
@@ -305,14 +366,28 @@ void QtopiaNetworkProperties::debugDump() const
         qLog(Network) << i.key() << ": " << i.value().toString();
         i++;
     }
-
+#endif
 }
 
 /*----------------------------------------------------------*/
 //QtopiaNetworkPlugin
 
 /*!
-  Constructor.
+  \class QtopiaNetworkPlugin
+  \mainclass
+  \brief The QtopiaNetworkPlugin class provides an abstract base class for all network plug-ins.
+ 
+  \ingroup plugins
+  \ingroup io
+
+  The plug-in should override at least type() and network(). The Qtopia network 
+  plug-ins can be found under \c{QPEDIR/src/plgins/network}.
+
+  \sa QtopiaNetworkFactoryIface, QtopiaNetworkInterface
+  */
+
+/*!
+  Constructs a QtopiaNetworkPlugin instance with the given \a parent.
 */
 QtopiaNetworkPlugin::QtopiaNetworkPlugin(QObject* parent)
     :QObject(parent)
@@ -320,14 +395,14 @@ QtopiaNetworkPlugin::QtopiaNetworkPlugin(QObject* parent)
 }
 
 /*!
-  Deconstructor.
+  Destroys the QtopiaNetworkPlugin instance.
 */
 QtopiaNetworkPlugin::~QtopiaNetworkPlugin()
 {
 }
 
 /*!
-  Deconstructor.
+  Destroys the QtopiaNetworkInterface instance.
 */
 QtopiaNetworkInterface::~QtopiaNetworkInterface()
 {
@@ -339,7 +414,37 @@ QtopiaNetworkMonitor* QtopiaNetworkInterface::monitor()
 }
 
 /*!
-  Deconstructor.
+  \class QtopiaNetworkFactoryIface
+  \mainclass
+  \ingroup io
+  \brief The QtopiaNetworkFactoryIface class defines the interface to network plug-ins.
+
+  The QtopiaNetworkFactoryIface class defines the interface to network plug-ins. Plug-ins will
+  typically inherit from QtopiaNetworkPlugin rather than this class.
+
+  \sa QtopiaNetworkPlugin, QtopiaNetworkInterface
+*/
+
+/*!
+  \fn QtopiaNetwork::Type QtopiaNetworkFactoryIface::type() const
+
+  Returns the type of network interfaces that the current plug-in can handle.
+  This function is usually called by the QtopiaNetworkServer to check whether this plug-in
+  is appropriate for the given network interface.
+
+  \sa QtopiaNetworkServer
+*/
+
+/*!
+  \fn QPointer<QtopiaNetworkInterface> QtopiaNetworkFactoryIface::network(const QString& handle)
+
+  Returns the instance of the QtopiaNetworkInterface provided by the plug-in.
+  Multiple calls to this function will return several instances. \a handle is 
+  the configuration file that this interface should be initialized with.
+*/
+
+/*!
+  \internal
 */
 QtopiaNetworkFactoryIface::~QtopiaNetworkFactoryIface()
 {

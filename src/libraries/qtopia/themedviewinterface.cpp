@@ -21,11 +21,18 @@
 
 #include "themedviewinterface_p.h"
 
+/*!
+    \class ThemedItemInterface
+    \internal
+*/
 ThemedItemInterface::~ThemedItemInterface()
 {
 }
 
-
+/*!
+    \class ThemedItemPlugin
+    \internal
+*/
 ThemedItemPlugin::ThemedItemPlugin( QObject* parent )
 {
     Q_UNUSED( parent );

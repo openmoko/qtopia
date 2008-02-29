@@ -36,13 +36,6 @@ public:
     virtual bool updateContent( QContent *content );
 };
 
-class QTOPIA_EXPORT QContentFactory
-{
-public:
-    static bool installContent( const QString &fileName, QContent *content );
-    static bool updateContent( QContent *content );
-};
-
 Q_DECLARE_INTERFACE( QContentPlugin, "com.trolltech.Qtopia.QContentPlugin/1.0" );
 
 #endif

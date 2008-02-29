@@ -34,12 +34,21 @@ static const int MIN_MEM_LIMIT = 10000;
   \brief The GenericMemoryMonitorTask class implements a simple page-fault
          driven memory monitor task.
 
-  The GenericMemoryMonitorTask task provides the MemoryMonitor task interface.
+  The GenericMemoryMonitorTask provides a Qtopia Server Task.  Qtopia Server 
+  Tasks are documented in full in the QtopiaServerApplication class 
+  documentation.
+
+  \table
+  \row \o Task Name \o GenericMemoryMonitory
+  \row \o Interfaces \o MemoryMonitor
+  \row \o Services \o None
+  \endtable
+
   The GenericMemoryMonitorTask uses a simple page-fault rate driven algorithm to
   approximate the memory "pressure" on the device.
 
-  In addition to providing MemoryMonitor interface, the GenericMemoryMonitorTask
-  task exports the following informational value space items.
+  The GenericMemoryMonitorTask task exports the following informational value 
+  space items.
 
   \table
   \header \o Item \o Description
@@ -47,7 +56,9 @@ static const int MIN_MEM_LIMIT = 10000;
   \row \o \c {/ServerTasks/GenericMemoryMonitorTask/ChangedTime} \o The date and time at which the memory level last changed.
   \endtable
 
-  The GenericMemoryMonitorTask provides the \c {GenericMemoryMonitor} task.
+  As polling is used to sample memory usage information from the /c {/proc} 
+  filesystem, the GenericMemoryMonitorTask should generally be replaced by 
+  system integrators with a more efficient, system specific mechanism.
  */
 
 /*!  \internal */

@@ -37,15 +37,8 @@
 class QContentSet;
 class QDawg;
 
-#ifndef Q_QDOC
 namespace Qtopia
 {
-#else
-class Qtopia
-{
-public:
-#endif
-
     /*
 
     Global functions
@@ -76,9 +69,7 @@ public:
     QTOPIABASE_EXPORT bool mousePreferred();
     QTOPIABASE_EXPORT bool hasKey(int key);
 
-#ifdef Q_WS_QWS
     QTOPIABASE_EXPORT void execute(const QString &exec, const QString &document=QString());
-#endif
 
     /*
 
@@ -135,6 +126,7 @@ public:
 
 #ifdef Q_WS_QWS
     QTOPIABASE_EXPORT QString version();
+    QTOPIABASE_EXPORT QString compatibleVersions();
     QTOPIABASE_EXPORT QString architecture();
     QTOPIABASE_EXPORT QString deviceId();
     QTOPIABASE_EXPORT QString ownerName();

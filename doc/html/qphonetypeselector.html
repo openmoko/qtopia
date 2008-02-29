@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QPhoneTypeSelector Class Reference</title>
+  <title>QPhoneTypeSelector Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPhoneTypeSelector Class Reference</h1>
-<p>The QPhoneTypeSelector class a way of selecting a single phone number from or for a <a href="qcontact.html">QContact</a>. <a href="#details">More...</a></p>
-<pre>#include &lt;QPhoneTypeSelector&gt;</pre><p>Inherits <a href="qdialog.html">QDialog</a>.</p>
+<p>The QPhoneTypeSelector class provides a way of selecting a single type of phone number. <a href="#details">More...</a></p>
+<pre>    #include &lt;QPhoneTypeSelector&gt;</pre><p>Inherits <a href="qdialog.html">QDialog</a>.</p>
 <ul>
 <li><a href="qphonetypeselector-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -39,24 +41,6 @@
 <li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
-<a name="protected-functions"></a>
-<h3>Protected Functions</h3>
-<ul>
-<li><div class="fn"/>virtual void <b><a href="qphonetypeselector.html#resizeEvent">resizeEvent</a></b> ( QResizeEvent * <i>event</i> )</li>
-</ul>
-<ul>
-<li><div class="fn"/>39 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
-</ul>
-<a name="protected-slots"></a>
-<h3>Protected Slots</h3>
-<ul>
-<li><div class="fn"/>virtual void <b><a href="qphonetypeselector.html#accept">accept</a></b> ()</li>
-</ul>
-<ul>
-<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
-</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>2 properties inherited from <a href="qdialog.html#properties">QDialog</a></li>
@@ -69,6 +53,10 @@
 <li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>13 static public members inherited from <a href="qpaintdevice.html#static-public-members">QPaintDevice</a></li>
+<li><div class="fn"/>39 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 protected type inherited from <a href="qpaintdevice.html#protected-variables">QPaintDevice</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
@@ -76,31 +64,40 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QPhoneTypeSelector class a way of selecting a single phone number from or for a <a href="qcontact.html">QContact</a>.</p>
-<p>QPhoneTypeSelector provides a way of selecting a single phone number from or for a <a href="qcontact.html">QContact</a>.</p>
+<p>The QPhoneTypeSelector class provides a way of selecting a single type of phone number.</p>
+<p>The phone number types correspond to those defined in <a href="qcontact.html#PhoneType-enum">QContact::PhoneType</a>.</p>
+<p>It can be used in one of two ways - either to allow the selection of one of a <a href="qcontact.html">QContact</a>'s existing phone numbers, or to allow the user to pick the type of a new phone number (for example, to save a phone number as a 'work mobile' number).</p>
+<p><table width="80 %" align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><img src="images/qphonetypeselector-existing.png" alt="&quot;Picking an existing phone number&quot;" /></td><td>Picking an existing number from a <a href="qcontact.html">QContact</a></td></tr>
+<tr valign="top" class="even"><td><img src="images/qphonetypeselector-new.png" alt="&quot;Picking a new phone number type&quot;" /></td><td>Choosing a phone number type for a new phone number. Note that the existing phone numbers for the <a href="qcontact.html">QContact</a> are displayed.</td></tr>
+</table></p>
+<p>See also <a href="qcontact.html">QContact</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QPhoneTypeSelector"></a>QPhoneTypeSelector::QPhoneTypeSelector ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
-<p>Contructs a <a href="qphonetypeselector.html">QPhoneTypeSelector</a> dialog with parent <i>parent</i>. The <a href="qphonetypeselector.html">QPhoneTypeSelector</a> will show phone numbers if <i>number</i> is empty will only show numbers for which there already exists and entry for the <i>contact</i> provided. Otherwise will provide a selection of all possible phone numbers.</p>
-<h3 class="fn"><a name="accept"></a>void QPhoneTypeSelector::accept ()&nbsp;&nbsp;<tt> [virtual protected slot]</tt></h3>
-<p>Reimplemented from <a href="qdialog.html#accept">QDialog</a>.</p>
-<h3 class="fn"><a name="resizeEvent"></a>void QPhoneTypeSelector::resizeEvent ( <a href="qresizeevent.html">QResizeEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This event handler can be reimplemented in a subclass to receive widget resize events which are passed in the <i>event</i> parameter. When resizeEvent() is called, the widget already has its new geometry. The old size is accessible through <a href="qresizeevent.html#oldSize">QResizeEvent::oldSize</a>().</p>
-<p>The widget will be erased and receive a paint event immediately after processing the resize event. No drawing need be (or should be) done inside this handler.</p>
-<p>Reimplemented from <a href="qwidget.html#resizeEvent">QWidget</a>.</p>
+<p>Constructs a <a href="qphonetypeselector.html">QPhoneTypeSelector</a> dialog with parent <i>parent</i>.</p>
+<p>The dialog will show phone numbers and phone number types from the given <i>contact</i>.</p>
+<p>The dialog can be used in two ways:</p>
+<ul>
+<li>To choose an existing phone number from a contact, pass an empty string as the <i>number</i> argument.</li>
+<li>To choose a phone number type for a new phone number, pass the phone number as a string as the <i>number</i> argument.</li>
+</ul>
+<p>In the second case, the dialog will show any existing phone numbers for the <i>contact</i> in addition to the available phone number types.</p>
+<p>See also <a href="qphonetypeselector.html#updateContact">updateContact</a>().</p>
 <h3 class="fn"><a name="selected"></a><a href="qcontact.html#PhoneType-enum">QContact::PhoneType</a> QPhoneTypeSelector::selected () const</h3>
-<p>Returns the <a href="qcontact.html#PhoneType-enum">QContact::PhoneType</a> that matches the phone number selected.</p>
+<p>Returns the <a href="qcontact.html#PhoneType-enum">QContact::PhoneType</a> that is selected in the dialog. If no phone number type is selected, this will return <tt>OtherPhone</tt>.</p>
 <h3 class="fn"><a name="selected-2"></a>void QPhoneTypeSelector::selected ( <a href="qcontact.html#PhoneType-enum">QContact::PhoneType</a> <i>type</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>This signal is emitted when the user selectes a phone number <i>type</i>.</p>
+<p>This signal is emitted when the user selects a phone number <i>type</i>.</p>
 <h3 class="fn"><a name="selectedNumber"></a><a href="qstring.html">QString</a> QPhoneTypeSelector::selectedNumber () const</h3>
-<p>Returns the value set for the phone number selected.</p>
+<p>Returns the contact's phone number that corresponds to the phone number type selected in the dialog.</p>
 <h3 class="fn"><a name="updateContact"></a>void QPhoneTypeSelector::updateContact ( <a href="qcontact.html">QContact</a> &amp; <i>contact</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i> ) const</h3>
-<p>Updates the <i>contact</i> so that the phone number selected is set to <i>number</i>.</p>
+<p>Updates <i>contact</i> to have the given <i>number</i> for the dialog's selected phone number type.</p>
+<p>See also <a href="qphonetypeselector.html#selected">selected</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

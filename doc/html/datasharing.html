@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Qtopia Data Sharing (QDS)</title>
+  <title>Qtopia Data Sharing (QDS)</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Data Sharing (QDS)<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Data Sharing (QDS)<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#how-it-works">How it Works</a></li>
 <li><a href="#using-qds">Using QDS</a></li>
@@ -52,14 +55,14 @@
 <p>An application uses a QDS service by constructing a <a href="qdsaction.html">QDSAction</a> object with a valid <a href="qdsserviceinfo.html">QDSServiceInfo</a> object. Depending on the suitability to the application, requests for the QDS service can then be made synchronously or asynchronously using the <a href="qdsaction.html">QDSAction</a> object.</p>
 <a name="example-of-synchronous-request"></a>
 <h4>Example of synchronous request</h4>
-<pre>&nbsp;   QDSServiceInfo service( &quot;getImage&quot;, &quot;ExampleService&quot; );
+<pre>    QDSServiceInfo service( &quot;getImage&quot;, &quot;ExampleService&quot; );
     QDSAction action( service);
     if ( action.exec() != QDSAction::Complete ) {
         qWarning() &lt;&lt; &quot;Couldn't use QDS service setImage from ExampleService&quot;;
     }</pre>
 <a name="example-of-asynchronous-request"></a>
 <h4>Example of asynchronous request</h4>
-<pre>&nbsp;   void MyWidget::getImage()
+<pre>    void MyWidget::getImage()
     {
         QDSServiceInfo service( &quot;getImage&quot;, &quot;ExampleService&quot; );
         QDSAction* action = new QDSAction( service );
@@ -85,7 +88,7 @@
 <a name="security-policy"></a>
 <h4>Security Policy</h4>
 <p>For devices which use SXE the application's project file must including <tt>qds</tt> in the package domain as well as the domain which provides access to the Qtopia service. For example file for a QDS client application is provided below:</p>
-<pre>&nbsp;   qtopia_project(qtopia app)
+<pre>    qtopia_project(qtopia app)
     TARGET=myapp
 
     HEADERS=myapp.h
@@ -106,7 +109,7 @@
 <h3>Providing QDS services</h3>
 <p>Any application can provide a number of QDS services. A public slot must be added to the application's Qtopia service class for each QDS service it provides. The slot must match the message constructed by <a href="qdsaction.html">QDSAction</a>, which is of the form <tt>void ClassName( const QDSActionRequest&amp; request )</tt>. QDS services can be made dependent on features defined in <a href="qtopiafeatures.html">QtopiaFeatures</a>, when these features are not present the service will not be available, and requests for the service will fail. For more details about service implementations see Qtopia's <a href="services.html">service documentation</a>. Finally, each QDS service should be described in the QDS service file (see <a href="qdsserviceinfo.html">QDSServiceInfo</a> for details).</p>
 <p>The example below demonstrates a server application which allows an image to set and restored.</p>
-<pre>&nbsp;   MyServer::MyServer( QWidget *parent, Qt::WFlags f )
+<pre>    MyServer::MyServer( QWidget *parent, Qt::WFlags f )
     :   QMainWindow( parent, f )
     {
         ...
@@ -159,7 +162,7 @@
     private:
         MyServer *parent;
     };</pre>
-<p>If the processing of the QDS service request is going to take substantial time, i.e. more than second, or requires user input a copy of the <a href="qdsactionrequest.html">QDSActionRequest</a> should be made as is done in the MyServer::getImage() and MyServer::setImage() methods above. This ensures that the client is informed that the request is being processed and a timeout error is not generated.</p>
+<p>If the processing of the QDS service request is going to take substantial time, i.e&#x2e; more than second, or requires user input a copy of the <a href="qdsactionrequest.html">QDSActionRequest</a> should be made as is done in the MyServer::getImage() and MyServer::setImage() methods above. This ensures that the client is informed that the request is being processed and a timeout error is not generated.</p>
 <a name="security-policy"></a>
 <h4>Security Policy</h4>
 <p>As with client applications, for devices which use SXE an application providing a QDS service must include <tt>qds</tt> in the package domain in the project file (see above for details), as well as the domain which provides access to the service class.</p>
@@ -167,7 +170,7 @@
 <h2>Extensibility</h2>
 <p>As <a href="qdsdata.html">QDSData</a> is typed, QDS provides an extensible API which can be used with user-defined classes by defining a MIME type for the class.</p>
 <p>The example below shows to create a <a href="qdsdata.html">QDSData</a> instance of a VCard using a streaming operator to pack the VCard into a <a href="qbytearray.html">QByteArray</a>.</p>
-<pre>&nbsp;   VCard vcard;
+<pre>    VCard vcard;
     QByteArray vCardArray;
     {
         QDataStream stream( &amp;vCardArray, QIODevice::WriteOnly );
@@ -176,20 +179,20 @@
     QDSData vCardData( vCardArray, QMimeType( &quot;text/x-vCard&quot; ) );</pre>
 <p>This allows services to be provided for <tt>text/x-vCard</tt> data assuming that there has streaming operator defined in the VCard class.</p>
 <p>For example</p>
-<pre>&nbsp;   //declare the streaming function in the VCard's header file
+<pre><span class="comment">    //declare the streaming function in the VCard's header file</span>
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard );
 
     ...
 
-    //implement the streaming function in the VCard's cpp file
+<span class="comment">    //implement the streaming function in the VCard's cpp file</span>
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard )
     {
     ...
     }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

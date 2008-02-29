@@ -1035,6 +1035,8 @@ QString ReadMail::encodeUrlAndMail(QString txt)
             endPos++;
         if ( !str[endPos].isLetterOrNumber() && (validChars.indexOf( str[endPos] ) == -1 ))
             endPos--;
+        if (endPos < pos)
+            endPos = pos; // Avoid infinite loop for txt = "@@"
 
         emailAddress = str.mid(beg, endPos - beg + 1);
         if ( emailAddress.startsWith("&lt;") ) {
@@ -1085,6 +1087,8 @@ QString ReadMail::encodeUrlAndMail(QString txt)
         if (endPos >= (int)str.length() ||
             (!str[endPos].isLetterOrNumber() && (validChars.indexOf( str[endPos] ) == -1 )))
             endPos--;
+        if (endPos < pos)
+            endPos = pos; // Avoid infinite loop
 
         url = str.mid(pos, endPos - pos + 1);
 

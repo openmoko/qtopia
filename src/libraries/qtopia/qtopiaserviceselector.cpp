@@ -34,12 +34,14 @@
 
 /*!
   \class QtopiaServiceDescription
+  \mainclass
   \brief The QtopiaServiceDescription class describes a service request in user terms.
 
   This data includes what action to undertake when activated, and a display name
   and icon.
 
   \ingroup ipc
+  \sa QtopiaServiceSelector, QtopiaServiceRequest
 */
 
 /*! \fn QtopiaServiceDescription::QtopiaServiceDescription()
@@ -54,26 +56,47 @@
 
 /*! \fn QtopiaServiceRequest QtopiaServiceDescription::request() const
   Returns the QtopiaServiceRequest described.
+
+  \sa setRequest()
 */
 
 /*! \fn QString QtopiaServiceDescription::label() const
   Returns the display label describing the request.
+
+  \sa setLabel()
 */
 
 /*! \fn QString QtopiaServiceDescription::iconName() const
   Returns the icon name describing the request.
+
+  \sa setIconName()
 */
 
 /*! \fn void QtopiaServiceDescription::setRequest(const QtopiaServiceRequest& r)
   Sets the request to \a r.
+
+  \sa request()
 */
 
 /*! \fn void QtopiaServiceDescription::setLabel(const QString& l)
   Sets the display label to \a l.
+
+  \sa label()
 */
 
 /*! \fn void QtopiaServiceDescription::setIconName(const QString& i)
   Sets the display icon to \a i.
+
+  \sa iconName()
+*/
+
+/*!
+  \class QtopiaServiceSelector
+  \mainclass
+  \brief The QtopiaServiceSelector class implements a list dialog for selecting a service.
+
+  \ingroup ipc
+  \sa QtopiaServiceDescription, QtopiaServiceRequest
 */
 
 class QListView;
@@ -82,7 +105,9 @@ class QListView;
 #define ICON_ROLE       Qt::UserRole + 1
 #define ACTION_ROLE     Qt::UserRole + 2
 
-
+/*!
+    Construct a Qtopia service selector dialog owned by \a parent.
+*/
 QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
 {
     setModal(true);
@@ -114,6 +139,10 @@ QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
 #endif
 }
 
+/*!
+    Add all installed applications to the list of services displayed in this selector.
+    By default, only service actions are shown.
+*/
 void QtopiaServiceSelector::addApplications()
 {
     // Copy all of the AppLnks to our own list
@@ -191,11 +220,25 @@ void QtopiaServiceSelector::populateActionsList(const QString& srv, QTranslatabl
     }
 }
 
+/*!
+    \reimp
+*/
 void QtopiaServiceSelector::closeEvent(QCloseEvent *e)
 {
     e->accept();
 }
 
+/*!
+    Displays this Qtopia service selector dialog, to allow the user to select
+    a service to associate with \a targetlabel.  The selected service description
+    is returned in \a item.
+
+    This function is typically used to edit the service associated with a device button
+    or similar action.  The contents of the service selector are not being edited; rather
+    the button or action is being edited.
+
+    Returns true if an item was selected; or false if the dialog was canceled.
+*/
 bool QtopiaServiceSelector::edit(const QString& targetlabel, QtopiaServiceDescription& item)
 {
     bool rowset = false;
@@ -267,6 +310,12 @@ QtopiaServiceDescription QtopiaServiceSelector::descFor(QListWidgetItem* item) c
     return QtopiaServiceDescription(sr, name, icon);
 }
 
+/*!
+    Returns the description of the service request \a req.  Descriptions include
+    the service request, a user-visible name, and an icon name.
+
+    \sa QtopiaServiceDescription
+*/
 QtopiaServiceDescription QtopiaServiceSelector::descriptionFor(const QtopiaServiceRequest& req) const
 {
     QString srv = req.service();
@@ -304,6 +353,9 @@ void QtopiaServiceSelector::selectAction(int a)
     accept();
 }
 
+/*!
+    \reimp
+*/
 void QtopiaServiceSelector::keyPressEvent(QKeyEvent* e)
 {
     int k = e->key();

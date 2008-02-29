@@ -69,9 +69,9 @@ public:
 
     QStringList charSets(); // internal (not translated)
 
-    void load();
     void save() const;
 private:
+    void load();
     QString userConfig() const;
     void loadData();
     void saveData() const;

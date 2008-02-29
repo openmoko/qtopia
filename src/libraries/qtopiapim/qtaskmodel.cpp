@@ -92,29 +92,29 @@ void QTaskModel::initMaps()
 }
 
 /*!
-  Returns a translated string describing the task model field \a k.
+  Returns a translated string describing the task model \a field.
 
   \sa fieldIcon(), fieldIdentifier(), identifierField()
 */
-QString QTaskModel::fieldLabel(Field k)
+QString QTaskModel::fieldLabel(Field field)
 {
     if (k2t.count() == 0)
         initMaps();
-    if (!k2t.contains(k))
+    if (!k2t.contains(field))
         return QString();
-    return k2t[k];
+    return k2t[field];
 }
 
 /*!
-  Returns a icon representing the task model field \a k.
+  Returns an icon representing the task model \a field.
 
   Returns a null icon if no icon is available.
 
   \sa fieldLabel(), fieldIdentifier(), identifierField()
 */
-QIcon QTaskModel::fieldIcon(Field k)
+QIcon QTaskModel::fieldIcon(Field field)
 {
-    QString ident = fieldIdentifier(k);
+    QString ident = fieldIdentifier(field);
 
     if (ident.isEmpty() || !QFile::exists(":icon/todolist/" + ident))
         return QIcon();
@@ -124,76 +124,97 @@ QIcon QTaskModel::fieldIcon(Field k)
 
 
 /*!
-  Returns a non-translated string describing the task model field \a k.
+  Returns a non-translated string describing the task model \a field.
 
   \sa fieldLabel(), fieldIcon(), identifierField()
 */
-QString QTaskModel::fieldIdentifier(Field k)
+QString QTaskModel::fieldIdentifier(Field field)
 {
     if (k2i.count() == 0)
         initMaps();
-    if (!k2i.contains(k))
+    if (!k2i.contains(field))
         return QString();
-    return k2i[k];
+    return k2i[field];
 }
 
 /*!
-  Returns the task model field for the non-translated string identifier \a i.
+  Returns the task model field for the non-translated field \a identifier.
 
   \sa fieldLabel(), fieldIcon(), fieldIdentifier()
 */
-QTaskModel::Field QTaskModel::identifierField(const QString &i)
+QTaskModel::Field QTaskModel::identifierField(const QString &identifier)
 {
     if (i2k.count() == 0)
         initMaps();
-    if (!i2k.contains(i))
+    if (!i2k.contains(identifier))
         return Invalid;
-    return i2k[i];
+    return i2k[identifier];
 }
 
 
 /*!
   \class QTaskModel
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QTaskModel class provides access to the the Tasks data.
+  \brief The QTaskModel class provides access to Tasks data.
 
-  The QTaskModel is used to access the Task data.  It is a descendant of QAbstractItemModel,
-  so it is suitable for use with the Qt View classes such as QListView and QTableView, as well as
-  any custom developer Views.
+  User tasks are represented in the task model as a table, with each row corresponding to a
+  particular task and each column as on of the fields of the task.  Complete QTask objects can
+  be retrieved using the task() function which takes either a row, index, or unique identifier.
 
-  QTaskModel provides functions for filtering of items.
-  For filters or sorting that is not provided by QTaskModel it is recommended that
-  QSortFilterProxyModel is used to wrap QTaskModel.
+  The task model is a descendant of QAbstractItemModel,  so it is suitable for use with the Qt View
+  classes such as QListView and QTableView, as well as QTaskListView or any custom views.
 
-  QTaskModel may merge data from multiple sources.
+  The task model provides functions for filtering of tasks by category and completion status,
+  and by default will sort by completion status, priority and description.  Note that this
+  sort order may change in future versions of Qtopia.
 
-  QTaskModel will also refresh when changes are made in other instances of QTaskModel or
-  from other applications.
+  The appointment model provides functions for sorting and some filtering of items.
+  For filters or sorting that is not provided by the task model, it is recommended that
+  QSortFilterProxyModel be used to wrap the task model.
+
+  A QTaskModel instance will also reflect changes made in other instances of QTaskModel,
+  both within this application and from other applications.  This will result in
+  the modelReset() signal being emitted.
+
+  \sa QTask, QTaskListView, QSortFilterProxyModel
 */
 
 /*!
   \enum QTaskModel::Field
 
   Enumerates the columns when in table mode and columns used for sorting.
-  Is a subset of data retrievable from a QTask.
+  This is a subset of the data retrievable from a QTask.
 
-  \omitvalue Invalid
-  \omitvalue Description
-  \omitvalue Priority
-  \omitvalue Completed
-  \omitvalue PercentCompleted
-  \omitvalue Status
-  \omitvalue DueDate
-  \omitvalue StartedDate
-  \omitvalue CompletedDate
-  \omitvalue Notes
-  \omitvalue Identifier
-  \omitvalue Categories
+  \value Invalid
+    An invalid field
+  \value Description
+    The description of the task
+  \value Priority
+    The priority of the task
+  \value Completed
+    Whether the task is completed
+  \value PercentCompleted
+    The percent completed of the task
+  \value Status
+    The status of the task
+  \value DueDate
+    The due date of the task
+  \value StartedDate
+    The started date of the task
+  \value CompletedDate
+    The completed date of the task
+  \value Notes
+    The notes of the task
+  \value Identifier
+    The identifier of the task
+  \value Categories
+    The list of categories the task belongs to
 */
 
 /*!
-  Contstructs a QTaskModel with parent \a parent.
+  Constructs a task model with the given \a parent.
 */
 QTaskModel::QTaskModel(QObject *parent)
     : QPimModel(parent)
@@ -209,16 +230,15 @@ QTaskModel::QTaskModel(QObject *parent)
 }
 
 /*!
-  Destructs the QTaskModel
+  Destroys the task model.
 */
 QTaskModel::~QTaskModel()
 {
+    delete d;
 }
 
 /*!
-  \overload
-
-    Returns the number of columns for the given \a parent.
+  \reimp
 */
 int QTaskModel::columnCount(const QModelIndex &parent) const
 {
@@ -236,19 +256,19 @@ QTask QTaskModel::task(const QModelIndex &index) const
 }
 
 /*!
-  Returns the task with the identifier \a id.  The task does
+  Returns the task in the model with the given \a identifier.  The task does
   not have to be in the current filter mode for it to be returned.
 */
-QTask QTaskModel::task(const QUniqueId & id) const
+QTask QTaskModel::task(const QUniqueId & identifier) const
 {
-    const QTaskIO *model = qobject_cast<const QTaskIO *>(access(id));
+    const QTaskIO *model = qobject_cast<const QTaskIO *>(access(identifier));
     if (model)
-        return model->task(id);
+        return model->task(identifier);
     return QTask();
 }
 
 /*!
-  Return the task for the \a row specified.
+  Return the task for the given \a row.
 */
 QTask QTaskModel::task(int row) const
 {
@@ -260,10 +280,10 @@ QTask QTaskModel::task(int row) const
 }
 
 /*!
-  Updates the task \a task so long as a there is a task in the
-  QTaskModel with the same uid as \a task.
+  Updates the task in the model with the same identifier as the specified \a task to
+  equal the specified task.
 
-  Returns true if the task was successfully updated.  Otherwise return false.
+  Returns true if the task was successfully updated.
 */
 bool QTaskModel::updateTask(const QTask &task)
 {
@@ -276,10 +296,9 @@ bool QTaskModel::updateTask(const QTask &task)
 }
 
 /*!
-  Removes the task \a task so long as there is a task in the QTaskModel with
-  the same uid as \a task.
+  Removes the task from the model with the same identifier as the specified \a task.
 
-  Returns true if the task was successfully removed.  Otherwise return false.
+  Returns true if the task was successfully removed.
 */
 bool QTaskModel::removeTask(const QTask &task)
 {
@@ -287,14 +306,14 @@ bool QTaskModel::removeTask(const QTask &task)
 }
 
 /*!
-  Removes the task that has the uid \a id from the TaskModel;
+  Removes the task from the model with the specified \a identifier.
 
-  Returns true if the task was successfully removed.  Otherwise return false.
+  Returns true if the task was successfully removed.
 */
-bool QTaskModel::removeTask(const QUniqueId& id)
+bool QTaskModel::removeTask(const QUniqueId& identifier)
 {
-    QTaskContext *c = qobject_cast<QTaskContext *>(context(id));
-    if (c && c->removeTask(id)) {
+    QTaskContext *c = qobject_cast<QTaskContext *>(context(identifier));
+    if (c && c->removeTask(identifier)) {
         refresh();
         return true;
     }
@@ -302,28 +321,31 @@ bool QTaskModel::removeTask(const QUniqueId& id)
 }
 
 /*!
-  Removes the tasks specified by the list of uids \a ids.
+  Removes the records in the model specified by the list of \a identifiers.
 
-  Returns true if tasks are successfully removed.  Otherwise returns  false.
+  Returns true if tasks were successfully removed.
 */
-bool QTaskModel::removeList(const QList<QUniqueId> &ids)
+bool QTaskModel::removeList(const QList<QUniqueId> &identifiers)
 {
     QUniqueId id;
-    foreach(id, ids) {
+    foreach(id, identifiers) {
         if (!exists(id))
             return false;
     }
-    foreach(id, ids) {
+    foreach(id, identifiers) {
         removeTask(id);
     }
     return true;
 }
 
 /*!
-  Adds the task \a task to the QTaskModel under the storage source \a source.
-  If source is empty will add the task to the default storage source.
+  Adds the \a task to the model under the specified storage \a source.
+  If source is null the function will add the task to the default storage source.
 
-  Returns true if the task was successfully added.  Otherwise return false.
+  Returns a valid identifier for the task if the task was
+  successfully added.  Otherwise returns a null identifier.
+
+  Note the current identifier of the specified appointment is ignored.
 */
 QUniqueId QTaskModel::addTask(const QTask& task, const QPimSource &source)
 {
@@ -340,16 +362,18 @@ QUniqueId QTaskModel::addTask(const QTask& task, const QPimSource &source)
 /*!
   \overload
 
-  Adds the PIM record encoded in \a bytes to the QTaskModel under the storage source \a source.
-  The format of the record in \a bytes is given by \a format.  An empty \a format string will
+  Adds the PIM record encoded in \a bytes to the model under the specified storage \a source.
+  The format of the record in \a bytes is given by \a format.  An empty format string will
   cause the record to be read using the data stream operators for the PIM data type of the model.
-  If \a source is empty will add the record to the default storage source.
+  If the specified source is null the function will add the record to the default storage source.
 
-  Returns valid id if the record was successfully added.  Otherwise returns an invalid id.
+  Returns a valid identifier for the record if the record was
+  successfully added.  Otherwise returns a null identifier.
 
   Can only add PIM data that is represented by the model.  This means that only task data
-  can be added using a QTaskModel.  Valid formats are "vCalendar" or an empty string.
+  can be added using a task model.  Valid formats are "vCalendar" or an empty string.
 
+  \sa addTask()
 */
 QUniqueId QTaskModel::addRecord(const QByteArray &bytes, const QPimSource &source, const QString &format)
 {
@@ -368,14 +392,17 @@ QUniqueId QTaskModel::addRecord(const QByteArray &bytes, const QPimSource &sourc
 
 /*!
   \overload
-
-  Updates the record enoded in \a bytes so long as there is a record in the QTaskModel with
-  the same uid as the record.  The format of the record in \a bytes is given by \a format.
+  Updates the corresponding record in the model to equal the record encoded in \a bytes.
+  The format of the record in \a bytes is given by the \a format string.
   An empty \a format string will cause the record to be read using the data stream operators
-  for the PIM data type of the model. If \a id is not null will set the record uid to \a id
+  for the PIM data type of the model. If \a id is not null will set the record identifier to \a id
   before attempting to update the record.
 
-  Returns true if the record was successfully updated.  Otherwise returns false.
+  Returns true if the record was successfully updated.
+
+  Valid formats are "vCalendar" or an empty string.
+
+  \sa updateTask()
 */
 bool QTaskModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, const QString &format)
 {
@@ -395,24 +422,30 @@ bool QTaskModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, cons
 }
 
 /*!
-  \fn bool QTaskModel::removeRecord(const QUniqueId &id)
+  \fn bool QTaskModel::removeRecord(const QUniqueId &identifier)
   \overload
 
-  Removes the record that has the uid \a id from the QTaskModel.
+  Removes the record from the model with the specified \a identifier.
 
-  Returns true if the record was successfully removed.  Otherwise returns false.
+  Returns true if the record was successfully removed.
+
+  \sa removeTask()
 */
 
 /*!
   \overload
 
-    Returns the record with the identifier \a id encoded in the format specified by \a format.
-    An empty \a format string will cause the record to be written using the data stream
-    operators for the PIM data type of the model.
+  Returns the record in the model with the specified \a identifier encoded in the format specified by the \a format string.
+  An empty format string will cause the record to be written using the data stream
+  operators for the PIM data type of the model.
+
+  Valid formats are "vCalendar" or an empty string.
+
+  \sa task()
 */
-QByteArray QTaskModel::record(const QUniqueId &id, const QString &format) const
+QByteArray QTaskModel::record(const QUniqueId &identifier, const QString &format) const
 {
-    QTask t = task(id);
+    QTask t = task(identifier);
     if (t.uid().isNull())
         return QByteArray();
 
@@ -453,22 +486,21 @@ QTaskModel::Field QTaskModel::sortField() const
 }
 
 /*!
-    If \a b is true sets the model to only contain completed tasks. 
-    Otherwise will contain both completed and uncompleted tasks.
+  Sets whether the model contains only completed Tasks to \a completedOnly.
 */
-void QTaskModel::setFilterCompleted(bool b)
+void QTaskModel::setFilterCompleted(bool completedOnly)
 {
-    if (b == filterCompleted())
+    if (completedOnly == filterCompleted())
         return;
 
     foreach(QRecordIO *model, accessModels()) {
         QTaskIO *taskModel = qobject_cast<QTaskIO *>(model);
-        taskModel->setCompletedFilter(b);
+        taskModel->setCompletedFilter(completedOnly);
     }
 }
 
 /*!
-  Returns true if the model only contains completed tasks. Otherwise returns false.
+  Returns true if the model contains only completed tasks.
 */
 bool QTaskModel::filterCompleted() const
 {
@@ -485,6 +517,12 @@ bool QTaskModel::filterCompleted() const
   \overload
 
   Returns the data stored under the given \a role for the item referred to by the \a index.
+
+  The row of the index specifies which task to access and the column of the index is treated as
+  a \c QTaskModel::Field.
+
+
+  \sa taskField()
 */
 QVariant QTaskModel::data(const QModelIndex &index, int role) const
 {
@@ -512,7 +550,7 @@ QVariant QTaskModel::data(const QModelIndex &index, int role) const
             case Notes:
                 return task(index).notes();
         }
-    } else if (role == Qt::DecorationRole) {
+    } else if (role == Qt::DecorationRole && index.column() == 0) {
         QTask t = task(index);
         if (t.isCompleted())
             return d->getCachedIcon(":icon/ok");
@@ -530,8 +568,13 @@ QVariant QTaskModel::data(const QModelIndex &index, int role) const
 
 /*!
   \overload
-  Sets the \a role data for the item at \a index to \a value. Returns true if successful,
-  otherwise returns false.
+  Sets the \a role data for the item at \a index to \a value. Returns true if successful.
+
+  The task model only accepts data for the \c EditRole.  The column of the specified
+  index specifies the \c QTaskModel::Field to set and the row of the index
+  specifies which task to modify.
+
+  \sa setTaskField()
 */
 bool QTaskModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -547,9 +590,9 @@ bool QTaskModel::setData(const QModelIndex &index, const QVariant &value, int ro
 
 #if 0
     /* disabled due to 'notifyUpdated' require whole record.
-       While writing whole record is less efficient than partial - at 
+       While writing whole record is less efficient than partial - at
        this stage it was the easiest way of fixing the bug where setData
-       did not result in cross-model data change from being propogated properly
+       did not result in cross-model data change from being propagated properly
    */
 
     int i = index.row();
@@ -562,22 +605,18 @@ bool QTaskModel::setData(const QModelIndex &index, const QVariant &value, int ro
 }
 
 /*!
-  \overload
-
-  Returns a map with values for all predefined roles in the model for the item at the
-  given \a index.
+  \reimp
 */
 QMap<int, QVariant> QTaskModel::itemData ( const QModelIndex &index ) const
 {
     QMap<int, QVariant> m;
     m.insert(Qt::DisplayRole, data(index, Qt::DisplayRole));
+    m.insert(Qt::DecorationRole, data(index, Qt::DecorationRole));
     return m;
 }
 
 /*!
-  \overload
-  For every Qt::ItemDataRole in \a roles, sets the role data for the item at \a index to the
-  associated value in \a roles. Returns true if successful, otherwise returns false.
+  \reimp
 */
 bool QTaskModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &roles)
 {
@@ -587,10 +626,7 @@ bool QTaskModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> 
 }
 
 /*!
-  \overload
-
-  Returns the data for the given \a role and \a section in the header with the
-  specified \a orientation.
+  \reimp
 */
 QVariant QTaskModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
@@ -606,8 +642,7 @@ QVariant QTaskModel::headerData(int section, Qt::Orientation orientation, int ro
 }
 
 /*!
-  \overload
-    Returns the item flags for the given \a index.
+  \reimp
 */
 Qt::ItemFlags QTaskModel::flags(const QModelIndex &index) const
 {
@@ -616,13 +651,11 @@ Qt::ItemFlags QTaskModel::flags(const QModelIndex &index) const
 }
 
 /*!
-  \overload
-    Returns a list of indexes for the items where the data
-    matches the specified \a value.  The list that is returned may be empty.
+  Returns a list of indexes for the items where the data matches the specified \a value.
+  The list that is returned may be empty.  The search starts from the \a start index.
 
-    The search starts from the \a start index.
-
-    The arguments \a role, \a hits and \a flags are currently ignored.
+  Currently unimplemented, this function ignores \a start, \a role, \a value, \a hits
+  and \a flags.
 */
 QModelIndexList QTaskModel::match(const QModelIndex &start, int role, const QVariant &value,
             int hits, Qt::MatchFlags flags) const
@@ -637,15 +670,7 @@ QModelIndexList QTaskModel::match(const QModelIndex &start, int role, const QVar
 }
 
 /*!
-  \overload
-
-  Returns an object that contains a serialized description of the specified \a indexes.
-  The format used to describe the items corresponding to the \a indexes is obtained from
-  the mimeTypes() function.
-
-  If the list of indexes is empty, 0 is returned rather than a serialized empty list.
-
-  Currently returns 0 but may be implemented at a future date.
+  \reimp
 */
 QMimeData * QTaskModel::mimeData(const QModelIndexList &indexes) const
 {
@@ -655,11 +680,7 @@ QMimeData * QTaskModel::mimeData(const QModelIndexList &indexes) const
 }
 
 /*!
-  \overload
-
-  Returns a list of MIME types that can be used to describe a list of model indexes.
-
-  Currently returns an empty list but may be implemented at a future date.
+  \reimp
 */
 QStringList QTaskModel::mimeTypes() const
 {
@@ -682,12 +703,13 @@ void QTaskModel::sort(int column, Qt::SortOrder order)
 }
 
 /*!
-  Returns the value from \a task that would be returned for
-  field \a f as it would from a row in the QTaskModel.
+  Returns the value for the specified \a field of the given \a task.
+
+  \sa data()
  */
-QVariant QTaskModel::taskField(const QTask &task, QTaskModel::Field f)
+QVariant QTaskModel::taskField(const QTask &task, QTaskModel::Field field)
 {
-    switch(f) {
+    switch(field) {
         default:
         case Invalid:
             break;
@@ -718,68 +740,69 @@ QVariant QTaskModel::taskField(const QTask &task, QTaskModel::Field f)
 }
 
 /*!
-  Sets the value in \a task that would be set for field \a f as it would
-  if modified for a task in the QTaskModel to \a v.
+  Sets the value for the specified \a field of the given \a task to \a value.
 
-  Returns true if the task was modified.  Otherwise returns false.
+  Returns true if the task was modified.
+
+  \sa setData()
 */
-bool QTaskModel::setTaskField(QTask &task, QTaskModel::Field f,  const QVariant &v)
+bool QTaskModel::setTaskField(QTask &task, QTaskModel::Field field,  const QVariant &value)
 {
-    switch (f) {
+    switch (field) {
         default:
         case Invalid:
             return false;
         case Description:
-            if (v.canConvert(QVariant::String)) {
-                task.setDescription(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                task.setDescription(value.toString());
                 return true;
             }
             return false;
         case Priority:
-            if (v.canConvert(QVariant::Int)) {
-                task.setPriority(v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                task.setPriority(value.toInt());
                 return true;
             }
             return false;
         case Completed:
-            if (v.canConvert(QVariant::Bool)) {
-                task.setCompleted(v.toBool());
+            if (value.canConvert(QVariant::Bool)) {
+                task.setCompleted(value.toBool());
                 return true;
             }
             return false;
         case PercentCompleted:
-            if (v.canConvert(QVariant::Int)) {
-                task.setPercentCompleted(v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                task.setPercentCompleted(value.toInt());
                 return true;
             }
             return false;
         case Status:
-            if (v.canConvert(QVariant::Int)) {
-                task.setStatus(v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                task.setStatus(value.toInt());
                 return true;
             }
             return false;
         case DueDate:
-            if (v.canConvert(QVariant::Date)) {
-                task.setDueDate(v.toDate());
+            if (value.canConvert(QVariant::Date)) {
+                task.setDueDate(value.toDate());
                 return true;
             }
             return false;
         case StartedDate:
-            if (v.canConvert(QVariant::Date)) {
-                task.setStartedDate(v.toDate());
+            if (value.canConvert(QVariant::Date)) {
+                task.setStartedDate(value.toDate());
                 return true;
             }
             return false;
         case CompletedDate:
-            if (v.canConvert(QVariant::Date)) {
-                task.setCompletedDate(v.toDate());
+            if (value.canConvert(QVariant::Date)) {
+                task.setCompletedDate(value.toDate());
                 return true;
             }
             return false;
         case Notes:
-            if (v.canConvert(QVariant::String)) {
-                task.setNotes(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                task.setNotes(value.toString());
                 return true;
             }
             return false;

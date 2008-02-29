@@ -29,7 +29,7 @@
 #include <qmediacontent.h>
 #include <qmediacontrol.h>
 #include <qmediatools.h>
-#include <activitymonitor.h>
+#include <private/activitymonitor_p.h>
 
 #include <QtGui>
 

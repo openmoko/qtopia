@@ -790,22 +790,23 @@ void QDSDataPrivate::shiftToStore()
 
 /*!
     \class QDSData
-    \brief The QDSData class encapsulates data which is shared with QDS
+    \mainclass
+    \brief The QDSData class encapsulates data shared by Qtopia Data Sharing (QDS)
     services.
 
-    The QDSData class is used with QDS services as an efficient means of
+    The QDSData class is used by QDS services as an efficient means of
     sharing data between client and provider applications. The data is
     implicitly shared between QDSData objects, and can be stored persistently.
 
-    For larger data sizes methods which use QFile and QIODevice are recommended.
+    For larger data sizes, methods which use QFile and QIODevice are recommended.
 
-    \sa QDSAction, QDSActionRequest
+    \sa QDSAction, QDSActionRequest, {Qtopia Data Sharing (QDS)}
 
     \ingroup ipc
 */
 
 /*!
-    The default constructor creates an empty object.
+    Constructs an empty QDSData object.
 */
 QDSData::QDSData()
 :   d( 0 )
@@ -815,7 +816,7 @@ QDSData::QDSData()
 }
 
 /*!
-    Copy constructor creates a deep copy of \a{other}.
+    Constructs a deep copy of \a{other}.
 */
 QDSData::QDSData( const QDSData& other )
 :   d( 0 )
@@ -833,7 +834,8 @@ QDSData::QDSData( const QDSData& other )
 }
 
 /*!
-    Constructs a data object from the \a key created by QDSData::store().
+    Constructs a data object from \a key
+    \a key should be a key previously created by QDSData::store().
 */
 QDSData::QDSData( const QUniqueId& key )
 :   d( 0 )
@@ -843,7 +845,7 @@ QDSData::QDSData( const QUniqueId& key )
 }
 
 /*!
-    Constructs a new data object with \a data of \a type.
+    Constructs a data object with \a data of \a type.
 */
 QDSData::QDSData( const QByteArray& data, const QMimeType& type )
 :   d( 0 )
@@ -852,7 +854,7 @@ QDSData::QDSData( const QByteArray& data, const QMimeType& type )
 }
 
 /*!
-    Constructs a new data object with \a data of \a type. \a data should not contain
+    Constructs a data object with \a data of \a type. \a data should not contain
     non-Latin1 characters as it is converted to a Latin1 representation.
 */
 QDSData::QDSData( const QString& data, const QMimeType& type )
@@ -862,7 +864,7 @@ QDSData::QDSData( const QString& data, const QMimeType& type )
 }
 
 /*!
-    Constructs a new data object with \a data of \a type. The data in \a data
+    Constructs a data object with \a data of \a type. The data in \a data
     is copied into the QDS data store.
 */
 QDSData::QDSData( QFile& data, const QMimeType& type )
@@ -872,7 +874,7 @@ QDSData::QDSData( QFile& data, const QMimeType& type )
 }
 
 /*!
-    Destructor.
+    Destroys the QDSData object.
 */
 QDSData::~QDSData()
 {
@@ -881,7 +883,8 @@ QDSData::~QDSData()
 }
 
 /*!
-    Assignment operator which deep copies \a other.
+    Makes a deep copy of \a other and assigns it to this QDSData object.
+    Returns a reference to this QDSData object.
 */
 const QDSData& QDSData::operator=( const QDSData& other )
 {
@@ -902,7 +905,7 @@ const QDSData& QDSData::operator=( const QDSData& other )
 }
 
 /*!
-    Comparison operator which returns true if \a other is equivalent.
+    Returns true if the data object is equal to the \a other data object specified; otherwise returns false.
 */
 bool QDSData::operator==( const QDSData& other ) const
 {
@@ -931,7 +934,7 @@ bool QDSData::operator==( const QDSData& other ) const
 }
 
 /*!
-    Comparison operator which returns true if \a other is not equivalent.
+    Returns true if the data object is not equal to the \a other data object specified; otherwise returns false.
 */
 bool QDSData::operator!=( const QDSData& other ) const
 {
@@ -939,7 +942,7 @@ bool QDSData::operator!=( const QDSData& other ) const
 }
 
 /*!
-    Determines if the data object is valid.
+    Returns true if the data object is valid; otherwise returns false.
 */
 bool QDSData::isValid() const
 {
@@ -1022,7 +1025,7 @@ QIODevice* QDSData::toIODevice() const
     Adds the data to the persistent data store, and returns a key for accessing
     the data in the future.
 
-    If the data was correctly stored, the returned key will not be null.
+    If the data was incorrectly stored, the returned key will be null.
 
     The persistent data is reference counted so all applications who wish to
     access the data from the data store should call this method.
@@ -1045,9 +1048,11 @@ QUniqueId QDSData::store()
 }
 
 /*!
-    Removes the data from the persistent data store, when the reference count
-    is zero, indicating that no-one requires the data, the data is deleted
-    permanently from the data store.
+    Removes the data from the persistent data store. When the reference count
+    is zero, indicating that no-one requires the data, the data is permanently
+    deleted from the data store.
+
+    Returns true on successful completion of the request; otherwise returns false.
 */
 bool QDSData::remove()
 {
@@ -1060,6 +1065,8 @@ bool QDSData::remove()
 /*!
     Replaces the data with \a data. It is assumed that \a data is of the same
     data type as the original data.
+
+    Returns true on successful completion of the request; otherwise returns false.
 */
 bool QDSData::modify( const QByteArray& data )
 {

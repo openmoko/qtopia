@@ -22,8 +22,8 @@
 #ifndef __QTOPIA_MEDIALIBRARY_QMEDIACODECREP_H
 #define __QTOPIA_MEDIALIBRARY_QMEDIACODECREP_H
 
-#include <qstring.h>
-#include <qvariant.h>
+#include <QString>
+#include <QVariant>
 
 #include "qmediacodecinfo.h"
 

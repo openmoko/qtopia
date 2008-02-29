@@ -27,8 +27,11 @@
   \internal
 
   \class HexKeyValidator
+  \brief The HexKeyValidator class validates hexadecimal keys such as WEP keys and MAC addresses.
+  \mainclass
 
-  This class can validate key hexadecimal keys such as WEP keys and MAC addresses.
+  This class should be used in connection with a QLineEdit. It allows the validation 
+  of user input.
 */
 
 HexKeyValidator::HexKeyValidator( QWidget* parent, int numDigits )

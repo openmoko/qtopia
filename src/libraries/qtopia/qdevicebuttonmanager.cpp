@@ -34,6 +34,7 @@ QPointer<QDeviceButtonManager> QDeviceButtonManager::m_Instance = 0L;
 
 /*!
   \class QDeviceButtonManager
+  \mainclass
   \brief The QDeviceButtonManager class manages device button mappings.
 
   The function buttons on a device may generate key presses and also
@@ -72,9 +73,9 @@ QPointer<QDeviceButtonManager> QDeviceButtonManager::m_Instance = 0L;
   the file.  Subsequent \c {Button<X>} groups are then named from
   \c {X = 0 ... Count - 1} to represent each mapped key.
 
-  Each key mapping contains the key to which it maps, an optional name and
-  an optional context and the action to take when the key is pressed and when it
-  is held.  The key name can be any one of the key names present in the
+  Each key mapping contains the key to which it maps, a name,
+  a context and the actions to take when the key is pressed and when it is held.
+  The key is mandatory and can be any one of the keys named in the
   Qt::Key enum.  For example, \c {Context1} and \c {F34} are both valid.  The
   user visible name and context are accessible through QDeviceButton::userText()
   and QDeviceButton::context() respectively.
@@ -94,12 +95,16 @@ QPointer<QDeviceButtonManager> QDeviceButtonManager::m_Instance = 0L;
   a \c {deviceButtonMappingChanged()} message is sent on the \c {QPE/System}
   channel.
 
+  The Buttons settings application in Qtopia allows the user to configure
+  mappable device buttons.
+
+
     \ingroup userinput
 */
 
 /*!
   Returns an instance of the \c QDeviceButtonManager.  \c QDeviceButtonManager
-  should never be constructed explicitly.
+  cannot be constructed explicitly.
 */
 QDeviceButtonManager& QDeviceButtonManager::instance()
 {
@@ -130,7 +135,7 @@ QDeviceButtonManager::~QDeviceButtonManager()
  Returns the available buttons on this device.  The number and location
  of buttons will vary depending on the device.  Button numbers will be assigned
  by the device manufacturer and will be from most preferred button to least preffered
- button.  Note that this list only contains user-programmable  buttons.
+ button.  Note that this list only contains user-programmable buttons.
  */
 const QList<QDeviceButton*>& QDeviceButtonManager::buttons() const
 {

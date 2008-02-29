@@ -63,10 +63,6 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
     QVBoxLayout *timeLayout, *formatLayout;
 #ifdef QTOPIA_PHONE
     QTabWidget *tb = new QTabWidget;
-    QVBoxLayout *vb = new QVBoxLayout;
-    vb->setMargin(0);
-    vb->addWidget(tb);
-    setLayout(vb);
 
     timePage = new QWidget;
     timeLayout = new QVBoxLayout;
@@ -105,6 +101,8 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
 
     tz = new QTimeZoneWidget;
     tzLayout->addWidget( tz );
+
+    lblZone->setBuddy( tz );
 
     time = new SetTime;
     timeLayout->addWidget( time );

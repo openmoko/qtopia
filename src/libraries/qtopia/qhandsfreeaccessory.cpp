@@ -34,10 +34,11 @@ static const char* const QHANDSFREEACCESSORY_MODE = "mode";
 
 /*!
     \class QHandsfreeAccessory
+    \mainclass
+
     \brief The QHandsfreeAccessory class provides access to a handsfree accessory on the device.
 
-    The QHandsfreeAccessory class provides access to a handsfree accessory
-    on the device. Handsfree device implementations should inherit from
+    Handsfree device implementations should inherit from
     QHandsfreeAccessoryProvider.
 
     \sa QHandsfreeAccessoryProvider, QHardwareInterface
@@ -55,17 +56,17 @@ static const char* const QHANDSFREEACCESSORY_MODE = "mode";
 */
 
 /*!
-    Construct a new handsfree acessory object for \a id and attach
+    Construct a new handsfree accessory object for \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the default
-    accessory that supports the handsfree interface.  If there is more
+    accessory provider that supports the handsfree interface. If there is more
     than one service that supports the handsfree interface, the caller
-    should enumerate them with QHardwareManager::supports()
+    should enumerate them with QHardwareManager::providers()
     and create separate QHandsfreeAccessory objects for each.
 
-    \sa QHardwareManager::supports()
+    \sa QHardwareManager::providers()
 */
 QHandsfreeAccessory::QHandsfreeAccessory(
     const QString& id,
@@ -76,14 +77,14 @@ QHandsfreeAccessory::QHandsfreeAccessory(
 }
 
 /*!
-    Destroys this handsfree accessory
+    Destroys the handsfree accessory.
 */
 QHandsfreeAccessory::~QHandsfreeAccessory()
 {
 }
 
 /*!
-    Returns the mode of the handsfree accessory
+    Returns the mode of the handsfree accessory.
 */
 QHandsfreeAccessory::Mode QHandsfreeAccessory::mode() const
 {
@@ -100,12 +101,12 @@ QHandsfreeAccessory::Mode QHandsfreeAccessory::mode() const
 
 /*!
     \class QHandsfreeAccessoryProvider
+    \mainclass
+
     \brief The QHandsfreeAccessoryProvider class provides an interface for handsfree devices to integrate into Qtopia.
 
-    The QHandsfreeAccessoryProvider class provides an interface for
-    handsfree devices to integrate into Qtopia.  Handsfree devices inherit from
-    this class and call setMode() to indicate the level of functionality that
-    is supported.
+    Handsfree devices inherit from this class and call setMode() to indicate
+    the level of functionality that is supported.
 
     \sa QHandsfreeAccessory
 
@@ -113,7 +114,7 @@ QHandsfreeAccessory::Mode QHandsfreeAccessory::mode() const
 */
 
 /*!
-    Create a handsfree device called \a id and attach it to \a parent.
+    Create a handsfree device called \a id and attaches it to \a parent.
 */
 QHandsfreeAccessoryProvider::QHandsfreeAccessoryProvider(
     const QString& id,
@@ -123,15 +124,15 @@ QHandsfreeAccessoryProvider::QHandsfreeAccessoryProvider(
 }
 
 /*!
-    Destroy this handsfree device provider
+    Destroys the handsfree device provider.
 */
 QHandsfreeAccessoryProvider::~QHandsfreeAccessoryProvider()
 {
 }
 
 /*!
-    Set the mode of the headset to \a mode. This is usually called from
-    the subclass constructor.
+    Set the mode of the handsfree device to \a mode.  This is typically called
+    from the constructor of subclass implementations.
 */
 void QHandsfreeAccessoryProvider::setMode( const Mode mode )
 {

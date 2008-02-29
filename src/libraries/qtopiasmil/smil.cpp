@@ -153,6 +153,10 @@ public:
 };
 
 
+/*!
+    \class SmilView
+    \internal
+*/
 SmilView::SmilView(QWidget *parent, Qt::WFlags f)
     : QWidget(parent, f), d(0)
 {

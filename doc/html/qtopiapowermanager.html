@@ -1,31 +1,35 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QtopiaPowerManager Class Reference</title>
+  <title>QtopiaPowerManager Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QtopiaPowerManager Class Reference</h1>
-<p>The QtopiaPowerManager class implements default device power management behaviour. Qtopia provides an implementation for a phone and PDA device. These implementations support the following three timeouts and actions. <a href="#details">More...</a></p>
-<pre>#include &lt;QtopiaPowerManager&gt;</pre><p>Inherits <a href="powermanagertask.html">PowerManagerTask</a> and <a href="qwsscreensaver.html">QWSScreenSaver</a>.</p>
+<p>The QtopiaPowerManager class implements default device power management behaviour. <a href="#details">More...</a></p>
+<pre>    #include &lt;QtopiaPowerManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a> and <a href="qwsscreensaver.html">QWSScreenSaver</a>.</p>
+<p>Inherited by <a href="phonepowermanager.html">PhonePowerManager</a>.</p>
 <ul>
 <li><a href="qtopiapowermanager-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
+<li><div class="fn"/><b><a href="qtopiapowermanager.html#QtopiaPowerManager">QtopiaPowerManager</a></b> ()</li>
 <li><div class="fn"/>virtual void <b><a href="qtopiapowermanager.html#restore">restore</a></b> ()</li>
 <li><div class="fn"/>virtual bool <b><a href="qtopiapowermanager.html#save">save</a></b> ( int <i>level</i> ) = 0</li>
 <li><div class="fn"/>void <b><a href="qtopiapowermanager.html#setDefaultIntervals">setDefaultIntervals</a></b> ()</li>
 <li><div class="fn"/>virtual void <b><a href="qtopiapowermanager.html#setIntervals">setIntervals</a></b> ( int * <i>a</i>, int <i>size</i> ) = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>2 public functions inherited from <a href="qwsscreensaver.html#public-functions">QWSScreenSaver</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>2 public functions inherited from <a href="qwsscreensaver.html#public-functions">QWSScreenSaver</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -42,34 +46,38 @@
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>1 protected slot inherited from <a href="powermanagertask.html#protected-slots">PowerManagerTask</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QtopiaPowerManager class implements default device power management behaviour. Qtopia provides an implementation for a phone and PDA device. These implementations support the following three timeouts and actions.</p>
-<p>PhonePowerManager (phone/phonepowermanager.cpp)</p>
+<p>The QtopiaPowerManager class implements default device power management behaviour.</p>
+<p>Qtopia provides an implementation for a phone device. These implementations support the following three timeouts and actions.</p>
+<p><a href="phonepowermanager.html">PhonePowerManager</a> (phone/phonepowermanager.cpp)</p>
 <ul>
 <li>show homescreen (and close open applications)</li>
 <li>dim backlight</li>
 <li>turn backlight off</li>
 </ul>
-<p>PDAPowerManager (pda/pdapowermanager.cpp)</p>
+<p>A PDA might have an implementation that provides the following three levels of actions:</p>
 <ul>
 <li>dim backlight</li>
 <li>turn backlight off</li>
 <li>suspend device (apm suspend)</li>
 </ul>
-<p>To extend Qtopia's default behaviour it is necessary to subclass either PhonePowerManager or PDAPowerManager. A minimal subclass has to reimplement the following functions:</p>
+<p>To extend Qtopia's default behaviour it is necessary to subclass either <a href="phonepowermanager.html">PhonePowerManager</a> or QtopiaPowerManager. A minimal subclass of QtopiaPowerManager has to reimplement the following functions:</p>
 <ul>
 <li><tt>setIntervals(int*, int)</tt></li>
 <li><tt>save(int)</tt></li>
 </ul>
-<p>See also <a href="qtopiapowermanager.html#setIntervals">setIntervals</a>() and <a href="qtopiapowermanager.html#save">save</a>().</p>
+<p>Applications can interact with the Qtopia power management via the <a href="qtopiapowermanagerservice.html">QtopiaPowerManagerService</a>. For more details on how to utilize services see the <a href="services.html">Services</a> documentation.</p>
+<p>This class provides functionality to temporarily restrict power management. It might be necessary to surpress the diming of the backlight e.g&#x2e;, when the mediaplayer is showing a video or to prevent the suspension of the device when the user is playing music. The <a href="qtopiapowerconstraintmanager.html">QtopiaPowerConstraintManager</a> ensures that application cannot request restriction beyond their own life time.</p>
+<p>See also <a href="qtopiapowermanager.html#setIntervals">setIntervals</a>(), <a href="qtopiapowermanager.html#save">save</a>(), <a href="phonepowermanager.html">PhonePowerManager</a>, <a href="qtopiapowermanagerservice.html">QtopiaPowerManagerService</a>, and <a href="qtopiapowerconstraintmanager.html">QtopiaPowerConstraintManager</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QtopiaPowerManager"></a>QtopiaPowerManager::QtopiaPowerManager ()</h3>
+<p>Constructs a <a href="qtopiapowermanager.html">QtopiaPowerManager</a> instance.</p>
 <h3 class="fn"><a name="restore"></a>void QtopiaPowerManager::restore ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Restores the state of the device when power saving is active. This usually happens when the user interacts with the device.</p>
 <p>Reimplemented from <a href="qwsscreensaver.html#restore">QWSScreenSaver</a>.</p>
@@ -86,8 +94,8 @@
 <p>This function needs to be reimplemented by subclasses.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

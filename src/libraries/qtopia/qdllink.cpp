@@ -80,6 +80,7 @@ QDLLinkPrivate::QDLLinkPrivate()
 
 /*!
     \class QDLLink
+    \mainclass
     \brief The QDLLink class fully describes a QDL link.
 
     The QDLLink class contains all the information for a QDL link. It allows
@@ -101,6 +102,8 @@ QDLLinkPrivate::QDLLinkPrivate()
 
 /*!
     Constructs a Null QDLLink
+
+    \sa isNull()
 */
 QDLLink::QDLLink()
 :   d( 0 )
@@ -159,7 +162,7 @@ QDLLink::QDLLink( const QDSData& dataObject )
 }
 
 /*!
-    \internal
+    Destroy a QDL Link object.
 */
 QDLLink::~QDLLink()
 {
@@ -183,6 +186,8 @@ QDLLink& QDLLink::operator=( const QDLLink &other )
 
 /*!
     Returns the MIME type used for QDLLinks stored in QDSData objects.
+
+    \sa listMimeType()
 */
 QMimeType QDLLink::mimeType()
 {
@@ -192,6 +197,8 @@ QMimeType QDLLink::mimeType()
 /*!
     Returns the MIME type used for a list of QDLLinks stored in QDSData
     objects.
+
+    \sa mimeType()
 */
 QMimeType QDLLink::listMimeType()
 {
@@ -199,7 +206,7 @@ QMimeType QDLLink::listMimeType()
 }
 
 /*!
-    Determines if the link is null.
+    Returns true if the link is null; otherwise returns false.
 */
 bool QDLLink::isNull() const
 {
@@ -207,8 +214,10 @@ bool QDLLink::isNull() const
 }
 
 /*!
-    Determines if the link is broken. This usually occurs when the QDL data
+    Returns true if the link is broken; otherwise returns false. This usually occurs when the QDL data
     source deletes the linked data item.
+
+    \sa setBroken()
 */
 bool QDLLink::isBroken() const
 {
@@ -227,6 +236,8 @@ QString QDLLink::service() const
 /*!
     Returns the application specific data used to activate the link on the QDL
     source.
+
+    \sa setData()
 */
 QByteArray QDLLink::data() const
 {
@@ -235,6 +246,8 @@ QByteArray QDLLink::data() const
 
 /*!
     Returns the description of the link.
+
+    \sa setDescription()
 */
 QString QDLLink::description() const
 {
@@ -243,6 +256,8 @@ QString QDLLink::description() const
 
 /*!
     Returns the icon name for the link.
+
+    \sa setIcon()
 */
 QString QDLLink::icon() const
 {
@@ -319,6 +334,8 @@ void QDLLink::setService( const QString &service )
 
 /*!
     Sets the application specific data for link activation to \a data.
+
+    \sa data()
 */
 void QDLLink::setData( const QByteArray &data )
 {
@@ -327,6 +344,8 @@ void QDLLink::setData( const QByteArray &data )
 
 /*!
     Sets the link description to \a description.
+
+    \sa description()
 */
 void QDLLink::setDescription( const QString &description )
 {
@@ -335,6 +354,8 @@ void QDLLink::setDescription( const QString &description )
 
 /*!
     Sets the link icon name to \a icon.
+
+    \sa icon()
 */
 void QDLLink::setIcon( const QString &icon )
 {
@@ -343,6 +364,8 @@ void QDLLink::setIcon( const QString &icon )
 
 /*!
     Set the link's broken state to \a broken.
+
+    \sa isBroken()
 */
 void QDLLink::setBroken( const bool broken )
 {

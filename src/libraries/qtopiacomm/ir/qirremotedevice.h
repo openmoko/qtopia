@@ -23,10 +23,11 @@
 #define __QIRREMOTEDEVICE_H__
 
 #include <qirnamespace.h>
+#include <qtopiaglobal.h>
 
 #include <QString>
 
-class QIrRemoteDevice
+class QTOPIACOMM_EXPORT QIrRemoteDevice
 {
 public:
     QIrRemoteDevice(const QString &name,

@@ -22,16 +22,17 @@
 #ifndef __QTOPIA_MEDIALIBRARY_MEDIADEVICEINFO_H
 #define __QTOPIA_MEDIALIBRARY_MEDIADEVICEINFO_H
 
-#include <qstring.h>
-#include <qlist.h>
-#include <qvariant.h>
+#include <QString>
+#include <QVariant>
+#include <QList>
 
 #include <qtopiaipcmarshal.h>
 
+
+class QMediaDeviceInfoPrivate;
+
 class QTOPIAMEDIA_EXPORT QMediaDeviceInfo
 {
-    struct QMediaDeviceInfoPrivate;
-
 public:
     QMediaDeviceInfo();
     QMediaDeviceInfo(QMediaDeviceInfo const& info);
@@ -48,10 +49,8 @@ public:
     bool isWritable() const;
 
     // {{{ Serialization
-    template <typename Stream>
-    void serialize(Stream &stream) const;
-    template <typename Stream>
-    void deserialize(Stream &stream);
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
     // }}}
 
 private:

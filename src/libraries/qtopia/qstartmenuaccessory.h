@@ -22,6 +22,9 @@
 #ifndef ACCESSORY_H
 #define ACCESSORY_H
 
+// THIS CLASS IS OBSOLETE
+// IT WILL BE REMOVED IN Qtopia 4.3
+
 #include <qtopiaglobal.h>
 #include <qmenu.h>
 class QString;

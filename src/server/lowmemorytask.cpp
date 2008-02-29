@@ -30,6 +30,15 @@
   \ingroup QtopiaServer::Task
   \brief The LowMemoryTask class reponds to low memory situations by closing applications.
 
+  The LowMemoryTask provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o LowMemoryTask
+  \row \o Interfaces \o None
+  \row \o Services \o None
+  \endtable
+
   The LowMemoryTask monitors memory pressure through the default MemoryMonitor
   providing task.  The following table describes the action taken by this task
   at each memory level.
@@ -46,6 +55,7 @@
   \row \o \o A \c {RecoverMemory()} message is sent to the \c {QPE/System} channel.  Applications may use this as a trigger to recover memory or to free caches.
   \row \o \o The most recently launched application is forcibly killed.  The most recently launched application refers to that most recently executed by the system, not the most recently raised.
   \endtable
+
  */
 
 /*! \internal */

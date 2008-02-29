@@ -195,21 +195,21 @@ void QCommDeviceController_Private::bringUpOneItem()
 
 /*!
     \class QCommDeviceController
+    \mainclass
     \brief The QCommDeviceController class provides facilities to control the power state of a hardware communications device
 
-    The QCommDeviceController class provides facilities to control the power state of a
-    hardware communications device.  The devices that fall under this category are currently
-    Bluetooth and Infrared devices.
+    Using the QCommDeviceController class it is possible to control the
+    power state of a Bluetooth or Infrared hardware device.  This class is
+    generally useful only to settings applications which need to control the
+    device state directly.  For typical useage, please see the
+    QCommDeviceSession class.
 
-    This class is generally reserved for settings applications which need to control the
-    device state directly.  For typical useage, please see the QCommDeviceSession class.
-
-    The device can be in four power states: on, off, on for one item, and on for a period of time.
+    The device can be in four power states: on, off, on for one item,
+    and on for a period of time.
 
     \sa QCommDeviceSession
 
     \ingroup hardware
-    \ingroup telephony
  */
 
 /*!
@@ -217,8 +217,8 @@ void QCommDeviceController_Private::bringUpOneItem()
 
     The current state of the device.
 
-    \value On The device is on permanently
-    \value Off The device is off
+    \value On The device is on permanently.
+    \value Off The device is off.
     \value OnOneItem The device is on until the last device session is closed.
     \value OnTimed The device is on for a specified period of time, at which time it is either turned off if there are no sessions open, or enters the OnOneItem state.
 */
@@ -229,6 +229,8 @@ void QCommDeviceController_Private::bringUpOneItem()
     Infrared devices and hciX for Bluetooth devices.
 
     The \a parent parameter is passed to the QObject constructor.
+
+    \sa deviceId()
 */
 QCommDeviceController::QCommDeviceController(const QByteArray &devId, QObject *parent) :
         QObject(parent)
@@ -255,6 +257,8 @@ const QByteArray &QCommDeviceController::deviceId() const
 
 /*!
     Brings up the device.  The device will attempt to enter the \bold{On} mode.
+
+    \sa bringDown(), bringUpTimed(), bringUpOneItem()
 */
 void QCommDeviceController::bringUp()
 {
@@ -264,6 +268,8 @@ void QCommDeviceController::bringUp()
 /*!
     Brings up the device in timed mode.  The device will attempt to enter the
     \bold{OnTimed} mode.  The device will remain in this mode for \a secs seconds.
+
+    \sa bringUp(), bringUpOneItem()
 */
 void QCommDeviceController::bringUpTimed(int secs)
 {
@@ -273,6 +279,8 @@ void QCommDeviceController::bringUpTimed(int secs)
 /*!
     Brings up the device for one item.  The device will attempt to enter the
     \bold{OnOneItem} mode.
+
+    \sa bringUp(), bringUpTimed()
 */
 void QCommDeviceController::bringUpOneItem()
 {
@@ -281,6 +289,8 @@ void QCommDeviceController::bringUpOneItem()
 
 /*!
     Brings down the device.  The device will attempt to enter the \bold{Off} mode.
+
+    \sa bringUp()
 */
 void QCommDeviceController::bringDown()
 {
@@ -290,6 +300,8 @@ void QCommDeviceController::bringDown()
 /*!
     Returns true if the device is currently turned on.  E.g. it is in
     On, OnTimed or OnOneItem mode.
+
+    \sa bringUp(), bringDown(), powerState()
 */
 bool QCommDeviceController::isUp() const
 {
@@ -298,6 +310,8 @@ bool QCommDeviceController::isUp() const
 
 /*!
     Returns the current power state of the device.
+
+    \sa isUp()
 */
 QCommDeviceController::PowerState QCommDeviceController::powerState() const
 {
@@ -308,12 +322,16 @@ QCommDeviceController::PowerState QCommDeviceController::powerState() const
     \fn void QCommDeviceController::up()
 
     This signal is emitted when the device is turned on.
+
+    \sa bringUp()
 */
 
 /*!
     \fn void QCommDeviceController::down()
 
     This signal is emitted when the device is turned off.
+
+    \sa bringDown()
 */
 
 /*!
@@ -321,6 +339,8 @@ QCommDeviceController::PowerState QCommDeviceController::powerState() const
 
     This signal is emitted when a device's power state has been changed.  The
     \a state parameter holds the new power state.
+
+    \sa powerState()
 */
 
 #include "qcommdevicecontroller.moc"

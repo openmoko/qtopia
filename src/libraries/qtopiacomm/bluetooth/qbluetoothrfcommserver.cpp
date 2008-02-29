@@ -49,10 +49,35 @@ public:
 
 /*!
     \class QBluetoothRfcommServer
+    \mainclass
     \brief The QBluetoothRfcommServer class represents an RFCOMM server socket.
 
     This class makes it possible to accept incoming RFCOMM connections.
     You can specify the address and the RFCOMM channel to listen on.
+
+    \bold{NOTE:} If you are implementing an OBEX based service, you
+    should use the QBluetoothObexServer instead.
+
+    Call listen() to make the server listen for new connections.  The
+    newConnection() signal will be emmited each time a client connects
+    to the server.
+
+    Security options controlling the authentication and encryption of the
+    Bluetooth link on the socket can be specified at any time by calling
+    setSecurityOptions().  Currently this will only affect all future
+    connections, not connections which are active or pending.
+
+    Call nextPendingConnection() to accept the pending client connection.
+
+    When listening for connections, server address and channel are available
+    by calling serverAddress() and serverChannel().
+
+    Calling close() will make the QBluetoothRfcommServer stop listening
+    for connections and delete all pending connections.
+
+    \sa QBluetoothRfcommSocket
+
+    \ingroup qtopiabluetooth
 */
 
 /*!
@@ -68,7 +93,7 @@ QBluetoothRfcommServer::QBluetoothRfcommServer(QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the server.
 */
 QBluetoothRfcommServer::~QBluetoothRfcommServer()
 {
@@ -79,6 +104,8 @@ QBluetoothRfcommServer::~QBluetoothRfcommServer()
 /*!
     Tells the server to listen for incoming connections on address \a local
     and channel \a channel.
+
+    The channel can be any value between 1 and 30.
 
     Returns true on success; otherwise returns false.
 
@@ -146,6 +173,8 @@ void QBluetoothRfcommServer::close()
 /*!
     Returns the RFCOMM channel the server is currently listening on.  If the server
     is not listening, returns -1.
+
+    \sa serverAddress()
 */
 int QBluetoothRfcommServer::serverChannel() const
 {
@@ -155,6 +184,8 @@ int QBluetoothRfcommServer::serverChannel() const
 /*!
     Returns the address the server is currently listening on.  If the server
     is not listening, returns QBluetoothAddress::invalid.
+
+    \sa serverChannel()
  */
 QBluetoothAddress QBluetoothRfcommServer::serverAddress() const
 {
@@ -199,7 +230,7 @@ QBluetooth::SecurityOptions QBluetoothRfcommServer::securityOptions() const
 }
 
 /*!
-    Sets the security options of the socket to be \a options.
+    Returns true if able to set the security options of the socket to be \a options; otherwise returns false.
 
     \sa securityOptions()
  */

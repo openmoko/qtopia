@@ -23,11 +23,17 @@
 
 /*!
     \class QAtResult
-    \brief The QAtResult class provides access to the results of an AT modem command
+    \mainclass
+    \brief The QAtResult class provides access to the results of AT modem commands and unsolicited notifications
     \ingroup telephony::serial
 
-    The QAtResult class provides access to the results of an AT
-    modem command that was executed via the QAtChat class.
+    AT commands that are sent to a modem with QAtChat::chat() result in a QAtResult
+    object being made available to describe the result of the command when it completes.
+
+    The resultCode() method can be used to determine the exact cause of an AT
+    modem command failure.  The content() method can be used to access the
+    response content that was returned from the command.  For complex response
+    contents, the QAtResultParser class can be used to decode the response.
 
     \sa QAtChat, QAtResultParser
 */
@@ -111,9 +117,9 @@ public:
     \value PLMNNotAllowed GSM 27.07 code 111: PLMN not allowed
     \value LocationAreaNotAllowed GSM 27.07 code 112: Location area not allowed
     \value RoamingNotAllowed GSM 27.07 code 113: Roaming not allowed in this location area
-    \value ServiceOptionNotSupported GSM 27.07 code 132: serivce option not supported
+    \value ServiceOptionNotSupported GSM 27.07 code 132: service option not supported
     \value ServiceOptionNotSubscribed GSM 27.07 code 133: service option not subscribed
-    \value ServiceOptionOutOfOrder GSM 27.07 code 134: serivce option temporarily out of order
+    \value ServiceOptionOutOfOrder GSM 27.07 code 134: service option temporarily out of order
     \value UnspecifiedGPRSError GSM 27.07 code 148: unspecified GPRS error
     \value PDPAuthenticationFailure GSM 27.07 code 149: PDP authentication failure
     \value InvalidMobileClass GSM 27.07 code 150: invalid mobile class
@@ -150,17 +156,18 @@ public:
     \value SMSCAddressUnknown GSM 27.05 code 330: SMSC address unknown
     \value SMSNoNetworkService GSM 27.05 code 331: no network service
     \value SMSNetworkTimeout GSM 27.05 code 332: network timeout
-    \value NoCNMAAckExpected GSM 27.05 code 340: no +CNMA acknowledgement expected
+    \value NoCNMAAckExpected GSM 27.05 code 340: no +CNMA acknowledgment expected
     \value UnknownError GSM 27.05 code 500: unknown error
 */
 
 /*!
     \class QAtResult::UserData
-    \brief Provides a mechanism to add user data to a result object.
+    \mainclass
+    \brief Provides a mechanism to add user data to a result object via QAtChat::chat().
 
-    The QAtResult::UserData class provides a mechanism to add user data
-    to an AT result object via QAtChat::chat().  Usually this class will
-    be inherited, with extra fields added to hold the user data.
+    Usually this class will be inherited, with extra fields added to hold the user data.
+
+    \sa QAtChat::chat()
 */
 
 /*!
@@ -209,7 +216,7 @@ QAtResult& QAtResult::operator=( const QAtResult& other )
 }
 
 /*!
-    Get the result line that terminated the command's response.
+    Returns the result line that terminated the command's response.
     This is usually a string such as \c{OK}, \c{ERROR}, \c{+CME ERROR: N},
     and so on.
 
@@ -226,8 +233,10 @@ QString QAtResult::result() const
 }
 
 /*!
-    Set the result line that terminated the command's response to \a value.
+    Sets the result line that terminated the command's response to \a value.
     This will also update resultCode() to reflect the appropriate code.
+
+    \sa result(), resultCode()
 */
 void QAtResult::setResult( const QString& value )
 {
@@ -236,7 +245,9 @@ void QAtResult::setResult( const QString& value )
 }
 
 /*!
-    Get the content that was returned with an AT command's result.
+    Returns the content that was returned with an AT command's result.
+
+    \sa setContent(), append()
 */
 QString QAtResult::content() const
 {
@@ -244,7 +255,9 @@ QString QAtResult::content() const
 }
 
 /*!
-    Set the content that was returned with an AT command's result to \a value.
+    Sets the content that was returned with an AT command's result to \a value.
+
+    \sa content(), append()
 */
 void QAtResult::setContent( const QString& value )
 {
@@ -253,6 +266,8 @@ void QAtResult::setContent( const QString& value )
 
 /*!
     Append \a value to the current content, after a line terminator.
+
+    \sa content(), setContent()
 */
 void QAtResult::append( const QString& value )
 {
@@ -263,11 +278,13 @@ void QAtResult::append( const QString& value )
 }
 
 /*!
-    Get the numeric result code associated with result().
+    Returns the numeric result code associated with result().
 
     Extended error codes are only possible if the appropriate modem error
     mode has been enabled (e.g. with the \c{AT+CMEE=1} command).  Otherwise
     most errors will simply be reported as QAtResult::Error.
+
+    \sa setResultCode(), result(), ok()
 */
 QAtResult::ResultCode QAtResult::resultCode() const
 {
@@ -275,8 +292,10 @@ QAtResult::ResultCode QAtResult::resultCode() const
 }
 
 /*!
-    Set the numeric result code to \a value, and update result()
+    Sets the numeric result code to \a value, and update result()
     to reflect the value.
+
+    \sa resultCode(), result()
 */
 void QAtResult::setResultCode( QAtResult::ResultCode value )
 {
@@ -286,10 +305,12 @@ void QAtResult::setResultCode( QAtResult::ResultCode value )
 }
 
 /*!
-    Determine if this result indicates a successful command.
+    Returns true if this result indicates a successful command; false otherwise.
     Success is indicated when resultCode() returns either
     QAtResult::OK or QAtResult::Connect.  All other result
     codes indicate failure.
+
+    \sa resultCode()
 */
 bool QAtResult::ok() const
 {
@@ -298,11 +319,13 @@ bool QAtResult::ok() const
 }
 
 /*!
-    Return a more verbose version of result(), suitable for debug output.
+    Returns a more verbose version of result(), suitable for debug output.
     Many modems report extended errors by number (e.g. \c{+CME ERROR: 4}),
     which can be difficult to use when diagnosing problems.  This function
     returns a string that is more suitable for diagnostic output than result().
     If result() is already verbose, it will be returned as-is.
+
+    \sa result()
 */
 QString QAtResult::verboseResult() const
 {
@@ -313,7 +336,9 @@ QString QAtResult::verboseResult() const
 }
 
 /*!
-    Get the user data associated with this result object.
+    Returns the user data associated with this result object.
+
+    \sa setUserData()
 */
 QAtResult::UserData *QAtResult::userData() const
 {
@@ -321,7 +346,9 @@ QAtResult::UserData *QAtResult::userData() const
 }
 
 /*!
-    Set the user data associated with this result object to \a value.
+    Sets the user data associated with this result object to \a value.
+
+    \sa userData()
 */
 void QAtResult::setUserData( QAtResult::UserData *value )
 {
@@ -562,7 +589,12 @@ QString QAtResult::codeToResult( const QString& defaultValue ) const
         }
     }
     if ( defaultValue.isEmpty() ) {
-        return "+CME ERROR: " + QString::number( d->resultCode );
+        if ( ((int)d->resultCode) >= 300 &&
+             ((int)d->resultCode) <= 500 ) {
+            return "+CMS ERROR: " + QString::number( d->resultCode );
+        } else {
+            return "+CME ERROR: " + QString::number( d->resultCode );
+        }
     } else {
         return defaultValue;
     }

@@ -22,13 +22,14 @@
 #include "qwindowdecorationinterface.h"
 
 /*! \class QWindowDecorationInterface
+  \mainclass
   \brief The QWindowDecorationInterface class provides an interface for Qtopia
   window decoration styles.
 
   Window decoration styles may be added to Qtopia via plug-ins. In order to
-  write a style plug-in you must create an interface to your QStyle derived
-  class by deriving from the QWindowDecorationInterface class and implementing
-  the pure virtual functions.
+  write a style plug-in you must 
+  derive from the QWindowDecorationInterface class and implement
+  the virtual functions.
 
   The window being decorated is defined by the
   QWindowDecorationPlugin::WindowData struct:
@@ -44,7 +45,24 @@ struct WindowData {
 };
 \endcode
 
-  \ingroup appearance
+    Window decorations are loaded by setting the \c Decoration setting
+    in the \c Appearance group of \c {Trolltech/qpe}, for example:
+
+\code
+    [Appearance]
+    Decoration=mydecoration
+\endcode
+
+    To allow a QWindowDecorationInterface class to be created a plug-in class
+    derived from QWindowDecorationPlugin should be implemented.
+
+    Note that the Qtopia Phone Edition includes a decoration plugin that
+    allows basic \l {Tutorial: Window Decoration Theme}{theming}, and this
+    should be used in preference to custom decoration plugins.
+
+    \sa QWindowDecorationPlugin
+
+    \ingroup appearance
 */
 
 /*! \internal
@@ -91,44 +109,77 @@ struct WindowData {
   \value TitleText defines the window caption.
 */
 
-/*! \fn int QWindowDecorationInterface::metric( Metric m, const WindowData *wd ) const
+/*! \fn int QWindowDecorationInterface::metric( Metric metric, const WindowData *wd ) const
 
-  returns the metric \a m for the window \a wd.
+  Returns the \a metric for the window defined by \a wd.
 */
 
 /*! \fn void QWindowDecorationInterface::drawArea( Area area, QPainter *p, const WindowData *wd ) const
 
-  Draw the specified \a area using QPainter \a p for window \a wd.
+  Draw the specified \a area using QPainter \a p for the window defined by \a wd.
 */
 
-/*! \fn void QWindowDecorationInterface::drawButton( Button b, QPainter *p, const WindowData *wd, int x, int y, int w, int h, QDecoration::DecorationState state ) const
+/*! \fn void QWindowDecorationInterface::drawButton( Button button, QPainter *painter, const WindowData *wd, int x, int y, int w, int h, QDecoration::DecorationState state ) const
 
-  Draw button \a b with QPainter \a p for window \a wd within the bounds
-  supplied by \a x, \a y, \a w, \a h in the state specified by \a state.
+  Draw \a button with QPainter \a painter for the window defined by \a wd
+  within the bounds supplied by \a x, \a y, \a w, \a h in the
+  specified \a state.
 */
 
 /*! \fn QRegion QWindowDecorationInterface::mask( const WindowData *wd ) const
 
   Returns the mask of the decoration including all borders and the title
-  for window \a wd as a QRegion.  The window decorations do not necessarily
-  need to be rectangular, however the title bar  must be rectangular and
-  must be the width of the window.  This ensures the title is drawn correctly
-  for maximized windows.
+  for the window defined by \a wd as a QRegion.  The window decorations do
+  not necessarily need to be rectangular, however the title bar must be
+  rectangular and must be the width of the window.  This ensures the title
+  is drawn correctly for maximized windows.
 */
 
 /*! \fn QString QWindowDecorationInterface::name() const
 
-  The name() function returns the name of the decoration. This will
+  Returns the name of the decoration. This will
   be displayed in the appearance settings dialog.
 */
 
 /*! \fn QPixmap QWindowDecorationInterface::icon() const
 
-  The icon() function returns the icon of the decoration. This may
+  Returns the icon of the decoration. This may
   be displayed in the appearance settings dialog.
 */
 
 
+
+/*!
+    \class QWindowDecorationPlugin
+    \brief The QWindowDecorationPlugin class defines a base class for
+    implementing window decoration plugins.
+
+    \ingroup plugins
+    \ingroup appearance
+
+    Classes that inherit QWindowDecorationPlugin must provide
+    implementations of the keys() and decoration() functions.
+
+    \sa QWindowDecorationInterface
+*/
+
+/*!
+    \fn QStringList QWindowDecorationPlugin::keys() const
+
+    Returns the list of interfaces implemented by this plug-in.
+*/
+
+/*!
+    \fn QWindowDecorationInterface *QWindowDecorationPlugin::decoration(const QString &key)
+
+    Returns an instance of the QWindowDecorationInterface matching \a key.
+*/
+
+/*!
+    \fn QWindowDecorationPlugin::QWindowDecorationPlugin(QObject* parent)
+
+    Constructs a QWindowDecorationPlugin with the given \a parent.
+*/
 QWindowDecorationPlugin::QWindowDecorationPlugin(QObject*)
 {
 }
@@ -136,7 +187,7 @@ QWindowDecorationPlugin::QWindowDecorationPlugin(QObject*)
 
 /*! \fn QWindowDecorationPlugin::~QWindowDecorationPlugin()
 
-  Deconstructor.
+  Destroys a QWindowDecorationPlugin.
 */
 QWindowDecorationPlugin::~QWindowDecorationPlugin()
 {

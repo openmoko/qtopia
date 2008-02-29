@@ -96,7 +96,7 @@ QBluetoothPasskeyAgent_Private::QBluetoothPasskeyAgent_Private(QBluetoothPasskey
 
     QDBusConnection dbc = QDBusConnection::systemBus();
     if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
     }
 
@@ -278,19 +278,21 @@ bool QBluetoothPasskeyAgent_Private::unregisterAgent(const QString &localAdapter
 
 /*!
     \class QBluetoothPasskeyAgent
+    \mainclass
     \brief The QBluetoothPasskeyAgent class represents a passkey entry proxy.
 
     The QBluetoothPasskeyAgent class provides an abstract interface for
     requesting and providing passkeys to the bluetooth system whenever a new
     pairing procedure is initiated.  It is up to the clients to actually
-    establish how the passkey is obtained.  For instance, it could ask the
-    user, or read passkeys from a file, or in some other fashion.
+    establish how the passkey is obtained.  For instance, the client
+    could ask the user, or read passkeys from a file, or by presenting
+    the user with a dialog box, or in some other fashion.
 
     The passkey agent can be registered as a global default, a default for a
     particular local bluetooth adapter, or just for a specific remote device.
 
     \ingroup qtopiabluetooth
-    \sa QBluetoothAddress, QBluetoothRemoteDevice, QBluetoothLocalDevice
+    \sa QBluetoothAddress, QBluetoothLocalDevice, QBluetoothPasskeyRequest
  */
 
 /*!
@@ -319,7 +321,7 @@ QBluetoothPasskeyAgent::QBluetoothPasskeyAgent(const QString &name, QObject *par
 }
 
 /*!
-    Destructor.
+    Destroys the passkey agent.
 */
 QBluetoothPasskeyAgent::~QBluetoothPasskeyAgent()
 {
@@ -347,7 +349,11 @@ QBluetoothPasskeyAgent::Error QBluetoothPasskeyAgent::error() const
     has received a request for a passkey, and the agent is registered to
     handle the particular request.
 
-    The \a request parameter contains the passkey request.
+    The \a request parameter contains the passkey request.  Please
+    see the QBluetoothPasskeyRequest documentation for more details
+    on how to handle the request.
+
+    \sa confirmPasskey(), cancelRequest()
 */
 void QBluetoothPasskeyAgent::requestPasskey(QBluetoothPasskeyRequest &request)
 {
@@ -362,6 +368,8 @@ void QBluetoothPasskeyAgent::requestPasskey(QBluetoothPasskeyRequest &request)
     contains the passkey that should be confirmed.
 
     The method should return true if the passkeys match, and false otherwise.
+
+    \sa requestPasskey(), cancelRequest()
 */
 bool QBluetoothPasskeyAgent::confirmPasskey(const QString &localDevice,
                                             const QBluetoothAddress &remoteAddr,
@@ -381,6 +389,8 @@ bool QBluetoothPasskeyAgent::confirmPasskey(const QString &localDevice,
     The request being cancelled is on \a localDevice and the address of the
     paired device is \a remoteAddr.  The \a localDevice is of the form hciX,
     and can be used to construct a QBluetoothLocalDevice object.
+
+    \sa confirmPasskey(), requestPasskey()
 */
 void QBluetoothPasskeyAgent::cancelRequest(const QString &localDevice, const QBluetoothAddress &remoteAddr)
 {
@@ -403,6 +413,8 @@ void QBluetoothPasskeyAgent::release()
     Register the passkey agent as the default agent for all local devices.
 
     Returns true if the agent could be registered successfully, and false otherwise.
+
+    \sa unregisterDefault()
 */
 bool QBluetoothPasskeyAgent::registerDefault()
 {
@@ -413,6 +425,8 @@ bool QBluetoothPasskeyAgent::registerDefault()
     Unregister the passkey agent as the default agent for all local devices.
 
     Returns true if the agent could be unregistered successfully, and false otherwise.
+
+    \sa registerDefault()
 */
 bool QBluetoothPasskeyAgent::unregisterDefault()
 {
@@ -425,6 +439,8 @@ bool QBluetoothPasskeyAgent::unregisterDefault()
     and can be used to construct a QBluetoothLocalDevice object.
 
     Returns true if the agent could be registered successfully, and false otherwise.
+
+    \sa unregisterDefault()
 */
 bool QBluetoothPasskeyAgent::registerDefault(const QString &localDevice)
 {
@@ -437,6 +453,8 @@ bool QBluetoothPasskeyAgent::registerDefault(const QString &localDevice)
     and can be used to construct a QBluetoothLocalDevice object.
 
     Returns true if the agent could be unregistered successfully, and false otherwise.
+
+    \sa registerDefault()
  */
 bool QBluetoothPasskeyAgent::unregisterDefault(const QString &localDevice)
 {
@@ -454,6 +472,8 @@ bool QBluetoothPasskeyAgent::unregisterDefault(const QString &localDevice)
     agent again.
  
     Returns true if the agent could be registered successfully, and false otherwise.
+
+    \sa unregisterForAddress()
  */
 bool QBluetoothPasskeyAgent::registerForAddress(QBluetoothAddress &addr)
 {
@@ -466,6 +486,8 @@ bool QBluetoothPasskeyAgent::registerForAddress(QBluetoothAddress &addr)
     pairing requests associated with remote device at address \a addr.
 
     Returns true if the agent could be unregistered successfully, and false otherwise.
+
+    \sa registerForAddress()
  */
 bool QBluetoothPasskeyAgent::unregisterForAddress(QBluetoothAddress &addr)
 {
@@ -485,6 +507,8 @@ bool QBluetoothPasskeyAgent::unregisterForAddress(QBluetoothAddress &addr)
     agent again.
  
     Returns true if the agent could be registered successfully, and false otherwise.
+
+    \sa unregisterForAddress()
  */
 bool QBluetoothPasskeyAgent::registerForAddress(const QString &localDevice,
          QBluetoothAddress &addr)
@@ -500,6 +524,8 @@ bool QBluetoothPasskeyAgent::registerForAddress(const QString &localDevice,
     remote device at address \a addr.
 
     Returns true if the agent could be unregistered successfully, and false otherwise.
+
+    \sa registerForAddress()
  */
 bool QBluetoothPasskeyAgent::unregisterForAddress(const QString &localDevice,
          QBluetoothAddress &addr)

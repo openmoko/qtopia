@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Distribution Packaging</title>
+  <title>Distribution Packaging</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Distribution Packaging<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Distribution Packaging<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#package-formats">Package Formats</a></li>
 <ul><li><a href="#make-packages">make packages</a></li>
@@ -32,28 +35,28 @@
 <ul>
 <li>PACKAGE_NAME - The name of the package</li>
 <li>PACKAGE_DESCRIPTION - A one line description of the package</li>
-<li>PACKAGE_VERSION - The version of the package (use x.y.z-rel so that a new package can be built without changing the version number)</li>
+<li>PACKAGE_VERSION - The version of the package (use x.y&#x2e;z-rel so that a new package can be built without changing the version number)</li>
 <li>PACKAGE_MAINTAINER - The entity responsible for maintaining this package (eg. Joe Bloggs &lt;<a href="mailto:joe@blogs">joe@blogs</a>.com&gt;)</li>
 <li>PACKAGE_LICENSE - The license this package is released under (eg. GPL, Commercial)</li>
 <li>PACKAGE_DEPENDS - A list of packages that this package depends on (eg. qpe-taskbar)</li>
 </ul>
 <p>If you are going to use pre/post install/uninstall scripts you will probably want to do something like this:</p>
 <p>In the .pro file:</p>
-<pre>&nbsp;   postinst.commands=$$COMMAND_HEADER\
+<pre>    postinst.commands=$$COMMAND_HEADER\
         export QPEDIR=$(INSTALL_ROOT);\
         export PATH=\$$QPEDIR/bin:\$$PATH;\
         $$PWD/$${PACKAGE_NAME}.postinst
     postinst.CONFIG=no_path
     INSTALLS+=postinst</pre>
 <p>In the .postinst file:</p>
-<pre>&nbsp;   if [ -x $QPEDIR/bin/qtopia-addmimetype ]; then
+<pre>    if [ -x $QPEDIR/bin/qtopia-addmimetype ]; then
         $QPEDIR/bin/qtopia-addmimetype application/x-rom rom
     fi</pre>
 <p>This means that &quot;make install&quot; will work. It also means that make packages won't fail. INSTALL_ROOT is set to a temporary location when building the package so scripts/binaries won't exist.</p>
 <a name="the-control-file"></a>
 <h3>The Control File</h3>
 <p>The control file has the following form:</p>
-<pre>&nbsp;   Files: bin/foo apps/Applications/foo.desktop etc/foo.dat
+<pre>    Files: bin/foo apps/Applications/foo.desktop etc/foo.dat
     Priority: optional
     Section: qpe/applications
     Maintainer: Your Name &lt;you@yourdomain.com&gt;
@@ -94,16 +97,16 @@
 <h3>Replacing the <b>.control</b> suffix</h3>
 <p>For IPKG format, you may also have files with the same name as the control file, but with the <b>.control</b> suffix replaced by one of the following:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Suffix</th><th>Notes</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>.preinst</td><td>This script will execute before files are moved into place at installation.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td>.postinst</td><td>This script will execute after files are moved into place at installation. Common uses of this script are:<ul>
+<thead><tr valign="top" class="qt-style"><th>Suffix</th><th>Notes</th></tr></thead>
+<tr valign="top" class="odd"><td>.preinst</td><td>This script will execute before files are moved into place at installation.</td></tr>
+<tr valign="top" class="even"><td>.postinst</td><td>This script will execute after files are moved into place at installation. Common uses of this script are:<ul>
 <li><tt>qtopia-addmimetype type/subtype extension</tt> -- add a MIME type for your application.</li>
 <li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadInputMethods()&quot;</tt> -- reload input methods if your software is an input method plug-in.</li>
 <li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadApplets()&quot;</tt> -- reload applets if your software is a taskbar applet.</li>
 </ul>
 </td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>.prerm</td><td>This script will execute before files are removed at de-installation.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td>.postrm</td><td>This script will execute after files are removed at de-installation. Common uses of this script are:<ul>
+<tr valign="top" class="odd"><td>.prerm</td><td>This script will execute before files are removed at de-installation.</td></tr>
+<tr valign="top" class="even"><td>.postrm</td><td>This script will execute after files are removed at de-installation. Common uses of this script are:<ul>
 <li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadInputMethods()&quot;</tt> -- reload input methods if your software was an input method plug-in.</li>
 <li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadApplets()&quot;</tt> -- reload applets if your software was a taskbar applet.</li>
 </ul>
@@ -111,8 +114,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

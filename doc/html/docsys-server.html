@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Document System: Document Server</title>
+  <title>Document System: Document Server</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document System: Document Server<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document System: Document Server<br /><span class="subtitle"></span>
+</h1>
 <ul><li><a href="#performance">Performance</a></li>
 <ul><li><a href="#performance">Performance</a></li>
 <li><a href="#database-schema-implementation">Database Schema Implementation</a></li>
@@ -29,23 +32,23 @@
 <p>Metadata records are stored in an embedded SQL database. The database backing store is in the main storage on the device, not on removable media. A server process monitors changes in storage and updates the SQL database as required.</p>
 <p>The database schema is as follows:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th colspan="3">ContentTable</th></tr>
-<tr valign="top" bgcolor="#a2c511"><th>Field</th><th>Type</th><th>Details/Index</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>id</tt></td><td><tt>int</tt></td><td>autoincrement unique key</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>uiName</tt></td><td><tt>varchar 100</tt></td><td>indexed</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>mimeType</tt></td><td><tt>varchar 50</tt></td><td>indexed</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>size</tt></td><td><tt>int</tt></td><td></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>drmStatus</tt></td><td><tt>enum</tt> one of: <tt>plain</tt> <tt>controlled</tt> <tt>unrenderable</tt></td><td></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td>docStatus</td><td>enum one of: <tt>doc</tt> <tt>dat</tt></td><td>indexed</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>icon</tt></td><td><tt>blob</tt> (binary large object)</td><td></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>thumbnail</tt></td><td><tt>blob</tt></td><td></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>owner</tt></td><td><tt>int</tt></td><td>index (foreign key)</td></tr>
+<thead><tr valign="top" class="qt-style"><th colspan="3">ContentTable</th></tr>
+<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>id</tt></td><td><tt>int</tt></td><td>autoincrement unique key</td></tr>
+<tr valign="top" class="even"><td><tt>uiName</tt></td><td><tt>varchar 100</tt></td><td>indexed</td></tr>
+<tr valign="top" class="odd"><td><tt>mimeType</tt></td><td><tt>varchar 50</tt></td><td>indexed</td></tr>
+<tr valign="top" class="even"><td><tt>size</tt></td><td><tt>int</tt></td><td></td></tr>
+<tr valign="top" class="odd"><td><tt>drmStatus</tt></td><td><tt>enum</tt> one of: <tt>plain</tt> <tt>controlled</tt> <tt>unrenderable</tt></td><td></td></tr>
+<tr valign="top" class="even"><td>docStatus</td><td>enum one of: <tt>doc</tt> <tt>dat</tt></td><td>indexed</td></tr>
+<tr valign="top" class="odd"><td><tt>icon</tt></td><td><tt>blob</tt> (binary large object)</td><td></td></tr>
+<tr valign="top" class="even"><td><tt>thumbnail</tt></td><td><tt>blob</tt></td><td></td></tr>
+<tr valign="top" class="odd"><td><tt>owner</tt></td><td><tt>int</tt></td><td>index (foreign key)</td></tr>
 </table></p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th colspan="3">CategoryMapTable</th></tr>
-<tr valign="top" bgcolor="#a2c511"><th>Field</th><th>Type</th><th>Details/Index</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>contentId</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>ContentTable</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>category</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>Categories</tt></td></tr>
+<thead><tr valign="top" class="qt-style"><th colspan="3">CategoryMapTable</th></tr>
+<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>contentId</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>ContentTable</tt></td></tr>
+<tr valign="top" class="even"><td><tt>category</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>Categories</tt></td></tr>
 </table></p>
 <p><b>Note:</b></p>
 <ul>
@@ -74,8 +77,8 @@
 <p>The Qtopia metadata import format (<tt>QDIF</tt>) files are XML and are essentially serialized from the database and have a device identifier embedded in them.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

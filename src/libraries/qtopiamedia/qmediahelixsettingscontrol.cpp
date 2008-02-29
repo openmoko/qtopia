@@ -58,14 +58,30 @@ signals:
 
 /*!
     \class QMediaHelixSettingsControl
+    \mainclass
     \brief The QMediaHelixSettingsControl class is used to alter settings of the helix engine.
 
-    This class can be used to query and alter Helix DNA Client related options.
+    This class can be used to query and alter options within the Helix DNA 
+    Client engine using the Helix preferences mechanism.
+
+    \ingroup multimedia
+
+    Options are set using a QString and QVariant pair. The QString being the
+    option to set and the QVariant being the value of the option.
+
+    \code
+        QMediaHelixSettingsControl settings;
+        settings.setOption( "ServerTimeOut", 10 );
+    \endcode
+
+    Options are applied at the global scope and will affect all media played
+    using the Helix DNA Client engine.
+
+    A list of options available to set and query can be obtained by using
+    availableOptions().
 
     It is only available when the Helix Client is being used as the media
     provider in Qtopia's media system.
-
-    \ingroup multimedia
 */
 
 /*!

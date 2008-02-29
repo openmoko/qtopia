@@ -26,11 +26,9 @@
 
 /*!
     \class QAtUtils
-    \brief The QAtUtils class provides utility functions for use with AT modems
+    \mainclass
+    \brief The QAtUtils class provides several utility functions that assist with interfacing to AT-based modems.
     \ingroup telephony::serial
-
-    The QAtUtils provides several utility functions to assist with
-    using AT-based modem commands.
 */
 
 static const char hexchars[] = "0123456789ABCDEF";
@@ -69,6 +67,8 @@ QString QAtUtils::quote( const QString& str )
 
 /*!
     Convert the byte array, \a binary, into a hexadecimal string.
+
+    \sa fromHex()
 */
 QString QAtUtils::toHex( const QByteArray& binary )
 {
@@ -85,6 +85,8 @@ QString QAtUtils::toHex( const QByteArray& binary )
 
 /*!
     Convert a hexadecimal string, \a hex, into a byte array.
+
+    \sa toHex()
 */
 QByteArray QAtUtils::fromHex( const QString& hex )
 {
@@ -124,6 +126,8 @@ QByteArray QAtUtils::fromHex( const QString& hex )
     a type of address octet, usually 145 for international numbers
     and 129 for local numbers.  The return will normalize the
     value to include the \c{+} prefix for international numbers.
+
+    \sa encodeNumber()
 */
 QString QAtUtils::decodeNumber( const QString& value, uint type )
 {
@@ -136,6 +140,8 @@ QString QAtUtils::decodeNumber( const QString& value, uint type )
 /*!
     Read a string field and a numeric field from \a parser and
     then decode them into a properly normalized phone number.
+
+    \sa encodeNumber()
 */
 QString QAtUtils::decodeNumber( QAtResultParser& parser )
 {
@@ -151,6 +157,8 @@ QString QAtUtils::decodeNumber( QAtResultParser& parser )
     become \c{"number",129}.  If \a keepPlus is true,
     then the \c{+} will be left on the resulting number,
     even if the type is 145.
+
+    \sa decodeNumber()
 */
 QString QAtUtils::encodeNumber( const QString& value, bool keepPlus )
 {
@@ -189,6 +197,8 @@ static int FromOctalDigit( uint ch )
 /*!
     Extract the next quoted string from \a buf, starting at
     \a posn.
+
+    \sa parseNumber(), skipField()
 */
 QString QAtUtils::nextString( const QString& buf, uint& posn )
 {
@@ -272,6 +282,8 @@ QString QAtUtils::nextString( const QString& buf, uint& posn )
 
 /*!
     Utility function for parsing a number from position \a posn in \a str.
+
+    \sa nextString(), skipField()
 */
 uint QAtUtils::parseNumber( const QString& str, uint& posn )
 {
@@ -289,6 +301,8 @@ uint QAtUtils::parseNumber( const QString& str, uint& posn )
 /*!
     Utility function for skipping a comma-delimited field starting
     at \a posn within \a str.
+
+    \sa nextString(), parseNumber()
 */
 void QAtUtils::skipField( const QString& str, uint& posn )
 {
@@ -866,7 +880,38 @@ QByteArray QCodePage850Codec::convertFromUnicode(const QChar *in, int length, Co
 }
 
 /*!
-    Get the text codec for the GSM character set identifier \a gsmCharset.
+    Returns the text codec for the GSM character set identifier \a gsmCharset.
+    The returned object should not be deleted.
+
+    The following standard GSM character sets from 3GPP TS 27.007 are recognized:
+
+    \table
+        \row \o \c GSM \o 7-bit default GSM alphabet.  There may be some loss of information
+                          where multiple Unicode characters map to the same 7-bit encoding.
+        \row \o \c HEX \o Hex encoding of the 7-bit default GSM alphabet.
+        \row \o \c UCS2 \o Hex encoding of UCS-2.
+        \row \o \c IRA \o International reference alphabet (i.e. ASCII).
+        \row \o \c PCCPxxx \o PC character set code page \c xxx.  Code pages 437 and 850
+                        are guaranteed to be supported.  Other code pages depend upon
+                        the codecs installed with QTextCodec.
+        \row \o \c PCDN \o PC Danish/Norwegian character set (same as \c PCCP850).
+        \row \o \c UTF-8 \o 8-bit encoding of Unicode.
+        \row \o \c 8859-n \o ISO 8859 Latin-n character set.
+        \row \o \c 8859-C \o ISO 8859 Latin/Cyrillic character set (same as \c 8859-5).
+        \row \o \c 8859-A \o ISO 8859 Latin/Arabic character set (same as \c 8859-6).
+        \row \o \c 8859-G \o ISO 8859 Latin/Greek character set (same as \c 8859-7).
+        \row \o \c 8859-H \o ISO 8859 Latin/Hebrew character set (same as \c 8859-8).
+    \endtable
+
+    This implementation also supports the following character sets, beyond those
+    mandated by 3GPP TS 27.007:
+
+    \table
+        \row \o \c gsm-noloss \o 7-bit default GSM alphabet, with no loss of information.
+        \row \o \c xxx \o Any codec \c xxx that is supported by QTextCodec::codecForName().
+    \endtable
+
+    \sa QTextCodec, QGsmCodec
 */
 QTextCodec *QAtUtils::codec( const QString& gsmCharset )
 {
@@ -1010,7 +1055,22 @@ QString QAtUtils::decode( const QString& str, QTextCodec *codec )
 
 /*!
     Strip non-digit characters from \a number and normalize special
-    characters.
+    characters.  The digit and special characters are normalized as follows:
+
+    \table
+        \header \o Input \o Normalized \o Meaning
+        \row \o \c 0..9 \o \c 0..9 \o Numeric dialing digits
+        \row \o \c ABCD \o \c ABCD \o Alphabetic dialing digits
+        \row \o \c abcd \o \c ABCD \o Alphabetic dialing digits
+        \row \o \c ,pPxX \o \c , \o Short pause or extension separator
+        \row \o \c wW \o \c W \o Wait for dial tone
+        \row \o \c ! \o \c ! \o Hook flash
+        \row \o \c @ \o \c @ \o Wait for silence
+    \endtable
+
+    All other characters are stripped from \a number.
+
+    \sa QPhoneNumber::resolveLetters()
 */
 QString QAtUtils::stripNumber( const QString& number )
 {
@@ -1044,8 +1104,10 @@ QString QAtUtils::stripNumber( const QString& number )
 }
 
 /*!
-    Determine if nextString() should parse backslash escape
-    sequences in octal rather than the default of hexadecimal.
+    Returns true if nextString() should parse backslash escape
+    sequences in octal rather than the default of hexadecimal; otherwise returns false.
+
+    \sa setOctalEscapes()
 */
 bool QAtUtils::octalEscapes()
 {
@@ -1055,7 +1117,9 @@ bool QAtUtils::octalEscapes()
 /*!
     Indicate that nextString() should parse backslash escape
     sequences in octal if \a value is true, rather than the
-    default of hexadecimal (\value is false).
+    default of hexadecimal (\a value is false).
+
+    \sa octalEscapes()
 */
 void QAtUtils::setOctalEscapes( bool value )
 {

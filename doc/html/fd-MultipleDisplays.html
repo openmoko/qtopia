@@ -1,23 +1,38 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title> Multiple Displays </title>
+  <title> Multiple Displays </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center"> Multiple Displays <br><small>Functional Description</small></h1>
 <p />
 <h2><a name="Features"></a> Features </h2>
 <p />
-Many phones support more than one display.  Qtopia provides easy access to typical data displayed on a secondary display via the <a href="qphonestatus.html" target="_top">QPhoneStatus</a> class.
+<h3><a name="Phone_Status_Information_Access"></a> Phone Status Information Access </h3>
+<p />
+QPhoneStatus provides status information about the phone, e.g.
+signal strength, incoming calls, etc.  This makes development of
+secondary status displays much easier as the data most likely to
+be needed is easily available from the one class.  The class is
+easily extensible, whilst still maintaining binary compatibility,
+allowing additional status information to be provided without
+impacting 3rd party applications.
+<p />
+<h3><a name="Multiple_Qt_Displays"></a> Multiple Qt Displays </h3>
+<p />
+Qtopia Core supports multiple displays via the QDesktopWidget API.  Qtopia utilizes this feature to display status information on the secondary display using the same theming functionality used in the primary idle screen.  A secondary call screen displays incoming and active call information.
+<p />
 <p />
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div>

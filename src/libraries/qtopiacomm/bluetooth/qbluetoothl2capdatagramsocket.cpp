@@ -61,21 +61,43 @@ QBluetoothL2CapDatagramSocketPrivate::QBluetoothL2CapDatagramSocketPrivate()
 
 /*!
     \class QBluetoothL2CapDatagramSocket
+    \mainclass
     \brief The QBluetoothL2CapDatagramSocket class represents an L2CAP Datagram Socket.
 
-    The Bluetooth L2CAP protocol provides reliable connection-oriented and unreliable
-    connectionless data services.  It is a lower layer protocol than RFCOMM.
-    The implementation of L2CAP Datagram protocol under Linux uses sockets, and is in general
-    very similar to UDP socket programming.
+    The Bluetooth L2CAP protocol provides reliable connection-oriented
+    and unreliable connectionless data services.  It is a lower
+    layer protocol than RFCOMM.
 
-    Note that unlike UDP, the L2Cap Datagram socket must be connected first by using connect().
+    PSM stands for Port and Service Multiplexer.  The PSM value can be
+    any \bold{odd} value the range of 1-32765.  For more information
+    please see Bluetooth Specification Version 2.0 + EDR [vol 4]
+    page 45.
+
+    The implementation of L2CAP Datagram protocol under Linux uses sockets,
+    and is in general very similar to UDP socket programming.
+
+    The most common way to use this class is to call connect() and then
+    write() and read() to write and read the data.  If you only wish
+    to receive data, call bind() and use the readDatagram() function.
+
+    Note that unlike UDP, the L2Cap Datagram socket must be connected
+    first by using connect().
+
+    Note that special attention should be paid to the incoming and outgoing
+    MTU sizes.  These determine in what size chunks the data should be
+    read / written.
+
+    \bold{NOTE:} The socket is not buffered.  All reads and writes happen
+    immediately.  The user must be prepared to deal with conditions where
+    no more data could be read/written to the socket.
 
     \ingroup qtopiabluetooth
+    \sa QBluetoothAbstractSocket
  */
 
 /*!
-    Constructs a new QBluetoothL2CapDatagramSocket object.  The \a parent parameter
-    is passed to the QObject constructor.
+    Constructs a new QBluetoothL2CapDatagramSocket object.
+    The \a parent parameter is passed to the QObject constructor.
  */
 QBluetoothL2CapDatagramSocket::QBluetoothL2CapDatagramSocket(QObject *parent)
     : QBluetoothAbstractSocket(new QBluetoothL2CapDatagramSocketPrivate, parent)
@@ -83,7 +105,7 @@ QBluetoothL2CapDatagramSocket::QBluetoothL2CapDatagramSocket(QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the socket.
  */
 QBluetoothL2CapDatagramSocket::~QBluetoothL2CapDatagramSocket()
 {
@@ -92,6 +114,8 @@ QBluetoothL2CapDatagramSocket::~QBluetoothL2CapDatagramSocket()
 /*!
     Returns the address of the remote device.  If the socket is not currently
     connected, returns QBluetoothAddress::invalid.
+
+    \sa remotePsm()
  */
 QBluetoothAddress QBluetoothL2CapDatagramSocket::remoteAddress() const
 {
@@ -102,6 +126,8 @@ QBluetoothAddress QBluetoothL2CapDatagramSocket::remoteAddress() const
 /*!
     Returns the address of the local device.  If the socket is not currently
     connected or bound, returns QBluetoothAddress::invalid.
+
+    \sa localPsm()
  */
 QBluetoothAddress QBluetoothL2CapDatagramSocket::localAddress() const
 {
@@ -112,6 +138,8 @@ QBluetoothAddress QBluetoothL2CapDatagramSocket::localAddress() const
 /*!
     Returns the PSM of the remote device.  If the socket is not
     currently connected, returns -1.
+
+    \sa remoteAddress()
  */
 int QBluetoothL2CapDatagramSocket::remotePsm() const
 {
@@ -122,6 +150,8 @@ int QBluetoothL2CapDatagramSocket::remotePsm() const
 /*!
     Returns the PSM that the socket is bound to on the local device.
     If the socket is not bound, returns -1
+
+    \sa localAddress()
 */
 int QBluetoothL2CapDatagramSocket::localPsm() const
 {
@@ -169,6 +199,8 @@ QBluetooth::SecurityOptions QBluetoothL2CapDatagramSocket::securityOptions() con
 /*!
     Sets the security options on the socket to \a options.  Returns true if the
     options could be set successfully and false otherwise.
+
+    \sa securityOptions(), isAuthenticated(), isEncrypted()
 */
 bool QBluetoothL2CapDatagramSocket::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
@@ -248,6 +280,11 @@ static bool readRemoteSocketParameters(int socket, QBluetoothAddress *remote, in
     return false;
 }
 
+/*!
+    \internal
+
+    \reimp
+*/
 bool QBluetoothL2CapDatagramSocket::readSocketParameters(int socket)
 {
     SOCKET_DATA(QBluetoothL2CapDatagramSocket);
@@ -288,6 +325,8 @@ bool QBluetoothL2CapDatagramSocket::readSocketParameters(int socket)
 
     Note that the connection could still fail, the state of the socket
     will be sent in the stateChanged() signal.
+
+    \sa connected(), stateChanged(), waitForConnected()
  */
 bool QBluetoothL2CapDatagramSocket::connect(const QBluetoothAddress &local,
                                             const QBluetoothAddress &remote,
@@ -356,6 +395,11 @@ bool QBluetoothL2CapDatagramSocket::connect(const QBluetoothAddress &local,
     return initiateConnect(sockfd, (struct sockaddr *) &addr, sizeof(addr));
 }
 
+/*!
+    \internal
+
+    \reimp
+*/
 void QBluetoothL2CapDatagramSocket::resetSocketParameters()
 {
     SOCKET_DATA(QBluetoothL2CapDatagramSocket);
@@ -370,8 +414,10 @@ void QBluetoothL2CapDatagramSocket::resetSocketParameters()
 }
 
 /*!
-    Binds an L2CAP socket to a specific \a local addres and \a psm.  The \a mtu
-    specifies the MTU to use.
+    Binds an L2CAP socket to a specific \a local address and \a psm, returning true if
+    successful; otherwise returns false. The \a mtu specifies the MTU to use.
+
+    \sa 
 */
 bool QBluetoothL2CapDatagramSocket::bind(const QBluetoothAddress &local, int psm, int mtu)
 {
@@ -439,12 +485,19 @@ bool QBluetoothL2CapDatagramSocket::bind(const QBluetoothAddress &local, int psm
 }
 
 /*!
-    Reads a datagram from the socket.  The \a data specifies the pointer to a buffer
-    of at least \a maxSize.  The \a address and \a psm parameters specify where to store
-    the address and psm of the remote device that sent the datagram.  The result is
-    discarded if address or psm are NULL.
+    Reads a datagram from the socket.  The \a data specifies the pointer
+    to a buffer of at least \a maxSize.  The \a address and \a psm parameters
+    specify where to store the address and psm of the remote device
+    that sent the datagram.  The result is discarded if address
+    or psm are NULL.
 
-    Note: Some Linux implementations do not currently return remote address information.
+    If the \a data buffer \a maxSize is smaller than the incoming MTU,
+    the data that does not fit will be discarded.
+
+    Note: Some Linux implementations do not currently return
+    remote address information.
+
+    \sa incomingMtu()
 */
 qint64 QBluetoothL2CapDatagramSocket::readDatagram(char * data, qint64 maxSize,
                                                    QBluetoothAddress *address,

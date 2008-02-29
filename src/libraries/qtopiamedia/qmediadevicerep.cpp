@@ -22,13 +22,21 @@
 #include "qmediadevicerep.h"
 
 
+// {{{ QMediaDeviceRepPrivate
 class QMediaDeviceRepPrivate
 {
 public:
     QString      id;
     QMediaDeviceRep::Options      options;
 };
+// }}}
 
+/*!
+    \class QMediaDeviceRep
+    \internal
+*/
+
+/// {{{ QMediaDeviceRep
 QMediaDeviceRep::QMediaDeviceRep()
 {
 }
@@ -70,6 +78,10 @@ QMediaDeviceRep::Options const& QMediaDeviceRep::options() const
 }
 
 // {{{ Serialization
+/*!
+    \fn void QMediaDeviceRep::serialize(S& stream) const
+    \internal
+*/
 template <typename S>
 void QMediaDeviceRep::serialize(S& stream) const
 {
@@ -77,12 +89,17 @@ void QMediaDeviceRep::serialize(S& stream) const
     stream << d->options;
 }
 
+/*!
+    \fn void QMediaDeviceRep::deserialize(S& stream)
+    \internal
+*/
 template <typename S>
 void QMediaDeviceRep::deserialize(S& stream)
 {
     stream >> d->id;
     stream >> d->options;
 }
+// }}}
 // }}}
 
 Q_IMPLEMENT_USER_METATYPE(QMediaDeviceRep);

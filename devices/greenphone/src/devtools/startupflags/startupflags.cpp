@@ -226,7 +226,7 @@ void StartupFlags::loadSettings()
                 contextItem = contexts.value(context);
             } else {
                 contextItem = new QTreeWidgetItem(list, QStringList() << context);
-                contextItem->setFlags(0);
+                contextItem->setFlags(contextItem->flags() & ~Qt::ItemIsSelectable);
                 list->expandItem(contextItem);
                 contexts.insert(context, contextItem);
             }
@@ -250,11 +250,13 @@ void StartupFlags::loadSettings()
                             v->setCheckState(0, Qt::Checked);
                         else
                             v->setCheckState(0, Qt::Unchecked);
+
+                        v->setWhatsThis(0, settings.value("Help[]").toString());
                     }
-                    i->setFlags(0);
+                    i->setFlags(i->flags() & ~Qt::ItemIsSelectable);
                     list->expandItem(i);
                 } else {
-                    i->setFlags(0);
+                    i->setFlags(i->flags() & ~Qt::ItemIsSelectable);
                 }
             } 
 

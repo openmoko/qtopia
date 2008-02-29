@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Identifying Device Performance Issues</title>
+  <title>Identifying Device Performance Issues</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Identifying Device Performance Issues<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Identifying Device Performance Issues<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#process">Process</a></li>
 <li><a href="#checking-memory-usage">Checking Memory Usage</a></li>
@@ -28,12 +31,11 @@
 <li>Start <tt>qvfb</tt></li>
 <li>Set the following environment variables to start the Qtopia program:<ul>
 <li>QPEDIR</li>
-<li>QTDIR</li>
 <li>PATH</li>
 <li>LD_LIBRARY_PATH</li>
 </ul>
 </li>
-<li>Run using:<pre>&nbsp;   callgrind --dump-every-bb=500000 --lowlat-syscalls=yes worldtime -qws</pre>
+<li>Run using:<pre>    callgrind --dump-every-bb=500000 --lowlat-syscalls=yes worldtime -qws</pre>
 </li>
 <li><tt>Ctrl-C</tt> to exit the application after startup</li>
 <li><tt>kcachegrind</tt> &amp;</li>
@@ -42,11 +44,11 @@
 <h2>Checking Memory Usage</h2>
 <p><tt>valgrind</tt> can provide memory usage information as follows:</p>
 <ul>
-<li>For total memory usage to standard output run:<pre>&nbsp;   valgrind --tool=addrcheck --leak-check=yes qpe</pre>
+<li>For total memory usage to standard output run:<pre>    valgrind --tool=addrcheck --leak-check=yes qpe</pre>
 </li>
-<li>For a breakdown of memory usage in <tt>html</tt> and to provide a graph in postscirpt format run:<pre>&nbsp;   valgrind --tool=massif --format=html qpe</pre>
+<li>For a breakdown of memory usage in <tt>html</tt> and to provide a graph in postscirpt format run:<pre>    valgrind --tool=massif --format=html qpe</pre>
 </li>
-<li>To check for <tt>pthread</tt> race conditions and print to standard output run:<pre>&nbsp;   valgrind --tool=helgrind qpe</pre>
+<li>To check for <tt>pthread</tt> race conditions and print to standard output run:<pre>    valgrind --tool=helgrind qpe</pre>
 </li>
 </ul>
 <a name="things-to-note"></a>
@@ -58,7 +60,7 @@
 </li>
 <li>Run <tt>callgrind</tt> on the desktop ,identify the problem and resolve.</li>
 <li>Run <tt>callgrind</tt> again if the total instructions have reduced to 40,000,000 (20,000,000)</li>
-<li>Estimated improvement on 200Mhz device is:<pre>&nbsp;    20/10 = 2 seconds</pre>
+<li>Estimated improvement on 200Mhz device is:<pre>     20/10 = 2 seconds</pre>
 </li>
 </ul>
 <p><b>Note:</b> How was the estimate of 10M instructions/sec was determined?</p>
@@ -70,8 +72,8 @@
 <p>It is difficult to obtain accurate values as other factors effect results so when measuring startup times on device, repeat it a number of times and take the average value.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

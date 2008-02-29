@@ -3,6 +3,14 @@ qtopia_project(subdirs)
 CONFIG+=ordered
 
 SUBDIRS=src
+build_qtopia:!enable_singleexec {
+    # We only want make to do examples, not make install!
+    defineTest(append_examples) {
+        qtopia_all.commands+=$$esc(\n\t)@$$MAKE -C examples
+        export(qtopia_all.commands)
+    }
+    runlast(append_examples())
+}
 build_qtopiadesktop:SUBDIRS+=src/qtopiadesktop
 
 !isEmpty(EXTRA_SUBDIRS):SUBDIRS+=$$EXTRA_SUBDIRS
@@ -14,20 +22,6 @@ enable_singleexec:SUBDIRS+=src/server
         env QPEDIR=$$QPEDIR $$QTOPIA_DEPOT_PATH/scripts/clean_qtopia
     QMAKE_EXTRA_TARGETS+=clean_qtopia
     qtopia_distclean.depends+=clean_qtopia
-}
-
-!equals(QTOPIA_SDKROOT,$$QPEDIR) {
-    sdk_inst.commands=$(MAKE) sdk
-    QMAKE_EXTRA_TARGETS+=sdk_inst
-    qtopia_install.depends+=sdk_inst
-} else {
-    sdk.commands=$$COMMAND_HEADER\
-        echo $${LITERAL_QUOTE}$${LITERAL_QUOTE} $$LINE_SEP\
-        echo $${LITERAL_QUOTE}You did not pass -sdk /path to configure so you cannot run make sdk.$${LITERAL_QUOTE} $$LINE_SEP\
-        echo $${LITERAL_QUOTE}Qtopia has been configured to use the build directory as the SDK location.$${LITERAL_QUOTE} $$LINE_SEP\
-        echo $${LITERAL_QUOTE}The build directory is $$QPEDIR$${LITERAL_QUOTE} $$LINE_SEP\
-        echo $${LITERAL_QUOTE}$${LITERAL_QUOTE}
-    QMAKE_EXTRA_TARGETS+=sdk
 }
 
 # Since people expect 'make install' to do the right thing and since it
@@ -49,6 +43,20 @@ qtopia_install.depends+=cleanimage
 # give them a way to do it
 runlast(append_install.commands=\$$qtopia_install.commands)
 QMAKE_EXTRA_TARGETS+=append_install
+
+!equals(QTOPIA_SDKROOT,$$QPEDIR) {
+    # make install implies make sdk
+    sdk_inst.commands=$(MAKE) sdk
+    QMAKE_EXTRA_TARGETS+=sdk_inst
+    qtopia_install.depends+=sdk_inst
+
+    # make sdk implies make cleansdk
+    cleansdk.commands=$$COMMAND_HEADER
+    win32:cleansdk.commands+=if exist $$prefix
+    cleansdk.commands+=$$RMRF $(SDKROOT)
+    QMAKE_EXTRA_TARGETS+=cleansdk
+    check_sdk.depends+=cleansdk
+}
 
 # Don't let common.prf put in the cleaninstall rule. Just make it call our install rule.
 CONFIG+=no_cleaninstall

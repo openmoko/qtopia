@@ -4,14 +4,14 @@ cd /
 
 case "$1" in
     killqtopia)
-        kill $( pidof qpe.sh ) 2>&1 >/dev/null
-    	if grep ' /opt/Qtopia.rom ' /proc/mounts 2>&1 >/dev/null; then
+        kill $( pidof qpe.sh ) >/dev/null 2>&1
+    	if grep ' /opt/Qtopia.rom ' /proc/mounts >/dev/null 2>&1; then
             fuser -m /opt/Qtopia.rom -k
         fi    
         exit 0
         ;;
     unmountqtopia)
-        if grep ' /opt/Qtopia.rom ' /proc/mounts 2>&1 >/dev/null; then
+        if grep ' /opt/Qtopia.rom ' /proc/mounts >/dev/null 2>&1; then
             sleep 1
             umount /opt/Qtopia.rom
         fi

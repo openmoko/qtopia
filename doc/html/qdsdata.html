@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QDSData Class Reference</title>
+  <title>QDSData Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDSData Class Reference</h1>
-<p>The QDSData class encapsulates data which is shared with QDS services. <a href="#details">More...</a></p>
-<pre>#include &lt;QDSData&gt;</pre><ul>
+<p>The QDSData class encapsulates data shared by Qtopia Data Sharing (QDS) services. <a href="#details">More...</a></p>
+<pre>    #include &lt;QDSData&gt;</pre><ul>
 <li><a href="qdsdata-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -44,32 +46,33 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QDSData class encapsulates data which is shared with QDS services.</p>
-<p>The QDSData class is used with QDS services as an efficient means of sharing data between client and provider applications. The data is implicitly shared between QDSData objects, and can be stored persistently.</p>
-<p>For larger data sizes methods which use <a href="qfile.html">QFile</a> and <a href="qiodevice.html">QIODevice</a> are recommended.</p>
-<p>See also <a href="qdsaction.html">QDSAction</a> and <a href="qdsactionrequest.html">QDSActionRequest</a>.</p>
+<p>The QDSData class encapsulates data shared by Qtopia Data Sharing (QDS) services.</p>
+<p>The QDSData class is used by QDS services as an efficient means of sharing data between client and provider applications. The data is implicitly shared between QDSData objects, and can be stored persistently.</p>
+<p>For larger data sizes, methods which use <a href="qfile.html">QFile</a> and <a href="qiodevice.html">QIODevice</a> are recommended.</p>
+<p>See also <a href="qdsaction.html">QDSAction</a>, <a href="qdsactionrequest.html">QDSActionRequest</a>, and <a href="datasharing.html">Qtopia Data Sharing (QDS)</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QDSData"></a>QDSData::QDSData ()</h3>
-<p>The default constructor creates an empty object.</p>
+<p>Constructs an empty <a href="qdsdata.html">QDSData</a> object.</p>
 <h3 class="fn"><a name="QDSData-2"></a>QDSData::QDSData ( const QDSData &amp; <i>other</i> )</h3>
-<p>Copy constructor creates a deep copy of <i>other</i>.</p>
+<p>Constructs a deep copy of <i>other</i>.</p>
 <h3 class="fn"><a name="QDSData-3"></a>QDSData::QDSData ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>key</i> )</h3>
-<p>Constructs a data object from the <i>key</i> created by <a href="qdsdata.html#store">QDSData::store</a>().</p>
+<p>Constructs a data object from <i>key</i> <i>key</i> should be a key previously created by <a href="qdsdata.html#store">QDSData::store</a>().</p>
 <h3 class="fn"><a name="QDSData-4"></a>QDSData::QDSData ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
-<p>Constructs a new data object with <i>data</i> of <i>type</i>.</p>
+<p>Constructs a data object with <i>data</i> of <i>type</i>.</p>
 <h3 class="fn"><a name="QDSData-5"></a>QDSData::QDSData ( const <a href="qstring.html">QString</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
-<p>Constructs a new data object with <i>data</i> of <i>type</i>. <i>data</i> should not contain non-Latin1 characters as it is converted to a Latin1 representation.</p>
+<p>Constructs a data object with <i>data</i> of <i>type</i>. <i>data</i> should not contain non-Latin1 characters as it is converted to a Latin1 representation.</p>
 <h3 class="fn"><a name="QDSData-6"></a>QDSData::QDSData ( <a href="qfile.html">QFile</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
-<p>Constructs a new data object with <i>data</i> of <i>type</i>. The data in <i>data</i> is copied into the QDS data store.</p>
+<p>Constructs a data object with <i>data</i> of <i>type</i>. The data in <i>data</i> is copied into the QDS data store.</p>
 <h3 class="fn"><a name="dtor.QDSData"></a>QDSData::~QDSData ()</h3>
-<p>Destructor.</p>
+<p>Destroys the <a href="qdsdata.html">QDSData</a> object.</p>
 <h3 class="fn"><a name="data"></a><a href="qbytearray.html">QByteArray</a> QDSData::data () const</h3>
 <p>Returns the data as a <a href="qbytearray.html">QByteArray</a>.</p>
 <h3 class="fn"><a name="isValid"></a>bool QDSData::isValid () const</h3>
-<p>Determines if the data object is valid.</p>
+<p>Returns true if the data object is valid; otherwise returns false.</p>
 <h3 class="fn"><a name="modify"></a>bool QDSData::modify ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
 <p>Replaces the data with <i>data</i>. It is assumed that <i>data</i> is of the same data type as the original data.</p>
+<p>Returns true on successful completion of the request; otherwise returns false.</p>
 <h3 class="fn"><a name="modify-2"></a>bool QDSData::modify ( const <a href="qstring.html">QString</a> &amp; <i>data</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Replaces the data with <i>data</i>. It is assumed that <i>data</i> is of the same data type as the original data.</p>
@@ -86,10 +89,11 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Replaces the data with <i>data</i> of <i>type</i>.</p>
 <h3 class="fn"><a name="remove"></a>bool QDSData::remove ()</h3>
-<p>Removes the data from the persistent data store, when the reference count is zero, indicating that no-one requires the data, the data is deleted permanently from the data store.</p>
+<p>Removes the data from the persistent data store. When the reference count is zero, indicating that no-one requires the data, the data is permanently deleted from the data store.</p>
+<p>Returns true on successful completion of the request; otherwise returns false.</p>
 <h3 class="fn"><a name="store"></a><a href="quniqueid.html">QUniqueId</a> QDSData::store ()</h3>
 <p>Adds the data to the persistent data store, and returns a key for accessing the data in the future.</p>
-<p>If the data was correctly stored, the returned key will not be null.</p>
+<p>If the data was incorrectly stored, the returned key will be null.</p>
 <p>The persistent data is reference counted so all applications who wish to access the data from the data store should call this method.</p>
 <h3 class="fn"><a name="toIODevice"></a><a href="qiodevice.html">QIODevice</a> * QDSData::toIODevice () const</h3>
 <p>Provides direct read-only access to the data using the <a href="qiodevice.html">QIODevice</a> interface. The caller owns the returned <a href="qiodevice.html">QIODevice</a> pointer, and must delete it when finished.</p>
@@ -99,15 +103,15 @@
 <h3 class="fn"><a name="type"></a><a href="qmimetype.html">QMimeType</a> QDSData::type () const</h3>
 <p>Returns the data type.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QDSData::operator!= ( const QDSData &amp; <i>other</i> ) const</h3>
-<p>Comparison operator which returns true if <i>other</i> is not equivalent.</p>
+<p>Returns true if the data object is not equal to the <i>other</i> data object specified; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-eq"></a>const QDSData &amp; QDSData::operator= ( const QDSData &amp; <i>other</i> )</h3>
-<p>Assignment operator which deep copies <i>other</i>.</p>
+<p>Makes a deep copy of <i>other</i> and assigns it to this <a href="qdsdata.html">QDSData</a> object. Returns a reference to this <a href="qdsdata.html">QDSData</a> object.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QDSData::operator== ( const QDSData &amp; <i>other</i> ) const</h3>
-<p>Comparison operator which returns true if <i>other</i> is equivalent.</p>
+<p>Returns true if the data object is equal to the <i>other</i> data object specified; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

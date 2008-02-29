@@ -145,50 +145,50 @@ void QContactModel::initMaps()
 }
 
 /*!
-  Returns a translated string describing the contact model field \a k.
+  Returns a translated string describing the contact model \a field.
 
   \sa fieldIcon(), fieldIdentifier(), identifierField()
 */
-QString QContactModel::fieldLabel(Field k)
+QString QContactModel::fieldLabel(Field field)
 {
     if (k2t.count() == 0)
         initMaps();
-    if (!k2t.contains(k))
+    if (!k2t.contains(field))
         return QString();
-    return k2t[k];
+    return k2t[field];
 }
 
 
 /*!
-  Returns a non-translated string describing the contact model field \a k.
+  Returns a non-translated string describing the contact model \a field.
 
   \sa fieldLabel(), fieldIcon(), identifierField()
 */
-QString QContactModel::fieldIdentifier(Field k)
+QString QContactModel::fieldIdentifier(Field field)
 {
     if (k2i.count() == 0)
         initMaps();
-    if (!k2i.contains(k))
+    if (!k2i.contains(field))
         return QString();
-    return k2i[k];
+    return k2i[field];
 }
 
 /*!
-  Returns the contact model field for the non-translated string identifier \a i.
+  Returns the contact model field for the non-translated field \a identifier.
 
   \sa fieldLabel(), fieldIcon(), fieldIdentifier()
 */
-QContactModel::Field QContactModel::identifierField(const QString &i)
+QContactModel::Field QContactModel::identifierField(const QString &identifier)
 {
     if (i2k.count() == 0)
         initMaps();
-    if (!i2k.contains(i))
+    if (!i2k.contains(identifier))
         return Invalid;
-    return i2k[i];
+    return i2k[identifier];
 }
 
 /*!
-  Returns the contact model fields that represent phone numbers for a contact.
+  Returns the contact model fields that represent the phone numbers for a contact.
 */
 QList<QContactModel::Field> QContactModel::phoneFields()
 {
@@ -210,9 +210,6 @@ QList<QContactModel::Field> QContactModel::phoneFields()
 }
 
 /*!
-  \internal
-  Was added in 4.1.6, will become public in 4.2
-
   Returns known name titles for the current language settings.  These
   are used to assist in parsing and constructing contact name information.
   Contacts are not restricted to these name titles.
@@ -223,9 +220,6 @@ QStringList QContactModel::localeNameTitles()
 }
 
 /*!
-  \internal
-  Was added in 4.1.6, will become public in 4.2
-
   Returns known suffixes for the current language settings.  These
   are used to assist in parsing and constructing contact name information.
   Contacts are not restricted to these suffixes.
@@ -278,15 +272,15 @@ QIcon QContactModelData::getCachedIcon(const QString& path)
 }
 
 /*!
-  Returns a icon representing the contact model field \a k.
+  Returns a icon representing the contact model \a field.
 
   Returns a null icon if no icon is available.
 
   \sa fieldLabel(), fieldIdentifier(), identifierField()
 */
-QIcon QContactModel::fieldIcon(Field k)
+QIcon QContactModel::fieldIcon(Field field)
 {
-    QString ident = fieldIdentifier(k);
+    QString ident = fieldIdentifier(field);
 
     if (ident.isEmpty() || !QFile::exists(":image/addressbook/" + ident))
         return QIcon();
@@ -297,23 +291,27 @@ QIcon QContactModel::fieldIcon(Field k)
 
 /*!
   \class QContactModel
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QContactModel class provides access to the the Contacts data.
+  \brief The QContactModel class provides access to the Contacts data.
 
-  The QContactModel is used to access the Contact data.  It is a descendant of QAbstractItemModel,
-  so it is suitable for use with the Qt View classes such as QListView and QTableView, as well as
-  any custom developer Views.
+  User contacts are represented in the contact model as a table, with each row corresponding to a
+  particular contact and each column as on of the fields of the contact.  Complete QContact objects can
+  be retrieved using the contact() function which takes either a row, index, or unique identifier.
 
-  QContactModel provides functions for sorting and some filtering of items.
-  For filters or sorting that is not provided by QContactModel it is recommended that
-  QSortFilterProxyModel is used to wrap QContactModel.
+  The contact model is a descendant of QAbstractItemModel, so it is suitable for use with
+  the Qt View classes such as QListView and QTableView, as well as QContactView and any custom views.
 
-  QContactModel may merge data from multiple sources such as sql files, xml files, or
-  SIM card access.
+  The contact model provides functions for sorting and some filtering of items.
+  For filters or sorting that is not provided by the contact model it is recommended that
+  QSortFilterProxyModel is used to wrap the contact model.
 
-  QContactModel will also refresh when changes are made in other instances of QContactModel or
-  from other applications.
+  A QContactModel instance will also reflect changes made in other instances of QContactModel,
+  both within this application and from other applications.  This will result in
+  the modelReset() signal being emitted.
+
+  \sa QContact, QContactListView, QSortFilterProxyModel
 */
 
 /*!
@@ -326,7 +324,7 @@ QIcon QContactModel::fieldIcon(Field k)
   \value SubLabelRole
     An alternative formatted text label of the contacts name.
   \value PortraitRole
-    A Pixmap of the contacts image, or a default image if
+    A pixmap of the contacts image, or a default image if
     none is specifically set.
   \value StatusIconRole
     An icon providing additional information about the contact.
@@ -340,70 +338,117 @@ QIcon QContactModel::fieldIcon(Field k)
   Enumerates the columns when in table mode and columns used for sorting.
   Is a subset of data retrievable from a QContact.
 
-  \omitvalue Invalid
-  \omitvalue Label
-  \omitvalue NameTitle
-  \omitvalue FirstName
-  \omitvalue MiddleName
-  \omitvalue LastName
-  \omitvalue Suffix
-  \omitvalue JobTitle
-  \omitvalue Department
-  \omitvalue Company
-  \omitvalue BusinessPhone
-  \omitvalue BusinessFax
-  \omitvalue BusinessMobile
-  \omitvalue DefaultEmail
-  \omitvalue Emails
+  \value Invalid
+    An invalid field
+  \value Label
+    An appropriate text label for the contact
+  \value NameTitle
+    The contact's title, such as Mr or Dr.  \sa localeNameTitles()
+  \value FirstName
+    The first name of the contact
+  \value MiddleName
+    The middle name of the contact
+  \value LastName
+    The last name of the contact
+  \value Suffix
+    The contact's suffix, such as Jr or II.  \sa localeSuffixes()
+  \value JobTitle
+    The contact's job title
+  \value Department
+    The contact's department
+  \value Company
+    The contact's company
+  \value BusinessPhone
+    The business phone number of the contact
+  \value BusinessFax
+    The business fax number of the contact
+  \value BusinessMobile
+    The business mobile number of the contact
+  \value BusinessPager
+    The business pager number of the contact
+  \value HomePhone
+    The home phone number of the contact
+  \value HomeFax
+    The home fax number of the contact
+  \value HomeMobile
+    The home mobile number of the contact
+  \value DefaultEmail
+    The default email address for the contact
+  \value Emails
+    The list of email addresses for the contact
   \omitvalue OtherPhone
   \omitvalue OtherFax
   \omitvalue OtherMobile
   \omitvalue OtherPager
-  \omitvalue HomePhone
-  \omitvalue HomeFax
-  \omitvalue HomeMobile
   \omitvalue HomePager
-  \omitvalue BusinessStreet
-  \omitvalue BusinessCity
-  \omitvalue BusinessState
-  \omitvalue BusinessZip
-  \omitvalue BusinessCountry
-  \omitvalue BusinessPager
-  \omitvalue BusinessWebPage
-  \omitvalue Office
-  \omitvalue Profession
-  \omitvalue Assistant
-  \omitvalue Manager
-  \omitvalue HomeStreet
-  \omitvalue HomeCity
-  \omitvalue HomeState
-  \omitvalue HomeZip
-  \omitvalue HomeCountry
-  \omitvalue HomeWebPage
-  \omitvalue Spouse
-  \omitvalue Gender
-  \omitvalue Birthday
-  \omitvalue Anniversary
-  \omitvalue Nickname
-  \omitvalue Children
-  \omitvalue Portrait
-  \omitvalue Notes
-  \omitvalue LastNamePronunciation
-  \omitvalue FirstNamePronunciation
-  \omitvalue CompanyPronunciation
-  \omitvalue Identifier
-  \omitvalue Categories
+  \value BusinessStreet
+    The business street address for the contact
+  \value BusinessCity
+    The city for the business address of the contact
+  \value BusinessState
+    The state for the business address of the contact
+  \value BusinessZip
+    The zip code for the business address of the contact
+  \value BusinessCountry
+    The country for the business address of the contact
+  \value BusinessWebPage
+    The business web page address of the contact
+  \value Office
+    The contact's office
+  \value Profession
+    The contact's profession
+  \value Assistant
+    The contact's assistant
+  \value Manager
+    The contact's manager
+  \value HomeStreet
+    The home street address for the contact
+  \value HomeCity
+    The city for the home address of the contact
+  \value HomeState
+    The state for the home address of the contact
+  \value HomeZip
+    The zip code for the home address of the contact
+  \value HomeCountry
+    The country for the home address of the contact
+  \value HomeWebPage
+    The home web page address of the contact
+  \value Spouse
+    The contact's spouse
+  \value Gender
+    The contact's gender
+  \value Birthday
+    The contact's birthday
+  \value Anniversary
+    The contact's anniversary
+  \value Nickname
+    The nickname of the contact
+  \value Children
+    The contact's children
+  \value Portrait
+    The portrait of the contact
+  \value Notes
+    The notes relating to the contact
+  \value LastNamePronunciation
+    The pronunciation of the last name of the contact
+  \value FirstNamePronunciation
+    The pronunciation of the first name of the contact
+  \value CompanyPronunciation
+    The pronunciation of the contact's company
+  \value Identifier
+    The identifier of the contact
+  \value Categories
+    The list of categories the contact belongs to
  */
 
 /*!
   \fn bool QContactModel::isPersonalDetails(int row) const
 
-  Returns true if the contact at \a row represents the personal details of the
-  device owner.  Otherwise returns false.
+  Returns true if the contact at the given \a row represents the personal details of the device owner.
 */
 
 /*!
-  Constructs a QContactModel with parent \a parent.
+  Constructs contact model with the given \a parent.
 */
 QContactModel::QContactModel(QObject *parent)
     : QPimModel(parent)
@@ -433,20 +478,15 @@ QContactModel::QContactModel(QObject *parent)
 }
 
 /*!
-  Destructs the QContactModel.
+  Destroys the contact model.
 */
-QContactModel::~QContactModel() {}
+QContactModel::~QContactModel()
+{
+    delete d;
+}
 
 /*!
-  \overload
-
-  Returns an object that contains a serialized description of the specified \a indexes.
-  The format used to describe the items corresponding to the \a indexes is obtained from
-  the mimeTypes() function.
-
-  If the list of indexes is empty, 0 is returned rather than a serialized empty list.
-
-  Currently returns 0 but may be implemented at a future date.
+  \reimp
 */
 QMimeData * QContactModel::mimeData(const QModelIndexList &indexes) const
 {
@@ -456,11 +496,7 @@ QMimeData * QContactModel::mimeData(const QModelIndexList &indexes) const
 }
 
 /*!
-  \overload
-
-  Returns a list of MIME types that can be used to describe a list of model indexes.
-
-  Currently returns an empty list but may be implemented at a future date.
+  \reimp
 */
 QStringList QContactModel::mimeTypes() const
 {
@@ -487,6 +523,10 @@ void QContactModel::sort(int column, Qt::SortOrder order)
   \overload
 
   Returns the data stored under the given \a role for the item referred to by the \a index.
+
+  The row of the index specifies which contact to access and the column of the index is treated as a \c QContactModel::Field.
+
+  \sa contactField()
 */
 QVariant QContactModel::data(const QModelIndex &index, int role) const
 {
@@ -570,9 +610,7 @@ QVariant QContactModel::data(const QModelIndex &index, int role) const
 }
 
 /*!
-  \overload
-
-    Returns the number of columns for the given \a parent.
+  \reimp
 */
 int QContactModel::columnCount(const QModelIndex &parent) const
 {
@@ -582,8 +620,13 @@ int QContactModel::columnCount(const QModelIndex &parent) const
 
 /*!
   \overload
-  Sets the \a role data for the item at \a index to \a value. Returns true if successful,
-  otherwise returns false.
+  Sets the \a role data for the item at \a index to \a value. Returns true if successful.
+
+  The contact model only accepts data for the \c EditRole.  The column of the specified
+  index specifies the \c QContactModel::Field to set and the row of the index
+  specifies which contact to modify.
+
+  \sa setContactField()
 */
 bool QContactModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -614,9 +657,7 @@ bool QContactModel::setData(const QModelIndex &index, const QVariant &value, int
 }
 
 /*!
-  \overload
-  For every Qt::ItemDataRole in \a roles, sets the role data for the item at \a index to the
-  associated value in \a roles. Returns true if successful, otherwise returns false.
+  \reimp
 */
 bool QContactModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &roles)
 {
@@ -626,10 +667,7 @@ bool QContactModel::setItemData(const QModelIndex &index, const QMap<int,QVarian
 }
 
 /*!
-  \overload
-
-  Returns a map with values for all predefined roles in the model for the item at the
-  given \a index.
+  \reimp
 */
 QMap<int,QVariant> QContactModel::itemData(const QModelIndex &index) const
 {
@@ -652,10 +690,7 @@ QMap<int,QVariant> QContactModel::itemData(const QModelIndex &index) const
 }
 
 /*!
-  \overload
-
-  Returns the data for the given \a role and \a section in the header with the
-  specified \a orientation.
+  \reimp
 */
 QVariant QContactModel::headerData(int section, Qt::Orientation orientation,
         int role) const
@@ -675,8 +710,7 @@ QVariant QContactModel::headerData(int section, Qt::Orientation orientation,
 }
 
 /*!
-  \overload
-    Returns the item flags for the given \a index.
+  \reimp
 */
 Qt::ItemFlags QContactModel::flags(const QModelIndex &index) const
 {
@@ -694,7 +728,7 @@ QContact QContactModel::contact(const QModelIndex &index) const
 }
 
 /*!
-  Return the contact for the \a row specified.
+  Return the contact for the given \a row.
 */
 QContact QContactModel::contact(int row) const
 {
@@ -706,24 +740,23 @@ QContact QContactModel::contact(int row) const
 }
 
 /*!
-  Returns the contact with the identifier \a id.  The contact does
+  Returns the contact in the model with the given \a identifier.  The contact does
   not have to be in the current filter mode for it to be returned.
 */
-QContact QContactModel::contact(const QUniqueId & id) const
+QContact QContactModel::contact(const QUniqueId & identifier) const
 {
-    const QContactIO *model = qobject_cast<const QContactIO *>(access(id));
+    const QContactIO *model = qobject_cast<const QContactIO *>(access(identifier));
     if (model)
-        return model->contact(id);
+        return model->contact(identifier);
     return QContact();
 }
 
 /*!
-  Returns the value from \a contact that would be returned for
-  field \a f as it would from a row in the QContactModel.
+  Returns the value for the specified \a field of the given \a contact.
 */
-QVariant QContactModel::contactField(const QContact &contact, QContactModel::Field f)
+QVariant QContactModel::contactField(const QContact &contact, QContactModel::Field field)
 {
-    switch(f) {
+    switch(field) {
         default:
         case QContactModel::Invalid:
             break;
@@ -839,316 +872,317 @@ QVariant QContactModel::contactField(const QContact &contact, QContactModel::Fie
 }
 
 /*!
-  Sets the value in \a contact that would be set for field \a f as it would
-  if modified for a contact in the QContactModel to \a v.
+  Sets the value for the specified \a field of the given \a contact to \a value.
 
-  Returns true if the contact was modified.  Otherwise returns false.
+  Returns true if the contact was modified.
+
+  \sa setData()
 */
-bool QContactModel::setContactField(QContact &contact, QContactModel::Field f,  const QVariant &v)
+bool QContactModel::setContactField(QContact &contact, QContactModel::Field field,  const QVariant &value)
 {
-    switch(f) {
+    switch(field) {
         default:
         case QContactModel::Invalid:
         case QContactModel::Identifier: // not a settable field
         case QContactModel::Label:
             return false;
         case QContactModel::Categories:
-            if (v.canConvert(QVariant::StringList)) {
-                contact.setCategories(v.toStringList());
+            if (value.canConvert(QVariant::StringList)) {
+                contact.setCategories(value.toStringList());
                 return true;
             }
             return false;
         case QContactModel::NameTitle:
-            if (v.canConvert(QVariant::String)) {
-                contact.setNameTitle(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setNameTitle(value.toString());
                 return true;
             }
             return false;
         case QContactModel::FirstName:
-            if (v.canConvert(QVariant::String)) {
-                contact.setFirstName(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setFirstName(value.toString());
                 return true;
             }
             return false;
         case QContactModel::MiddleName:
-            if (v.canConvert(QVariant::String)) {
-                contact.setMiddleName(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setMiddleName(value.toString());
                 return true;
             }
             return false;
         case QContactModel::LastName:
-            if (v.canConvert(QVariant::String)) {
-                contact.setLastName(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setLastName(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Suffix:
-            if (v.canConvert(QVariant::String)) {
-                contact.setSuffix(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setSuffix(value.toString());
                 return true;
             }
             return false;
         case QContactModel::JobTitle:
-            if (v.canConvert(QVariant::String)) {
-                contact.setJobTitle(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setJobTitle(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Department:
-            if (v.canConvert(QVariant::String)) {
-                contact.setDepartment(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setDepartment(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Company:
-            if (v.canConvert(QVariant::String)) {
-                contact.setCompany(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setCompany(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessPhone:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessPhone(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessPhone(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessFax:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessFax(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessFax(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessMobile:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessMobile(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessMobile(value.toString());
                 return true;
             }
             return false;
         case QContactModel::DefaultEmail:
-            if (v.canConvert(QVariant::String)) {
-                contact.setDefaultEmail(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setDefaultEmail(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Emails:
-            if (v.canConvert(QVariant::StringList)) {
-                contact.setEmailList(v.toStringList());
+            if (value.canConvert(QVariant::StringList)) {
+                contact.setEmailList(value.toStringList());
                 return true;
             }
             return false;
         case QContactModel::OtherPhone:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::OtherPhone, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::OtherPhone, value.toString());
                 return true;
             }
             return false;
         case QContactModel::OtherFax:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::Fax, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::Fax, value.toString());
                 return true;
             }
             return false;
         case QContactModel::OtherMobile:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::Mobile, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::Mobile, value.toString());
                 return true;
             }
             return false;
         case QContactModel::OtherPager:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::Pager, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::Pager, value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomePhone:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::HomePhone, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::HomePhone, value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeFax:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::HomeFax, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::HomeFax, value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeMobile:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::HomeMobile, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::HomeMobile, value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomePager:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPhoneNumber(QContact::HomePager, v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPhoneNumber(QContact::HomePager, value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessStreet:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessStreet(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessStreet(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessCity:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessCity(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessCity(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessState:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessState(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessState(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessZip:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessZip(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessZip(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessCountry:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessCountry(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessCountry(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessPager:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessPager(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessPager(value.toString());
                 return true;
             }
             return false;
         case QContactModel::BusinessWebPage:
-            if (v.canConvert(QVariant::String)) {
-                contact.setBusinessWebpage(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setBusinessWebpage(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Office:
-            if (v.canConvert(QVariant::String)) {
-                contact.setOffice(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setOffice(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Profession:
-            if (v.canConvert(QVariant::String)) {
-                contact.setProfession(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setProfession(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Assistant:
-            if (v.canConvert(QVariant::String)) {
-                contact.setAssistant(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setAssistant(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Manager:
-            if (v.canConvert(QVariant::String)) {
-                contact.setManager(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setManager(value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeStreet:
-            if (v.canConvert(QVariant::String)) {
-                contact.setHomeStreet(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setHomeStreet(value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeCity:
-            if (v.canConvert(QVariant::String)) {
-                contact.setHomeCity(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setHomeCity(value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeState:
-            if (v.canConvert(QVariant::String)) {
-                contact.setHomeState(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setHomeState(value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeZip:
-            if (v.canConvert(QVariant::String)) {
-                contact.setHomeZip(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setHomeZip(value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeCountry:
-            if (v.canConvert(QVariant::String)) {
-                contact.setHomeCountry(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setHomeCountry(value.toString());
                 return true;
             }
             return false;
         case QContactModel::HomeWebPage:
-            if (v.canConvert(QVariant::String)) {
-                contact.setHomeWebpage(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setHomeWebpage(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Spouse:
-            if (v.canConvert(QVariant::String)) {
-                contact.setSpouse(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setSpouse(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Gender:
-            if (v.canConvert(QVariant::Int)) {
-                contact.setGender((QContact::GenderType)v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                contact.setGender((QContact::GenderType)value.toInt());
                 return true;
             }
             return false;
         case QContactModel::Birthday:
-            if (v.canConvert(QVariant::Date)) {
-                contact.setBirthday(v.toDate());
+            if (value.canConvert(QVariant::Date)) {
+                contact.setBirthday(value.toDate());
                 return true;
             }
             return false;
         case QContactModel::Anniversary:
-            if (v.canConvert(QVariant::Date)) {
-                contact.setAnniversary(v.toDate());
+            if (value.canConvert(QVariant::Date)) {
+                contact.setAnniversary(value.toDate());
                 return true;
             }
             return false;
         case QContactModel::Nickname:
-            if (v.canConvert(QVariant::String)) {
-                contact.setNickname(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setNickname(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Children:
-            if (v.canConvert(QVariant::String)) {
-                contact.setChildren(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setChildren(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Portrait:
-            if (v.canConvert(QVariant::String)) {
-                contact.setPortraitFile(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setPortraitFile(value.toString());
                 return true;
             }
             return false;
         case QContactModel::Notes:
-            if (v.canConvert(QVariant::String)) {
-                contact.setNotes(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setNotes(value.toString());
                 return true;
             }
             return false;
         case QContactModel::LastNamePronunciation:
-            if (v.canConvert(QVariant::String)) {
-                contact.setLastNamePronunciation(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setLastNamePronunciation(value.toString());
                 return true;
             }
             return false;
         case QContactModel::FirstNamePronunciation:
-            if (v.canConvert(QVariant::String)) {
-                contact.setFirstNamePronunciation(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setFirstNamePronunciation(value.toString());
                 return true;
             }
             return false;
         case QContactModel::CompanyPronunciation:
-            if (v.canConvert(QVariant::String)) {
-                contact.setCompanyPronunciation(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                contact.setCompanyPronunciation(value.toString());
                 return true;
             }
             return false;
@@ -1156,10 +1190,10 @@ bool QContactModel::setContactField(QContact &contact, QContactModel::Field f,  
     return false;
 }
 /*!
-  Updates the contact \a contact so long as a there is a contact in the
-  QContactModel with the same uid as \a contact.
+  Updates the contact in the model with the same identifier as the specified \a contact to
+  equal the specified contact.
 
-  Returns true if the contact was successfully updated.  Otherwise returns false.
+  Returns true if the contact was successfully updated.
 */
 bool QContactModel::updateContact(const QContact& contact)
 {
@@ -1177,10 +1211,9 @@ bool QContactModel::updateContact(const QContact& contact)
 }
 
 /*!
-  Removes the contact \a contact so long as there is a contact in the QContactModel with
-  the same uid as \a contact.
+  Removes the contact from the model with the same identifier as the specified \a contact.
 
-  Returns true if the contact was successfully removed.  Otherwise returns false.
+  Returns true if the contact was successfully removed.
 */
 bool QContactModel::removeContact(const QContact& contact)
 {
@@ -1188,17 +1221,17 @@ bool QContactModel::removeContact(const QContact& contact)
 }
 
 /*!
-  Removes the contact that has the uid \a id from the QContactModel.
+  Removes the contact from the model with the specified \a identifier.
 
-  Returns true if the contact was successfully removed.  Otherwise returns false.
+  Returns true if the contact was successfully removed.
 */
-bool QContactModel::removeContact(const QUniqueId& id)
+bool QContactModel::removeContact(const QUniqueId& identifier)
 {
-    QContactContext *c = qobject_cast<QContactContext *>(context(id));
+    QContactContext *c = qobject_cast<QContactContext *>(context(identifier));
     if (c) {
-        bool result = c->removeContact(id);
+        bool result = c->removeContact(identifier);
         if (result) {
-            if (id == personalID())
+            if (identifier == personalID())
                 clearPersonalDetails();
             refresh();
         }
@@ -1208,10 +1241,13 @@ bool QContactModel::removeContact(const QUniqueId& id)
 }
 
 /*!
-  Adds the contact \a contact to the QContactModel under the storage source \a source.
-  If source is empty will add the contact to the default storage source.
+  Adds the \a contact to the model under the specified storage \a source.
+  If source is null the function will add the contact to the default storage source.
 
-  Returns valid id if the contact was successfully added.  Otherwise returns an invalid id.
+  Returns a valid identifier for the contact if the contact was
+  successfully added.  Otherwise returns a null identifier.
+
+  Note the current identifier of the specified appointment is ignored.
 */
 QUniqueId QContactModel::addContact(const QContact& contact, const QPimSource &source)
 {
@@ -1226,19 +1262,19 @@ QUniqueId QContactModel::addContact(const QContact& contact, const QPimSource &s
 }
 
 /*!
-  Removes the contacts specified by the list of uids \a ids.
+  Removes the records in the model specified by the list of \a identifiers.
 
-  Returns true if contacts are successfully removed.  Otherwise returns  false.
+  Returns true if contacts were successfully removed.
 */
-bool QContactModel::removeList(const QList<QUniqueId> &ids)
+bool QContactModel::removeList(const QList<QUniqueId> &identifiers)
 {
     QUniqueId id;
-    foreach(id, ids) {
+    foreach(id, identifiers) {
         if (!exists(id))
             return false;
     }
     QUniqueId pid = personalID();
-    foreach(id, ids) {
+    foreach(id, identifiers) {
         removeContact(id);
         if (id == pid)
             removeBusinessCard();
@@ -1249,15 +1285,16 @@ bool QContactModel::removeList(const QList<QUniqueId> &ids)
 /*!
   \overload
 
-  Adds the PIM record encoded in \a bytes to the QContactModel under the storage source \a source.
-  The format of the record in \a bytes is given by \a format.  An empty \a format string will
+  Adds the PIM record encoded in \a bytes to the model under the specified storage \a source.
+  The format of the record in \a bytes is given by \a format.  An empty format string will
   cause the record to be read using the data stream operators for the PIM data type of the model.
-  If \a source is empty will add the record to the default storage source.
+  If the specified source is null the function will add the record to the default storage source.
 
-  Returns valid id if the record was successfully added.  Otherwise returns an invalid id.
+  Returns a valid identifier for the record if the record was
+  successfully added.  Otherwise returns a null identifier.
 
   Can only add PIM data that is represented by the model.  This means that only contact data
-  can be added using a QContactModel.  Valid formats are "vCard" or an empty string.
+  can be added using a contact model.  Valid formats are "vCard" or an empty string.
 
 */
 QUniqueId QContactModel::addRecord(const QByteArray &bytes, const QPimSource &source, const QString &format)
@@ -1277,14 +1314,17 @@ QUniqueId QContactModel::addRecord(const QByteArray &bytes, const QPimSource &so
 
 /*!
   \overload
-
-  Updates the record enoded in \a bytes so long as there is a record in the QContactModel with
-  the same uid as the record.  The format of the record in \a bytes is given by \a format.
+  Updates the corresponding record in the model to equal the record encoded in \a bytes.
+  The format of the record in \a bytes is given by the \a format string.
   An empty \a format string will cause the record to be read using the data stream operators
-  for the PIM data type of the model. If \a id is not null will set the record uid to \a id
+  for the PIM data type of the model. If \a id is not null will set the record identifier to \a id
   before attempting to update the record.
 
-  Returns true if the record was successfully updated.  Otherwise returns false.
+  Returns true if the record was successfully updated.
+
+  Valid formats are "vCalendar" or an empty string.
+
+  \sa updateContact()
 */
 bool QContactModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, const QString &format)
 {
@@ -1304,24 +1344,28 @@ bool QContactModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, c
 }
 
 /*!
-  \fn bool QContactModel::removeRecord(const QUniqueId &id)
+  \fn bool QContactModel::removeRecord(const QUniqueId &identifier)
   \overload
 
-  Removes the record that has the uid \a id from the QContactModel.
+  Removes the record from the model with the specified \a identifier.
 
-  Returns true if the record was successfully removed.  Otherwise returns false.
+  Returns true if the record was successfully removed.
 */
 
 /*!
   \overload
 
-    Returns the record with the identifier \a id encoded in the format specified by \a format.
-    An empty \a format string will cause the record to be written using the data stream
-    operators for the PIM data type of the model.
+  Returns the record in the model with the specified \a identifier encoded in the format specified by the \a format string.
+  An empty format string will cause the record to be written using the data stream
+  operators for the PIM data type of the model.
+
+  Valid formats are "vCard" or an empty string.
+
+  \sa contact()
 */
-QByteArray QContactModel::record(const QUniqueId &id, const QString &format) const
+QByteArray QContactModel::record(const QUniqueId &identifier, const QString &format) const
 {
-    QContact c = contact(id);
+    QContact c = contact(identifier);
     if (c.uid().isNull())
         return QByteArray();
 
@@ -1365,10 +1409,10 @@ void QContactModel::pimMessage(const QString& message, const QByteArray& data)
 }
 
 /*!
-  Returns the uid for the contact representing the personal details of the device owner.
+  Returns the identifier for the contact representing the personal details of the device owner.
 
   If no contact is specified as the personal details of the device owner, will return a
-  null id.
+  null identifier.
 */
 QUniqueId QContactModel::personalID() const
 {
@@ -1399,8 +1443,8 @@ QContact QContactModel::personalDetails() const
 }
 
 /*!
-  Returns true if a contact in the QContactModel is specified as the personal details of the
-  device owner.  Otherwise returns false.
+  Returns true if a contact in the contact model is specified as the personal details of the
+  device owner.
 */
 bool QContactModel::hasPersonalDetails() const
 {
@@ -1409,20 +1453,22 @@ bool QContactModel::hasPersonalDetails() const
 }
 
 /*!
-  Returns true if the contact for the row specified by \a i represents the personal details
-  of the device owner.  Otherwise returns false.
+  Returns true if the contact for the specified \a row represents the personal details
+  of the device owner.
 */
-bool QContactModel::isPersonalDetails(const QModelIndex &i) const
+bool QContactModel::isPersonalDetails(const QModelIndex &row) const
 {
     QUniqueId personalId = personalID();
-    if (personalId == id(i) && exists(personalId))
+    if (personalId == id(row) && exists(personalId))
         return true;
     return false;
 }
 
 /*!
-  Sets no contact to represent the personal details of the device owner.  Does not remove
-  any contacts from the QContactModel.
+  Clears the personal details of the device owner.  Does not remove
+  and contacts from the contact model.
+
+  /sa setPersonalDetails()
 */
 void QContactModel::clearPersonalDetails()
 {
@@ -1430,40 +1476,39 @@ void QContactModel::clearPersonalDetails()
 }
 
 /*!
-  Sets the contact representing the personal details of the device owner to the contact
-  identified by the uid \a i.  If there is no contact with the uid \a i in the QContactModel
-  or \a i is null, this will clear the personal details.
+  Sets the personal details of the device owner to the contact with the given \a identifier.
+  If there is no contact with the specified identifier in the contact model this will clear the personal details.
 
   \sa clearPersonalDetails()
 */
-void QContactModel::setPersonalDetails(const QUniqueId & i)
+void QContactModel::setPersonalDetails(const QUniqueId & identifier)
 {
     {
         QSettings c("Trolltech","Pim");
         c.beginGroup("Contacts");
-        c.setValue("personalid", i.toString());
+        c.setValue("personalid", identifier.toString());
     }
 
-    d->mPersonalId = i;
+    d->mPersonalId = identifier;
     d->mPersonalIdRead = true;
 
     // The IPC will send the appropriate signals, if required.
     {
         QtopiaIpcEnvelope e("QPE/PIM", "updatePersonalId(QUniqueId)");
-        e << i;
+        e << identifier;
     }
 
-    updateBusinessCard(contact(i));
+    updateBusinessCard(contact(identifier));
 }
 
 /*!
-  Returns true if the contact with uid \a i represents the personal details
-  of the device owner.  Otherwise returns false.
+  Returns true if the contact with specified \a identifier represents the personal details
+  of the device owner.
 */
-bool QContactModel::isPersonalDetails(const QUniqueId & i) const
+bool QContactModel::isPersonalDetails(const QUniqueId & identifier) const
 {
     QUniqueId personalId = personalID();
-    if (personalId == i && exists(personalId))
+    if (personalId == identifier && exists(personalId))
         return true;
     return false;
 }
@@ -1503,7 +1548,7 @@ void QContactModel::removeBusinessCard()
 #ifdef QTOPIA_PHONE
 /*!
   Returns the best match for the phone number \a text.  If no contact
-  in the model has a phone number matching \a text, returns a
+  in the model has a phone number matching the given text returns a
   null contact.
 */
 QContact QContactModel::matchPhoneNumber(const QString &text)
@@ -1561,8 +1606,7 @@ void QContactModel::setFilter(const QString &text, int flags)
 }
 
 /*!
-  Returns the filter text being used by the model to filter
-  contact labels.
+  Returns the filter text being used by the model.
 
   \sa setFilter()
 */
@@ -1572,8 +1616,7 @@ QString QContactModel::filterText() const
 }
 
 /*!
-  Returns the filter flags being used by the model to filter
-  contact type information
+  Returns the filter flags being used by the model.
 
   \sa setFilter()
 */
@@ -1583,7 +1626,7 @@ int QContactModel::filterFlags() const
 }
 
 /*!
-  Clear Contact name and type filtering for the model.
+  Clears contact name and type filtering for the model.
   Does not affect category filtering.
 */
 void QContactModel::clearFilter()
@@ -1602,8 +1645,7 @@ void QContactModel::clearFilter()
 
 #ifdef QTOPIA_PHONE
 /*!
-  Returns true if the contact at \a index is stored on the SIM card.
-  Otherwise returns false.
+  Returns true if the contact at the given \a index is stored on the SIM card.
 */
 bool QContactModel::isSIMCardContact(const QModelIndex &index) const
 {
@@ -1611,17 +1653,16 @@ bool QContactModel::isSIMCardContact(const QModelIndex &index) const
 }
 
 /*!
-  Returns true if the contact identified by \a id is on the SIM card.
-  Otherwise returns false.
+  Returns true if the contact with the given \a identifier is on the SIM card.
 */
-bool QContactModel::isSIMCardContact(const QUniqueId & id) const
+bool QContactModel::isSIMCardContact(const QUniqueId & identifier) const
 {
 #ifdef QTOPIA_CELL
     simSource();
     // mContext part of id
-    return id.mappedContext() == d->simContext;
+    return identifier.mappedContext() == d->simContext;
 #else
-    Q_UNUSED(id);
+    Q_UNUSED(identifier);
     return false;
 #endif
 }
@@ -1668,63 +1709,66 @@ QPimSource QContactModel::phoneSource() const
 }
 
 /*!
-  Exports the contact with identifier \a id and imports it into \a dest.
-  The contact is modified by the source and destination storage contexts
-  to account for storage restrictions.  For instance a contact may be split into
-  multiple contacts when mirrored to the active SIM card and contacts from the
-  SIM card will be merged into contacts in local storage if they have
-  equal name information.
+  Exports the contact in the model with the specified \a identifier and imports
+  it into the \a destination storage source.  The contact is modified by the
+  source and destination storage contexts to account for storage restrictions.
+  For instance a contact may be split into multiple contacts when mirrored to
+  the active SIM card and contacts from the SIM card will be merged into contacts
+  in local storage if they have equal name information.
+
+  Returns true upon success.
 
   \sa mirrorAll()
 */
-bool QContactModel::mirrorToSource(const QPimSource &dest, const QUniqueId &id)
+bool QContactModel::mirrorToSource(const QPimSource &destination, const QUniqueId &identifier)
 {
     QContact c;
-    QContactContext *sourceContext = qobject_cast<QContactContext *>(context(id));
-    QPimSource source = QContactModel::source(id);
-    QContactContext *destContext = qobject_cast<QContactContext *>(context(dest));
+    QContactContext *sourceContext = qobject_cast<QContactContext *>(context(identifier));
+    QPimSource source = QContactModel::source(identifier);
+    QContactContext *destContext = qobject_cast<QContactContext *>(context(destination));
 
-    if (source == dest)
+    if (source == destination)
         return false;
 
     if (sourceContext && destContext) {
         bool result;
-        QContact c = sourceContext->exportContact(id, result);
+        QContact c = sourceContext->exportContact(identifier, result);
         if (result)
-            return destContext->importContact(dest, c);
+            return destContext->importContact(destination, c);
     }
 
     return false;
 }
 
 /*!
-  Exports the contacts stored in \a source and imports them into \a dest.
-  The contacts are modified by the source and destination storage contexts
-  to account for storage restrictions.
+  Exports the contacts stored in \a source storage source and imports them into the \a destination storage source.
+  The contacts are modified by the source and destination storage contexts to account for storage restrictions.
+
+  Returns true upon success.
 
   \sa mirrorToSource()
 */
-bool QContactModel::mirrorAll(const QPimSource &source, const QPimSource &dest)
+bool QContactModel::mirrorAll(const QPimSource &source, const QPimSource &destination)
 {
-    if (source == dest || source.isNull() || dest.isNull())
+    if (source == destination || source.isNull() || destination.isNull())
         return false;
     QContactContext *sourceContext = qobject_cast<QContactContext *>(context(source));
-    QContactContext *destContext = qobject_cast<QContactContext *>(context(dest));
+    QContactContext *destContext = qobject_cast<QContactContext *>(context(destination));
 
     if (sourceContext && destContext) {
         bool result;
         QList<QContact> c = sourceContext->exportContacts(source, result);
         if (result)
-            return destContext->importContacts(dest, c);
+            return destContext->importContacts(destination, c);
     }
     return false;
 }
 
 /*!
-   Write vcards for all visible contacts in the model to the file
+   Write vCards for all visible contacts in the model to the file
    specified by \a filename.
 
-   Returns true if the write was successful, or false on failure.
+   Returns true if successful.
 */
 bool QContactModel::writeVCard( const QString &filename )
 {
@@ -1751,8 +1795,8 @@ bool QContactModel::writeVCard( const QString &filename )
     Returns a list of indexes for the items where the data
     matches the specified \a value.  The list that is returned may be empty.
 
-    The search starts from the \a start index, and continues until the number of
-    matching data items equals \a hits, the search reaches the last row
+    The search starts from the \a start index and continues until the number of
+    matching data items equals \a hits or the search reaches the last row
 
     The arguments \a role and \a flags are currently ignored.
 */

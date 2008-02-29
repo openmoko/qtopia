@@ -27,11 +27,14 @@
 
 /*!
     \class QSlotInvoker
+    \mainclass
     \brief The QSlotInvoker class provides an interface for invoking slots with explicit arguments
 
-    The QSlotInvoker class provides an interface to invoke arbitrary slots
-    with explicit metacall arguments, without needing to create and emit an
-    explicit signal.
+    IPC mechanisms need to intercept protocol messages and convert them into
+    slot invocations, but it is generally impractical to create explicit code
+    for every slot that needs to be dispatched.  The QSlotInvoker class allows
+    an IPC dispatching mechanism to invoke slots in a generic fashion using
+    the invoke() method.
 
     Methods that are marked with Q_INVOKABLE or Q_SCRIPTABLE can also
     be invoked with this class.
@@ -60,7 +63,6 @@ public:
 };
 
 /*!
-    \internal
     Create a slot invoker that can invoke \a member on \a receiver.
     The object will be attached to \a parent, if present.
 */
@@ -108,7 +110,6 @@ QSlotInvoker::QSlotInvoker( QObject *receiver, const QByteArray &member,
 }
 
 /*!
-    \internal
     Destroy a slot invoker.
 */
 QSlotInvoker::~QSlotInvoker()
@@ -117,8 +118,7 @@ QSlotInvoker::~QSlotInvoker()
 }
 
 /*!
-    \internal
-    Determine if the member is present on the object.
+    Returns true if the member is present on the object.
 */
 bool QSlotInvoker::memberPresent() const
 {
@@ -126,10 +126,9 @@ bool QSlotInvoker::memberPresent() const
 }
 
 /*!
-    \internal
-    Determine if the member can be invoked with \a numArgs arguments.
+    Returns true if the member can be invoked with \a numArgs arguments.
     That is, the receiver has not been destroyed, the member is present,
-    and it requires \a numArgs or less araguments.
+    and it requires \a numArgs or less arguments.
 */
 bool QSlotInvoker::canInvoke( int numArgs ) const
 {
@@ -139,8 +138,7 @@ bool QSlotInvoker::canInvoke( int numArgs ) const
 }
 
 /*!
-    \internal
-    Get the object that will receive slot invocations.
+    Returns the object that will receive slot invocations.
 */
 QObject *QSlotInvoker::receiver() const
 {
@@ -148,8 +146,7 @@ QObject *QSlotInvoker::receiver() const
 }
 
 /*!
-    \internal
-    Get the member that will receiver slot invocations.
+    Returns the member that will receiver slot invocations.
 */
 QByteArray QSlotInvoker::member() const
 {
@@ -157,8 +154,7 @@ QByteArray QSlotInvoker::member() const
 }
 
 /*!
-    \internal
-    Get the parameter types associated with this member.
+    Returns the parameter types associated with this member.
 */
 int *QSlotInvoker::parameterTypes() const
 {
@@ -166,8 +162,7 @@ int *QSlotInvoker::parameterTypes() const
 }
 
 /*!
-    \internal
-    Get the number of parameter types associated with this member.
+    Returns the number of parameter types associated with this member.
 */
 int QSlotInvoker::parameterTypesCount() const
 {
@@ -175,8 +170,7 @@ int QSlotInvoker::parameterTypesCount() const
 }
 
 /*!
-    \internal
-    Invoke the slot represented by this object with the argument
+    Invokes the slot represented by this object with the argument
     list \a args.  The slot's return value is returned from
     this method.  If the slot's return type is "void", then a
     QVariant instance of type QVariant::Invalid will be returned.

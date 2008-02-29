@@ -100,7 +100,8 @@ private:
 	Phone,
 	Int,
 	Lower,
-	Upper
+	Upper,
+        Dict
     };
     Mode cMode;
     QPoint lastPoint;
@@ -109,6 +110,10 @@ private:
     int choicePos;
     QStringList choices;
     void loadProfiles();
+    
+    // Worker functions for interpreting input
+    bool processInputMatcherChar(InputMatcher *matcher, int unicode, int keycode, bool isPress);
+    bool processBackspace();
 
     void selectProfile(const QString &);
     void appendGuess(const InputMatcherGuessList &);

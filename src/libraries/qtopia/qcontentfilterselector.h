@@ -37,7 +37,7 @@ public:
                                      const QStringList &checked = QStringList(),
                                      QWidget *parent = 0 );
     explicit QContentFilterSelector( QContentFilter::FilterType type,
-                                     const QString &subType = QString(),
+                                     const QString &scope = QString(),
                                      QContentFilterModel::TemplateOptions options = QContentFilterModel::SelectAll,
                                      const QStringList &checked = QStringList(),
                                      QWidget *parent = 0 );
@@ -52,7 +52,7 @@ public:
                            QContentFilterModel::TemplateOptions options = QContentFilterModel::SelectAll,
                            const QStringList &checked = QStringList() );
     void setModelTemplate( QContentFilter::FilterType type,
-                           const QString &subType = QString(),
+                           const QString &scope = QString(),
                            QContentFilterModel::TemplateOptions options = QContentFilterModel::SelectAll,
                            const QStringList &checked = QStringList() );
 
@@ -83,7 +83,7 @@ public:
                                    const QStringList &checked = QStringList(),
                                    QWidget *parent = 0 );
     explicit QContentFilterDialog( QContentFilter::FilterType type,
-                                   const QString &subType = QString(),
+                                   const QString &scope = QString(),
                                    QContentFilterModel::TemplateOptions options = QContentFilterModel::SelectAll,
                                    const QStringList &checked = QStringList(),
                                    QWidget *parent = 0 );
@@ -98,7 +98,7 @@ public:
                            QContentFilterModel::TemplateOptions options = QContentFilterModel::SelectAll,
                            const QStringList &checked = QStringList() );
     void setModelTemplate( QContentFilter::FilterType type,
-                           const QString &subType = QString(),
+                           const QString &scope = QString(),
                            QContentFilterModel::TemplateOptions options = QContentFilterModel::SelectAll,
                            const QStringList &checked = QStringList() );
 

@@ -31,12 +31,16 @@ Q_OBJECT
 public:
     QAPerformanceTest();
 
+signals:
+    void shutdown( QtopiaServerApplication::ShutdownType );
+
 private slots:
     void perfMsg(const QString &msg, const QByteArray &data);
     void runPerformanceTest();
 
 private:
     bool m_willQuit;
+    bool m_closeApps;
 };
 
 #endif // _PERFORMANCETEST_H_

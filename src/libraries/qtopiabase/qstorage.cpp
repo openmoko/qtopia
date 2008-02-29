@@ -49,15 +49,16 @@
 
 /*!
   \class QStorageMetaInfo
+  \mainclass
   \brief The QStorageMetaInfo class describes the disks mounted on the file system.
 
   This class provides access to the mount information for the Linux
-  filesystem. Each mount point is represented by the \c QFileSystem class.
-  To ensure this class has the most up to date size information, call
-  the \c update() method. Note that this will automatically be signaled
-  by the operating system when a disk has been mounted or unmounted.
+  filesystem. Each mount point is represented by the QFileSystem class.
+  To ensure this class has the most up to date size information, call update().
 
   \ingroup io
+  \ingroup content
+  \sa QFileSystem
 */
 
 class QStorageMetaInfoPrivate
@@ -77,7 +78,10 @@ public:
 };
 
 /*! Constructor that determines the current mount points of the filesystem.
-  The standard \a parent parameters is passed on to QObject.
+  The standard \a parent parameters is passed on to QObject. QStorageMetaInfo::instance()
+  is the preferred method of obtaining a copy of this class.
+
+  \sa instance()
  */
 QStorageMetaInfo::QStorageMetaInfo( QObject *parent )
     : QObject( parent )
@@ -106,7 +110,7 @@ QStorageMetaInfo::~QStorageMetaInfo()
     delete d;
 }
 
-/*! Returns the longest matching \c QFileSystem that starts with the
+/*! Returns the longest matching QFileSystem that starts with the
    same prefix as \a filename as its mount point. Use \a connectedOnly to search
    only the filesystems that are connected.
 */
@@ -178,6 +182,11 @@ const QFileSystem *QStorageMetaInfo::applicationsFileSystem()
     return d->applicationsFileSystem;
 }
 
+/*!
+    \internal System hook to listen for notifications that a new file system has been connected
+    and we need to refresh our internal information.
+*/
+
 void QStorageMetaInfo::cardMessage( const QString& msg, const QByteArray& )
 {
     if ( msg == "updateStorage()" )
@@ -185,7 +194,7 @@ void QStorageMetaInfo::cardMessage( const QString& msg, const QByteArray& )
 }
 
 /*! Updates the mount and free space information for each mount
-  point and is automatically called when a disk is mounted or
+  point. This function is automatically called when a mount point is mounted or
   unmounted.
 */
 void QStorageMetaInfo::update()
@@ -356,6 +365,8 @@ void QStorageMetaInfo::update()
 /*!
   Returns a string containing the name, path, size and read/write parameters
   of all known filesystems
+
+  \sa installLocationsString()
 */
 QString QStorageMetaInfo::cardInfoString()
 {
@@ -377,6 +388,12 @@ QString QStorageMetaInfo::installLocationsString()
     return infoString( fileSystems( &fsf ), "/Documents" );
 }
 
+/*!
+  \internal Returns infostrings for each of the \a filesystems passed, appending \a extension
+  to the path.
+
+  \sa cardInfoString(), installLocationsString()
+*/
 QString QStorageMetaInfo::infoString( QList<QFileSystem*> filesystems, const QString &extension )
 {
     //storage->update();
@@ -393,6 +410,8 @@ QString QStorageMetaInfo::infoString( QList<QFileSystem*> filesystems, const QSt
 /*!
   Returns a list of available mounted file systems matching the \a filter. Use \a connectedOnly to return
   a list of only the filesystems that are connected.
+
+  \sa fileSystemNames(), QFileSystemFilter
 */
 QList<QFileSystem*> QStorageMetaInfo::fileSystems( QFileSystemFilter *filter, bool connectedOnly )
 {
@@ -410,8 +429,10 @@ QList<QFileSystem*> QStorageMetaInfo::fileSystems( QFileSystemFilter *filter, bo
 }
 
 /*!
-  Returns a list of file system names (matching the \a filter ). Use \a connectedOnly to return
+  Returns a list of file system names matching the \a filter. Use \a connectedOnly to return
   a list of only the filesystems that are connected.
+
+  \sa fileSystems(), QFileSystemFilter
 */
 QStringList QStorageMetaInfo::fileSystemNames( QFileSystemFilter *filter, bool connectedOnly )
 {
@@ -424,8 +445,8 @@ QStringList QStorageMetaInfo::fileSystemNames( QFileSystemFilter *filter, bool c
 }
 
 /*! \fn void QStorageMetaInfo::disksChanged()
-  Is emitted when a disk has been mounted or unmounted, such as when
-  a CF card has been inserted.
+  This signal is emitted whenever a disk has been mounted or unmounted, such as when
+  a CF card has been inserted or removed.
 */
 
 Q_GLOBAL_STATIC(QStorageMetaInfo,storageMetaInfoInstance);
@@ -474,25 +495,20 @@ public:
 };
 
 
-/*! \class QFileSystem
+/*! 
+    \class QFileSystem
     \brief The QFileSystem class describes a single mount point.
 
-    This class returns mount point information including:
-    \list
-    \o file system name
-    \o mount point
-    \o human readable name
-    \o size information
-    \o mount options.
-    \endlist
+    This class is an informational result structure returned by the QStorageMetaInfo class.
+    This class should not be created directly, but should rather be used in tandem
+    with the QStorageMetaInfo class.
 
     \ingroup io
-
-    \sa QStorageMetaInfo
+    \ingroup content
 */
 
 /*!
-    Constructs a null QFileSystem.
+    Construct an empty QFileSystem object.
 */
 QFileSystem::QFileSystem()
 {
@@ -500,12 +516,17 @@ QFileSystem::QFileSystem()
 }
 
 /*!
-    Constructs a copy of the QFileSystem \a other.
+    Construct a copy of \a other.
 */
 QFileSystem::QFileSystem( const QFileSystem &other )
     : d( other.d )
 {
 }
+
+/*!
+    \internal Called by QStorageMetaInfo to construct and initialise a QFileSystem object
+    for use.
+*/
 
 QFileSystem::QFileSystem( const QString &disk, const QString &path, const QString &prevPath, const QString &options,
                         const QString &name, const QString &documentsPath, const QString &applicationsPath, bool removable,
@@ -528,14 +549,14 @@ QFileSystem::QFileSystem( const QString &disk, const QString &path, const QStrin
 }
 
 /*!
-    Destroys a QFileSystem.
+    Destroys this QFileSystem object.
 */
 QFileSystem::~QFileSystem()
 {
 }
 
 /*!
-    Copies the value of the QFileSystem \a other to a QFileSystem.
+    Assign the contents of \a other to this object.
 */
 QFileSystem &QFileSystem::operator =( const QFileSystem &other )
 {
@@ -543,6 +564,10 @@ QFileSystem &QFileSystem::operator =( const QFileSystem &other )
 
     return *this;
 }
+
+/*!
+    \internal Update the size infromation for this QFileSystem.
+*/
 
 void QFileSystem::update()
 {
@@ -561,6 +586,10 @@ void QFileSystem::update()
 #endif
 }
 
+/*!
+    \internal Update the size infromation for this QFileSystem only if the \a connected state has
+    changed, passing \a path in, in case of disconnection to keep track of where a filesystem was mounted.
+*/
 void QFileSystem::update( bool connected, const QString &path )
 {
     if( d.constData()->connected != connected )
@@ -587,7 +616,7 @@ bool QFileSystem::isNull() const
 }
 
 /*!
-  Returns the file system name, such as /dev/hda3
+  Returns the file system name, eg. /dev/hda3
 */
 const QString &QFileSystem::disk() const
 {
@@ -595,7 +624,7 @@ const QString &QFileSystem::disk() const
 }
 
 /*!
-  Returns the mount path, such as /home
+  Returns the mount path, eg. /home
 */
 const QString &QFileSystem::path() const
 {
@@ -603,7 +632,7 @@ const QString &QFileSystem::path() const
 }
 
 /*!
-    Returns the path of the documents directory, such as /home/Documents.
+    Returns the path of the documents directory, eg. /home/Documents.
 */
 const QString &QFileSystem::documentsPath() const
 {
@@ -611,7 +640,7 @@ const QString &QFileSystem::documentsPath() const
 }
 
 /*!
-    Returns the path of the applications directory, such as /home/Applications.
+    Returns the path of the applications directory, eg. /home/Applications.
 */
 const QString &QFileSystem::applicationsPath() const
 {
@@ -619,7 +648,8 @@ const QString &QFileSystem::applicationsPath() const
 }
 
 /*!
-  Returns the previous mount path, such as /home (useful when a filesystem has been unmounted)
+  Returns the previous mount path, eg. /home
+  This is useful when a filesystem has been unmounted.
 */
 const QString &QFileSystem::prevPath() const
 {
@@ -716,7 +746,7 @@ bool QFileSystem::isConnected() const
 }
 
 /*!
-    Returns a QFileSystem describing the file system on which the file with the name \a fileName is located.
+    Returns a QFileSystem object describing the file system on which the file with the name \a fileName is located.
 
     If \a connectedOnly is true the QFileSystem will only be returned if it is currently connected.
 */
@@ -757,8 +787,9 @@ QFileSystem QFileSystem::applicationsFileSystem()
 
 // ====================================================================
 
-/*! \class QFileSystemFilter
-  \brief The QFileSystemFilter class is used to restrict the available filesystems.
+/*! 
+  \class QFileSystemFilter
+  \brief The QFileSystemFilter class is used to restrict the available filesystems returned from QStorageMetaInfo.
 
   Extending the filter class is relatively simple.
 
@@ -776,7 +807,8 @@ public:
         if ( (writable == QFileSystemFilter::Set && !fs->isWritable()) ||
              (writable == QFileSystemFilter::NotSet && fs->isWritable()) )
             return false;
-        return QFileSystemFilter::filter();
+        else
+            return QFileSystemFilter::filter(fs);
     }
 
     QFileSystemFilter::FilterOption writable;
@@ -784,6 +816,8 @@ public:
   \endcode
 
   \ingroup io
+  \ingroup content
+  \sa QStorageMetaInfo
 */
 
 /*!
@@ -810,7 +844,7 @@ QFileSystemFilter::~QFileSystemFilter()
 {
 }
 
-/*! Does the \a fs match the filter?
+/*! Returns true if the \a fs matches the filter; otherwise returns false.
 */
 bool QFileSystemFilter::filter( QFileSystem *fs )
 {

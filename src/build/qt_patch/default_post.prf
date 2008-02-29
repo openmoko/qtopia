@@ -104,5 +104,11 @@ equals(TEMPLATE,subdirs):contains(SUBDIRS,svgiconengine) {
     SUBDIRS-=svgiconengine
 }
 
+# Turn off hiding symbols in qtestlib
+equals(TARGET,QtTest) {
+    QT_CONFIG -= reduce_exports
+    CONFIG    -= hide_symbols
+}
+
 # Get Qt's version of this file
 load(default_post)

@@ -36,6 +36,7 @@
 /*!
   \internal
   \class GeneralOpenVPNPage
+  \mainclass
   */
 
 GeneralOpenVPNPage::GeneralOpenVPNPage( QWidget* parent )
@@ -89,6 +90,7 @@ void GeneralOpenVPNPage::forceRemoteName()
 /*!
   \internal
   \class CertificateOpenVPNPage
+  \mainclass
   */
 
 CertificateOpenVPNPage::CertificateOpenVPNPage( QWidget* parent )
@@ -296,6 +298,7 @@ void CertificateOpenVPNPage::selectFile()
 /*!
   \internal
   \class OptionsOpenVPNPage
+  \mainclass
   */
 
 OptionsOpenVPNPage::OptionsOpenVPNPage( QWidget* parent )
@@ -382,6 +385,7 @@ void OptionsOpenVPNPage::selectConfigScript()
 /*!
   \internal
   \class DeviceOpenVPNPage
+  \mainclass
   */
 
 DeviceOpenVPNPage::DeviceOpenVPNPage( QWidget * parent )

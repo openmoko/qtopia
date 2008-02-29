@@ -14,6 +14,12 @@
                 <text rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter" format="RichText" transient="yes" active="expr:@/Accessories/Battery/Charge == 100">
                     <tr><trtext>Battery fully charged</trtext></tr>
                 </text>
+                <text name="loading" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter" format="RichText" transient="yes" active="no">
+                    <tr><trtext>Loading Qtopia</trtext></tr>
+                </text>
+                <text name="poweroff" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter" format="RichText" transient="yes" active="no">
+                    <tr><trtext>Powering off</trtext></tr>
+                </text>
             </exclusive>
         </rect>
     </image>

@@ -207,17 +207,18 @@ QString QTimeStringData::numberDate(const QDate &d, QTimeString::Length length) 
 
 /*!
   \class QTimeString
-  \brief The QTimeString class provides localised strings for times and dates.
+  \mainclass
+  \brief The QTimeString class provides localized strings for times and dates.
 
-  It is recommended to use QTimeString rather than QDateTimes' toString functions.
-  QTimeString returns localised strings for a given date and/or time. Each function
-  expects a parameter that determines the length of a returned string. If the user
-  changes the language, date or time format all strings obtained from QTimeString
-  have to be invalidated. The \c{QtopiaApplication::dateFormatChanged()} and
-  \c{QtopiaApplication::clockChanged()} signals will indicate when this happens.
+  It is recommended to use QTimeString rather than QDateTime::toString()
+  because QTimeString returns localized strings for a given date and/or time.
+  Each function expects a parameter that determines the length of a returned string.
+  If the user changes the date or time format all strings obtained from QTimeString
+  have to be invalidated. The QtopiaApplication::dateFormatChanged() and
+  QtopiaApplication::clockChanged() signals will indicate when this happens.
   The handler for these signals must ensure that all time/date strings are refreshed.
 
-  \warning The length of a string can still vary among languages.
+  \warning The length of the localized string can vary among languages.
 
   \sa QtopiaApplication::dateFormatChanged(), QtopiaApplication::clockChanged()
 
@@ -228,12 +229,11 @@ QString QTimeStringData::numberDate(const QDate &d, QTimeString::Length length) 
 /*!
   \enum QTimeString::Length
 
-  \value Short shortest possible string (mostly used on phones)
-  \value Medium default option
-  \value Long verbose string
+  This enum specifies the different string lengths supported by QTimeString.
 
-  Enumerates the different string lengths supported by QTimeString.
-  It provides an indication as how long a time/date string should be.
+  \value Short Returns shortest possible string (mostly used on phones).
+  \value Medium Returns default length string.
+  \value Long Returns verbose string.
 */
 
 static QString shortDayName( int weekday )
@@ -252,8 +252,9 @@ static QString shortDayName( int weekday )
 
 
 /*!
-  Returns the name for the \a d of the week. \a len determines
-  the length of the resulting string.
+  \fn QString QTimeString::nameOfWeekDay( int day, Length len)
+
+  Returns the name for the \a day of the week in the given \a len.
 
   \list
     \o \c{QTimeString::Long} - Monday
@@ -284,8 +285,9 @@ QString QTimeString::nameOfWeekDay( int d, Length len)
 }
 
 /*!
-  Returns the name of month \a m. \a len determines
-  the length of the resulting string.
+  \fn QString QTimeString::nameOfMonth( int month, Length len )
+
+  Returns the name of \a month in the given \a len.
 
   \list
     \o \c{QTimeString::Long} - January
@@ -311,8 +313,7 @@ QString QTimeString::nameOfMonth( int m, Length len)
 }
 
 /*!
-  Returns the user's current preference for 12 hour time
-  over 24 hour time.
+  Returns true if 12 hour time is preferred over 24 hour time; otherwise returns false.
 */
 bool QTimeString::currentAMPM()
 {
@@ -329,8 +330,11 @@ void QTimeString::updateFormats()
 }
 
 /*!
-  Returns the date format used by QTimeString (e.g. D.M.Y). If the returned string
-  is empty the format of date strings is set by the current locale ( see QLocale::dateFormat() ).
+  Returns the date format used by QTimeString (e.g. D.M.Y) if set;
+  otherwise returns an empty string.
+
+  In case no format is set the default format which is returned
+  by QLocale::dateFormat() in QLocale::ShortFormat is used.
 
   \sa QTimeString::formatOptions()
 */
@@ -342,7 +346,8 @@ QString QTimeString::currentFormat()
 
 /*!
   Returns additional format options for a date string. The default format
-  is the format of the current locale.
+  is the format of the current locale as returned
+  by QLocale::dateFormat() in QLocale::ShortFormat.
 
   \sa QTimeString::currentFormat()
 */
@@ -360,11 +365,13 @@ QStringList QTimeString::formatOptions()
 
 /*!
   \deprecated
-  Use \l{QDate::fromString()} instead.
+  Use QDate::fromString() instead.
 
   This function simply logs a warning message to qLog(Time) to indicate
   that it is deprecated.
   The \a date, \a year. \a month and \a day parameters are all ignored.
+
+  This function always returns true.
 */
 bool QTimeString::parseDate(const QString& date, int& year, int& month, int& day)
 {
@@ -379,8 +386,11 @@ bool QTimeString::parseDate(const QString& date, int& year, int& month, int& day
 
 
 /*!
-  Returns date \a date as a string showing day, month and year as a number.
-  \a len determines the length of the resulting string.
+  \fn QString QTimeString::numberDateString( const QDate &date, Length len )
+
+  Returns a localized string for \a date
+  showing day, month and year as a number in the given \a len.
+
   \list
     \o \c{QTimeString::Long} - 07/08/2005
     \o \c{QTimeString::Medium} - 07/08/05
@@ -396,10 +406,11 @@ QString QTimeString::numberDateString( const QDate &date, Length len )
 }
 
 /*!
-  Returns \a hour as a string, in either 12 hour ( if QTimeString::currentAMPM() is true) or
-  24 hour format.
+  Returns a localized string for \a hour,
+  in 12 hour if QTimeString::currentAMPM() is true;
+  otherwise in 24 hour format.
 
-  If \a hour is greater than 23 or less then 0 then hour will default to 0
+  If \a hour is greater than 23 or less then 0 then hour will default to 0.
 */
 QString QTimeString::localH( int hour )
 {
@@ -438,9 +449,9 @@ QString timeString(const QTime &t, bool seconds, QTimeString::Length len)
 }
 
 /*!
-  Returns time \a t as a string, showing hours and minutes.
+  Returns a localized string for \a t in the given \a len,
+  showing hours and minutes.
 
-  \a len determines the length of the resulting string.
   \list
     \o \c{QTimeString::Long} - 02:05 PM
     \o \c{QTimeString::Medium} - 2:05 PM
@@ -455,10 +466,9 @@ QString QTimeString::localHM( const QTime &t, Length len )
 }
 
 /*!
-  Returns time \a t as a string,
+  Returns a localized string for \a t in the given \a len,
   showing hours, minutes, and seconds.
 
-  \a len determines the length of the resulting string.
   \list
     \o \c{QTimeString::Long} - 02:05:12 PM
     \o \c{QTimeString::Medium} - 2:05:12 PM
@@ -473,10 +483,9 @@ QString QTimeString::localHMS( const QTime &t, Length len)
 }
 
 /*!
-  Returns date/time \a t as a string,
+  Returns a localized string for \a t in the given \a len,
   showing hours, minutes, and day of the week.
 
-  \a len determines the length of the resulting string.
   \list
     \o \c{QTimeString::Long} - Monday 02:04 PM
     \o \c{QTimeString::Medium} - Mon 2:40 PM
@@ -494,10 +503,9 @@ QString QTimeString::localHMDayOfWeek( const QDateTime &t, Length len )
 }
 
 /*!
-  Returns date/time \a t as a string,
+  Returns a localized string for \a t in the given \a len,
   showing hours, minutes, seconds, and day of the week.
 
-  \a len determines the length of the resulting string.
   \list
     \o \c{QTimeString::Long} - Monday 02:04:14 PM
     \o \c{QTimeString::Medium} - Mon 2:40:14 PM
@@ -515,9 +523,8 @@ QString QTimeString::localHMSDayOfWeek( const QDateTime &t, Length len )
 }
 
 /*!
-  Returns date \a dt as a localised string,
+  Returns a localized string for \a dt in the given \a len,
   showing month and date.
-  \a len determines the length of the resulting string.
 
   \list
     \o \c{QTimeString::Long} - 27 September
@@ -554,9 +561,8 @@ QString QTimeString::localMD( const QDate &dt, Length len )
 
 
 /*!
-  Returns date \a dt as a string,
+  Returns a localized string for \a dt in the given \a len
   showing year, month, and date.
-  \a len determines the length of the resulting string.
 
   \list
     \o \c{QTimeString::Long} - Mon 27 September 2005
@@ -579,9 +585,8 @@ QString QTimeString::localYMD( const QDate &dt, Length len )
 }
 
 /*!
-  Returns date/time \a dt as a string,
+  Returns a localized string for \a dt in the given \a len,
   showing year, month, date, hours, minutes, and seconds.
-  \a len determines the length of the resulting string.
 
   \list
     \o \c{QTimeString::Long} - 27 September 2005 02:54:22 PM
@@ -600,8 +605,9 @@ QString QTimeString::localYMDHMS( const QDateTime &dt, Length len )
 }
 
 /*!
-  Returns the nameof the weekday for date \a d. \a len determines
-  what length the string will have:
+  \fn QString QTimeString::localDayOfWeek( const QDate& date, Length len )
+  Returns a localized name of the week day on \a date in the given \a len.
+
   \list
     \o \c{QTimeString::Long} - Monday
     \o \c{QTimeString::Medium} - Mon

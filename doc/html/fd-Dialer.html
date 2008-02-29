@@ -1,14 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>  Dialer </title>
+  <title>  Dialer </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Dialer <br><small>Functional Description</small></h1>
 <p />
 <strong>Dialer</strong> is the interface used to create outgoing phone calls. It is integrated with the <a href="fd-Contacts.html" class="twikiLink">Contacts</a> and <a href="fd-CallHistory.html" class="twikiLink">Call History</a> applications to make it easy to dial contacts or previous calls. Separate user interfaces are provided for the keypad and touchscreen dialers with the user able to access <strong>Dialer</strong> by typing numbers on a keypad device or pushing a button on the homescreen on a touchscreen device. On a touchscreen device <strong>Dialer</strong> also provides access to the <a href="fd-CallHistory.html" class="twikiLink">Call History</a> application.
@@ -82,6 +84,18 @@ The user is able to create a Message based on the number entered or a highlighte
 <p />
 The user is able to view a contact when an item in the look-up list is highlighted and has an associated contact.
 <p />
+<h4><a name="Contacts"></a> Contacts </h4>
+<p />
+<strong>Dialer</strong> is able to match user input with a contact's name or one of its numbers. <strong>Dialer</strong> provides the ability to create new contacts from user input. <strong>Dialer</strong> provides the ability to view the full details of matched contacts.
+<p />
+<h4><a name="Messages"></a> Messages </h4>
+<p />
+<strong>Dialer</strong> allows the creation of Messages based on user input, <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record matches and/or <strong>Contact</strong> matches with a mobile phone number.
+<p />
+<h4><a name="Call_History"></a> Call History </h4>
+<p />
+<strong>Dialer</strong> is able to match user input with a <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record.
+<p />
 <h3><a name="Keypad_Dialer_User_Interface"></a> Keypad Dialer User Interface </h3>
 <p />
 The Keypad <strong>Dialer</strong> user interface consists of a number of input fields and the look-up list. When the user inputs numbers the look-up list is updated to show <a href="fd-Contacts.html" class="twikiLink">Contacts</a> and <a href="fd-CallHistory.html" class="twikiLink">Call History</a> records matching the new input.
@@ -94,23 +108,9 @@ The user can reasonably be expected to wish to use their fingers to input a phon
 <p />
 Due to the size of the number pad the look-up list can not be displayed and automatically updated on the same screen as the keypad version. The Touchscreen <strong>Dialer</strong> provides a button to access the look-up list that pops-up over the <strong>Dialer</strong>.
 <p />
-<h2><a name="Dependencies"></a> Dependencies </h2>
-<p />
-<h3><a name="Contacts"></a> Contacts </h3>
-<p />
-<strong>Dialer</strong> is able to match user input with a contact's name or one of its numbers. <strong>Dialer</strong> provides the ability to create new contacts from user input. <strong>Dialer</strong> provides the ability to view the full details of matched contacts.
-<p />
-<h3><a name="Messages"></a> Messages </h3>
-<p />
-<strong>Dialer</strong> allows the creation of Messages based on user input, <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record matches and/or <strong>Contact</strong> matches with a mobile phone number.
-<p />
-<h3><a name="Call_History"></a> Call History </h3>
-<p />
-<strong>Dialer</strong> is able to match user input with a <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record.
-<p />
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div>

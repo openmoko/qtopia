@@ -117,7 +117,37 @@ QMAKE_EXTRA_TARGETS*=test
     contains(PROJECT_TYPE,embedded)|qtopia {
         qt:!isEmpty(EMBEDDED_RPATH):LIBS+=$$EMBEDDED_RPATH
     }
+
+    qtopia_depot:!win32 {
+        # make docs builds docs for this dir (and warns if this dir isn't in qtopia.qdocconf)
+        docs.commands=$$COMMAND_HEADER\
+            $$QPEDIR/scripts/mkdocs -onlydir $$SRCDIR $$OUT_PWD/docs
+        QMAKE_EXTRA_TARGETS+=docs
+        create_raw_dependency(.PHONY,docs)
+
+        # make auto_docs builds docs for this dir if it's listed in qtopia.qdocconf
+        auto_docs.commands=$$docs.commands -ignoreinvaliddir
+        QMAKE_EXTRA_TARGETS+=auto_docs
+        create_raw_dependency(.PHONY,auto_docs)
+
+        # make auto_docs is run automatically if the -qdoc switch is passed to configure
+        qdoc:ALL_DEPS+=auto_docs
+    }
 }
+
+# Print out the "make sdk" warning everywhere, not just the top of the tree
+equals(QTOPIA_SDKROOT,$$QPEDIR) {
+    check_sdk.commands=$$COMMAND_HEADER\
+        echo $${LITERAL_QUOTE}$${LITERAL_QUOTE} $$LINE_SEP\
+        echo $${LITERAL_QUOTE}You did not pass -sdk /path to configure so you cannot run make sdk.$${LITERAL_QUOTE} $$LINE_SEP\
+        echo $${LITERAL_QUOTE}Qtopia has been configured to use the build directory as the SDK location.$${LITERAL_QUOTE} $$LINE_SEP\
+        echo $${LITERAL_QUOTE}The build directory is $$QPEDIR$${LITERAL_QUOTE} $$LINE_SEP\
+        echo $${LITERAL_QUOTE}$${LITERAL_QUOTE}
+} else {
+    check_sdk.commands=$$COMMAND_HEADER\
+        $$MAKE -f Makefile.target sdk
+}
+QMAKE_EXTRA_TARGETS+=check_sdk
 
 # relink does a remove_target and then a make (so that everything is relinked)
 relink.commands=$$COMMAND_HEADER\

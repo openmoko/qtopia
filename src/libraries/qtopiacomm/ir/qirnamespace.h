@@ -24,8 +24,14 @@
 
 #include <QFlags>
 
+#ifndef Q_QDOC
 namespace QIr
 {
+#else
+class QIr
+{
+public:
+#endif
     enum DeviceClass {
         PlugNPlay = 0x0001,
         PDA = 0x0002,

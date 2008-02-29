@@ -25,6 +25,7 @@ Q_IMPLEMENT_USER_METATYPE_ENUM( QDrmRights::Permission );
 
 /*!
     \class QDrmRights
+    \mainclass
     \brief The QDrmRights class describes the status and constraints associated with a permission for DRM protected content.
 
     A drm rights object represents the rights associated with an item of content for a permission.  It is composed of a
@@ -73,8 +74,8 @@ public:
 
 /*!
     \class QDrmRights::Constraint
-
-    Describes a constraint placed on the usage of drm content.
+    \mainclass
+    \brief The Constraint class describes a constraint placed on the usage of DRM content.
 
     A constraint is typically a simple name value pair where the name describes the type of constraint
     the value represents.  A constraint on the the number of times a content item may be rendered may have

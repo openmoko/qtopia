@@ -5,117 +5,126 @@
 #
 # See also: make_sdk_images.sh -help
 
-find_dirs()
-{
-    find $1 -type d -printf "%P\n"
-}
-
-find_files()
-{
-    find $1 -type f -printf "%P\n"
-}
-
 HELP=0
+STRIP=0
 
-if [ $1 = "-h" -a $1 = "--help" ]; then
-    HELP=1
+# Hopefully this will make the -strip argument useful even when the toolchain lives somewhere else
+# (ie. just set PATH and it will work)
+TOOLCHAIN=/opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux/bin
+PATH=$TOOLCHAIN:$PATH
+
+if [ "$1" = "-strip" ]; then
+    STRIP=1
+    shift
 fi
 
 if [ $# -eq 1 ]; then
-    QTOPIA=$1
+    IMAGE=$1
     OUTDIR=`pwd`
 elif [ $# -eq 2 ]; then
-    QTOPIA=$1
+    IMAGE=$1
     OUTDIR=`(cd $2 ; pwd)`
 elif [ $# -eq 3 ] && [ $3 = "-perftest" ]; then
     PERFTEST=1
-    QTOPIA=$1
+    IMAGE=$1
     OUTDIR=`(cd $2 ; pwd)`
 else
     HELP=1;
-    echo "make_sdk_images.sh <Qtopia Tree> [Output dir]"
-    echo "This script creates a Qtopia image suitable for flashing onto the Greenphone"
-    echo "Create qtopia.cramfs and qtopia_default.tgz " \
-         "in Output dir or the current directory from " \
-         "the specified Qtopia tree."
+    echo "$(basename $0) [-strip] <image> [Output dir]"
+    echo "This script creates a cramfs image suitable for flashing onto the Greenphone"
+    echo "Create qtopia.cramfs in Output dir or the current directory from the specified image."
     exit 1;
 fi
 
-# Check our pre-condition that a Qtopia image seems to be under $QTOPIA
-if [ ! -f $QTOPIA/bin/qpe ]; then
-    echo "Error : Missing $QTOPIA/bin/qpe, check the value of <Qtopia Tree> argument"
+# Check our pre-condition that a Qtopia image seems to be under $IMAGE
+if [ ! -f $IMAGE/bin/qpe ]; then
+    echo "Error : Missing $IMAGE/bin/qpe, check the value of <image> argument"
     exit 1;
 fi
-
-WORK=`mktemp -d /tmp/greenphone.XXXXXXXX`
-
-mkdir ${WORK}/Qtopia.rom
-cp -a $QTOPIA/* ${WORK}/Qtopia.rom/
-cd ${WORK}
 
 rm -f "$OUTDIR/qtopia.cramfs"
 rm -f "$OUTDIR/qtopia_default.tgz"
 
-# split Qtopia into Qtopia.rom and Qtopia.rw
-mkdir -p ${WORK}/Qtopia.default
-cd ${WORK}/Qtopia.default
-mkdir bin lib packages
-mv ../Qtopia.rom/etc .
-mv ../Qtopia.rom/services .
-mv ../Qtopia.rom/i18n .
-mv ../Qtopia.rom/qtopia_db.sqlite .
-if [ "$PERFTEST" = "1" ]; then
-    mv ../Qtopia.rom/qpe_performance.sh ./qpe.sh 
-    mv ../Qtopia.rom/qpe_original.sh .
-else
-    mv ../Qtopia.rom/qpe.sh .
+echo "Creating working directory..."
+WORK=`mktemp -d /tmp/greenphone.XXXXXXXX`
+mkdir $WORK/opt
+QPEROM=$WORK/opt/Qtopia.rom
+QTOPIA_PREFIX=$WORK/opt/Qtopia
+cp -R $IMAGE $QPEROM
+mkdir $QTOPIA_PREFIX
+
+if [ "$STRIP" = 1 ]; then
+    echo "Stripping binaries..."
+    files="$(find $QPEROM -type f | xargs file | grep ELF | grep 'not stripped' | awk '{print $1}' | sed 's/:$//')"
+    for file in $files; do
+        arm-linux-strip --strip-all -R .note -R .comment $file
+    done
+    files="$(find $QPEROM -type f | xargs file | grep ELF | grep 'not stripped' | awk '{print $1}' | sed 's/:$//')"
+    for file in $files; do
+        arm-linux-strip --strip-unneeded -R .note -R .comment $file
+    done
 fi
 
-# Symlink qpe
-ln -s /opt/Qtopia.rom/bin/qpe ${WORK}/Qtopia.default/bin/qpe
+# setup the "dynamic" directories
+setup_dynamic()
+{
+    rom=$1
+    ram=$2
+    mkdir -p $ram
+    dirs="$(find $rom/ -type d | sed 's,^'$rom'/,,')"
+    for dir in $dirs; do
+        mkdir -p $ram/$dir
+    done
+    for file in $(ls -a $rom); do
+        file=$rom/$file
+        if test -L $file; then
+            filename=$(basename $file)
+            file=$(readlink $file)
+            ln $ln_args $file $ram/$filename
+        elif test -f $file; then
+            file=$(echo $file | sed 's,^'$rom_prefix',,')
+            ln $ln_args $file $ram
+        fi
+    done
+    for dir in $dirs; do
+        for file in $(ls -a $rom/$dir); do
+            file=$rom/$dir/$file
+            if test -L $file; then
+                filename=$(basename $file)
+                file=$(readlink $file)
+                ln $ln_args $file $ram/$dir/$filename
+            elif test -f $file; then
+                file=$(echo $file | sed 's,^'$rom_prefix',,')
+                ln $ln_args $file $ram/$dir
+            fi
+        done
+    done
+}
 
-# Symlink themes
-mkdir -p ${WORK}/Qtopia.default/pics/themes
-for i in `find_dirs ../Qtopia.rom/pics/themes`; do
-    ln -s /opt/Qtopia.rom/pics/themes/$i ${WORK}/Qtopia.default/pics/themes/$i
-done
+echo "Creating symlinks..."
+ln_args="-sf"
+rom_prefix=$WORK
+setup_dynamic $QPEROM $QTOPIA_PREFIX
 
-# Symlink plugins
-for i in `find_dirs ../Qtopia.rom/plugins`; do
-    mkdir -p ${WORK}/Qtopia.default/plugins/$i
-done
-for i in `find_files ../Qtopia.rom/plugins`; do
-    ln -s /opt/Qtopia.rom/plugins/$i ${WORK}/Qtopia.default/plugins/$i
-done
+if [ "$PERFTEST" = "1" ]; then
+    rm $QTOPIA_PREFIX/qpe.sh
+    ln -s /opt/Qtopia.rom/qpe_performance.sh $QTOPIA_PREFIX/qpe.sh
+fi
 
-# Symlink qt_plugins
-for i in `find_dirs ../Qtopia.rom/qt_plugins`; do
-    mkdir -p ${WORK}/Qtopia.default/qt_plugins/$i
-done
-for i in `find_files ../Qtopia.rom/qt_plugins`; do
-    ln -s /opt/Qtopia.rom/qt_plugins/$i ${WORK}/Qtopia.default/qt_plugins/$i
-done
-
-# Symlink other hardcoded files
-[ -e ../Qtopia.rom/lib/fonts ] && ln -s /opt/Qtopia.rom/lib/fonts ${WORK}/Qtopia.default/lib/fonts
-[ -e ../Qtopia.rom/bin/qtopia-pppd-internal ] && ln -s /opt/Qtopia.rom/bin/qtopia-pppd-internal ${WORK}/Qtopia.default/bin
-[ -e ../Qtopia.rom/bin/ppp-network ] && ln -s /opt/Qtopia.rom/bin/ppp-network ${WORK}/Qtopia.default/bin
-[ -e ../Qtopia.rom/bin/lan-network ] && ln -s /opt/Qtopia.rom/bin/lan-network ${WORK}/Qtopia.default/bin
-[ -e ../Qtopia.rom/bin/dbmigrate ] && ln -s /opt/Qtopia.rom/bin/dbmigrate ${WORK}/Qtopia.default/bin
-[ -e ../Qtopia.rom/bin/quicklauncher ] && ln -s /opt/Qtopia.rom/bin/quicklauncher ${WORK}/Qtopia.default/bin
-[ -e ../Qtopia.rom/bin/qss ] && ln -s /opt/Qtopia.rom/bin/qss ${WORK}/Qtopia.default/bin
-[ -e ../Qtopia.rom/bin/qcop ] && ln -s /opt/Qtopia.rom/bin/qcop ${WORK}/Qtopia.default/bin
-[ -e ../Qtopia.rom/bin/sxemonitor ] && ln -s /opt/Qtopia.rom/bin/sxemonitor ${WORK}/Qtopia.default/bin
-
-ln -s /usr/share/zoneinfo ${WORK}/Qtopia.default/etc/zoneinfo
+# This is a fix for Greenphone-specific tools that assume the PREFIX is writeable.
+# The problem comes because you can't open a symlink for writing. This is why I
+# want to get UnionFS going on the Greenphone (because then you would be able to
+# do that)
+rm -rf $QTOPIA_PREFIX/etc
+cp -R $QPEROM/etc $QTOPIA_PREFIX/etc
 
 # create qtopia_default.tgz
-cd ${WORK}/Qtopia.default
-tar --owner=0 --group=0 -czf "${WORK}/Qtopia.rom/qtopia_default.tgz" *
+cd $QTOPIA_PREFIX
+tar --owner=0 --group=0 -czf "${WORK}/opt/Qtopia.rom/qtopia_default.tgz" *
 
 # create qtopia.cramfs
 cd ${WORK}
-/sbin/mkfs.cramfs ${WORK}/Qtopia.rom "${OUTDIR}/qtopia.cramfs"
+/sbin/mkfs.cramfs ${WORK}/opt/Qtopia.rom "${OUTDIR}/qtopia.cramfs"
 echo "Qtopia.rom image created as ${OUTDIR}/qtopia.cramfs"
 
 cd "$OUTDIR"

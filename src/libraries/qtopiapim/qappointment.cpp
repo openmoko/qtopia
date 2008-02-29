@@ -82,6 +82,7 @@ static QDateTime trimSeconds( const QDateTime &dt )
 
 /*!
   \class QAppointment
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QAppointment class holds the data of a calendar appointment.
@@ -244,8 +245,13 @@ QAppointment::RepeatRule QAppointment::repeatRule() const { return (RepeatRule)d
 int QAppointment::frequency() const { return d->mFrequency; }
 
 /*!
-  Returns if the exact date the appointment would occur is not a valid date.
-  and the appointment should be shown on the nearest match of an occurrence
+  Returns true if the repeating appointment occurs on the nearest previous date
+  in cases where the date it would normally occur on is invalid.
+
+
+  As an example, an appointment that normally repeats on the 31st of each month
+  and returns true for this function will occur on the 30th in June
+  as the 31st of June is not a valid date.
 
   \sa setShowOnNearest()
 */
@@ -258,10 +264,9 @@ bool QAppointment::showOnNearest() const { return d->mShowOnNearest; }
 QAppointment::WeekFlags QAppointment::weekFlags() const { return d->weekMask; }
 
 /*!
-  Sets the days of the week the appointment occurs on to be those specified
-  by the flags \a f.
+  Sets the days of the week the appointment occurs on to the specified \a days.
 */
-void QAppointment::setWeekFlags(WeekFlags f) { d->weekMask = f; }
+void QAppointment::setWeekFlags(WeekFlags days) { d->weekMask = days; }
 
 /*!
   Returns true if the appointment is an all day appointment.  Otherwise returns false.
@@ -355,7 +360,7 @@ void QAppointment::init(const QDateTime &s, const QDateTime &e)
 }
 
 /*!
-  Destroys a QAppointment.
+  Destroys the appointment.
 */
 QAppointment::~QAppointment()
 {
@@ -445,15 +450,14 @@ void QAppointment::setTimeZone( const QTimeZone &zone )
 }
 
 /*!
-  Sets an alarm for the appointment, \a minutes before the start of the appointment, with
-  an alarm type of \a s.
+  Sets the alarm \a action to precede the start of the appointment by the specified \a minutes.
 
   \sa clearAlarm(), hasAlarm(), alarm(), alarmDelay()
 */
-void QAppointment::setAlarm( int minutes, AlarmFlags s )
+void QAppointment::setAlarm( int minutes, AlarmFlags action )
 {
     d->mAlarmDelay = minutes;
-    d->mAlarmSound = s;
+    d->mAlarmSound = action;
 }
 
 /*!
@@ -477,18 +481,18 @@ void QAppointment::setRepeatRule( RepeatRule t )
 }
 
 /*!
-  Sets the frequency of the appointment to \a freq.  If \a freq is less than 1
-  will set the frequency of the appointment to 1.
+  Sets the repeat \a frequency of the appointment.  If the specified \a frequency is less than 1
+  will set the repeat frequency of the appointment to 1.
 
   \sa frequency()
 */
-void QAppointment::setFrequency( int freq )
+void QAppointment::setFrequency( int frequency )
 {
-    d->mFrequency = freq > 0 ? freq : 1;
+    d->mFrequency = frequency > 0 ? frequency : 1;
 }
 
 /*!
-  Sets the date the appointment will repeat until to \a date.  If date is before
+  Sets the appointment to repeat until the specified \a date.  If the \a date is before
   the end of the first appointment will set the appointment to occur once.
 
   \sa repeatUntil(), repeatForever()
@@ -498,8 +502,8 @@ void QAppointment::setRepeatUntil( const QDate &date )
     d->mRepeatUntil = ( date.isNull() || date > d->mEnd.date() ) ? date : d->mEnd.date(); }
 
 /*!
-  Sets whether the appointment is an an all day appointment to \a enable.
-  All day appointments have a no set time-zone (empty string).
+  Sets the appointment to an all day appointment if \a enable is true.
+  All day appointments have a no set time-zone.
 
   \sa isAllDay(), setTimeZone()
 */
@@ -579,18 +583,18 @@ void QAppointment::setRepeatForever( )
 }
 
 /*!
-  Sets whether to show a repeating appointment on the nearest previous date if the
-  day it would repeat on does not exist to \a b.
+  If \a nearest is true sets the repeating appointment to occur on the nearest previous
+  date if the day it would would normally occur on does not exist.
 
-  An example would be a repeating appointment that occurs on the 31st of each month.
-  Setting showOnNearest to true will have the appointment show up on the 30th on
-  months that do not have 31 days, (or 28/29 in the case of February).
+  As an example, for an appointment repeats on the 31st of each month passing true to this
+  function will cause the appointment to occur on the 30th in June
+  as the 31st of June is not a valid date.
 
   \sa showOnNearest()
 */
-void QAppointment::setShowOnNearest( bool b)
+void QAppointment::setShowOnNearest( bool nearest)
 {
-    d->mShowOnNearest = b;
+    d->mShowOnNearest = nearest;
 }
 
 /*!
@@ -656,8 +660,8 @@ bool QAppointment::repeatOnWeekDay(int day) const
 }
 
 /*!
-  Sets the appointment to repeat on the \a day of the week if \a enable is true.
-  Otherwise sets the appointment not to repeat on the \a day of the week.
+  Sets the appointment to repeat on the specified \a day of the week if \a enable is true.
+  Otherwise sets the appointment not to repeat on the specified \a day of the week.
 
   Event will always repeat on the day of the week that it started on.
 
@@ -671,7 +675,7 @@ void QAppointment::setRepeatOnWeekDay(int day, bool enable)
 }
 
 /*!
-  Returns the list of exceptions to the appointments repeat rule.
+  Returns the list of exceptions to the appointment's repeat rule.
 */
 QList<QAppointment::Exception> QAppointment::exceptions() const
 {
@@ -679,7 +683,7 @@ QList<QAppointment::Exception> QAppointment::exceptions() const
 }
 
 /*!
-  Sets the exceptions for the appointment to those in \a list.
+  Sets the exceptions for the appointment to the specified \a list.
 
 Note: setting exceptions and updating appointment in the QAppointmentModel will
 NOT store the exception.  Use the functions
@@ -739,8 +743,6 @@ bool QAppointment::isValid() const
 
 /*!
   Returns the first date on or after \a from that the appointment will next occur.
-  If the appointment only occurs once (no repeat) will return the date of the
-  start of the appointment if the start of the appointment is on or after \a from.
 
   If the appointment does not occur on or after \a from then a null occurrence is returned.
 */
@@ -1843,11 +1845,14 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 
 /*!
   \class QOccurrence
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QOccurrence class holds the data of an occurrence of a calendar appointment.
 
   This data includes descriptive data of the appointment and scheduling information.
+
+  \sa QAppointment
 */
 
 
@@ -1860,8 +1865,7 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 /*!
   \fn int QOccurrence::alarmDelay() const
 
-  Returns the number of minutes before the appointment to activate the alarm
-  for the occurrence.
+  Returns the number of minutes before the appointment to activate the alarm.
 */
 
 /*!
@@ -1927,12 +1931,12 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 */
 
 /*!
-  Constructs a new QOccurrence.
+  Constructs an empty occurrence.
 */
 QOccurrence::QOccurrence() {}
 
 /*!
-  Constructs a new QOccurrence as a copy of \a occurrence;
+  Constructs a copy of \a occurrence;
 */
 QOccurrence::QOccurrence(const QOccurrence &occurrence)
     : appointmentCache(occurrence.appointmentCache), mStart(occurrence.mStart)
@@ -1940,7 +1944,7 @@ QOccurrence::QOccurrence(const QOccurrence &occurrence)
 }
 
 /*!
-  Constructs a new QOccurrence based of an occurrence of \a appointment occurring on
+  Constructs an occurrence of the \a appointment occurring on
   \a date.  Does not check whether this is a valid occurrence for the \a appointment.
 */
 QOccurrence::QOccurrence(const QDate &date, const QAppointment &appointment ) : appointmentCache(appointment), mStart(date)
@@ -1948,7 +1952,7 @@ QOccurrence::QOccurrence(const QDate &date, const QAppointment &appointment ) : 
 }
 
 /*!
-  Destroys a QOccurrence.
+  Destroys the occurrence.
 */
 QOccurrence::~QOccurrence() {}
 
@@ -2160,15 +2164,15 @@ QOccurrence QOccurrence::nextOccurrence() const
 }
 
 /*!
-  Sets the uid of the repeating appointment that this an exception to \a id.
+  Sets this appointment to be an exception to an appointment with the specified \a identifier.
  */
-void QAppointment::setExceptionParent( const QUniqueId &id )
+void QAppointment::setExceptionParent( const QUniqueId &identifier )
 {
-    d->mExceptionParent = id;
+    d->mExceptionParent = identifier;
 }
 
 /*!
-  Returns the uid of the repeating appointment that this an exception to
+  Returns the identifier of the repeating appointment to which this appointment is an exception.
  */
 QUniqueId QAppointment::exceptionParent() const
 {
@@ -2187,6 +2191,7 @@ Q_IMPLEMENT_USER_METATYPE(QAppointment)
 
 /*!
   \class QAppointment::Exception
+  \mainclass
 
   This structure has the following fields:
 

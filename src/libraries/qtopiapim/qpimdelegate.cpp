@@ -35,14 +35,12 @@ public:
 
 /*!
   \class QPimDelegate
+  \preliminary
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QPimDelegate class provides an abstract delegate for
          rendering multiple lines of text.
-
-  It is useful for drawing lists of PIM information in a somewhat consistent
-  way.  It is subclassed for the specific types of PIM information (Contacts,
-  Tasks, Alarms etc).
 
   QPimDelegate draws an item with the following features:
   \list
@@ -60,13 +58,18 @@ public:
 
   All text lines will be elided if they are too wide.
 
-  This class is not intended to be used directly.  Subclasses are expected
-  to override some or all of the customization functions providing the above
-  pieces of information or styling settings.
+  Much like QAbstractItemDelegate, this class is not intended to be used
+  directly.  Subclasses are expected to override some or all of the
+  customization functions providing the above pieces of information
+  or styling settings.
+
+  \image qpimdelegate-subtexts.png "Sample image of QPimDelegate"
+
+  \sa QAbstractItemDelegate, QContactDelegate, QPimRecord
 */
 
 /*!
-  Constructs a QPimDelegate, with parent object \a parent.
+  Constructs a QPimDelegate, with the given \a parent.
 */
 QPimDelegate::QPimDelegate(QObject *parent)
     : QAbstractItemDelegate(parent), d(new QPimDelegateData)
@@ -79,7 +82,7 @@ QPimDelegate::QPimDelegate(QObject *parent)
 */
 QPimDelegate::~QPimDelegate()
 {
-
+    delete d;
 }
 
 /*!
@@ -143,11 +146,12 @@ int QPimDelegate::subTextsCountHint(
   Returns the list of subsidiary lines to render.  This is
   stored in a list of pairs of strings, with the first member
   of the pair being the "header" string, and the second member
-  of the pair being the "value" string.  The "header" string
-  will be rendered with a bold font, while the "value" string will
-  be rendered with a normal weight font.  If either member of
-  the pair is a null QString, then the subsidiary line is
-  rendered with the full width and the corresponding font.
+  of the pair being the "value" string.
+
+  If either member of the pair is a null QString (\c QString()),
+  then the subsidiary line is considered to consist of a single
+  string that will take up the entire line.  You can specify an
+  empty QString (\c QString("")) if you wish to have blank space.
 
   The default implementation returns an empty list, and
   ignores the supplied \a index and \a option parameters.
@@ -178,6 +182,8 @@ QList<StringPair> QPimDelegate::subTexts(
     bottom in slightly different shades of either the style's
     highlight brush color (if the item is selected) or the base
     brush color.
+
+  \image qpimdelegate-bgstyle.png "BackgroundStyle variations"
 
   \sa backgroundStyle()
  */
@@ -213,6 +219,8 @@ QPimDelegate::BackgroundStyle QPimDelegate::backgroundStyle(
     aligned, so that the header and value strings for a subsidiary line will be
     cuddled together.
 
+  \image qpimdelegate-subtextalignment.png "Examples of SubTextAlignment"
+
   \sa subTextAlignment()
 */
 
@@ -244,12 +252,11 @@ QPimDelegate::SubTextAlignment QPimDelegate::subTextAlignment(
   \a option (\a {option}.rect), and the \a index of the item to paint.
 
   This function should return (in the \a leadingFloats and \a trailingFloats
-  parameters) two lists of rectangles that rendered text should be excluded
-  from.  The lists are used in the following way:  If a line of text
-  would intersect the rectangles returned, the line of text's leading
-  edge will be adjusted to the most trailing edge of any intersected
-  \a leadingFloats rectangle, and to the most leading edge of any intersected
-  \a trailingFloats rectangle.
+  parameters) lists of rectangles that the rendered text will be wrapped
+  around.  Rectangles on the leading side of the text should be returned in
+  \a leadingFloats, and rectangles on the trailing side should be returned
+  in \a trailingFloats.  This allows some flexibility in deciding whether
+  decorations should be drawn behind or beside the text.
 
   The default implementation does not draw anything, and returns two empty
   lists.
@@ -354,7 +361,7 @@ void QPimDelegate::drawBackground(QPainter *p,
 
   This function is called after painting all other visual elements
   (background, decorations, text etc) and could be used to apply a
-  transparency effect to the rendered items.
+  transparent effect to the rendered items.
 
   The default implementation does not paint anything.
  */
@@ -461,7 +468,7 @@ void QPimDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         /* First, calculate the width of all the header sections, if the style is cuddly */
         if (subAlign == CuddledPerItem) {
             foreach(subLine, subTexts) {
-                if (!subLine.first.isEmpty()) {
+                if (!subLine.first.isEmpty() && !subLine.second.isNull()) {
                     int w = fsubheaderM.boundingRect(subLine.first).width();
                     if (w > headerWidth)
                         headerWidth = w;
@@ -566,8 +573,9 @@ QFont QPimDelegate::secondaryFont(const QStyleOptionViewItem &option, const QMod
   attempt to return a font that is similar to \a start except different
   in size by approximately \a step.  If no matching font for a given
   \a step value is found, it will try increasingly larger/smaller fonts
-  (depending on whether \a step was originally positive or negative,
-  and up to 6 in total).
+  (depending on whether \a step was originally positive or negative).  If
+  no suitable font is found after trying different sizes, the original font
+  \a start will be returned.
  */
 QFont QPimDelegate::differentFont(const QFont& start, int step) const
 {

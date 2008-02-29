@@ -4,17 +4,18 @@ CONFIG+=no_pkg qtopia_visibility no_tr
 
 HEADERS += media.h
 
-HEADERS += mediastyle.h \
-            qmediatools.h \
-            qmediawidgets.h \
-            servicerequest.h \
-            requesthandler.h \
-            menumodel.h \
-            menuview.h \
-            browser.h \
-            activitymonitor.h \
-            keyhold.h \
-            observer.h
+PRIVATE_HEADERS += mediastyle_p.h \
+            servicerequest_p.h \
+            requesthandler_p.h \
+            menumodel_p.h \
+            menuview_p.h \
+            browser_p.h \
+            activitymonitor_p.h \
+            keyhold_p.h \
+            observer_p.h
+
+HEADERS += qmediatools.h \
+            qmediawidgets.h
 
 HEADERS += qmediasession.h \
             qmediacontrol.h \
@@ -69,7 +70,15 @@ depends(libraries/qtopia)
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)
 
+PREFIX=QTOPIAMEDIA
+resolve_include()
+
 headers.files = $$HEADERS
 headers.path = /include/qtopia/qtopiamedia
 headers.hint = headers sdk
-INSTALLS += headers
+
+private_headers.files = $$PRIVATE_HEADERS
+private_headers.path = /include/qtopia/qtopiamedia/private
+private_headers.hint = headers sdk
+
+INSTALLS += headers private_headers

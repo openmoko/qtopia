@@ -360,11 +360,18 @@ bool StartupApplicationsPrivate::terminated(const QString &name,
   \ingroup QtopiaServer::Task
   \brief The StartupApplications class launches applications preemptively at startup.
 
+  The StartupApplications provides a Qtopia Server Task.  Qtopia Server Tasks 
+  are documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o StartupApplications
+  \row \o Interfaces \o None
+  \row \o Services \o None
+  \endtable
+
   Qtopia provides support for preloading GUI applications, and for launching
   background daemon-type applications during startup.  The StartupApplications
   class provides this functionality.
-
-  The StartupApplications class provides the \c {StartupApplications} task.
 
   \section1 Preloaded Applications
 

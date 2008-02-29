@@ -32,26 +32,24 @@
 
 /*!
   \class QPimRecord
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QPimRecord class is the base class for PIM data recorded in the
   Qtopia database.
 
-  The Pim record class contains data that is common to all data used
-  by the PIM applications, in particular a unique ID and a set of
-  categories.
-
-  A QPimRecord's ID is returned by uid() and is set with setUid(). Each
-  category is represented by an integer. A QPimRecord's categories are
-  returned by categories() and are set with setCategories().
-
-  QPimRecord comparisons are provided by operator==() and operator!=().
+  The QPimRecord class contains data that is common to the differing kinds
+  of PIM records such as contacts, tasks and appointments.  It is an also
+  abstract and as such should not be created explicitly.  Instead use one
+  of the subclasses, QContact, QAppointment or QTask.
 */
 
 /*!
   \fn QMap<QString, QString> QPimRecord::customFields() const
 
   Returns a map of custom field key and value for the record.
+
+  \sa setCustomFields()
 */
 
 
@@ -64,7 +62,7 @@
 
 /*!
   \fn QString QPimRecord::setNotes(const QString &text)
-  Sets the notes for the record to \a text.
+  Sets the notes for the record to the given \a text.
 
   \sa notes()
 */
@@ -72,32 +70,32 @@
 /*!
   \fn QUniqueId &QPimRecord::uidRef()
 
-  Subclass should reimplement this function to return a reference to the unqiue id for this object.
+  Subclass should re-implement this function to return a reference to the identifier for this object.
 */
 
 /*!
   \fn const QUniqueId &QPimRecord::uidRef() const
-  Subclass should reimplement this function to return a reference to the unqiue id for this object.
+  Subclass should re-implement this function to return a reference to the identifier for this object.
 */
 
 /*!
   \fn QList<QString> &QPimRecord::categoriesRef()
-  Subclass should reimplement this function to return a reference to the categories for this object.
+  Subclass should re-implement this function to return a reference to the categories for this object.
 */
 
 /*!
   \fn const QList<QString> &QPimRecord::categoriesRef() const
-  Subclass should reimplement this function to return a reference to the categories for this object.
+  Subclass should re-implement this function to return a reference to the categories for this object.
 */
 
 /*!
   \fn QMap<QString, QString> &QPimRecord::customFieldsRef()
-  Subclass should reimplement this function to return a reference to the custom fields for this object.
+  Subclass should re-implement this function to return a reference to the custom fields for this object.
 */
 
 /*!
   \fn const QMap<QString, QString> &QPimRecord::customFieldsRef() const
-  Subclass should reimplement this function to return a reference to the custom fields for this object.
+  Subclass should re-implement this function to return a reference to the custom fields for this object.
 */
 
 /*!
@@ -151,10 +149,9 @@ bool QPimRecord::operator!=( const QPimRecord &other ) const
 }
 
 /*!
-  Sets the record to belong to the set of categories specificed
-  by \a categories.
+  Sets the record to belong to the given set of \a categories.
 
-  \sa categories()
+  \sa categories(), Categories
 */
 void QPimRecord::setCategories( const QList<QString> &categories )
 {
@@ -162,14 +159,14 @@ void QPimRecord::setCategories( const QList<QString> &categories )
 }
 
 /*!
-  Sets the record to belong only to the category specified by \a id.
+  Sets the record to belong only to the given category \a identifier.
 
-  \sa categories()
+  \sa categories(), Categories
 */
-void QPimRecord::setCategories( const QString & id )
+void QPimRecord::setCategories( const QString & identifier )
 {
     QList<QString> newcats;
-    newcats.append(id);
+    newcats.append(identifier);
     categoriesRef() = newcats;
 }
 
@@ -189,16 +186,18 @@ void QPimRecord::reassignCategoryId( const QString & oldId, const QString & newI
 }
 
 /*!
-  Removes categories from record that do not appear in \a validCats
+  Removes categories from record that do not appear in the
+  given set of valid \a categories.
+  Returns true if the record was modified.
 */
-bool QPimRecord::pruneDeadCategories(const QList<QString> &validCats)
+bool QPimRecord::pruneDeadCategories(const QList<QString> &categories)
 {
     QList<QString> &cRef = categoriesRef();
     QMutableListIterator<QString> it(cRef);
     bool ret = false;
     while(it.hasNext()) {
         QString id = it.next();
-        if (!validCats.contains(id)) {
+        if (!categories.contains(id)) {
             ret = true;
             it.remove();
         }
@@ -221,14 +220,17 @@ QList<QString> QPimRecord::categories() const
 /*!
   \fn QUniqueId QPimRecord::uid() const
 
-  Returns the unique ID for this record.
+  Returns the unique identifier for this record.
+  
+  \sa setUid()
 */
 
 /*!
-  \fn void QPimRecord::setUid(const QUniqueId &)
-  \internal
+  \fn void QPimRecord::setUid(const QUniqueId &identifier)
 
-  Sets the record to have unique ID \a uid.
+  Sets the record to have given unique \a identifier.
+
+  \sa uid()
 */
 
 /*!
@@ -246,11 +248,14 @@ QString QPimRecord::customField(const QString &key) const
 /*!
 \fn void QPimRecord::setCustomFields(const QMap<QString, QString> &fields)
 
-    Sets the custom fields for the record to \a fields.
+    Sets the custom fields for the record to the given \a fields.
+
+    Custom fields allow storing data that doesn't fit into the existing
+    fields for a given PIM record.
 */
 
 /*!
-  Sets the string stored for the custom field \a key to \a value.
+  Sets the string stored for the custom field \a key to the given \a value.
  */
 void QPimRecord::setCustomField(const QString &key, const QString &value)
 {
@@ -258,7 +263,7 @@ void QPimRecord::setCustomField(const QString &key, const QString &value)
 }
 
 /*!
-  Removes the custom field \a key.
+  Removes the custom field for the given \a key.
  */
 void QPimRecord::removeCustomField(const QString &key)
 {

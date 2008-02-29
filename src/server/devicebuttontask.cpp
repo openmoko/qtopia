@@ -28,15 +28,22 @@
 
 /*!
   \class DeviceButtonTask
-  \ingroup QtopiaServer
+  \ingroup QtopiaServer::Task
   \brief The DeviceButtonTask class performs configurable actions when special
          purpose buttons are pressed or held.
+  
+  The DeviceButtonTask provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o DeviceButton
+  \row \o Interfaces \o DeviceButtonTask
+  \row \o Services \o None
+  \endtable
 
   The DeviceButtonTask class provides the server backend for the QDeviceButton
   and QDeviceButtonManager APIs.  The DeviceButtonTask will issue the actions
   for all configured button mappings without a specified context.
-
-  The DeviceButtonTask class provides the \c {DeviceButton} task.
 
   \sa QDeviceButton, QDeviceButtonManager
  */

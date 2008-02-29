@@ -308,25 +308,25 @@ void Dialer::themeLoaded( const QString & )
     // if any of these items aren't provided by the theme, put them in the contextmenu
     QAction *newAction = 0;
     int actionCount = 0;
-    if( !findItem( "selectcontact", 0 ) ) {
+    if( !findItem( "selectcontact" ) ) {
         newAction = new QAction( QIcon( ":icon/addressbook/AddressBook" ),
                 tr("Select Contact"), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(selectContact()) );
         ++actionCount;
     }
-    if( !findItem( "callhistory" , 0 ) ) {
+    if( !findItem( "callhistory" ) ) {
         newAction = new QAction( QPixmap( ":image/callhistory/CallHistory"),
                 tr("Call History"), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(selectCallHistory()) );
         ++actionCount;
     }
-    if( !findItem( "messages" , 0 ) ) {
+    if( !findItem( "messages" ) ) {
         newAction = new QAction( QIcon( ":icon/txt" ),
                 tr("Send Message"), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(sms()) );
         ++actionCount;
     }
-    if( !findItem( "savecontact", 0 ) ) {
+    if( !findItem( "savecontact" ) ) {
         newAction = new QAction( QIcon( ":image/addressbook/AddressBook" ),
                 tr( "Save to Contacts" ), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(saveToContact()) );
@@ -453,7 +453,7 @@ void Dialer::wait()
 
 void Dialer::character()
 {
-    ThemeItem *i = findItem( "star", 0 );
+    ThemeItem *i = findItem( "star" );
     if( !i )
         return;
 
@@ -480,6 +480,10 @@ QMenu *Dialer::characterMenu()
   \class PhoneTouchDialerScreen
   \ingroup QtopiaServer::PhoneUI
   \brief The PhoneTouchDialerScreen class implements a touchscreen dialer.
+  
+  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+
+  \sa QAbstractServerInterface, QAbstractDialerScreen
  */
 
 // define PhoneTouchDialerScreen
@@ -506,25 +510,25 @@ PhoneTouchDialerScreen::PhoneTouchDialerScreen(QWidget *parent, Qt::WFlags flags
     QObject::connect(m_dialer, SIGNAL(keyEntered(const QString&)), this, SLOT(keyEntered(const QString&)));
 }
 
-/*! \internal */
+/*! \reimp */
 void PhoneTouchDialerScreen::reset()
 {
     m_dialer->clear();
 }
 
-/*! \internal */
+/*! \reimp */
 void PhoneTouchDialerScreen::appendDigits(const QString &digits)
 {
     m_dialer->appendDigits(digits);
 }
 
-/*! \internal */
+/*! \reimp */
 void PhoneTouchDialerScreen::setDigits(const QString &digits)
 {
     m_dialer->setDigits(digits);
 }
 
-/*! \internal */
+/*! \reimp */
 QString PhoneTouchDialerScreen::digits() const
 {
     return m_dialer->digits();

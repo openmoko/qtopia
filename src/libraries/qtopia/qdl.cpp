@@ -220,6 +220,7 @@ bool QDLPrivate::decodeHref( const QString& href,
 
 /*!
     \class QDL
+    \mainclass
     \brief The QDL class provides general utility functions for use
         with Qtopia Data Linking.
 

@@ -43,6 +43,7 @@
 #include <QSettings>
 #include <QtGlobal>
 #include <qtopialog.h>
+#include <QtopiaService>
 
 #include "drmcontent_p.h"
 
@@ -225,6 +226,7 @@ QMimeType::Private& QMimeType::data()
 
 /*!
     \class QMimeType
+    \mainclass
     \brief The QMimeType class provides MIME type information.
 
     A QMimeType object is a light-weight value which
@@ -243,16 +245,17 @@ QMimeType::Private& QMimeType::data()
 */
 
 /*!
-    The QMimeType class Constructs a QMimeType.  The parameter \a ext_or_id is a MIME type, however, it
+    Constructs a QMimeType object. If the parameter \a ext_or_id is a MIME type, it
     is interpreted as a filename if all of the following conditions hold:
     \list
-    \o it is not in the known list of MIME types
-    \o if either QFile( \a ext_or_id).exists() is true, or if ext_or_id starts with a '/' or contains no
-    '/'
+        \o it is not in the known list of MIME types
+        \o if either QFile( \a ext_or_id ).exists() is true, or if ext_or_id starts with a '/'
+            or contains no internal '/'
     \endlist
-    If it is interpreted as a file name, the file extension (for exmaple, .txt)
-    is used as the MIME type.
-    If none of the above is true, then it is treated as an unknown  MIME type.
+
+    Otherwise, if it is interpreted as a file name, the file extension (ie, for /foo/bar.txt this will
+    be .txt) is used to determine the MIME type. If it does not appear to be a registered file
+    extension, or a valid file, then it is treated as an unknown MIME type.
 */
 QMimeType::QMimeType( const QString& ext_or_id )
 {
@@ -260,7 +263,7 @@ QMimeType::QMimeType( const QString& ext_or_id )
 }
 
 /*!
-    Constructs a QMimeType from the type() of \a lnk.
+    Constructs a QMimeType from the \l {QContent::}{type()} of \a lnk.
 */
 QMimeType::QMimeType( const QContent& lnk )
 {
@@ -268,7 +271,7 @@ QMimeType::QMimeType( const QContent& lnk )
 }
 
 /*!
-    Returns the MIME type identifier.
+    Returns the MIME type identifier. eg. image/jpeg
 */
 QString QMimeType::id() const
 {
@@ -297,8 +300,7 @@ QIcon QMimeType::icon( IconType iconType ) const
 
 
 /*!
-    \internal
-    This function is not generally available.
+    Returns the first extension associated with the MIME type.
 */
 QString QMimeType::extension() const
 {
@@ -321,8 +323,8 @@ QStringList QMimeType::extensions() const
 }
 
 /*!
-    \internal
-    This function is not generally available.
+    Returns a list of QContent objects of the applications associated
+    with this MIME type, or an empty list if none is associated.
 */
 QContentList QMimeType::applications() const
 {
@@ -331,7 +333,7 @@ QContentList QMimeType::applications() const
 }
 
 /*!
-    Returns the QContent defining the application associated
+    Returns the QContent of the default application associated
     with this MIME type, or an invalid QContent if none is associated.
 
     \sa QtopiaService::binding()
@@ -345,7 +347,7 @@ QContent QMimeType::application() const
 /*!
     Returns the permission type used by the associated application to open
     a file of this MIME type.  If no application is associated or the application
-    does not support DRM QDrmContent::Unrestricted is returned.
+    does not support DRM, then QDrmRights::Unrestricted is returned.
 */
 QDrmRights::Permission QMimeType::permission() const
 {
@@ -354,9 +356,8 @@ QDrmRights::Permission QMimeType::permission() const
 }
 
 /*!
-    \internal
     Returns the permissions used by the associated applications.
-    Permissions are mapped one to one with  the list returned by applications().
+    Permissions are mapped one to one with the list returned by applications().
 */
 QList< QDrmRights::Permission > QMimeType::permissions() const
 {
@@ -364,17 +365,10 @@ QList< QDrmRights::Permission > QMimeType::permissions() const
     return mtd ? mtd->permissions : QList< QDrmRights::Permission >();
 }
 
-static QString serviceBinding(const QString& service)
-{
-    // Copied from qtopiaservices
-    QString svrc = service;
-    for (int i=0; i<(int)svrc.length(); i++)
-        if ( svrc[i]=='/' ) svrc[i] = '-';
-    return "Service-"+svrc; // No tr
-}
-
 /*!
     \internal
+    Registers an application to the MIME system. It does this by querying QContent::mimeTypes()
+    to find out which applications it wishes to register support for.
 */
 void QMimeType::registerApp( const QContent& lnk )
 {
@@ -404,7 +398,7 @@ void QMimeType::registerApp( const QContent& lnk )
         {
             if( type.right(2)==QLatin1String("/*") )
                 type.truncate( type.length()-2 );
-            QSettings binding( QLatin1String("Trolltech"), serviceBinding( QLatin1String("Open/") + type ) );
+            QSettings binding( QLatin1String("Trolltech"), QtopiaService::binding( QLatin1String("Open/") + type ) );
             QString def;
             if( binding.status()==QSettings::NoError )
             {
@@ -437,6 +431,7 @@ void QMimeType::registerApp( const QContent& lnk )
 
 /*!
     \internal
+    Clears out the internal structures, to force a reload of the information.
 */
 void QMimeType::clear()
 {
@@ -448,6 +443,10 @@ void QMimeType::clear()
     loadedTimes()->clear();
 }
 
+/*!
+    \internal
+    Loads the information from /etc/mime.types from all installpaths, and the root directory
+*/
 void QMimeType::loadExtensions()
 {
     QStringList paths;
@@ -469,6 +468,10 @@ void QMimeType::loadExtensions()
     }
 }
 
+/*!
+    \internal
+    Returns the next word, given the input and starting position.
+*/
 static QString nextString( const char *line, int& posn )
 {
     if ( line[posn] == '\0' )
@@ -497,6 +500,10 @@ static QString nextString( const char *line, int& posn )
     return QString::fromLocal8Bit(result, resultLen);
 }
 
+/*!
+    \internal
+    Loads the information from the /etc/mime.types passed as \a filename.
+*/
 void QMimeType::loadExtensions(const QString& filename)
 {
     QMutexLocker staticsGuard(&staticsGuardMutex);
@@ -532,6 +539,11 @@ void QMimeType::loadExtensions(const QString& filename)
         }
     }
 }
+
+/*!
+    \internal
+    Offload common initialisation work for the given file extension or filename passed via \a ext_or_id.
+*/
 
 void QMimeType::init( const QString& ext_or_id )
 {
@@ -589,6 +601,10 @@ void QMimeType::init( const QString& ext_or_id )
         updateApplications();
 }
 
+/*!
+    \internal
+    Accessor for the internal singleton.
+*/
 QMimeTypeData* QMimeType::data(const QString& id)
 {
     QMutexLocker staticsGuard(&staticsGuardMutex);
@@ -607,7 +623,10 @@ QMimeTypeData* QMimeType::data(const QString& id)
 }
 
 /*!
+    \obsolete
     Returns a Qtopia folder containing application definitions.
+    This function is used to help port functionality from Qtopia2/Qtopia 4.1 applications
+    that relied upon this information.
 */
 QString QMimeType::appsFolderName()
 {
@@ -615,6 +634,7 @@ QString QMimeType::appsFolderName()
 }
 
 /*!
+    \internal
     Reloads application definitions.
 */
 void QMimeType::updateApplications()
@@ -656,7 +676,7 @@ void QMimeType::updateApplications()
             {
                 if( type.right(2)==QLatin1String("/*") )
                     type.truncate( type.length()-2 );
-                QSettings binding( QLatin1String("Trolltech"), serviceBinding( QLatin1String("Open/") + type ) );
+                QSettings binding( QLatin1String("Trolltech"), QtopiaService::binding( QLatin1String("Open/") + type ) );
                 QString def;
                 if( binding.status()==QSettings::NoError )
                 {
@@ -687,6 +707,11 @@ void QMimeType::updateApplications()
         }
     }
 }
+
+/*!
+    \internal
+    Makes sure the internal singleton appmanager data structure is created.
+*/
 
 void QMimeType::initializeAppManager()
 {

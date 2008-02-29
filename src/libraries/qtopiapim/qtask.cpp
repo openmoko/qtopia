@@ -53,12 +53,46 @@ public:
 
 /*!
   \class QTask
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QTask class holds the data of a todo entry.
+  \brief The QTask class holds the data of a task (to-do list) entry.
 
-  This data includes the priority of the task, a description, an optional due
-  date, and whether the task is completed or not.
+  A QTask stores several pieces of information about a task and its progress,
+  including:
+  \list
+  \o a description
+  \o a priority (see \l Priority)
+  \o a due date for the task (optional)
+  \o the progress of a task
+  \o notes associated with the task (optional)
+  \endlist
+
+  The progress of a task is tracked in a number of ways:
+  \list
+  \o the status of a task (\l Status)
+  \o the date a task was started (can be null)
+  \o the date a task was finished (can be null)
+  \o a percentage completed
+  \endlist
+
+  These progress fields are interrelated.  Setting one field
+  may cause a change in other fields, since QTask will manage the
+  dependencies between them automatically.  These dependencies include:
+  \list
+  \o startedDate - only set if status is not \c NotStarted
+  \o completedDate - only set if status is \c Completed, and vice versa
+  \o percentCompleted - 0 if status is \c NotStarted, 100 if status is \c Completed, otherwise between 0 and 99 inclusive
+  \endlist
+
+  These dependencies work in both directions.  For example:
+  \list
+  \o setting the \c percentCompleted to 0 will force the \c status to become \c NotStarted, and the \c startedDate and \c completedDate will be set to null
+  \o setting the \c status to \c NotStarted will force the \c startedDate and \c completedDate to become null, and the \c percentCompleted to be 0
+  \o setting the \c percentCompleted to 99 will force the \c status to become \c InProgress (unless it is currently \c Deferred or \c Waiting), sets the \c startedDate to be the current date (if it was previously null), and clears the \c completedDate
+  \endlist
+
+  \sa Status, Priority
 */
 
 
@@ -89,6 +123,7 @@ void QTask::setPriority( Priority priority ) { d->mPriority = priority; }
 
 /*!
   Sets the priority of the task to \a priority.
+  This is a convenience wrapper function.
 
   \sa priority()
 */
@@ -112,11 +147,11 @@ QTask::Priority QTask::priority() const { return (Priority)d->mPriority; }
 QString QTask::notes() const { return d->mNotes; }
 
 /*!
-  Sets the notes of the task to \a s.
+  Sets the notes of the task to \a notes.
 
   \sa notes()
 */
-void QTask::setNotes(const QString &s) { d->mNotes = s; }
+void QTask::setNotes(const QString &notes) { d->mNotes = notes; }
 
 /*!
   Sets the description of the task to \a description.
@@ -141,11 +176,17 @@ QString QTask::description() const { return d->mDesc; }
 void QTask::clearDueDate() { d->mDueDate = QDate(); }
 
 /*!
-  If \a b is true marks the task as completed.  Otherwise marks the task as
-  uncompleted, and if necessary, the percentage complete will be adjusted to 99
-  percent.
+  If \a b is true, marks the task as completed, and otherwise marks the task as incomplete.
 
-  \sa isCompleted()
+  Several fields are dependent on the new completion state:
+  \list
+  \o If the task is not marked as complete, then the completed date is cleared, and
+  the percentage complete is limited to a maximum of 99%.
+  \o if the task is marked as complete, the percentage complete will be forced to 100%,
+  and the completed date will be set to the current date if it was not previously set.
+  \endlist
+
+  \sa isCompleted(), completedDate()
 */
 void QTask::setCompleted( bool b )
 {
@@ -153,9 +194,9 @@ void QTask::setCompleted( bool b )
         return;
 
     d->mCompletedDate = b ? QDate::currentDate() : QDate();
-    /* Might also need to set the percent completed to something less than 100 */
     if ( !b && d->mPercentCompleted == 100 )
         d->mPercentCompleted = 99;
+    // percentComplete returns 100% if completed.
 }
 
 /*!
@@ -182,79 +223,105 @@ bool QTask::hasDueDate() const { return !d->mDueDate.isNull(); }
 
 /*!
   Returns the date the task was started.  If the task has not yet been started, the returned
-  date is undefined.
+  date is null.
 
   \sa hasStartedDate(), setStartedDate()
 */
 QDate QTask::startedDate() const { return d->mStartedDate; }
 
 /*!
-  Sets the tasks to have started on \a date.
+  Sets the tasks to have started on \a date.  If \a date is null, then
+  the task will be marked as having status \c NotStarted, any
+  completed date will be cleared, and the percentage completed will
+  be 0.
 
   \sa hasStartedDate(), startedDate()
 */
-void QTask::setStartedDate(const QDate &date) { d->mStartedDate = date; }
+void QTask::setStartedDate(const QDate &date)
+{
+    d->mStartedDate = date;
+
+    if (date.isNull()) {
+        d->mCompletedDate = QDate();
+        d->mPercentCompleted = 0;
+    }
+}
 
 /*!
   Returns the date the task was completed.  If the task is not completed, the returned
-  date is undefined.
+  date is null.
 
   \sa isCompleted(), setCompletedDate()
 */
 QDate QTask::completedDate() const { return d->mCompletedDate; }
 
 /*!
-  Sets the tasks completed date to \a date.
+  Sets the tasks completed date to \a date.  If \a date is null, and the
+  task was previously completed, then the task will be marked as having
+  status \c InProgress, and the percentage completed will be forced to 99%.
+  In addition, if the task's started date was not previously set, it will
+  be set to the supplied date.
 
   \sa isCompleted(), completedDate()
 */
-void QTask::setCompletedDate(const QDate &date) { d->mCompletedDate = date; }
+void QTask::setCompletedDate(const QDate &date)
+{
+    d->mCompletedDate = date;
+    if (date.isNull()) {
+        if (d->mPercentCompleted == 100)
+            d->mPercentCompleted = 99;
+    } else {
+        d->mPercentCompleted = 100;
+        if (d->mStartedDate.isNull())
+            d->mStartedDate = date;
+    }
+}
 
 /*!
-  \overload
+  \reimp
 */
 QUniqueId &QTask::uidRef() { return d->mUid; }
 /*!
-  \overload
+  \reimp
 */
 const QUniqueId &QTask::uidRef() const { return d->mUid; }
 
 /*!
-  \overload
+  \reimp
 */
 QList<QString> &QTask::categoriesRef() { return d->mCategories; }
 /*!
-  \overload
+  \reimp
 */
 const QList<QString> &QTask::categoriesRef() const { return d->mCategories; }
 
 /*!
-  \overload
+  \reimp
 */
 QMap<QString, QString> &QTask::customFieldsRef() { return d->customMap; }
 /*!
-  \overload
+  \reimp
 */
 const QMap<QString, QString> &QTask::customFieldsRef() const { return d->customMap; }
 
 /*!
   \enum QTask::Status
 
-  These enums describe the current \l status() of the Task.
+  These values describe the current \l status() of the Task.
 
   The values are:
 
-  \value NotStarted
-  \value InProgress
-  \value Completed
-  \value Waiting
-  \value Deferred
+  \value NotStarted the task has not been started yet (0% complete, no started or completed dates)
+  \value InProgress the task has a startedDate (but no completedDate), and percentCompleted is between 0 and 99 inclusive
+  \value Completed the task has a startedDate and a completedDate, and percentCompleted is 100
+  \value Waiting similar to InProgress
+  \value Deferred similar to InProgress
 */
 
 /*!
   \enum QTask::Priority
 
-  These enums describe the current \l priority() of the Task.
+  These values describe the current \l priority() of the Task.
 
   The values are:
 
@@ -327,49 +394,71 @@ QTask::Status QTask::status() const
 }
 
 /*!
-  Sets the \l Status of the task to \a s.
+  Sets the \l Status of the task to \a status.
+
+  If the new status is \c NotStarted, the
+  task's started date will be cleared.  Otherwise,
+  if the task was not previously started, the
+  current date will be used as the task's starting date.
+
+  Similarly, if the new status \c Completed and the
+  task was not previously completed, then the current
+  date will be used as the task's completed date.
+  Otherwise, if the new status is not \c Completed,
+  the completed date will be cleared.
+
+  If a task's status is \c Completed, the percent
+  completed will be set to 100%.  Otherwise, the
+  percent completed is limited to a maximum of 99%.
 
   \sa status()
 */
-void QTask::setStatus(Status s)
+void QTask::setStatus(Status status)
 {
-    d->mStatus = s;
+    d->mStatus = status;
     // check date fields.
     if (d->mStartedDate.isNull()) {
-        if (s != NotStarted)
+        if (status != NotStarted)
             d->mStartedDate = QDate::currentDate();
     } else {
-        if (s == NotStarted)
+        if (status == NotStarted)
             d->mStartedDate = QDate();
     }
     if (d->mCompletedDate.isNull()) {
-        if (s == Completed)
+        if (status == Completed)
             d->mCompletedDate = QDate::currentDate();
     } else {
-        if (s != Completed)
+        if (status != Completed)
             d->mCompletedDate = QDate();
     }
-    if (s != Completed && d->mPercentCompleted == 100)
+
+    // adjust % complete
+    if (status == Completed)
+        d->mPercentCompleted = 100;
+    else if(status == NotStarted)
+        d->mPercentCompleted = 0;
+    else if (d->mPercentCompleted == 100)
         d->mPercentCompleted = 99;
 }
 
 /*!
-  Sets the \l Status of the task to \a s.
+  Sets the \l Status of the task to \a status.
+  This is a convenience wrapper function.
 
   \sa status()
 */
-void QTask::setStatus(int s)
+void QTask::setStatus(int status)
 {
-    if (s >= NotStarted && s <= Deferred)
-        setStatus((Status)s);
+    if (status >= NotStarted && status <= Deferred)
+        setStatus((Status)status);
 }
 
 /*!
-  Returns the translated text for the the task status \a s.
+  Returns the translated text for the the task status \a status.
 */
-QString QTask::statusToText(Status s)
+QString QTask::statusToText(Status status)
 {
-    if (s < NotStarted || s > Deferred)
+    if (status < NotStarted || status > Deferred)
         return QString();
 
     static const char *const status_strings[] = {
@@ -381,9 +470,9 @@ QString QTask::statusToText(Status s)
     };
 
     if (qApp)
-        return qApp->translate("QTask", status_strings[s]);
+        return qApp->translate("QTask", status_strings[status]);
     else
-        return status_strings[s];
+        return status_strings[status];
 }
 
 /*!
@@ -397,8 +486,9 @@ void QTask::setDueDate( const QDate &date )
 }
 
 /*!
-  Returns an int indicating the percent completed of the task.
-  For completed tasks, this function will always return 100.
+  Returns progress of the task as a percent completed.
+  For tasks that have not been started, this will return 0, and
+  for completed tasks, this function will always return 100.
 
   \sa setPercentCompleted(), status()
 */
@@ -414,8 +504,19 @@ uint QTask::percentCompleted() const
 
 /*!
   Sets the tasks percent completed field to \a percent.
-  if \a percent is greater than 99 this function will also
-  set the status to Completed.
+
+  The task's status field depends on the new percentage
+  complete value in the following ways:
+
+  \list
+  \o If \a percent is greater than 99, then a value of
+  100 is used, and this function will also set the
+  task's status to \c Completed.
+  \o If \a percent is 0, this function will set the
+  task's status to \c InProgress (if the task's startedDate is not null) or \c NotStarted
+  \o Otherwise, the task's status will be set to \c InProgress
+  if it was not \c Deferred or \c Waiting.
+  \endlist
 
   \sa percentCompleted(), status()
 */
@@ -425,7 +526,10 @@ void QTask::setPercentCompleted( uint percent )
         setStatus(Completed);
         d->mPercentCompleted = 100;
     } else if (percent == 0) {
-        setStatus(NotStarted);
+        if (d->mStartedDate.isNull())
+            setStatus(NotStarted);
+        else
+            setStatus(InProgress);
         d->mPercentCompleted = 0;
     } else {
         QTask::Status s = status();
@@ -458,7 +562,21 @@ static QString statusToTrString(QTask::Status s)
 }
 
 /*!
-  Returns true if the part of task matches \a r. Otherwise returns false.
+  Returns true if this task matches regular expression \a r. Otherwise returns false.
+
+  This is intended to allow the user to enter text to find matching tasks.
+
+  The expression will be matched against the following fields:
+  \list
+  \o the task's priority (as a number)
+  \o the task's due date, if valid
+  \o the task's description
+  \o the task's start date, if valid
+  \o the task's completed date, if valid
+  \o the task's percentage complete, if the task has been started but not finished.
+  \o the task's notes.
+  \o the task's status, as a translated string.
+  \endlist
 */
 bool QTask::match ( const QRegExp &r ) const
 {
@@ -677,10 +795,8 @@ void QTask::writeVCalendar( const QString &filename, const QTask &task)
 }
 
 /*!
-   Writes the task as a vCalendar object to the file specified
+   Writes this task as a vCalendar object to the file specified
    by \a filename.
-
-   Returns true on success, false on fail.
 
    \sa readVCalendar()
 */
@@ -692,7 +808,7 @@ void QTask::writeVCalendar( const QString &filename ) const
 /*!
    \overload
 
-   Writes the task as a vCalendar object to the given \a file,
+   Writes this task as a vCalendar object to the given \a file,
    which must be already open for writing.
 
    \sa readVCalendar()
@@ -707,7 +823,7 @@ void QTask::writeVCalendar( QFile &file ) const
 /*!
    \overload
 
-   Writes the task as a vCalendar object to the given \a stream,
+   Writes this task as a vCalendar object to the given \a stream,
    which must be writable.
 
    \sa readVCalendar()
@@ -722,7 +838,8 @@ void QTask::writeVCalendar( QDataStream *stream ) const
 
 /*!
   Reads the file specified by \a filename as a list of vCalendar objects
-  and returns the list of near equivalent tasks.
+  and returns a list of QTasks that correspond to the data.  Note that
+  some vCalendar properties may not be supported by QTask.
 
   \sa writeVCalendar()
 */
@@ -732,6 +849,11 @@ QList<QTask> QTask::readVCalendar( const QString &filename )
     return readVCalendarData(obj);
 }
 
+/*!
+  \internal
+
+  Reads a list of tasks from an opened VObject
+*/
 QList<QTask> QTask::readVCalendarData( VObject *obj )
 {
     QList<QTask> tasks;
@@ -762,10 +884,10 @@ QList<QTask> QTask::readVCalendarData( VObject *obj )
 }
 
 /*!
-  Reads the \a data of \a len byets as a list of vCalendar objects
-  and returns the list of near equivalent tasks.
+  Reads the \a data of \a len bytes as a list of vCalendar objects
+  and returns the list of corresponding QTasks.
 
-  \sa writeVCalendar()
+  \sa writeVCalendar(), readVCalendar()
 */
 QList<QTask> QTask::readVCalendarData( const char *data, unsigned long len )
 {
@@ -774,8 +896,8 @@ QList<QTask> QTask::readVCalendarData( const char *data, unsigned long len )
 }
 
 /*!
-  Reads the given VCalendar data in \a vcal and returns the list of
-  near equivalent tasks.
+  Reads the given vCalendar data in \a vcal and returns the list of
+  corresponding QTasks.
 
   \sa writeVCalendar()
 */

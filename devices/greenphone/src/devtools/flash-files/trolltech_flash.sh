@@ -72,7 +72,7 @@ check_free_space()
 {
     # Find size of QTOPIA_IMAGE_DEVICE
     local DEVICE=`basename $QTOPIA_IMAGE_DEVICE`
-    if grep $DEVICE /proc/partitions; then
+    if grep $DEVICE /proc/partitions >/dev/null; then
         local AVAILABLE_SPACE=`awk "/$DEVICE/ {print \\$3}" /proc/partitions`
     else
         local AVAILABLE_SPACE=0
@@ -96,12 +96,12 @@ flash_status()
 check_and_repair_filesystems()
 {
     # check and repair /mnt/disk2 (/dev/tffsb)
-    umount /mnt/disk2
+    umount -o remount,ro /mnt/disk2 >/dev/null 2>&1
     if fsck -p -y /dev/tffsb 2>&1 | grep REBOOT ; then
         flash_status flash-status-fserror "Filesystem errors fixed on /mnt/disk2"
         reboot
     fi
-    mount -o rw,noatime /dev/tffsb
+    mount -o remount,rw,noatime /dev/tffsb >/dev/null 2>&1
 
     # check and repair /mnt/user (/dev/tffsc)
     #mount -o remount,ro,noatime /mnt/user
@@ -153,10 +153,12 @@ fi
 echo "TROLL: Installing Qtopia Image"
 
 # unmount Qtopia image
-umount $QTOPIA_IMAGE_DEVICE
+if grep "^$QTOPIA_IMAGE_DEVICE " /proc/mounts; then
+    umount $QTOPIA_IMAGE_DEVICE >/dev/null 2>&1
+fi
 
 # install Qtopia image
-dd if=/mnt/sd/$QTOPIA_IMAGE of=$QTOPIA_IMAGE_DEVICE bs=1024
+dd if=/mnt/sd/$QTOPIA_IMAGE of=$QTOPIA_IMAGE_DEVICE bs=1024 >/dev/null 2>&1
 
 # mount /opt/Qtopia.rom, needed for ldconfig
 mount /opt/Qtopia.rom
@@ -170,7 +172,7 @@ cat > /etc/ld.so.conf <<EOF
 /opt/Qtopia.rom/lib
 /opt/Qtopia/lib
 EOF
-ldconfig
+ldconfig >/dev/null 2>&1
 
 umount /opt/Qtopia.rom
 

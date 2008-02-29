@@ -38,7 +38,7 @@ PlayerControl::~PlayerControl()
 
 void PlayerControl::open( const QString& url )
 {
-    setMediaContent( new QMediaContent( url ) );
+    setMediaContent( new QMediaContent( QUrl(url) ) );
 }
 
 void PlayerControl::open( const QContent& content )

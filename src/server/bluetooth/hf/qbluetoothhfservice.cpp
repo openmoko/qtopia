@@ -115,6 +115,23 @@ public:
     int m_channel;
 };
 
+/*!
+    \class QBluetoothHandsfreeService
+    \brief The QBluetoothHandsfreeService class implements Bluetooth Handsfree Audio Gateway profile.
+    \ingroup QtopiaServer::Task::Bluetooth
+
+    Bluetooth Handsfree profile provides mechanisms for basic
+    phone call control and audio transfer between the Audio Gateway
+    (phone) and the Bluetooth Audio headset.  This class
+    implements the Bluetooth Handsfree Audio Gateway as defined
+    in the Handsfree Bluetooth Profile specification.
+*/
+
+/*!
+    Construct a new Handsfree service with service name given by
+    \a service.  The display string to use is given by \a displayName
+    and QObject \a parent.
+*/
 QBluetoothHandsfreeService::QBluetoothHandsfreeService(const QString &service, const QString &displayName, QObject *parent)
     : QBluetoothAbstractService(service, displayName, parent)
 {
@@ -149,12 +166,17 @@ QBluetoothHandsfreeService::QBluetoothHandsfreeService(const QString &service, c
 
     m_data->m_session = 0;
     m_data->m_interface = 0;
+    m_data->m_audioDev = 0;
 }
 
+/*!
+    Destructor.
+*/
 QBluetoothHandsfreeService::~QBluetoothHandsfreeService()
 {
     if (m_data) {
-        bt_sco_close(m_data->m_audioDev);
+        if (m_data->m_audioDev)
+            bt_sco_close(m_data->m_audioDev);
         delete m_data->m_server;
         delete m_data->m_scoServer;
         delete m_data->m_scoSocket;
@@ -168,6 +190,9 @@ QBluetoothHandsfreeService::~QBluetoothHandsfreeService()
     }
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::serialPortsChanged()
 {
     if (!m_data->m_activeClient)
@@ -184,6 +209,7 @@ void QBluetoothHandsfreeService::serialPortsChanged()
 }
 
 /*!
+    \internal
   Returns true if the audio gateway is up and running
   otherwise attempts to start the gateway
   */
@@ -196,12 +222,9 @@ bool QBluetoothHandsfreeService::audioGatewayInitialized()
 
     if (audioDev.isEmpty()) {
         qWarning("No headset audio devices available...");
-        return false;
     }
-
-    if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData()) < 0) {
+    else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData()) < 0) {
         qWarning("Unable to open audio device: %s", audioDev.constData());
-        return false;
     }
 
     m_data->m_interface = new QBluetoothHandsfreeCommInterface(audioDev, this);
@@ -210,6 +233,9 @@ bool QBluetoothHandsfreeService::audioGatewayInitialized()
     return true;
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeService::start()
 {
     qLog(Bluetooth) << "QBluetoothHandsfreeService::start";
@@ -221,7 +247,7 @@ void QBluetoothHandsfreeService::start()
     }
 
     // register the SDP service
-    m_data->m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/hf.xml");
+    m_data->m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/hfag.xml");
     if (m_data->m_sdpRecordHandle == 0) {
         emit started(true,
                      tr("Error registering with SDP server"));
@@ -256,6 +282,9 @@ void QBluetoothHandsfreeService::start()
     emit started(false, QString());
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeService::stop()
 {
     qLog(Bluetooth) << "QBluetoothHandsfreeService::stop";
@@ -273,13 +302,22 @@ void QBluetoothHandsfreeService::stop()
     emit stopped();
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeService::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
+    qDebug() << "SetSecurityOptions for Handsfree service got called" << options;
     m_data->m_securityOptions = options;
-    if (m_data->m_server->isListening())
+    if (m_data->m_server->isListening()) {
+        qDebug() << "Setting security options to server socket";
         m_data->m_server->setSecurityOptions(options);
+    }
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::sessionOpen()
 {
     if (m_data->m_connectInProgress) {
@@ -298,6 +336,9 @@ void QBluetoothHandsfreeService::sessionOpen()
     }
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::sessionFailed()
 {
     if (m_data->m_connectInProgress) {
@@ -307,7 +348,17 @@ void QBluetoothHandsfreeService::sessionFailed()
     }
 }
 
-// Methods from the Handsfree AG Interface
+/*!
+    This method is the concrete implementation of the
+    QBluetoothAudioGateway interface method of the same name.
+    It is called from the QBluetoothHandsfreeAudioGatewayServer
+    class, which acts as a forwarding agent.
+
+    The address and channel to connect to are given by \a addr
+    and \a rfcomm_channel respectively.
+
+    \sa QBluetoothHandsfreeAudioGatewayServer
+*/
 void QBluetoothHandsfreeService::connect(const QBluetoothAddress &addr,
                                          int rfcomm_channel)
 {
@@ -354,6 +405,14 @@ void QBluetoothHandsfreeService::connect(const QBluetoothAddress &addr,
     m_data->m_session->startSession();
 }
 
+/*!
+    This method is the concrete implementation of the
+    QBluetoothAudioGateway interface method of the same name.
+    It is called from the QBluetoothHandsfreeAudioGatewayServer
+    class, which acts as a forwarding agent.
+
+    \sa QBluetoothHandsfreeAudioGatewayServer
+*/
 void QBluetoothHandsfreeService::disconnect()
 {
     // We have connected, but not setup the tty yet
@@ -376,6 +435,9 @@ void QBluetoothHandsfreeService::disconnect()
     req.send();
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::doDisconnect()
 {
     releaseAudio();
@@ -392,6 +454,17 @@ void QBluetoothHandsfreeService::doDisconnect()
     emit disconnected();
 }
 
+/*!
+    This method is the concrete implementation of the
+    QBluetoothAudioGateway interface method of the same name.
+    It is called from the QBluetoothHandsfreeAudioGatewayServer
+    class, which acts as a forwarding agent.
+
+    Instructs the Bluetooth device to set the speaker volume to
+    \a volume.
+
+    \sa QBluetoothHandsfreeAudioGatewayServer
+*/
 void QBluetoothHandsfreeService::setSpeakerVolume(int volume)
 {
     if (!m_data->m_activeClient)
@@ -404,6 +477,9 @@ void QBluetoothHandsfreeService::setSpeakerVolume(int volume)
     updateSpeakerVolume(volume);
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::updateSpeakerVolume(int volume)
 {
     m_data->m_speakerVolume = volume;
@@ -411,6 +487,17 @@ void QBluetoothHandsfreeService::updateSpeakerVolume(int volume)
     emit speakerVolumeChanged();
 }
 
+/*!
+    This method is the concrete implementation of the
+    QBluetoothAudioGateway interface method of the same name.
+    It is called from the QBluetoothHandsfreeAudioGatewayServer
+    class, which acts as a forwarding agent.
+
+    Instructs the Bluetooth device to set the microphone volume to
+    \a volume.
+
+    \sa QBluetoothHandsfreeAudioGatewayServer
+*/
 void QBluetoothHandsfreeService::setMicrophoneVolume(int volume)
 {
     if (!m_data->m_activeClient)
@@ -423,6 +510,9 @@ void QBluetoothHandsfreeService::setMicrophoneVolume(int volume)
     updateMicrophoneVolume(volume);
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::updateMicrophoneVolume(int volume)
 {
     m_data->m_microphoneVolume = volume;
@@ -430,6 +520,9 @@ void QBluetoothHandsfreeService::updateMicrophoneVolume(int volume)
     emit microphoneVolumeChanged();
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::scoStateChanged(QBluetoothAbstractSocket::SocketState socketState)
 {
     switch (socketState) {
@@ -445,7 +538,8 @@ void QBluetoothHandsfreeService::scoStateChanged(QBluetoothAbstractSocket::Socke
             delete m_data->m_scoSocket;
             m_data->m_scoSocket = 0;
 
-            bt_sco_set_fd(m_data->m_audioDev, m_data->m_scofd);
+            if (m_data->m_audioDev)
+                bt_sco_set_fd(m_data->m_audioDev, m_data->m_scofd);
             m_data->m_interface->setValue("AudioEnabled", true);
             emit audioStateChanged();
             break;
@@ -453,7 +547,8 @@ void QBluetoothHandsfreeService::scoStateChanged(QBluetoothAbstractSocket::Socke
             break;
         case QBluetoothRfcommSocket::UnconnectedState:
             // This happens on a failed connect
-            bt_sco_set_fd(m_data->m_audioDev, -1);
+            if (m_data->m_audioDev)
+                bt_sco_set_fd(m_data->m_audioDev, -1);
 
             delete m_data->m_scoSocket;
             m_data->m_scoSocket = 0;
@@ -464,6 +559,14 @@ void QBluetoothHandsfreeService::scoStateChanged(QBluetoothAbstractSocket::Socke
     };
 }
 
+/*!
+    This method is the concrete implementation of the
+    QBluetoothAudioGateway interface method of the same name.
+    It is called from the QBluetoothHandsfreeAudioGatewayServer
+    class, which acts as a forwarding agent.
+
+    \sa QBluetoothHandsfreeAudioGatewayServer
+*/
 void QBluetoothHandsfreeService::releaseAudio()
 {
     if (m_data->m_scoSocket) {
@@ -474,7 +577,8 @@ void QBluetoothHandsfreeService::releaseAudio()
     if (m_data->m_scofd == -1)
         return;
 
-    bt_sco_set_fd(m_data->m_audioDev, -1);
+    if (m_data->m_audioDev)
+        bt_sco_set_fd(m_data->m_audioDev, -1);
     close(m_data->m_scofd);
     m_data->m_scofd = -1;
 
@@ -482,11 +586,22 @@ void QBluetoothHandsfreeService::releaseAudio()
     emit audioStateChanged();
 }
 
+/*!
+    This method is the concrete implementation of the
+    QBluetoothAudioGateway interface method of the same name.
+    It is called from the QBluetoothHandsfreeAudioGatewayServer
+    class, which acts as a forwarding agent.
+
+    \sa QBluetoothHandsfreeAudioGatewayServer
+*/
 void QBluetoothHandsfreeService::connectAudio()
 {
     doConnectAudio();
 }
 
+/*!
+    \internal
+*/
 bool QBluetoothHandsfreeService::doConnectAudio()
 {
     if (!m_data->m_activeClient) {
@@ -524,8 +639,13 @@ bool QBluetoothHandsfreeService::doConnectAudio()
     return ret;
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::newConnection()
 {
+    qDebug() << "New Connection to QBluetoothHandsfreeService";
+
     // New client has connected
     QBluetoothRfcommSocket *socket =
         static_cast<QBluetoothRfcommSocket *>(m_data->m_server->nextPendingConnection());
@@ -548,11 +668,14 @@ void QBluetoothHandsfreeService::newConnection()
         QObject::connect(m_data->m_session, SIGNAL(sessionFailed()), this, SLOT(sessionFailed()));
     }
 
-    m_data->m_session->startSession();
-
     setupTty(socket, true);
+
+    m_data->m_session->startSession();
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::error(QBluetoothAbstractSocket::SocketError)
 {
     if (m_data->m_connectInProgress) {
@@ -564,6 +687,9 @@ void QBluetoothHandsfreeService::error(QBluetoothAbstractSocket::SocketError)
 #endif
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::stateChanged(QBluetoothAbstractSocket::SocketState socketState)
 {
     switch (socketState) {
@@ -593,6 +719,9 @@ void QBluetoothHandsfreeService::stateChanged(QBluetoothAbstractSocket::SocketSt
     };
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::hookupSocket(QBluetoothRfcommSocket *socket)
 {
     m_data->m_client = socket;
@@ -602,6 +731,9 @@ void QBluetoothHandsfreeService::hookupSocket(QBluetoothRfcommSocket *socket)
                      this, SLOT(error(QBluetoothAbstractSocket::SocketError)));
 }
 
+/*!
+    \internal
+*/
 bool QBluetoothHandsfreeService::setupTty(QBluetoothRfcommSocket *socket, bool incoming)
 {
     m_data->m_connectInProgress = false;
@@ -644,13 +776,21 @@ bool QBluetoothHandsfreeService::setupTty(QBluetoothRfcommSocket *socket, bool i
     return false;
 }
 
+/*!
+    \internal
+*/
 bool QBluetoothHandsfreeService::canConnectAudio()
 {
     return true;
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeService::newScoConnection()
 {
+    qLog(Bluetooth) << "QBluetoothHandsfreeService::New Sco Connection hint";
+
     // New client has connected
     QBluetoothScoSocket *socket =
         static_cast<QBluetoothScoSocket *>(m_data->m_scoServer->nextPendingConnection());
@@ -676,6 +816,35 @@ void QBluetoothHandsfreeService::newScoConnection()
     m_data->m_scoSocket = socket;
 }
 
+/*!
+    \fn void QBluetoothHandsfreeService::connectResult(bool success, const QString &msg);
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeService::newConnection(const QBluetoothAddress &addr);
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeService::disconnected();
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeService::speakerVolumeChanged();
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeService::microphoneVolumeChanged();
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeService::audioStateChanged();
+    \internal
+*/
 
 //==========================================================
 
@@ -686,7 +855,22 @@ public:
     QBluetoothHandsfreeAudioGatewayServer *m_gatewayServer;
 };
 
+/*!
+    \class QBluetoothHandsfreeCommInterface
+    \brief The QBluetoothHandsfreeCommInterface class provides a Qtopia IPC interface to the Handsfree Audio Gateway profile implementation.
 
+    The QBluetoothHandsfreeCommInterface extends
+    the QAbstractIpcInterfaceGroup class.  It adds the an
+    implementation of the QBluetoothAudioGateway interface
+    which forwards all calls to the implementation object,
+    which is passed in the constructor.
+*/
+
+/*!
+    Constructs a new Handsfree Interface group.  The audio
+    device to use is given by \a audioDev.  The implementation
+    object is given by \a parent.
+*/
 QBluetoothHandsfreeCommInterface::QBluetoothHandsfreeCommInterface(const QByteArray &audioDev, QBluetoothHandsfreeService *parent)
     : QAbstractIpcInterfaceGroup(parent->name(), parent),
       m_data(new QBluetoothHandsfreeCommInterfacePrivate)
@@ -709,51 +893,107 @@ QBluetoothHandsfreeCommInterface::QBluetoothHandsfreeCommInterface(const QByteAr
                      SIGNAL(audioStateChanged()));
 }
 
+/*!
+    Destructor.
+*/
 QBluetoothHandsfreeCommInterface::~QBluetoothHandsfreeCommInterface()
 {
     delete m_data;
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeCommInterface::initialize()
 {
     if ( !supports<QBluetoothAudioGateway>() )
         addInterface(m_data->m_gatewayServer);
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeCommInterface::setValue(const QString &key, const QVariant &value)
 {
     m_data->m_gatewayServer->setValue(key, value);
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeCommInterface::connect(const QBluetoothAddress &addr, int rfcomm_channel)
 {
     m_data->m_service->connect(addr, rfcomm_channel);
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeCommInterface::disconnect()
 {
     m_data->m_service->disconnect();
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeCommInterface::setSpeakerVolume(int volume)
 {
     m_data->m_service->setSpeakerVolume(volume);
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeCommInterface::setMicrophoneVolume(int volume)
 {
     m_data->m_service->setMicrophoneVolume(volume);
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeCommInterface::releaseAudio()
 {
     m_data->m_service->releaseAudio();
 }
 
+/*!
+    \internal
+*/
 void QBluetoothHandsfreeCommInterface::connectAudio()
 {
     m_data->m_service->connectAudio();
 }
 
+/*!
+    \fn void QBluetoothHandsfreeCommInterface::connectResult(bool success, const QString &msg);
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeCommInterface::newConnection(const QBluetoothAddress &addr);
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeCommInterface::disconnected();
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeCommInterface::speakerVolumeChanged();
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeCommInterface::microphoneVolumeChanged();
+    \internal
+*/
+
+/*!
+    \fn void QBluetoothHandsfreeCommInterface::audioStateChanged();
+    \internal
+*/
 
 #include "qbluetoothhfservice.moc"

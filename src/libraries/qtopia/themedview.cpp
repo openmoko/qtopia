@@ -58,7 +58,7 @@ struct ThemeListDelegatePrivate;
 class ThemeListDelegate : public QItemDelegate
 {
 public:
-    ThemeListDelegate(QListView* listview, ThemedView* tv, QObject *parent = 0);
+    ThemeListDelegate(QListView *listview, ThemedView *view, QObject *parent = 0);
     virtual ~ThemeListDelegate();
 
     void paint(QPainter *p, const QStyleOptionViewItem& option, const QModelIndex& index) const;
@@ -73,7 +73,7 @@ private:
 class ThemeFactory;
 struct ThemedViewPrivate : public QXmlDefaultHandler
 {
-    ThemedViewPrivate(ThemedView *v);
+    ThemedViewPrivate(ThemedView *view);
     ~ThemedViewPrivate();
 
     /* XML Parser related methods */
@@ -142,8 +142,8 @@ private:
 
 struct ThemeItemPrivate
 {
-    ThemeItemPrivate( ThemeItem* p, ThemedView* v )
-        : parent(p), view(v), rmode(ThemeItem::Rect), actv(true), visible(true), press(false), focus(false), interactive(false), activeExpr(0), isDataExpression(false)
+    ThemeItemPrivate( ThemeItem *parent, ThemedView *view )
+        : parent(parent), view(view), rmode(ThemeItem::Rect), actv(true), visible(true), press(false), focus(false), interactive(false), activeExpr(0), isDataExpression(false)
     {
     }
     ThemeItem *parent;
@@ -188,10 +188,10 @@ public:
         m_mode = m;
     }
 
-    ThemeFactory(ThemedView* v) : view(v), m_mode(View), ignore(0), parseDone(false), root(0),  insideTemplate(false), templateCount(0), templateParent(0), currentlyParsing(false) {}
+    ThemeFactory(ThemedView *view) : view(view), m_mode(View), ignore(0), parseDone(false), root(0),  insideTemplate(false), templateCount(0), templateParent(0), currentlyParsing(false) {}
 
-    void setTemplateParent( ThemeItem* p ) {
-        templateParent = p;
+    void setTemplateParent( ThemeItem *parent ) {
+        templateParent = parent;
     }
 
     void setTemplateUid( const QString& uid ) {
@@ -215,31 +215,31 @@ public:
         trData.argCount = 0;
     }
 
-    bool startElement( const QString& qName, const ThemeAttributes& atts ) {
+    bool startElement( const QString& qName, const ThemeAttributes &atts ) {
         currentlyParsing = true;
-        if( filter( qName, atts ) ) {
+        if ( filter( qName, atts ) ) {
             if (m_mode == ThemeFactory::View && qName == QLatin1String("page")) {
-                if( insideTemplate ) {
+                if ( insideTemplate ) {
                     qWarning("ThemedViewPrivate::startElement - Error - Cannot create 'page' element inside a 'template' element.");
                     return false;
                 }
                 Q_ASSERT(!root);
                 root = new ThemePageItem(view, atts);
                 parseStack.push(root);
-            } else if( m_mode == ThemeFactory::Template && qName == QLatin1String("template") && !ignore ) {
+            } else if ( m_mode == ThemeFactory::Template && qName == QLatin1String("template") && !ignore ) {
                 Q_ASSERT(!root);
                 root = new ThemeTemplateInstanceItem(templateParent, view, atts);
                 root->setVSPath( templateUid ); // set this instance's vs path to its uid
-                if( templateParent != 0 && root != 0 )
+                if ( templateParent != 0 && root != 0 )
                     templateParent->addChild( root );
                 parseStack.push(root);
             } else if (root && !ignore) {
                 ThemeItem *top = parseStack.top();
                 ThemeItem *item = 0;
-                if( m_mode == ThemeFactory::View && insideTemplate ) {
+                if ( m_mode == ThemeFactory::View && insideTemplate ) {
                     Q_ASSERT(top != 0);
                     Q_ASSERT(top->rtti() == ThemedView::Template);
-                    if( qName == "template" ) {
+                    if ( qName == "template" ) {
                         qWarning("ThemeFactory - Error - Template items cannot be nested.");
                         return false;
                     }
@@ -248,12 +248,12 @@ public:
                     ++templateCount;
                     return true;
                 }
-                if(parseTrStack.count() > 0 ) {
-                    if( parseTrStack.top() == TrText ) {
+                if (parseTrStack.count() > 0 ) {
+                    if ( parseTrStack.top() == TrText ) {
                         qWarning("ThemeFactory - Error - trtext element cannot have any children.");
                         return false;
                     }
-                    if( parseTrStack.top() == TrArg ) {
+                    if ( parseTrStack.top() == TrArg ) {
                         qWarning("ThemeFactory - Error - trarg element cannot have any children.");
                         return false;
                     }
@@ -268,23 +268,23 @@ public:
                     item = new ThemeImageItem(top, view, atts);
                 } else if (qName == QLatin1String("text")) {
                     item = new ThemeTextItem(top, view, atts);
-                } else if(qName == QLatin1String("tr")) {
+                } else if (qName == QLatin1String("tr")) {
                     Q_ASSERT(parseTrStack.count() == 0);
                     //seenTrElement = true;
                     parseTrStack.push(ThemeFactory::TrRoot);
                 } else if (qName == QLatin1String("trtext")) {
-                    if(parseTrStack.count() <= 0 ||  parseTrStack.top() != ThemeFactory::TrRoot) {
+                    if (parseTrStack.count() <= 0 ||  parseTrStack.top() != ThemeFactory::TrRoot) {
                         qWarning("ThemeFactory - Error - trtext element can only be used inside a tr element.");
                         return false;
                     }
-                    if(trData.seenTrText) {
+                    if (trData.seenTrText) {
                         qWarning("ThemeFactory - Error - Only a single trtext element can only be defined under a tr element.");
                         return false;
                     }
                     parseTrStack.push(ThemeFactory::TrText);
                     trData.seenTrText = true;
-                } else if(qName == QLatin1String("trarg")) {
-                    if(parseTrStack.count() <= 0 || parseTrStack.top() != ThemeFactory::TrRoot) {
+                } else if (qName == QLatin1String("trarg")) {
+                    if (parseTrStack.count() <= 0 || parseTrStack.top() != ThemeFactory::TrRoot) {
                         qWarning("ThemeFactory - Error - trarg element can only be used inside a tr element.");
                         return false;
                     }
@@ -300,13 +300,13 @@ public:
                     item = new ThemeExclusiveItem(top, view, atts);
                 } else if (qName == QLatin1String("layout")) {
                     item = new ThemeLayoutItem(top, view, atts);
-                } else if(qName == QLatin1String("group")) {
+                } else if (qName == QLatin1String("group")) {
                     item = new ThemeGroupItem(top, view, atts);
-                } else if(qName == QLatin1String("list")) {
+                } else if (qName == QLatin1String("list")) {
                     item = new ThemeListItem(top,view,atts);
-                } else if(qName == QLatin1String("widget")) {
+                } else if (qName == QLatin1String("widget")) {
                     item = new ThemeWidgetItem(top,view,atts);
-                } else if(qName == QLatin1String("template")) {
+                } else if (qName == QLatin1String("template")) {
                     // mode == view && !insideTemplate
                     Q_ASSERT(!insideTemplate);
                     Q_ASSERT(m_mode == ThemeFactory::View);
@@ -318,11 +318,11 @@ public:
                 if (item && top) {
                     parseStack.top()->addChild(item);
                     parseStack.push(item);
-                } else if(!parseTrStack.count()) {
+                } else if (!parseTrStack.count()) {
                     //invalid item, ignore
                     ignore++;
                 }
-            } else if( root ) {
+            } else if ( root ) {
                 //ignoring from previous
                 ++ignore;
             }
@@ -339,12 +339,12 @@ public:
             ignore--;
         } else {
             Q_ASSERT(parseStack.count());
-            if( m_mode == ThemeFactory::View ) {
-                if( insideTemplate ) {
+            if ( m_mode == ThemeFactory::View ) {
+                if ( insideTemplate ) {
                     Q_ASSERT(templateCount >= 0);
                     Q_ASSERT(parseStack.top()->rtti() == ThemedView::Template);
                     ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(parseStack.top());
-                    if( templateCount > 0 ) {
+                    if ( templateCount > 0 ) {
                         ti->endElement();
                         --templateCount;
                         return true;
@@ -355,12 +355,12 @@ public:
                     }
                 }
             }
-            if(parseTrStack.count() > 0) {
-                if(parseTrStack.top() == ThemeFactory::TrRoot) {
+            if (parseTrStack.count() > 0) {
+                if (parseTrStack.top() == ThemeFactory::TrRoot) {
                     // ending element tr, generate expression
                     // translate the trtext
-                    if(!trData.seenTrText) {
-                        if(trData.argCount > 0) {
+                    if (!trData.seenTrText) {
+                        if (trData.argCount > 0) {
                             qWarning("ThemeFactory - Error - trarg elements given for tr element with no trtext element.");
                             return false;
                         }
@@ -375,15 +375,15 @@ public:
                     int curIdx = 0, idx = 0;
                     while(idx != -1) {
                         idx = translated.indexOf(numregex, curIdx);
-                        if(idx >= 0) {
-                            if(idx-curIdx > 0) {
+                        if (idx >= 0) {
+                            if (idx-curIdx > 0) {
                                 split.append(translated.mid(curIdx, idx-curIdx));
                                 curIdx = idx;
                             }
                             split.append(translated.mid(curIdx, 2));
                             curIdx += 2;
                             idx = curIdx;
-                        } else if(curIdx < translated.length()) {
+                        } else if (curIdx < translated.length()) {
                             split.append(translated.right(translated.length()-curIdx));
                         }
                         // else at last index
@@ -392,16 +392,16 @@ public:
                     int ii = 0;
                     while(ii < split.count()) {
                         QString cur = split[ii];
-                        if(numregex.exactMatch(cur)) {
+                        if (numregex.exactMatch(cur)) {
                             // variable operand
-                            if(ii > 0)
+                            if (ii > 0)
                                 expanded += " . ";
                             expanded += cur;
                         } else {
                             // string data
-                            if(ii > 0)
+                            if (ii > 0)
                                 expanded += " . ";
-                            if(cur.isEmpty())
+                            if (cur.isEmpty())
                                 expanded += "\"\"";
                             else
                                 expanded += (QString("\"") + cur + QString("\""));
@@ -410,9 +410,9 @@ public:
                     }
                     for(QStringList::Iterator it = trData.args.begin(); it != trData.args.end() ; ++it)
                         expanded = expanded.arg(*it);
-                    if(expanded.isEmpty())
+                    if (expanded.isEmpty())
                         expanded += "\"\"";
-                    if(expanded.contains(numregex)) {
+                    if (expanded.contains(numregex)) {
                         qWarning("ThemeFactory - Error - trtext has more variable markers than corresponding trarg elements.");
                         return false;
                     }
@@ -439,16 +439,16 @@ public:
 
     bool characters( const QString& str ) {
         if (!parseDone && !parseStack.isEmpty()) {
-            if( insideTemplate ) {
+            if ( insideTemplate ) {
                 ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(parseStack.top());
                 ti->characters( str );
             } else {
-                if(parseTrStack.count() > 0) {
-                    if(parseTrStack.top() == ThemeFactory::TrText)
+                if (parseTrStack.count() > 0) {
+                    if (parseTrStack.top() == ThemeFactory::TrText)
                         trData.text += str;
-                    else if(parseTrStack.top() == ThemeFactory::TrArg) {
+                    else if (parseTrStack.top() == ThemeFactory::TrArg) {
                         Q_ASSERT(trData.args.count() <= trData.argCount);
-                        if(trData.args.count() == trData.argCount)
+                        if (trData.args.count() == trData.argCount)
                             trData.args.last().append(str);
                         else {
                             trData.args.append(str);
@@ -467,20 +467,20 @@ public:
 
 private:
     bool filter( const QString& qName, const ThemeAttributes &atts ) {
-        if( qName == "template" && insideTemplate ) {
+        if ( qName == "template" && insideTemplate ) {
             qWarning("ThemedView: Template inside template, ignoring.");
             return false;
         }
         bool keypad = atts.value( QLatin1String("keypad") ) != QLatin1String("no");
         bool touchscreen = atts.value( QLatin1String("touchscreen") ) != QLatin1String("no");
-        if( !keypad && !Qtopia::mousePreferred() )
+        if ( !keypad && !Qtopia::mousePreferred() )
             return false;
-        if( !touchscreen && Qtopia::mousePreferred() )
+        if ( !touchscreen && Qtopia::mousePreferred() )
             return false;
         return true;
     }
 
-    ThemedView* view;
+    ThemedView *view;
 
     // mode stuff
     Mode m_mode;
@@ -516,7 +516,7 @@ private:
 
 /*!
   \class ThemeTemplateInstanceItem
-
+  \mainclass
   \brief The ThemeTemplateInstanceItem class represents a template instance in a ThemedView.
 
   You can create new template instance items using ThemeTemplateItem::createInstance().
@@ -529,10 +529,10 @@ private:
 
 /*!
   Constructs a ThemeTemplateItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeTemplateInstanceItem::ThemeTemplateInstanceItem( ThemeItem* p, ThemedView* v, const ThemeAttributes& atts )
-    : ThemeTemplateItem(p,v,atts)
+ThemeTemplateInstanceItem::ThemeTemplateInstanceItem( ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts )
+    : ThemeTemplateItem(parent, view, atts)
 {
 }
 
@@ -542,11 +542,12 @@ ThemeTemplateInstanceItem::ThemeTemplateInstanceItem( ThemeItem* p, ThemedView* 
   */
 ThemeTemplateInstanceItem::~ThemeTemplateInstanceItem()
 {
-    if( parentItem() )
+    if ( parentItem() )
         parentItem()->removeChild( this );
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::TemplateInstance.
 */
@@ -567,6 +568,7 @@ struct ThemeTemplateItemPrivate
 
 /*!
   \class ThemeTemplateItem
+  \mainclass
 
   \brief The ThemeTemplateItem class represents a theme template in a ThemedView.
 
@@ -585,10 +587,10 @@ struct ThemeTemplateItemPrivate
 
 /*!
   Constructs a ThemeTemplateItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
   */
-ThemeTemplateItem::ThemeTemplateItem( ThemeItem* p, ThemedView* v, const ThemeAttributes& atts )
-    : ThemeItem(p, v, atts)
+ThemeTemplateItem::ThemeTemplateItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeItem(parent, view, atts)
 {
     d = new ThemeTemplateItemPrivate;
 }
@@ -602,6 +604,7 @@ ThemeTemplateItem::~ThemeTemplateItem()
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Template.
 */
@@ -659,7 +662,7 @@ ThemeTemplateInstanceItem* ThemeTemplateItem::createInstance( const QString& uid
     return static_cast<ThemeTemplateInstanceItem*>(item);
 }
 
-bool ThemeTemplateItem::startElement( const QString& qName, const ThemeAttributes& atts ) {
+bool ThemeTemplateItem::startElement( const QString& qName, const ThemeAttributes &atts ) {
     d->ostream << (int)Start;
     d->ostream << qName;
     d->ostream << atts.map();
@@ -677,11 +680,11 @@ bool ThemeTemplateItem::characters( const QString& str ) {
     return true;
 }
 
-ThemedViewPrivate::ThemedViewPrivate(ThemedView *v)
-    : root(0), view(v), needLayout(false),
+ThemedViewPrivate::ThemedViewPrivate(ThemedView *view)
+    : root(0), view(view), needLayout(false),
       sourceLoaded(false), pressedItem(0), factory(0)
 {
-    factory = new ThemeFactory(v);
+    factory = new ThemeFactory(view);
 }
 
 ThemedViewPrivate::~ThemedViewPrivate()
@@ -691,7 +694,7 @@ ThemedViewPrivate::~ThemedViewPrivate()
 
 bool ThemedViewPrivate::startElement(const QString &, const QString &, const QString &qName, const QXmlAttributes &atts)
 {
-    MapAttributes xatts(atts);
+    XmlAttributes xatts(atts);
     return factory->startElement( qName, xatts );
 }
 
@@ -795,6 +798,9 @@ static ThemeItem::State indexToState( int idx )
 }
 
 /*!
+  \class ThemeItem
+  \mainclass
+
   \brief The ThemeItem class is the base class of all items in a ThemedView.
 
   A ThemedView manages the theme item tree, which is run-time representation of
@@ -807,18 +813,32 @@ static ThemeItem::State indexToState( int idx )
   Normally you do not want to call this item's functions directly, but rather
   specify the relevant attributes and data for this item in the themed view XML.
 
-  \sa ThemedView, \l{Themed View Elements#themecommonattributes}{common theme attributes}
-
+  \sa ThemedView, {Themed View Elements#themecommonattributes}{common theme attributes}
+  \ingroup appearance
 */
-ThemeItem::ThemeItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : d(new ThemeItemPrivate(p, v))
+
+/*!
+    \enum ThemeItem::State
+    State describes the different states of a theme element.
+
+    \value Default The default state of an element.
+    \value Focus The element has the focus.
+    \value Pressed The element is pressed.
+    \value All All the states of an element.
+*/
+
+/*!
+  Constructs a ThemeItem with parent \a parent, view \a view and attributes \a atts.
+*/
+ThemeItem::ThemeItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : d(new ThemeItemPrivate(parent, view))
 {
     d->name = atts.value(QLatin1String("name"));
     d->sr = parseRect(atts, d->rmode);
     d->transient = atts.value(QLatin1String("transient")) == QLatin1String("yes");
     QString actvdata = atts.value(QLatin1String("active"));
     bool isliteral = !isStringExpression(actvdata);
-    if( isliteral ) {
+    if ( isliteral ) {
         d->actv = actvdata != QLatin1String("no");
     } else {
         setAttribute("activeExpression", stripStringExpression(actvdata));
@@ -831,10 +851,10 @@ ThemeItem::ThemeItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
     setVSPath( atts.value(QLatin1String("vspath")) );
 
     QMap<QString,QString> onClickAtts = parseSubAtts( atts.value(QLatin1String("onclick")) );
-    if( onClickAtts.contains( "message" ) ) {
+    if ( onClickAtts.contains( "message" ) ) {
         bool ok = false;
         ThemeMessageData data( parseMessage( onClickAtts["message"], &ok ) );
-        if( ok )
+        if ( ok )
             d->message.append( data );
     }
 }
@@ -848,35 +868,35 @@ void ThemeItem::clickedEvent()
     for( int i = 0 ; i < d->message.count() ; ++i ) {
         QString msg;
         msg = d->message[i].msg + "(";
-        if( !d->message[i].type.isEmpty() )
+        if ( !d->message[i].type.isEmpty() )
             msg += d->message[i].type;
         msg += ")";
 
         // look for a service with this name, and get the channel from that if it exists
         QtopiaService service;
         bool isService = service.channel( d->message[i].channel ).length() != 0;
-        if( isService ) {
+        if ( isService ) {
             QString channel = d->message[i].channel;
             QtopiaServiceRequest req( d->message[i].channel, msg );
-            if( !d->message[i].type.isEmpty() )
+            if ( !d->message[i].type.isEmpty() )
                 req.addVariantArg(d->message[i].variant); // QtopiaServiceRequest will serialize the variant's value
             req.send();
         } else {
             QtopiaIpcEnvelope e( d->message[i].channel, msg );
-            if( !d->message[i].type.isEmpty() )
+            if ( !d->message[i].type.isEmpty() )
                 QMetaType::save( e, d->message[i].variant.type(), d->message[i].variant.data() );
         }
     }
 }
 
-ThemeMessageData ThemeItem::parseMessage( const QString& message, bool* ok )
+ThemeMessageData ThemeItem::parseMessage(const QString &message, bool *ok)
 {
     //channel,msg([param])[,param1]
-    if( ok )
+    if ( ok )
         *ok = true;
     ThemeMessageData data;
     QStringList tokens = message.split( QRegExp("[,()]" ), QString::SkipEmptyParts );
-    if( tokens.count() != 2 && tokens.count() != 4 ) {
+    if ( tokens.count() != 2 && tokens.count() != 4 ) {
         *ok = false;
         qWarning("Error parsing message for theme element with name '%s'", itemName().toAscii().constData());
         return ThemeMessageData();
@@ -886,16 +906,16 @@ ThemeMessageData ThemeItem::parseMessage( const QString& message, bool* ok )
 
     data.msg = tokens[1];
 
-    if( tokens.count() == 4 ) {
+    if ( tokens.count() == 4 ) {
         // verify that the passed parameter type is the same type as
         data.type = tokens[2];
-        if( tokens[3].length() == 1 ) { // special case, passing a single character, store its unicode value so conversion to char is valid
+        if ( tokens[3].length() == 1 ) { // special case, passing a single character, store its unicode value so conversion to char is valid
             data.variant.setValue( tokens[3].at(0) );
         } else {
             data.variant.setValue( tokens[3] );
         }
         QVariant::Type t = QVariant::nameToType( data.type.toAscii().constData() );
-        if( !data.variant.canConvert( t ) ) {
+        if ( !data.variant.canConvert( t ) ) {
             qWarning("Error parsing message for theme element with name '%s' - Cannot convert parameter '%s' with data type '%s' to data type '%s'", itemName().toAscii().constData(), tokens[3].toAscii().constData(), data.variant.typeName(), QVariant::typeToName(t));
             *ok = false;
             return ThemeMessageData();
@@ -915,16 +935,16 @@ ThemeItem::~ThemeItem()
 {
     foreach( ThemeItem *child, d->chldn )
         delete child;
-    if( d->activeExpr ) {
+    if ( d->activeExpr ) {
         delete d->activeExpr;
         d->activeExpr = 0;
     }
     delete d;
 }
 
-void ThemeItem::setVSPath( const QString& p )
+void ThemeItem::setVSPath( const QString &path )
 {
-    setAttribute( "vspath", p.trimmed() );
+    setAttribute( "vspath", path.trimmed() );
 }
 
 
@@ -949,16 +969,16 @@ QString ThemeItem::fullVSPath()
 {
     QString parentPath;
     QString path = vsPath();
-    if( parentItem() != 0 ) {
+    if ( parentItem() != 0 ) {
         parentPath = parentItem()->fullVSPath();
     }
-    if( !parentPath.endsWith("/") )
+    if ( !parentPath.endsWith("/") )
         parentPath += "/"; // parent path always ends in a /, even if it is empty
 
-    if( path.startsWith("/") )
+    if ( path.startsWith("/") )
         path = path.remove(0,1); // so remove a leading / in our path
 
-    if( !path.isEmpty() && !path.endsWith("/") )
+    if ( !path.isEmpty() && !path.endsWith("/") )
         path += "/"; // and add one incase we are the deepest caller
 
     return parentPath + path;
@@ -1000,10 +1020,10 @@ void ThemeItem::setDataExpression(bool b)
 /*!
   Returns true if \a str is an expression from the themed view XML, false otherwise.
 */
-bool ThemeItem::isStringExpression( const QString& str )
+bool ThemeItem::isStringExpression(const QString &str)
 {
     QString s = str.trimmed();
-    if( s.startsWith( "expr:" ) )
+    if ( s.startsWith( "expr:" ) )
         return true;
     return false;
 }
@@ -1012,7 +1032,7 @@ bool ThemeItem::isStringExpression( const QString& str )
   Strips the expression indicators from the expression \a str.
   isStringExpression(str) must return true, or this function will abort.
 */
-QString ThemeItem::stripStringExpression( const QString& str )
+QString ThemeItem::stripStringExpression(const QString &str)
 {
     Q_ASSERT(isStringExpression(str));
     QString s = str.trimmed();
@@ -1022,20 +1042,20 @@ QString ThemeItem::stripStringExpression( const QString& str )
 
 /*!
    Called by ThemedView for a QExpressionEvaluator instance when it emits the Expression::termsChanged() signal.
-   \a expr is an expression registered through a call to ThemedView::registerExpression().
-   The Expression \a expr will be an expression that belongs to this item.
-   Subclasses should make sure they call the base class version of this function should they not know about \a expr.
+   \a expression is an expression registered through a call to ThemedView::registerExpression().
+   The Expression \a expression will be an expression that belongs to this item.
+   Subclasses should make sure they call the base class version of this function should they not know about \a expression.
 */
-void ThemeItem::expressionChanged( QExpressionEvaluator* expr )
+void ThemeItem::expressionChanged(QExpressionEvaluator *expression)
 {
-    Q_ASSERT(d->activeExpr == expr);
-    if( d->activeExpr == expr ) {
-        Q_ASSERT(d->activeExpr == expr);
-        QVariant result = getExpressionResult( expr, QVariant::Bool );
-        if( !result.canConvert(QVariant::Bool) ) {
+    Q_ASSERT(d->activeExpr == expression);
+    if (d->activeExpr == expression) {
+        Q_ASSERT(d->activeExpr == expression);
+        QVariant result = getExpressionResult(expression, QVariant::Bool);
+        if (!result.canConvert(QVariant::Bool)) {
             qWarning() << "ThemeItem::expressionChanged() - Cannot convert value to Bool";
         } else {
-            setActive( result.toBool() );
+            setActive(result.toBool());
         }
     }
 }
@@ -1050,36 +1070,35 @@ void ThemeItem::constructionComplete()
 {
     Q_ASSERT(d->activeExpr == 0);
     QString expr = strAttribute("activeExpression");
-    if( !expr.isEmpty() ) {
+    if ( !expr.isEmpty() ) {
         d->activeExpr = createExpression( expr );
-        if( d->activeExpr != 0 )
+        if ( d->activeExpr != 0 )
             ThemeItem::expressionChanged( d->activeExpr );
         setAttribute("activeExpression", QString());
     }
 }
 
 /*!
-  Retreives a QVariant from \a expr that can be converted to the specified type \a t.
-  It performs error checking to ensure \a expr is a valid expression and \c expr->result() returns a type that
-  can be converted to \a t.
-  If an error occurs, returns a QVariant that cannot be converted to type \a t.
-  Returns a QVariant that can be converted to type \a t otherwise.
+  Retreives a QVariant from \a expression that can be converted to the specified type \a type.
+  It performs error checking to ensure \a expression is a valid expression and \c expression->result() returns a type that can be converted to \a type.
+  If an error occurs, returns a QVariant that cannot be converted to type \a type.
+  Returns a QVariant that can be converted to type \a type otherwise.
  */
-QVariant ThemeItem::getExpressionResult( QExpressionEvaluator* expr, const QVariant::Type& t )
+QVariant ThemeItem::getExpressionResult(QExpressionEvaluator *expression, const QVariant::Type &type)
 {
-    Q_ASSERT(expr != 0);
+    Q_ASSERT(expression != 0);
     QVariant result;
-    Q_ASSERT(expr->isValid());
-    if( !(expr->evaluate()) ) {
-        qWarning("Error: ThemeItem(name='%s')::getExpressionResult(): Error evaluating expression", d->name.toAscii().data());
+    Q_ASSERT(expression->isValid());
+    if (!(expression->evaluate())) {
+        qWarning("Error: ThemeItem(name='%s')::getExpressionResult(): Error evaluating expression",
+                 d->name.toAscii().data());
     } else {
         // a null result isn't error
-        result = expr->result();
-        if( result.isNull() )
+        result = expression->result();
+        if (result.isNull())
             result.setValue(QString(""));
-        if( !result.canConvert(t) ) {
-            qWarning("Error: ThemeItem(name='%s')::getExpressionResult():  Variant returned by expression could not be converted to required variant type '%d'.",
-                                                                                                                                d->name.toAscii().data(), t);
+        if (!result.canConvert(type)) {
+            qWarning("Error: ThemeItem(name='%s')::getExpressionResult():  Variant returned by expression could not be converted to required variant type '%d'.", d->name.toAscii().data(), type);
         }
     }
     return result;
@@ -1092,19 +1111,19 @@ QVariant ThemeItem::getExpressionResult( QExpressionEvaluator* expr, const QVari
   If no error occurs, registers the expression with ThemedView by calling ThemedView::registerExpression()
   and returns a pointer to the new expression, otherwise returns 0.
   */
-QExpressionEvaluator* ThemeItem::createExpression( const QString& data )
+QExpressionEvaluator* ThemeItem::createExpression(const QString &data)
 {
     QExpressionEvaluator* expr = 0;
-    if( !data.isEmpty() ) {
+    if ( !data.isEmpty() ) {
         // prepend this item's fullVSPath to any vs terms in expression
         QString expandedData = data;
         QString fp = fullVSPath();
-        if( !fp.isEmpty() && fp != "/") {
+        if ( !fp.isEmpty() && fp != "/") {
             expandedData = QString(data).replace( "@", "@"+fp );
             //qWarning() << "ThemeItem::createExpression: expanded:" << expandedData << " orig:" << data;
         }
         expr = new QExpressionEvaluator( expandedData.toUtf8() );
-        if( expr->isValid() )
+        if ( expr->isValid() )
             view()->registerExpression( this, expr );
         else {
             qWarning("ThemeItem(name='%s')::createExpression(): Invalid expression given", d->name.toAscii().data());
@@ -1117,45 +1136,45 @@ QExpressionEvaluator* ThemeItem::createExpression( const QString& data )
 
 
 /*!
-  Stores the integer \a val for the state \a st based on the given storage \a key.
+  Stores the integer \a value for the state \a state based on the given storage \a key.
 */
-void ThemeItem::setAttribute( const QString &key, const int &val, ThemeItem::State st )
+void ThemeItem::setAttribute(const QString &key, const int &value, ThemeItem::State state)
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex(state);
     QMap<QString,int> &dataset = d->intattributes[_st];
-    if( dataset.contains( key ) )
-        dataset.remove( key );
-    dataset.insert( key, val );
+    if (dataset.contains(key))
+        dataset.remove(key);
+    dataset.insert(key, value);
 }
 
 /*!
-  Returns an integer value for state \a st based on the given storage \a key.
+  Returns an integer value for state \a state based on the given storage \a key.
 */
-int ThemeItem::attribute( const QString &key, ThemeItem::State st ) const
+int ThemeItem::attribute(const QString &key, ThemeItem::State state) const
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex(state);
     const QMap<QString,int> &dataset = d->intattributes[_st];
     return dataset[key];
 }
 
 /*!
-  Stores the string \a val for state \a st based on the given storage \a key.
+  Stores the string \a value for state \a state based on the given storage \a key.
 */
-void ThemeItem::setAttribute( const QString &key, const QString &val, ThemeItem::State st )
+void ThemeItem::setAttribute(const QString &key, const QString &value, ThemeItem::State state)
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex(state);
     QMap<QString,QString> &dataset = d->strattributes[_st];
-    if( dataset.contains( key ) )
-        dataset.remove( key );
-    dataset.insert( key, val );
+    if (dataset.contains(key))
+        dataset.remove(key);
+    dataset.insert(key, value);
 }
 
 /*!
-  Returns the string value for state \a st based on the given storage \a key.
+  Returns the string value for state \a state based on the given storage \a key.
 */
-QString ThemeItem::strAttribute( const QString &key, ThemeItem::State st )
+QString ThemeItem::strAttribute(const QString &key, ThemeItem::State state)
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex(state);
     const QMap<QString,QString> &dataset = d->strattributes[_st];
     return dataset[key];
 }
@@ -1173,9 +1192,9 @@ void ThemeItem::paletteChange(const QPalette &)
 */
 ThemeItem::State ThemeItem::state() const
 {
-    if( pressed() ) {
+    if (pressed()) {
         return ThemeItem::Pressed;
-    } else if( hasFocus() ) {
+    } else if (hasFocus()) {
         return ThemeItem::Focus;
     } else {
         return ThemeItem::Default;
@@ -1185,53 +1204,53 @@ ThemeItem::State ThemeItem::state() const
 /*!
   \internal
 */
-void ThemeItem::setFocus( bool f )
+void ThemeItem::setFocus(bool focus)
 {
-    if( !isInteractive() )
+    if ( !isInteractive() )
         return;
 
-    if( f != d->focus )
+    if ( focus != d->focus )
     {
-        if( active() && (rtti() != ThemedView::Status || (!d->focus || ((ThemeStatusItem *)this)->isOn())) )
+        if ( active() && (rtti() != ThemedView::Status || (!d->focus || ((ThemeStatusItem *)this)->isOn())) )
         {
             ThemeItem::State oldState = state();
-            d->focus = f;
-            if( !d->focus )
+            d->focus = focus;
+            if ( !d->focus )
                 setPressed(false);
 
-            if(oldState != state())
+            if (oldState != state())
                 stateChanged(state());
-            if( isVisible() )
+            if ( isVisible() )
                 update();
         }
     }
 }
 
 /*!
-  Called whenever an item's state() changes.
+  Called when an item's state is changed to \a state.
   The default implementation does nothing.
 */
-void ThemeItem::stateChanged(const ThemeItem::State& st)
+void ThemeItem::stateChanged(const ThemeItem::State &state)
 {
-    Q_UNUSED(st);
+    Q_UNUSED(state);
 }
 
 /*!
   \internal
 */
-void ThemeItem::setPressed( bool p )
+void ThemeItem::setPressed(bool pressed)
 {
-    if( !isInteractive() )
+    if ( !isInteractive() )
         return;
 
-    if( p != d->press ) // only allow presses if
+    if ( pressed != d->press ) // only allow presses if
     {
-        if( active() && (rtti() != ThemedView::Status || (!p || ((ThemeStatusItem *)this)->isOn())) )
+        if ( active() && (rtti() != ThemedView::Status || (!pressed || ((ThemeStatusItem *)this)->isOn())) )
         {
-            d->press = p;
-            if( d->press )
+            d->press = pressed;
+            if ( d->press )
                 d->focus = true;
-            if( isVisible() )
+            if ( isVisible() )
                 update();
         }
     }
@@ -1281,12 +1300,12 @@ QRectF ThemeItem::geometryHint()const
 }
 
 /*!
-  Sets this item's run-time geometry to \a b.
+  Sets this item's run-time geometry to \a rect.
   This controls the position and size of the item in the ThemedView.
 */
-void ThemeItem::setGeometry(const QRect& b)
+void ThemeItem::setGeometry(const QRect& rect)
 {
-    d->br = b;
+    d->br = rect;
 }
 
 /*!
@@ -1326,11 +1345,11 @@ QList<ThemeItem*> ThemeItem::children() const { return d->chldn; }
 
 ThemeItem* ThemeItem::parentLayout() const
 {
-    ThemeItem* par = parentItem();
-    while( par != 0 ) {
-        if( par->rtti() == ThemedView::Layout )
-            return par;
-        par = par->parentItem();
+    ThemeItem *parent = parentItem();
+    while( parent != 0 ) {
+        if ( parent->rtti() == ThemedView::Layout )
+            return parent;
+        parent = parent->parentItem();
      }
      return 0;
  }
@@ -1344,18 +1363,18 @@ bool ThemeItem::active() const
 }
 
 /*!
-  Sets this item to be active if \a a is true, otherwise sets the item to be inactive.
+  Sets this item to be active if \a active is true, otherwise sets the item to be inactive.
 */
-void ThemeItem::setActive(bool a)
+void ThemeItem::setActive(bool active)
 {
-    if (a != d->actv) {
-        d->actv = a;
-        if( !d->actv )
+    if (active != d->actv) {
+        d->actv = active;
+        if ( !d->actv )
             d->press = false; //can't be pressed when not active
         view()->layout();
         // update me or my parent, position controlling layout?
         ThemeItem* item = this;
-        ThemeItem* plhelp = 0;
+        ThemeItem *plhelp = 0;
         while( (plhelp = item->parentLayout()) )
             item = plhelp;
         item->update();
@@ -1386,13 +1405,13 @@ bool ThemeItem::isVisible() const
 }
 
 /*!
-  Sets this item to be visible if \a v is true, otherwise hides the item.
+  Sets this item to be visible if \a visible is true, otherwise hides the item.
 */
-void ThemeItem::setVisible( bool v )
+void ThemeItem::setVisible( bool visible )
 {
-    if( v != d->visible ) {
-        d->visible = v;
-        view()->visChanged(this, v);
+    if ( visible != d->visible ) {
+        d->visible = visible;
+        view()->visChanged(this, visible);
     }
 }
 
@@ -1476,11 +1495,13 @@ int ThemeItem::rtti() const
 }
 
 /*!
-    Paints the \a rect portion of the item using the painter \a p.
+    Paints the \a rect portion of the item using the painter \a painter.
     Normally overridden by sub-classes.
 */
-void ThemeItem::paint(QPainter *, const QRect &)
+void ThemeItem::paint(QPainter *painter, const QRect &rect)
 {
+    Q_UNUSED(painter);
+    Q_UNUSED(rect);
 }
 
 QRectF ThemeItem::parseRect(const ThemeAttributes &atts, RMode &mode, const QString &name)
@@ -1547,13 +1568,13 @@ QRectF ThemeItem::parseRect(const ThemeAttributes &atts, RMode &mode, const QStr
 QMap<QString,QString> ThemeItem::parseSubAtts( const QString &subatts ) const
 {
     QMap<QString,QString> subAtts;
-    if( subatts.trimmed().isEmpty() )
+    if ( subatts.trimmed().isEmpty() )
         return subAtts;
     QStringList assignments = subatts.split(";");
     for( int i = 0 ; i < assignments.count() ; ++i )
     {
         QStringList assignment = assignments[i].split("=");
-        if( assignment.count() == 2 )
+        if ( assignment.count() == 2 )
             subAtts.insert( assignment[0], assignment[1] );
     }
     return subAtts;
@@ -1589,25 +1610,26 @@ int ThemeItem::parseAlignment(const ThemeAttributes &atts, const QString &name)
 }
 
 /*!
-  Adds the characters \a ch to this item.
+  Adds the characters \a characters to this item.
   Normally overridden by subclasses.
 */
-void ThemeItem::addCharacters(const QString &ch)
+void ThemeItem::addCharacters(const QString &characters)
 {
-    Q_UNUSED(ch);
+    Q_UNUSED(characters);
 }
 
 //---------------------------------------------------------------------------
 
 /*!
   \class ThemeGroupItem
+  \mainclass
 
   \brief The ThemeGroupItem class groups its children into a single item in a ThemedView.
 
   The ThemeGroupItem class implements the \l{Themed View Elements#themegroupelement}{group element} from the theme XML.
 
   This is useful when a single logical item is made up of multiple graphical components.
-  Eg. A ThemeGroupItem item may represent a single button by grouping multiple child text and image items
+  Eg. a ThemeGroupItem item may represent a single button by grouping multiple text and image items
   together.
 
   Normally you do not want to call this item's functions directly, but rather
@@ -1620,14 +1642,15 @@ void ThemeItem::addCharacters(const QString &ch)
 
 /*!
   Constructs a ThemeGroupItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeGroupItem::ThemeGroupItem( ThemeItem *p, ThemedView *v, const ThemeAttributes &atts )
-    : ThemeItem( p, v, atts )
+ThemeGroupItem::ThemeGroupItem( ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts )
+    : ThemeItem(parent, view, atts)
 {
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Group.
 */
@@ -1652,6 +1675,7 @@ void ThemeGroupItem::setPressed( bool p )
 
 /*!
   \class ThemePluginItem
+  \mainclass
 
   \brief The ThemePluginItem class manages the interaction between a ThemedItemInterface implementation and a ThemedView.
 
@@ -1677,11 +1701,11 @@ struct ThemePluginItemPrivate
 };
 
 /*!
-  Constructs a ThemeExclusiveItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  Constructs a ThemePluginItem.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemePluginItem::ThemePluginItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeItem(p, v, atts)
+ThemePluginItem::ThemePluginItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeItem(parent, view, atts)
 {
     d = new ThemePluginItemPrivate;
 }
@@ -1712,12 +1736,12 @@ void ThemePluginItem::setPlugin(const QString &name)
 }
 
 /*!
-    Sets the plug-in for the item to be the already constructed plug-in pointed to by \a i.
+    Sets the plug-in for the item to be the already constructed plug-in pointed to by \a plugin.
 */
-void ThemePluginItem::setBuiltin(ThemedItemPlugin *i)
+void ThemePluginItem::setBuiltin(ThemedItemPlugin *plugin)
 {
     releasePlugin();
-    d->iface = i;
+    d->iface = plugin;
     if (d->iface) {
         d->builtin = true;
         d->iface->resize(geometry().width(), geometry().height());
@@ -1727,6 +1751,7 @@ void ThemePluginItem::setBuiltin(ThemedItemPlugin *i)
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Plugin.
 */
@@ -1737,12 +1762,12 @@ int ThemePluginItem::rtti() const
 
 /*!
   \reimp
-    Paints the \a rect portion of the status item using the painter \a p.
+    Paints the \a rect portion of the status item using the painter \a painter.
 */
-void ThemePluginItem::paint(QPainter *p, const QRect &r)
+void ThemePluginItem::paint(QPainter *painter, const QRect &r)
 {
     if (d->iface)
-        d->iface->paint(p, r);
+        d->iface->paint(painter, r);
 }
 
 /*!
@@ -1769,14 +1794,15 @@ void ThemePluginItem::releasePlugin()
 
 /*!
   \class ThemeExclusiveItem
+  \mainclass
 
-  \brief The ThemeExclusiveItem class allows only 1 of its children to be active in a ThemedView.
+  \brief The ThemeExclusiveItem class allows only one of its children to be active in a ThemedView.
 
   The ThemeExclusiveItem class implements the \l{Themed View Elements#themeexclusiveelement}{exclusive element} from the theme XML.
 
-  This is useful for a number of items where only 1 can logically be active/visible at a time.
+  This is useful for a number of items where only one can logically be active/visible at a time.
   When a new child item becomes active, all other items are set to be inactive.
-  If there are 2 child items, and 1 becomes inactive, the other is set to be active.
+  If there are two child items, and one becomes inactive, the other is set to be active.
 
   Normally you do not want to call this item's functions directly, but rather
   specify the relevant attributes and data for this item in the themed view XML.
@@ -1787,10 +1813,10 @@ void ThemePluginItem::releasePlugin()
 
 /*!
   Constructs a ThemeExclusiveItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeExclusiveItem::ThemeExclusiveItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeItem(p, v, atts)
+ThemeExclusiveItem::ThemeExclusiveItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeItem(parent, view, atts)
 {
 }
 
@@ -1814,7 +1840,7 @@ void ThemeExclusiveItem::layout()
 {
     ThemeItem::layout();
     QList<ThemeItem*> c = children();
-    if( c.count() != 0 ) {
+    if ( c.count() != 0 ) {
         bool found = false;
         for( int j = c.count()-1 ; j >= 0 ; --j ) {
             ThemeItem *item = c[j];
@@ -1843,12 +1869,13 @@ struct ThemeLayoutItemPrivate
 
 /*!
   \class ThemeLayoutItem
+  \mainclass
 
   \brief The ThemeLayoutItem class positions and resizes its child items in a ThemedView.
 
   The ThemeLayoutItem class implements the \l{Themed View Elements#themelayoutelement}{layout element} from the theme XML.
 
-  ThemeLayoutItem is not display anything to the user - it simply a manages the
+  ThemeLayoutItem does not display anything to the user - it simply manages the
   geometry of any child items.
 
   \sa {Themed View Elements#themelayoutelement}{layout element}
@@ -1857,10 +1884,10 @@ struct ThemeLayoutItemPrivate
 
 /*!
   Constructs a ThemeLayoutItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeLayoutItem::ThemeLayoutItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeItem(p, v, atts)
+ThemeLayoutItem::ThemeLayoutItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeItem(parent, view, atts)
 {
     d = new ThemeLayoutItemPrivate;
     d->orient = atts.value(QLatin1String("orientation")) == QLatin1String("vertical") ? Qt::Vertical : Qt::Horizontal;
@@ -1873,7 +1900,7 @@ ThemeLayoutItem::ThemeLayoutItem(ThemeItem *p, ThemedView *v, const ThemeAttribu
 
 
 /*!
-  Deconstructs the ThemeLayoutItem.
+  Destroys the ThemeLayoutItem.
 */
 ThemeLayoutItem::~ThemeLayoutItem()
 {
@@ -1881,6 +1908,7 @@ ThemeLayoutItem::~ThemeLayoutItem()
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Layout.
 */
@@ -1900,6 +1928,7 @@ void ThemeLayoutItem::paint(QPainter *p, const QRect &r)
 }
 
 /*!
+  \reimp
   Lays out this item.
   The layout item positions and resizes its children.
 */
@@ -1915,12 +1944,12 @@ void ThemeLayoutItem::layout()
             visCount++;
             item->layout(); // need to layout child items now, in order to get their width/height
             if (d->orient == Qt::Horizontal) {
-                if( item->attribute("expanding") != 0 )
+                if ( item->attribute("expanding") != 0 )
                     ++expandingCount;
                 else
                     fixedSize += resolveUnit(item->geometry().width(), geometry().width(), item->d->runit[2]);
             } else {
-                if( item->attribute("expanding") != 0 )
+                if ( item->attribute("expanding") != 0 )
                     ++expandingCount;
                 else {
                     fixedSize += resolveUnit(item->geometry().height(), geometry().height(), item->d->runit[3]);
@@ -1947,7 +1976,7 @@ void ThemeLayoutItem::layout()
         if ((!item->transient() || item->active()) && item->isVisible()) {
             if (d->orient == Qt::Horizontal) {
                 w = item->geometry().width();
-                if( item->attribute("expanding") != 0 ) {
+                if ( item->attribute("expanding") != 0 ) {
                     w = expansionSize;
                     item->d->runit[2] = Pixel;
                 }
@@ -1987,6 +2016,7 @@ struct ThemePageItemPrivate
 };
 /*!
   \class ThemePageItem
+  \mainclass
 
   \brief The ThemePageItem class is the root item in a ThemedView.
 
@@ -2005,10 +2035,10 @@ struct ThemePageItemPrivate
 
 /*!
   Constructs a ThemePageItem.
-  \a v and \a atts are passed to the base class constructor.
+  \a view and \a atts are passed to the base class constructor.
   */
-ThemePageItem::ThemePageItem(ThemedView *v, const ThemeAttributes &atts)
-    : ThemeItem(0, v, atts)
+ThemePageItem::ThemePageItem(ThemedView *view, const ThemeAttributes &atts)
+    : ThemeItem(0, view, atts)
 {
     d = new ThemePageItemPrivate;
     d->bd = atts.value(QLatin1String("base"));
@@ -2017,10 +2047,10 @@ ThemePageItem::ThemePageItem(ThemedView *v, const ThemeAttributes &atts)
     QString val = atts.value(QLatin1String("background"));
     if (!val.isEmpty()) {
         d->bg = QPixmap(QLatin1String(":image/")+d->bd+val);
-        if( d->bg.isNull() )
-            d->bg = QPixmap(QLatin1String(":image/")+v->defaultPics()+val);
+        if ( d->bg.isNull() )
+            d->bg = QPixmap(QLatin1String(":image/")+view->defaultPics()+val);
     }
-    v->clearMask();
+    view->clearMask();
     d->maskImg = atts.value(QLatin1String("mask"));
     val = atts.value(QLatin1String("stretch"));
     if (!val.isEmpty()) {
@@ -2033,14 +2063,14 @@ ThemePageItem::ThemePageItem(ThemedView *v, const ThemeAttributes &atts)
         d->sorient = atts.value(QLatin1String("orientation")) == QLatin1String("vertical") ? Qt::Vertical : Qt::Horizontal;
     }
     if (atts.value(QLatin1String("transparent")) == QLatin1String("yes")) {
-        QPalette pal = v->palette();
+        QPalette pal = view->palette();
         pal.setColor(QPalette::All, QPalette::Window, QColor(0,0,0,0));
-        v->setPalette(pal);
+        view->setPalette(pal);
     }
 }
 
 /*!
-  Deconstructs the ThemePageItem.
+  Destroys the ThemePageItem.
 */
 ThemePageItem::~ThemePageItem()
 {
@@ -2111,6 +2141,7 @@ void ThemePageItem::applyMask()
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Page.
 */
@@ -2121,42 +2152,42 @@ int ThemePageItem::rtti() const
 
 /*!
   \reimp
-    Paints the \a rect portion of the status item using the painter \a p.
+    Paints the \a rect portion of the status item using the painter \a painter.
 */
-void ThemePageItem::paint(QPainter *p, const QRect &r)
+void ThemePageItem::paint(QPainter *painter, const QRect &rect)
 {
-    p->save();
-    p->setClipRect(r);
+    painter->save();
+    painter->setClipRect(rect);
     if (!d->bg.isNull()) {
         if (!d->stretch) {
-            p->drawPixmap(0, 0, d->bg);
+            painter->drawPixmap(0, 0, d->bg);
         } else if (d->sorient == Qt::Horizontal) {
             int h = d->bg.height();
-            p->drawPixmap(0, 0, d->bg, 0, 0, d->offs[0], h);
+            painter->drawPixmap(0, 0, d->bg, 0, 0, d->offs[0], h);
             int w = geometry().width() - d->offs[0] - (d->bg.width()-d->offs[1]);
             int sw = d->offs[1]-d->offs[0];
             int x = 0;
             if (sw) {
                 for (; x < w-sw; x+=sw)
-                    p->drawPixmap(d->offs[0]+x, 0, d->bg, d->offs[0], 0, sw, h);
+                    painter->drawPixmap(d->offs[0]+x, 0, d->bg, d->offs[0], 0, sw, h);
             }
-            p->drawPixmap(d->offs[0]+x, 0, d->bg, d->offs[0], 0, w-x, h);
-            p->drawPixmap(geometry().width()-(d->bg.width()-d->offs[1]), 0, d->bg, d->offs[1], 0, d->bg.width()-d->offs[1], h);
+            painter->drawPixmap(d->offs[0]+x, 0, d->bg, d->offs[0], 0, w-x, h);
+            painter->drawPixmap(geometry().width()-(d->bg.width()-d->offs[1]), 0, d->bg, d->offs[1], 0, d->bg.width()-d->offs[1], h);
         } else {
             int w = d->bg.width();
-            p->drawPixmap(0, 0, d->bg, 0, 0, w, d->offs[0]);
+            painter->drawPixmap(0, 0, d->bg, 0, 0, w, d->offs[0]);
             int h = geometry().height() - d->offs[0] - (d->bg.height()-d->offs[1]);
             int sh = d->offs[1]-d->offs[0];
             int y = 0;
             if (d->offs[1]-d->offs[0]) {
                 for (; y < h-sh; y+=sh)
-                    p->drawPixmap(0, d->offs[0]+y, d->bg, 0, d->offs[0], w, sh);
+                    painter->drawPixmap(0, d->offs[0]+y, d->bg, 0, d->offs[0], w, sh);
             }
-                p->drawPixmap(0, d->offs[0]+y, d->bg, 0, d->offs[0], w, h-y);
-            p->drawPixmap(0, geometry().height()-(d->bg.height()-d->offs[1]), d->bg, 0, d->offs[1], w, d->bg.height()-d->offs[1]);
+                painter->drawPixmap(0, d->offs[0]+y, d->bg, 0, d->offs[0], w, h-y);
+            painter->drawPixmap(0, geometry().height()-(d->bg.height()-d->offs[1]), d->bg, 0, d->offs[1], w, d->bg.height()-d->offs[1]);
         }
     }
-    p->restore();
+    painter->restore();
 }
 
 /*!
@@ -2227,7 +2258,8 @@ struct ThemeGraphicItemPrivate
 };
 
 /*!
-    \class ThemeGraphicItem
+  \class ThemeGraphicItem
+  \mainclass
 
   \brief The ThemeGraphicItem class contains common functionality for graphics based items in a ThemedView.
 
@@ -2241,16 +2273,16 @@ struct ThemeGraphicItemPrivate
 
 /*!
   Constructs a ThemeGraphicItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeGraphicItem::ThemeGraphicItem( ThemeItem *p, ThemedView *v, const ThemeAttributes &atts )
-    : ThemeItem( p, v, atts )
+ThemeGraphicItem::ThemeGraphicItem( ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts )
+    : ThemeItem(parent, view, atts)
 {
     d = new ThemeGraphicItemPrivate;
 }
 
 /*!
-  Deconstructs the ThemeGraphicItem
+  Destroys the ThemeGraphicItem
 */
 ThemeGraphicItem::~ThemeGraphicItem()
 {
@@ -2258,75 +2290,75 @@ ThemeGraphicItem::~ThemeGraphicItem()
 }
 
 /*!
-  Stores the given color \a col based on the given storage \a key and state \a st.
+  Stores the given color \a color based on the given storage \a key and state \a state.
 */
-void ThemeGraphicItem::setupColor( const QString &key, const QString &col, ThemeItem::State st )
+void ThemeGraphicItem::setupColor( const QString &key, const QString &color, ThemeItem::State state )
 {
-    QColor colour;
-    int role = parseColor( col, colour );
-    if( role == QPalette::NColorRoles && st != ThemeItem::Default )
+    QColor _color;
+    int role = parseColor( color, _color );
+    if ( role == QPalette::NColorRoles && state != ThemeItem::Default )
     {
         role = attribute( key + QLatin1String("Role") );
-        colour = color( key );
+        _color = this->color( key );
     }
-    setAttribute( key + QLatin1String("Role"), role, st );
-    setColor( key, colour, st );
+    setAttribute( key + QLatin1String("Role"), role, state );
+    setColor( key, _color, state );
 }
 
 /*!
-  Stores the alpha attribute \a al for this item based on the given storage \a key and state \a st.
+  Stores the alpha attribute \a alpha for this item based on the given storage \a key and state \a state.
 */
-void ThemeGraphicItem::setupAlpha( const QString &key, const QString &al, ThemeItem::State st )
+void ThemeGraphicItem::setupAlpha( const QString &key, const QString &alpha, ThemeItem::State state )
 {
     bool ok;
-    int alpha = al.toInt(&ok);
-    Q_UNUSED(alpha);
+    int _alpha = alpha.toInt(&ok);
+    Q_UNUSED(_alpha);
     if (ok) {
         //still set a string version, so can easily check for 'emptiness' in usage case
-        setAttribute( key, al, st );
+        setAttribute( key, alpha, state );
     }
 }
 
 /*!
-  Stores the color \a val based on the given storage \a key and state \a st.
+  Stores the color \a value based on the given storage \a key and state \a state.
 */
-void ThemeGraphicItem::setColor( const QString &key, const QColor &val, ThemeItem::State st )
+void ThemeGraphicItem::setColor( const QString &key, const QColor &value, ThemeItem::State state )
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex( state );
     QMap<QString,QColor> &dataset = d->colors[_st];
-    if( dataset.contains( key ) )
+    if ( dataset.contains( key ) )
         dataset.remove( key );
-    dataset.insert( key, val );
+    dataset.insert( key, value );
 }
 
 /*!
-  Returns the color for the given storage key \a key and state \a st.
+  Returns the color for the given storage key \a key and state \a state.
 */
-QColor ThemeGraphicItem::color( const QString &key, ThemeItem::State st ) const
+QColor ThemeGraphicItem::color( const QString &key, ThemeItem::State state ) const
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex( state );
     const QMap<QString,QColor> &dataset = d->colors[_st];
     return dataset[key];
 }
 
 /*!
-  Stores the font \a val based on the given storage \a key and state \a st.
+  Stores the font \a value based on the given storage \a key and state \a state.
 */
-void ThemeGraphicItem::setFont( const QString &key, const QFont &val, ThemeItem::State st )
+void ThemeGraphicItem::setFont( const QString &key, const QFont &value, ThemeItem::State state )
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex( state );
     QMap<QString,QFont> &dataset = d->fonts[_st];
-    if( dataset.contains( key ) )
+    if ( dataset.contains( key ) )
         dataset.remove( key );
-    dataset.insert( key, val );
+    dataset.insert( key, value );
 }
 
 /*!
-  Returns the font for the given storage \a key and state \a st.
+  Returns the font for the given storage \a key and state \a state.
 */
-QFont ThemeGraphicItem::font( const QString &key, ThemeItem::State st ) const
+QFont ThemeGraphicItem::font( const QString &key, ThemeItem::State state ) const
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex( state );
     const QMap<QString,QFont> &dataset = d->fonts[_st];
     return dataset[key];
 }
@@ -2356,21 +2388,21 @@ QFont ThemeGraphicItem::parseFont(const QFont &defFont, const QString &size, con
 }
 
 /*!
-  Parses the color given by the color name \a val.
-  \a val can either be a palette color name, eg. HighlightedText, or a name
+  Parses the color given by the color name \a value.
+  \a value can either be a palette color name, eg. HighlightedText, or a name
   suitable for being passed to QColor::setNamedColor().
-  If \a val references the palette, this function returns the QPalette::ColorRole
-  for the color and does not modify \a col.
-  Otherwise, \a val is passed to QColor::setNamedColor(), the result is stored in \a col,
+  If \a value references the palette, this function returns the QPalette::ColorRole
+  for the color and does not modify \a color.
+  Otherwise, \a value is passed to QColor::setNamedColor(), the result is stored in \a color,
   and the function returns QPalette::NColorRoles+1.
 */
-int ThemeGraphicItem::parseColor(const QString &val, QColor &col)
+int ThemeGraphicItem::parseColor(const QString &value, QColor &color)
 {
     int role = QPalette::NColorRoles;
-    if (!val.isEmpty()) {
+    if (!value.isEmpty()) {
         int i = 0;
         while (colorTable[i].name) {
-            if (QString(colorTable[i].name).toLower() == val.toLower()) {
+            if (QString(colorTable[i].name).toLower() == value.toLower()) {
                 role = colorTable[i].role;
                 break;
             }
@@ -2378,7 +2410,7 @@ int ThemeGraphicItem::parseColor(const QString &val, QColor &col)
         }
         if (!colorTable[i].name) {
             role = QPalette::NColorRoles+1;
-            col.setNamedColor(val);
+            color.setNamedColor(value);
         }
     }
 
@@ -2386,17 +2418,17 @@ int ThemeGraphicItem::parseColor(const QString &val, QColor &col)
 }
 
 /*!
-  Returns a QColor object for either \a col or \a role.
+  Returns a QColor object for either \a color or \a role.
   If role is a valid QPalette::ColorRole, the corresponding
   QColor object for the role is returned.
-  Otherwise, \a col is returned.
+  Otherwise, \a color is returned.
 */
-QColor ThemeGraphicItem::getColor(const QColor &col, int role) const
+QColor ThemeGraphicItem::getColor(const QColor &color, int role) const
 {
     if (role < QPalette::NColorRoles)
         return view()->palette().color((QPalette::ColorRole)role);
     else
-        return col;
+        return color;
 }
 
 //---------------------------------------------------------------------------
@@ -2420,7 +2452,7 @@ struct ThemeTextItemPrivate {
 
 /*!
   \class ThemeTextItem
-
+  \mainclass
   \brief The ThemeTextItem class represents a text in a ThemedView.
 
   The ThemeTextItem class implements the \l{Themed View Elements#themetextelement}{text element} from the theme XML.
@@ -2429,7 +2461,7 @@ struct ThemeTextItemPrivate {
     The format of the text can be set explicitly using the setTextFormat() function.
 
   Normally you do not want to call this item's functions directly, but rather
-  specify the relevant attributes and data for this item in the themed view XML.
+  specify the relevant data for this item in the themed view XML or in the valuespace.
 
     \sa {Themed View Elements#themetextelement}{text element}
   \ingroup appearance
@@ -2437,22 +2469,22 @@ struct ThemeTextItemPrivate {
 
 /*!
   Constructs a ThemeTextItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeTextItem::ThemeTextItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeGraphicItem(p, v, atts)
+ThemeTextItem::ThemeTextItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeGraphicItem(parent, view, atts)
 
 {
     d = new ThemeTextItemPrivate;
 
     QMap<QString,QString> onClickAtts, onFocusAtts;
-    if( isInteractive() ) {
-        onClickAtts = parseSubAtts( atts.value(QLatin1String("onclick")) );
-        onFocusAtts = parseSubAtts( atts.value(QLatin1String("onfocus")) );
+    if (isInteractive()) {
+        onClickAtts = parseSubAtts(atts.value(QLatin1String("onclick")));
+        onFocusAtts = parseSubAtts(atts.value(QLatin1String("onfocus")));
     }
-    setupFont( v->font(), atts.value(QLatin1String("size")), atts.value(QLatin1String("bold")), atts.value(QLatin1String("color")), atts.value(QLatin1String("outline")) );
-    setupFont( font(QLatin1String("font")), onClickAtts[QLatin1String("size")], onClickAtts[QLatin1String("bold")], onClickAtts[QLatin1String("color")], onClickAtts[QLatin1String("outline")], ThemeItem::Pressed );
-    setupFont( font(QLatin1String("font")), onFocusAtts[QLatin1String("size")], onFocusAtts[QLatin1String("bold")], onFocusAtts[QLatin1String("color")], onFocusAtts[QLatin1String("outline")], ThemeItem::Focus );
+    setupFont(view->font(), atts.value(QLatin1String("size")), atts.value(QLatin1String("bold")), atts.value(QLatin1String("color")), atts.value(QLatin1String("outline")));
+    setupFont(font(QLatin1String("font")), onClickAtts[QLatin1String("size")], onClickAtts[QLatin1String("bold")], onClickAtts[QLatin1String("color")], onClickAtts[QLatin1String("outline")], ThemeItem::Pressed);
+    setupFont(font(QLatin1String("font")), onFocusAtts[QLatin1String("size")], onFocusAtts[QLatin1String("bold")], onFocusAtts[QLatin1String("color")], onFocusAtts[QLatin1String("outline")], ThemeItem::Focus);
 
     QString val = atts.value(QLatin1String("shadow"));
     if (!val.isEmpty())
@@ -2480,12 +2512,12 @@ ThemeTextItem::ThemeTextItem(ThemeItem *p, ThemedView *v, const ThemeAttributes 
 }
 
 /*!
-  Deconstructs the ThemeTextItem.
+  Destroys the ThemeTextItem.
 */
 ThemeTextItem::~ThemeTextItem()
 {
     delete d->shadowImg;
-    if( d->textExpr ) {
+    if (d->textExpr) {
         delete d->textExpr;
         d->textExpr = 0;
     }
@@ -2494,26 +2526,26 @@ ThemeTextItem::~ThemeTextItem()
 
 /*!
   \internal
-  Stores the font related data given by \a deffont, \a size, \a bold, \a col and \a outline for the given state \a st.
+  Stores the font related data given by \a deffont, \a size, \a bold, \a col and \a outline for the given state \a state.
 */
-void ThemeTextItem::setupFont( const QFont &deffont, const QString &size, const QString &bold, const QString &col, const QString &outline, ThemeItem::State st )
+void ThemeTextItem::setupFont(const QFont &deffont, const QString &size, const QString &bold, const QString &col, const QString &outline, ThemeItem::State state)
 {
-    setFont( QLatin1String("font"), parseFont( deffont, size, bold ), st );
+    setFont(QLatin1String("font"), parseFont(deffont, size, bold), state);
     QColor colour;
-    int role = parseColor( col, colour );
-    if( role == QPalette::NColorRoles && st != ThemeItem::Default )
-        role = attribute( QLatin1String("colorRole") );
-    if( !colour.isValid() && st != ThemeItem::Default )
-        colour = color( QLatin1String("color") );
-    setAttribute( QLatin1String("colorRole"), role, st );
-    setColor( QLatin1String("color"), colour, st );
-    role = parseColor( outline, colour );
-    if( role == QPalette::NColorRoles && st != ThemeItem::Default )
-        role = attribute( QLatin1String("outlineRole") );
-    if( !colour.isValid() && st != ThemeItem::Default )
-        colour = color( QLatin1String("outline") );
-    setAttribute( QLatin1String("outlineRole"), role, st );
-    setColor( QLatin1String("outline"), colour, st );
+    int role = parseColor(col, colour);
+    if (role == QPalette::NColorRoles && state != ThemeItem::Default)
+        role = attribute(QLatin1String("colorRole"));
+    if (!colour.isValid() && state != ThemeItem::Default)
+        colour = color(QLatin1String("color"));
+    setAttribute(QLatin1String("colorRole"), role, state);
+    setColor(QLatin1String("color"), colour, state);
+    role = parseColor( outline, colour);
+    if (role == QPalette::NColorRoles && state != ThemeItem::Default)
+        role = attribute(QLatin1String("outlineRole"));
+    if (!colour.isValid() && state != ThemeItem::Default)
+        colour = color(QLatin1String("outline"));
+    setAttribute(QLatin1String("outlineRole"), role, state);
+    setColor(QLatin1String("outline"), colour, state);
 }
 
 /*!
@@ -2521,16 +2553,16 @@ void ThemeTextItem::setupFont( const QFont &deffont, const QString &size, const 
   */
 void ThemeTextItem::setupThemeText()
 {
-    if( !d->themeText.isEmpty() ) { // should only occur once
+    if (!d->themeText.isEmpty()) { // should only occur once
         QString newtext = d->themeText;
         d->themeText = QString(); // setText() expects this to be empty
-        if(isDataExpression() && !newtext.trimmed().startsWith("expr:"))
+        if (isDataExpression() && !newtext.trimmed().startsWith("expr:"))
             newtext = newtext.prepend("expr:");
-        if( isStringExpression(newtext) ) {
+        if (isStringExpression(newtext)) {
             Q_ASSERT(d->textExpr == 0);
-            d->textExpr = createExpression( stripStringExpression(newtext) );
-            if( d->textExpr != 0 )
-                expressionChanged( d->textExpr ); // Force initial update
+            d->textExpr = createExpression(stripStringExpression(newtext));
+            if (d->textExpr != 0)
+                expressionChanged(d->textExpr); // Force initial update
         } else {
             setText(newtext);
         }
@@ -2539,13 +2571,13 @@ void ThemeTextItem::setupThemeText()
 }
 
 /*!
-  Sets the content for this text item. \a t will be drawn to the screen.
+  Sets the content for this text item. \a text will be drawn to the screen.
   */
-void ThemeTextItem::setText(const QString &t)
+void ThemeTextItem::setText(const QString &text)
 {
     Q_ASSERT(d->themeText.isEmpty()); // no theme text should be left to process
-    if (t != d->displayText) {
-        d->displayText = t;
+    if (text != d->displayText) {
+        d->displayText = text;
         if (d->format == Qt::AutoText)
             d->richText = Qt::mightBeRichText(d->displayText);
         delete d->shadowImg;
@@ -2571,12 +2603,12 @@ bool ThemeTextItem::shortLabel() const  { return d->shortLbl; }
 Qt::TextFormat ThemeTextItem::textFormat() const { return d->format; }
 
 /*!
-  Sets the text format of the item explicitly to \a fmt.
+  Sets the text format of the item explicitly to \a format.
   If the value is Qt::AutoText, the item tries to determine the correct format.
 */
-void ThemeTextItem::setTextFormat(Qt::TextFormat fmt)
+void ThemeTextItem::setTextFormat(Qt::TextFormat format)
 {
-    d->format = fmt;
+    d->format = format;
     switch (d->format) {
         case Qt::AutoText:
             d->richText = Qt::mightBeRichText(d->displayText);
@@ -2590,6 +2622,7 @@ void ThemeTextItem::setTextFormat(Qt::TextFormat fmt)
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Text.
 */
@@ -2600,15 +2633,15 @@ int ThemeTextItem::rtti() const
 
 /*!
   \reimp
-    Paints the \a rect portion of the status item using the painter \a p.
+    Paints the \a rect portion of the status item using the painter \a painter.
 */
-void ThemeTextItem::paint(QPainter *p, const QRect &rect)
+void ThemeTextItem::paint(QPainter *painter, const QRect &rect)
 {
     Q_UNUSED(rect);
-    QFont defaultFnt = font( QLatin1String("font"), state() );
+    QFont defaultFnt = font(QLatin1String("font"), state());
     if (!d->displayText.isEmpty()) {
         QFont fnt(defaultFnt);
-        //if (itemName() == QLatin1String("time") ) {
+        //if (itemName() == QLatin1String("time")) {
             // (workaround) use helvetica for time strings or we run into trouble
             // when the default font is not scalable
             // assumption!!??!: time string can always be displayed
@@ -2629,7 +2662,7 @@ void ThemeTextItem::paint(QPainter *p, const QRect &rect)
             doc->setHtml(text);
             doc->setPageSize(QSize(w, INT_MAX));
             QAbstractTextDocumentLayout *layout = doc->documentLayout();
-            QSizeF bound( layout->documentSize() );
+            QSizeF bound(layout->documentSize());
             w = (int)bound.width();
             h = (int)bound.height();
             if (d->align & Qt::AlignRight)
@@ -2681,15 +2714,15 @@ void ThemeTextItem::paint(QPainter *p, const QRect &rect)
                     }
                 }
             }
-            p->drawImage(x, y-1, *d->shadowImg);
+            painter->drawImage(x, y-1, *d->shadowImg);
         }
-        QColor col = color( QLatin1String("color"), state() );
-        int role = attribute( QLatin1String("colorRole"), state() ),
-            outlineRole = attribute( QLatin1String("outlineRole"), state() );
+        QColor col = color(QLatin1String("color"), state());
+        int role = attribute(QLatin1String("colorRole"), state()),
+            outlineRole = attribute(QLatin1String("outlineRole"), state());
         if (d->richText) {
             if (outlineRole != QPalette::NColorRoles) {
                 pal.setColor(QPalette::Text, getColor(col, role));
-                drawOutline(p, QRect(x,y,geometry().width(),geometry().height()), pal, doc->documentLayout());
+                drawOutline(painter, QRect(x,y,geometry().width(),geometry().height()), pal, doc->documentLayout());
             } else {
                 QAbstractTextDocumentLayout *layout = doc->documentLayout();
                 doc->setPageSize(QSize(w, INT_MAX));
@@ -2697,19 +2730,19 @@ void ThemeTextItem::paint(QPainter *p, const QRect &rect)
                 context.palette = view()->palette();
                 context.palette.setColor(QPalette::Text, getColor(col, role));
                 QRect cr = QRect(0,0,geometry().width(),geometry().height());
-                p->translate(x, y);
-                p->setClipRect(cr);
-                layout->draw(p, context);
-                p->setClipping(false); // clear our call to setClipRect()
-                p->translate(-x, -y);
+                painter->translate(x, y);
+                painter->setClipRect(cr);
+                layout->draw(painter, context);
+                painter->setClipping(false); // clear our call to setClipRect()
+                painter->translate(-x, -y);
             }
         } else {
-            p->setPen(getColor(col, role));
-            p->setFont(fnt);
+            painter->setPen(getColor(col, role));
+            painter->setFont(fnt);
             if (outlineRole != QPalette::NColorRoles)
-                drawOutline(p, QRect(x,y,w,h), d->align, text);
+                drawOutline(painter, QRect(x,y,w,h), d->align, text);
             else {
-                p->drawText(QRect(x,y,w,h), d->align, text);
+                painter->drawText(QRect(x,y,w,h), d->align, text);
             }
         }
         delete doc;
@@ -2719,17 +2752,17 @@ void ThemeTextItem::paint(QPainter *p, const QRect &rect)
 /*!
   \reimp
   */
-void ThemeTextItem::expressionChanged( QExpressionEvaluator* expr )
+void ThemeTextItem::expressionChanged(QExpressionEvaluator *expression)
 {
-    if( d->textExpr == expr ) {
-        QVariant result = getExpressionResult( expr, QVariant::String );
-        if(!result.canConvert(QVariant::String)) {
-            qWarning("ThemeTextItem::expressionChanged() - Expression '%s' could not be coerced to string type, ignoring value.", expr->expression().constData());
+    if (d->textExpr == expression) {
+        QVariant result = getExpressionResult(expression, QVariant::String);
+        if (!result.canConvert(QVariant::String)) {
+            qWarning("ThemeTextItem::expressionChanged() - Expression '%s' could not be coerced to string type, ignoring value.", expression->expression().constData());
         } else {
-            setText( result.toString() );
+            setText(result.toString());
         }
     } else {
-        ThemeItem::expressionChanged( expr );
+        ThemeItem::expressionChanged(expression);
     }
 }
 
@@ -2743,41 +2776,41 @@ void ThemeTextItem::constructionComplete()
 }
 
 
-void ThemeTextItem::drawOutline(QPainter *p, const QRect &r, int flags, const QString &text)
+void ThemeTextItem::drawOutline(QPainter *painter, const QRect &rect, int flags, const QString &text)
 {
-    QColor outlineColor = color( QLatin1String("outline"), state() );
-    int outlineRole = attribute( QLatin1String("outlineRole"), state() );
+    QColor outlineColor = color(QLatin1String("outline"), state());
+    int outlineRole = attribute(QLatin1String("outlineRole"), state());
 
     // Cheaper to paint into pixmap and blit that four times than
     // to draw text four times.
-    QFontMetrics fm(p->font());
-    QRect br = fm.boundingRect(r, flags, text);
+    QFontMetrics fm(painter->font());
+    QRect br = fm.boundingRect(rect, flags, text);
     QImage img(br.size(), QImage::Format_ARGB32_Premultiplied);
     img.fill(qRgba(0,0,0,0));
     QPainter ppm(&img);
-    ppm.setFont(p->font());
+    ppm.setFont(painter->font());
     ppm.setPen(getColor(outlineColor, outlineRole));
-    ppm.translate(r.topLeft()-br.topLeft());
-    ppm.drawText(r, flags, text);
+    ppm.translate(rect.topLeft()-br.topLeft());
+    ppm.drawText(rect, flags, text);
 
 
     QPoint pos(br.topLeft());
     pos += QPoint(-1,0);
-    p->drawImage(pos, img);
+    painter->drawImage(pos, img);
     pos += QPoint(2,0);
-    p->drawImage(pos, img);
+    painter->drawImage(pos, img);
     pos += QPoint(-1,-1);
-    p->drawImage(pos, img);
+    painter->drawImage(pos, img);
     pos += QPoint(0,2);
-    p->drawImage(pos, img);
+    painter->drawImage(pos, img);
 
-    p->drawText(r, flags, text);
+    painter->drawText(rect, flags, text);
 }
 
 void ThemeTextItem::drawOutline(QPainter *p, const QRect &r, const QPalette &pal, QAbstractTextDocumentLayout *layout)
 {
-    QColor outlineColor = color( QLatin1String("outline"), state() );
-    int outlineRole = attribute( QLatin1String("outlineRole"), state() );
+    QColor outlineColor = color(QLatin1String("outline"), state());
+    int outlineRole = attribute(QLatin1String("outlineRole"), state());
     QAbstractTextDocumentLayout::PaintContext context;
     context.palette = view()->palette();
     context.palette.setColor(QPalette::Text, getColor(outlineColor, outlineRole));
@@ -2807,16 +2840,9 @@ void ThemeTextItem::addCharacters(const QString &ch)
 
 //---------------------------------------------------------------------------
 
-/*
-class ThemeRectItemPrivate
-{
-public:
-    int alpha;
-};
-*/
-
 /*!
   \class ThemeRectItem
+  \mainclass
 
   \brief The ThemeRectItem class represents a visual rectangle in a ThemedView.
 
@@ -2831,18 +2857,13 @@ public:
 
 /*!
   Constructs a ThemeRectItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeRectItem::ThemeRectItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeGraphicItem(p, v, atts)
+ThemeRectItem::ThemeRectItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeGraphicItem(parent, view, atts)
 {
-    /*
-    d[0] = 0;
-    d[1] = 0;
-    d[2] = 0;
-    */
     QMap<QString,QString> onClickAtts, onFocusAtts;
-    if( isInteractive() ) {
+    if ( isInteractive() ) {
         onClickAtts = parseSubAtts( atts.value(QLatin1String("onclick")) );
         onFocusAtts = parseSubAtts( atts.value(QLatin1String("onfocus")) );
     }
@@ -2861,14 +2882,15 @@ ThemeRectItem::ThemeRectItem(ThemeItem *p, ThemedView *v, const ThemeAttributes 
 }
 
 /*!
-  Returns the color used for the rectangle's background for the given state \a st.
+  Returns the color used for the rectangle's background for the given state \a state.
 */
-QColor ThemeRectItem::brushColor( ThemeItem::State st ) const
+QColor ThemeRectItem::brushColor( ThemeItem::State state ) const
 {
-    return getColor( color( QLatin1String("bg"), st ), attribute( QLatin1String("bgRole"), st ) );
+    return getColor( color( QLatin1String("bg"), state ), attribute( QLatin1String("bgRole"), state ) );
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Rect.
 */
@@ -2901,7 +2923,7 @@ void ThemeRectItem::paint(QPainter *p, const QRect &rect)
     } else {
         QColor col = getColor(color(QLatin1String("bg"), state()), bgRole);
         QString al = strAttribute("alpha", state());
-        if( !al.isEmpty() ) {
+        if ( !al.isEmpty() ) {
             bool ok = false;
             if (!al.isEmpty() && al != "255")
                 col.setAlpha(al.toInt(&ok));
@@ -2918,6 +2940,7 @@ void ThemeRectItem::paint(QPainter *p, const QRect &rect)
 
 /*!
   \class ThemeLineItem
+  \mainclass
 
   \brief The ThemeLineItem class represents a visual line in a ThemedView.
 
@@ -2932,10 +2955,10 @@ void ThemeRectItem::paint(QPainter *p, const QRect &rect)
 
 /*!
   Constructs a ThemeLineItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeLineItem::ThemeLineItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeGraphicItem(p, v, atts)
+ThemeLineItem::ThemeLineItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeGraphicItem(parent, view, atts)
 {
     QColor colour;
     setAttribute( QLatin1String("colorRole"), parseColor(atts.value(QLatin1String("color")), colour) );
@@ -2943,6 +2966,7 @@ ThemeLineItem::ThemeLineItem(ThemeItem *p, ThemedView *v, const ThemeAttributes 
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Line.
 */
@@ -2981,6 +3005,7 @@ struct ThemePixmapItemPrivate
 
 /*!
   \class ThemePixmapItem
+  \mainclass
 
   \brief The ThemePixmapItem class contains common functionality for image based items in a ThemedView.
 
@@ -2995,10 +3020,10 @@ struct ThemePixmapItemPrivate
 
 /*!
   Constructs a ThemePixmapItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
   */
-ThemePixmapItem::ThemePixmapItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeGraphicItem( p, v, atts )
+ThemePixmapItem::ThemePixmapItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeGraphicItem(parent, view, atts)
 {
     d = new ThemePixmapItemPrivate;
 
@@ -3024,31 +3049,31 @@ ThemePixmapItem::~ThemePixmapItem()
 }
 
 /*!
-  Returns the pixmap for the given \a key and state \a st.
-  \a st  has a default value of ThemeItem::Default.
+  Returns the pixmap for the given \a key and state \a state.
+  \a state  has a default value of ThemeItem::Default.
 */
-QPixmap ThemePixmapItem::pixmap( const QString &key, ThemeItem::State st ) const
+QPixmap ThemePixmapItem::pixmap( const QString &key, ThemeItem::State state ) const
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex( state );
     const QMap<QString,Image> &dataset = d->images[_st];
     return dataset[key].pixmap;
 }
 
 /*!
-  Sets the pixmap \a val for the given \a key and state \a st from \a filename.
-  \a st has a default value of ThemeItem::Default.
+  Sets the pixmap \a value for the given \a key and state \a state from \a filename.
+  \a state has a default value of ThemeItem::Default.
 */
-void ThemePixmapItem::setPixmap( const QString &key, const QPixmap &val, ThemeItem::State st, const QString &filename )
+void ThemePixmapItem::setPixmap( const QString &key, const QPixmap &value, ThemeItem::State state, const QString &filename )
 {
-    int _st = stateToIndex( st );
+    int _st = stateToIndex( state );
     QMap<QString,Image> &dataset = d->images[_st];
-    if( dataset.contains( key ) ) {
-        dataset[key].pixmap = val;
+    if ( dataset.contains( key ) ) {
+        dataset[key].pixmap = value;
         dataset[key].filename = filename;
     }
     else {
         Image image;
-        image.pixmap = val;
+        image.pixmap = value;
         image.filename = filename;
         dataset.insert( key, image );
     }
@@ -3164,10 +3189,10 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
             doc.load(QLatin1String(":image/")+view()->base()+imgName);
         else
             imgName = imgName.mid(dflt_path.length());
-        if(buffer.isNull())
+        if (buffer.isNull())
             doc.load(QLatin1String(":image/")+view()->defaultPics()+imgName);
         doc.render(&painter);
-        if( colour.isValid() ) // only call colorizeImage if the colour isValid
+        if ( colour.isValid() ) // only call colorizeImage if the colour isValid
             colorizeImage( buffer, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = QPixmap::fromImage(buffer);
         QPixmapCache::insert(key, pm);
@@ -3181,13 +3206,13 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
             img = QImage(QLatin1String(":image/")+view()->base()+imgName);
         else
             imgName = imgName.mid(dflt_path.length());
-        if( img.isNull() )
+        if ( img.isNull() )
             img = QImage(QLatin1String(":image/")+view()->defaultPics()+imgName);
-        if( img.isNull() )
+        if ( img.isNull() )
             img = QImage(imgName);
         if ( img.isNull() )
             return pm;
-        if( colour.isValid() ) // only call colorizeImage if the colour isValid
+        if ( colour.isValid() ) // only call colorizeImage if the colour isValid
             colorizeImage( img, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = pm.fromImage( img );
     } else {
@@ -3195,23 +3220,27 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
             pm = QPixmap(QLatin1String(":image/")+view()->base()+imgName);
         else
             imgName = imgName.mid(dflt_path.length());
-        if( pm.isNull() )
+        if ( pm.isNull() )
             pm = QPixmap(QLatin1String(":image/")+view()->defaultPics()+imgName);
-        if( pm.isNull() )
+        if ( pm.isNull() )
             pm = QPixmap(imgName);
     }
 
     return pm;
 }
 
+/*!
+    \internal
+*/
 QPixmap ThemePixmapItem::scalePixmap( const QPixmap &pix, int width, int height )
 {
-    if( pix.isNull() || (width <= 0 || height <= 0) || (pix.width() == width && pix.height() == height) )
+    if ( pix.isNull() || (width <= 0 || height <= 0) || (pix.width() == width && pix.height() == height) )
         return pix;
     return pix.scaled(width, height);
 }
 
 /*!
+    \internal
     Set horizontal scaling if \a enable is true, otherwise the pixmap
     will not be scaled in the horizontal direction.
 */
@@ -3221,6 +3250,7 @@ void ThemePixmapItem::setHorizontalScale( bool enable )
 }
 
 /*!
+    \internal
     Set vertical scaling if \a enable is true, otherwise the pixmap
     will not be scaled in the vertical direction.
 */
@@ -3230,6 +3260,7 @@ void ThemePixmapItem::setVerticalScale( bool enable )
 }
 
 /*!
+    \internal
     Returns true if the pixmap will be scaled horizontally.
 */
 bool ThemePixmapItem::horizontalScale() const
@@ -3239,6 +3270,7 @@ bool ThemePixmapItem::horizontalScale() const
 
 
 /*!
+    \internal
     Returns true if the pixmap will be scaled vertically.
 */
 bool ThemePixmapItem::verticalScale() const
@@ -3339,6 +3371,7 @@ struct ThemeAnimationItemPrivate
 
 /*!
   \class ThemeAnimationItem
+  \mainclass
 
   \brief The ThemeAnimationItem class represents a pixmap-based animation in a ThemedView.
 
@@ -3357,39 +3390,39 @@ struct ThemeAnimationItemPrivate
 
 /*!
   Constructs a ThemeAnimationitem
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeAnimationItem::ThemeAnimationItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemePixmapItem(p, v, atts)
+ThemeAnimationItem::ThemeAnimationItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemePixmapItem(parent, view, atts)
 {
     d = new ThemeAnimationItemPrivate;
 
     QMap<QString,QString> onClickAtts, onFocusAtts;
-    if( isInteractive() ) {
+    if ( isInteractive() ) {
         onClickAtts = parseSubAtts( atts.value(QLatin1String("onclick")) );
         onFocusAtts = parseSubAtts( atts.value(QLatin1String("onfocus")) );
     }
 
-    setupAnimation( v->base(), atts.value( QLatin1String("src") ), atts.value( QLatin1String("color") ), atts.value( QLatin1String("alpha") ), atts.value( QLatin1String("count") ), atts.value( QLatin1String("width") ),
-            atts.value( QLatin1String("loop") ), atts.value( QLatin1String("looprev") ), atts.value( QLatin1String("delay") ), atts.value(QLatin1String("play")) );
+    setupAnimation(view->base(), atts.value( QLatin1String("src") ), atts.value( QLatin1String("color") ), atts.value( QLatin1String("alpha") ), atts.value( QLatin1String("count") ), atts.value( QLatin1String("width") ),
+            atts.value( QLatin1String("loop") ), atts.value( QLatin1String("looprev") ), atts.value( QLatin1String("delay") ), atts.value(QLatin1String("play")));
     QString filename;
     filename = onClickAtts[QLatin1String("src")];
     /*
-    if( filename.isEmpty() )
+    if ( filename.isEmpty() )
         filename = atts.value( QLatin1String("src") );
         */
-    setupAnimation( v->base(), filename, onClickAtts[QLatin1String("color")], onClickAtts[QLatin1String("alpha")], onClickAtts[QLatin1String("count")], onClickAtts[QLatin1String("width")],
-            onClickAtts[QLatin1String("loop")], onClickAtts[QLatin1String("looprev")], onClickAtts[QLatin1String("delay")], onClickAtts[QLatin1String("play")], ThemeItem::Pressed );
+    setupAnimation(view->base(), filename, onClickAtts[QLatin1String("color")], onClickAtts[QLatin1String("alpha")], onClickAtts[QLatin1String("count")], onClickAtts[QLatin1String("width")],
+            onClickAtts[QLatin1String("loop")], onClickAtts[QLatin1String("looprev")], onClickAtts[QLatin1String("delay")], onClickAtts[QLatin1String("play")], ThemeItem::Pressed);
     filename = onFocusAtts[QLatin1String("src")];
     /*
-    if( filename.isEmpty() )
+    if ( filename.isEmpty() )
         filename = atts.value( QLatin1String("src") );
         */
-    setupAnimation( v->base(), filename, onFocusAtts[QLatin1String("color")], onFocusAtts[QLatin1String("alpha")], onFocusAtts[QLatin1String("count")], onFocusAtts[QLatin1String("width")],
-            onFocusAtts[QLatin1String("loop")], onFocusAtts[QLatin1String("looprev")], onFocusAtts[QLatin1String("delay")], onFocusAtts[QLatin1String("play")], ThemeItem::Focus );
+    setupAnimation(view->base(), filename, onFocusAtts[QLatin1String("color")], onFocusAtts[QLatin1String("alpha")], onFocusAtts[QLatin1String("count")], onFocusAtts[QLatin1String("width")],
+            onFocusAtts[QLatin1String("loop")], onFocusAtts[QLatin1String("looprev")], onFocusAtts[QLatin1String("delay")], onFocusAtts[QLatin1String("play")], ThemeItem::Focus);
 
     for( int i = 0 ; i < 3 ; ++i )
-        if( !pixmap( QLatin1String("src"), indexToState(i) ).isNull() && attribute( QLatin1String("delay"), indexToState(i) ) > 0 )
+        if ( !pixmap( QLatin1String("src"), indexToState(i) ).isNull() && attribute( QLatin1String("delay"), indexToState(i) ) > 0 )
             d->fi[i] = new ThemeAnimationFrameInfo(this, attribute(QLatin1String("delay"), indexToState(i) ));
         else
             d->fi[i] = 0;
@@ -3406,15 +3439,15 @@ ThemeAnimationItem::ThemeAnimationItem(ThemeItem *p, ThemedView *v, const ThemeA
 ThemeAnimationItem::~ThemeAnimationItem()
 {
     for( int i = 0 ; i < 3 ; ++i )
-        if( d->fi[i] )
+        if ( d->fi[i] )
             delete d->fi[i];
 
     QExpressionEvaluator* firstexpr = d->playExpr[0];
     for(int i = 0 ; i < 3 ; ++i)
-        if(i == 0 || d->playExpr[i] != firstexpr)
+        if (i == 0 || d->playExpr[i] != firstexpr)
             delete d->playExpr[i];
 
-    if( d->frameExpr ) {
+    if ( d->frameExpr ) {
         delete d->frameExpr;
         d->frameExpr = 0;
     }
@@ -3447,20 +3480,20 @@ const QString &width, const QString &loop, const QString &looprev, const QString
     int role = QPalette::NColorRoles;
     QString c = col;
     int idx = stateToIndex(st);
-    if( c.isEmpty() && st != ThemeItem::Default ) {
+    if ( c.isEmpty() && st != ThemeItem::Default ) {
         colour = color( QLatin1String("color") );
         role = attribute( QLatin1String("colorRole") );
-    } else if( !c.isEmpty() )
+    } else if ( !c.isEmpty() )
         role = parseColor( c, colour );
     int al;
-    if( alpha.isEmpty() && st != ThemeItem::Default )
+    if ( alpha.isEmpty() && st != ThemeItem::Default )
         al = attribute( QLatin1String("alpha") );
-    else if( !alpha.isEmpty() )
+    else if ( !alpha.isEmpty() )
         al = alpha.toInt();
     else
         al = 255;
     QString s = src;
-    if( s.isEmpty() && st != ThemeItem::Default ) {
+    if ( s.isEmpty() && st != ThemeItem::Default ) {
         s = strAttribute( QLatin1String("src") );
     }
     setAttribute( QLatin1String("src"), s, st );
@@ -3470,51 +3503,51 @@ const QString &width, const QString &loop, const QString &looprev, const QString
     setColor( QLatin1String("color"), colour, st );
     setAttribute( QLatin1String("alpha"), al, st );
 
-    if( !count.isEmpty() )
+    if ( !count.isEmpty() )
         setAttribute( QLatin1String("count"), count.toInt(), st );
-    else if( st != ThemeItem::Default )
+    else if ( st != ThemeItem::Default )
         setAttribute( QLatin1String("count"), attribute( QLatin1String("count") ), st );
     else
         setAttribute( QLatin1String("count"), 0 );
-    if( !width.isEmpty() )
+    if ( !width.isEmpty() )
         setAttribute( QLatin1String("width"), width.toInt(), st );
-    else if( st != ThemeItem::Default )
+    else if ( st != ThemeItem::Default )
         setAttribute( QLatin1String("width"), attribute( QLatin1String("width") ), st );
     else
     {
         int count = attribute(QLatin1String("count"));
-        if( count <= 0 )
+        if ( count <= 0 )
             count = 1;
         setAttribute( QLatin1String("width"), pixmap( QLatin1String("src") ).width() / count );
     }
-    if( !loop.isEmpty() )
+    if ( !loop.isEmpty() )
         setAttribute( QLatin1String("loop"), loop.toInt(), st );
-    else if( st != ThemeItem::Default )
+    else if ( st != ThemeItem::Default )
         setAttribute( QLatin1String("loop"), attribute( QLatin1String("loop") ), st );
     else
         setAttribute( QLatin1String("loop"), -1, st );
-    if( !looprev.isEmpty() )
+    if ( !looprev.isEmpty() )
         setAttribute( QLatin1String("looprev"), looprev.toInt(), st );
-    else if( st != ThemeItem::Default )
+    else if ( st != ThemeItem::Default )
         setAttribute( QLatin1String("looprev"), attribute( QLatin1String("looprev") ), st );
     else
         setAttribute( QLatin1String("looprev"), 0 );
-    if( !delay.isEmpty() )
+    if ( !delay.isEmpty() )
         setAttribute( QLatin1String("delay"), delay.toInt(), st );
-    else if( st != ThemeItem::Default )
+    else if ( st != ThemeItem::Default )
         setAttribute( QLatin1String("delay"), attribute( QLatin1String("delay") ), st );
     else
         setAttribute( QLatin1String("delay"), 0 );
-    if( !play.isEmpty() ) {
-        if(isStringExpression(play)) {
+    if ( !play.isEmpty() ) {
+        if (isStringExpression(play)) {
             d->playExpr[idx] = createExpression(stripStringExpression(play));
-            if( d->playExpr[idx] )
+            if ( d->playExpr[idx] )
                 expressionChanged(d->playExpr[idx]);
-        } else if(play != "no") {
-            if(!attribute("playing"))
+        } else if (play != "no") {
+            if (!attribute("playing"))
                 start();
         }
-    } else if( st != ThemeItem::Default ) {
+    } else if ( st != ThemeItem::Default ) {
         d->playExpr[stateToIndex(st)] = d->playExpr[stateToIndex(ThemeItem::Default)];
     } else {
         d->playExpr[stateToIndex(st)] = 0;
@@ -3522,14 +3555,14 @@ const QString &width, const QString &loop, const QString &looprev, const QString
 }
 
 /*!
-  Sets the current frame to \a f.
-  If the animation is currently playing, the animation will jump to the frame at \a f.
-  Otherwise, the animation will begin playing from the frame at \a f.
+  Sets the current frame to \a frame.
+  If the animation is currently playing, the animation will jump to the frame at \a frame.
+  Otherwise, the animation will begin playing from the frame at \a frame.
 */
-void ThemeAnimationItem::setFrame(int f)
+void ThemeAnimationItem::setFrame(int frame)
 {
-    if (f >= 0 && f < attribute(QLatin1String("count"), state()) && d->currFrame != f) {
-        d->currFrame = f;
+    if (frame >= 0 && frame < attribute(QLatin1String("count"), state()) && d->currFrame != frame) {
+        d->currFrame = frame;
         if (isVisible())
             update();
     }
@@ -3544,7 +3577,7 @@ void ThemeAnimationItem::start()
 {
     int cst = stateToIndex( state() );
     //set all variables, even if there's no animation for this state
-    if( rtti() != ThemedView::Level ) {
+    if ( rtti() != ThemedView::Level ) {
         d->currFrame = 0;
         d->inc = 1;
     } //don't reset current frame for levels
@@ -3562,7 +3595,7 @@ void ThemeAnimationItem::start()
 void ThemeAnimationItem::stop()
 {
     for( int i = 0 ; i < 3 ; ++i )
-        if(d->fi[i]) {
+        if (d->fi[i]) {
             d->fi[i]->stop();
         }
     setAttribute("playing", 0);
@@ -3624,6 +3657,7 @@ void ThemeAnimationItem::advance()
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Animation.
 */
@@ -3637,7 +3671,7 @@ int ThemeAnimationItem::rtti() const
 */
 void ThemeAnimationItem::stateChanged( const ThemeItem::State& /*st*/ )
 {
-    if(attribute("playing") != 0) {
+    if (attribute("playing") != 0) {
         stop();
         start();
     }
@@ -3648,10 +3682,10 @@ void ThemeAnimationItem::stateChanged( const ThemeItem::State& /*st*/ )
 */
 void ThemeAnimationItem::constructionComplete()
 {
-    if( !d->text.isEmpty() ) {
-        if( isStringExpression( d->text ) ) {
+    if ( !d->text.isEmpty() ) {
+        if ( isStringExpression( d->text ) ) {
             d->frameExpr = createExpression( stripStringExpression(d->text));
-            if( d->frameExpr != 0 )
+            if ( d->frameExpr != 0 )
                 expressionChanged( d->frameExpr );
         } else {
             setFrame( d->text.toInt() );
@@ -3666,23 +3700,23 @@ void ThemeAnimationItem::constructionComplete()
 */
 void ThemeAnimationItem::expressionChanged( QExpressionEvaluator* expr )
 {
-    if( d->frameExpr == expr ) {
+    if ( d->frameExpr == expr ) {
         QVariant result = getExpressionResult( expr, QVariant::Int );
-        if( !result.canConvert(QVariant::Int) ) {
+        if ( !result.canConvert(QVariant::Int) ) {
             qWarning() << "ThemeAnimationItem::expressionChanged() - Cannot convert value to Int.";
         } else {
             setFrame( result.toInt() );
         }
-    } else if( d->playExpr[stateToIndex(state())] == expr) {
+    } else if ( d->playExpr[stateToIndex(state())] == expr) {
         // play expr for current state
         QVariant result = getExpressionResult(expr, QVariant::Bool);
-        if(result.canConvert(QVariant::Bool)) {
+        if (result.canConvert(QVariant::Bool)) {
             bool b = result.toBool();
-            if(b) {
-                if(attribute("playing") == 0)
+            if (b) {
+                if (attribute("playing") == 0)
                     start();
             } else {
-                if(attribute("playing") != 0)
+                if (attribute("playing") != 0)
                     stop();
             }
         }
@@ -3707,12 +3741,13 @@ struct ThemeLevelItemPrivate
 
 /*!
   \class ThemeLevelItem
+  \mainclass
 
   \brief The ThemeLevelItem class represents a level indicator in a ThemedView.
 
   The ThemeLevelItem class implements the \l{Themed View Elements#themelevelelement}{level element} from the theme XML.
 
-  An example of a level indicator is the battery level or signal quality indicators in Qtopia.
+  Examples of level indicators are the battery level or signal quality indicators in Qtopia.
   A ThemeLevelItem has a range given by minValue() and maxValue(). It displays an indicator
   showing a current value within that range.
   The range can be manually set using setRange(), and the current value using setValue().
@@ -3726,17 +3761,17 @@ struct ThemeLevelItemPrivate
 
 /*!
   Constructs a ThemeLevelItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeLevelItem::ThemeLevelItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeAnimationItem(p, v, atts)
+ThemeLevelItem::ThemeLevelItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeAnimationItem(parent, view, atts)
 {
     d = new ThemeLevelItemPrivate;
     d->maxVal = attribute(QLatin1String("count"),state());
 
-    if( !atts.value( "max" ).isEmpty() )
+    if ( !atts.value( "max" ).isEmpty() )
         d->maxVal = atts.value( "max" ).toInt();
-    if( !atts.value( "min" ).isEmpty() )
+    if ( !atts.value( "min" ).isEmpty() )
         d->minVal = atts.value( "min" ).toInt();
 }
 
@@ -3782,12 +3817,12 @@ void ThemeLevelItem::setFrame(int v)
 }
 
 /*!
-  Sets the current level of the level item to \a v.
+  Sets the current level of the level item to \a value.
 */
-void ThemeLevelItem::setValue(int v)
+void ThemeLevelItem::setValue(int value)
 {
-    if(d->val != v)
-        updateValue(v);
+    if (d->val != value)
+        updateValue(value);
 }
 
 void ThemeLevelItem::updateValue(int v)
@@ -3804,12 +3839,12 @@ void ThemeLevelItem::updateValue(int v)
 }
 
 /*!
-  Sets the minimum and maximum value of the level to be \a minv and \a maxv respectively.
+  Sets the minimum and maximum value of the level to be \a min and \a max respectively.
 */
-void ThemeLevelItem::setRange(int minv, int maxv)
+void ThemeLevelItem::setRange(int min, int max)
 {
-    d->minVal = minv;
-    d->maxVal = maxv;
+    d->minVal = min;
+    d->maxVal = max;
 }
 
 /*!
@@ -3823,6 +3858,7 @@ void ThemeLevelItem::layout()
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Level.
 */
@@ -3845,6 +3881,7 @@ struct ThemeStatusItemPrivate
 
 /*!
   \class ThemeStatusItem
+  \mainclass
 
   \brief The ThemeStatusItem class represents a status indicator in a ThemedView.
 
@@ -3861,15 +3898,15 @@ struct ThemeStatusItemPrivate
 
 /*!
   Constructs a ThemeStatusItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
   */
-ThemeStatusItem::ThemeStatusItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemePixmapItem(p, v, atts)
+ThemeStatusItem::ThemeStatusItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemePixmapItem(parent, view, atts)
 {
     d = new ThemeStatusItemPrivate;
 
     QMap<QString,QString> onClickAtts, onFocusAtts;
-    if( isInteractive() ) {
+    if ( isInteractive() ) {
         onClickAtts = parseSubAtts( atts.value(QLatin1String("onclick")) );
         onFocusAtts = parseSubAtts( atts.value(QLatin1String("onfocus")) );
     }
@@ -3880,7 +3917,7 @@ ThemeStatusItem::ThemeStatusItem(ThemeItem *p, ThemedView *v, const ThemeAttribu
        in the system */
     QString expr = atts.value( QLatin1String( "on" ) );
     bool isliteral = !isStringExpression(expr);
-    if( isliteral ) {
+    if ( isliteral ) {
         d->isOn = expr != QLatin1String("no");
     } else {
         d->isOn = false;
@@ -3890,11 +3927,11 @@ ThemeStatusItem::ThemeStatusItem(ThemeItem *p, ThemedView *v, const ThemeAttribu
     QString filename = atts.value( QLatin1String("imageon") );
     createImage( QLatin1String("on"), filename, atts.value( QLatin1String("coloron") ), atts.value( QLatin1String("alphaon") ) );
     filename = onClickAtts[QLatin1String("imageon")];
-    if( filename.isEmpty() && onClickAtts[QLatin1String("coloron")].length() || onClickAtts[QLatin1String("alphaon")].length() )
+    if ( filename.isEmpty() && onClickAtts[QLatin1String("coloron")].length() || onClickAtts[QLatin1String("alphaon")].length() )
         filename = atts.value( QLatin1String("imageon") );
     createImage( QLatin1String("on"), filename, onClickAtts[QLatin1String("coloron")], onClickAtts[QLatin1String("alphaon")], ThemeItem::Pressed );
     filename = onFocusAtts[QLatin1String("imageon")];
-    if( filename.isEmpty() && onFocusAtts[QLatin1String("coloron")].length() || onFocusAtts[QLatin1String("alphaon")].length() )
+    if ( filename.isEmpty() && onFocusAtts[QLatin1String("coloron")].length() || onFocusAtts[QLatin1String("alphaon")].length() )
         filename = atts.value( QLatin1String("imageon") );
     createImage( QLatin1String("on"), filename, onFocusAtts[QLatin1String("coloron")], onFocusAtts[QLatin1String("alphaon")], ThemeItem::Focus );
     filename = atts.value( QLatin1String("imageoff") );
@@ -3906,7 +3943,7 @@ ThemeStatusItem::ThemeStatusItem(ThemeItem *p, ThemedView *v, const ThemeAttribu
 */
 ThemeStatusItem::~ThemeStatusItem()
 {
-    if( d->onExpr ) {
+    if ( d->onExpr ) {
         delete d->onExpr;
         d->onExpr = 0;
     }
@@ -3919,9 +3956,9 @@ ThemeStatusItem::~ThemeStatusItem()
 void ThemeStatusItem::constructionComplete()
 {
     QString expr = strAttribute("onExpression");
-    if( !expr.isEmpty() ) {
+    if ( !expr.isEmpty() ) {
         d->onExpr = createExpression( expr );
-        if( d->onExpr != 0 )
+        if ( d->onExpr != 0 )
             expressionChanged( d->onExpr ); // Force initial update
         setAttribute("onExpression", QString());
     }
@@ -3933,9 +3970,9 @@ void ThemeStatusItem::constructionComplete()
  */
 void ThemeStatusItem::expressionChanged( QExpressionEvaluator* expr )
 {
-    if( d->onExpr == expr ) {
+    if ( d->onExpr == expr ) {
         QVariant result = getExpressionResult( expr, QVariant::Bool );
-        if( !result.canConvert(QVariant::Bool) ) {
+        if ( !result.canConvert(QVariant::Bool) ) {
             qWarning() << "ThemeStatusItem::expressionChanged() - Cannot convert value to Bool";
         } else {
             setOn( result.toBool() );
@@ -3953,12 +3990,12 @@ void ThemeStatusItem::createImage( const QString &key, const QString &filename, 
     int role = QPalette::NColorRoles;
     int al = 255;
     QPixmap pm;
-    if( !filename.isEmpty() ) {
+    if ( !filename.isEmpty() ) {
         role = parseColor( col, colour );
-        if( !alpha.isEmpty() )
+        if ( !alpha.isEmpty() )
             al = alpha.toInt();
         pm = loadImage( filename, role, colour, al );
-    } else if( st != ThemeItem::Default ) {
+    } else if ( st != ThemeItem::Default ) {
 
         role = attribute( QLatin1String("colorrole") + key );
         pm = pixmap( QLatin1String("image") + key );
@@ -3977,15 +4014,15 @@ void ThemeStatusItem::createImage( const QString &key, const QString &filename, 
 bool ThemeStatusItem::isOn() const { return d->isOn; }
 
 /*!
-  Sets whether the item is on or off based on the flag \a e.
+  Sets whether the item is on or off based on the flag \a on.
   The status item is displayed to the user differently depending
   on whether it is on or off.
 */
-void ThemeStatusItem::setOn(bool e)
+void ThemeStatusItem::setOn(bool on)
 {
-    if (e != d->isOn) {
-        d->isOn = e;
-        if( !d->isOn )
+    if (on != d->isOn) {
+        d->isOn = on;
+        if ( !d->isOn )
             setPressed(false); // if disabled can't be pressed
         if (isVisible())
             update();
@@ -3993,6 +4030,7 @@ void ThemeStatusItem::setOn(bool e)
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Status.
 */
@@ -4039,6 +4077,7 @@ struct ThemeImageItemPrivate
 
 /*!
   \class ThemeImageItem
+  \mainclass
 
   \brief The ThemeImageItem class represents an image in a ThemedView.
 
@@ -4056,26 +4095,26 @@ struct ThemeImageItemPrivate
 
 /*!
   Constructs a ThemeImageItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeImageItem::ThemeImageItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemePixmapItem(p, v, atts)
+ThemeImageItem::ThemeImageItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemePixmapItem(parent, view, atts)
 {
     d = new ThemeImageItemPrivate;
 
     QMap<QString,QString> onClickAtts, onFocusAtts;
-    if( isInteractive() ) {
+    if ( isInteractive() ) {
         onClickAtts = parseSubAtts( atts.value(QLatin1String("onclick")) );
         onFocusAtts = parseSubAtts( atts.value(QLatin1String("onfocus")) );
     }
 
     setAttribute( "src", atts.value(QLatin1String("src")));
     QString imgName = onClickAtts[QLatin1String("src")];
-    if( imgName.isEmpty() && (!onClickAtts[QLatin1String("alpha")].isEmpty() || !onClickAtts[QLatin1String("color")].isEmpty()) )
+    if ( imgName.isEmpty() && (!onClickAtts[QLatin1String("alpha")].isEmpty() || !onClickAtts[QLatin1String("color")].isEmpty()) )
         imgName = atts.value("src");
     setAttribute( "src", imgName, ThemeItem::Pressed );
     imgName = onFocusAtts[QLatin1String("src")];
-    if( imgName.isEmpty() && (!onFocusAtts[QLatin1String("alpha")].isEmpty() || !onFocusAtts[QLatin1String("color")].isEmpty()) )
+    if ( imgName.isEmpty() && (!onFocusAtts[QLatin1String("alpha")].isEmpty() || !onFocusAtts[QLatin1String("color")].isEmpty()) )
         imgName = atts.value("src");
     setAttribute( "src", imgName, ThemeItem::Focus );
 
@@ -4110,7 +4149,7 @@ ThemeImageItem::ThemeImageItem(ThemeItem *p, ThemedView *v, const ThemeAttribute
 ThemeImageItem::~ThemeImageItem()
 {
     for( int i = 0 ; i < 3 ; ++i )
-        if( d->expressions[i] != 0 )
+        if ( d->expressions[i] != 0 )
             delete d->expressions[i];
     delete d;
 }
@@ -4123,18 +4162,18 @@ void ThemeImageItem::expressionChanged( QExpressionEvaluator* expr )
     // FIXME : implement expression handling for images
     Q_ASSERT(expr != 0);
     QString result = getExpressionResult(expr, QVariant::String).toString();
-    if( d->expressions[stateToIndex(ThemeItem::Default)] == expr ) {
-        if( strAttribute("src", ThemeItem::Default) != result ) {
+    if ( d->expressions[stateToIndex(ThemeItem::Default)] == expr ) {
+        if ( strAttribute("src", ThemeItem::Default) != result ) {
             setAttribute( "src", result, ThemeItem::Default );
             updateImage( ThemeItem::Default );
         }
-    } else if( d->expressions[stateToIndex(ThemeItem::Pressed)] == expr ) {
-        if( strAttribute("src", ThemeItem::Pressed) != result ) {
+    } else if ( d->expressions[stateToIndex(ThemeItem::Pressed)] == expr ) {
+        if ( strAttribute("src", ThemeItem::Pressed) != result ) {
             setAttribute( "src", result, ThemeItem::Pressed);
             updateImage( ThemeItem::Pressed );
         }
-    } else if( d->expressions[stateToIndex(ThemeItem::Focus)] == expr ) {
-        if( strAttribute("src", ThemeItem::Focus) != result ) {
+    } else if ( d->expressions[stateToIndex(ThemeItem::Focus)] == expr ) {
+        if ( strAttribute("src", ThemeItem::Focus) != result ) {
             setAttribute( "src", result, ThemeItem::Focus );
             updateImage( ThemeItem::Focus );
         }
@@ -4150,27 +4189,27 @@ void ThemeImageItem::constructionComplete()
 {
     // construct images now
     QString imgName = strAttribute("src", ThemeItem::Default);
-    if( isStringExpression(imgName) ) {
+    if ( isStringExpression(imgName) ) {
         d->expressions[stateToIndex(ThemeItem::Default)] = createExpression( stripStringExpression(imgName) );
-        if( d->expressions[stateToIndex(ThemeItem::Default)] != 0 )
+        if ( d->expressions[stateToIndex(ThemeItem::Default)] != 0 )
             expressionChanged( d->expressions[stateToIndex(ThemeItem::Default)] );
-    } else if( !imgName.isEmpty() ) {
+    } else if ( !imgName.isEmpty() ) {
         updateImage( ThemeItem::Default );
     }
     imgName = strAttribute("src", ThemeItem::Pressed);
-    if( isStringExpression(imgName) ) {
+    if ( isStringExpression(imgName) ) {
         d->expressions[stateToIndex(ThemeItem::Pressed)] = createExpression( stripStringExpression(imgName) );
-        if( d->expressions[stateToIndex(ThemeItem::Pressed)] != 0 )
+        if ( d->expressions[stateToIndex(ThemeItem::Pressed)] != 0 )
             expressionChanged( d->expressions[stateToIndex(ThemeItem::Pressed)] );
-    } else if( !imgName.isEmpty() ) {
+    } else if ( !imgName.isEmpty() ) {
         updateImage( ThemeItem::Pressed );
     }
     imgName = strAttribute("src", ThemeItem::Focus);
-    if( isStringExpression(imgName) )  {
+    if ( isStringExpression(imgName) )  {
         d->expressions[stateToIndex(ThemeItem::Focus)] = createExpression( stripStringExpression(imgName) );
-        if( d->expressions[stateToIndex(ThemeItem::Focus)] != 0 )
+        if ( d->expressions[stateToIndex(ThemeItem::Focus)] != 0 )
             expressionChanged( d->expressions[stateToIndex(ThemeItem::Focus)] );
-    } else if( !imgName.isEmpty() ) {
+    } else if ( !imgName.isEmpty() ) {
         updateImage( ThemeItem::Focus );
     }
     ThemePixmapItem::constructionComplete();
@@ -4184,11 +4223,11 @@ void ThemeImageItem::updateImage( ThemeItem::State st )
     int alpha = 255;
     QPixmap pm;
 
-    if( !strAttribute("alpha",st).isEmpty() )
+    if ( !strAttribute("alpha",st).isEmpty() )
         alpha = strAttribute("alpha",st).toInt();
     pm = loadImage( strAttribute("src", st), attribute("colorRole", st), color("color",st), alpha );
     setPixmap( QLatin1String("src"), pm, st, strAttribute("src", st) );
-    if( isVisible() )
+    if ( isVisible() )
         scaleImages();  //updated image might be different size. scalePixmap internally verifies whether a scale is needed.
     /*
     setAttribute( QLatin1String("colorRole"), colorRole, st );
@@ -4198,23 +4237,23 @@ void ThemeImageItem::updateImage( ThemeItem::State st )
 }
 
 /*!
-  Sets \a p to be the image for this item for the state \a st.
+  Sets \a pixImage to be the image for this item for the state \a state.
 */
-void ThemeImageItem::setImage( const QPixmap &p, ThemeItem::State st )
+void ThemeImageItem::setImage(const QPixmap &pixImage, ThemeItem::State state)
 {
-    if (pixmap(QLatin1String("src"), st).serialNumber() != p.serialNumber()) {
-        setPixmap( QLatin1String("src"), p, st );
-        if( isVisible() )
+    if (pixmap(QLatin1String("src"), state).serialNumber() != pixImage.serialNumber()) {
+        setPixmap( QLatin1String("src"), pixImage, state );
+        if ( isVisible() )
             update();
     }
 }
 
 /*!
-  Returns the QPixmap for this item for the state \a st.
+  Returns the QPixmap for this item for the state \a state.
 */
-QPixmap ThemeImageItem::image( ThemeItem::State st ) const
+QPixmap ThemeImageItem::image( ThemeItem::State state ) const
 {
-    return pixmap( QLatin1String("src"), st );
+    return pixmap( QLatin1String("src"), state );
 }
 
 /*!
@@ -4252,6 +4291,7 @@ void ThemeImageItem::layout()
 }
 
 /*!
+  \reimp
   Run-time type information.
   Returns ThemedView::Image.
   */
@@ -4267,11 +4307,11 @@ int ThemeImageItem::rtti() const
 void ThemeImageItem::paint(QPainter *p, const QRect &r)
 {
     QPixmap pix = pixmap( QLatin1String("src"), state() );
-    if( pix.isNull() ) {
+    if ( pix.isNull() ) {
         pix = image();
     }
 
-    if( pix.isNull() )
+    if ( pix.isNull() )
         return;
 
     if (d->tile) {
@@ -4320,12 +4360,12 @@ void ThemeImageItem::paint(QPainter *p, const QRect &r)
 
 void ThemeImageItem::paletteChange(const QPalette &)
 {
-    if( attribute( QLatin1String("colorRole") ) != QPalette::NColorRoles)
+    if ( attribute( QLatin1String("colorRole") ) != QPalette::NColorRoles)
         setImage( loadImage(strAttribute("src",ThemeItem::Default), attribute( QLatin1String("colorRole") ), color( QLatin1String("color") ), attribute( QLatin1String("alpha") ) ) );
-    if( attribute( QLatin1String("colorRole"), ThemeItem::Pressed ) != QPalette::NColorRoles )
+    if ( attribute( QLatin1String("colorRole"), ThemeItem::Pressed ) != QPalette::NColorRoles )
         setPixmap( QLatin1String("src"), loadImage( strAttribute("src", ThemeItem::Pressed), attribute( QLatin1String("colorRole"), ThemeItem::Pressed ),
         color( QLatin1String("color"), ThemeItem::Pressed ), attribute( QLatin1String("alpha"), ThemeItem::Pressed ) ), ThemeItem::Pressed );
-    if( attribute( QLatin1String("colorRole"), ThemeItem::Focus ) != QPalette::NColorRoles )
+    if ( attribute( QLatin1String("colorRole"), ThemeItem::Focus ) != QPalette::NColorRoles )
         setPixmap( QLatin1String("src"), loadImage( strAttribute("src",ThemeItem::Focus), attribute( QLatin1String("colorRole"), ThemeItem::Focus ),
         color( QLatin1String("color"), ThemeItem::Focus ), attribute( QLatin1String("alpha"), ThemeItem::Focus ) ), ThemeItem::Focus );
 }
@@ -4339,22 +4379,22 @@ public:
         {}
 
     ~ThemeWidgetItemPrivate() {
-        if( widget && autoDelete )
+        if ( widget && autoDelete )
             delete widget;
     }
 
     void setWidget( QWidget* w ) {
-        if( widget == w )
+        if ( widget == w )
             return;
-        if( widget != 0 && autoDelete )
+        if ( widget != 0 && autoDelete )
             delete widget;
         widget = w;
-        if( !item->active() ) widget->hide();
+        if ( !item->active() ) widget->hide();
         else widget->show();
         // trying to base active semantic on show/hide events doesn't seem to work, too complicated, just always enforce widget visibility in paint()
         //widget->installEventFilter(this);
         item->parseColorGroup( colorGroupAtts );
-        if( widget != 0 )
+        if ( widget != 0 )
             widget->setFont( item->parseFont( widget->font(), size, font ) );
     }
 
@@ -4370,11 +4410,11 @@ protected:
     /*
     virtual bool eventFilter( QObject* watched, QEvent* event ) {
         Q_ASSERT(watched == widget);
-        if( widget->isVisible() != parent->active() )
+        if ( widget->isVisible() != parent->active() )
             parent->setActive( widget->isVisible() );
-        if( event->type() == QEvent::Hide ) {
+        if ( event->type() == QEvent::Hide ) {
             parent->setActive(false);
-        } else if( event->type() == QEvent::Show ) {
+        } else if ( event->type() == QEvent::Show ) {
             parent->setActive(true);
         }
         return false;
@@ -4384,6 +4424,7 @@ protected:
 
 /*!
   \class ThemeWidgetItem
+  \mainclass
 
   \brief The ThemeWidgetItem class represents a widget in a ThemedView.
 
@@ -4403,13 +4444,13 @@ protected:
 
 /*!
   Constructs a ThemeWidgetItem.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeWidgetItem::ThemeWidgetItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts)
-    : ThemeGraphicItem( p, v, atts )
+ThemeWidgetItem::ThemeWidgetItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts)
+    : ThemeGraphicItem(parent, view, atts)
 {
     d = new ThemeWidgetItemPrivate(this);
-    if( !atts.value(QLatin1String("colorGroup")).isEmpty() )
+    if ( !atts.value(QLatin1String("colorGroup")).isEmpty() )
         d->colorGroupAtts = parseSubAtts(atts.value(QLatin1String("colorGroup")));
     d->size = atts.value(QLatin1String("size"));
     d->font = atts.value(QLatin1String("bold"));
@@ -4439,7 +4480,7 @@ void ThemeWidgetItem::paint( QPainter* p, const QRect& r)
 */
 void ThemeWidgetItem::parseColorGroup( const QMap<QString,QString> &cgatts )
 {
-    if( !d->widget )
+    if ( !d->widget )
         return;
     QPalette pal = view()->palette();
     for( int i = 0 ; colorTable[i].role != QPalette::NColorRoles ; ++i )
@@ -4449,12 +4490,12 @@ void ThemeWidgetItem::parseColorGroup( const QMap<QString,QString> &cgatts )
         for( QMap<QString,QString>::ConstIterator it = cgatts.begin() ;
                                                     it != cgatts.end() ; ++it )
         {
-            if( it.key().toLower() == curColorName ) {
+            if ( it.key().toLower() == curColorName ) {
                 colour = getColor( *it, parseColor( *it, colour ) );
                 break;
             }
         }
-        if( colour.isValid() ) {
+        if ( colour.isValid() ) {
             pal.setColor( QPalette::Active, colorTable[i].role, colour );
             pal.setColor( QPalette::Inactive, colorTable[i].role, colour );
             pal.setColor( QPalette::Disabled, colorTable[i].role, colour );
@@ -4470,9 +4511,9 @@ void ThemeWidgetItem::parseColorGroup( const QMap<QString,QString> &cgatts )
 void ThemeWidgetItem::setGeometry( const QRect& geom )
 {
     ThemeItem::setGeometry(geom);
-    if( !geom.isValid() )
+    if ( !geom.isValid() )
         return;
-    if( d->widget ) {
+    if ( d->widget ) {
         QRect r = rect();
         d->widget->setFixedSize(r.width(), r.height());
         d->widget->move(r.x(), r.y());
@@ -4491,8 +4532,8 @@ void ThemeWidgetItem::setActive( bool f )
 
 void ThemeWidgetItem::updateWidget()
 {
-    if(d->widget != 0) {
-        if(active()) {
+    if (d->widget != 0) {
+        if (active()) {
             d->widget->show();
             d->widget->raise();
             d->widget->update();
@@ -4516,23 +4557,23 @@ void ThemeWidgetItem::constructionComplete()
 
 /*!
   Sets the auto-delete flag for this widget item.
-  If \a ad is true (the default), subsequent calls to setWidget()
+  If \a autodelete is true (the default), subsequent calls to setWidget()
   will cause any existing widget to be deleted.
   If you don't want ThemeWidgetItem to take memory ownership
   of the widgets you set on it, then call setAutoDelete(false) to disable
   this behaviour.
 */
-void ThemeWidgetItem::setAutoDelete( bool ad )
+void ThemeWidgetItem::setAutoDelete( bool autodelete )
 {
-    d->autoDelete = ad;
+    d->autoDelete = autodelete;
 }
 
 /*!
-  Sets the widget \a w on this item.
+  Sets the widget \a widget on this item.
 */
-void ThemeWidgetItem::setWidget( QWidget* w )
+void ThemeWidgetItem::setWidget( QWidget* widget )
 {
-    d->setWidget( w );
+    d->setWidget( widget );
     updateWidget();
 }
 
@@ -4559,18 +4600,18 @@ void ThemeWidgetItem::paletteChange(const QPalette &)
 */
 void ThemeWidgetItem::layout()
 {
-    if( !d->widget )
+    if ( !d->widget )
         return;
 
-    if( ThemeItem::d->sr.width() < 0 )
+    if ( ThemeItem::d->sr.width() < 0 )
         ThemeItem::d->sr.setWidth( d->widget->sizeHint().width() );
-    if( ThemeItem::d->sr.height() < 0 )
+    if ( ThemeItem::d->sr.height() < 0 )
         ThemeItem::d->sr.setHeight( d->widget->sizeHint().height() );
 
     ThemeItem::layout();
 
-    if( d->widget != 0 ) {
-        if( !parentItem() || parentItem()->isVisible()) {
+    if ( d->widget != 0 ) {
+        if ( !parentItem() || parentItem()->isVisible()) {
             d->widget->setFixedSize(rect().width(), rect().height());
             d->widget->move(rect().x(), rect().y());
         }
@@ -4597,6 +4638,7 @@ struct ThemeListItemPrivate
 };
 /*!
   \class ThemeListItem
+  \mainclass
 
   \brief The ThemeListItem class represents a graphical list in a themed view.
 
@@ -4617,14 +4659,14 @@ struct ThemeListItemPrivate
 
 /*!
   Constructs a ThemeListItem object.
-  \a p, \a v and \a atts are passed to the base class constructor.
+  \a parent, \a view and \a atts are passed to the base class constructor.
 */
-ThemeListItem::ThemeListItem(ThemeItem* p, ThemedView* v, const ThemeAttributes & atts)
-    : ThemeWidgetItem(p, v, atts)
+ThemeListItem::ThemeListItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes & atts)
+    : ThemeWidgetItem(parent, view, atts)
 {
     d = new ThemeListItemPrivate;
     /*
-    if( 0 == widget() ) {
+    if ( 0 == widget() ) {
         setWidget( new QListView( ir ) );
     }
     */
@@ -4655,10 +4697,10 @@ ThemeListModel* ThemeListItem::model() const
 */
 void ThemeListItem::setModel( ThemeListModel* model )
 {
-    if( d->model != model ) {
+    if ( d->model != model ) {
         d->model = model;
         QListView* view = listView();
-        if( view != 0 && view->model() != d->model )
+        if ( view != 0 && view->model() != d->model )
             view->setModel(d->model);
     }
 }
@@ -4687,11 +4729,11 @@ void ThemeListItem::setWidget( QWidget* w )
 {
     ThemeWidgetItem::setWidget( w );
     Q_ASSERT(widget() == 0 || widget()->inherits("QListView") == true);
-    if( !widget() )
+    if ( !widget() )
         return;
     QListView* v = listView();
     v->setItemDelegate( new ThemeListDelegate( v, view(), view() ) );
-    if(d->model != 0 && v->model() != d->model)
+    if (d->model != 0 && v->model() != d->model)
         v->setModel( d->model );
 }
 
@@ -4701,7 +4743,7 @@ void ThemeListItem::setWidget( QWidget* w )
 */
 QListView* ThemeListItem::listView() const
 {
-    if( !widget() )
+    if ( !widget() )
         return 0;
     Q_ASSERT(widget()->inherits("QListView") == true);
     return qobject_cast<QListView*>(widget());
@@ -4721,6 +4763,7 @@ struct ThemeListModelEntryPrivate
 
 /*!
     \class ThemeListModelEntry
+  \mainclass
 
     \brief The ThemeListModelEntry class implements a single theme list entry in a ThemeListModel.
 
@@ -4751,7 +4794,7 @@ ThemeListModelEntry::ThemeListModelEntry( ThemeListModel* model )
     Destroys the ThemeListModelEntry. Any associated theme template instance is deleted.
 */
 ThemeListModelEntry::~ThemeListModelEntry() {
-    if( d->templateInstance != 0 )
+    if ( d->templateInstance != 0 )
         delete d->templateInstance;
     delete d;
 }
@@ -4830,20 +4873,20 @@ ThemeTemplateInstanceItem* ThemeListModelEntry::templateInstance()
 
 void ThemeListModelEntry::getTemplateInstance() {
     Q_ASSERT(d->model != 0);
-    if( d->templateInstance == 0 ) {
+    if ( d->templateInstance == 0 ) {
         // FIXME : should only search under theme list item
         //qWarning("ThemeListModelEntry::getTemplateInstance() - Type returned '%s'", type().toAscii().data());
         ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(d->model->themedView()->findItem( /*li,*/ type(), ThemedView::Template ));
-        if( !ti ) {
+        if ( !ti ) {
             qWarning("ThemeListModelEntry::getTemplateInstance() - Cannot find template item with name '%s'", type().toAscii().data());
             return;
         }
         d->templateInstance = ti->createInstance( uid() );
-        if( !d->templateInstance ) {
+        if ( !d->templateInstance ) {
             qWarning("ThemeListModelEntry::getTemplateInstance() - Could not create template instance.");
             return;
         }
-    } else if( d->templateInstance->itemName() != type() ) {
+    } else if ( d->templateInstance->itemName() != type() ) {
        Q_ASSERT(d->templateInstance->itemName() != type());
        delete d->templateInstance;
        d->templateInstance = 0;
@@ -4863,10 +4906,11 @@ struct ThemeListModelPrivate
 
 /*!
     \class ThemeListModel
+    \mainclass
 
-    \brief The ThemeListModel class provides a list model that is used for list functionality in Qtopia themeing.
+    \brief The ThemeListModel class provides a list model that is used for list functionality in Qtopia theming.
 
-    List functionality in themeing is implemented using Qt's model-view architecture and theme templates.
+    List functionality in theming is implemented using Qt's model-view architecture and theme templates.
 
     To use a ThemeListModel you pass in the associated ThemeListItem and ThemedView objects during construction, and then
     populate it with ThemeListModelEntry items using the addEntry() and removeEntry() functions.
@@ -4929,18 +4973,18 @@ struct ThemeListModelPrivate
 
 /*!
   Constructs a ThemeListModel.
-  \a parent is passed to QAbstractListModel, \a li is the ThemeListItem associated with this model and \a view
+  \a parent is passed to QAbstractListModel, \a listItem is the ThemeListItem associated with this model and \a view
   is the ThemedView associated with this model.
-  The model is installed on the ThemeListItem \a li using the ThemeListItem::setModel() function.
+  The model is installed on the ThemeListItem \a listItem using the ThemeListItem::setModel() function.
 */
-ThemeListModel::ThemeListModel( QObject* parent, ThemeListItem* li, ThemedView* view )
+ThemeListModel::ThemeListModel( QObject* parent, ThemeListItem* listItem, ThemedView *view )
     : QAbstractListModel(parent)
 {
     d = new ThemeListModelPrivate;
-    d->listItem = li;
+    d->listItem = listItem;
     d->themedView = view;
-    Q_ASSERT(li != 0);
-    li->setModel(this);
+    Q_ASSERT(listItem != 0);
+    listItem->setModel(this);
 }
 
 /*!
@@ -5048,7 +5092,7 @@ void ThemeListModel::removeEntry( const QModelIndex &index )
 */
 void ThemeListModel::clear()
 {
-    if( !rowCount() )
+    if ( !rowCount() )
         return;
     beginRemoveRows(QModelIndex(), 0, rowCount() );
     while( d->items.count() != 0 ) {
@@ -5092,14 +5136,14 @@ ThemeListDelegate::~ThemeListDelegate()
 void ThemeListDelegate::paint(QPainter *p, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     const ThemeListModel* model = qobject_cast<const ThemeListModel*>(index.model());
     ThemeListModelEntry* entry = model->themeListModelEntry(index);
-    if(entry == 0) {
+    if (entry == 0) {
         qWarning("ThemeListDelegate::paint(): invalid index passed ");
         return;
     }
     Q_ASSERT(d->themedView != 0);
     Q_ASSERT(d->listView != 0);
 
-    if( !entry->templateInstance() )
+    if ( !entry->templateInstance() )
         return;
 
     // paint that item into this rect
@@ -5133,7 +5177,7 @@ QSize ThemeListDelegate::sizeHint( const QStyleOptionViewItem&,
 
 int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) const {
     Q_ASSERT(entry != 0);
-    if( !entry->templateInstance() )
+    if ( !entry->templateInstance() )
         return 0;
     return entry->templateInstance()->geometry().height();
 }
@@ -5142,6 +5186,7 @@ int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) c
 
 /*!
   \class ThemedView
+  \mainclass
 
   \brief The ThemedView widget constructs, manages and displays themed views in Qtopia.
 
@@ -5158,10 +5203,10 @@ int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) c
   There are 2 different methods of getting data into a themed view for display to the user.
   1. Using the ThemedView::findItem() function, you can get access to theme items in the tree and set data on them directly. Eg.
   \code
-    ThemedView* view;
+    ThemedView *view;
     ..
     ThemeTextItem* myTextItem = static_cast<ThemeTextItem*>(view->findItem("myTextItem", ThemedView::Text);
-    if(myTextItem != 0)
+    if (myTextItem != 0)
         myTextItem->setText("Hello, World!");
   \endcode
   The above example finds the item with name "myTextItem" and a ThemeItem::rtti() value of ThemedView::Text and
@@ -5222,10 +5267,10 @@ int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) c
 */
 
 /*!
-  \fn void ThemedView::visibilityChanged(ThemeItem* item, bool vis)
+  \fn void ThemedView::visibilityChanged(ThemeItem* item, bool visible)
 
   Emitted when the visibility of \a item changes.
-  The \a vis parameter is true if \a item is visible or false otherwise.
+  The \a visible parameter is true if \a item is visible or false otherwise.
 */
 
 /*!
@@ -5260,20 +5305,20 @@ QWidget *ThemedView::newWidget(ThemeWidgetItem* item, const QString& name)
 }
 
 /*!
-  Registers the expression \a expr for the given theme \a item.
-  The ThemedView will unregister the expression when \a expr is deleted, and call
+  Registers the expression \a expression for the given theme \a item.
+  The ThemedView will unregister the expression when \a expression is deleted, and call
   the expressionChanged() call-back on \a item whenever the QExpressionEvaluator::termsChanged()
   signal is emitted.
 */
-void ThemedView::registerExpression( ThemeItem* item, QExpressionEvaluator* expr )
+void ThemedView::registerExpression(ThemeItem *item, QExpressionEvaluator *expression)
 {
-    if( d->expressionToThemeItemMap.contains( expr ) ) {
+    if ( d->expressionToThemeItemMap.contains( expression ) ) {
         qWarning("ThemedView::registerExpression - Already registered expression for this item");
         return;
     }
-    d->expressionToThemeItemMap.insert( expr, item );
-    connect( expr, SIGNAL(termsChanged()), this, SLOT(notifyExpressionChanged()) );
-    connect( expr, SIGNAL(destroyed(QObject*)), this, SLOT(expressionDestroyed(QObject*)) );
+    d->expressionToThemeItemMap.insert( expression, item );
+    connect( expression, SIGNAL(termsChanged()), this, SLOT(notifyExpressionChanged()) );
+    connect( expression, SIGNAL(destroyed(QObject*)), this, SLOT(expressionDestroyed(QObject*)) );
 }
 
 void ThemedView::notifyExpressionChanged()
@@ -5299,9 +5344,9 @@ void ThemedView::mousePressEvent( QMouseEvent *e )
     QPoint p = e->pos();
     //find the closest item to p
     d->pressedItem = itemAt( p );
-    if( d->pressedItem ) {
+    if ( d->pressedItem ) {
         d->pressedItem->setPressed( true );
-        if( !d->pressedItem->pressed() )
+        if ( !d->pressedItem->pressed() )
             d->pressedItem = 0;
         else
             emit itemPressed( d->pressedItem );
@@ -5315,11 +5360,11 @@ void ThemedView::mouseMoveEvent( QMouseEvent *e )
 {
     ThemeItem *item = itemAt( e->pos() );
     //no item under mouse or an item that is not the initially pressed item
-    if( !item || item != d->pressedItem )
-        while( (item = findItem( QString(), 0, ThemeItem::Pressed)) )
+    if ( !item || item != d->pressedItem )
+        while( (item = findItem( QString(), ThemedView::Item, ThemeItem::Pressed)) )
             item->setPressed( false );
     //item that was initially pressed, set to be pressed if not already
-    else if( !item->pressed() )
+    else if ( !item->pressed() )
         item->setPressed( true );
     //else initially pressed item already pressed
 }
@@ -5331,14 +5376,14 @@ void ThemedView::mouseReleaseEvent( QMouseEvent *e )
 {
     ThemeItem *item = itemAt( e->pos() );
     bool ic = false;
-    if( item && item == d->pressedItem )
+    if ( item && item == d->pressedItem )
         ic = true;
     ThemeItem *pitem;
-    while( (pitem = findItem( QString(), 0, ThemeItem::Pressed )) )
+    while( (pitem = findItem( QString(), ThemedView::Item, ThemeItem::Pressed )) )
         pitem->setPressed( false );
     if (item)
         emit itemReleased( item );
-    if( ic )
+    if ( ic )
     {
         d->pressedItem->clickedEvent(); // deliver the pressed event to the item
         emit itemClicked( d->pressedItem );
@@ -5347,12 +5392,12 @@ void ThemedView::mouseReleaseEvent( QMouseEvent *e )
 }
 
 /*!
-  If the rectangle \a r is different to the current rect(),
-  sets the new geometry to \a r and calls layout() immediately.
+  If the rectangle \a rect is different to the current rect(),
+  sets the new geometry to \a rect and calls layout() immediately.
 */
-void ThemedView::setGeometryAndLayout(const QRect& r)
+void ThemedView::setGeometryAndLayout(const QRect &rect)
 {
-    setGeometryAndLayout(r.x(), r.y(), r.width(), r.height());
+    setGeometryAndLayout(rect.x(), rect.y(), rect.width(), rect.height());
 }
 
 /*!
@@ -5371,36 +5416,36 @@ void ThemedView::setGeometryAndLayout(int gx, int gy, int w, int h)
    Returns the ThemeItem located at the point \a pos in this ThemedView.
    \a pos is in local coordinates.
 */
-ThemeItem *ThemedView::itemAt( const QPoint &pos ) const
+ThemeItem *ThemedView::itemAt(const QPoint &pos) const
 {
-    if( !d->root )
+    if ( !d->root )
         return 0;
     return itemAt( pos, d->root );
 }
 
-ThemeItem *ThemedView::itemAt( const QPoint &pos, ThemeItem *item ) const
+ThemeItem *ThemedView::itemAt(const QPoint &pos, ThemeItem *item) const
 {
-    if( !item->children().count() )
+    if ( !item->children().count() )
         return 0;
     ThemeItem *bestMatch = 0; //
     QList<ThemeItem*> c = item->children();
     foreach(ThemeItem *cur, c) {
         //br is local coordinates, ThemeItem::rect sums the x,y offsets back to top parent
-        if( cur->rect().contains( pos )
+        if ( cur->rect().contains( pos )
                 && (!item->transient() || item->active()))
         {
-            if( cur->rtti() == ThemedView::Group && cur->isInteractive() && cur->active() && isOn( cur ) ) {
+            if ( cur->rtti() == ThemedView::Group && cur->isInteractive() && cur->active() && isOn( cur ) ) {
                 bestMatch = cur; // current is a group and interactive
             } else
             {
                 ThemeItem *f = itemAt( pos, cur );
-                if( f && f->isInteractive() && f->active() && isOn( f ) )
+                if ( f && f->isInteractive() && f->active() && isOn( f ) )
                     bestMatch = f; // an item, deeper than cur
-                else if( cur->isInteractive() && cur->active() && isOn( cur ) )
+                else if ( cur->isInteractive() && cur->active() && isOn( cur ) )
                     bestMatch = cur; //cur item is deepest
-                else if( f && f->active() && isOn( f ) && (!bestMatch || !bestMatch->isInteractive()) )
+                else if ( f && f->active() && isOn( f ) && (!bestMatch || !bestMatch->isInteractive()) )
                     bestMatch = f; // not user items, but some kind of items under the cursor. only set if don't already have an interactive match
-                else if( cur->active() && isOn( cur ) && (!bestMatch || !bestMatch->isInteractive()) )
+                else if ( cur->active() && isOn( cur ) && (!bestMatch || !bestMatch->isInteractive()) )
                     bestMatch = cur;
                 //if it's not a user item, just a rect or a line or something, keep looking for a better match
             }
@@ -5434,16 +5479,16 @@ void ThemedView::setSourceFile(const QString &fileName)
 */
 bool ThemedView::loadSource(const QString &fileName)
 {
-    if( !fileName.isEmpty() )
+    if ( !fileName.isEmpty() )
         d->themeSource = fileName;
-    if( d->themeSource.isEmpty() ) {
+    if ( d->themeSource.isEmpty() ) {
         qWarning("ThemedView::loadSource() - No theme file to set.");
         themeLoaded(QString());
         return false;
     }
 
 
-    if( d->root ) { // delete before reset
+    if ( d->root ) { // delete before reset
         delete d->root;
         d->root = 0;
     }
@@ -5476,11 +5521,11 @@ bool ThemedView::loadSource(const QString &fileName)
 }
 
 /*!
-    Paints \a item using the painter \a p within the given \a clip rect.
+    Paints \a item using the painter \a painter within the given \a clip rect.
     You normally don't want to call this function directly, but it is useful
     for painting template items to a user-specified painter.
 */
-void ThemedView::paint(QPainter *p, const QRect &clip, ThemeItem *item)
+void ThemedView::paint(QPainter *painter, const QRect &clip, ThemeItem *item)
 {
     if (!d->root)
         return;
@@ -5488,7 +5533,7 @@ void ThemedView::paint(QPainter *p, const QRect &clip, ThemeItem *item)
         layout();
     if (!item)
         item = d->root;
-    paintItem(p, item, clip);
+    paintItem(painter, item, clip);
 }
 
 /*!
@@ -5571,28 +5616,28 @@ QString ThemedView::rttiToString(int rtti) const
 
 /*!
   \internal
-  Paint \a item and all sub-items on the \a p painter.  \a clip dictates the
+  Paint \a item and all sub-items on the painter \a painter.  \a clip dictates the
   clip rectangle to use relative to \a item.  That is a clip rect of 
   QRect(0, 0, item->width(), item->height()) does not clip item at all.
  */
-void ThemedView::paintItem(QPainter *p, ThemeItem *item, const QRect &clip)
+void ThemedView::paintItem(QPainter *painter, ThemeItem *item, const QRect &clip)
 {
-    if(!clip.isEmpty() && 
+    if (!clip.isEmpty() && 
        (!item->transient() || item->active()) && 
        item->isVisible()) {
         QRect geom = item->geometry();
         QRect myClip = clip.intersected(geom).translated(-geom.topLeft());
         if (!myClip.isEmpty()) {
-            p->translate(geom.topLeft());
-            p->setClipRect(myClip);
-            item->paint(p, myClip);
+            painter->translate(geom.topLeft());
+            painter->setClipRect(myClip);
+            item->paint(painter, myClip);
 
             QList<ThemeItem*> children = item->children();
             foreach( ThemeItem *child, children ) { 
-                paintItem(p, child, myClip);
+                paintItem(painter, child, myClip);
             }
 
-            p->translate(-geom.topLeft());
+            painter->translate(-geom.topLeft());
         }
     }
 }
@@ -5612,7 +5657,7 @@ QSize ThemedView::sizeHint() const
 ThemePageItem* ThemedView::pageItem() const
 {
     ThemeItem* item = d->root;
-    if( !item ) { // get from factory if in the process of parsing
+    if ( !item ) { // get from factory if in the process of parsing
         Q_ASSERT(d->factory != 0);
         item = d->factory->rootItem();
     }
@@ -5646,7 +5691,7 @@ const QString ThemedView::pageName() const
 {
     ThemePageItem* item = pageItem();
     QString n;
-    if(item)
+    if (item)
         n = item->itemName();
     return n;
 }
@@ -5661,7 +5706,7 @@ const QString ThemedView::base() const
 {
     ThemePageItem* item = pageItem();
     QString b;
-    if(item)
+    if (item)
         b = item->base();
     return b;
 }
@@ -5676,12 +5721,45 @@ const QString ThemedView::defaultPics() const
 }
 
 /*!
-  Finds the item in the theme item tree that has an ThemeItem::itemName() \a in, an ThemeItem::rtti() of \a type and a ThemeItem::state() of \a state.
-  If the value of \a type is 0, items with any type are searched for.
+  \deprecated
+*/
+QList<ThemeItem*> ThemedView::findItems(const QString &name, int type, int state) const
+{
+    return findItems(name, (Type)type, (ThemeItem::State)state);
+}
+
+/*!
+  \deprecated
+*/
+ThemeItem *ThemedView::findItem(const QString &name, int type, int state) const
+{
+    return findItem(name, (Type)type, (ThemeItem::State)state);
+}
+
+/*!
+  \deprecated
+*/
+ThemeItem *ThemedView::findItem(ThemeItem *item, const QString &name, int type, int state) const
+{
+    return findItem(item, name, (Type)type, (ThemeItem::State)state);
+}
+
+/*!
+  \deprecated
+*/
+void ThemedView::findItems(ThemeItem *item, const QString &name, int type,
+                           int pressed, QList<ThemeItem*> &list) const
+{
+    return findItems(item, name, (Type)type, (ThemeItem::State)pressed, list);
+}
+
+/*!
+  Finds the item in the theme item tree that has the name \a name, the type \a type and the state \a state.
+  If the value of \a type is ThemedView::Item, items with any type are searched for.
   The default value of \a state is ThemeItem::All which matches the state of all items.
   Returns a pointer to the item if found, otherwise returns 0.
 */
-ThemeItem *ThemedView::findItem(const QString &in, int type, int state) const
+ThemeItem *ThemedView::findItem(const QString &name, ThemedView::Type type, ThemeItem::State state) const
 {
     if (!d->root)
         return 0;
@@ -5689,20 +5767,21 @@ ThemeItem *ThemedView::findItem(const QString &in, int type, int state) const
         ThemedView *that = (ThemedView *)this;
         that->layout();
     }
-    return findItem(d->root, in, type, state);
+    return findItem(d->root, name, type, state);
 }
 
-ThemeItem *ThemedView::findItem(ThemeItem *item, const QString &in, int type, int state) const
+ThemeItem *ThemedView::findItem(ThemeItem *item, const QString &name,
+                                ThemedView::Type type, ThemeItem::State state) const
 {
     if (!item)
         item = d->root;
     bool statematch = (state == ThemeItem::All || state == item->state());
-    if ( (in.isNull() || item->itemName() == in) && (!type || type == item->rtti()) && statematch )
+    if ( (name.isNull() || item->itemName() == name) && (!type || type == item->rtti()) && statematch )
         return item;
 
     QList<ThemeItem*> c = item->children();
     foreach ( ThemeItem *itm, c ) {
-        ThemeItem *fi = findItem(itm, in, type, state);
+        ThemeItem *fi = findItem(itm, name, type, state);
         if (fi)
             return fi;
     }
@@ -5711,38 +5790,33 @@ ThemeItem *ThemedView::findItem(ThemeItem *item, const QString &in, int type, in
 }
 
 /*!
-  Finds all of the items in the theme item tree that have an itemName() of \a n, an rtti() of \a type and a state() of \a state.
-  If the value of \a type is 0, items with any type are searched for.
+  Finds all of the items in the theme item tree that have the name \a name, the type \a type and the state \a state.
+  If the value of \a type is ThemedView::Item, items with any type are searched for.
   By default, \a state if set to ThemeItem::All, and so items with any state are search for.
   Returns any items found.
 */
-QList<ThemeItem*> ThemedView::findItems(const QString &n, int type, int state) const
+QList<ThemeItem*> ThemedView::findItems(const QString &name, ThemedView::Type type, ThemeItem::State state) const
 {
     QList<ThemeItem*> list;
-    if (d->root) {
-        /*
-        if (d->needLayout)
-            layout();
-            */
-        findItems(d->root, n, type,state, list);
-    }
-
+    if (d->root)
+        findItems(d->root, name, type, state, list);
     return list;
 }
 
 
 
-void ThemedView::findItems(ThemeItem *item, const QString &in, int type, int state, QList<ThemeItem*> &list) const
+void ThemedView::findItems(ThemeItem *item, const QString &name, ThemedView::Type type,
+                           ThemeItem::State state, QList<ThemeItem*> &list) const
 {
-    if( !item )
+    if ( !item )
         return;
     bool statematch = (state == ThemeItem::All || state == item->state());
-    if ( (in.isNull() || item->itemName() == in) && (!type || type == item->rtti()) && statematch )
+    if ( (name.isNull() || item->itemName() == name) && (!type || type == item->rtti()) && statematch )
         list.append(item);
 
     QList<ThemeItem*> c = item->children();
     foreach ( ThemeItem *itm, c ) {
-        findItems(itm, in, type, state, list);
+        findItems(itm, name, type, state, list);
     }
 }
 
@@ -5767,9 +5841,9 @@ void ThemedView::layout(ThemeItem *item)
         item = d->root;
         d->needLayout = false;
     }
-    if( !item )
+    if ( !item )
         return;
-    if( !item->parentItem() || item->parentItem()->rtti() != ThemedView::Layout ) {
+    if ( !item->parentItem() || item->parentItem()->rtti() != ThemedView::Layout ) {
         /* Don't call layout() on items that are direct children of a ThemeLayoutItem. ThemeLayoutItem
            calls layout() on its direct children before it lays out itself in order to get their 'real' geometry (stored in br).
            It needs to do this to work out how to place items within itself.
@@ -5827,12 +5901,12 @@ void ThemedView::visChanged(ThemeItem *item, bool vis)
 
 bool ThemedView::isOn( ThemeItem *item ) const
 {
-    if( !item )
+    if ( !item )
         return false;
-    if( item->rtti() == ThemedView::Status )
+    if ( item->rtti() == ThemedView::Status )
     {
         ThemeStatusItem *statusItem = (ThemeStatusItem *)item;
-        if( !statusItem->isOn() )
+        if ( !statusItem->isOn() )
             return false;
     }
     return true;

@@ -1,14 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>  Tasks </title>
+  <title>  Tasks </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Tasks <br><small>Functional Description</small></h1>
 <p />
 The <strong>Tasks</strong> application allows the user to prioritize tasks,
@@ -16,7 +18,11 @@ manage due dates and, when appropriate, mark tasks as completed.
 <p />
 
 <p />
-<h2><a name="Data"></a> Data </h2>
+<h2><a name="Features"></a> Features </h2>
+<p />
+<p />
+<p />
+<h3><a name="Data_Model"></a> Data Model </h3>
 <p />
 A task consists of the following data:
 <p /> <ul>
@@ -40,7 +46,8 @@ A task consists of the following data:
 </li></ul> 
 <p />
 <p />
-<h2><a name="Application_Views"></a> Application Views </h2>
+<p />
+<h3><a name="Task_Views"></a> Task Views </h3>
 <p />
 It is possible to view tasks in the following three ways:
 <p /> <ul>
@@ -50,7 +57,7 @@ It is possible to view tasks in the following three ways:
 </li></ul> 
 <p />
 <p />
-<h3><a name="Sorted_List"></a> Sorted List </h3>
+<h4><a name="Sorted_List"></a> Sorted List </h4>
 <p />
 The primary display of the application shows a sorted list of tasks. In this
 list a user is able to change the priority of a task, mark a task Completed
@@ -74,7 +81,7 @@ From the sorted list view the user is able to:
 </li></ul> 
 <p />
 <p />
-<h3><a name="Detailed_View"></a> Detailed View </h3>
+<h4><a name="Detailed_View"></a> Detailed View </h4>
 <p />
 The detailed view of a task shows data for a single task.  This is shown as
 rich text.  All the information for the task is formatted for optimum readability.
@@ -87,7 +94,7 @@ From the sorted list view the user is able to:
 </li></ul> 
 <p />
 <p />
-<h3><a name="Edit_View"></a> Edit View </h3>
+<h4><a name="Edit_View"></a> Edit View </h4>
 <p />
 The edit view of a task allows the user to specify the data for a new task
 or modify that of an old task.
@@ -95,8 +102,6 @@ or modify that of an old task.
 Non-applicable values are disabled. For example, the start date field is disabled if the the task status is marked as Not Started.
 <p />
 When the editing has been completed the user is able to either accept or cancel the changes they have made.
-<p />
-<h2><a name="Features"></a> Features </h2>
 <p />
 <h3><a name="Add_Task"></a> Add Task </h3>
 <p />
@@ -152,20 +157,10 @@ When activated the <strong>Tasks</strong> application runs and shows linked task
 QDL links are embedded into the notes of a task.  When in the Detailed View,
 clicking on a QDL link activates the link's application.
 <p />
-<h2><a name="Config"></a> Config </h2>
-<p />
-The Phone Edition's <strong>Task</strong> application does not store any configuration-related data.
-<p />
-<h2><a name="Services"></a> Services </h2>
-<p /> <ul>
-<li> IR Receive text/x-vCalendar-Tasks
-</li> <li> Tasks - allows editing of tasks via <a href="fd-PIM.html" class="twikiLink">PIM</a> Library interface.
-</li> <li> QDL
-</li></ul> 
 <p />
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div>

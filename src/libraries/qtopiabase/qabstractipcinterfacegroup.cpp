@@ -25,16 +25,34 @@
 
 /*!
     \class QAbstractIpcInterfaceGroup
+    \mainclass
     \brief The QAbstractIpcInterfaceGroup class provides a convenient wrapper to create the interfaces within a server group.
     \ingroup ipc
 
-    The QAbstractIpcInterfaceGroup class provides a convenient wrapper to
-    create the interfaces within a server group.
+    This class is used to collect together several related QAbstractIpcInterface
+    instances into a single logical group.  It provides a standard pattern for
+    creating all interfaces in the group via the initialize() method, and provides
+    discovery mechanisms to allow one interface in a group to quickly locate
+    another via the interface() method.
 
-    It also provides discovery mechanisms that allows one interface
-    in a group to quickly locate another at runtime.
+\if !defined(QTOPIA_OPENSOURCE)
+    The most extensive use of this class is for Qtopia telephony services, which
+    create a large number of related interfaces for network registration, phone
+    call management, call forwarding settings, SIM file contents, and so on.
+    See QTelephonyService for more information.
+\endif
 
-    \sa QAbstractIpcInterface
+    It isn't necessary that QAbstractIpcInterface instances be part of a group;
+    they can be standalone.
+
+    The QAbstractIpcInterfaceGroupManager class can be used to receive run time
+    notification of when groups are added and removed from the system.
+
+\if defined(QTOPIA_OPENSOURCE)
+    \sa QAbstractIpcInterface, QAbstractIpcInterfaceGroupManager
+\else
+    \sa QAbstractIpcInterface, QAbstractIpcInterfaceGroupManager, QTelephonyService
+\endif
     \ingroup ipc
 */
 
@@ -76,7 +94,7 @@ QAbstractIpcInterfaceGroup::~QAbstractIpcInterfaceGroup()
 }
 
 /*!
-    Return the name of this server interface group.
+    Returns the name of this server interface group.
 */
 QString QAbstractIpcInterfaceGroup::groupName() const
 {
@@ -84,7 +102,7 @@ QString QAbstractIpcInterfaceGroup::groupName() const
 }
 
 /*!
-    Initialize this server interface group by creating all of the interfaces
+    Initializes this server interface group by creating all of the interfaces
     that it supports.  In subclasses, interfaces should be created using
     the following pattern:
 
@@ -121,8 +139,8 @@ void QAbstractIpcInterfaceGroup::initialize()
 /*!
     \fn bool QAbstractIpcInterfaceGroup::supports<T>() const
 
-    Determine if this server interface group supports an interface with
-    the name \c{T}.
+    Returns true if this server interface group supports an interface with
+    the name \c{T}; otherwise returns false.
 */
 
 /*!
@@ -133,7 +151,7 @@ void QAbstractIpcInterfaceGroup::initialize()
 */
 
 /*!
-    Add \a interface to the list of interfaces that is supported by
+    Adds \a interface to the list of interfaces that is supported by
     this server interface group.
 */
 void QAbstractIpcInterfaceGroup::addInterface
@@ -151,11 +169,13 @@ void QAbstractIpcInterfaceGroup::addInterface
 /*!
     \fn void QAbstractIpcInterfaceGroup::suppressInterface<T>()
 
-    Suppress the interface \c{T} from being created during initialize().
+    Suppresses the interface \c{T} from being created during initialize().
     This causes the supports() function to return true for \c{T} even
-    if no interface object for \c{T} has been added yet.  The main use
-    of this method is to stop a parent class from creating a default
-    implementation of \c{T} when the subclass does not create their own.
+    if no interface object for \c{T} has been added yet.
+
+    The main use of this method is to stop a parent class from creating a default
+    implementation of \c{T} when the subclass does not create their own override,
+    but the default implementation would cause problems if used.
 */
 
 void QAbstractIpcInterfaceGroup::interfaceDestroyed()

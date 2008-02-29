@@ -30,13 +30,37 @@
 
 /*!
   \class QVPNClient
+  \mainclass
   \brief The QVPNClient class abstracts data and state of a virtual private network.
 
-  An instance of a QVPNClient can be created by using a QVPNFactory. New VPN implementations
-  must subclass this abstract class.
+  An instance of a QVPNClient can be created by using \l QVPNFactory. Qtopia currently 
+  supports OpenVPN only. New VPN implementations must subclass this abstract class.
+  
+  Each VPNClient instance operates in one of the follwoing two modes:
+  \list
+    \o Client mode - 
+        This mode is the most common way of using a QVPNClient object. Any Qtopia application
+        that obtains a QVPNClient instance via QVPNFactory::create() will create such an object.
+        Essentially the return instance acts as a thin wrapper that forwards the VPN requests
+        to the QtopiaVpnManager.
+    \o Server mode - 
+        Only the QtopiaVpnManager can create such a QVPNObject instance. It performs the actual
+        VPN operations by making the appropriate calls to the root file system.
+  \endlist
 
-  For more details see \l QVPNFactory::create()
+  Every VPN can be identified via a unique identifier returned by id(), has a name() and a type().
+  The VPN configuration can be changed via configure(). connect() will establish 
+  the VPN connection. Once the VPN has been started its
+  state() will change from \c{QVPNCLient::Disconnected} to \c{QVPNClient::Pending} 
+  and eventually to \c{QVPNClient::Connected}. Each state change is indicated via the 
+  connectionStateChanged() signal. If an error occurs during the startup period the user 
+  can obtain a human-readable string describing the nature of the error.
 
+  If the user decides to delete a VPN connection cleanup() should be called to remove any
+  configuration file that has been created previously. By default Qtopia saves VPN
+  configuration files in \c{$HOME/Applications/Netork/vpn}.
+
+  \sa QVPNFactory
   \ingroup io
 */
 
@@ -57,13 +81,26 @@
 
   \value Disconnected The VPN connection is offline.
   \value Pending The VPN connection is in a transitional phase between Disconnected and Connected.
-  \value Connected The VPN connection is active.
+  \value Connected The VPN connection is active and can be used.
 */
 
 
 
 /*!
-  \internal
+  Creates a new QVPNClient instance with the given \a parent. QVPNClient instances 
+  can only be created via QVPNFactory::create().
+
+  \a serverMode determines whether this VPN object operates in server mode.
+  Qtopia applications usually obtain client mode instances of QVPNClient. In this mode
+  all request are forwarded to the QtopiaVpnManager which keeps a reference to a
+  VPNClient instance running in server mode. This allows the synchronization of 
+  multiple VPN requests to the same VPN.
+
+  This constructor is used internally by QVPNFactory whenever the user creates a new
+  VPN that doesn't exist yet.
+
+  \sa QtopiaVpnManager, QVPNFactory
+
   */
 QVPNClient::QVPNClient( bool serverMode, QObject* parent )
     : QObject( parent )
@@ -74,7 +111,18 @@ QVPNClient::QVPNClient( bool serverMode, QObject* parent )
 }
 
 /*!
-  \internal
+  Creates a new QVPNClient instance with the given \a parent. QVPNClient instances 
+  can only be created via QVPNFactory::create().
+
+  \a serverMode determines whether this VPN object operates in server mode.
+  Qtopia applications usually obtain client mode instances of QVPNClient. In this mode
+  all request are forwarded to the QtopiaVpnManager which keeps a reference to a
+  VPNClient instance running in server mode. This allows the synchronization of 
+  multiple VPN requests to the same VPN.
+
+  \a vpnID acts as an identifier for a particular VPN. 
+    
+  \sa QtopiaVpnManager, QVPNFactory
   */
 QVPNClient::QVPNClient( bool serverMode, uint vpnID, QObject* parent )
     : QObject( parent )
@@ -117,7 +165,7 @@ uint QVPNClient::id() const
 }
 
 /*!
-  Returns the user set name of this connection.
+  Returns the user set name for this VPN.
   */
 QString QVPNClient::name() const
 {
@@ -174,13 +222,17 @@ QString QVPNClient::errorString() const
 /*!
   \fn void QVPNClient::cleanup()
 
-  Deletes the VPN client an all files associated to it. This function
-  does nothing if the client is still active.
+  Deletes the VPN client and all files associated to it. This function
+  does nothing if the client is still connected.
   */
 
 /*!
   \fn void QVPNClient::connectionStateChanged( bool error )
 
-  This signal is emitted when the state of the VPN connetion changes.
-  \a error will be set to \c TRUE if an error occured during the last state transition.
+  This signal is emitted when the state of the VPN connection changes.
+
+  \a error will be set to \c TRUE if an error occurred during the last state transition.
+  A human-readable string of the error can be obtained via errorString()
+
+  This signal must be emitted by subclasses of QVPNClient when state transitions occur.
   */

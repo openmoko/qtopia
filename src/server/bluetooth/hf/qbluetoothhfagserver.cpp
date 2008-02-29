@@ -24,6 +24,31 @@
 #include <qtopia/comm/qbluetoothaddress.h>
 #include <qtopialog.h>
 
+/*!
+    \class QBluetoothHandsfreeAudioGatewayServer
+    \ingroup QtopiaServer::Task::Bluetooth
+    \brief The QBluetoothHandsfreeAudioGatewayServer class implements the Bluetooth handsfree service Audio Gateway interface.
+
+    The QBluetoothHandsfreeAudioGatewayServer class implements Bluetooth
+    Handsfree Audio Gateway profile..
+
+    QBluetoothHandsfreeAudioGatewayServer implements the
+    QBluetoothAudioGateway interface.  Client applications
+    should use the QBluetoothAudioGateway class instead of
+    this class to access the Bluetooth Audio Gateway functionality.
+
+    Please note, this class only acts as a forwarding agent
+    to the QBluetoothHandsfreeService class, which handles all
+    implementation details.
+
+    \sa QBluetoothAudioGateway, QBluetoothHandsfreeService
+*/
+
+/*!
+    Create a new Bluetooth Handsfree server for \a parent.  The name
+    of the service is set to \a service.  The audio device to use
+    is given by \a audioDev.
+*/
 QBluetoothHandsfreeAudioGatewayServer::QBluetoothHandsfreeAudioGatewayServer(
         QBluetoothHandsfreeCommInterface *parent,
         const QString &audioDev,
@@ -50,37 +75,58 @@ QBluetoothHandsfreeAudioGatewayServer::QBluetoothHandsfreeAudioGatewayServer(
     setValue("RemotePeer", QVariant::fromValue(QBluetoothAddress::invalid), Delayed);
 }
 
+/*!
+    Destructor.
+*/
 QBluetoothHandsfreeAudioGatewayServer::~QBluetoothHandsfreeAudioGatewayServer()
 {
 
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeAudioGatewayServer::connect(const QBluetoothAddress &addr,
         int rfcomm_channel)
 {
     m_parent->connect(addr, rfcomm_channel);
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeAudioGatewayServer::disconnect()
 {
     m_parent->disconnect();
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeAudioGatewayServer::setSpeakerVolume(int volume)
 {
     m_parent->setSpeakerVolume(volume);
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeAudioGatewayServer::setMicrophoneVolume(int volume)
 {
     m_parent->setMicrophoneVolume(volume);
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeAudioGatewayServer::releaseAudio()
 {
     m_parent->releaseAudio();
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHandsfreeAudioGatewayServer::connectAudio()
 {
     m_parent->connectAudio();

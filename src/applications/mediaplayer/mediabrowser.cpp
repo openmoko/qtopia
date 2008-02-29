@@ -28,8 +28,8 @@
 #include <qmediacontrol.h>
 #include <qmediatools.h>
 #include <qmediawidgets.h>
-#include <browser.h>
-#include <servicerequest.h>
+#include <private/browser_p.h>
+#include <private/servicerequest_p.h>
 
 #include <qtopiaapplication.h>
 #include <qcontentset.h>

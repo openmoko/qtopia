@@ -66,6 +66,8 @@ for(pr,PROJECT_ROOTS) {
         include($$file)
 
         SINGLEEXEC_READER_ADD=0
+        # Desktop projects aren't considered part of Qtopia when it comes to linking the singleexec binary!
+        desktop:CONFIG-=part_of_qtopia
         # Only Qtopia projects are considered
         part_of_qtopia|qtopia {
             # Only apps, plugins and libs are considered

@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QContentSet Class Reference</title>
+  <title>QContentSet Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContentSet Class Reference</h1>
 <p>The QContentSet class represents a set of <a href="qcontent.html">QContent</a> objects. <a href="#details">More...</a></p>
-<pre>#include &lt;QContentSet&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QContentSet&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qcontentset-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -36,6 +38,7 @@
 <li><div class="fn"/>void <b><a href="qcontentset.html#appendFrom">appendFrom</a></b> ( QContentSet &amp; <i>other</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontentset.html#clear">clear</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qcontentset.html#clearFilter">clearFilter</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qcontentset.html#contains">contains</a></b> ( const QContent &amp; <i>content</i> ) const</li>
 <li><div class="fn"/>int <b><a href="qcontentset.html#count">count</a></b> () const</li>
 <li><div class="fn"/>QContentFilter <b><a href="qcontentset.html#filter">filter</a></b> () const</li>
 <li><div class="fn"/>QContent <b><a href="qcontentset.html#findExecutable">findExecutable</a></b> ( const QString &amp; <i>exec</i> ) const</li>
@@ -51,7 +54,7 @@
 <li><div class="fn"/>QStringList <b><a href="qcontentset.html#sortOrder">sortOrder</a></b> () const</li>
 <li><div class="fn"/>QStringList <b><a href="qcontentset.html#types">types</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qcontentset.html#uninstallContent">uninstallContent</a></b> ()</li>
-<li><div class="fn"/>QContentSet &amp; <b><a href="qcontentset.html#operator-eq">operator=</a></b> ( const QContentSet &amp; <i>content</i> )</li>
+<li><div class="fn"/>QContentSet &amp; <b><a href="qcontentset.html#operator-eq">operator=</a></b> ( const QContentSet &amp; <i>contentset</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -82,6 +85,11 @@
 <ul>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
+<a name="related-non-members"></a>
+<h3>Related Non-Members</h3>
+<ul>
+<li><div class="fn"/>typedef <b><a href="qcontentset.html#QContentList-typedef">QContentList</a></b></li>
+</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
@@ -95,24 +103,23 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QContentSet class represents a set of <a href="qcontent.html">QContent</a> objects.</p>
-<p>When building GUI elements representing a collection of <tt>QContent</tt> objects perform the following:</p>
+<p>When building GUI elements representing a collection of <a href="qcontent.html">QContent</a> objects perform the following:</p>
 <ul>
-<li>create a new <tt>QContent</tt> set with a suitable filter</li>
-<li>create a <tt>QContentSetModel()</tt> model to display in the GUI.</li>
+<li>create a new QContentSet with a suitable filter.</li>
+<li>create a <a href="qcontentsetmodel.html">QContentSetModel</a> to display in the GUI using <a href="model-view-programming.html">Model/View classes</a>.</li>
 </ul>
-<p>As the model is automatically kept up-to-date, this is preferable to accessing a list of <tt>QContent</tt>.</p>
+<p>Example:</p>
+<pre>    QContentSet set(QContentFilter::Role, &quot;Document&quot;);
+    QContentSetModel model(&amp;set);</pre>
+<p>As the model is automatically kept up-to-date, this is preferable method of accessing a list of <a href="qcontent.html">QContent</a> objects</p>
 <p>The set is synchronized so that the data is as up-to-date as possible when new storage media (such as CF or SD cards) are inserted or removed, or when other applications change content files.</p>
 <p>The mechanism for this synchronization is as follows:</p>
 <ul>
 <li>Accesses and changes to the metadata backing store must be via the <a href="qcontent.html">QContent</a> API.</li>
-<li>If customizing Qtopia, directly altering the backing store ,for examply via SQL statemenst, is not supported.</li>
-<li>When a <tt>QContentSet</tt> object is created it opens a <tt>QCop</tt> listener on the <tt>QContent</tt> channel internally.</li>
-<li>If a call to the API changes one or more metadata records, a message is sent on the <tt>QContent</tt> channel containing a datastream of all the record numbers affected.</li>
-<li>If a <tt>QContentSet</tt> receives a message on the <tt>QCop</tt> channel reflecting a change in a record held in the set, or it makes a change to such a record itself, then the following signal is emitted:<ul>
-<li>the changed <a href="qcontent.html#QContentIdList-typedef">QContentIdList</a> signal - for a change affecting one or more specific records.</li>
-<li>the <a href="qcontentset.html#changed">changed</a>() signal - for a change affecting many records.</li>
-</ul>
-</li>
+<li>If customizing Qtopia, directly altering the backing store, for example via direct SQL statements, is not supported.</li>
+<li>When a QContentSet object is created it opens a <a href="qcopchannel.html">QCopChannel</a> listener on the <a href="qcontent.html">QContent</a> channel internally.</li>
+<li>If a call to the API changes one or more metadata records, a message is sent on the <a href="qcontent.html">QContent</a> channel containing a datastream of all the record numbers affected.</li>
+<li>If a QContentSet receives a message on the <a href="qcopchannel.html">QCopChannel</a> reflecting a change in a record held in the set, or it makes a change to such a record itself, then the <a href="qcontentset.html#changed">changed()</a> signal is emitted.</li>
 </ul>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -127,42 +134,52 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QContentSet"></a>QContentSet::QContentSet ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Create a new empty <tt>QContentSet</tt> with parent <i>parent</i>.</p>
+<p>Constructs a new unfiltered <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>.</p>
 <h3 class="fn"><a name="QContentSet-2"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>catFilters</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Create a new <tt>QContentSet</tt> with parent <i>parent</i>, containing all records from the backing store which pass all the filters listed in <i>catFilters</i>.</p>
+<p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>, containing all records from the backing store which match the filters listed in <i>catFilters</i>.</p>
 <h3 class="fn"><a name="QContentSet-3"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>catFilters</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>sortOrder</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Create a new <tt>QContentSet</tt> with parent <i>parent</i>, containing all records from the backing store which pass all the filters listed in <i>catFilters</i> sorted by <i>sortOrder</i>.</p>
+<p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>, containing all records from the backing store which match the filters listed in <i>catFilters</i> sorted by <i>sortOrder</i>.</p>
 <h3 class="fn"><a name="QContentSet-4"></a>QContentSet::QContentSet ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>tag</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Create a new <tt>QContentSet</tt> with parent <i>parent</i>, containing all records from the backing store which pass the filtering criteria specified by <i>tag</i> and <i>filter</i>.</p>
+<p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>, containing all records from the backing store which match the filtering criteria specified by <i>tag</i> and <i>filter</i>.</p>
 <h3 class="fn"><a name="QContentSet-5"></a>QContentSet::QContentSet ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>tag</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>sortOrder</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Create a new <tt>QContentSet</tt> with parent <i>parent</i>, containing all records from the backing store which pass the filtering criteria specified by <i>tag</i> and <i>filter</i> and sorted by <i>sortOrder</i>.</p>
+<p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>, containing all records from the backing store which match the filtering criteria specified by <i>tag</i> and <i>filter</i> and sorted by <i>sortOrder</i>.</p>
 <h3 class="fn"><a name="QContentSet-6"></a>QContentSet::QContentSet ( const QContentSet &amp; <i>original</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Create a new <tt>QContentSet</tt> with parent <i>parent</i>, containing all records from <i>original</i>.</p>
+<p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>, containing all records from <i>original</i>.</p>
 <h3 class="fn"><a name="dtor.QContentSet"></a>QContentSet::~QContentSet ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destroy the <a href="qcontentset.html">QContentSet</a> object.</p>
+<p>Destroys the <a href="qcontentset.html">QContentSet</a>.</p>
 <h3 class="fn"><a name="aboutToSort"></a>void QContentSet::aboutToSort ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when this <tt>QContentSet</tt> is about to be sorted.</p>
+<p>This signal is emitted when this <a href="qcontentset.html">QContentSet</a> is about to be sorted.</p>
 <h3 class="fn"><a name="add"></a>void QContentSet::add ( const <a href="qcontent.html">QContent</a> &amp; <i>content</i> )</h3>
-<p>Explicitly add the <tt>QContent</tt> object <i>content</i> to this set but not to the backing store. <tt>QContentSet::contains()</tt> is called first and does not add if the object is already present.</p>
-<p>If using this method and <tt>QContentSet::remove()</tt>, a filter expression is not used. This is useful for building up a set of <tt>Content</tt> objects to display or to perform bulk operations such as moving to a new location.</p>
+<p>Explicitly add the <a href="qcontent.html">QContent</a> object <i>content</i> to this set but not to the backing store. <a href="qcontentset.html#contains">contains</a>() is called first to test if the content already exists in the set, and does not add it if it is already present.</p>
+<p>If using this method and <a href="qcontentset.html#remove">remove()</a>, a filter expression is not used for these items. This is useful for building up a set of <a href="qcontent.html">QContent</a> objects to display or to perform bulk operations upon, such as moving to a new location.</p>
 <p>If a filter expression is used and the object added matches it, this method is effectively a null operation - although it will update the internal cache.</p>
+<p>See also <a href="qcontentset.html#remove">remove</a>(), <a href="qcontentset.html#contains">contains</a>(), and <a href="qcontentset.html#clear">clear</a>().</p>
 <h3 class="fn"><a name="addCriteria"></a>void QContentSet::addCriteria ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>kind</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i>, <a href="qcontentfilter.html#Operand-enum">QContentFilter::Operand</a> <i>operand</i> )</h3>
-<p>Joins a filtering criteria of <tt>FilterType</tt> <i>kind</i> and value <i>filter</i> to the current filter set using the given <i>operand</i>.</p>
+<p>Joins a filtering criteria of filter type <i>kind</i> and value <i>filter</i> to the current filter set using the given <i>operand</i>.</p>
 <h3 class="fn"><a name="addCriteria-2"></a>void QContentSet::addCriteria ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filters</i>, <a href="qcontentfilter.html#Operand-enum">QContentFilter::Operand</a> <i>operand</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Joins a group of filtering criteria <i>filters</i> to the current filter set using the given <i>operand</i>.</p>
 <h3 class="fn"><a name="appendFrom"></a>void QContentSet::appendFrom ( QContentSet &amp; <i>other</i> )</h3>
-<p>Appends the contents of <i>other</i> to this <tt>QContentSet</tt>. Currently it appends them as explicit items to the current QContenSet, in the future, it will concatenate the two filter sets to create a new aggregate filter set.</p>
+<p>Appends the contents of <i>other</i> to this <a href="qcontentset.html">QContentSet</a>. Currently it appends them as explicit items to the current QContenSet, in the future, it will concatenate the two filter sets to create a new aggregate filter set.</p>
 <h3 class="fn"><a name="changed"></a>void QContentSet::changed ( const <a href="qcontent.html#QContentIdList-typedef">QContentIdList</a> &amp; <i>idList</i>, <a href="qcontent.html#ChangeType-enum">QContent::ChangeType</a> <i>type</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when <tt>QContent</tt> with Ids <i>idList</i>, included in the filter expression for this <tt>QContentSet</tt> are changed, for example, by another application.</p>
-<p><i>type</i> specifies the type of change <a href="qcontent.html#ChangeType-enum">QContent::ChangeType</a>.</p>
+<p>This signal is emitted when <a href="qcontent.html">QContent</a> included in the filter expression for this <a href="qcontentset.html">QContentSet</a> are changed by another application, or by removable media being inserted or removed.</p>
+<p><i>idList</i> contains a list of the Ids of <a href="qcontent.html">QContent</a> items that have changed.</p>
+<p><i>type</i> specifies the type of change that is being signalled.</p>
 <h3 class="fn"><a name="changed-2"></a>void QContentSet::changed ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Emitted when a number of <tt>QContent</tt> objects included in the filter expression for this <tt>QContentSet</tt> are changed by another application or by removable media being inserted or removed.</p>
+<p>This signal is emitted when a large number of <a href="qcontent.html">QContent</a> objects included in the filter expression for this <a href="qcontentset.html">QContentSet</a> are changed by another application or by removable media being inserted or removed.</p>
 <h3 class="fn"><a name="clear"></a>void QContentSet::clear ()</h3>
-<p>Remove all content from this set.</p>
+<p>Remove all filters and explicitly added <a href="qcontent.html">QContent</a> objects from this set.</p>
+<p>See also <a href="qcontentset.html#add">add</a>(), <a href="qcontentset.html#remove">remove</a>(), and <a href="qcontentset.html#contains">contains</a>().</p>
 <h3 class="fn"><a name="clearFilter"></a>void QContentSet::clearFilter ()</h3>
-<p>Clear the current filter expression on the set</p>
+<p>Clears the current filter expression on the set</p>
+<h3 class="fn"><a name="contains"></a>bool QContentSet::contains ( const <a href="qcontent.html">QContent</a> &amp; <i>content</i> ) const</h3>
+<p>Return true if the set contains the object <i>content</i>, that is:</p>
+<ul>
+<li>if it has been explicitly added</li>
+<li>if it matches the filter expression.</li>
+</ul>
+<p>See also <a href="qcontentset.html#add">add</a>(), <a href="qcontentset.html#remove">remove</a>(), and <a href="qcontentset.html#clear">clear</a>().</p>
 <h3 class="fn"><a name="contentAboutToBeInserted"></a>void QContentSet::contentAboutToBeInserted ( int <i>start</i>, int <i>end</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when content items are about to be inserted between the <i>start</i> and <i>end</i> indexes.</p>
 <h3 class="fn"><a name="contentAboutToBeRemoved"></a>void QContentSet::contentAboutToBeRemoved ( int <i>start</i>, int <i>end</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -170,68 +187,80 @@
 <h3 class="fn"><a name="contentChanged"></a>void QContentSet::contentChanged ( int <i>start</i>, int <i>end</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when content items between the <i>start</i> and <i>end</i> indexes have changed.</p>
 <h3 class="fn"><a name="contentInserted"></a>void QContentSet::contentInserted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when the content insertion indicated by <tt>QContentSet::contentAboutToBeInserted(int start, int end)</tt> has been completed.</p>
+<p>This signal is emitted when the content insertion indicated by <a href="qcontentset.html#contentAboutToBeInserted">contentAboutToBeInserted</a>() has been completed.</p>
 <h3 class="fn"><a name="contentRemoved"></a>void QContentSet::contentRemoved ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when the content removal indicated by <tt>QContentSet::contentAboutToBeRemoved(int start, int end)</tt> has been completed.</p>
+<p>This signal is emitted when the content removal indicated by <a href="qcontentset.html#contentAboutToBeRemoved">contentAboutToBeRemoved</a>() has been completed.</p>
 <h3 class="fn"><a name="count"></a>int QContentSet::count () const</h3>
-<p>Return the number of <tt>QContent</tt> objects in this set.</p>
+<p>Return the number of <a href="qcontent.html">QContent</a> objects in this set.</p>
 <h3 class="fn"><a name="count-2"></a>int QContentSet::count ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the number of content items in the database that match the content filter <i>filter</i>.</p>
 <h3 class="fn"><a name="filter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentSet::filter () const</h3>
-<p>Returns a copy of the current filter for this <tt>QContentSet</tt>.</p>
+<p>Returns a copy of the current filter set for this <tt>QContentSet</tt>.</p>
 <h3 class="fn"><a name="findDocuments"></a>void QContentSet::findDocuments ( QContentSet * <i>folder</i>, const <a href="qstring.html">QString</a> &amp; <i>mimefilter</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Finds all documents in the system's document directories which match the filter <i>mimefilter</i>, and appends the resulting <a href="qcontent.html">QContent</a> objects to <i>folder</i>.</p>
 <h3 class="fn"><a name="findExecutable"></a><a href="qcontent.html">QContent</a> QContentSet::findExecutable ( const <a href="qstring.html">QString</a> &amp; <i>exec</i> ) const</h3>
-<p>Find a <tt>QContent</tt> object for the executable <i>exec</i> in the current <a href="qcontentset.html">QContentSet</a>. Returns an empty/invalid <a href="qcontent.html">QContent</a> if unsuccessful.</p>
+<p>Find a <a href="qcontent.html">QContent</a> object for the executable <i>exec</i> in the current <a href="qcontentset.html">QContentSet</a>. Returns an empty/invalid <a href="qcontent.html">QContent</a> if unsuccessful.</p>
+<p>See also <a href="qcontent.html#InvalidId-var">QContent::InvalidId</a>.</p>
 <h3 class="fn"><a name="findFileName"></a><a href="qcontent.html">QContent</a> QContentSet::findFileName ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
-<p>Find a <tt>QContent</tt> object for the <i>filename</i> in the current <a href="qcontentset.html">QContentSet</a>. Returns an empty/invalid <a href="qcontent.html">QContent</a> if unsuccessful.</p>
-<p>Paths are not acceptable in <i>filename</i>, ie the <tt>QString</tt> <i>filename</i> must not contain any &quot;/&quot; characters.</p>
-<p>Note that if more than one item with the <i>filename</i> exists in the <a href="qcontentset.html">QContentSet</a> no guarantee is provided of which is returned.</p>
+<p>Find a <a href="qcontent.html">QContent</a> object for the <i>filename</i> in the current <a href="qcontentset.html">QContentSet</a>. Returns an empty/invalid <a href="qcontent.html">QContent</a> if unsuccessful.</p>
+<p>Paths are not acceptable in <i>filename</i>, ie the <i>filename</i> must not contain any &quot;/&quot; characters.</p>
+<p>Note that if more than one item with the <i>filename</i> exists in the <a href="qcontentset.html">QContentSet</a> no guarantee is provided as to which one is returned.</p>
 <p>This method is typically used with filters such that only one <i>filename</i> item exists in the filtered set.</p>
+<p>See also <a href="qcontent.html#InvalidId-var">QContent::InvalidId</a>.</p>
 <h3 class="fn"><a name="installContent"></a>void QContentSet::installContent ()</h3>
 <p>Store the meta information objects into the backing store, and create a file on the file system if the content type is appropriate.</p>
+<p>See also <a href="qcontentset.html#uninstallContent">uninstallContent</a>().</p>
 <h3 class="fn"><a name="isEmpty"></a>bool QContentSet::isEmpty () const</h3>
-<p>Returns true if this set is empty; otherwise false.</p>
+<p>Returns true if this set is empty.</p>
 <h3 class="fn"><a name="itemIds"></a><a href="qcontent.html#QContentIdList-typedef">QContentIdList</a> QContentSet::itemIds () const</h3>
-<p>Return a <tt>QContentIdList</tt> of content Ids in this set.</p>
-<p>It is a snapshot of the currently known content in the list, which could go out of date immediately after it is obtained.</p>
-<p>When considering using this method first examine the process of retrieving a pointer to the internal model and using an MVC solution.</p>
-<p>See also <a href="qcontentset.html#items">QContentSet::items</a>().</p>
-<h3 class="fn"><a name="items"></a>QContentList QContentSet::items () const</h3>
-<p>Return a <tt>QList&lt;QContent&gt;</tt> of items in this set. Note: This is a relatively expensive operation, and generally should not be used unless it is known that only a few items will be returned.</p>
-<p>It is also a snapshot of the currently known items in the list, which could go out of date immediately after it is obtained.</p>
-<p>When considering using this method first examine the process of retrieving a pointer to the internal model and using an MVC solution.</p>
+<p>Return a <a href="qcontent.html#QContentIdList-typedef">QContentIdList</a> of content Ids in this set.</p>
+<p>This is a relatively expensive operation, and generally should not be used unless it is known that only a few items will be returned.</p>
+<p>It is also a snapshot of the currently known items in the list, which has a possibility of going out of date immediately after it is obtained.</p>
+<p>When considering use of this method first examine the process of retrieving a pointer to the internal model and using a <a href="model-view-programming.html">Model/View</a> solution.</p>
+<p>See also <a href="qcontentsetmodel.html">QContentSetModel</a> and <a href="qcontentset.html#items">items</a>().</p>
+<h3 class="fn"><a name="items"></a><a href="qcontentset.html#QContentList-typedef">QContentList</a> QContentSet::items () const</h3>
+<p>Return a <a href="qcontentset.html#QContentList-typedef">QContentList</a> of items in this set.</p>
+<p>This is a relatively expensive operation, and generally should not be used unless it is known that only a few items will be returned.</p>
+<p>It is also a snapshot of the currently known items in the list, which has a possibility of going out of date immediately after it is obtained.</p>
+<p>When considering use of this method first examine the process of retrieving a pointer to the internal model and using a <a href="model-view-programming.html">Model/View</a> solution.</p>
+<p>See also <a href="qcontentsetmodel.html">QContentSetModel</a> and <a href="qcontentset.html#itemIds">itemIds</a>().</p>
 <h3 class="fn"><a name="remove"></a>void QContentSet::remove ( const <a href="qcontent.html">QContent</a> &amp; <i>cl</i> )</h3>
-<p>Remove the <tt>QContent</tt> object <i>cl</i> from this set. Note: This does not remove the object from the backing store. This is useful for trimming down a set of <tt>Content</tt> objects to display to the user, or perform bulk operations on such as moving to a new location.</p>
+<p>Remove the <a href="qcontent.html">QContent</a> object <i>cl</i> from this set. This does not remove the object from the backing store. This is useful for trimming down a set of <a href="qcontent.html">QContent</a> objects to display to the user, or perform bulk operations on such as moving to a new location.</p>
 <p>The method cannot remove an object that matches the filter expression, if one is set.</p>
-<p>See also <a href="qcontentset.html#add">QContentSet::add</a>().</p>
+<p>See also <a href="qcontentset.html#add">add</a>(), <a href="qcontentset.html#contains">contains</a>(), and <a href="qcontentset.html#clear">clear</a>().</p>
 <h3 class="fn"><a name="scan"></a>void QContentSet::scan ( const <a href="qstring.html">QString</a> &amp; <i>path</i>, <a href="qcontentset.html#Priority-enum">Priority</a> <i>priority</i> = NormalPriority )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Scan for added/removed content in <i>path</i> with priority <i>priority</i>. Directories will be scanned recusively in the background.</p>
+<p>Scan for added/removed content in <i>path</i> with the specified <i>priority</i>. Directories will be scanned recusively in a background thread located in the server process.</p>
 <h3 class="fn"><a name="setCriteria"></a>void QContentSet::setCriteria ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>kind</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i> )</h3>
-<p>Sets a filtering criteria of <tt>FilterType</tt> <i>kind</i> and value <i>filter</i> to the current filter set.</p>
+<p>Sets a filtering criteria of <tt>FilterType</tt> <i>kind</i> and value <i>filter</i> to the current filter set. This operation will replace all previously specified filters.</p>
 <h3 class="fn"><a name="setCriteria-2"></a>void QContentSet::setCriteria ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filters</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Sets a group of filtering criteria <i>filters</i> to the current filter set.</p>
+<p>Sets a group of filtering criteria <i>filters</i> to the current filter set. This operation will replace all previously specified filters.</p>
 <h3 class="fn"><a name="setSortOrder"></a>void QContentSet::setSortOrder ( const <a href="qstringlist.html">QStringList</a> &amp; <i>sortOrder</i> )</h3>
-<p>Sets the attributes content is ordered by to <i>sortOrder</i>.</p>
+<p>Sets the attribute(s) that content in this <a href="qcontentset.html">QContentSet</a> is ordered by to <i>sortOrder</i>.</p>
 <p>See also <a href="qcontentset.html#sortOrder">sortOrder</a>().</p>
 <h3 class="fn"><a name="sortOrder"></a><a href="qstringlist.html">QStringList</a> QContentSet::sortOrder () const</h3>
-<p>Returns the attributes the content is ordered by.</p>
+<p>Returns the attribute(s) the content in this <a href="qcontentset.html">QContentSet</a> is ordered by.</p>
 <p>See also <a href="qcontentset.html#setSortOrder">setSortOrder</a>().</p>
 <h3 class="fn"><a name="sorted"></a>void QContentSet::sorted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when this <tt>QContentSet</tt> has been sorted.</p>
+<p>This signal is emitted when this <a href="qcontentset.html">QContentSet</a> has been sorted.</p>
 <h3 class="fn"><a name="types"></a><a href="qstringlist.html">QStringList</a> QContentSet::types () const</h3>
-<p>Returns the list of types in the set.</p>
-<p>For applications, games and settings the type is application/x-executable for documents the type is the document's MIME type, or application/octet-stream if unknown.</p>
+<p>Returns the list of mime-types contained in this set.</p>
+<p>For applications, games and settings the type is application/x-executable.</p>
+<p>For documents the type is the document's MIME type, or application/octet-stream if the file type is unknown.</p>
 <h3 class="fn"><a name="uninstallContent"></a>void QContentSet::uninstallContent ()</h3>
 <p>Remove the meta information objects in this set from the backing store, and remove any files from the file system if the content type is appropriate. In the case of DRM controlled files this will also remove any rights objects.</p>
-<h3 class="fn"><a name="operator-eq"></a>QContentSet &amp; QContentSet::operator= ( const QContentSet &amp; <i>content</i> )</h3>
-<p>Assigns the given <i>content</i> to this <a href="qcontent.html">QContent</a> and returns a reference to this <a href="qcontent.html">QContent</a>.</p>
+<p>See also <a href="qcontentset.html#installContent">installContent</a>().</p>
+<h3 class="fn"><a name="operator-eq"></a>QContentSet &amp; QContentSet::operator= ( const QContentSet &amp; <i>contentset</i> )</h3>
+<p>Assigns the given <i>contentset</i> to this <a href="qcontentset.html">QContentSet</a> and returns a reference to this <a href="qcontentset.html">QContentSet</a>.</p>
+<hr />
+<h2>Related Non-Members</h2>
+<h3 class="fn"><a name="QContentList-typedef"></a>typedef QContentList</h3>
+<p>Synonym for <a href="qlist.html">QList</a>&lt;<a href="qcontent.html">QContent</a>&gt;.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

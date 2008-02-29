@@ -1,24 +1,26 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QTaskModel Class Reference</title>
+  <title>QTaskModel Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QTaskModel Class Reference</h1>
-<p>The QTaskModel class provides access to the the Tasks data. <a href="#details">More...</a></p>
-<pre>#include &lt;QTaskModel&gt;</pre><p>Inherits <a href="qpimmodel.html">QPimModel</a>.</p>
+<p>The QTaskModel class provides access to Tasks data. <a href="#details">More...</a></p>
+<pre>    #include &lt;QTaskModel&gt;</pre><p>Inherits <a href="qpimmodel.html">QPimModel</a>.</p>
 <ul>
 <li><a href="qtaskmodel-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qtaskmodel.html#Field-enum">Field</a></b> { }</li>
+<li><div class="fn"/>enum <b><a href="qtaskmodel.html#Field-enum">Field</a></b> { Invalid, Description, Priority, Completed, ..., Categories }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -27,44 +29,37 @@
 <li><div class="fn"/>virtual <b><a href="qtaskmodel.html#dtor.QTaskModel">~QTaskModel</a></b> ()</li>
 <li><div class="fn"/>virtual QUniqueId <b><a href="qtaskmodel.html#addRecord">addRecord</a></b> ( const QByteArray &amp; <i>bytes</i>, const QPimSource &amp; <i>source</i>, const QString &amp; <i>format</i> = QString() )</li>
 <li><div class="fn"/>QUniqueId <b><a href="qtaskmodel.html#addTask">addTask</a></b> ( const QTask &amp; <i>task</i>, const QPimSource &amp; <i>source</i> = QPimSource() )</li>
-<li><div class="fn"/>virtual int <b><a href="qtaskmodel.html#columnCount">columnCount</a></b> ( const QModelIndex &amp; <i>parent</i> = QModelIndex() ) const</li>
 <li><div class="fn"/>virtual QVariant <b><a href="qtaskmodel.html#data">data</a></b> ( const QModelIndex &amp; <i>index</i>, int <i>role</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qtaskmodel.html#filterCompleted">filterCompleted</a></b> () const</li>
-<li><div class="fn"/>virtual Qt::ItemFlags <b><a href="qtaskmodel.html#flags">flags</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
-<li><div class="fn"/>virtual QVariant <b><a href="qtaskmodel.html#headerData">headerData</a></b> ( int <i>section</i>, Qt::Orientation <i>orientation</i>, int <i>role</i> = Qt::DisplayRole ) const</li>
-<li><div class="fn"/>virtual QMap&lt;int, QVariant&gt; <b><a href="qtaskmodel.html#itemData">itemData</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
 <li><div class="fn"/>virtual QModelIndexList <b><a href="qtaskmodel.html#match">match</a></b> ( const QModelIndex &amp; <i>start</i>, int <i>role</i>, const QVariant &amp; <i>value</i>, int <i>hits</i> = 1, Qt::MatchFlags <i>flags</i> = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap ) ) const</li>
-<li><div class="fn"/>virtual QMimeData * <b><a href="qtaskmodel.html#mimeData">mimeData</a></b> ( const QModelIndexList &amp; <i>indexes</i> ) const</li>
-<li><div class="fn"/>virtual QStringList <b><a href="qtaskmodel.html#mimeTypes">mimeTypes</a></b> () const</li>
-<li><div class="fn"/>virtual QByteArray <b><a href="qtaskmodel.html#record">record</a></b> ( const QUniqueId &amp; <i>id</i>, const QString &amp; <i>format</i> = QString() ) const</li>
-<li><div class="fn"/>bool <b><a href="qtaskmodel.html#removeList">removeList</a></b> ( const QList&lt;QUniqueId&gt; &amp; <i>ids</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qtaskmodel.html#removeRecord">removeRecord</a></b> ( const QUniqueId &amp; <i>id</i> )</li>
+<li><div class="fn"/>virtual QByteArray <b><a href="qtaskmodel.html#record">record</a></b> ( const QUniqueId &amp; <i>identifier</i>, const QString &amp; <i>format</i> = QString() ) const</li>
+<li><div class="fn"/>bool <b><a href="qtaskmodel.html#removeList">removeList</a></b> ( const QList&lt;QUniqueId&gt; &amp; <i>identifiers</i> )</li>
+<li><div class="fn"/>virtual bool <b><a href="qtaskmodel.html#removeRecord">removeRecord</a></b> ( const QUniqueId &amp; <i>identifier</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtaskmodel.html#removeTask">removeTask</a></b> ( const QTask &amp; <i>task</i> )</li>
-<li><div class="fn"/>bool <b><a href="qtaskmodel.html#removeTask-2">removeTask</a></b> ( const QUniqueId &amp; <i>id</i> )</li>
+<li><div class="fn"/>bool <b><a href="qtaskmodel.html#removeTask-2">removeTask</a></b> ( const QUniqueId &amp; <i>identifier</i> )</li>
 <li><div class="fn"/>virtual bool <b><a href="qtaskmodel.html#setData">setData</a></b> ( const QModelIndex &amp; <i>index</i>, const QVariant &amp; <i>value</i>, int <i>role</i> )</li>
-<li><div class="fn"/>void <b><a href="qtaskmodel.html#setFilterCompleted">setFilterCompleted</a></b> ( bool <i>b</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qtaskmodel.html#setItemData">setItemData</a></b> ( const QModelIndex &amp; <i>index</i>, const QMap&lt;int, QVariant&gt; &amp; <i>roles</i> )</li>
+<li><div class="fn"/>void <b><a href="qtaskmodel.html#setFilterCompleted">setFilterCompleted</a></b> ( bool <i>completedOnly</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="qtaskmodel.html#sort">sort</a></b> ( int <i>column</i>, Qt::SortOrder <i>order</i> = Qt::AscendingOrder )</li>
 <li><div class="fn"/>QTask <b><a href="qtaskmodel.html#task">task</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
-<li><div class="fn"/>QTask <b><a href="qtaskmodel.html#task-2">task</a></b> ( const QUniqueId &amp; <i>id</i> ) const</li>
+<li><div class="fn"/>QTask <b><a href="qtaskmodel.html#task-2">task</a></b> ( const QUniqueId &amp; <i>identifier</i> ) const</li>
 <li><div class="fn"/>QTask <b><a href="qtaskmodel.html#task-3">task</a></b> ( int <i>row</i> ) const</li>
 <li><div class="fn"/>virtual bool <b><a href="qtaskmodel.html#updateRecord">updateRecord</a></b> ( const QUniqueId &amp; <i>id</i>, const QByteArray &amp; <i>bytes</i>, const QString &amp; <i>format</i> = QString() )</li>
 <li><div class="fn"/>bool <b><a href="qtaskmodel.html#updateTask">updateTask</a></b> ( const QTask &amp; <i>task</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>35 public functions inherited from <a href="qpimmodel.html#public-functions">QPimModel</a></li>
+<li><div class="fn"/>31 public functions inherited from <a href="qpimmodel.html#public-functions">QPimModel</a></li>
 <li><div class="fn"/>34 public functions inherited from <a href="qabstractitemmodel.html#public-functions">QAbstractItemModel</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>QIcon <b><a href="qtaskmodel.html#fieldIcon">fieldIcon</a></b> ( Field <i>k</i> )</li>
-<li><div class="fn"/>QString <b><a href="qtaskmodel.html#fieldIdentifier">fieldIdentifier</a></b> ( Field <i>k</i> )</li>
-<li><div class="fn"/>QString <b><a href="qtaskmodel.html#fieldLabel">fieldLabel</a></b> ( Field <i>k</i> )</li>
-<li><div class="fn"/>Field <b><a href="qtaskmodel.html#identifierField">identifierField</a></b> ( const QString &amp; <i>i</i> )</li>
-<li><div class="fn"/>bool <b><a href="qtaskmodel.html#setTaskField">setTaskField</a></b> ( QTask &amp; <i>task</i>, QTaskModel::Field <i>f</i>, const QVariant &amp; <i>v</i> )</li>
-<li><div class="fn"/>QVariant <b><a href="qtaskmodel.html#taskField">taskField</a></b> ( const QTask &amp; <i>task</i>, QTaskModel::Field <i>f</i> )</li>
+<li><div class="fn"/>QIcon <b><a href="qtaskmodel.html#fieldIcon">fieldIcon</a></b> ( Field <i>field</i> )</li>
+<li><div class="fn"/>QString <b><a href="qtaskmodel.html#fieldIdentifier">fieldIdentifier</a></b> ( Field <i>field</i> )</li>
+<li><div class="fn"/>QString <b><a href="qtaskmodel.html#fieldLabel">fieldLabel</a></b> ( Field <i>field</i> )</li>
+<li><div class="fn"/>Field <b><a href="qtaskmodel.html#identifierField">identifierField</a></b> ( const QString &amp; <i>identifier</i> )</li>
+<li><div class="fn"/>bool <b><a href="qtaskmodel.html#setTaskField">setTaskField</a></b> ( QTask &amp; <i>task</i>, QTaskModel::Field <i>field</i>, const QVariant &amp; <i>value</i> )</li>
+<li><div class="fn"/>QVariant <b><a href="qtaskmodel.html#taskField">taskField</a></b> ( const QTask &amp; <i>task</i>, QTaskModel::Field <i>field</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
@@ -78,7 +73,6 @@
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qabstractitemmodel.html#public-variables">QAbstractItemModel</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>6 protected functions inherited from <a href="qpimmodel.html#protected-functions">QPimModel</a></li>
 <li><div class="fn"/>15 protected functions inherited from <a href="qabstractitemmodel.html#protected-functions">QAbstractItemModel</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
@@ -87,134 +81,133 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QTaskModel class provides access to the the Tasks data.</p>
-<p>The QTaskModel is used to access the Task data. It is a descendant of <a href="qabstractitemmodel.html">QAbstractItemModel</a>, so it is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a>, as well as any custom developer Views.</p>
-<p>QTaskModel provides functions for filtering of items. For filters or sorting that is not provided by QTaskModel it is recommended that <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a> is used to wrap QTaskModel.</p>
-<p>QTaskModel may merge data from multiple sources.</p>
-<p>QTaskModel will also refresh when changes are made in other instances of QTaskModel or from other applications.</p>
+<p>The QTaskModel class provides access to Tasks data.</p>
+<p>User tasks are represented in the task model as a table, with each row corresponding to a particular task and each column as on of the fields of the task. Complete <a href="qtask.html">QTask</a> objects can be retrieved using the <a href="qtaskmodel.html#task">task</a>() function which takes either a row, index, or unique identifier.</p>
+<p>The task model is a descendant of <a href="qabstractitemmodel.html">QAbstractItemModel</a>, so it is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a>, as well as <a href="qtasklistview.html">QTaskListView</a> or any custom views.</p>
+<p>The task model provides functions for filtering of tasks by category and completion status, and by default will sort by completion status, priority and description. Note that this sort order may change in future versions of Qtopia.</p>
+<p>The appointment model provides functions for sorting and some filtering of items. For filters or sorting that is not provided by the task model, it is recommended that <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a> be used to wrap the task model.</p>
+<p>A QTaskModel instance will also reflect changes made in other instances of QTaskModel, both within this application and from other applications. This will result in the <a href="qabstractitemmodel.html#modelReset">modelReset</a>() signal being emitted.</p>
+<p>See also <a href="qtask.html">QTask</a>, <a href="qtasklistview.html">QTaskListView</a>, and <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Field-enum"></a>enum QTaskModel::Field</h3>
-<p>Enumerates the columns when in table mode and columns used for sorting. Is a subset of data retrievable from a <a href="qtask.html">QTask</a>.</p>
+<p>Enumerates the columns when in table mode and columns used for sorting. This is a subset of the data retrievable from a <a href="qtask.html">QTask</a>.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QTaskModel::Invalid</tt></td><td align="center" valign="top"><tt>-1</tt></td><td valign="top">An invalid field</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Description</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The description of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Priority</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The priority of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Completed</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Whether the task is completed</td></tr>
+<tr><td valign="top"><tt>QTaskModel::PercentCompleted</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The percent completed of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Status</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The status of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::DueDate</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The due date of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::StartedDate</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">The started date of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::CompletedDate</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">The completed date of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Notes</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The notes of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Identifier</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">The identifier of the task</td></tr>
+<tr><td valign="top"><tt>QTaskModel::Categories</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The list of categories the task belongs to</td></tr>
+</table></p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QTaskModel"></a>QTaskModel::QTaskModel ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Contstructs a <a href="qtaskmodel.html">QTaskModel</a> with parent <i>parent</i>.</p>
+<p>Constructs a task model with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QTaskModel"></a>QTaskModel::~QTaskModel ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destructs the <a href="qtaskmodel.html">QTaskModel</a></p>
+<p>Destroys the task model.</p>
 <h3 class="fn"><a name="addRecord"></a><a href="quniqueid.html">QUniqueId</a> QTaskModel::addRecord ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>bytes</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="qstring.html">QString</a> &amp; <i>format</i> = QString() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Adds the PIM record encoded in <i>bytes</i> to the <a href="qtaskmodel.html">QTaskModel</a> under the storage source <i>source</i>. The format of the record in <i>bytes</i> is given by <i>format</i>. An empty <i>format</i> string will cause the record to be read using the data stream operators for the PIM data type of the model. If <i>source</i> is empty will add the record to the default storage source.</p>
-<p>Returns valid id if the record was successfully added. Otherwise returns an invalid id.</p>
-<p>Can only add PIM data that is represented by the model. This means that only task data can be added using a <a href="qtaskmodel.html">QTaskModel</a>. Valid formats are &quot;vCalendar&quot; or an empty string.</p>
+<p>Adds the PIM record encoded in <i>bytes</i> to the model under the specified storage <i>source</i>. The format of the record in <i>bytes</i> is given by <i>format</i>. An empty format string will cause the record to be read using the data stream operators for the PIM data type of the model. If the specified source is null the function will add the record to the default storage source.</p>
+<p>Returns a valid identifier for the record if the record was successfully added. Otherwise returns a null identifier.</p>
+<p>Can only add PIM data that is represented by the model. This means that only task data can be added using a task model. Valid formats are &quot;vCalendar&quot; or an empty string.</p>
 <p>Reimplemented from <a href="qpimmodel.html#addRecord">QPimModel</a>.</p>
+<p>See also <a href="qtaskmodel.html#addTask">addTask</a>().</p>
 <h3 class="fn"><a name="addTask"></a><a href="quniqueid.html">QUniqueId</a> QTaskModel::addTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> = QPimSource() )</h3>
-<p>Adds the task <i>task</i> to the <a href="qtaskmodel.html">QTaskModel</a> under the storage source <i>source</i>. If source is empty will add the task to the default storage source.</p>
-<p>Returns true if the task was successfully added. Otherwise return false.</p>
-<h3 class="fn"><a name="columnCount"></a>int QTaskModel::columnCount ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the number of columns for the given <i>parent</i>.</p>
-<p>Reimplemented from <a href="qabstractitemmodel.html#columnCount">QAbstractItemModel</a>.</p>
+<p>Adds the <i>task</i> to the model under the specified storage <i>source</i>. If source is null the function will add the task to the default storage source.</p>
+<p>Returns a valid identifier for the task if the task was successfully added. Otherwise returns a null identifier.</p>
+<p>Note the current identifier of the specified appointment is ignored.</p>
 <h3 class="fn"><a name="data"></a><a href="qvariant.html">QVariant</a> QTaskModel::data ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i>, int <i>role</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the data stored under the given <i>role</i> for the item referred to by the <i>index</i>.</p>
+<p>The row of the index specifies which task to access and the column of the index is treated as a <tt>QTaskModel::Field</tt>.</p>
 <p>Reimplemented from <a href="qabstractitemmodel.html#data">QAbstractItemModel</a>.</p>
-<p>See also <a href="qtaskmodel.html#setData">setData</a>().</p>
-<h3 class="fn"><a name="fieldIcon"></a><a href="qicon.html">QIcon</a> QTaskModel::fieldIcon ( <a href="qtaskmodel.html#Field-enum">Field</a> <i>k</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns a icon representing the task model field <i>k</i>.</p>
+<p>See also <a href="qtaskmodel.html#setData">setData</a>() and <a href="qtaskmodel.html#taskField">taskField</a>().</p>
+<h3 class="fn"><a name="fieldIcon"></a><a href="qicon.html">QIcon</a> QTaskModel::fieldIcon ( <a href="qtaskmodel.html#Field-enum">Field</a> <i>field</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns an icon representing the task model <i>field</i>.</p>
 <p>Returns a null icon if no icon is available.</p>
 <p>See also <a href="qtaskmodel.html#fieldLabel">fieldLabel</a>(), <a href="qtaskmodel.html#fieldIdentifier">fieldIdentifier</a>(), and <a href="qtaskmodel.html#identifierField">identifierField</a>().</p>
-<h3 class="fn"><a name="fieldIdentifier"></a><a href="qstring.html">QString</a> QTaskModel::fieldIdentifier ( <a href="qtaskmodel.html#Field-enum">Field</a> <i>k</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns a non-translated string describing the task model field <i>k</i>.</p>
+<h3 class="fn"><a name="fieldIdentifier"></a><a href="qstring.html">QString</a> QTaskModel::fieldIdentifier ( <a href="qtaskmodel.html#Field-enum">Field</a> <i>field</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns a non-translated string describing the task model <i>field</i>.</p>
 <p>See also <a href="qtaskmodel.html#fieldLabel">fieldLabel</a>(), <a href="qtaskmodel.html#fieldIcon">fieldIcon</a>(), and <a href="qtaskmodel.html#identifierField">identifierField</a>().</p>
-<h3 class="fn"><a name="fieldLabel"></a><a href="qstring.html">QString</a> QTaskModel::fieldLabel ( <a href="qtaskmodel.html#Field-enum">Field</a> <i>k</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns a translated string describing the task model field <i>k</i>.</p>
+<h3 class="fn"><a name="fieldLabel"></a><a href="qstring.html">QString</a> QTaskModel::fieldLabel ( <a href="qtaskmodel.html#Field-enum">Field</a> <i>field</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns a translated string describing the task model <i>field</i>.</p>
 <p>See also <a href="qtaskmodel.html#fieldIcon">fieldIcon</a>(), <a href="qtaskmodel.html#fieldIdentifier">fieldIdentifier</a>(), and <a href="qtaskmodel.html#identifierField">identifierField</a>().</p>
 <h3 class="fn"><a name="filterCompleted"></a>bool QTaskModel::filterCompleted () const</h3>
-<p>Returns true if the model only contains completed tasks. Otherwise returns false.</p>
+<p>Returns true if the model contains only completed tasks.</p>
 <p>See also <a href="qtaskmodel.html#setFilterCompleted">setFilterCompleted</a>().</p>
-<h3 class="fn"><a name="flags"></a><a href="qt.html#ItemFlags-typedef">Qt::ItemFlags</a> QTaskModel::flags ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the item flags for the given <i>index</i>.</p>
-<p>Reimplemented from <a href="qabstractitemmodel.html#flags">QAbstractItemModel</a>.</p>
-<h3 class="fn"><a name="headerData"></a><a href="qvariant.html">QVariant</a> QTaskModel::headerData ( int <i>section</i>, <a href="qt.html#Orientation-enum">Qt::Orientation</a> <i>orientation</i>, int <i>role</i> = Qt::DisplayRole ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the data for the given <i>role</i> and <i>section</i> in the header with the specified <i>orientation</i>.</p>
-<p>Reimplemented from <a href="qabstractitemmodel.html#headerData">QAbstractItemModel</a>.</p>
-<h3 class="fn"><a name="identifierField"></a><a href="qtaskmodel.html#Field-enum">Field</a> QTaskModel::identifierField ( const <a href="qstring.html">QString</a> &amp; <i>i</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the task model field for the non-translated string identifier <i>i</i>.</p>
+<h3 class="fn"><a name="identifierField"></a><a href="qtaskmodel.html#Field-enum">Field</a> QTaskModel::identifierField ( const <a href="qstring.html">QString</a> &amp; <i>identifier</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the task model field for the non-translated field <i>identifier</i>.</p>
 <p>See also <a href="qtaskmodel.html#fieldLabel">fieldLabel</a>(), <a href="qtaskmodel.html#fieldIcon">fieldIcon</a>(), and <a href="qtaskmodel.html#fieldIdentifier">fieldIdentifier</a>().</p>
-<h3 class="fn"><a name="itemData"></a><a href="qmap.html">QMap</a>&lt;int, <a href="qvariant.html">QVariant</a>&gt; QTaskModel::itemData ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns a map with values for all predefined roles in the model for the item at the given <i>index</i>.</p>
-<p>Reimplemented from <a href="qabstractitemmodel.html#itemData">QAbstractItemModel</a>.</p>
-<p>See also <a href="qtaskmodel.html#setItemData">setItemData</a>().</p>
 <h3 class="fn"><a name="match"></a>QModelIndexList QTaskModel::match ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>start</i>, int <i>role</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i>, int <i>hits</i> = 1, <a href="qt.html#MatchFlags-typedef">Qt::MatchFlags</a> <i>flags</i> = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap ) ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns a list of indexes for the items where the data matches the specified <i>value</i>. The list that is returned may be empty.</p>
-<p>The search starts from the <i>start</i> index.</p>
-<p>The arguments <i>role</i>, <i>hits</i> and <i>flags</i> are currently ignored.</p>
+<p>Returns a list of indexes for the items where the data matches the specified <i>value</i>. The list that is returned may be empty. The search starts from the <i>start</i> index.</p>
+<p>Currently unimplemented, this function ignores <i>start</i>, <i>role</i>, <i>value</i>, <i>hits</i> and <i>flags</i>.</p>
 <p>Reimplemented from <a href="qabstractitemmodel.html#match">QAbstractItemModel</a>.</p>
-<h3 class="fn"><a name="mimeData"></a><a href="qmimedata.html">QMimeData</a> * QTaskModel::mimeData ( const QModelIndexList &amp; <i>indexes</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns an object that contains a serialized description of the specified <i>indexes</i>. The format used to describe the items corresponding to the <i>indexes</i> is obtained from the <a href="qtaskmodel.html#mimeTypes">mimeTypes</a>() function.</p>
-<p>If the list of indexes is empty, 0 is returned rather than a serialized empty list.</p>
-<p>Currently returns 0 but may be implemented at a future date.</p>
-<p>Reimplemented from <a href="qabstractitemmodel.html#mimeData">QAbstractItemModel</a>.</p>
-<h3 class="fn"><a name="mimeTypes"></a><a href="qstringlist.html">QStringList</a> QTaskModel::mimeTypes () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns a list of MIME types that can be used to describe a list of model indexes.</p>
-<p>Currently returns an empty list but may be implemented at a future date.</p>
-<p>Reimplemented from <a href="qabstractitemmodel.html#mimeTypes">QAbstractItemModel</a>.</p>
-<h3 class="fn"><a name="record"></a><a href="qbytearray.html">QByteArray</a> QTaskModel::record ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>format</i> = QString() ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the record with the identifier <i>id</i> encoded in the format specified by <i>format</i>. An empty <i>format</i> string will cause the record to be written using the data stream operators for the PIM data type of the model.</p>
+<h3 class="fn"><a name="record"></a><a href="qbytearray.html">QByteArray</a> QTaskModel::record ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i>, const <a href="qstring.html">QString</a> &amp; <i>format</i> = QString() ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the record in the model with the specified <i>identifier</i> encoded in the format specified by the <i>format</i> string. An empty format string will cause the record to be written using the data stream operators for the PIM data type of the model.</p>
+<p>Valid formats are &quot;vCalendar&quot; or an empty string.</p>
 <p>Reimplemented from <a href="qpimmodel.html#record">QPimModel</a>.</p>
-<h3 class="fn"><a name="removeList"></a>bool QTaskModel::removeList ( const <a href="qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; &amp; <i>ids</i> )</h3>
-<p>Removes the tasks specified by the list of uids <i>ids</i>.</p>
-<p>Returns true if tasks are successfully removed. Otherwise returns false.</p>
-<h3 class="fn"><a name="removeRecord"></a>bool QTaskModel::removeRecord ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Removes the record that has the uid <i>id</i> from the <a href="qtaskmodel.html">QTaskModel</a>.</p>
-<p>Returns true if the record was successfully removed. Otherwise returns false.</p>
+<p>See also <a href="qtaskmodel.html#task">task</a>().</p>
+<h3 class="fn"><a name="removeList"></a>bool QTaskModel::removeList ( const <a href="qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; &amp; <i>identifiers</i> )</h3>
+<p>Removes the records in the model specified by the list of <i>identifiers</i>.</p>
+<p>Returns true if tasks were successfully removed.</p>
+<h3 class="fn"><a name="removeRecord"></a>bool QTaskModel::removeRecord ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Removes the record from the model with the specified <i>identifier</i>.</p>
+<p>Returns true if the record was successfully removed.</p>
 <p>Reimplemented from <a href="qpimmodel.html#removeRecord">QPimModel</a>.</p>
+<p>See also <a href="qtaskmodel.html#removeTask">removeTask</a>().</p>
 <h3 class="fn"><a name="removeTask"></a>bool QTaskModel::removeTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i> )</h3>
-<p>Removes the task <i>task</i> so long as there is a task in the <a href="qtaskmodel.html">QTaskModel</a> with the same uid as <i>task</i>.</p>
-<p>Returns true if the task was successfully removed. Otherwise return false.</p>
-<h3 class="fn"><a name="removeTask-2"></a>bool QTaskModel::removeTask ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> )</h3>
+<p>Removes the task from the model with the same identifier as the specified <i>task</i>.</p>
+<p>Returns true if the task was successfully removed.</p>
+<h3 class="fn"><a name="removeTask-2"></a>bool QTaskModel::removeTask ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Removes the task that has the uid <i>id</i> from the TaskModel;</p>
-<p>Returns true if the task was successfully removed. Otherwise return false.</p>
+<p>Removes the task from the model with the specified <i>identifier</i>.</p>
+<p>Returns true if the task was successfully removed.</p>
 <h3 class="fn"><a name="setData"></a>bool QTaskModel::setData ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i>, int <i>role</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Sets the <i>role</i> data for the item at <i>index</i> to <i>value</i>. Returns true if successful, otherwise returns false.</p>
+<p>Sets the <i>role</i> data for the item at <i>index</i> to <i>value</i>. Returns true if successful.</p>
+<p>The task model only accepts data for the <tt>EditRole</tt>. The column of the specified index specifies the <tt>QTaskModel::Field</tt> to set and the row of the index specifies which task to modify.</p>
 <p>Reimplemented from <a href="qabstractitemmodel.html#setData">QAbstractItemModel</a>.</p>
-<p>See also <a href="qtaskmodel.html#data">data</a>().</p>
-<h3 class="fn"><a name="setFilterCompleted"></a>void QTaskModel::setFilterCompleted ( bool <i>b</i> )</h3>
-<p>If <i>b</i> is true sets the model to only contain completed tasks. Otherwise will contain both completed and uncompleted tasks.</p>
+<p>See also <a href="qtaskmodel.html#data">data</a>() and <a href="qtaskmodel.html#setTaskField">setTaskField</a>().</p>
+<h3 class="fn"><a name="setFilterCompleted"></a>void QTaskModel::setFilterCompleted ( bool <i>completedOnly</i> )</h3>
+<p>Sets whether the model contains only completed Tasks to <i>completedOnly</i>.</p>
 <p>See also <a href="qtaskmodel.html#filterCompleted">filterCompleted</a>().</p>
-<h3 class="fn"><a name="setItemData"></a>bool QTaskModel::setItemData ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i>, const <a href="qmap.html">QMap</a>&lt;int, <a href="qvariant.html">QVariant</a>&gt; &amp; <i>roles</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>For every <a href="qt.html#ItemDataRole-enum">Qt::ItemDataRole</a> in <i>roles</i>, sets the role data for the item at <i>index</i> to the associated value in <i>roles</i>. Returns true if successful, otherwise returns false.</p>
-<p>Reimplemented from <a href="qabstractitemmodel.html#setItemData">QAbstractItemModel</a>.</p>
-<p>See also <a href="qtaskmodel.html#itemData">itemData</a>().</p>
-<h3 class="fn"><a name="setTaskField"></a>bool QTaskModel::setTaskField ( <a href="qtask.html">QTask</a> &amp; <i>task</i>, <a href="qtaskmodel.html#Field-enum">QTaskModel::Field</a> <i>f</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>v</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Sets the value in <i>task</i> that would be set for field <i>f</i> as it would if modified for a task in the <a href="qtaskmodel.html">QTaskModel</a> to <i>v</i>.</p>
-<p>Returns true if the task was modified. Otherwise returns false.</p>
-<p>See also <a href="qtaskmodel.html#taskField">taskField</a>().</p>
+<h3 class="fn"><a name="setTaskField"></a>bool QTaskModel::setTaskField ( <a href="qtask.html">QTask</a> &amp; <i>task</i>, <a href="qtaskmodel.html#Field-enum">QTaskModel::Field</a> <i>field</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Sets the value for the specified <i>field</i> of the given <i>task</i> to <i>value</i>.</p>
+<p>Returns true if the task was modified.</p>
+<p>See also <a href="qtaskmodel.html#taskField">taskField</a>() and <a href="qtaskmodel.html#setData">setData</a>().</p>
 <h3 class="fn"><a name="sort"></a>void QTaskModel::sort ( int <i>column</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sorts the model by <i>column</i> in ascending order</p>
 <p>Currently <i>order</i> is ignored but may be implemented at a future date.</p>
 <p>Reimplemented from <a href="qabstractitemmodel.html#sort">QAbstractItemModel</a>.</p>
 <h3 class="fn"><a name="task"></a><a href="qtask.html">QTask</a> QTaskModel::task ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns the task for the row specified by <i>index</i>. The column of <i>index</i> is ignored.</p>
-<h3 class="fn"><a name="task-2"></a><a href="qtask.html">QTask</a> QTaskModel::task ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const</h3>
+<h3 class="fn"><a name="task-2"></a><a href="qtask.html">QTask</a> QTaskModel::task ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns the task with the identifier <i>id</i>. The task does not have to be in the current filter mode for it to be returned.</p>
+<p>Returns the task in the model with the given <i>identifier</i>. The task does not have to be in the current filter mode for it to be returned.</p>
 <h3 class="fn"><a name="task-3"></a><a href="qtask.html">QTask</a> QTaskModel::task ( int <i>row</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Return the task for the <i>row</i> specified.</p>
-<h3 class="fn"><a name="taskField"></a><a href="qvariant.html">QVariant</a> QTaskModel::taskField ( const <a href="qtask.html">QTask</a> &amp; <i>task</i>, <a href="qtaskmodel.html#Field-enum">QTaskModel::Field</a> <i>f</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the value from <i>task</i> that would be returned for field <i>f</i> as it would from a row in the <a href="qtaskmodel.html">QTaskModel</a>.</p>
-<p>See also <a href="qtaskmodel.html#setTaskField">setTaskField</a>().</p>
+<p>Return the task for the given <i>row</i>.</p>
+<h3 class="fn"><a name="taskField"></a><a href="qvariant.html">QVariant</a> QTaskModel::taskField ( const <a href="qtask.html">QTask</a> &amp; <i>task</i>, <a href="qtaskmodel.html#Field-enum">QTaskModel::Field</a> <i>field</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the value for the specified <i>field</i> of the given <i>task</i>.</p>
+<p>See also <a href="qtaskmodel.html#setTaskField">setTaskField</a>() and <a href="qtaskmodel.html#data">data</a>().</p>
 <h3 class="fn"><a name="updateRecord"></a>bool QTaskModel::updateRecord ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>bytes</i>, const <a href="qstring.html">QString</a> &amp; <i>format</i> = QString() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Updates the record enoded in <i>bytes</i> so long as there is a record in the <a href="qtaskmodel.html">QTaskModel</a> with the same uid as the record. The format of the record in <i>bytes</i> is given by <i>format</i>. An empty <i>format</i> string will cause the record to be read using the data stream operators for the PIM data type of the model. If <i>id</i> is not null will set the record uid to <i>id</i> before attempting to update the record.</p>
-<p>Returns true if the record was successfully updated. Otherwise returns false.</p>
+<p>Updates the corresponding record in the model to equal the record encoded in <i>bytes</i>. The format of the record in <i>bytes</i> is given by the <i>format</i> string. An empty <i>format</i> string will cause the record to be read using the data stream operators for the PIM data type of the model. If <i>id</i> is not null will set the record identifier to <i>id</i> before attempting to update the record.</p>
+<p>Returns true if the record was successfully updated.</p>
+<p>Valid formats are &quot;vCalendar&quot; or an empty string.</p>
 <p>Reimplemented from <a href="qpimmodel.html#updateRecord">QPimModel</a>.</p>
+<p>See also <a href="qtaskmodel.html#updateTask">updateTask</a>().</p>
 <h3 class="fn"><a name="updateTask"></a>bool QTaskModel::updateTask ( const <a href="qtask.html">QTask</a> &amp; <i>task</i> )</h3>
-<p>Updates the task <i>task</i> so long as a there is a task in the <a href="qtaskmodel.html">QTaskModel</a> with the same uid as <i>task</i>.</p>
-<p>Returns true if the task was successfully updated. Otherwise return false.</p>
+<p>Updates the task in the model with the same identifier as the specified <i>task</i> to equal the specified task.</p>
+<p>Returns true if the task was successfully updated.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1060,6 +1060,14 @@ void ContactSqlIO::setFilter(const QString &text, int flags)
     /* should do on construction? or in QContactIO construction */
     QMap<QChar, QString> pbt = phoneButtonText();
 
+    QRegExp simIndex("^(\\d{1,3})#$");
+    if (simIndex.exactMatch(text)) {
+        QStringList sl; 
+        sl.append("simcardidmap");
+        QPimSqlIO::setJoins(sl);
+        QPimSqlIO::setFilter("simcardidmap.cardindex = " + simIndex.cap(1));
+        return;
+    }
     bool allNumbers = true;
     for(int i = 0; i < text.length(); ++i) {
         if (!pbt.contains(text[i])) {

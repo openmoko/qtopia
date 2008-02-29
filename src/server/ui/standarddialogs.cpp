@@ -32,6 +32,11 @@
 #include <QPowerStatusManager>
 #include <QtopiaServiceRequest>
 
+#ifdef QTOPIA_TEST
+#include <QTestMessage>
+#include <QtopiaServerTestSlave>
+#endif
+
 static bool criticalMemoryPopup = true;
 static bool shutdownDialog = true;
 static bool defaultCrashDialog = true;
@@ -145,7 +150,20 @@ void StandardDialogsImpl::applicationTerminated(
     bool executeAction = !buttonAction.isNull();
     if( !text.isEmpty() ) {
         bool ba = !buttonAction.isNull() && !buttonText.isEmpty();
-        QMessageBox* box = new QMessageBox(tr("Application terminated"), text, QMessageBox::Critical, QMessageBox::Ok | QMessageBox::Default, ba ? QMessageBox::No : QMessageBox::NoButton, QMessageBox::NoButton);
+
+    QString error_title = tr("Application terminated");
+
+#ifdef QTOPIA_TEST
+        QtopiaServerApplication *a = (QtopiaServerApplication*)qApp;
+        if (a) {
+            QTestMessage msg("application_terminated");
+            msg["title"] = error_title;
+            msg["text"] = text;
+            a->m_serverSlave->postMessage( msg );
+        }
+#endif
+
+        QMessageBox* box = new QMessageBox(error_title, text, QMessageBox::Critical, QMessageBox::Ok | QMessageBox::Default, ba ? QMessageBox::No : QMessageBox::NoButton, QMessageBox::NoButton);
 
         if(ba)
             box->setButtonText(QMessageBox::No, buttonText);
@@ -200,7 +218,20 @@ void StandardDialogsImpl::applicationTerminated(const QString &name,
     if(app.id() == QContent::InvalidId || !app.isValid()) return;
     QString appname = Qtopia::dehyphenate(app.name());
 
-    QMessageBox::information(0, tr("Application terminated"), tr("<qt><b>%1</b> was terminated due to application error.</qt>").arg(appname));
+    QString error_title = tr("Application terminated");
+    QString error_details = tr("<qt><b>%1</b> was terminated due to application error.</qt>").arg(appname);
+
+#ifdef QTOPIA_TEST
+        QtopiaServerApplication *a = (QtopiaServerApplication*)qApp;
+        if (a) {
+            QTestMessage msg("application_terminated");
+            msg["title"] = error_title;
+            msg["text"] = error_details;
+            a->m_serverSlave->postMessage( msg );
+        }
+#endif
+
+    QMessageBox::information(0, error_title, error_details);
 }
 
 void StandardDialogsImpl::preloadTerminated(const QString &name)
@@ -213,7 +244,20 @@ void StandardDialogsImpl::preloadTerminated(const QString &name)
     if(!app.isValid()) return;
     QString appname = Qtopia::dehyphenate(app.name());
 
-    QMessageBox::information(0, tr("Application terminated"), tr("<qt><b>%1</b> was terminated due to application error.  (Fast loading has been disabled for this application. Tap and hold the application icon to reenable it.)</qt>").arg(appname));
+    QString error_title = tr("Application terminated");
+    QString error_details = tr("<qt><b>%1</b> was terminated due to application error.  (Fast loading has been disabled for this application. Tap and hold the application icon to reenable it.)</qt>").arg(appname);
+
+#ifdef QTOPIA_TEST
+        QtopiaServerApplication *a = (QtopiaServerApplication*)qApp;
+        if (a) {
+            QTestMessage msg("application_terminated");
+            msg["title"] = error_title;
+            msg["text"] = error_details;
+            a->m_serverSlave->postMessage( msg );
+        }
+#endif
+
+    QMessageBox::information(0, error_title, error_details);
 }
 
 QTOPIA_TASK(StandardDialogs, StandardDialogsImpl);

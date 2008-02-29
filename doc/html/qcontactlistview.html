@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QContactListView Class Reference</title>
+  <title>QContactListView Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContactListView Class Reference</h1>
-<p>The QContactListView class provides a list view widget with some convenience functions for use with <a href="qcontactmodel.html">QContactModel</a>. <a href="#details">More...</a></p>
-<pre>#include &lt;QContactListView&gt;</pre><p>Inherits <a href="qlistview.html">QListView</a>.</p>
+<p>The QContactListView class provides a list view widget for use with <a href="qcontactmodel.html">QContactModel</a>. <a href="#details">More...</a></p>
+<pre>    #include &lt;QContactListView&gt;</pre><p>Inherits <a href="qlistview.html">QListView</a>.</p>
 <ul>
 <li><a href="qcontactlistview-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -71,34 +73,38 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QContactListView class provides a list view widget with some convenience functions for use with <a href="qcontactmodel.html">QContactModel</a>.</p>
-<p>The QContactListView is a <a href="qlistview.html">QListView</a> with some additional functions to aid in using a list view of a <a href="qcontactmodel.html">QContactModel</a>.</p>
+<p>The QContactListView class provides a list view widget for use with <a href="qcontactmodel.html">QContactModel</a>.</p>
+<p>The convenience functions provided by QContactListView include functions for interpreting the view's model, delegate and current item as the corresponding <a href="qcontactmodel.html">QContactModel</a>, <a href="qcontactdelegate.html">QContactDelegate</a> and <a href="qcontact.html">QContact</a> objects. In addition, QContactListView enforces using a <a href="qcontactmodel.html">QContactModel</a> (or a derivative) as the model.</p>
+<p>Upon construction, QContactListView automatically sets itself to use a <a href="qcontactdelegate.html">QContactDelegate</a> for drawing, sets <tt>Batch</tt> layout mode (<a href="qlistview.html#setLayoutMode">setLayoutMode</a>()), and sets the resize mode to <tt>Adjust</tt> (<a href="qlistview.html#setResizeMode">setResizeMode</a>()).</p>
+<p>The following image displays a QContactListView, using the default <a href="qcontactdelegate.html">QContactDelegate</a> to render QContacts from a <a href="qcontactmodel.html">QContactModel</a>.</p>
+<p align="center"><img src="images/qcontactview.png" alt="&quot;List of QContacts&quot;" /></p><p>See also <a href="qcontact.html">QContact</a>, <a href="qcontactmodel.html">QContactModel</a>, and <a href="qcontactdelegate.html">QContactDelegate</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QContactListView"></a>QContactListView::QContactListView ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
-<p>Contructs a <a href="qcontactlistview.html">QContactListView</a> with parent <i>parent</i>.</p>
+<p>Constructs a <a href="qcontactlistview.html">QContactListView</a> with the given <i>parent</i>.</p>
+<p>This also sets the layout mode to <tt>Batched</tt> for performance, the resize mode to <tt>Adjust</tt>, and creates a <a href="qcontactdelegate.html">QContactDelegate</a> to use as the delegate.</p>
 <h3 class="fn"><a name="dtor.QContactListView"></a>QContactListView::~QContactListView ()</h3>
-<p>Destorys the <a href="qcontactlistview.html">QContactListView</a>.</p>
+<p>Destroys the <a href="qcontactlistview.html">QContactListView</a>.</p>
 <h3 class="fn"><a name="contactDelegate"></a><a href="qcontactdelegate.html">QContactDelegate</a> * QContactListView::contactDelegate () const</h3>
-<p>Returns the <a href="qcontactdelegate.html">QContactDelegate</a> Set for the view.</p>
+<p>Returns the <a href="qcontactdelegate.html">QContactDelegate</a> set for the view. During construction, <a href="qcontactlistview.html">QContactListView</a> will automatically create a <a href="qcontactdelegate.html">QContactDelegate</a> to use as the delegate, but this can be overridden with a different delegate derived from <a href="qcontactdelegate.html">QContactDelegate</a> if necessary.</p>
 <h3 class="fn"><a name="contactModel"></a><a href="qcontactmodel.html">QContactModel</a> * QContactListView::contactModel () const</h3>
 <p>Returns the <a href="qcontactmodel.html">QContactModel</a> set for the view.</p>
 <h3 class="fn"><a name="currentContact"></a><a href="qcontact.html">QContact</a> QContactListView::currentContact () const</h3>
-<p>Return the <a href="qcontact.html">QContact</a> for the currently selected index.</p>
+<p>Returns the <a href="qcontact.html">QContact</a> for the currently selected index.</p>
 <h3 class="fn"><a name="selectedContactIds"></a><a href="qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QContactListView::selectedContactIds () const</h3>
-<p>Returns the list of ids for contacts selected from the view.</p>
+<p>Returns the list of ids for contacts selected in the view.</p>
 <p>See also <a href="qcontactlistview.html#selectedContacts">selectedContacts</a>().</p>
 <h3 class="fn"><a name="selectedContacts"></a><a href="qlist.html">QList</a>&lt;<a href="qcontact.html">QContact</a>&gt; QContactListView::selectedContacts () const</h3>
-<p>Returns the list of complete contacts selected from the view. If a large number of contacts might be selected this function can be expensive, and <a href="qcontactlistview.html#selectedContactIds">selectedContactIds</a>() should be used instead</p>
+<p>Returns the list of complete contacts selected from the view. If a large number of contacts might be selected this function can be expensive, and <a href="qcontactlistview.html#selectedContactIds">selectedContactIds</a>() should be used instead.</p>
 <p>See also <a href="qcontactlistview.html#selectedContactIds">selectedContactIds</a>().</p>
 <h3 class="fn"><a name="setModel"></a>void QContactListView::setModel ( <a href="qabstractitemmodel.html">QAbstractItemModel</a> * <i>model</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets the model for the view to <i>model</i>.</p>
-<p>Will only accept the model if it inherits or is a <a href="qcontactmodel.html">QContactModel</a>.</p>
+<p>Will only accept the model if it inherits or is a <a href="qcontactmodel.html">QContactModel</a>. If the <i>model</i> does not inherit a <a href="qcontactmodel.html">QContactModel</a>, the existing model will be retained.</p>
 <p>Reimplemented from <a href="qabstractitemview.html#setModel">QAbstractItemView</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

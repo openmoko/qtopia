@@ -25,14 +25,15 @@
 #include <QValueSpaceItem>
 #include "qtopiaserverapplication.h"
 
-/* 
+/*! 
    \class DefaultSignal
+   \ingroup QtopiaServer::Task
    \brief The DefaultSignal class provides a proxy for another system signal.
 
    To simplify the design of system themes and other mechanisms that source 
    information directly from the value space, the DefaultSignal class proxies
-   the information of another, configurable system signal under the name
-   "DefaultSignalSource".
+   the information of another, configurable system signal provider under the name
+   "DefaultSignal".
 
    The Signal to proxy can be manually configured by setting the 
    \c {SignalSources/DefaultSignalSource} key in the \c {Trolltech/SignalStatus}
@@ -44,7 +45,7 @@
   */
 
 /*!
-  \internal
+  Constructs a new DefaultSignal instance with the given \a parent.
   */
 DefaultSignal::DefaultSignal(QObject *parent)
 : QSignalSourceProvider(QLatin1String("virtual"), QLatin1String("DefaultSignal"), parent),
@@ -54,7 +55,7 @@ DefaultSignal::DefaultSignal(QObject *parent)
     m_primary = cfg.value("SignalSources/DefaultSignalSource").toString();
 
     if(m_primary.isEmpty()) {
-        m_signalSourceVS = new QValueSpaceItem( QLatin1String("/Hardware/Accessories/SignalSources") );
+        m_signalSourceVS = new QValueSpaceItem( QLatin1String("/Hardware/Accessories/QSignalSource") );
         connect( m_signalSourceVS, SIGNAL(contentsChanged()), this, SLOT(accessoryAdded()) );
     } else {
         m_signalSource = new QSignalSource(m_primary);

@@ -127,6 +127,7 @@ class QBluetoothRfcommSerialPortPrivate : public QObject
 
 public:
     QBluetoothRfcommSerialPortPrivate(QBluetoothRfcommSerialPort *parent);
+    ~QBluetoothRfcommSerialPortPrivate();
 
     // Max of 31 rfcomm devices
     char m_id;
@@ -182,6 +183,12 @@ QBluetoothRfcommSerialPortPrivate::QBluetoothRfcommSerialPortPrivate(QBluetoothR
 
     m_timer = new QTimer(this);
     QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(setupTtyRetry()));
+}
+
+QBluetoothRfcommSerialPortPrivate::~QBluetoothRfcommSerialPortPrivate()
+{
+    delete m_socket;
+    m_socket = 0;
 }
 
 static void read_serial_port_parameters(void *userData, struct rfcomm_dev_info *info)
@@ -259,13 +266,17 @@ void QBluetoothRfcommSerialPortPrivate::setupTtyRetry()
         }
 
         emit m_parent->error(m_error);
+        return;
     }
 
     char devname[MAXPATHLEN];
     snprintf(devname, MAXPATHLEN - 1, "/dev/rfcomm%d", m_id);
     if ((m_fd = open(devname, O_RDONLY | O_NOCTTY)) < 0) {
+        qLog(Bluetooth) << "Opening" << devname << strerror(errno);
         snprintf(devname, MAXPATHLEN-1, "/dev/bluetooth/rfcomm/%d", m_id);
         m_fd = open(devname, O_RDONLY | O_NOCTTY);
+        if ( qLogEnabled(Bluetooth) && m_fd < 0 )
+            qLog(Bluetooth) << "Opening" << devname << strerror(errno);
     }
 
     m_retries++;
@@ -389,11 +400,41 @@ bool QBluetoothRfcommSerialPortPrivate::disconnect()
 
 /*!
     \class QBluetoothRfcommSerialPort
+    \mainclass
     \brief The QBluetoothRfcommSerialPort class represents a RFCOMM serial port device.
 
-    This class provides a similiar functionality as the command line tool rfcomm.
-    It allows the creation of a tty serial port device from an RFCOMM connection.  The
-    resulting tty device can be used by other applications like a regular serial device.
+    This class enables conversion of RFCOMM sockets into serial
+    tty devices. The class can be used in two major ways, by
+    adapting an existing connected RFCOMM socket or by using the
+    connect() function to establish a client connection to a remote
+    device and adapt the resulting connection to a tty device.
+
+    The resulting tty device can be used by other applications
+    like a regular serial tty device.
+
+    \code
+        // Adapt a connected RFCOMM socket into a serial tty device
+
+        if (rfcommSocket->state() != QBluetoothRfcommSocket::ConnectedState) {
+            // Bail out
+            return;
+        }
+
+        QBluetoothRfcommSerialPort *serial =
+            new QBluetoothRfcommSerialPort(rfcommSocket);
+
+        if (serial->id() == -1) {
+            // Error creating serial port
+            return;
+        }
+
+        rfcommSocket->close();
+
+        // Use serial port
+        openSerialPort(serial->device());
+    \endcode
+
+    \sa QBluetoothRfcommSocket, QSerialIODevice
 
     \ingroup qtopiabluetooth
 */
@@ -410,10 +451,10 @@ bool QBluetoothRfcommSerialPortPrivate::disconnect()
     Defines errors that could occur in QBluetoothRfcommSerialPort
 
     \value NoError No error has occurred.
+    \value SocketNotConnected The given socket is not connected.
     \value ConnectionFailed Could not connect to the remote device.
     \value ConnectionCancelled Connection has been cancelled.
     \value CreationError Could not create the serial port device.
-    \value SocketNotConnected The given socket is not connected.
 */
 
 /*!
@@ -433,7 +474,9 @@ QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort( QObject* parent)
 QBluetoothRfcommSerialPort::~QBluetoothRfcommSerialPort()
 {
     if ( d->m_fd != -1 )
-        disconnect();
+        d->disconnect();
+
+    delete d;
 }
 
 /*!
@@ -441,15 +484,20 @@ QBluetoothRfcommSerialPort::~QBluetoothRfcommSerialPort()
 
     This constructor is useful in situations where you already have a connected RFCOMM socket
     and wish to convert it to a serial port.  This is true of connections returned by
-    QBluetoothRfcommServer::nextPendingConnection().
+    QBluetoothRfcommServer::nextPendingConnection() or RFCOMM socket connections
+    which require non-blocking connections.
 
-    Note: The caller should call QBluetoothRfcommSocket::close() on \a socket immediately
-    after calling this function.  Before the created QBluetoothRfcommSerialPort device can
-    be used, the \a socket should be closed.   The \a deviceFlags parameter holds the
+    Note: The caller should call QBluetoothRfcommSocket::close() on \a socket
+    immediately after calling this constructor.  Before the created
+    QBluetoothRfcommSerialPort device can be used, the \a socket should be
+    closed.   The \a deviceFlags parameter holds the
     optional flags that modify the serial port behavior.
 
-    In case the device could not be created or an error occurred, the id() method will return
-    -1.  The caller should check the return value of this method before using the serial port device.
+    In case the device could not be created or an error occurred,
+    the id() method will return -1.  The caller should check the return
+    value of id() before using the serial port device.
+
+    \sa id()
 */
 QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort(QBluetoothRfcommSocket* socket,
         QBluetoothRfcommSerialPort::Flags deviceFlags, QObject *parent)
@@ -533,7 +581,7 @@ bool QBluetoothRfcommSerialPort::connect(const QBluetoothAddress &local,
 }
 
 /*!
-    Disconnects the serial port.  The underlying device will be removed unless the
+    Returns true if able to disconnects the serial port; otherwise returns false. The underlying device will be removed unless the
     QBluetoothRfcommSerialPort::KeepAlive flag is set.  The disconnected() signal
     will be sent once the disconnection is complete.
 
@@ -555,6 +603,8 @@ bool QBluetoothRfcommSerialPort::disconnect()
 /*!
     Returns the RFCOMM tty device which is being managed by the current instance of this class.
     If the instance is not managing a device, an empty string is returned.
+
+    \sa id()
  */
 QString QBluetoothRfcommSerialPort::device() const
 {
@@ -567,6 +617,8 @@ QString QBluetoothRfcommSerialPort::device() const
 /*!
     Returns the device id of the associated RFCOMM device.  If no device is found,
     returns -1.  The device id is usually in the range of 0-31.
+
+    \sa device()
 */
 int QBluetoothRfcommSerialPort::id() const
 {
@@ -583,6 +635,8 @@ QBluetoothRfcommSerialPort::Flags QBluetoothRfcommSerialPort::flags() const
 
 /*!
     Returns the last error that has occurred.
+
+    \sa errorString()
 */
 QBluetoothRfcommSerialPort::Error QBluetoothRfcommSerialPort::error() const
 {
@@ -591,6 +645,8 @@ QBluetoothRfcommSerialPort::Error QBluetoothRfcommSerialPort::error() const
 
 /*!
     Returns the human readable form of the last error that has occurred.
+
+    \sa error()
 */
 QString QBluetoothRfcommSerialPort::errorString() const
 {
@@ -598,6 +654,8 @@ QString QBluetoothRfcommSerialPort::errorString() const
 }
 
 /*!
+    \internal
+
     Sets the error to \a error.  This also updates the error string.
 
     \sa error(), errorString()
@@ -636,6 +694,8 @@ void QBluetoothRfcommSerialPort::setError(QBluetoothRfcommSerialPort::Error erro
 /*!
     Returns the address of the remote device.  If the socket is not currently
     connected, returns QBluetoothAddress::invalid.
+
+    \sa localAddress(), remoteChannel()
  */
 QBluetoothAddress QBluetoothRfcommSerialPort::remoteAddress() const
 {
@@ -648,6 +708,8 @@ QBluetoothAddress QBluetoothRfcommSerialPort::remoteAddress() const
 /*!
     Returns the address of the local device.  If the socket is not currently
     connected, returns QBluetoothAddress::invalid.
+
+    \sa remoteAddress()
  */
 QBluetoothAddress QBluetoothRfcommSerialPort::localAddress() const
 {
@@ -660,6 +722,8 @@ QBluetoothAddress QBluetoothRfcommSerialPort::localAddress() const
 /*!
     Returns the RFCOMM channel of the remote device.  If the socket is not
     currently connected, returns -1.
+
+    \sa remoteAddress()
  */
 int QBluetoothRfcommSerialPort::remoteChannel() const
 {
@@ -670,7 +734,9 @@ int QBluetoothRfcommSerialPort::remoteChannel() const
 }
 
 /*!
-    Releases the RFCOMM device with \a id.
+    Returns true if able to release the RFCOMM device with \a id; otherwise returns false.
+
+    \sa listDevices()
 */
 bool QBluetoothRfcommSerialPort::releaseDevice(int id)
 {
@@ -701,6 +767,8 @@ static void no_filter(void *userData, struct rfcomm_dev_info *info)
 
 /*!
     Returns a list of all RFCOMM device bindings.
+
+    \sa releaseDevice()
 */
 QList<int> QBluetoothRfcommSerialPort::listDevices()
 {
@@ -720,7 +788,10 @@ static void addr_filter(void *userData, struct rfcomm_dev_info *info)
 }
 
 /*!
-    Returns a list of all RFCOMM device for a particular Bluetooth adapter given by \a local.
+    Returns a list of all RFCOMM devices for a particular Bluetooth
+    adapter given by \a local.
+
+    \sa releaseDevice()
 */
 QList<int> QBluetoothRfcommSerialPort::listDevices(const QBluetoothLocalDevice &local)
 {
@@ -756,6 +827,5 @@ QList<int> QBluetoothRfcommSerialPort::listDevices(const QBluetoothLocalDevice &
 
     \sa connect()
 */
-
 
 #include "qbluetoothrfcommserialport.moc"

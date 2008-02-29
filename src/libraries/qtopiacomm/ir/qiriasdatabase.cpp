@@ -39,12 +39,12 @@
 
 /*!
     \class QIrIasDatabase
+    \mainclass
     \brief The QIrIasDatabase class provides access to the local IAS Database.
 
     IAS stands for Information Access Service.  The IAS database provides a way
     for applications to register information about the infrared services they
-    provide.  Applications can also query remote IAS databases to find out
-    what services the remote device supports.
+    provide.
 
     QIrIasDatabase class provides access to the local IAS Database, and gives
     the ability to add, query and delete attributes.  This class also allows
@@ -55,7 +55,7 @@
  */
 
 /*!
-    Sets a new attribute into the IAS Database.  The \a attr parameter
+    Sets a new attribute into the IAS Database returning true if successful; otherwise returning false.  The \a attr parameter
     holds the attribute to be set.  Attr can be of the following types:
 
     \list
@@ -69,6 +69,8 @@
     holds the attribute name of the attribute.
 
     NOTE: Under linux this function requires administrator privileges.
+
+    \sa attribute(), removeAttribute()
  */
 bool QIrIasDatabase::setAttribute(const QString &className,
                                   const QString &attribName,
@@ -140,9 +142,9 @@ bool QIrIasDatabase::setAttribute(const QString &className,
 }
 
 /*!
-    Gets an attribute from the local IAS Database.  The \a className
-    parameter specifies the class name of the attribute.  The
-    \a attribName parameter specifies the attribute name.  Returns an
+    Returns the value of an attribute from the local IAS Database.
+    The \a className parameter specifies the class name of the attribute.
+    The \a attribName parameter specifies the attribute name.  Returns an
     invalid QVariant in case of failure, and valid otherwise.
     The value of QVariant can be one of:
     \list
@@ -152,6 +154,8 @@ bool QIrIasDatabase::setAttribute(const QString &className,
     \endlist
 
     NOTE: Under linux this function requires administrator privileges.
+
+    \sa setAttribute(), removeAttribute()
  */
 QVariant QIrIasDatabase::attribute(const QString &className, const QString &attribName)
 {
@@ -189,6 +193,8 @@ QVariant QIrIasDatabase::attribute(const QString &className, const QString &attr
     Returns true if the attribute could be removed, false otherwise.
 
     NOTE: Under linux this function requires administrator privileges.
+
+    \sa setAttribute(), attribute()
 */
 bool QIrIasDatabase::removeAttribute(const QString &className,
                                      const QString &attribName)

@@ -854,7 +854,9 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     l->addWidget(activeDisplay);
 
     loadConfig();
+#ifdef QTOPIA_CELL // airplane mode only makes sense in cell network environment.
     activeDisplay->setPlaneMode(profMan.planeMode(), profMan.planeModeAvailable());
+#endif
 
     connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
             this, SLOT(appMessage(const QString&,const QByteArray&)) );
@@ -879,7 +881,7 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     actionSpeedDial = new QAction( QIcon(":icon/phone/speeddial"), tr("Add to Speed Dial..."), this );
     connect( actionSpeedDial, SIGNAL(triggered()), this, SLOT(addToSpeedDial()) );
 
-#ifdef QTOPIA_CELL // airplane mode only makes sense in cell network environment.
+#ifdef QTOPIA_CELL
     actionPlane = new QAction( QIcon( ":icon/aeroplane" ), tr("Airplane Safe Mode"), this );
     actionPlane->setCheckable(true);
     actionPlane->setChecked(profMan.planeMode());
@@ -909,15 +911,6 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     if (itemlist->count() > 0 && itemlist->currentRow() == -1 )
         itemlist->setItemSelected(itemlist->item(0), true);
 
-    // highlight current item
-    QFont fontCurrent;
-    fontCurrent.setBold( true );
-    itemlist->currentItem()->setFont( fontCurrent );
-
-#ifdef QTOPIA_PHONE
-    updateIcons();
-#endif
-
     setWindowTitle( tr("Profiles") );
 }
 
@@ -945,15 +938,18 @@ void ProfileSelect::loadConfig()
         }
     }
 
+#ifdef QTOPIA_CELL
     origPlaneMode = profMan.planeMode();
+#endif
     isLoading = false;
 }
 
 void ProfileSelect::closeEvent(QCloseEvent *e)
 {
+#ifdef QTOPIA_CELL
     if ( profMan.planeMode() != origPlaneMode )
         origPlaneMode = profMan.planeMode();
-
+#endif
     QDialog::closeEvent(e);
 }
 
@@ -1011,34 +1007,48 @@ void ProfileSelect::activateProfile(QListWidgetItem *activeProfileItem )
 // don't call this before the first call to loadConfig()
 void ProfileSelect::setActiveProfile( PhoneProfileItem *pItem, bool force )
 {
-    if ( force || isLoading || activeProfile != pItem ) {
-        // give warning when plane mode is about to be cancelled.
-        if ( !isLoading && profMan.planeMode() && !pItem->profile().planeMode() ) {
-            if ( QMessageBox::warning( this, tr( "Airplane Mode" ),
-                    tr( "<qt>Activating %1 will turn off Airplane Safe Mode.\n"
-                        "Do you really want to change the profile?</qt>", "%1 = profile name" )
-                    .arg(pItem->profile().name()),
-                    QMessageBox::Yes, QMessageBox::No ) == QMessageBox::No )
-                return;
-        }
-        activeDisplay->setText( pItem ? pItem->text() : QString() );
+    if ( pItem && ( force || isLoading || activeProfile != pItem ) ) {
         PhoneProfileItem *prevActiveProfile = activeProfile;
         activeProfile = pItem;
         if( activeProfile )
             itemlist->setCurrentItem( activeProfile );
-        if( !isLoading ) { //it has really changed, not just setting an active profile from loadConfig()
-            QFont f;
+
+        activeDisplay->setText( pItem ? pItem->text() : QString() );
+
+#ifdef QTOPIA_CELL
+        bool prevPlaneMode = profMan.planeMode();
+#endif
+
+        profMan.activateProfile(activeProfile?activeProfile->profile().id():-1);
+        QFont f;
+        f.setBold( true );
+        activeProfile->setFont( f );
+
+        //it has really changed, not just setting an active profile from loadConfig()
+        if ( !isLoading && prevActiveProfile ) {
+            // change fonts.
             f.setBold( false );
             prevActiveProfile->setFont( f );
-            f.setBold( true );
-            activeProfile->setFont( f );
-            profMan.activateProfile(activeProfile?activeProfile->profile().id():-1);
 
-            if( activeProfile )
-                Qtopia::actionConfirmation( QIcon( ":icon/Note" ).pixmap(
-                    QStyle::PixelMetric(QStyle::PM_SmallIconSize), true ), tr("Profile '%1' activated").arg( activeProfile->text() ) );
-            // activate plane mode
-            setPlaneMode( pItem->profile().planeMode() );
+#ifdef QTOPIA_CELL
+            // give warning when changing profiles from airplane mode to other.
+            if ( prevActiveProfile->profile().planeMode()
+                && !activeProfile->profile().planeMode() ) {
+                if ( QMessageBox::warning( this, tr( "Airplane Mode" ),
+                        tr( "<qt>Do you wish to stay in Airplane Safe Mode.</qt>" ),
+                        QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes )
+                    setPlaneMode( true );
+                else
+                    setPlaneMode( false );
+            } else if ( !prevActiveProfile->profile().planeMode()
+                    && !activeProfile->profile().planeMode() ) {
+                // inherit previous plane mode.
+                setPlaneMode( prevPlaneMode );
+            } else if ( activeProfile->profile().planeMode() ) {
+                // airplane profile, always on
+                setPlaneMode( true );
+            }
+#endif
         }
     }
 }
@@ -1210,6 +1220,7 @@ void ProfileSelect::updateIcons()
 
 void ProfileSelect::activatePlaneMode()
 {
+#ifdef QTOPIA_CELL
     bool active = profMan.planeMode();
     if ( active ) {
         if ( activeProfile->profile().planeMode() ) {
@@ -1236,6 +1247,7 @@ void ProfileSelect::activatePlaneMode()
         tr( "<qt>Airplane Safe Mode is enabled.</qt>" ) :
         tr( "<qt>Airplane Safe Mode is disabled.</qt>" );
     QMessageBox::warning( this, tr( "Airplane Mode" ), result );
+#endif
 }
 
 void ProfileSelect::appMessage(const QString &msg, const QByteArray &data)
@@ -1300,7 +1312,9 @@ ProfilesService::~ProfilesService()
 */
 void ProfilesService::activatePlaneMode()
 {
+#ifdef QTOPIA_CELL
     parent->activatePlaneMode();
+#endif
 }
 
 /*!

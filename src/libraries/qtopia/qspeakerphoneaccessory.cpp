@@ -23,11 +23,13 @@
 
 /*!
     \class QSpeakerPhoneAccessory
+    \mainclass
+
     \brief The QSpeakerPhoneAccessory class provides access to the speaker phone.
 
-    The QSpeakerPhoneAccessory class provides access to the speaker phone.
-    The usual way to turn on the speaker phone within a client application
-    is as follows:
+    QSpeakerPhoneAccessory can be used to switch the speaker phone mode on and
+    off using setOnSpeaker().  The usual way to turn on the speaker phone
+    within a client application is as follows:
 
     \code
     QSpeakerPhoneAccessory sp;
@@ -39,21 +41,21 @@
 
     \sa QSpeakerPhoneAccessoryProvider, QHardwareInterface
 
-  \ingroup hardware
+    \ingroup hardware
 */
 
 /*!
-    Construct a new speaker phone acessory object for \a id and attach
+    Construct a new speaker phone accessory object for provider \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the first available
-    accessory that supports the speaker phone interface.  If there is more
+    accessory provider that supports the speaker phone interface.  If there is more
     than one service that supports the speaker phone interface, the caller
-    should enumerate them with QHardwareManager::supports()
+    should enumerate them with QHardwareManager::providers()
     and create separate QSpeakerPhoneAccessory objects for each.
 
-    \sa QHardwareManager::supports()
+    \sa QHardwareManager::providers()
 */
 QSpeakerPhoneAccessory::QSpeakerPhoneAccessory
     ( const QString& id, QObject *parent, QAbstractIpcInterface::Mode mode )
@@ -63,14 +65,14 @@ QSpeakerPhoneAccessory::QSpeakerPhoneAccessory
 }
 
 /*!
-    Destroy this speaker phone accessory.
+    Destroys the speaker phone accessory.
 */
 QSpeakerPhoneAccessory::~QSpeakerPhoneAccessory()
 {
 }
 
 /*!
-    Determine if audio is currently being played via the speaker.
+    Returns true if audio is currently being played via the speaker; otherwise returns false.
 */
 bool QSpeakerPhoneAccessory::onSpeaker() const
 {
@@ -78,7 +80,7 @@ bool QSpeakerPhoneAccessory::onSpeaker() const
 }
 
 /*!
-    Set the speaker phone state to \a value.
+    Sets the speaker phone state to \a value.
 */
 void QSpeakerPhoneAccessory::setOnSpeaker( bool value )
 {
@@ -93,12 +95,12 @@ void QSpeakerPhoneAccessory::setOnSpeaker( bool value )
 
 /*!
     \class QSpeakerPhoneAccessoryProvider
+    \mainclass
+
     \brief The QSpeakerPhoneAccessoryProvider class provides an interface for speaker phone devices to integrate into Qtopia.
 
-    The QSpeakerPhoneAccessoryProvider class provides an interface for
-    speaker phone devices to integrate into Qtopia.  Speaker phone devices
-    inherit from this class and override setOnSpeaker() to
-    implement the required functionality.
+    Speaker phone devices inherit from this class and override setOnSpeaker()
+    to implement the required functionality.
 
     \sa QSpeakerPhoneAccessory
 
@@ -106,7 +108,7 @@ void QSpeakerPhoneAccessory::setOnSpeaker( bool value )
 */
 
 /*!
-    Create a speaker phone device called \a id and attach it to \a parent.
+    Create a speaker phone device provider called \a id and attaches it to \a parent.
 */
 QSpeakerPhoneAccessoryProvider::QSpeakerPhoneAccessoryProvider
         ( const QString& id, QObject *parent )
@@ -115,14 +117,18 @@ QSpeakerPhoneAccessoryProvider::QSpeakerPhoneAccessoryProvider
 }
 
 /*!
-    Destroy this speaker phone provider.
+    Destroys speaker phone provider.
 */
 QSpeakerPhoneAccessoryProvider::~QSpeakerPhoneAccessoryProvider()
 {
 }
 
 /*!
-    \reimp
+    Sets the speaker phone state to \a value.  The default implementation
+    updates the speaker phone state as seen by onSpeaker() on the client.
+    Speaker phone implementations should override this function to provide
+    device-specific functionality and then call this implementation to update
+    the client's view of the speaker phone state.
 */
 void QSpeakerPhoneAccessoryProvider::setOnSpeaker( bool value )
 {

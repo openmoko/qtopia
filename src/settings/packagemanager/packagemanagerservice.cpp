@@ -150,8 +150,8 @@ PackageServiceInstaller::PackageServiceInstaller( PackageView *parent, Qt::Windo
 
 void PackageServiceInstaller::doReportError( const QString &simpleError, const QString &detailedError )
 {
-    Q_UNUSED( detailedError );
     m_progressLabel->setText( simpleError );
+    qWarning( qPrintable(detailedError) );
 }
 
 void PackageServiceInstaller::confirmInstall( const InstallControl::PackageInfo &package )
@@ -218,12 +218,7 @@ void PackageServiceInstaller::confirmInstall( const InstallControl::PackageInfo 
 
 void PackageServiceInstaller::installPendingPackage()
 {
-    QString downloadPath = Qtopia::packagePath() + QLatin1String( "tmp/" );
-
-    if( !(QFile::exists( downloadPath ) ) )
-        QDir::root().mkpath( downloadPath );
-
-    m_packageFile.setFileName( downloadPath + m_pendingPackage.packageFile );
+    m_packageFile.setFileName( Qtopia::tempDir() + m_pendingPackage.packageFile );
 
     m_packageFile.unsetError();
 
@@ -234,7 +229,7 @@ void PackageServiceInstaller::installPendingPackage()
 
         QUrl url( m_pendingPackage.url );
 
-        m_http.setHost( url.host() );
+        m_http.setHost( url.host(), url.port(80) );
         m_http.get( url.path(), &m_packageFile );
 
         m_progressLabel->setText( tr( "Downloading %1...", "%1 = package name" ).arg( m_pendingPackage.name ) );
@@ -266,7 +261,7 @@ void PackageServiceInstaller::installPackage( const QString &url )
 
     QUrl u( url );
 
-    m_http.setHost( u.host() );
+    m_http.setHost( u.host(), u.port(80) );
     m_http.get( u.path(), &m_headerBuffer );
 }
 

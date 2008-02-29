@@ -19,6 +19,8 @@
 **
 ****************************************************************************/
 
+#include "phonepowermanager.h"
+
 #include <qtopialog.h>
 #include <QList>
 #include <QSettings>
@@ -29,55 +31,41 @@
 
 #include <qtopiaipcenvelope.h>
 #include "qtopiaserverapplication.h"
-#include "qtopiapowermanager.h"
 
-/*
-  The PhonePowerManager class implements phone specific power management
+/*!
+  \class PhonePowerManager
+  \ingroup QtopiaServer::Task
+  \brief The PhonePowerManager class implements phone specific power management
   functionality in Qtopia.
-
 
   This manager uses three levels for power management. The first level dims
   the background light, the second level turns the light off and the last level
   returns the phone to the homescreen.
+
+  The PhonePowerManager class provides the \c {PhonePowerManager} task.
+  \sa QtopiaPowerManager
 */
-class PhonePowerManager : public QtopiaPowerManager
+
+/*!
+  Constructs a new PhonePowerManager instance.
+  */
+PhonePowerManager::PhonePowerManager() : 
+    QtopiaPowerManager(), showhomescreen_on(false), suspend_on(true)
 {
-    enum PowerMode {
-        DimLight = 0,
-        LightOff = 1,
-        Suspend = 2,
-        HomeScreen = 3
-    };
+    setDefaultIntervals();
+}
 
-public:
-    PhonePowerManager() : showhomescreen_on(false), suspend_on(true)
-    {
-        setDefaultIntervals();
-    };
-    virtual ~PhonePowerManager() {};
+/*!
+  Destroys the PhonePowerManager instance
+*/
+PhonePowerManager::~PhonePowerManager() 
+{
+}
 
-    bool save(int level);
-
-    /*! This function sets the internal screensaver timeouts
-      to the values passed in \a a.
-
-     The phone screensaver maps the timeouts to the following actions:
-        \list
-        \o 0 -> dim light
-        \o 1 -> turn off light
-        \o 3 -> show HomeScreen
-        \endlist
-
-     */
-    void setIntervals(int* a, int size);
-
-
-private:
-    bool showhomescreen_on;
-    bool suspend_on;
-};
-
-
+/*!
+    This function activates the appropriate actions for the given
+    screensaver \a level.
+  */
 bool PhonePowerManager::save(int level)
 {
     int action = m_levelToAction.value(level);
@@ -126,6 +114,21 @@ bool PhonePowerManager::save(int level)
     return false;
 }
 
+
+/*! 
+    This function sets the internal screensaver timeouts
+    to the values passed in \a ivals. \a size determines the number of entries in 
+    \a ivals.
+
+
+    The phone screensaver maps the timeouts to the following actions:
+        \list
+        \o 0 -> dim light
+        \o 1 -> turn off light
+        \o 3 -> show HomeScreen
+        \endlist
+
+     */
 void PhonePowerManager::setIntervals(int* ivals, int size )
 {
     QSettings config("Trolltech","qpe");

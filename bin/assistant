@@ -19,11 +19,13 @@ if ( $isWindows ) {
     check_script($0, "$depotpath/bin", $ARGV[0]);
 }
 
-
-# Load the Qtopia content file
-if ( -f "$depotpath/doc/html/qtopia.dcf" ) {
-    system("$DQTDIR/bin/assistant", "-addContentFile", "$depotpath/doc/html/qtopia.dcf");
+# Load the Qtopia content files
+for my $file ( "$QPEDIR/doc/html/qtopia.dcf", "$QPEDIR/doc/html/buildsystem/buildsystem.dcf" ) {
+    if ( -f $file ) {
+        system("$DQTDIR/bin/assistant", "-addContentFile", $file);
+    }
 }
+
 my $ret = system("$DQTDIR/bin/assistant", @ARGV);
 exit $ret;
 

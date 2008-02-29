@@ -54,12 +54,18 @@ QBluetoothL2CapSocketPrivate::QBluetoothL2CapSocketPrivate()
 
 /*!
     \class QBluetoothL2CapSocket
+    \mainclass
     \brief The QBluetoothL2CapSocket class represents an L2CAP client socket.
 
     The Bluetooth L2CAP protocol provides reliable connection-oriented and unreliable
     connectionless data services.  It is a lower layer protocol than RFCOMM.
     The implementation of L2CAP protocol under Linux uses sockets, and is in general
     very similar to TCP socket programming.
+
+    PSM stands for Port and Service Multiplexer.  The PSM value can be
+    any \bold{odd} value the range of 1-32765.  For more information
+    please see Bluetooth Specification Version 2.0 + EDR [vol 4]
+    page 45.
 
     The PSM and address of the connected peer are fetched by calling remotePsm() and
     remoteAddress() respectively.  The localAddress() returns the address of the local
@@ -87,7 +93,7 @@ QBluetoothL2CapSocket::QBluetoothL2CapSocket(QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the socket.
  */
 QBluetoothL2CapSocket::~QBluetoothL2CapSocket()
 {
@@ -96,6 +102,8 @@ QBluetoothL2CapSocket::~QBluetoothL2CapSocket()
 /*!
     Returns the address of the remote device.  If the socket is not currently
     connected, returns QBluetoothAddress::invalid.
+
+    \sa remotePsm(), localAddress()
  */
 QBluetoothAddress QBluetoothL2CapSocket::remoteAddress() const
 {
@@ -106,6 +114,8 @@ QBluetoothAddress QBluetoothL2CapSocket::remoteAddress() const
 /*!
     Returns the address of the local device.  If the socket is not currently
     connected, returns QBluetoothAddress::invalid.
+
+    \sa remotePsm(), remoteAddress()
  */
 QBluetoothAddress QBluetoothL2CapSocket::localAddress() const
 {
@@ -116,6 +126,8 @@ QBluetoothAddress QBluetoothL2CapSocket::localAddress() const
 /*!
     Returns the PSM of the remote device.  If the socket is not
     currently connected, returns -1.
+
+    \sa remoteAddress(), localAddress()
  */
 int QBluetoothL2CapSocket::remotePsm() const
 {
@@ -186,6 +198,9 @@ int QBluetoothL2CapSocket::outgoingMtu() const
     return m_data->m_omtu;
 }
 
+/*!
+    \reimp
+*/
 bool QBluetoothL2CapSocket::readSocketParameters(int socket)
 {
     SOCKET_DATA(QBluetoothL2CapSocket);
@@ -253,6 +268,8 @@ bool QBluetoothL2CapSocket::readSocketParameters(int socket)
 
     Note that the connection could still fail, the state of the socket
     will be sent in the stateChanged() signal.
+
+    \sa state(), connected(), waitForConnected()
  */
 bool QBluetoothL2CapSocket::connect(const QBluetoothAddress &local,
                                      const QBluetoothAddress &remote,
@@ -320,6 +337,9 @@ bool QBluetoothL2CapSocket::connect(const QBluetoothAddress &local,
     return initiateConnect(sockfd, (struct sockaddr *) &addr, sizeof(addr));
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothL2CapSocket::resetSocketParameters()
 {
     SOCKET_DATA(QBluetoothL2CapSocket);

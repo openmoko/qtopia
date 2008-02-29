@@ -22,6 +22,7 @@
 
 /*!
     \class QMediaHandle
+    \mainclass
     \brief The QMediaHandle class is used to refer to an activated media content
            within Qtopia's Media System.
     \ingroup multimedia

@@ -84,6 +84,7 @@ TARGETS=\
     $$SYNCQTOPIA $$QMAKE_TARGETS regenerate_all test checkp4 lupdate packages\
     install_target remove_target nodeps mocables printdependrules qmake_check
 !equals(QTOPIA_SDKROOT,$$QPEDIR):TARGETS+=sdk
+qtopia_depot:TARGETS+=auto_docs
 ORDERED_TARGETS=
 
 # Create the "Qtopia wrappers" to the qmake targets

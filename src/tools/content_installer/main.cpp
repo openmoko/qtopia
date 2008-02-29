@@ -48,7 +48,12 @@ int main( int argc, char** argv )
 
     QApplication app(argc, argv, false);
     if ( argc < 6  ) {
-        printf("Usage: %s database prefix destpath categories file/s\n", app.arguments().at(0).toLocal8Bit().constData());
+        qWarning("Usage: %s database prefix destpath categories file/s\n", app.arguments().at(0).toLocal8Bit().constData());
+        qWarning() <<  "This tool is for use only by Qtopia's build system. \n" \
+                   <<  "Should there be need to remove add/remove items from the content database either \n" \
+                   <<  "    * recreate the content database via running \"make cleaninstall\" \n" \
+                   <<  "    * use the Package Manager application \n" \
+                   <<  "    * use the QContent::uninstall() API\n" ;
         return 1;
     }
 

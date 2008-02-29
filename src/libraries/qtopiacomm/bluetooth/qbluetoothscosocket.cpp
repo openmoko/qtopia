@@ -50,6 +50,7 @@ QBluetoothScoSocketPrivate::QBluetoothScoSocketPrivate()
 
 /*!
     \class QBluetoothScoSocket
+    \mainclass
     \brief The QBluetoothScoSocket class represents an SCO client socket.
 
     The Bluetooth SCO protocol provides Synchronous Connection Oriented sockets.
@@ -61,7 +62,7 @@ QBluetoothScoSocketPrivate::QBluetoothScoSocketPrivate()
     The localAddress() returns the address of the local socket.
 
     \ingroup qtopiabluetooth
-    \sa QBluetoothScoServer
+    \sa QBluetoothScoServer, QBluetoothAbstractSocket
  */
 
 /*!
@@ -74,7 +75,7 @@ QBluetoothScoSocket::QBluetoothScoSocket(QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the socket. 
 */
 QBluetoothScoSocket::~QBluetoothScoSocket()
 {
@@ -91,6 +92,8 @@ QBluetoothScoSocket::~QBluetoothScoSocket()
 
     Note that the connection could still fail, the state of the socket
     will be sent in the stateChanged() signal.
+
+    \sa state(), connected(), waitForConnected()
  */
 bool QBluetoothScoSocket::connect(const QBluetoothAddress &local,
                                   const QBluetoothAddress &remote)
@@ -134,6 +137,8 @@ bool QBluetoothScoSocket::connect(const QBluetoothAddress &local,
     Returns the remote address of the opened SCO socket.  If the socket
     is currently not connected, or the information could not be obtained,
     an invalid QBluetoothAddress is returned.
+
+    \sa localAddress()
 */
 QBluetoothAddress QBluetoothScoSocket::remoteAddress() const
 {
@@ -145,6 +150,8 @@ QBluetoothAddress QBluetoothScoSocket::remoteAddress() const
     Returns the local address of the opened SCO socket.  If the socket
     is currently not connected, or the information could not be obtained,
     an invalid QBluetoothAddress is returned.
+
+    \sa remoteAddress()
 */
 QBluetoothAddress QBluetoothScoSocket::localAddress() const
 {
@@ -162,6 +169,9 @@ int QBluetoothScoSocket::mtu() const
     return m_data->m_mtu;
 }
 
+/*!
+    \reimp
+*/
 bool QBluetoothScoSocket::readSocketParameters(int sockfd)
 {
     SOCKET_DATA(QBluetoothScoSocket);
@@ -203,6 +213,9 @@ bool QBluetoothScoSocket::readSocketParameters(int sockfd)
     return true;
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothScoSocket::resetSocketParameters()
 {
     SOCKET_DATA(QBluetoothScoSocket);

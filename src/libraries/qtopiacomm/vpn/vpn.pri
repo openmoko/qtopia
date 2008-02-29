@@ -7,7 +7,6 @@ VPN_HEADERS+=\
 
 VPN_SOURCES+=\
     qvpnclient.cpp\
-    qvpnmanager.cpp\
     qvpnfactory.cpp\
     qopenvpn.cpp\
     qopenvpngui.cpp\
@@ -18,7 +17,6 @@ VPN_SOURCES+=\
 VPN_PRIVATE_HEADERS+=\
     qvpnclientprivate_p.h\
     qopenvpn_p.h\
-    qvpnmanager_p.h\
     qipsec_p.h \
     qx500identity.h \
     qkey.h

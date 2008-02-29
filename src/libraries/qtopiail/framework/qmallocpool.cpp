@@ -117,6 +117,7 @@ struct QMallocPtr
 
 /*!
   \class QMallocPool
+  \mainclass
   \brief The QMallocPool class allows management of allocations within a
   designated memory region.
 
@@ -126,7 +127,7 @@ struct QMallocPtr
 
   The QMallocPool class provides equivalents for most standard memory management
   functions, such as \c {malloc}, \c {calloc}, \c {realloc} and \c {free}.
-  However, unlike these standard functions which aquire their memory from the
+  However, unlike these standard functions which acquire their memory from the
   system kernel, QMallocPool operators on a region of memory provided to it
   during construction.
 
@@ -135,6 +136,8 @@ struct QMallocPtr
   projects, including several versions of Linux libc.
 
   QMallocPool is not thread safe.
+
+  \ingroup misc
  */
 
 /*!
@@ -146,8 +149,8 @@ struct QMallocPtr
   allocations.  The PoolType controls where this bookkeeping data is stored.
 
   \value Owned
-  The bookkeeping data is maintained in the QMallocPool instance.  Only people
-  who have access to this instance can allocate into the pool.
+  The bookkeeping data is maintained in the QMallocPool instance.  Allocation to
+  the pool is only possible via this instance.
   \value NewShared
   The bookkeeping data is maintained in the managed region itself.  This allows
   multiple QMallocPool instances, possibly in separate processes, to allocate
@@ -157,14 +160,22 @@ struct QMallocPtr
   state.  Thus, while the bookkeeping data is shared, only one of the sharing
   instances should use a NewShared type.  All other instances should use the
   Shared pool type.
+
+  The malloc pool bookkeeping data contains absolute pointers.  As such, if
+  multiple processes intend to allocate into the malloc pool, is is essential 
+  that they map the memory region to the same virtual address location.
   \value Shared
   The bookkeeping data is stored in the managed region, and has previously been
   initialized by another QMallocPool instance constructed using the NewShared
   pool type.
+
+  The malloc pool bookkeeping data contains absolute pointers.  As such, if
+  multiple processes intend to allocate into the malloc pool, is is essential 
+  that they map the memory region to the same virtual address location.
   */
 
 /*!
-  Create an invalid QMallocPool instance.
+  Creates an invalid QMallocPool.
   */
 QMallocPool::QMallocPool()
 : d(0)
@@ -172,9 +183,9 @@ QMallocPool::QMallocPool()
 }
 
 /*!
-  Create a QMallocPool instance on the memory region \a poolBase of length
+  Creates a QMallocPool on the memory region \a poolBase of length
   \a poolLength.  The pool will be constructed with the passed \a type and
-  \a name.  \a name is used for diagnostics purposes only.
+  \a name. The \a name is used for diagnostics purposes only.
   */
 QMallocPool::QMallocPool(void * poolBase, unsigned int poolLength,
                          PoolType type, const QString& name)
@@ -198,7 +209,7 @@ QMallocPool::~QMallocPool()
 }
 
 /*!
-  Return the allocated size of \a mem, assuming \a mem was previously returned
+  Returns the allocated size of \a mem, assuming \a mem was previously returned
   by malloc(), calloc() or realloc().
   */
 size_t QMallocPool::size_of(void *mem)
@@ -268,7 +279,7 @@ bool QMallocPool::isValid() const
 }
 
 /*!
-  Displays statistical information regarding the state of the malloc pool
+  Outputs statistical information regarding the state of the malloc pool
   using qLog().
  */
 void QMallocPool::dumpStats() const

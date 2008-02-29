@@ -24,6 +24,7 @@
 /*!
   \internal
   \class MediaRecorderEncoder
+  \mainclass
   \brief The MediaRecorderEncoder class provides an abstract base class for
   Qtopia MediaRecorder encoder plug-ins.
 
@@ -247,9 +248,8 @@
 /*!
   \internal
   \class MediaRecorderCodecFactoryInterface
-  \brief The MediaRecorderCodecFactoryInterface class provides a method of obtaining a multimedia encoder.
-
   \mainclass
+  \brief The MediaRecorderCodecFactoryInterface class provides a method of obtaining a multimedia encoder.
 
   The abstract  MediaRecorderCodecFactoryInterface class allows applications
   to obtain an encoder to record multimedia data to a file or other
@@ -264,6 +264,11 @@
   Creates and returns a new plug-in encoder instance.  It is the
   responsibility of the caller to delete the instance before unloading
   the plug-in interface library.
+*/
+
+/*!
+    \class MediaRecorderCodecPlugin
+    \internal
 */
 
 MediaRecorderCodecPlugin::MediaRecorderCodecPlugin( QObject* parent )

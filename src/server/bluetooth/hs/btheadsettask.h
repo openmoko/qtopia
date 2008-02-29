@@ -25,13 +25,13 @@
 #include <QObject>
 
 class QBluetoothHeadsetService;
-class BtHeadsetService : public QObject
+class BtHeadsetServiceTask : public QObject
 {
     Q_OBJECT
 
 public:
-    BtHeadsetService( QObject* parent = 0 );
-    ~BtHeadsetService();
+    BtHeadsetServiceTask( QObject* parent = 0 );
+    ~BtHeadsetServiceTask();
 
 private:
     QBluetoothHeadsetService *m_hsService;

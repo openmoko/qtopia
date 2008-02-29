@@ -25,6 +25,9 @@
 #include <qpixmap.h>
 #include <QRegion>
 
+// WARNING: These classes are not part of the Qtopia API.
+// They are subject to change at any time.
+
 class SmilTransferServer;
 class SmilModule;
 class SmilElement;

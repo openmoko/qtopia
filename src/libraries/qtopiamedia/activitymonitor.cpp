@@ -19,8 +19,17 @@
 **
 ****************************************************************************/
 
-#include "activitymonitor.h"
+#include "activitymonitor_p.h"
 
+/*!
+    \class ActivityMonitor
+    \internal
+*/
+
+/*!
+    \fn void ActivityMonitor::update()
+    \internal
+*/
 void ActivityMonitor::update()
 {
     if( isActive() ) {
@@ -34,6 +43,10 @@ void ActivityMonitor::update()
     }
 }
 
+/*!
+    \fn void ActivityMonitor::timerEvent( QTimerEvent* e )
+    \internal
+*/
 void ActivityMonitor::timerEvent( QTimerEvent* e )
 {
     if( e->timerId() == m_timer ) {

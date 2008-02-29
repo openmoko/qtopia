@@ -155,8 +155,7 @@ void QuickLauncher::exec( int argc, char **argv )
     if ( sep > 0 )
         appName = appName.mid( sep+1 );
 
-    qLog(Performance) << appName.toLatin1().constData() << " : " << "Starting quicklauncher exec : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(appName.toLatin1().constData()) << "Starting quicklauncher exec";
 
     if ( needsInit ) {
         needsInit = false;
@@ -168,15 +167,13 @@ void QuickLauncher::exec( int argc, char **argv )
 #endif
 
 #ifndef SINGLE_EXEC
-    qLog(Performance) << appName.toLatin1().constData() << " : " << "Before loading libraries : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(appName.toLatin1().constData()) << "Before loading libraries ";
 #ifndef QT_NO_SXE
     // loader invokes the constructor - need to clear the key before this
     guaranteed_memset( _key, 0, QSXE_KEY_LEN );
 #endif
     appInstance = loader->instance(appName);
-    qLog(Performance) << appName.toLatin1().constData() << " : " << "After loading libraries : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(appName.toLatin1().constData()) << "After loading libraries";
     appIface = qobject_cast<QApplicationFactoryInterface*>(appInstance);
     if ( !appIface ) {
         qWarning("%s: cannot load application: %s", (const char*) QFile::encodeName(appName),
@@ -186,11 +183,9 @@ void QuickLauncher::exec( int argc, char **argv )
 #ifndef QT_NO_SXE
     appIface->setProcessKey( appName );
 #endif
-    qLog(Performance) << appName.toLatin1().constData() << " : " << "Before creating main window : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(appName.toLatin1().constData()) << "Before creating main window";
     mainWindow = appIface->createMainWindow( appName );
-    qLog(Performance) << appName.toLatin1().constData() << " : " << "After creating main window : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(appName.toLatin1().constData()) << "After creating main window";
 #else
     if ( qpeAppMap()->contains(appName) ) {
         mainWindow = (*qpeAppMap())[appName](0, 0);

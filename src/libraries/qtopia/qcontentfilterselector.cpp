@@ -59,6 +59,7 @@ public:
 
 /*!
     \class QTreePageProxyModel
+    \mainclass
     \internal
 
     Proxy model for navigating a tree model as a flat list.  The proxy model lists the immediate children of an index
@@ -590,6 +591,7 @@ static QRect textLayoutBounds(const QStyleOptionViewItemV2 &option)
 
 /*!
     \class QTreePageItemDelegate
+    \mainclass
     \internal
 
     Item delegate which expands on the basic QItemDelegate by displaying arrows indicating if an item
@@ -856,6 +858,7 @@ void QTreePageItemDelegate::drawArrow(QPainter *painter,
 
 /*!
     \class QContentFilterView
+    \mainclass
     \internal
 
     Provides a view for navigating QContentFilterModels.  Selecting items in the model will
@@ -912,8 +915,8 @@ QContentFilter QContentFilterView::checkedFilter( const QModelIndex &parent ) co
 
 /*!
     Returns a short summary describing the checked filters, if a single filter is checked the display text for that label
-    is returned concatenated with a list of it's parent filter's display text.  If multiple filters are checked then the\
-    text 'Multi' is returned concatentated to a list of parents common to all checked filters.
+    is returned concatenated with a list of it's parent filter's display text.  If multiple filters are checked then the
+    text 'Multi' is returned concatenated to a list of parents common to all checked filters.
  */
 QString QContentFilterView::checkedLabel() const
 {
@@ -1063,6 +1066,7 @@ public:
 
 /*!
     \class QContentFilterSelector
+    \mainclass
     \brief The QContentFilterSelector widget allows the user to select filters to refine the visible selection of content on a device.
 
     QContentFilterDialog is based on \l QContentFilterModel and its contents are defined using a \l QContentFilterModel::Template.
@@ -1099,7 +1103,7 @@ public:
 }
 
 /*!
-    Constructs a filter dialog with the parent \a parent and the initial template \a modelTemplate.
+    Constructs a filter selector widget with the parent \a parent and the template \a modelTemplate.
  */
 QContentFilterSelector::QContentFilterSelector( const QContentFilterModel::Template &modelTemplate, QWidget *parent )
     : QWidget( parent )
@@ -1110,8 +1114,8 @@ QContentFilterSelector::QContentFilterSelector( const QContentFilterModel::Templ
 }
 
 /*!
-    Constructs a filter dialog with the parent \a parent and an initial template which lists the possible values of \a property
-    according to the given \a options.
+    Constructs a filter selector widget parented to \a parent that lists the possible values of \a property
+    according to the filter model template options \a options.
 
     The properties listed in the \a checked list will be checked by default.
  */
@@ -1124,17 +1128,17 @@ QContentFilterSelector::QContentFilterSelector( QContent::Property property, QCo
 }
 
 /*!
-    Constructs a filter dialog with the parent \a parent and an intial template which lists filters of type \a type with the
-    specialistion \a subType according to the given \a options.
+    Constructs a filter selector widget parented to \a parent that lists filters which are of type \a type and within the given
+    \a scope according to the filter model template options \a options.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
  */
-QContentFilterSelector::QContentFilterSelector( QContentFilter::FilterType type, const QString &subType, QContentFilterModel::TemplateOptions options, const QStringList &checked,  QWidget *parent )
+QContentFilterSelector::QContentFilterSelector( QContentFilter::FilterType type, const QString &scope, QContentFilterModel::TemplateOptions options, const QStringList &checked,  QWidget *parent )
     : QWidget( parent )
 {
     init();
 
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, subType, options, checked ) );
+    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 void QContentFilterSelector::init()
@@ -1205,14 +1209,14 @@ void QContentFilterSelector::setModelTemplate( QContent::Property property, QCon
 }
 
 /*!
-    Set the model template to a list of filters of type \a type with the specialisation \a subType
+    Set the model template to a list of filters of type \a type with the specialization \a scope
     according to the given \a options.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
  */
-void QContentFilterSelector::setModelTemplate( QContentFilter::FilterType type, const QString &subType, QContentFilterModel::TemplateOptions options, const QStringList &checked )
+void QContentFilterSelector::setModelTemplate( QContentFilter::FilterType type, const QString &scope, QContentFilterModel::TemplateOptions options, const QStringList &checked )
 {
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, subType, options, checked ) );
+    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 /*!
@@ -1225,8 +1229,8 @@ QContentFilter QContentFilterSelector::checkedFilter() const
 
 /*!
     Returns a short summary describing the checked filters, if a single filter is checked the display text for that label
-    is returned concatenated with a list of it's parent filter's display text.  If multiple filters are checked then the\
-    text 'Multi' is returned concatentated to a list of parents common to all checked filters.
+    is returned concatenated with a list of it's parent filter's display text.  If multiple filters are checked then the
+    text 'Multi' is returned concatenated to a list of parents common to all checked filters.
  */
 QString QContentFilterSelector::checkedLabel() const
 {
@@ -1259,6 +1263,7 @@ public:
 
 /*!
     \class QContentFilterDialog
+    \mainclass
     \brief The QContentFilterDialog widget provides a dialog box for selecting content filters.
 
     QContentFilterDialog is based on \l QContentFilterModel and its contents are defined using a \l QContentFilterModel::Template.
@@ -1307,7 +1312,7 @@ public:
  */
 
 /*!
-    Constructs a filter dialog with the parent \a parent.
+    Constructs a content filter dialog with the parent \a parent.
  */
 QContentFilterDialog::QContentFilterDialog( QWidget *parent )
     : QDialog( parent )
@@ -1316,7 +1321,7 @@ QContentFilterDialog::QContentFilterDialog( QWidget *parent )
 }
 
 /*!
-    Constructs a filter dialog with the parent \a parent and the initial template \a modelTemplate.
+    Constructs a content filter selector dialog with the parent \a parent and the initial template \a modelTemplate.
  */
 QContentFilterDialog::QContentFilterDialog( const QContentFilterModel::Template &modelTemplate, QWidget *parent )
     : QDialog( parent )
@@ -1327,8 +1332,8 @@ QContentFilterDialog::QContentFilterDialog( const QContentFilterModel::Template 
 }
 
 /*!
-    Constructs a filter dialog with the parent \a parent and an initial template which lists the possible values of \a property
-    according to the given \a options.
+    Constructs a content filter dialog parented to \a parent that lists the possible values of \a property
+    according to the filter model template options \a options.
 
     The properties listed in the \a checked list will be checked by default.
  */
@@ -1341,17 +1346,17 @@ QContentFilterDialog::QContentFilterDialog( QContent::Property property, QConten
 }
 
 /*!
-    Constructs a filter dialog with the parent \a parent and an intial template which lists filters of type \a type with the
-    specialistion \a subType according to the given \a options.
+    Constructs a content filter dialog parented to \a parent that lists filters which are of type \a type and within the given
+    \a scope according to the filter model template options \a options.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
  */
-QContentFilterDialog::QContentFilterDialog( QContentFilter::FilterType type, const QString &subType, QContentFilterModel::TemplateOptions options, const QStringList &checked,  QWidget *parent )
+QContentFilterDialog::QContentFilterDialog( QContentFilter::FilterType type, const QString &scope, QContentFilterModel::TemplateOptions options, const QStringList &checked,  QWidget *parent )
     : QDialog( parent )
 {
     init();
 
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, subType, options, checked ) );
+    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 /*!
@@ -1415,7 +1420,7 @@ void QContentFilterDialog::setModelTemplate( const QContentFilterModel::Template
 }
 
 /*!
-    Sets the model tempalte to a list of possible values of \a property according to the given \a options.
+    Sets the model template to a list of possible values of \a property according to the given \a options.
 
     The properties listed in the \a checked list will be checked by default.
  */
@@ -1425,14 +1430,14 @@ void QContentFilterDialog::setModelTemplate( QContent::Property property, QConte
 }
 
 /*!
-    Set the model template to a list of filters of type \a type with the specialisation \a subType
+    Set the model template to a list of filters of type \a type with the specialization \a scope
     according to the given \a options.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
  */
-void QContentFilterDialog::setModelTemplate( QContentFilter::FilterType type, const QString &subType, QContentFilterModel::TemplateOptions options, const QStringList &checked )
+void QContentFilterDialog::setModelTemplate( QContentFilter::FilterType type, const QString &scope, QContentFilterModel::TemplateOptions options, const QStringList &checked )
 {
-    d->model()->setModelTemplate( QContentFilterModel::Template( type, subType, options, checked ) );
+    d->model()->setModelTemplate( QContentFilterModel::Template( type, scope, options, checked ) );
 }
 
 /*!
@@ -1453,8 +1458,8 @@ QContentFilter QContentFilterDialog::checkedFilter() const
 
 /*!
     Returns a short summary describing the checked filters, if a single filter is checked the display text for that label
-    is returned concatenated with a list of it's parent filter's display text.  If multiple filters are checked then the\
-    text 'Multi' is returned concatentated to a list of parents common to all checked filters.
+    is returned concatenated with a list of it's parent filter's display text.  If multiple filters are checked then the
+    text 'Multi' is returned concatenated to a list of parents common to all checked filters.
 */
 QString QContentFilterDialog::checkedLabel() const
 {

@@ -326,8 +326,10 @@ bool QBluetoothAbstractSocketPrivate::initiateConnect(int socket,
     ::fcntl(m_fd, F_SETFD, FD_CLOEXEC);
 
     if (::connect(m_fd, addr, size) < 0) {
-        qWarning("QBluetoothAbstractSocketPrivate::initiateConnect: error during connect: %d, %s",
-                 errno, strerror(errno));
+	if (errno != EINPROGRESS && errno != EAGAIN && errno != EALREADY && errno != EISCONN)
+		qWarning("QBluetoothAbstractSocketPrivate::initiateConnect: error during connect: %d, %s", 
+			 errno, strerror(errno));
+
         switch(errno) {
             case EINVAL:
                 m_parent->setError(QBluetoothAbstractSocket::UnknownError);
@@ -550,10 +552,14 @@ qint64 QBluetoothAbstractSocketPrivate::bytesAvailable() const
 }
 
 /*!
+    \internal
+
     Clients of this class can set the \a mtu to be used on reading.  This
     value will be used as the maximum number of bytes to read on a socket.
 
     A value of 0 means there is no MTU.
+
+    \sa readMtu()
 */
 void QBluetoothAbstractSocket::setReadMtu(int mtu)
 {
@@ -561,10 +567,14 @@ void QBluetoothAbstractSocket::setReadMtu(int mtu)
 }
 
 /*!
+    \internal
+
     Clients of this class can set the \a mtu to be used when writing.  This
     value will be used as the maximum number of bytes to write on a socket.
 
     A value of 0 means there is no MTU.
+
+    \sa writeMtu()
 */
 void QBluetoothAbstractSocket::setWriteMtu(int mtu)
 {
@@ -572,7 +582,11 @@ void QBluetoothAbstractSocket::setWriteMtu(int mtu)
 }
 
 /*!
+    \internal
+
     Returns the current read MTU.
+
+    \sa setReadMtu()
 */
 int QBluetoothAbstractSocket::readMtu() const
 {
@@ -580,7 +594,11 @@ int QBluetoothAbstractSocket::readMtu() const
 }
 
 /*!
+    \internal
+
     Returns the current write MTU.
+
+    \sa setWriteMtu()
 */
 int QBluetoothAbstractSocket::writeMtu() const
 {
@@ -589,24 +607,38 @@ int QBluetoothAbstractSocket::writeMtu() const
 
 /*!
     \class QBluetoothAbstractSocket
+    \mainclass
     \brief The QBluetoothAbstractSocket class represents an abstract Bluetooth client socket.
 
+    QBluetoothAbstractSocket is a common base class used by all Bluetooth
+    sockets.  This class implements functionality common to all socket types.
+
+    Clients that need to interact with RFCOMM based services should
+    use the QBluetoothRfcommSocket class.  For interacting with
+    L2CAP based services, use the QBluetoothL2CapSocket class.
+    Headset and Handsfree profile implementations might need to use
+    the QBluetoothScoSocket class.
+
     At any time, the QBluetoothAbstractSocket has a state (returned by
-    state()). The initial state is QBluetoothAbstractSocket::UnconnectedState. After
-    calling connect(), the socket enters QBluetoothAbstractSocket::ConnectingState.
-    If connection is established, the socket enters
-    QBluetoothAbstractSocket::ConnectedState and emits connected(). If an error
-    occurs at any stage, error() is emitted. Whenever the state changes,
-    stateChanged() is emitted.
+    state()). Upon creation, the initial state is
+    QBluetoothAbstractSocket::UnconnectedState.
+
+    After calling connect(), the socket enters
+    the QBluetoothAbstractSocket::ConnectingState. If connection is
+    established, the socket enters QBluetoothAbstractSocket::ConnectedState
+    and emits connected().
+
+    If an error occurs at any time, the error() signal is emitted.
+    Whenever the state changes, stateChanged() is emitted.
     For convenience, isValid() returns true if the socket is ready for
     reading and writing.
 
-    Read or write data by calling read() or write(), or use the
-    convenience functions readLine() and readAll(). QBluetoothAbstractSocket
-    also inherits getChar(), putChar(), and ungetChar() from
-    QIODevice, which work on single bytes. For every chunk of data
-    that has been written to the socket, the bytesWritten() signal is
-    emitted.
+    Read or write data to/from the socket by calling read() or write(),
+    or use the convenience functions readLine() and readAll().
+    QBluetoothAbstractSocket also inherits getChar(), putChar(),
+    and ungetChar() from QIODevice, which work on single bytes.
+    For every chunk of data that has been written to the socket,
+    the bytesWritten() signal is emitted.
 
     The readyRead() signal is emitted every time a new chunk of data
     has arrived. bytesAvailable() then returns the number of bytes
@@ -617,10 +649,12 @@ int QBluetoothAbstractSocket::writeMtu() const
     appended to QBluetoothAbstractSocket's internal read buffer. To limit the
     size of the read buffer, call setReadBufferSize().
 
-    To close the socket, call disconnect(). QBluetoothAbstractSocket enters
-    QBluetoothAbstractSocket::ClosingState, then emits closing(). After all
-    pending data has been written to the socket, QBluetoothAbstractSocket actually
-    closes the socket, enters the QBluetoothAbstractSocket::ClosedState,
+    To close the socket, call disconnect(). Once disconnect() is
+    called, QBluetoothAbstractSocket enters the
+    QBluetoothAbstractSocket::ClosingState and emits the stateChanged()
+    signal.  After all pending data has been written to the socket,
+    QBluetoothAbstractSocket actually closes the socket, enters the
+    QBluetoothAbstractSocket::ClosedState,
     and emits disconnected(). If no data is pending when disconnect() is
     called, the connection is disconnected immediately.  If you want to
     abort a connection immediately, discarding all pending data, call
@@ -641,6 +675,9 @@ int QBluetoothAbstractSocket::writeMtu() const
 
         \o waitForDisconnected() blocks until the connection has closed.
     \endlist
+
+    \sa QBluetoothRfcommSocket, QBluetoothL2CapSocket, QBluetoothScoSocket
+    \sa QBluetoothL2CapDatagramSocket
 
     \ingroup qtopiabluetooth
  */
@@ -707,6 +744,8 @@ QBluetoothAbstractSocket::~QBluetoothAbstractSocket()
 /*!
     Returns the socket descriptor for the socket if the socket is currently
     active (e.g. not in UnconnectedState).  Otherwise returns -1.
+
+    \sa state()
  */
 int QBluetoothAbstractSocket::socketDescriptor() const
 {
@@ -717,6 +756,10 @@ int QBluetoothAbstractSocket::socketDescriptor() const
     Initializes the QBluetoothAbstractSocket with the native descriptor
     \a socketDescriptor.  The socket is put into the \a state and
     opened in \a openMode.
+
+    Returns true on successful completion of the request; otherwise returns false.
+
+    \sa socketDescriptor()
  */
 bool QBluetoothAbstractSocket::setSocketDescriptor(int socketDescriptor,
         QBluetoothAbstractSocket::SocketState state,
@@ -768,6 +811,8 @@ void QBluetoothAbstractSocket::close()
 
 /*!
     Returns the last error that has occurred.
+
+    \sa state()
  */
 QBluetoothAbstractSocket::SocketError QBluetoothAbstractSocket::error() const
 {
@@ -776,6 +821,8 @@ QBluetoothAbstractSocket::SocketError QBluetoothAbstractSocket::error() const
 
 /*!
     Returns the state of the socket.
+
+    \sa error()
  */
 QBluetoothAbstractSocket::SocketState QBluetoothAbstractSocket::state() const
 {
@@ -828,6 +875,8 @@ qint64 QBluetoothAbstractSocket::readBufferSize() const
     Sets the capacity of QBluetoothAbstractSocket's internal read buffer to be
     \a size bytes.  If \a size is 0 the buffer has unlimited capacity.  This is
     the default.
+
+    \sa readBufferSize()
  */
 void QBluetoothAbstractSocket::setReadBufferSize(qint64 size)
 {
@@ -1070,6 +1119,12 @@ qint64 QBluetoothAbstractSocket::writeData(const char *data, qint64 size)
     returns false.  In the case where it returns false, you can call error()
     to determine the cause of the error.
 
+    This is a blocking function call. Its use is not advised in a
+    single-threaded GUI application, since the whole application will
+    stop responding until the function returns.
+    waitForNewConnected() is mostly useful when there is no event
+    loop available.
+
     \sa connect(), connected()
  */
 bool QBluetoothAbstractSocket::waitForConnected(int msecs)
@@ -1126,6 +1181,12 @@ bool QBluetoothAbstractSocket::waitForConnected(int msecs)
     the connection has been terminated, this function returns true; otherwise
     returns false.  In the case where it returns false, you can call error()
     to determine the cause of the error.
+
+    This is a blocking function call. Its use is not advised in a
+    single-threaded GUI application, since the whole application will
+    stop responding until the function returns.
+    waitForDisconnected() is mostly useful when there is no event
+    loop available.
 
     \sa disconnect(), close(), disconnected()
  */
@@ -1218,8 +1279,7 @@ void QBluetoothAbstractSocket::abort()
 }
 
 /*!
-    Returns true if no more data is currently
-    available for reading; otherwise returns false.
+    \reimp
  */
 bool QBluetoothAbstractSocket::atEnd() const
 {
@@ -1230,6 +1290,8 @@ bool QBluetoothAbstractSocket::atEnd() const
     This function writes as much as possible from the internal write buffer to
     the underlying network socket, without blocking. If any data was written,
     this function returns true; otherwise false is returned.
+
+    \sa write(), waitForBytesWritten()
  */
 bool QBluetoothAbstractSocket::flush()
 {
@@ -1237,11 +1299,15 @@ bool QBluetoothAbstractSocket::flush()
 }
 
 /*!
+    \internal
+
     Clients of this class can call this method to initiate connection
     procedures common to all Bluetooth socket types.  The \a socket parameter
     holds the socket file descriptor to use.  The \a addr structure holds the
     sockaddr structure of the remote peer to connect to and \a size holds the
     size of the sockaddr structure.
+
+    Returns true on successful completion of the request; otherwise returns false.
 */
 bool QBluetoothAbstractSocket::initiateConnect(int socket,
         sockaddr *addr, int size)
@@ -1267,6 +1333,8 @@ bool QBluetoothAbstractSocket::initiateConnect(int socket,
     been written.  Eventually it will enter UnconnectedState and emit
     the disconnected() signal.
 
+    Returns true on successful completion of the request; otherwise returns false.
+
     \sa close()
  */
 bool QBluetoothAbstractSocket::disconnect()
@@ -1279,6 +1347,8 @@ bool QBluetoothAbstractSocket::disconnect()
 }
 
 /*!
+    \internal
+
     Can be used by the clients of this class to set the \a error that might have occurred.
     This function is generally used from the specific socket connect implementation.
 */
@@ -1330,6 +1400,8 @@ void QBluetoothAbstractSocket::setError(QBluetoothAbstractSocket::SocketError er
 }
 
 /*!
+    \internal
+
     The clients of this class can override this method to read specific socket
     parameters from the socket given by \a sockfd.  This method is called
     when the socket initially enters the connected state.
@@ -1346,6 +1418,8 @@ bool QBluetoothAbstractSocket::readSocketParameters(int sockfd)
 }
 
 /*!
+    \internal
+
     The clients of this class should override this method to reset the
     specific socket parameters.  This method is called when a socket enters
     the disconnected state.

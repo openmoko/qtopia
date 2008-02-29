@@ -23,20 +23,23 @@
 
 /*!
     \class QIrRemoteDevice
+    \mainclass
     \brief The QIrRemoteDevice class represents a remote infrared device.
 
-    The QIrRemoteDevice class refers to a single remote infrared device.
-    The remote device can provide some basic information about itself,
-    namely the name, its major device classes and the negotiated address.
+    QIrRemoteDevice holds information about a remote Infrared device.
+    Only basic information is provided, namely the name of the remote
+    device, its major device classes and the negotiated address.
 
     \ingroup qtopiair
     \sa QIrLocalDevice
  */
 
 /*!
-    Constructs a new QIrRemoteDevice with the \a name as the name,
+    Constructs a QIrRemoteDevice with \a name as the name,
     \a devClasses as the major device classes supported by by this
     device and address given by \a addr.
+
+    \sa name(), deviceClasses(), address()
 */
 QIrRemoteDevice::QIrRemoteDevice(const QString &name,
                                  QIr::DeviceClasses &devClasses,
@@ -57,7 +60,7 @@ QIrRemoteDevice::QIrRemoteDevice(const QIrRemoteDevice &dev)
 }
 
 /*!
-    Destructor.
+    Destroys the device object.
 */
 QIrRemoteDevice::~QIrRemoteDevice()
 {
@@ -99,13 +102,15 @@ bool QIrRemoteDevice::operator==(const QIrRemoteDevice &other) const
 }
 
 /*!
-    Returns the address of the remote device.  This is a 32 bit integer,
-    and due to the nature of the IrDA protocol this number should be considered
-    highly dynamic.  To refresh the number, a new discovery must be performed.
-    It is not recommended to try and reuse the address for extended periods
+    Returns the address of the remote device.
+
+    \warning This is a 32 bit integer, and due to the nature of the
+    IrDA protocol this number should be considered highly dynamic.  To
+    refresh the number, a new discovery must be performed. It is not
+    recommended to try and reuse the address for extended periods
     of time.
 
-    \sa QIrLocalDevice
+    \sa QIrLocalDevice, name()
 */
 uint QIrRemoteDevice::address() const
 {
@@ -114,6 +119,8 @@ uint QIrRemoteDevice::address() const
 
 /*!
     Returns the major device classes supported by the remote device.
+
+    \sa name()
 */
 QIr::DeviceClasses QIrRemoteDevice::deviceClasses() const
 {
@@ -122,6 +129,8 @@ QIr::DeviceClasses QIrRemoteDevice::deviceClasses() const
 
 /*!
     Returns the name of the remote device.
+
+    \sa address(), deviceClasses()
 */
 QString QIrRemoteDevice::name() const
 {

@@ -26,7 +26,7 @@
 #include "mediabrowser.h"
 
 #include <qmediatools.h>
-#include <requesthandler.h>
+#include <private/requesthandler_p.h>
 
 #include <qtopiaapplication.h>
 

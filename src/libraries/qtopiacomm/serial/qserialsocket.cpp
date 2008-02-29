@@ -78,14 +78,21 @@ enum TelnetOption
 
 /*!
     \class QSerialSocket
+    \mainclass
     \brief The QSerialSocket class provides a serial port abstraction via a TCP socket.
     \ingroup io
 
-    The QSerialSocket class provides a serial port abstraction via a TCP
-    socket.  The abstraction implements the telnet protocol (RFC 854),
+    This serial port abstraction implements the telnet protocol (RFC 854),
     to make it easy to debug AT command handlers using a telnet client.
 
+\if defined(QTOPIA_OPENSOURCE)
     \sa QSerialSocketServer, QSerialIODevice
+\else
+    The QSerialSocket class is also used by data calls initiated by QPhoneCall
+    to pass the raw modem data and handshaking signals to client applications.
+
+    \sa QSerialSocketServer, QSerialIODevice, QPhoneCall
+\endif
 */
 #include <QDebug>
 class QSerialSocketPrivate
@@ -718,13 +725,13 @@ void QSerialSocket::receiveSubOption( int option, const char *buf, int len )
 
 /*!
     \class QSerialSocketServer
-    \brief The QSerialSocketServer class provides a server to handling incoming serial-over-sockets connections.
+    \mainclass
+    \brief The QSerialSocketServer class provides a server to handle incoming serial-over-sockets connections.
     \ingroup io
     \ingroup ipc
 
-    The QSerialSocketServer class provides a server to handling incoming
-    serial-over-sockets connections.  As each connection arrives, the
-    incoming() signal is emitted with a QSerialSocket instance as its argument.
+    As each connection arrives, the incoming() signal is emitted with a QSerialSocket
+    instance as its argument.
 
     \sa QSerialSocket
 */
@@ -755,8 +762,8 @@ QSerialSocketServer::~QSerialSocketServer()
 }
 
 /*!
-    Determine if this server was able to listen on the specified
-    port number when it was constructed.
+    Returns true if this server was able to listen on the specified
+    port number when it was constructed; otherwise returns false.
 */
 bool QSerialSocketServer::isListening() const
 {
@@ -764,7 +771,7 @@ bool QSerialSocketServer::isListening() const
 }
 
 /*!
-    Return the port number that this serial-over-sockets server is bound to.
+    Returns the port number that this serial-over-sockets server is bound to.
 */
 quint16 QSerialSocketServer::port() const
 {

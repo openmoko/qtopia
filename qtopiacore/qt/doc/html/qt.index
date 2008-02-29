@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE QDOCINDEX>
-<INDEX title="Qt Reference Documentation" version="4.2.3" url="" >
+<INDEX title="Qt Reference Documentation" version="4.2.3" url="http://doc.trolltech.com/4.2" >
  <namespace access="public" location="" href="" name="" >
   <class access="public" location="qaxbase.h" href="qaxbase.html" bases="" name="QAxBase" >
    <property access="public" location="qaxbase.h" href="qaxbase.html#control-prop" name="control" />
@@ -40305,6 +40305,49 @@
    <contents title="OpenGL Rendering" name="opengl-rendering" />
    <contents title="Item Groups" name="item-groups" />
   </page>
+  <page title="Grouped Classes" access="public" location="groups.qdoc" subtype="page" fulltitle="Grouped Classes" href="groups.html" name="groups.html" subtitle="" />
+  <page title="Advanced Widgets" access="public" location="groups.qdoc" subtype="group" fulltitle="Advanced Widgets" href="advanced" name="advanced" subtitle="" />
+  <page title="Abstract Widget Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Abstract Widget Classes" href="abstractwidgets" name="abstractwidgets" subtitle="" />
+  <page title="Accessibility Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Accessibility Classes" href="accessibility" name="accessibility" subtitle="" />
+  <page title="Widget Appearance and Style" access="public" location="groups.qdoc" subtype="group" fulltitle="Widget Appearance and Style" href="appearance" name="appearance" subtitle="" />
+  <page title="Main Window and Related Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Main Window and Related Classes" href="application" name="application" subtitle="" />
+  <page title="Basic Widgets" access="public" location="groups.qdoc" subtype="group" fulltitle="Basic Widgets" href="basic" name="basic" subtitle="" />
+  <page title="Database Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Database Classes" href="database" name="database" subtitle="" />
+  <page title="Standard Dialog Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Standard Dialog Classes" href="dialogs" name="dialogs" subtitle="" />
+  <page title="Desktop Environment Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Desktop Environment Classes" href="desktop" name="desktop" subtitle="" />
+  <page title="Drag And Drop Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Drag And Drop Classes" href="draganddrop" name="draganddrop" subtitle="" />
+  <page title="Environment Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Environment Classes" href="environment" name="environment" subtitle="" />
+  <page title="Event Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Event Classes" href="events" name="events" subtitle="" />
+  <page title="Layout Management" access="public" location="groups.qdoc" subtype="group" fulltitle="Layout Management" href="geomanagement" name="geomanagement" subtitle="" />
+  <page title="Help System" access="public" location="groups.qdoc" subtype="group" fulltitle="Help System" href="helpsystem" name="helpsystem" subtitle="" >
+   <keyword name="help-system" />
+  </page>
+  <page title="Input/Output and Networking" access="public" location="groups.qdoc" subtype="group" fulltitle="Input/Output and Networking" href="io" name="io" subtitle="" />
+  <page title="Miscellaneous Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Miscellaneous Classes" href="misc" name="misc" subtitle="" />
+  <page title="Model/View Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Model/View Classes" href="modelview" name="model-view" subtitle="" />
+  <page title="Multimedia, Graphics, and Printing" access="public" location="groups.qdoc" subtype="group" fulltitle="Multimedia, Graphics, and Printing" href="multimedia" name="multimedia" subtitle="" />
+  <page title="Object Model" access="public" location="groups.qdoc" subtype="group" fulltitle="Object Model" href="objectmodel" name="objectmodel" subtitle="" />
+  <page title="Organizers" access="public" location="groups.qdoc" subtype="group" fulltitle="Organizers" href="organizers" name="organizers" subtitle="" />
+  <page title="Plugin Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Plugin Classes" href="plugins" name="plugins" subtitle="" />
+  <page title="Qtopia Core Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Qtopia Core Classes" href="qws" name="qws" subtitle="" />
+  <page title="Implicitly Shared Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Implicitly Shared Classes" href="shared" name="shared" subtitle="" >
+   <keyword name="implicit-data-sharing" />
+   <keyword name="implicit-sharing" />
+   <keyword name="implicitly-shared" />
+   <keyword name="reference-counting" />
+   <keyword name="shared-implicitly" />
+   <keyword name="shared-classes" />
+   <keyword name="deep-copy" />
+   <keyword name="shallow-copy" />
+   <contents title="Overview" name="overview" />
+   <contents title="Implicit Sharing in Detail" name="implicit-sharing-in-detail" />
+   <contents title="List of Classes" name="list-of-classes" />
+  </page>
+  <page title="Text Related Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Text Related Classes" href="text" name="text" subtitle="" />
+  <page title="Threading Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Threading Classes" href="thread" name="thread" subtitle="" />
+  <page title="Date and Time Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Date and Time Classes" href="time" name="time" subtitle="" />
+  <page title="Non-GUI Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="Non-GUI Classes" href="tools" name="tools" subtitle="" />
+  <page title="XML Classes" access="public" location="groups.qdoc" subtype="group" fulltitle="XML Classes" href="xmltools" name="xml-tools" subtitle="" />
   <page title="Books about GUI Design" access="public" location="guibooks.qdoc" subtype="page" fulltitle="Books about GUI Design" href="guibooks.html" name="guibooks.html" subtitle="" >
    <target name="fowler" />
    <target name="design-patterns" />

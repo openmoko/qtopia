@@ -187,7 +187,8 @@ static const unsigned short extensionLatin1Table[256] =
 };
 
 /*!
-    \class QGsmCodec qgsmcodec.h
+    \class QGsmCodec
+    \mainclass
     \brief The QGsmCodec class represents the text codec for the GSM 7-bit encoding of Latin-1
     \ingroup telephony::serial
 
@@ -201,12 +202,38 @@ static const unsigned short extensionLatin1Table[256] =
     Application programs will rarely need to use this class, because
     the QSMSMessage class automatically converts between 7-bit and Unicode
     encodings as necessary.
+
+    If an application program does need to use this class, it should call
+    QAtUtils::codec() to obtain an instance of the codec.  Constructing
+    QGsmCodec objects directly is not recommended, due to how QTextCodec
+    registers and deregisters codec implementations.
+
+    The following example converts the \c input string into the compact
+    7-bit encoding within \c output.
+
+    \code
+    QString input = "...";
+    QByteArray output = QAtUtils::codec("gsm")->fromUnicode(input);
+    \endcode
+
+    This codec implementation conforms to 3GPP TS 03.38 and 3GPP TS 07.05,
+    including the extension tables from 3GPP TS 03.38.
+
+    \sa QSMSMessage, QAtUtils::codec()
 */
 
 /*!
     Construct a new GSM text codec.  If \a noLoss is true, then the
     codec should not encode characters that may result in an
     ambiguous decoding.
+
+    This constructor should not be used directly.  Instead, call QAtUtils::codec()
+    to obtain an instance of this codec implementation.  This is due to how
+    QTextCodec registers and deregisters codec implementations.  The codec names
+    to use with QAtUtils::codec() are \c gsm and \c gsm-noloss, for the regular
+    and no-loss versions of the codec.
+
+    \sa QAtUtils::codec()
 */
 QGsmCodec::QGsmCodec( bool noLoss )
 {
@@ -214,14 +241,15 @@ QGsmCodec::QGsmCodec( bool noLoss )
 }
 
 /*!
-    Destruct a GSM text codec.
+    Destruct a GSM text codec.  This should not be used directly by
+    application programs.
 */
 QGsmCodec::~QGsmCodec()
 {
 }
 
 /*!
-    Get the name of this codec.
+    Returns the name of this codec.
 */
 QByteArray QGsmCodec::name() const
 {
@@ -232,7 +260,7 @@ QByteArray QGsmCodec::name() const
 }
 
 /*!
-    Get the MIB value associated with this codec.
+    Returns the MIB value associated with this codec.
 */
 int QGsmCodec::mibEnum() const
 {
@@ -249,6 +277,8 @@ int QGsmCodec::mibEnum() const
 
     Note: this will not work for two-byte GSM encodings.  Use
     twoByteFromUnicode() instead.
+
+    \sa singleToUnicode(), twoByteFromUnicode()
 */
 char QGsmCodec::singleFromUnicode(QChar c)
 {
@@ -267,6 +297,8 @@ char QGsmCodec::singleFromUnicode(QChar c)
 
     Note: this will not work for two-byte GSM encodings.  Use
     twoByteToUnicode() instead.
+
+    \sa singleFromUnicode(), twoByteToUnicode()
 */
 QChar QGsmCodec::singleToUnicode(char ch)
 {
@@ -277,6 +309,8 @@ QChar QGsmCodec::singleToUnicode(char ch)
     Convert a Unicode character \a ch into its GSM-encoded counterpart.
     The return value will be greater than 256 if the Unicode character
     should be encoded as two bytes.
+
+    \sa twoByteToUnicode()
 */
 unsigned short QGsmCodec::twoByteFromUnicode(QChar ch)
 {
@@ -294,6 +328,8 @@ unsigned short QGsmCodec::twoByteFromUnicode(QChar ch)
 /*!
     Convert a single GSM-encoded character into its Unicode counterpart.
     If \a ch is greater than 256, then it represents a two-byte sequence.
+
+    \sa twoByteFromUnicode()
 */
 QChar QGsmCodec::twoByteToUnicode(unsigned short ch)
 {
@@ -311,8 +347,11 @@ QChar QGsmCodec::twoByteToUnicode(unsigned short ch)
 }
 
 /*!
-    Convert the \a length bytes at \a in into Unicode.  The \a state
-    parameter is unused by this class.
+    Convert the \a length bytes at \a in into Unicode.  The \c invalidChars
+    field of \a state will be incremented if there are invalid characters
+    within \a in.
+
+    \sa convertFromUnicode()
 */
 QString QGsmCodec::convertToUnicode(const char *in, int length, ConverterState *state) const
 {
@@ -350,8 +389,11 @@ QString QGsmCodec::convertToUnicode(const char *in, int length, ConverterState *
 }
 
 /*!
-    Convert the \a length characters at \a in into 7-bit GSM.  The
-    \a state parameter is unused by this class.
+    Convert the \a length characters at \a in into 7-bit GSM.  The \c invalidChars
+    field of \a state will be incremented if there are invalid characters
+    within \a in.
+
+    \sa convertToUnicode()
 */
 QByteArray QGsmCodec::convertFromUnicode(const QChar *in, int length, ConverterState *state) const
 {

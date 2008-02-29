@@ -231,7 +231,8 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
 
 /*!
     \class QDSServiceInfo
-    \brief The QDSServiceInfo class encapsulates the description of a QDS service
+    \mainclass
+    \brief The QDSServiceInfo class encapsulates the description of a Qtopia Data Sharing (QDS) service
 
     Each QDS service is described by:
 
@@ -299,7 +300,7 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
     \endcode
 
     The QDS service should also be included in the actions section of the
-    Qtopia service description, for the QDS services list above the
+    Qtopia service description, for the QDS services list above, the
     \c{<Qtopia Runtime Prefix>/services/Contacts.service} file would look
     like:
 
@@ -313,13 +314,13 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
     Name[]=Contacts
     \endcode
 
-    \sa QDSAction, QDSActionRequest, QDSServices
+    \sa QDSAction, QDSActionRequest, QDSServices, {Qtopia Data Sharing (QDS)}
 
     \ingroup ipc
 */
 
 /*!
-    Default constructor which creates an empty QDSServiceInfo object.
+    Constructs an empty QDSServiceInfo object.
 */
 QDSServiceInfo::QDSServiceInfo()
 :   d( 0 )
@@ -328,7 +329,7 @@ QDSServiceInfo::QDSServiceInfo()
 }
 
 /*!
-    Copy constructor which creates a deep copy of \a other
+    Constructs a deep copy of \a{other}.
 */
 QDSServiceInfo::QDSServiceInfo( const QDSServiceInfo& other )
 :   d( 0 )
@@ -337,7 +338,7 @@ QDSServiceInfo::QDSServiceInfo( const QDSServiceInfo& other )
 }
 
 /*!
-    Constructor for the service specified by the QDS service \a name
+    Constructs a QDSServiceInfo object for the QDS service \a name
     and the Qtopia service \a service.
 */
 QDSServiceInfo::QDSServiceInfo( const QString& name,
@@ -348,7 +349,7 @@ QDSServiceInfo::QDSServiceInfo( const QString& name,
 }
 
 /*!
-    Destructor.
+    Destroys the QDSServiceInfo object.
 */
 QDSServiceInfo::~QDSServiceInfo()
 {
@@ -356,7 +357,8 @@ QDSServiceInfo::~QDSServiceInfo()
 }
 
 /*!
-    Assignment operator which deep copies \a other.
+    Makes a deep copy of \a other and assigns it to this QDSServiceInfo object.
+    Returns a reference to this QDSServiceInfo object.
 */
 const QDSServiceInfo& QDSServiceInfo::operator=( const QDSServiceInfo& other )
 {
@@ -375,7 +377,7 @@ const QDSServiceInfo& QDSServiceInfo::operator=( const QDSServiceInfo& other )
 }
 
 /*!
-    Comparison operator which returns true if \a other is the same QDS service.
+    Returns true if \a other describes the same QDS service; otherwise returns false.
 */
 bool QDSServiceInfo::operator==( const QDSServiceInfo& other ) const
 {
@@ -388,7 +390,7 @@ bool QDSServiceInfo::operator==( const QDSServiceInfo& other ) const
 }
 
 /*!
-    Comparison operator which returns true if \a other is not the same QDS service.
+    Returns true if \a other doesn't describe the same QDS service; otherwise returns false.
 */
 bool QDSServiceInfo::operator!=( const QDSServiceInfo& other ) const
 {
@@ -396,8 +398,8 @@ bool QDSServiceInfo::operator!=( const QDSServiceInfo& other ) const
 }
 
 /*!
-    Determines if the QDSServiceInfo describes a valid QDS service. For this
-    to be true a correctly formatted service file is required.
+    Returns true if the QDSServiceInfo object describes a valid QDS service; 
+    otherwise returns false. For this to be true a correctly formatted service file is required.
 */
 bool QDSServiceInfo::isValid() const
 {
@@ -408,9 +410,9 @@ bool QDSServiceInfo::isValid() const
 }
 
 /*!
-    The QDS service is available if all dependent features are currently
-    available in QtopiaFeatures. A QDS service must be availale for a
-    QDSAction request to be successful.
+    Returns true if the QDS service is available; otherwise returns false. The QDS service is available
+    if all dependent features are currently available in QtopiaFeatures.
+    A QDS service must be available for a QDSAction request to be successful.
 */
 bool QDSServiceInfo::isAvailable() const
 {
@@ -434,7 +436,7 @@ QString QDSServiceInfo::serviceId() const
 }
 
 /*!
-    Returns the translated name of this QDS service
+    Returns the translated name of the QDS service.
 */
 QString QDSServiceInfo::serviceName() const
 {
@@ -450,7 +452,10 @@ QString QDSServiceInfo::name() const
 }
 
 /*!
+    \fn QStringList QDSServiceInfo::requestDataTypes() const
     Returns the IDs for supported request data types.
+
+    \sa supportsRequestDataType(), responseDataTypes()
 */
 QStringList QDSServiceInfo::requestDataTypes() const
 {
@@ -461,7 +466,10 @@ QStringList QDSServiceInfo::requestDataTypes() const
 }
 
 /*!
+    \fn bool QDSServiceInfo::supportsRequestDataType( const QMimeType& type ) const
     Returns true if the described service supports request data of \a type.
+
+    \sa requestDataTypes(), supportsResponseDataType()
 */
 bool QDSServiceInfo::supportsRequestDataType( const QMimeType& type ) const
 {
@@ -485,7 +493,10 @@ bool QDSServiceInfo::supportsRequestDataTypeOrWild(
 
 
 /*!
+    \fn QStringList QDSServiceInfo::responseDataTypes() const
     Returns the IDs for supported response data types.
+
+    \sa supportsResponseDataType(), requestDataTypes()
 */
 QStringList QDSServiceInfo::responseDataTypes() const
 {
@@ -496,7 +507,10 @@ QStringList QDSServiceInfo::responseDataTypes() const
 }
 
 /*!
+    \fn bool QDSServiceInfo::supportsResponseDataType( const QMimeType& type ) const
     Returns true if the described service supports response data of \a type.
+
+    \sa responseDataTypes(), supportsRequestDataType()
 */
 bool QDSServiceInfo::supportsResponseDataType( const QMimeType& type ) const
 {

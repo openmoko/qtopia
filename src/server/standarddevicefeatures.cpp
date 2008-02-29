@@ -28,6 +28,7 @@
 #include <qwindowsystem_qws.h>
 #include <QDebug>
 #include <QtopiaFeatures>
+#include <QBatteryAccessory>
 #include <QPowerStatus>
 
 static bool batteryMonitor = true;
@@ -44,8 +45,6 @@ class BatteryMonitor : public QObject
 public:
     BatteryMonitor(QObject *p);
     virtual ~BatteryMonitor();
-
-    void setUpdateTimer(int duration);
 
     int value() const;
     bool charging() const;
@@ -118,7 +117,6 @@ StandardDeviceFeaturesImpl::StandardDeviceFeaturesImpl(QObject *parent)
     if (batteryMonitor) {
         // BatteryMonitor keeps the value space updated correctly
         battery = new BatteryMonitor(this);
-        battery->setUpdateTimer(10000);
     }
 
     if (cameraMonitor) {
@@ -185,13 +183,6 @@ void StandardDeviceFeaturesImpl::disableClamshellMonitor()
 
 void StandardDeviceFeaturesImpl::backlightChanged()
 {
-    if(batteryMonitor) {
-        int backlight = backlightVsi->value("Backlight", 255).toInt();
-        if (backlight <= 1)
-            battery->setUpdateTimer(60000);
-        else
-            battery->setUpdateTimer(10000);
-    }
 }
 
 bool StandardDeviceFeaturesImpl::filter(int unicode, int keycode,
@@ -413,23 +404,18 @@ class BatteryMonitorPrivate : public QObject
 Q_OBJECT
 public:
     BatteryMonitorPrivate(QObject *parent);
-    void setUpdateTimer(int duration);
+    //void setUpdateTimer(int duration);
 
 signals:
     void valueChanged(int);
     void chargingChanged(bool);
 
-protected:
-    void timerEvent(QTimerEvent *e);
-
 private slots:
 #ifdef QTOPIA_ATCBC_BATTERY
     void queryResult( QPhoneLine::QueryType type, const QString& value );
 #endif
-
-private:
-    void doValueChanged(int newActual, int newPercent);
-    void setCharging(bool charge);
+    void chargeModified();
+    void chargingModified();
 
 private:
     int chargeId;
@@ -437,6 +423,7 @@ private:
     bool initialUpdate;
     int duration;
 
+    QBatteryAccessory* battery;
 #ifdef QTOPIA_ATCBC_BATTERY
     QPhoneLine *line;
 #endif
@@ -456,128 +443,36 @@ BatteryMonitorPrivate::BatteryMonitorPrivate(QObject *p)
   duration(10000), vso("/Accessories/Battery"),
   charging(true), actualPercent(-1), percent(-1)
 {
-#ifdef QTOPIA_ATCBC_BATTERY
-    line = new QPhoneLine( QString(), this );
-    connect(line, SIGNAL(queryResult(QPhoneLine::QueryType,const QString&)),
-            this, SLOT(queryResult(QPhoneLine::QueryType,const QString&)));
-    connect(line, SIGNAL(notification(QPhoneLine::QueryType,const QString&)),
-            this, SLOT(queryResult(QPhoneLine::QueryType,const QString&)));
-#endif
+    battery = new QBatteryAccessory("modem", this );
+    connect( battery, SIGNAL(chargeModified()), this, SLOT(chargeModified()) );
+    connect( battery, SIGNAL(chargingModified()), this, SLOT(chargingModified()) );
 
-    doValueChanged(0, 0);
-    setCharging(false);
-    updateId = startTimer(0);
+    vso.setAttribute("Charging", charging);
+    vso.setAttribute("Charge", actualPercent);
+    vso.setAttribute("VisualCharge", actualPercent);
+
+    chargeModified();
+    chargingModified();
 }
 
-void BatteryMonitorPrivate::setCharging(bool charge)
+void BatteryMonitorPrivate::chargeModified()
 {
-    if(charge != charging) {
-        charging = charge;
-        vso.setAttribute("Charging", charging);
-        emit chargingChanged(charging);
-    }
-}
-
-void BatteryMonitorPrivate::doValueChanged(int newActual, int)
-{
-    if(newActual != actualPercent) {
-        actualPercent = newActual;
+    if(battery->charge() != actualPercent) {
+        actualPercent = battery->charge();
         vso.setAttribute("Charge", actualPercent);
+        vso.setAttribute("VisualCharge", actualPercent);
         emit valueChanged(actualPercent);
     }
 }
 
-void BatteryMonitorPrivate::setUpdateTimer(int d)
+void BatteryMonitorPrivate::chargingModified()
 {
-    duration = d;
-    if(!initialUpdate) {
-        if (updateId)
-            killTimer(updateId);
-
-        updateId = startTimer(duration);
+    if ( battery->charging() != charging ) {
+        charging = battery->charging();
+        vso.setAttribute("Charging", charging);
+        emit chargingChanged(charging);
     }
 }
-
-void BatteryMonitorPrivate::timerEvent(QTimerEvent *e)
-{
-    if (!e)
-        return;
-
-    if (initialUpdate) {
-        initialUpdate = false;
-        setUpdateTimer(duration);
-    }
-#ifdef QTOPIA_ATCBC_BATTERY
-    line->query( QPhoneLine::BatteryCharge );
-#else
-    QPowerStatus oldPs = ps;
-    ps = QPowerStatusManager::readStatus();
-    if ( oldPs != ps ) {
-        int newpercent = ps.batteryPercentRemaining();
-
-        if (!charging && ps.batteryStatus() == QPowerStatus::Charging) {
-            setCharging(true);
-            doValueChanged(newpercent, 0);
-        } else if ( charging && ps.batteryStatus() != QPowerStatus::Charging ) {
-            setCharging(false);
-            doValueChanged(newpercent, newpercent);
-        }
-    }
-#endif
-}
-
-#ifdef QTOPIA_ATCBC_BATTERY
-void BatteryMonitorPrivate::queryResult(QPhoneLine::QueryType type,
-                                        const QString& value)
-{
-    // The "AT+CBC" command responds with "n,m" where n is one
-    // of the following: 0 - ME powered by battery, 1 - ME has
-    // a battery but is not currently powered by it (i.e. a power
-    // cord is plugged in), 2 - ME does not have a battery, and
-    // 3 - something else wrong with the ME.  If n is zero, then
-    // m will be 1-100 for a power percentage, 0 for "empty"
-    // or <0 for "invalid".
-    if ( type == QPhoneLine::BatteryCharge ) {
-        int posn = value.indexOf( ',' );
-        if ( posn != -1 ) {
-            int st = value.left( posn ).toInt();
-            int level;
-            int posn2 = value.indexOf( ',', posn + 1 );
-            if ( posn2 != -1 )
-                level = value.mid( posn + 1, posn2 - posn - 1 ).toInt();
-            else
-                level = value.mid( posn + 1 ).toInt();
-            if(level > 100)
-                level = 100;
-
-            if ( st != 0 && level < 99 ) {
-                // The phone is not powered by a battery.
-                st = -1;
-
-                // We cannot detect the current battery level.  We assume
-                // that a power cord is connected and set the value to 100%.
-                level = 100;
-
-                // power cord is plugged in -> activate charging
-                if (!charging) {
-                    setCharging(true);
-                    chargeId = startTimer( 500 );
-                    doValueChanged(level, 0);
-                }
-            } else if(charging) {
-                setCharging(false);
-                if (chargeId) {
-                    killTimer(chargeId);
-                    chargeId = 0;
-                }
-                doValueChanged(level, level);
-            } else {
-                doValueChanged(level, level);
-            }
-        }
-    }
-}
-#endif
 
 // define BatteryMonitor
 
@@ -619,11 +514,12 @@ BatteryMonitor::~BatteryMonitor()
 /*!
   Default \a duration is 10000 milliseconds.
  */
-void BatteryMonitor::setUpdateTimer(int duration)
+/*void BatteryMonitor::setUpdateTimer(int duration)
 {
     Q_ASSERT(duration > 0);
     d->setUpdateTimer(duration);
-}
+}*/
+
 
 int BatteryMonitor::value() const
 {

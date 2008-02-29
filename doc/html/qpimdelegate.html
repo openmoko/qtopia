@@ -1,17 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QPimDelegate Class Reference</title>
+  <title>QPimDelegate Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPimDelegate Class Reference</h1>
 <p>The QPimDelegate class provides an abstract delegate for rendering multiple lines of text. <a href="#details">More...</a></p>
-<pre>#include &lt;QPimDelegate&gt;</pre><p>Inherits <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>.</p>
+<pre>    #include &lt;QPimDelegate&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
+<p>Inherits <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>.</p>
 <p>Inherited by <a href="qcontactdelegate.html">QContactDelegate</a>.</p>
 <ul>
 <li><a href="qpimdelegate-members.html">List of all members, including inherited members</a></li>
@@ -71,7 +74,6 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QPimDelegate class provides an abstract delegate for rendering multiple lines of text.</p>
-<p>It is useful for drawing lists of PIM information in a somewhat consistent way. It is subclassed for the specific types of PIM information (Contacts, Tasks, Alarms etc).</p>
 <p>QPimDelegate draws an item with the following features:</p>
 <ul>
 <li>a background</li>
@@ -81,7 +83,8 @@
 <li>an optional foreground</li>
 </ul>
 <p>All text lines will be elided if they are too wide.</p>
-<p>This class is not intended to be used directly. Subclasses are expected to override some or all of the customization functions providing the above pieces of information or styling settings.</p>
+<p>Much like <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, this class is not intended to be used directly. Subclasses are expected to override some or all of the customization functions providing the above pieces of information or styling settings.</p>
+<p align="center"><img src="images/qpimdelegate-subtexts.png" alt="&quot;Sample image of QPimDelegate&quot;" /></p><p>See also <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, <a href="qcontactdelegate.html">QContactDelegate</a>, and <a href="qpimrecord.html">QPimRecord</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="BackgroundStyle-enum"></a>enum QPimDelegate::BackgroundStyle</h3>
@@ -92,7 +95,7 @@
 <tr><td valign="top"><tt>QPimDelegate::SelectedOnly</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Only the selected item will have its background drawn by the delegate. This uses the selected palette brush.</td></tr>
 <tr><td valign="top"><tt>QPimDelegate::Gradient</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The delegate draws a linear gradient from top to bottom in slightly different shades of either the style's highlight brush color (if the item is selected) or the base brush color.</td></tr>
 </table></p>
-<p>See also <a href="qpimdelegate.html#backgroundStyle">backgroundStyle</a>().</p>
+<p align="center"><img src="images/qpimdelegate-bgstyle.png" alt="&quot;BackgroundStyle variations&quot;" /></p><p>See also <a href="qpimdelegate.html#backgroundStyle">backgroundStyle</a>().</p>
 <h3 class="fn"><a name="SubTextAlignment-enum"></a>enum QPimDelegate::SubTextAlignment</h3>
 <p>Enumerates the ways that the header and value pairs of the subsidiary lines can be rendered.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -100,11 +103,11 @@
 <tr><td valign="top"><tt>QPimDelegate::Independent</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Each header and value pair is rendered independently, leading aligned, with the value string being rendered immediately after the header.</td></tr>
 <tr><td valign="top"><tt>QPimDelegate::CuddledPerItem</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">All of the subsidiary lines of an item will be rendered with the same width for the header strings, and the header strings will be rendered trailing aligned within this space. The value strings will be rendered leading aligned, so that the header and value strings for a subsidiary line will be cuddled together.</td></tr>
 </table></p>
-<p>See also <a href="qpimdelegate.html#subTextAlignment">subTextAlignment</a>().</p>
+<p align="center"><img src="images/qpimdelegate-subtextalignment.png" alt="&quot;Examples of SubTextAlignment&quot;" /></p><p>See also <a href="qpimdelegate.html#subTextAlignment">subTextAlignment</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QPimDelegate"></a>QPimDelegate::QPimDelegate ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qpimdelegate.html">QPimDelegate</a>, with parent object <i>parent</i>.</p>
+<p>Constructs a <a href="qpimdelegate.html">QPimDelegate</a>, with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QPimDelegate"></a>QPimDelegate::~QPimDelegate ()</h3>
 <p>Destroys a <a href="qpimdelegate.html">QPimDelegate</a>.</p>
 <h3 class="fn"><a name="backgroundStyle"></a><a href="qpimdelegate.html#BackgroundStyle-enum">BackgroundStyle</a> QPimDelegate::backgroundStyle ( const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
@@ -114,7 +117,7 @@
 <p>Given the size hint for the rendered text, return the size hint for the entire delegate, based on how any decorations are rendered. For example, if decorations are rendered on the left or right of the text, the given <i>textSizeHint</i> should be expanded horizontally by the width of any decorations, and the height should be expanded (if necessary) to the height of any decorations.</p>
 <p>The default implementation returns the supplied <i>textSizeHint</i>, and ignores the supplied <i>index</i> and <i>option</i> parameters.</p>
 <h3 class="fn"><a name="differentFont"></a><a href="qfont.html">QFont</a> QPimDelegate::differentFont ( const <a href="qfont.html">QFont</a> &amp; <i>start</i>, int <i>step</i> ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Given a starting font <i>start</i>, and a point size difference <i>step</i>, attempt to return a font that is similar to <i>start</i> except different in size by approximately <i>step</i>. If no matching font for a given <i>step</i> value is found, it will try increasingly larger/smaller fonts (depending on whether <i>step</i> was originally positive or negative, and up to 6 in total).</p>
+<p>Given a starting font <i>start</i>, and a point size difference <i>step</i>, attempt to return a font that is similar to <i>start</i> except different in size by approximately <i>step</i>. If no matching font for a given <i>step</i> value is found, it will try increasingly larger/smaller fonts (depending on whether <i>step</i> was originally positive or negative). If no suitable font is found after trying different sizes, the original font <i>start</i> will be returned.</p>
 <h3 class="fn"><a name="drawBackground"></a>void QPimDelegate::drawBackground ( <a href="qpainter.html">QPainter</a> * <i>p</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Paints the background of the item.</p>
 <p>The rectangle to paint in (using <i>p</i>) should be obtained from <i>option</i> (<i>option</i>.rect), and the <i>index</i> of the item to paint.</p>
@@ -122,13 +125,13 @@
 <h3 class="fn"><a name="drawDecorations"></a>void QPimDelegate::drawDecorations ( <a href="qpainter.html">QPainter</a> * <i>p</i>, bool <i>rtl</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i>, <a href="qlist.html">QList</a>&lt;<a href="qrect.html">QRect</a>&gt; &amp; <i>leadingFloats</i>, <a href="qlist.html">QList</a>&lt;<a href="qrect.html">QRect</a>&gt; &amp; <i>trailingFloats</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Paints any decorations, and return (by reference) two lists of rectangles used to align the painted text. The <i>rtl</i> argument is a convenience parameter that is true if the decorations should be painted in a right-to-left manner, or false if they should be painted in a left-to right manner. This may affect which side of the rectangle a decoration should be painted on.</p>
 <p>The rectangle to paint in (using <i>p</i>) should be obtained from <i>option</i> (<i>option</i>.rect), and the <i>index</i> of the item to paint.</p>
-<p>This function should return (in the <i>leadingFloats</i> and <i>trailingFloats</i> parameters) two lists of rectangles that rendered text should be excluded from. The lists are used in the following way: If a line of text would intersect the rectangles returned, the line of text's leading edge will be adjusted to the most trailing edge of any intersected <i>leadingFloats</i> rectangle, and to the most leading edge of any intersected <i>trailingFloats</i> rectangle.</p>
+<p>This function should return (in the <i>leadingFloats</i> and <i>trailingFloats</i> parameters) lists of rectangles that the rendered text will be wrapped around. Rectangles on the leading side of the text should be returned in <i>leadingFloats</i>, and rectangles on the trailing side should be returned in <i>trailingFloats</i>. This allows some flexibility in deciding whether decorations should be drawn behind or beside the text.</p>
 <p>The default implementation does not draw anything, and returns two empty lists.</p>
 <p>See also <a href="qpimdelegate.html#textRectangle">textRectangle</a>().</p>
 <h3 class="fn"><a name="drawForeground"></a>void QPimDelegate::drawForeground ( <a href="qpainter.html">QPainter</a> * <i>p</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Paints the foreground of the item.</p>
 <p>The rectangle to paint in (using <i>p</i>) should be obtained from <i>option</i> (<i>option</i>.rect), and the <i>index</i> of the item to paint.</p>
-<p>This function is called after painting all other visual elements (background, decorations, text etc) and could be used to apply a transparency effect to the rendered items.</p>
+<p>This function is called after painting all other visual elements (background, decorations, text etc) and could be used to apply a transparent effect to the rendered items.</p>
 <p>The default implementation does not paint anything.</p>
 <h3 class="fn"><a name="mainFont"></a><a href="qfont.html">QFont</a> QPimDelegate::mainFont ( const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns the font to use for painting the main label text of the item, for the given <i>index</i> and style option <i>option</i>.</p>
@@ -162,7 +165,8 @@
 <p>Returns the alignment of the header and value pairs of the subsidiary lines of text.</p>
 <p>The default implementation returns <a href="qpimdelegate.html#SubTextAlignment-enum">QPimDelegate::Independent</a>, and ignores the supplied <i>index</i> and <i>option</i> parameters.</p>
 <h3 class="fn"><a name="subTexts"></a><a href="qlist.html">QList</a>&lt;StringPair&gt; QPimDelegate::subTexts ( const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>Returns the list of subsidiary lines to render. This is stored in a list of pairs of strings, with the first member of the pair being the &quot;header&quot; string, and the second member of the pair being the &quot;value&quot; string. The &quot;header&quot; string will be rendered with a bold font, while the &quot;value&quot; string will be rendered with a normal weight font. If either member of the pair is a null <a href="qstring.html">QString</a>, then the subsidiary line is rendered with the full width and the corresponding font.</p>
+<p>Returns the list of subsidiary lines to render. This is stored in a list of pairs of strings, with the first member of the pair being the &quot;header&quot; string, and the second member of the pair being the &quot;value&quot; string.</p>
+<p>If either member of the pair is a null <a href="qstring.html">QString</a> (<tt>QString()</tt>), then the subsidiary line is considered to consist of a single string that will take up the entire line. You can specify an empty <a href="qstring.html">QString</a> (<tt>QString(&quot;&quot;)</tt>) if you wish to have blank space.</p>
 <p>The default implementation returns an empty list, and ignores the supplied <i>index</i> and <i>option</i> parameters.</p>
 <h3 class="fn"><a name="subTextsCountHint"></a>int QPimDelegate::subTextsCountHint ( const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns a hint for the number of subsidiary lines of text to render for an item, which is used to calculate the sizeHint of this delegate.</p>
@@ -171,13 +175,13 @@
 <p>See also <a href="qpimdelegate.html#subTexts">subTexts</a>().</p>
 <h3 class="fn"><a name="textRectangle"></a><a href="qrect.html">QRect</a> QPimDelegate::textRectangle ( const <a href="qrect.html">QRect</a> &amp; <i>entireRect</i>, const <a href="qlist.html">QList</a>&lt;<a href="qrect.html">QRect</a>&gt; &amp; <i>leftFloats</i>, const <a href="qlist.html">QList</a>&lt;<a href="qrect.html">QRect</a>&gt; &amp; <i>rightFloats</i>, int <i>top</i>, int <i>height</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Given the list of left (<i>leftFloats</i>) and right (<i>rightFloats</i>) decoration rectangles, and the <i>entireRect</i> rectangle describing the entire area, and the <i>top</i> pixel coordinate of a line of text, and the <i>height</i> of a line of text, return the rectangle that that line of text should be rendered in.</p>
-<p>Note that the <a href="qpimdelegate.html#drawDecorations">drawDecorations()</a> function returns lists of rectangles that are RTL independent (e.g. leading and trailing instead of left and right). The lists of rectangles passed to this function are in absolute terms (left and right) - for an LTR language, they are equivalent, but for an RTL language the two lists will be exchanged.</p>
+<p>Note that the <a href="qpimdelegate.html#drawDecorations">drawDecorations()</a> function returns lists of rectangles that are RTL independent (e.g&#x2e; leading and trailing instead of left and right). The lists of rectangles passed to this function are in absolute terms (left and right) - for an LTR language, they are equivalent, but for an RTL language the two lists will be exchanged.</p>
 <p>This function is used while rendering each line of text in the item (both the main line and any subsidiary lines).</p>
 <p>See also <a href="qpimdelegate.html#drawDecorations">drawDecorations</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

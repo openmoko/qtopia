@@ -42,11 +42,24 @@ public:
 
 /*!
     \class QBluetoothRemoteDevice
+    \mainclass
     \brief The QBluetoothRemoteDevice class represents a remote bluetooth device.
 
-The QBluetoothRemoteDevice class encapsulates a remote Bluetooth device.
-This class holds various device attributes of the remote device.  These
-attributes are device address, device class, manufacturer, etc.
+    This class holds various device attributes of the remote device.  These
+    attributes are device address, device class, manufacturer, etc.  The most
+    common source of all remote device information is the discovery process.
+    This process must be initiated by using the
+    QBluetoothLocalDevice::discoverDevices() method and hooking onto the
+    appropriate signals.
+
+    Please note that depending on the source that provided the
+    QBluetoothRemoteDevice instance, some or all of the information might
+    not be available.  In general, address, device major, device minor
+    and service class attributes should always be available.  Other
+    attributes might require a connection be established to the
+    remote device, and thus might not be available.
+    In this case, default constructed values will be
+    returned.
 
     \ingroup qtopiabluetooth
     \sa QBluetoothAddress, QBluetoothLocalDevice
@@ -170,7 +183,10 @@ bool QBluetoothRemoteDevice::operator==(const QBluetoothRemoteDevice &other) con
     For display purposes, it is best to display the address
     of the device in this case.
 
-    \sa setName()
+    Each local Bluetooth adapter might have an alias associated
+    with the remote device.
+
+    \sa setName(), QBluetoothLocalDevice::remoteAlias()
 */
 QString QBluetoothRemoteDevice::name() const
 {
@@ -179,7 +195,8 @@ QString QBluetoothRemoteDevice::name() const
 
 /*!
     Sets the name attribute of the remote device to \a name.
-    In general clients do not need to use this function.
+
+    In general, you should not need to use this function.
 
     \sa name()
 */
@@ -202,6 +219,8 @@ QString QBluetoothRemoteDevice::version() const
 /*!
     Sets the version attribute of the remote device to \a version.
 
+    In general, you should not need to use this function.
+
     \sa version()
 */
 void QBluetoothRemoteDevice::setVersion(const QString &version)
@@ -223,6 +242,7 @@ QString QBluetoothRemoteDevice::revision() const
 
 /*!
     Sets the revision attribute of the remote device to \a revision.
+    Clients should not need to use this function.
 
     \sa revision()
 */
@@ -245,6 +265,8 @@ QString QBluetoothRemoteDevice::manufacturer() const
 /*!
     Sets the manufacturer attribute of the remote device
     to \a manufacturer.
+
+    In general, you should not need to use this function.
 
     \sa manufacturer()
 */
@@ -272,6 +294,8 @@ QString QBluetoothRemoteDevice::company() const
 
 /*!
     Sets the company attribute of the remote device to \a company.
+
+    In general, you should not need to use this function.
 
     \sa company()
 */
@@ -304,6 +328,8 @@ QString QBluetoothRemoteDevice::deviceMajorAsString() const
     Sets the major device attribute of the remote device
     to \a deviceMajor.
 
+    In general, you should not need to use this function.
+
     \sa deviceMajor(), deviceMajorAsString()
 */
 void QBluetoothRemoteDevice::setDeviceMajor(QBluetooth::DeviceMajor deviceMajor)
@@ -322,7 +348,8 @@ quint8 QBluetoothRemoteDevice::deviceMinor() const
 }
 
 /*!
-    Returns the minor device number of the remote device.
+    Returns the minor device number of the remote device as a human
+    readable string.
 
     \sa deviceMinor(), setDeviceMinor()
  */
@@ -365,6 +392,8 @@ QStringList QBluetoothRemoteDevice::serviceClassesAsString() const
 
 /*!
     Sets the service classes attribute of the remote device to \a serviceClasses.
+
+    In general, you should not need to use this function.
 
     \sa serviceClasses(), serviceClassesAsString()
 */

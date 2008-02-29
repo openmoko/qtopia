@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QMultiPortMultiplexer Class Reference</title>
+  <title>QMultiPortMultiplexer Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QMultiPortMultiplexer Class Reference</h1>
 <p>The QMultiPortMultiplexer class provides multiplexing across several serial ports <a href="#details">More...</a></p>
-<pre>#include &lt;QMultiPortMultiplexer&gt;</pre><p>Inherits <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a>.</p>
+<pre>    #include &lt;QMultiPortMultiplexer&gt;</pre><p>Inherits <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a>.</p>
 <ul>
 <li><a href="qmultiportmultiplexer-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -42,7 +44,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QMultiPortMultiplexer class provides multiplexing across several serial ports</p>
-<p>The QMultiPortMultiplexer class provides multiplexing across several serial ports. Use this instead of <a href="qgsm0710multiplexer.html">QGsm0710Multiplexer</a> if the kernel has builtin support for multiplexing.</p>
+<p>Use this class instead of <a href="qgsm0710multiplexer.html">QGsm0710Multiplexer</a> if the operating system kernel has built-in support for multiplexing.</p>
+<p>Instances of QMultiPortMultiplexer are created by multiplexer plug-ins. See the <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a> for more information on how to write a multiplexer plug-in that uses QMultiPortMultiplexer.</p>
 <p>See also <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a>, <a href="qgsm0710multiplexer.html">QGsm0710Multiplexer</a>, and <a href="qserialiodevicemultiplexerplugin.html">QSerialIODeviceMultiplexerPlugin</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -52,11 +55,11 @@
 <p>Destruct this multi-port multiplexer object.</p>
 <h3 class="fn"><a name="addChannel"></a>bool QMultiPortMultiplexer::addChannel ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qserialiodevice.html">QSerialIODevice</a> * <i>device</i> )</h3>
 <p>Add a new channel to this multiplexer, with requests for <i>name</i> being redirected to <i>device</i>. Returns false if <i>name</i> already exists.</p>
-<p>Ownership of <i>device</i> will pass to this object; it will be deleted when this object is deleted. A single device can be added for multiple channels (e.g. <tt>data</tt> and <tt>datasetup</tt>). This object will ensure that such devices will be deleted only once.</p>
+<p>Ownership of <i>device</i> will pass to this object; it will be deleted when this object is deleted. A single device can be added for multiple channels (e.g&#x2e; <tt>data</tt> and <tt>datasetup</tt>). This object will ensure that such devices will be deleted only once.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

@@ -126,6 +126,7 @@ QString concat(const char *a, const char *b, const char *c, const char *d = 0, c
 /*
   \internal
   \class QPimSqlIO
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QPimSqlIO class provides generalized access to QPimRecord based

@@ -27,6 +27,9 @@
 
 #include <qdatetime.h>
 
+// WARNING: These classes are not part of the Qtopia API.
+// They are subject to change at any time.
+
 //===========================================================================
 
 class SmilTimingAttribute;

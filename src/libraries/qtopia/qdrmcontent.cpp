@@ -65,11 +65,14 @@ void QDrmContentPrivate::rightsExpired( const QContent &content, QDrmRights::Per
 
 /*!
     \class QDrmContent
-    QDrmContent provides the interface through which applications can request access to DRM protected content
-    and notify the DRM agent of usage information when access has been granted.  QDrmContent objects can be
-    reused for sequential access to different content but an individual QDrmContent object will only allow access
-    to a single item of content at a time, concurrent access to multiple content items requires a QDrmContent
-    object for each item of content.
+    \mainclass
+    \brief The QDrmContent class provides applications with access to DRM protected content.
+
+    In order to enforce the constraints placed on DRM protected content it is neccessary to validate the content's
+    permissions before rendering, and to meter usage and revalidate permissions during rendering.  QDrmContent provides
+    the interface through which applications can request access to DRM protected content and DRM agents can monitor content
+    usage.  An individual QDrmContent object allows access to a single item of content at a time, concurrent access to
+    multiple content items requires a QDrmContent object for each item of content.
 
     File access to DRM content is requested  using the the \l requestLicense() method.  If requestLicense() returns
     true access to the content has been granted and it is possible to access the content using the standard Qt file
@@ -111,9 +114,13 @@ void QDrmContentPrivate::rightsExpired( const QContent &content, QDrmRights::Per
     {
         openContent.setPermission( QDrmRights::Play );
 
+        // Connect status signals and slots.
         connect( this, SIGNAL(playing()), &openContent, SLOT(renderStarted()));
         connect( this, SIGNAL(paused()), &openContent, SLOT(renderPaused()));
         connect( this, SIGNAL(stopped()), &openContent, SLOT(renderStopped()));
+
+        // Stop playback when the rights have expired.
+        connect( &openContent, SIGNAL(rightsExpired(const QDrmContent&)), this, SLOT(stop()) );
 
         // Perform initialisation.
     }
@@ -193,12 +200,16 @@ void QDrmContentPrivate::rightsExpired( const QContent &content, QDrmRights::Per
     \fn QDrmContent::licenseGranted( const QContent &content )
 
     Signals that a call to \l {QDrmContent::requestLicense()} to request a license to render \a content  succeeded.
+
+    \sa requestLicense(), licenseDenied()
 */
 
 /*!
     \fn QDrmContent::licenseDenied( const QContent &content )
 
     Signals that a call to \l {QDrmContent::requestLicense()} to request a license to render \a content  failed.
+
+    \sa requestLicense(), licenseGranted()
 */
 
 /*!
@@ -263,6 +274,8 @@ void QDrmContent::setPermission( QDrmRights::Permission permission )
 /*!
     Returns the license options indicating how the user should be prompted if the content has
     invalid rights and the type of license that should be requested.
+
+    \sa enableLicenseOptions(), disableLicenseOptions()
 */
 QDrmContent::LicenseOptions QDrmContent::licenseOptions() const
 {
@@ -272,6 +285,8 @@ QDrmContent::LicenseOptions QDrmContent::licenseOptions() const
 /*!
     Sets the license \a options indicating how the user should be prompted if the content has
     invalid rights and the type of license that should be requested.
+
+    \sa enableLicenseOptions(), disableLicenseOptions()
  */
 void QDrmContent::setLicenseOptions( LicenseOptions options )
 {
@@ -326,7 +341,16 @@ QContent QDrmContent::content() const
 
 /*!
     Requests a license to render DRM \a content using the currently assigned permission type.
-    This is equivalent to assigning content to an instance of QDrmContent and then calling \c requestLicense().
+
+    If there are no current permissions to render the content the user will be prompted to acquire new permissions
+    or informed that the content can not be rendered.  If the permissions are valid or the user succeeds in acquiring
+    new permissions the licenseGranted() signal will be emitted and true returned.  If the permissions are invalid and
+    user cannnot acquire new permissions, or must go through an external agent such as a web browser to acquire new
+    permissions the licenseDenied() signal will be emitted and false returned.
+
+    Activatation can be turned off by clearing the Activate license option using disableLicenceOptions().
+
+    \sa licenseGranted(), licenseDenied(), permission()
  */
 bool QDrmContent::requestLicense( const QContent &content )
 {
@@ -395,6 +419,13 @@ bool QDrmContent::getLicense( const QContent &content, QDrmRights::Permission pe
 /*!
     Releases the currently held content license. No further file access will be possible
     after this unless a new license is requested.
+
+    If the permissions have expired or are about to expire the user may be prompted to acquire new permissions, this
+    prompt can be disabled by clearing the Reactivate license option using disableLicenseOptions().
+
+    Requesting a new license will automatically release a previously held one.
+
+    \sa requestLicense()
 */
 void QDrmContent::releaseLicense()
 {
@@ -418,6 +449,8 @@ void QDrmContent::releaseLicense()
 
 /*!
     Notifies the DRM agent that rendering of the content has started.
+
+    \sa renderStopped(), renderPaused()
 */
 void QDrmContent::renderStarted()
 {
@@ -431,6 +464,8 @@ void QDrmContent::renderStarted()
 
 /*!
     Notifies the DRM agent that rendering of the content has ended.
+
+    \sa renderStarted(), renderPaused()
 */
 void QDrmContent::renderStopped()
 {
@@ -444,6 +479,8 @@ void QDrmContent::renderStopped()
 
 /*!
     Notifies the DRM agent that rendering of the content has been paused.
+
+    \sa renderStarted(), renderStopped()
  */
 void QDrmContent::renderPaused()
 {
@@ -464,6 +501,8 @@ void QDrmContent::renderPaused()
     so rights may not be available until some time after this method is called.
 
     Any dialogs displayed will be parented off the given \a focus widget.
+
+    \sa canActivate()
 */
 bool QDrmContent::activate( const QContent &content, QWidget *focus )
 {
@@ -473,7 +512,9 @@ bool QDrmContent::activate( const QContent &content, QWidget *focus )
 }
 
 /*!
-    Indicates whether options exist to activate the given \a content.
+    Returns true if options exist to activate the given \a content; otherwise returns false.
+
+    \sa activate()
 */
 bool QDrmContent::canActivate( const QContent &content )
 {

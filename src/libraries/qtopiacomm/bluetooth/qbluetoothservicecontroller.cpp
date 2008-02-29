@@ -26,9 +26,6 @@
 #include <qtopialog.h>
 
 /*
-    \internal
-    \class QBluetoothServiceControllerPrivate
-
     This receives IPC messages from the BluetoothServiceManager when a service
     is registered, modified, etc. It's enabled the "other end" of the messages
     to and from ServiceUserMessenger in src/server/bluetoothservicemanager.cpp.
@@ -144,19 +141,27 @@ QVariant QBluetoothServiceControllerPrivate::serviceValue(const QString &name, c
 
 /*!
     \class QBluetoothServiceController
-    \brief The QBluetoothServiceController class provides a means to control and access information about Bluetooth services in Qtopia.
+    \mainclass
+    \brief The QBluetoothServiceController class provides a means to control and access information for Qtopia Bluetooth services.
 
-    To create a Bluetooth service that can be accessed by instances of
-    QBluetoothServiceController, simply subclass QBluetoothAbstractService.
+    This class allows the programmer to start and stop Qtopia Bluetooth
+    services, set their security options, and view a service's attributes,
+    such as its state, name and security options.
 
-    \sa QBluetoothAbstractService
+    Qtopia has a number of built-in Bluetooth services, as found in Qtopia's
+    Bluetooth settings application. Any of these services can be controlled
+    through an instance of QBluetoothServiceController. You can also create
+    your own Qtopia Bluetooth services that will be controllable through
+    this interface; simply subclass QBluetoothAbstractService. (See the
+    QBluetoothAbstractService class documentation for more details.)
+
     \ingroup qtopiabluetooth
  */
 
 /*!
     \enum QBluetoothServiceController::ServiceState
 
-    Defines the service state of the service.
+    Defines the possible states for a service which may be returned from state().
 
     \value NotRunning The service is not running.
     \value Starting The service is starting.
@@ -164,7 +169,7 @@ QVariant QBluetoothServiceControllerPrivate::serviceValue(const QString &name, c
 */
 
 /*!
-    Constructs a QBluetoothServiceController with the parent object \a parent.
+    Constructs a QBluetoothServiceController with parent object \a parent.
  */
 QBluetoothServiceController::QBluetoothServiceController(QObject *parent)
     : QObject(parent),
@@ -181,6 +186,10 @@ QBluetoothServiceController::~QBluetoothServiceController()
 
 /*!
     Starts the service named \a name.
+
+    The started() signal will be emitted when the service has started.
+
+    \sa stop()
  */
 void QBluetoothServiceController::start(const QString &name)
 {
@@ -189,6 +198,10 @@ void QBluetoothServiceController::start(const QString &name)
 
 /*!
     Stops the service named \a name.
+
+    The stopped() signal will be emitted when the service has stopped.
+
+    \sa start()
  */
 void QBluetoothServiceController::stop(const QString &name)
 {
@@ -197,6 +210,8 @@ void QBluetoothServiceController::stop(const QString &name)
 
 /*!
     Returns the state of the service named \a name.
+
+    \sa stopped(), started()
  */
 QBluetoothServiceController::ServiceState QBluetoothServiceController::state(const QString &name) const
 {
@@ -206,6 +221,8 @@ QBluetoothServiceController::ServiceState QBluetoothServiceController::state(con
 /*!
     Sets the security options for the service with name \a name to the given
     \a options.
+
+    \sa securityOptions()
  */
 void QBluetoothServiceController::setSecurityOptions(const QString &name, QBluetooth::SecurityOptions options)
 {
@@ -214,6 +231,8 @@ void QBluetoothServiceController::setSecurityOptions(const QString &name, QBluet
 
 /*!
     Returns the security options for the service named \a name.
+
+    \sa setSecurityOptions()
  */
 QBluetooth::SecurityOptions QBluetoothServiceController::securityOptions(const QString &name) const
 {
@@ -244,12 +263,16 @@ QStringList QBluetoothServiceController::services() const
     This signal is emitted when the service named \a name has started or
     failed while attempting to start. If there was a failure, \a error is \c true
     and \a description provides the human-readable error description.
+
+    \sa start(), stopped()
  */
 
 /*!
     \fn void QBluetoothServiceController::stopped(const QString &name)
 
     This signal is emitted when the service named \a name has stopped.
+
+    \sa stop(), started()
 */
 
 

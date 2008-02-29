@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QContact Class Reference</title>
+  <title>QContact Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContact Class Reference</h1>
 <p>The QContact class holds the data of an address book entry. <a href="#details">More...</a></p>
-<pre>#include &lt;QContact&gt;</pre><p>Inherits <a href="qpimrecord.html">QPimRecord</a>.</p>
+<pre>    #include &lt;QContact&gt;</pre><p>Inherits <a href="qpimrecord.html">QPimRecord</a>.</p>
 <ul>
 <li><a href="qcontact-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -146,7 +148,7 @@
 <li><div class="fn"/>bool <b><a href="qcontact.html#operator-eq-eq">operator==</a></b> ( const QContact &amp; <i>other</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>15 public functions inherited from <a href="qpimrecord.html#public-functions">QPimRecord</a></li>
+<li><div class="fn"/>16 public functions inherited from <a href="qpimrecord.html#public-functions">QPimRecord</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -164,16 +166,7 @@
 <li><div class="fn"/>QSize <b><a href="qcontact.html#thumbnailSize">thumbnailSize</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qcontact.html#writeVCard">writeVCard</a></b> ( const QString &amp; <i>filename</i>, const QList&lt;QContact&gt; &amp; <i>contacts</i> )</li>
 </ul>
-<a name="protected-functions"></a>
-<h3>Protected Functions</h3>
-<ul>
-<li><div class="fn"/>virtual QList&lt;QString&gt; &amp; <b><a href="qcontact.html#categoriesRef">categoriesRef</a></b> ()</li>
-<li><div class="fn"/>virtual const QList&lt;QString&gt; &amp; <b><a href="qcontact.html#categoriesRef-2">categoriesRef</a></b> () const</li>
-<li><div class="fn"/>virtual QMap&lt;QString, QString&gt; &amp; <b><a href="qcontact.html#customFieldsRef">customFieldsRef</a></b> ()</li>
-<li><div class="fn"/>virtual const QMap&lt;QString, QString&gt; &amp; <b><a href="qcontact.html#customFieldsRef-2">customFieldsRef</a></b> () const</li>
-<li><div class="fn"/>virtual QUniqueId &amp; <b><a href="qcontact.html#uidRef">uidRef</a></b> ()</li>
-<li><div class="fn"/>virtual const QUniqueId &amp; <b><a href="qcontact.html#uidRef-2">uidRef</a></b> () const</li>
-</ul>
+<h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>6 protected functions inherited from <a href="qpimrecord.html#protected-functions">QPimRecord</a></li>
 </ul>
@@ -181,7 +174,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QContact class holds the data of an address book entry.</p>
-<p>This data includes information the name of the person, contact information, and business information such as department and job title.</p>
+<p>This data includes information the name of the contact, phone numbers and email addresses, postal address information, and business information such as department and job title.</p>
+<p>It also allows a portrait picture (and corresponding thumbnail) to be specified, provides functions for matching a contact against a regular expression, and converting to and from vCard format.</p>
 <p>See also <a href="qcontactaddress.html">QContactAddress</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -194,12 +188,12 @@
 <tr><td valign="top"><tt>QContact::Female</tt></td><td align="center" valign="top"><tt>2</tt></td></tr>
 </table></p>
 <h3 class="fn"><a name="Location-enum"></a>enum QContact::Location</h3>
-<p>Enumerates the types of addresses a contact can have. For instance Home mailing address.</p>
+<p>Enumerates the types of addresses a contact can have.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QContact::Home</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">Residential contact information</td></tr>
-<tr><td valign="top"><tt>QContact::Business</tt></td><td align="center" valign="top"><tt>0x02</tt></td><td valign="top">Business contact information</td></tr>
-<tr><td valign="top"><tt>QContact::Other</tt></td><td align="center" valign="top"><tt>0x00</tt></td><td valign="top">Contact information that does not fit into other Location types</td></tr>
+<tr><td valign="top"><tt>QContact::Home</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">Residential contact address</td></tr>
+<tr><td valign="top"><tt>QContact::Business</tt></td><td align="center" valign="top"><tt>0x02</tt></td><td valign="top">Business contact address</td></tr>
+<tr><td valign="top"><tt>QContact::Other</tt></td><td align="center" valign="top"><tt>0x00</tt></td><td valign="top">Contact address that does not fit into other Location types</td></tr>
 </table></p>
 <h3 class="fn"><a name="PhoneType-enum"></a>enum QContact::PhoneType</h3>
 <p>Enumerates the types of phone numbers that can be assigned to a contact.</p>
@@ -227,18 +221,18 @@
 <h3 class="fn"><a name="dtor.QContact"></a>QContact::~QContact ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the contact.</p>
 <h3 class="fn"><a name="address"></a><a href="qcontactaddress.html">QContactAddress</a> QContact::address ( <a href="qcontact.html#Location-enum">Location</a> <i>location</i> ) const</h3>
-<p>Returns the contacts address for the specified <i>location</i>.</p>
+<p>Returns the contact's address for the specified <i>location</i>.</p>
 <p>See also <a href="qcontact.html#setAddress">setAddress</a>().</p>
 <h3 class="fn"><a name="addresses"></a><a href="qmap.html">QMap</a>&lt;<a href="qcontact.html#Location-enum">Location</a>, <a href="qcontactaddress.html">QContactAddress</a>&gt; QContact::addresses () const</h3>
-<p>Returns the list of addresses of the contact.</p>
+<p>Returns the contact's list of addresses with their types.</p>
 <h3 class="fn"><a name="anniversary"></a><a href="qdate.html">QDate</a> QContact::anniversary () const</h3>
-<p>Return the person's anniversary date. <a href="qdate.html">QDate</a> will be null if there is anniversary has not been set.</p>
+<p>Return the contact's anniversary date. If this has not been set, the returned date will be null.</p>
 <p>See also <a href="qcontact.html#setAnniversary">setAnniversary</a>().</p>
 <h3 class="fn"><a name="assistant"></a><a href="qstring.html">QString</a> QContact::assistant () const</h3>
 <p>Returns the assistant of the contact.</p>
 <p>See also <a href="qcontact.html#setAssistant">setAssistant</a>().</p>
 <h3 class="fn"><a name="birthday"></a><a href="qdate.html">QDate</a> QContact::birthday () const</h3>
-<p>Return the person's birthday. <a href="qdate.html">QDate</a> will be null if there is birthday has not been set.</p>
+<p>Return the contact's birthday. If this has not been set, the returned date will be null.</p>
 <p>See also <a href="qcontact.html#setBirthday">setBirthday</a>().</p>
 <h3 class="fn"><a name="businessCity"></a><a href="qstring.html">QString</a> QContact::businessCity () const</h3>
 <p>Returns the business city of the contact.</p>
@@ -270,13 +264,9 @@
 <h3 class="fn"><a name="businessZip"></a><a href="qstring.html">QString</a> QContact::businessZip () const</h3>
 <p>Returns the business zip of the contact.</p>
 <p>See also <a href="qcontact.html#setBusinessZip">setBusinessZip</a>().</p>
-<h3 class="fn"><a name="categoriesRef"></a><a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; &amp; QContact::categoriesRef ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>Reimplemented from <a href="qpimrecord.html#categoriesRef">QPimRecord</a>.</p>
-<h3 class="fn"><a name="categoriesRef-2"></a>const <a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; &amp; QContact::categoriesRef () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Reimplemented from <a href="qpimrecord.html#categoriesRef-2">QPimRecord</a>.</p>
 <h3 class="fn"><a name="changePortrait"></a>void QContact::changePortrait ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>p</i> )</h3>
-<p>Changes the contacts portrait to the given pixmap <i>p</i>. The pixmap is saved to the contactimages directory, and removes the file previously used as the contact's portrait.</p>
+<p>Changes the contacts portrait to the given pixmap <i>p</i>. The pixmap is saved to the contactimages directory in the Qtopia &quot;addressbook&quot; application storage directory, and removes the file previously used as the contact's portrait. The corresponding filename will be set as the <tt>Portrait</tt> field of this contact.</p>
+<p>Note: the previous image is removed immediately, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
 <h3 class="fn"><a name="children"></a><a href="qstring.html">QString</a> QContact::children () const</h3>
 <p>Returns the children of the contact.</p>
 <p>See also <a href="qcontact.html#setChildren">setChildren</a>().</p>
@@ -286,36 +276,31 @@
 <p>Returns the company for the contact.</p>
 <p>See also <a href="qcontact.html#setCompany">setCompany</a>().</p>
 <h3 class="fn"><a name="companyPronunciation"></a><a href="qstring.html">QString</a> QContact::companyPronunciation () const</h3>
-<p>Returns the pronunciation of the contacts company name.</p>
+<p>Returns the pronunciation of the contact's company name.</p>
 <p>See also <a href="qcontact.html#setCompanyPronunciation">setCompanyPronunciation</a>().</p>
-<h3 class="fn"><a name="customFieldsRef"></a><a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="qstring.html">QString</a>&gt; &amp; QContact::customFieldsRef ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>Reimplemented from <a href="qpimrecord.html#customFieldsRef">QPimRecord</a>.</p>
-<h3 class="fn"><a name="customFieldsRef-2"></a>const <a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="qstring.html">QString</a>&gt; &amp; QContact::customFieldsRef () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Reimplemented from <a href="qpimrecord.html#customFieldsRef-2">QPimRecord</a>.</p>
 <h3 class="fn"><a name="defaultEmail"></a><a href="qstring.html">QString</a> QContact::defaultEmail () const</h3>
 <p>Returns the default email address of the contact.</p>
 <p>See also <a href="qcontact.html#setDefaultEmail">setDefaultEmail</a>().</p>
 <h3 class="fn"><a name="defaultPhoneNumber"></a><a href="qstring.html">QString</a> QContact::defaultPhoneNumber () const</h3>
-<p>Return the default phone number of the contact. If no default phone number is set returns the null string.</p>
+<p>Return the default phone number of the contact. If no default phone number is set, this returns the null string.</p>
 <p>See also <a href="qcontact.html#setDefaultPhoneNumber">setDefaultPhoneNumber</a>().</p>
 <h3 class="fn"><a name="department"></a><a href="qstring.html">QString</a> QContact::department () const</h3>
 <p>Returns the department for the contact.</p>
 <p>See also <a href="qcontact.html#setDepartment">setDepartment</a>().</p>
 <h3 class="fn"><a name="displayAddress"></a><a href="qstring.html">QString</a> QContact::displayAddress ( <a href="qcontact.html#Location-enum">Location</a> <i>location</i> ) const</h3>
-<p>Returns the formated address of the contact of type <i>location</i>.</p>
+<p>Returns a formatted string with the contact's address of type <i>location</i>.</p>
 <h3 class="fn"><a name="displayBusinessAddress"></a><a href="qstring.html">QString</a> QContact::displayBusinessAddress () const</h3>
-<p>Returns the formatted address of the contacts business address.</p>
+<p>Returns a formatted string with the contact's business address.</p>
 <h3 class="fn"><a name="displayHomeAddress"></a><a href="qstring.html">QString</a> QContact::displayHomeAddress () const</h3>
-<p>Returns the formatted address of the contacts home address.</p>
+<p>Returns a formatted string with the contact's home address.</p>
 <h3 class="fn"><a name="emailList"></a><a href="qstringlist.html">QStringList</a> QContact::emailList () const</h3>
 <p>Returns a list of email addresses belonging to the contact, including the default email address.</p>
-<p>See also <a href="qcontact.html#setEmailList">setEmailList</a>().</p>
+<p>See also <a href="qcontact.html#setEmailList">setEmailList</a>() and <a href="qcontact.html#defaultEmail">defaultEmail</a>().</p>
 <h3 class="fn"><a name="firstName"></a><a href="qstring.html">QString</a> QContact::firstName () const</h3>
 <p>Returns the first name of the contact.</p>
 <p>See also <a href="qcontact.html#setFirstName">setFirstName</a>().</p>
 <h3 class="fn"><a name="firstNamePronunciation"></a><a href="qstring.html">QString</a> QContact::firstNamePronunciation () const</h3>
-<p>Returns the pronunciation of the contacts first name.</p>
+<p>Returns the pronunciation of the contact's first name.</p>
 <p>See also <a href="qcontact.html#setFirstNamePronunciation">setFirstNamePronunciation</a>().</p>
 <h3 class="fn"><a name="gender"></a><a href="qcontact.html#GenderType-enum">GenderType</a> QContact::gender () const</h3>
 <p>Returns the gender of the contact as type <a href="qcontact.html#GenderType-enum">GenderType</a>.</p>
@@ -353,34 +338,35 @@
 <p>Returns the job title of the contact.</p>
 <p>See also <a href="qcontact.html#setJobTitle">setJobTitle</a>().</p>
 <h3 class="fn"><a name="label"></a><a href="qstring.html">QString</a> QContact::label () const</h3>
-<p>Returns a suitable display string for the contact.</p>
+<p>Returns a suitable display string for the contact. This is built up by using fields of the contact and the format set for generating the contact labels.</p>
+<p>See also <a href="qcontact.html#labelFormat">labelFormat</a>() and <a href="qcontact.html#labelFields">labelFields</a>().</p>
 <h3 class="fn"><a name="labelFields"></a><a href="qstringlist.html">QStringList</a> QContact::labelFields ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the string identifiers suitable for describing the format for the contact label.</p>
+<p>See also <a href="qcontact.html#labelFormat">labelFormat</a>() and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="labelFormat"></a><a href="qstring.html">QString</a> QContact::labelFormat ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the format for contact labels.</p>
 <p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be _ for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
-<p>For example:</p>
-<p>LastName , _ FirstName | LastName | FirstName | Company</p>
-<p>See also <a href="qcontact.html#setLabelFormat">setLabelFormat</a>().</p>
+<p>For example: <tt>LastName , _ FirstName | LastName | FirstName | Company</tt></p>
+<p>See also <a href="qcontact.html#setLabelFormat">setLabelFormat</a>(), <a href="qcontact.html#labelFields">labelFields</a>(), and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="lastName"></a><a href="qstring.html">QString</a> QContact::lastName () const</h3>
 <p>Returns the last name of the contact.</p>
 <p>See also <a href="qcontact.html#setLastName">setLastName</a>().</p>
 <h3 class="fn"><a name="lastNamePronunciation"></a><a href="qstring.html">QString</a> QContact::lastNamePronunciation () const</h3>
-<p>Returns the pronunciation of the contacts last name.</p>
+<p>Returns the pronunciation of the contact's last name.</p>
 <p>See also <a href="qcontact.html#setLastNamePronunciation">setLastNamePronunciation</a>().</p>
 <h3 class="fn"><a name="manager"></a><a href="qstring.html">QString</a> QContact::manager () const</h3>
 <p>Returns the manager of the contact.</p>
 <p>See also <a href="qcontact.html#setManager">setManager</a>().</p>
 <h3 class="fn"><a name="match"></a>bool QContact::match ( const <a href="qstring.html">QString</a> &amp; <i>regexp</i> ) const</h3>
-<p>Returns true if the part of contact matches <i>regexp</i>. Otherwise returns false.</p>
+<p>Returns true if one of this contact's fields matches <i>regexp</i>. Otherwise returns false.</p>
 <h3 class="fn"><a name="match-2"></a>bool QContact::match ( const <a href="qregexp.html">QRegExp</a> &amp; <i>r</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns true if the part of contact matches <i>r</i>. Otherwise returns false.</p>
+<p>Returns true if one of this contact's fields matches <i>r</i>. Otherwise returns false.</p>
 <h3 class="fn"><a name="middleName"></a><a href="qstring.html">QString</a> QContact::middleName () const</h3>
 <p>Returns the middle name of the contact.</p>
 <p>See also <a href="qcontact.html#setMiddleName">setMiddleName</a>().</p>
 <h3 class="fn"><a name="nameTitle"></a><a href="qstring.html">QString</a> QContact::nameTitle () const</h3>
-<p>Returns the title of the contact.</p>
+<p>Returns the title of the contact (e.g&#x2e; Dr., Prof.)</p>
 <p>See also <a href="qcontact.html#setNameTitle">setNameTitle</a>().</p>
 <h3 class="fn"><a name="nickname"></a><a href="qstring.html">QString</a> QContact::nickname () const</h3>
 <p>Returns the nickname of the contact.</p>
@@ -393,54 +379,57 @@
 <p>Returns the office for the contact.</p>
 <p>See also <a href="qcontact.html#setOffice">setOffice</a>().</p>
 <h3 class="fn"><a name="phoneIcon"></a><a href="qicon.html">QIcon</a> QContact::phoneIcon ( <a href="qcontact.html#PhoneType-enum">PhoneType</a> <i>type</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns an icon representing the phone number <i>type</i> Returns a null icon if no icon is available for the phone number type.</p>
+<p>Returns an icon representing the phone number <i>type</i>. Returns a null icon if no icon is available for the phone number type.</p>
 <p>See also <a href="qcontact.html#phoneIconResource">phoneIconResource</a>().</p>
 <h3 class="fn"><a name="phoneIconResource"></a><a href="qstring.html">QString</a> QContact::phoneIconResource ( <a href="qcontact.html#PhoneType-enum">PhoneType</a> <i>type</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the resource location for an icon representing the phone number <i>type</i>. Returns a null string if no icon is available for the phone number type.</p>
+<p>Returns the resource location (e.g&#x2e; <tt>&quot;:icon/addressbook/homephone&quot;</tt>) for an icon representing the phone number <i>type</i>. Returns a null string if no icon is available for the phone number <i>type</i>.</p>
 <p>See also <a href="qcontact.html#phoneIcon">phoneIcon</a>().</p>
 <h3 class="fn"><a name="phoneNumber"></a><a href="qstring.html">QString</a> QContact::phoneNumber ( <a href="qcontact.html#PhoneType-enum">PhoneType</a> <i>type</i> ) const</h3>
-<p>Returns the phone number of <i>type</i> for the contact.</p>
+<p>Returns the phone number of <i>type</i> for the contact. If the contact does not have a corresponding phone number, this will return a null <a href="qstring.html">QString</a>.</p>
 <p>See also <a href="qcontact.html#setPhoneNumber">setPhoneNumber</a>().</p>
 <h3 class="fn"><a name="phoneNumbers"></a><a href="qmap.html">QMap</a>&lt;<a href="qcontact.html#PhoneType-enum">PhoneType</a>, <a href="qstring.html">QString</a>&gt; QContact::phoneNumbers () const</h3>
-<p>Returns the list of phone numbers of the contact.</p>
+<p>Returns the contact's list of phone numbers and their types.</p>
 <h3 class="fn"><a name="phoneTypes"></a><a href="qlist.html">QList</a>&lt;<a href="qcontact.html#PhoneType-enum">PhoneType</a>&gt; QContact::phoneTypes ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of phone types that can be assigned as a contact phone number.</p>
 <h3 class="fn"><a name="portrait"></a><a href="qpixmap.html">QPixmap</a> QContact::portrait () const</h3>
-<p>Returns the pixmap portrait of the contact. If there is no portrait set for the contact will return a default pixmap</p>
+<p>Returns the portrait pixmap of the contact. If there is no portrait set for the contact, this will return a default pixmap based on the contact's fields.</p>
 <p>See also <a href="qcontact.html#portraitSize">portraitSize</a>().</p>
 <h3 class="fn"><a name="portraitFile"></a><a href="qstring.html">QString</a> QContact::portraitFile () const</h3>
-<p>Returns the path for the portrait file of the contact.</p>
+<p>Returns the path for the portrait file of the contact. This is either a resource file path (e.g&#x2e; <tt>&quot;:icon/happyface&quot;</tt>) or the name of a file that is stored in the &quot;addressbook/contactimages&quot; directory in the Qtopia application data storage directory.</p>
 <p>See also <a href="qcontact.html#setPortraitFile">setPortraitFile</a>().</p>
 <h3 class="fn"><a name="portraitSize"></a><a href="qsize.html">QSize</a> QContact::portraitSize ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the size of the pixmap portrait of a contact.</p>
-<p>See also <a href="qcontact.html#portrait">portrait</a>().</p>
+<p>Returns the size of the portrait pixmap of a contact.</p>
+<p>See also <a href="qcontact.html#portrait">portrait</a>() and <a href="qcontact.html#thumbnailSize">thumbnailSize</a>().</p>
 <h3 class="fn"><a name="profession"></a><a href="qstring.html">QString</a> QContact::profession () const</h3>
 <p>Returns the profession of the contact.</p>
 <p>See also <a href="qcontact.html#setProfession">setProfession</a>().</p>
 <h3 class="fn"><a name="readVCard"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Reads the file specified by <i>filename</i> as a list of vCards objects and returns the list of near equivalent contacts.</p>
+<p>Reads the file specified by <i>filename</i> as a list of vCard objects and returns the list of contacts that correspond to the vCard objects.</p>
+<p>Note: the fields stored by <a href="qcontact.html">QContact</a> may not correspond exactly to the vCard data.</p>
 <p>See also <a href="qcontact.html#writeVCard">writeVCard</a>().</p>
 <h3 class="fn"><a name="readVCard-2"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>vcard</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Reads the given vCard data in <i>vcard</i>, and returns the list of near equivalent contacts.</p>
+<p>Reads the given vCard data in <i>vcard</i>, and returns the list of corresponding contacts.</p>
+<p>Note: the fields stored by <a href="qcontact.html">QContact</a> may not correspond exactly to the vCard data.</p>
 <p>See also <a href="qcontact.html#writeVCard">writeVCard</a>().</p>
 <h3 class="fn"><a name="readVCard-3"></a><a href="qlist.html">QList</a>&lt;QContact&gt; QContact::readVCard ( VObject * <i>vobject</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Reads the given vCard data in <i>vobject</i>, and returns the list of near equivalent contacts.</p>
+<p>Reads the given vCard data in <i>vobject</i>, and returns the list of corresponding contacts.</p>
+<p>Note: the fields stored by <a href="qcontact.html">QContact</a> may not correspond exactly to the vCard data.</p>
 <p>See also <a href="qcontact.html#writeVCard">writeVCard</a>().</p>
 <h3 class="fn"><a name="removeEmail"></a>void QContact::removeEmail ( const <a href="qstring.html">QString</a> &amp; <i>email</i> )</h3>
 <p>Removes <i>email</i> from the list of email address for the contact. If the email is the default email, the default email will be set to the first one in the list.</p>
 <h3 class="fn"><a name="setAddress"></a>void QContact::setAddress ( <a href="qcontact.html#Location-enum">Location</a> <i>location</i>, const <a href="qcontactaddress.html">QContactAddress</a> &amp; <i>address</i> )</h3>
-<p>Sets the contacts address for the <i>location</i> to <i>address</i></p>
+<p>Sets the contact's address for the given <i>location</i> to <i>address</i>. If the address is empty, this will effectively remove that <tt>Location</tt> type for this contact.</p>
 <p>See also <a href="qcontact.html#address">address</a>().</p>
 <h3 class="fn"><a name="setAnniversary"></a>void QContact::setAnniversary ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
-<p>Sets the person's anniversary to <i>date</i>.</p>
+<p>Sets the contact's anniversary to <i>date</i>.</p>
 <p>See also <a href="qcontact.html#anniversary">anniversary</a>().</p>
 <h3 class="fn"><a name="setAssistant"></a>void QContact::setAssistant ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the assistant of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#assistant">assistant</a>().</p>
 <h3 class="fn"><a name="setBirthday"></a>void QContact::setBirthday ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
-<p>Sets the person's birthday to <i>date</i>.</p>
+<p>Sets the contact's birthday to <i>date</i>.</p>
 <p>See also <a href="qcontact.html#birthday">birthday</a>().</p>
 <h3 class="fn"><a name="setBusinessCity"></a>void QContact::setBusinessCity ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the business city of the contact to <i>str</i>.</p>
@@ -479,31 +468,31 @@
 <p>Sets the company for contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#company">company</a>().</p>
 <h3 class="fn"><a name="setCompanyPronunciation"></a>void QContact::setCompanyPronunciation ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
-<p>Sets the pronunciation of the contacts company name to <i>str</i>.</p>
+<p>Sets the pronunciation of the contact's company name to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#companyPronunciation">companyPronunciation</a>().</p>
 <h3 class="fn"><a name="setDefaultEmail"></a>void QContact::setDefaultEmail ( const <a href="qstring.html">QString</a> &amp; <i>v</i> )</h3>
-<p>Sets the default email to <i>v</i> and adds it to the list.</p>
-<p>See also <a href="qcontact.html#defaultEmail">defaultEmail</a>().</p>
+<p>Sets the default email to <i>v</i>. If the given email address <i>v</i> is not already in the contact's list of email addresses, this function adds it.</p>
+<p>See also <a href="qcontact.html#defaultEmail">defaultEmail</a>() and <a href="qcontact.html#setEmailList">setEmailList</a>().</p>
 <h3 class="fn"><a name="setDefaultPhoneNumber"></a>void QContact::setDefaultPhoneNumber ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
-<p>If the phone number <i>str</i> is a phone number for the contact will set it as the default phone number.</p>
+<p>If the contact has an existing phone number that matches <i>str</i>, it will be set as the default phone number.</p>
 <p>See also <a href="qcontact.html#defaultPhoneNumber">defaultPhoneNumber</a>().</p>
 <h3 class="fn"><a name="setDefaultPhoneNumber-2"></a>void QContact::setDefaultPhoneNumber ( <a href="qcontact.html#PhoneType-enum">PhoneType</a> <i>type</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>If the phone number of <i>type</i> is a phone number for the contact will set it as the default phone number.</p>
+<p>If the contact has an existing phone number of a type that matches <i>type</i>, it will be set as the default phone number.</p>
 <h3 class="fn"><a name="setDepartment"></a>void QContact::setDepartment ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the department for contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#department">department</a>().</p>
 <h3 class="fn"><a name="setEmailList"></a>void QContact::setEmailList ( const <a href="qstringlist.html">QStringList</a> &amp; <i>emails</i> )</h3>
 <p>Sets the email list to <i>emails</i></p>
-<p>See also <a href="qcontact.html#emailList">emailList</a>().</p>
+<p>See also <a href="qcontact.html#emailList">emailList</a>() and <a href="qcontact.html#defaultEmail">defaultEmail</a>().</p>
 <h3 class="fn"><a name="setFirstName"></a>void QContact::setFirstName ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the first name of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#firstName">firstName</a>().</p>
 <h3 class="fn"><a name="setFirstNamePronunciation"></a>void QContact::setFirstNamePronunciation ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
-<p>Sets the pronunciation of the contacts first name to <i>str</i>.</p>
+<p>Sets the pronunciation of the contact's first name to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#firstNamePronunciation">firstNamePronunciation</a>().</p>
 <h3 class="fn"><a name="setGender"></a>void QContact::setGender ( <a href="qcontact.html#GenderType-enum">GenderType</a> <i>g</i> )</h3>
-<p>Sets the persons gender to the enum value specified in <i>g</i>.</p>
+<p>Sets the contact's gender to the enum value specified in <i>g</i>.</p>
 <p>See also <a href="qcontact.html#gender">gender</a>().</p>
 <h3 class="fn"><a name="setHomeCity"></a>void QContact::setHomeCity ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the home city of the contact to <i>str</i>.</p>
@@ -537,15 +526,14 @@
 <p>See also <a href="qcontact.html#jobTitle">jobTitle</a>().</p>
 <h3 class="fn"><a name="setLabelFormat"></a>void QContact::setLabelFormat ( const <a href="qstring.html">QString</a> &amp; <i>f</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the format for contact labels to that described by <i>f</i>.</p>
-<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be _ for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
-<p>For example:</p>
-<p>LastName , _ FirstName | LastName | FirstName | Company</p>
-<p>See also <a href="qcontact.html#labelFormat">labelFormat</a>().</p>
+<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be _ for a space, an identifier as from identifierKey(), or any string. The format used for <a href="qcontact.html#label">label</a>() will be the first pattern for which all fields specified are non null for the contact.</p>
+<p>For example: <tt>LastName , _ FirstName | LastName | FirstName | Company</tt></p>
+<p>See also <a href="qcontact.html#labelFormat">labelFormat</a>(), <a href="qcontact.html#labelFields">labelFields</a>(), and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="setLastName"></a>void QContact::setLastName ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the last name of the contact to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#lastName">lastName</a>().</p>
 <h3 class="fn"><a name="setLastNamePronunciation"></a>void QContact::setLastNamePronunciation ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
-<p>Sets the pronunciation of the contacts last name to <i>str</i>.</p>
+<p>Sets the pronunciation of the contact's last name to <i>str</i>.</p>
 <p>See also <a href="qcontact.html#lastNamePronunciation">lastNamePronunciation</a>().</p>
 <h3 class="fn"><a name="setManager"></a>void QContact::setManager ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the manager of the contact to <i>str</i>.</p>
@@ -568,7 +556,7 @@
 <p>See also <a href="qcontact.html#office">office</a>().</p>
 <h3 class="fn"><a name="setPhoneNumber"></a>void QContact::setPhoneNumber ( <a href="qcontact.html#PhoneType-enum">PhoneType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the phone number of type <i>type</i> to <i>str</i>.</p>
-<p>If there is no default phone number set will set this number as the default phone number.</p>
+<p>If there is no default phone number set, this will set the given number as the default phone number.</p>
 <p>See also <a href="qcontact.html#phoneNumber">phoneNumber</a>().</p>
 <h3 class="fn"><a name="setPortraitFile"></a>void QContact::setPortraitFile ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the path for the portrait file of the contact to <i>str</i>.</p>
@@ -589,26 +577,22 @@
 <p>Returns the suffix of the contact.</p>
 <p>See also <a href="qcontact.html#setSuffix">setSuffix</a>().</p>
 <h3 class="fn"><a name="thumbnail"></a><a href="qpixmap.html">QPixmap</a> QContact::thumbnail () const</h3>
-<p>Returns the pixmap portrait of the contact, scaled down the thumbnail size. If there is no portrait set for the contact will return a default pixmap</p>
+<p>Returns the portrait of the contact, scaled down to the thumbnail size.</p>
+<p>If there is no portrait set for the contact, this will return a default pixmap based on the contact's fields.</p>
 <p>See also <a href="qcontact.html#thumbnailSize">thumbnailSize</a>().</p>
 <h3 class="fn"><a name="thumbnailSize"></a><a href="qsize.html">QSize</a> QContact::thumbnailSize ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the size of the pixmap thumbnail of a contact's portrait.</p>
-<p>See also <a href="qcontact.html#thumbnail">thumbnail</a>().</p>
+<p>Returns the size of the thumbnail pixmap of a contact's portrait.</p>
+<p>See also <a href="qcontact.html#thumbnail">thumbnail</a>() and <a href="qcontact.html#portraitSize">portraitSize</a>().</p>
 <h3 class="fn"><a name="toRichText"></a><a href="qstring.html">QString</a> QContact::toRichText () const</h3>
 <p>Returns a rich text formatted <a href="qstring.html">QString</a> of the <a href="qcontact.html">QContact</a>.</p>
-<h3 class="fn"><a name="uidRef"></a><a href="quniqueid.html">QUniqueId</a> &amp; QContact::uidRef ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>Reimplemented from <a href="qpimrecord.html#uidRef">QPimRecord</a>.</p>
-<h3 class="fn"><a name="uidRef-2"></a>const <a href="quniqueid.html">QUniqueId</a> &amp; QContact::uidRef () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Reimplemented from <a href="qpimrecord.html#uidRef-2">QPimRecord</a>.</p>
 <h3 class="fn"><a name="writeVCard"></a>bool QContact::writeVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qlist.html">QList</a>&lt;QContact&gt; &amp; <i>contacts</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Write the list of <i>contacts</i> as vCard objects to the file specified by <i>filename</i>.</p>
-<p>Returns true on success, false on fail.</p>
+<p>Returns true on success, false on failure.</p>
 <p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
 <h3 class="fn"><a name="writeVCard-2"></a>bool QContact::writeVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the contact as a vCard object to the file specified by <i>filename</i>.</p>
-<p>Returns true on success, false on fail.</p>
+<p>Returns true on success, false on failure.</p>
 <p>See also <a href="qcontact.html#readVCard">readVCard</a>().</p>
 <h3 class="fn"><a name="writeVCard-3"></a>void QContact::writeVCard ( <a href="qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -623,11 +607,11 @@
 <h3 class="fn"><a name="operator-eq"></a>QContact &amp; QContact::operator= ( const QContact &amp; <i>contact</i> )</h3>
 <p>Makes a copy of <i>contact</i> and assigns it to this <a href="qcontact.html">QContact</a>.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QContact::operator== ( const QContact &amp; <i>other</i> ) const</h3>
-<p>Compares to <i>other</i> contact and returns true if it is equivalent. Otherwise returns false</p>
+<p>Compares to <i>other</i> contact and returns true if it is equivalent. Otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

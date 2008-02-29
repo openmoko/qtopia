@@ -1,17 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QObexSocket Class Reference</title>
+  <title>QObexSocket Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QObexSocket Class Reference</h1>
 <p>The QObexSocket class is an abstract base class for OBEX sockets. <a href="#details">More...</a></p>
-<pre>#include &lt;QObexSocket&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QObexSocket&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<p>Inherited by <a href="qbluetoothobexsocket.html">QBluetoothObexSocket</a> and <a href="qirobexsocket.html">QIrObexSocket</a>.</p>
 <ul>
 <li><a href="qobexsocket-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -24,7 +27,7 @@
 <li><div class="fn"/>virtual bool <b><a href="qobexsocket.html#connect">connect</a></b> () = 0</li>
 <li><div class="fn"/>void * <b><a href="qobexsocket.html#handle">handle</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qobexsocket.html#isConnected">isConnected</a></b> () const</li>
-<li><div class="fn"/>void <b><a href="qobexsocket.html#setHandle">setHandle</a></b> ( void * <i>handle</i> )</li>
+<li><div class="fn"/>virtual int <b><a href="qobexsocket.html#socketDescriptor">socketDescriptor</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -44,30 +47,33 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QObexSocket class is an abstract base class for OBEX sockets.</p>
-<p>This class provides a common base class for OBEX sockets. Subclasses such as QBluetoothObexSocket and QIrObexSocket provide implementations specific to their own types of transport.</p>
-<p>See also <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a>.</p>
+<p>This class provides a common base class for OBEX sockets. It is used to implement different types of transport connections for the OBEX protocol. For example, <a href="qbluetoothobexsocket.html">QBluetoothObexSocket</a> and <a href="qirobexsocket.html">QIrObexSocket</a> subclass QObexSocket to provide OBEX connections over Bluetooth and IrDA, respectively.</p>
+<p>QObexSocket is abstract and cannot be instantiated, but it is common to use the interface it defines to provide transport-independent OBEX features. For example, <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> are constructed using QObexSocket pointers, allowing them to be used with various types of transport connections (such as Bluetooth or IrDA).</p>
+<p>Call <a href="qobexsocket.html#connect">connect</a>() to connect the transport connection. You can use <a href="qobexsocket.html#isConnected">isConnected</a>() to check whether the socket is connected, and <a href="qobexsocket.html#socketDescriptor">socketDescriptor</a>() to get the socket's file descriptor.</p>
+<p>See also <a href="qbluetoothobexsocket.html">QBluetoothObexSocket</a> and <a href="qirobexsocket.html">QIrObexSocket</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QObexSocket"></a>QObexSocket::QObexSocket ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qobexsocket.html">QObexSocket</a> with parent object <i>parent</i>.</p>
+<p>Constructs an OBEX socket with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QObexSocket"></a>QObexSocket::~QObexSocket ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destroys a <a href="qobexsocket.html">QObexSocket</a>.</p>
+<p>Destroys the socket.</p>
 <h3 class="fn"><a name="close"></a>void QObexSocket::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Closes the socket and disconnects the transport connection. Returns true if the socket was able to be closed.</p>
+<p>Closes the socket and disconnects the transport connection.</p>
 <h3 class="fn"><a name="connect"></a>bool QObexSocket::connect ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Connects the underlying transport connection. Returns true if the socket was connected successfully.</p>
+<p>See also <a href="qobexsocket.html#isConnected">isConnected</a>().</p>
 <h3 class="fn"><a name="handle"></a>void * QObexSocket::handle ()</h3>
-<p>Returns the underlying implementation handle.</p>
-<p>See also <a href="qobexsocket.html#setHandle">setHandle</a>().</p>
+<p>Returns the implementation-dependent handle.</p>
 <h3 class="fn"><a name="isConnected"></a>bool QObexSocket::isConnected () const</h3>
-<p>Returns whether the transport for this socket is connected.</p>
-<h3 class="fn"><a name="setHandle"></a>void QObexSocket::setHandle ( void * <i>handle</i> )</h3>
-<p>Sets the underlying implementation handle to <i>handle</i>.</p>
-<p>See also <a href="qobexsocket.html#handle">handle</a>().</p>
+<p>Returns whether the socket is connected.</p>
+<p>See also <a href="qobexsocket.html#connect">connect</a>().</p>
+<h3 class="fn"><a name="socketDescriptor"></a>int QObexSocket::socketDescriptor () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the socket descriptor associated with this OBEX Socket.</p>
+<p><b>Note:</b> This implies that transports which are not socket based cannot be used with this class.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

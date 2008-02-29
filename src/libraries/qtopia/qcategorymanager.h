@@ -94,6 +94,7 @@ public:
 
     QString add( const QString &trLabel, const QString &icon=QString(), bool forceGlobal=false );
     bool addCategory( const QString &id, const QString &trLabel, const QString &icon=QString(), bool forceGlobal=false, bool isSystem=false );
+    bool ensureSystemCategory( const QString &id, const QString &trLabel, const QString &icon=QString(), bool forceGlobal=false );
 
     bool remove( const QString &id );
     bool setLabel( const QString &id, const QString &trLabel );

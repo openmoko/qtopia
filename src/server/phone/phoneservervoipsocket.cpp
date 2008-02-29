@@ -142,6 +142,8 @@ PhoneServerVoIPCallProvider::PhoneServerVoIPCallProvider( PhoneServerVoIPService
 {
     _service = service;
     setCallTypes( QStringList( "VoIP" ) );
+    connect( service, SIGNAL(handlerReceived(QStringList)),
+             this, SLOT(received(QStringList)) );
 }
 
 PhoneServerVoIPCallProvider::PhoneServerVoIPCallProvider::~PhoneServerVoIPCallProvider()

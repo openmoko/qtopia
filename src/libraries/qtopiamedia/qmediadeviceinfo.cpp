@@ -21,14 +21,23 @@
 
 #include "qmediadeviceinfo.h"
 
-struct QMediaDeviceInfo::QMediaDeviceInfoPrivate
+// {{{ QMediaDeviceInfoPrivate
+class QMediaDeviceInfoPrivate
 {
+public:
     QString id;
     QString name;
     bool    isReadable;
     bool    isWritable;
 };
+// }}}
 
+/*!
+    \class QMediaDeviceInfo
+    \internal
+*/
+
+// {{{ QMediaDeviceInfo
 QMediaDeviceInfo::QMediaDeviceInfo():
     d(new QMediaDeviceInfoPrivate)
 {
@@ -77,6 +86,10 @@ bool QMediaDeviceInfo::isWritable() const
 }
 
 // {{{ Serialization
+/*!
+    \fn void QMediaDeviceInfo::serialize(Stream &stream) const
+    \internal
+*/
 template <typename Stream>
 void QMediaDeviceInfo::serialize(Stream &stream) const
 {
@@ -86,6 +99,10 @@ void QMediaDeviceInfo::serialize(Stream &stream) const
     stream << d->isWritable;
 }
 
+/*!
+    \fn void QMediaDeviceInfo::deserialize(Stream &stream)
+    \internal
+*/
 template <typename Stream>
 void QMediaDeviceInfo::deserialize(Stream &stream)
 {
@@ -94,6 +111,7 @@ void QMediaDeviceInfo::deserialize(Stream &stream)
     stream >> d->isReadable;
     stream >> d->isWritable;
 }
+// }}}
 // }}}
 
 Q_IMPLEMENT_USER_METATYPE(QMediaDeviceInfo);

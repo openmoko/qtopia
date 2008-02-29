@@ -40,6 +40,22 @@
     AT command stream at any one time.  Because of this, Qtopia Phone
     multiplexes multiple process' requests through the phone server,
     which is the only process that may access the actual hardware.
+
+    The Qtopia phone server is responsible for starting all telephony
+    services, including those for GSM, VoIP, and other network types.
+
+    At start up, the Qtopia phone server sends a \c{start()} message to
+    all applications that are registered as implementing the
+    \l{TelephonyService}{Telephony} service.  This is the usual method
+    for starting VoIP and third-party telephony services.
+
+    If Qtopia is configured with the \c{QTOPIA_MODEM} flag, it will also
+    start the default built-in AT command handler for the \c modem service using
+    QModemService::createVendorSpecific().  If Qtopia is not configured
+    with this flag, then the \c modem service is either not required, or will
+    be provided by a third-party telephony service implementation.
+
+    \sa QTelephonyService, QModemService
 */
 
 static void executeTelephony( const QString& message )

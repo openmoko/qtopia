@@ -29,11 +29,21 @@
 
 /*!
     \class QContentPlugin
+    \mainclass
+    \brief The QContentPlugin class provide an interface for the Qtopia Document System to discover detailed information about a file.
 
-    The QContentPlugin class provides an interface to discover the attributes of a file that should
-    be assigned to a new QContent.
+    Content plug-ins are used by the document system to read meta-data from files that may be used to index the content or better
+    describe it to the user.  When a new file is first discovered by the document system its extension is used to identify
+    possible plug-ins that may be able to identify the file. If any such plug-in is found the plug-in's installContent() method
+    is called with the file name and the destination QContent as arguments.  The document system will keep trying potential
+    content plug-ins until one is found that identifies itself as having successfully processed the file by returning true.
+
+    The content plug-ins are also invoked when a content record is found to be out of date, but in this case the updateContent()
+    method of the plug-in is called.  A content record is determined to be out of date when the backing file's last modified date
+    is more recent than the content records last update date.
 
   \ingroup content
+  \ingroup plugins
 */
 
 /*!
@@ -52,63 +62,22 @@ QContentPlugin::~QContentPlugin()
 /*!
     \fn QContentPlugin::installContent( const QString &fileName, QContent *content )
 
-    Populates \a content with data from the file with the file name \a fileName.  Returns true on success.
+    Populates \a content with data from the file with the file name \a fileName.  Returns true if the content
+    plug-in successfully populated the QContent.
 
     Installation is only performed when the content is first identified by the content system, if the file changes
-    after installation updateContent() will be called to ensure the content data is up to date.
+    after installation updateContent() will be called to ensure the content data is up to date; otherwise returns
+    false
 */
 
 /*!
     Refreshes the content data of \a content following a change to the file it references.
 
-    Returns true if the content data was out of date, false otherwise.
+    Returns true if the content data has been ensured to be up to date; otherwise returns false.
 */
 bool QContentPlugin::updateContent( QContent *content )
 {
     Q_UNUSED( content );
-
-    return false;
-}
-
-/*!
-    \class QContentFactory
-
-    Creates QContentHandlers.
-
-  \ingroup content
-*/
-
-Q_GLOBAL_STATIC( ContentPluginManager, pluginManager );
-
-/*!
-    Populates \a content with data from the file with the file name \a fileName if an appropriate plug-in exists
-    to handle the file.  Returns true if a plug-in is found to extract the content data.
-
-    Installation is only performed when the content is first identified by the content system, if the file changes
-    after installation updateContent() will be called to ensure the content data is up to date.
-*/
-bool QContentFactory::installContent( const QString &fileName, QContent *content )
-{
-    QList< QContentPlugin * > plugins = pluginManager()->findPlugins( fileName );
-
-    foreach( QContentPlugin *p, plugins )
-        if( p->installContent( fileName, content ) )
-            return true;
-
-    return false;
-}
-
-/*!
-    Refreshes the content data of \a content following a change to the file it references if an appropriate plug-in exists
-    to handle the file.  Returns true if a plug-in is found to update the content data, and the data is out of date.
-*/
-bool QContentFactory::updateContent( QContent *content )
-{
-    QList< QContentPlugin * > plugins = pluginManager()->findPlugins( content->file() );
-
-    foreach( QContentPlugin *p, plugins )
-        if( p->updateContent( content ) )
-            return true;
 
     return false;
 }

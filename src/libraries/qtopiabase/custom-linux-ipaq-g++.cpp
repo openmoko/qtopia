@@ -112,28 +112,3 @@ QTOPIABASE_EXPORT void QPowerStatusManager::getStatus()
     }
 }
 
-typedef struct KeyOverride {
-    ushort scan_code;
-    QWSServer::KeyMap map;
-};
-
-static const KeyOverride deviceKeys[] = {
-   { 0x79,   {   Qt::Key_F34,    0xffff, 0xffff, 0xffff  } }, // power
-#if defined(QT_KEYPAD_MODE)
-   { 0x7a,   {   Qt::Key_Call,      0xffff, 0xffff, 0xffff  } },
-   { 0x7b,   {   Qt::Key_Context1,  0xffff, 0xffff, 0xffff  } },
-   { 0x7c,   {   Qt::Key_Back,      0xffff, 0xffff, 0xffff  } },
-   { 0x7d,   {   Qt::Key_Hangup,    0xffff, 0xffff, 0xffff  } },
-#else
-   { 0x7a,   {   Qt::Key_F9,        0xffff, 0xffff, 0xffff  } },
-   { 0x7b,   {   Qt::Key_F10,       0xffff, 0xffff, 0xffff  } },
-   { 0x7c,   {   Qt::Key_F11,       0xffff, 0xffff, 0xffff  } },
-   { 0x7d,   {   Qt::Key_F12,       0xffff, 0xffff, 0xffff  } },
-#endif
-   { 0,      {   0,                 0xffff, 0xffff, 0xffff  } }
-};
-
-QTOPIABASE_EXPORT const KeyOverride* qtopia_override_keys()
-{
-    return deviceKeys;
-}

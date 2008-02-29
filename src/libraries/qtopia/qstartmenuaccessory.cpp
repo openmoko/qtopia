@@ -44,11 +44,14 @@ struct QStartMenuAccessoryData {
 /*!
   \internal
   \class QStartMenuAccessory
+  \mainclass
   \brief The QStartMenuAccessory class allows applet plugins to add themselves to
   the Q menu in Qtopia PDA edition.
 
   Accessories can add a single menu entry or add a sub-menu and are particularly useful
   when using real estate on the taskbar is wasteful.
+
+  This class is obsolete. It will be removed in Qtopia 4.3.
 */
 
 /*!

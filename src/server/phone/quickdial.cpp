@@ -203,6 +203,27 @@ void QuickDialModel::populate()
 
 //---------------------------------------------------------------------------
 
+/*!
+  \class PhoneQuickDialerScreen
+  \brief The PhoneQuickDialerScreen class implements a keypad based dialer UI.
+  \ingroup QtopiaServer::PhoneUI
+
+  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+
+  \sa QAbstractServerInterface, QAbstractDialerScreen
+  */
+
+
+/*!
+  \fn void PhoneQuickDialerScreen::numberSelected(const QString&, const QUniqueId&)
+
+  \internal
+*/
+
+/*!
+  Constructs a new PhoneQuickDialerScreen object with the specified
+  \a parent and widget flags \a fl.
+*/
 PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     : QAbstractDialerScreen( parent, fl ), mSpeedDial( false )
 {
@@ -252,10 +273,14 @@ PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     // Set the dialog to the maximum possible size.
 }
 
+/*!
+  Destroys the PhoneQuickDialerScreen object.
+  */
 PhoneQuickDialerScreen::~PhoneQuickDialerScreen()
 {
 }
 
+/*! \internal */
 void PhoneQuickDialerScreen::showEvent( QShowEvent *e )
 {
     QAbstractDialerScreen::showEvent( e );
@@ -268,11 +293,13 @@ void PhoneQuickDialerScreen::showEvent( QShowEvent *e )
     }
 }
 
+/*! \internal */
 void PhoneQuickDialerScreen::selectedNumber( const QString &num )
 {
     selectedNumber( num, QUniqueId() );
 }
 
+/*! \internal */
 void PhoneQuickDialerScreen::selectedNumber( const QString &num, const QUniqueId &cnt )
 {
     if( num.isEmpty() )
@@ -293,6 +320,7 @@ void PhoneQuickDialerScreen::selectedNumber( const QString &num, const QUniqueId
     emit numberSelected( mNumber, cnt );
 }
 
+/*! \internal */
 bool PhoneQuickDialerScreen::eventFilter( QObject *o, QEvent *e )
 {
     QEvent::Type t = e->type();
@@ -377,6 +405,7 @@ bool PhoneQuickDialerScreen::eventFilter( QObject *o, QEvent *e )
     return false;
 }
 
+/*! \reimp */
 void PhoneQuickDialerScreen::reset()
 {
     mNumberDS->setNumber("");
@@ -384,6 +413,7 @@ void PhoneQuickDialerScreen::reset()
     mNumber = QString();
 }
 
+/*! \internal */
 void PhoneQuickDialerScreen::rejectEmpty( const QString &t )
 {
     if( t.isEmpty() && !isVisible() )
@@ -399,6 +429,7 @@ void PhoneQuickDialerScreen::rejectEmpty( const QString &t )
     }
 }
 
+/*! \internal */
 void PhoneQuickDialerScreen::appendDigits( const QString &digits, bool refresh,
                               bool speedDial )
 {
@@ -412,6 +443,7 @@ void PhoneQuickDialerScreen::appendDigits( const QString &digits, bool refresh,
     }
 }
 
+/*! \reimp */
 QString PhoneQuickDialerScreen::digits() const
 {
     if( mNumber.isEmpty() )
@@ -419,12 +451,14 @@ QString PhoneQuickDialerScreen::digits() const
     return mNumber;
 }
 
+/*! \reimp */
 void PhoneQuickDialerScreen::setDigits(const QString &digits)
 {
     reset();
     appendDigits(digits, false, false);
 }
 
+/*! \reimp */
 void PhoneQuickDialerScreen::appendDigits(const QString &digits)
 {
     appendDigits(digits, false, true);

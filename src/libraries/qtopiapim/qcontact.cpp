@@ -116,12 +116,18 @@ QString emailSeparator() { return " "; }
 
 /*!
   \class QContact
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QContact class holds the data of an address book entry.
 
-  This data includes information the name of the person, contact
-  information, and business information such as department and job title.
+  This data includes information the name of the contact, phone numbers
+  and email addresses, postal address information, and business
+  information such as department and job title.
+
+  It also allows a portrait picture (and corresponding thumbnail) to
+  be specified, provides functions for matching a contact against a
+  regular expression, and converting to and from vCard format.
 
   \sa QContactAddress
 */
@@ -394,16 +400,16 @@ QString QContact::displayAddress( const QString &street,
 
 /*!
   \fn QString QContact::displayHomeAddress() const
-  Returns the formatted address of the contacts home address.
+  Returns a formatted string with the contact's home address.
 */
 
 /*!
   \fn QString QContact::displayBusinessAddress() const
-  Returns the formatted address of the contacts business address.
+  Returns a formatted string with the contact's business address.
 */
 
 /*!
-  Returns the formated address of the contact of type \a location.
+  Returns a formatted string with the contact's address of type \a location.
 */
 QString QContact::displayAddress(Location location) const
 {
@@ -439,7 +445,7 @@ QList<QContact::PhoneType> QContact::phoneTypes()
 }
 
 /*!
-   Returns an icon representing the phone number \a type
+   Returns an icon representing the phone number \a type.
    Returns a null icon if no icon is available for the
    phone number type.
 
@@ -454,9 +460,9 @@ QIcon QContact::phoneIcon(PhoneType type)
 }
 
 /*!
-  Returns the resource location for an icon representing the
-  phone number \a type.  Returns a null string if no icon
-  is available for the phone number type.
+  Returns the resource location (e.g. \c ":icon/addressbook/homephone")
+  for an icon representing the phone number \a type.  Returns a null
+  string if no icon is available for the phone number \a type.
 
    \sa phoneIcon()
 */
@@ -484,7 +490,7 @@ QString QContact::phoneIconResource(PhoneType type)
 }
 
 /*!
-  Returns the list of phone numbers of the contact.
+  Returns the contact's list of phone numbers and their types.
 */
 QMap<QContact::PhoneType, QString> QContact::phoneNumbers() const
 {
@@ -492,7 +498,7 @@ QMap<QContact::PhoneType, QString> QContact::phoneNumbers() const
 }
 
 /*!
-  Returns the list of addresses of the contact.
+  Returns the contact's list of addresses with their types.
 */
 QMap<QContact::Location, QContactAddress> QContact::addresses() const
 {
@@ -501,7 +507,7 @@ QMap<QContact::Location, QContactAddress> QContact::addresses() const
 
 /*!
   Return the default phone number of the contact.
-  If no default phone number is set returns the null string.
+  If no default phone number is set, this returns the null string.
 */
 QString QContact::defaultPhoneNumber() const
 {
@@ -512,8 +518,8 @@ QString QContact::defaultPhoneNumber() const
 }
 
 /*!
-  If the phone number \a str is a phone number for the contact
-  will set it as the default phone number.
+  If the contact has an existing phone number that matches \a str,
+  it will be set as the default phone number.
 */
 void QContact::setDefaultPhoneNumber(const QString &str)
 {
@@ -528,8 +534,8 @@ void QContact::setDefaultPhoneNumber(const QString &str)
 }
 
 /*!
-  If the phone number of \a type is a phone number for the contact
-  will set it as the default phone number.
+  If the contact has an existing phone number of a type that matches \a type,
+  it will be set as the default phone number.
 */
 void QContact::setDefaultPhoneNumber(PhoneType type)
 {
@@ -540,8 +546,8 @@ void QContact::setDefaultPhoneNumber(PhoneType type)
 /*!
   Sets the phone number of type \a type to \a str.
 
-  If there is no default phone number set will set this
-  number as the default phone number.
+  If there is no default phone number set, this will set
+  the given number as the default phone number.
 */
 void QContact::setPhoneNumber(PhoneType type, const QString &str)
 {
@@ -562,7 +568,7 @@ void QContact::setPhoneNumber(PhoneType type, const QString &str)
 }
 
 /*!
-  Sets the persons gender to the enum value specified in \a g.
+  Sets the contact's gender to the enum value specified in \a g.
 */
 void QContact::setGender( GenderType g )
 {
@@ -586,7 +592,7 @@ QContact::GenderType QContact::gender() const
 }
 
 /*!
-  Sets the person's birthday to \a date.
+  Sets the contact's birthday to \a date.
 */
 void QContact::setBirthday( const QDate &date )
 {
@@ -594,8 +600,9 @@ void QContact::setBirthday( const QDate &date )
 }
 
 /*!
-  Return the person's birthday. QDate will be null if there
-  is birthday has not been set.
+  Return the contact's birthday.
+  If this has not been set, the returned date
+  will be null.
 */
 QDate QContact::birthday() const
 {
@@ -603,7 +610,7 @@ QDate QContact::birthday() const
 }
 
 /*!
-  Sets the person's anniversary to \a date.
+  Sets the contact's anniversary to \a date.
 */
 void QContact::setAnniversary( const QDate &date )
 {
@@ -611,8 +618,9 @@ void QContact::setAnniversary( const QDate &date )
 }
 
 /*!
-  Return the person's anniversary date.  QDate will be null if there
-  is  anniversary has not been set.
+  Return the contact's anniversary date.
+  If this has not been set, the returned date
+  will be null.
 */
 QDate QContact::anniversary() const
 {
@@ -677,12 +685,13 @@ void QContact::clearEmailList()
 
   The format is a set of pattern separated by '|'s.  Each pattern is
   a set of space separated tokens.  A token can either be _ for a space,
-  an identifier as from identifierKey(), or any string.  The format for label
-  will the first pattern for which all fields specified are non null for the contact.
+  an identifier as from identifierKey(), or any string.  The format used for label()
+  will be the first pattern for which all fields specified are non null for the contact.
 
   For example:
+  \c {LastName , _ FirstName | LastName | FirstName | Company}
 
-  LastName , _ FirstName | LastName | FirstName | Company
+  \sa labelFormat(), labelFields(), label()
 */
 
 void QContact::setLabelFormat(const QString &f)
@@ -699,8 +708,9 @@ void QContact::setLabelFormat(const QString &f)
   will the first pattern for which all fields specified are non null for the contact.
 
   For example:
+  \c {LastName , _ FirstName | LastName | FirstName | Company}
 
-  LastName , _ FirstName | LastName | FirstName | Company
+  \sa setLabelFormat(), labelFields(), label()
 */
 QString QContact::labelFormat()
 {
@@ -710,6 +720,8 @@ QString QContact::labelFormat()
 /*!
   Returns the string identifiers suitable for describing the format for the contact
   label.
+
+  \sa labelFormat(), label()
 */
 QStringList QContact::labelFields()
 {
@@ -717,7 +729,11 @@ QStringList QContact::labelFields()
 }
 
 /*!
-  Returns a suitable display string for the contact.
+  Returns a suitable display string for the contact.  This is built up
+  by using fields of the contact and the format set for generating
+  the contact labels.
+
+  \sa labelFormat(), labelFields()
 */
 QString QContact::label() const
 {
@@ -726,6 +742,8 @@ QString QContact::label() const
 
 /*!
   Returns the phone number of \a type for the contact.
+  If the contact does not have a corresponding phone number,
+  this will return a null QString.
 */
 QString QContact::phoneNumber(PhoneType type) const
 {
@@ -735,7 +753,11 @@ QString QContact::phoneNumber(PhoneType type) const
 }
 
 /*!
-  Sets the contacts address for the \a location to \a address
+  Sets the contact's address for the given \a location to \a address.
+  If the address is empty, this will effectively remove that \c Location
+  type for this contact.
+
+  \sa address()
 */
 void QContact::setAddress(Location location, const QContactAddress &address)
 {
@@ -747,7 +769,9 @@ void QContact::setAddress(Location location, const QContactAddress &address)
 }
 
 /*!
-  Returns the contacts address for the specified \a location.
+  Returns the contact's address for the specified \a location.
+
+  \sa setAddress()
 */
 QContactAddress QContact::address(Location location) const
 {
@@ -759,6 +783,8 @@ QContactAddress QContact::address(Location location) const
 /*!
   Returns a list of email addresses belonging to the contact, including
   the default email address.
+
+  \sa defaultEmail()
 */
 QStringList QContact::emailList() const
 {
@@ -766,7 +792,11 @@ QStringList QContact::emailList() const
 }
 
 /*!
-  Sets the default email to \a v and adds it to the list.
+  Sets the default email to \a v.
+  If the given email address \a v is not already in the contact's
+  list of email addresses, this function adds it.
+
+  \sa defaultEmail(), setEmailList()
 */
 void QContact::setDefaultEmail( const QString &v )
 {
@@ -779,6 +809,7 @@ void QContact::setDefaultEmail( const QString &v )
 
 /*!
   Sets the email list to \a emails
+  \sa emailList(), defaultEmail()
 */
 void QContact::setEmailList( const QStringList &emails )
 {
@@ -797,8 +828,10 @@ void QContact::setEmailList( const QStringList &emails )
 }
 
 /*!
-  Returns the pixmap portrait of the contact, scaled down the thumbnail size.
-  If there is no portrait set for the contact will return a default pixmap
+  Returns the portrait of the contact, scaled down to the thumbnail size.
+
+  If there is no portrait set for the contact, this will return a default pixmap
+  based on the contact's fields.
 
   \sa thumbnailSize()
 */
@@ -853,9 +886,9 @@ QPixmap QContact::thumbnail() const
 }
 
 /*!
-  Returns the size of the pixmap thumbnail of a contact's portrait.
+  Returns the size of the thumbnail pixmap of a contact's portrait.
 
-  \sa thumbnail()
+  \sa thumbnail(), portraitSize()
 */
 QSize QContact::thumbnailSize()
 {
@@ -877,8 +910,9 @@ QSize QContact::thumbnailSize()
 }
 
 /*!
-  Returns the pixmap portrait of the contact.  If there is no portrait set for the contact
-  will return a default pixmap
+  Returns the portrait pixmap of the contact.
+  If there is no portrait set for the contact, this will return a default pixmap
+  based on the contact's fields.
 
   \sa portraitSize()
 */
@@ -920,9 +954,9 @@ QPixmap QContact::portrait() const
 }
 
 /*!
-  Returns the size of the pixmap portrait of a contact.
+  Returns the size of the portrait pixmap of a contact.
 
-  \sa portrait()
+  \sa portrait(), thumbnailSize()
 */
 QSize QContact::portraitSize()
 {
@@ -1418,7 +1452,7 @@ static QContact parseVObject( VObject *obj )
 
 /*!
   Compares to \a other contact and returns true if it is equivalent.
-  Otherwise returns false
+  Otherwise returns false.
 */
 bool QContact::operator==(const QContact &other) const
 {
@@ -1473,7 +1507,7 @@ bool QContact::operator!=(const QContact &other) const
    Write the list of \a contacts as vCard objects to the file
    specified by \a filename.
 
-   Returns true on success, false on fail.
+   Returns true on success, false on failure.
 
    \sa readVCard()
 */
@@ -1496,7 +1530,7 @@ bool QContact::writeVCard( const QString &filename, const QList<QContact> &conta
    Writes the contact as a vCard object to the file specified
    by \a filename.
 
-   Returns true on success, false on fail.
+   Returns true on success, false on failure.
 
    \sa readVCard()
 */
@@ -1543,8 +1577,10 @@ void QContact::writeVCard( QDataStream *stream ) const
 }
 
 /*!
-  Reads the file specified by \a filename as a list of vCards objects
-  and returns the list of near equivalent contacts.
+  Reads the file specified by \a filename as a list of vCard objects
+  and returns the list of contacts that correspond to the vCard objects.
+
+  Note:  the fields stored by QContact may not correspond exactly to the vCard data.
 
   \sa writeVCard()
 */
@@ -1561,7 +1597,9 @@ QList<QContact> QContact::readVCard( const QString &filename )
 
 /*!
   Reads the given vCard data in \a vcard, and returns the list of
-  near equivalent contacts.
+  corresponding contacts.
+
+  Note:  the fields stored by QContact may not correspond exactly to the vCard data.
 
   \sa writeVCard()
 */
@@ -1578,7 +1616,9 @@ QList<QContact> QContact::readVCard( const QByteArray &vcard )
 
 /*!
   Reads the given vCard data in \a vobject, and returns the list of
-  near equivalent contacts.
+  corresponding contacts.
+
+  Note:  the fields stored by QContact may not correspond exactly to the vCard data.
 
   \sa writeVCard()
 */
@@ -1604,7 +1644,7 @@ QList<QContact> QContact::readVCard( VObject* vobject )
 }
 
 /*!
-  Returns true if the part of contact matches \a regexp. Otherwise returns false.
+  Returns true if one of this contact's fields matches \a regexp. Otherwise returns false.
 */
 bool QContact::match( const QString &regexp ) const
 {
@@ -1612,7 +1652,7 @@ bool QContact::match( const QString &regexp ) const
 }
 
 /*!
-  Returns true if the part of contact matches \a r. Otherwise returns false.
+  Returns true if one of this contact's fields matches \a r. Otherwise returns false.
 */
 bool QContact::match( const QRegExp &r ) const
 {
@@ -1630,32 +1670,32 @@ bool QContact::match( const QRegExp &r ) const
 }
 
 /*!
-  \overload
+  \reimp
 */
 QUniqueId &QContact::uidRef() { return d->mUid; }
 
 /*!
-  \overload
+  \reimp
 */
 const QUniqueId &QContact::uidRef() const { return d->mUid; }
 
 /*!
-  \overload
+  \reimp
 */
 QList<QString> &QContact::categoriesRef() { return d->mCategories; }
 
 /*!
-  \overload
+  \reimp
 */
 const QList<QString> &QContact::categoriesRef() const { return d->mCategories; }
 
 /*!
-  \overload
+  \reimp
 */
 QMap<QString, QString> &QContact::customFieldsRef() { return d->customMap; }
 
 /*!
-  \overload
+  \reimp
 */
 const QMap<QString, QString> &QContact::customFieldsRef() const { return d->customMap; }
 
@@ -1664,10 +1704,14 @@ const QMap<QString, QString> &QContact::customFieldsRef() const { return d->cust
 */
 
 /*!
-  Changes the contacts portrait to the given pixmap \a p. The pixmap is saved to the contactimages
-  directory, and removes the file previously used as the contact's portrait.
-*/
+  Changes the contacts portrait to the given pixmap \a p. The pixmap is saved
+  to the contactimages directory in the Qtopia "addressbook" application
+  storage directory, and removes the file previously used as the contact's
+  portrait.  The corresponding filename will be set as the \c Portrait field of this contact.
 
+  Note: the previous image is removed immediately, but the database will not
+  be updated until \c QContactModel::updateContact is called.
+*/
 void QContact::changePortrait( const QPixmap &p )
 {
     //  Check for existing contact portraits, and delete them if necessary.
@@ -1881,15 +1925,14 @@ template <typename Stream> void QContact::serialize(Stream &s) const
 /*!
   \enum QContact::Location
 
-  Enumerates the types of addresses a contact can have.  For instance
-  Home mailing address.
+  Enumerates the types of addresses a contact can have.
 
   \value Home
-    Residential contact information
+    Residential contact address
   \value Business
-    Business contact information
+    Business contact address
   \value Other
-    Contact information that does not fit into other Location types
+    Contact address that does not fit into other Location types
 */
 
 
@@ -1946,30 +1989,30 @@ template <typename Stream> void QContact::serialize(Stream &s) const
 */
 
 /*! \fn void QContact::setFirstNamePronunciation( const QString &str )
-  Sets the pronunciation of the contacts first name to \a str.
+  Sets the pronunciation of the contact's first name to \a str.
 */
 
 /*!
   \fn QString QContact::firstNamePronunciation() const
-  Returns the pronunciation of the contacts first name.
+  Returns the pronunciation of the contact's first name.
 */
 
 /*! \fn void QContact::setLastNamePronunciation( const QString &str )
-  Sets the pronunciation of the contacts last name to \a str.
+  Sets the pronunciation of the contact's last name to \a str.
 */
 
 /*!
   \fn QString QContact::lastNamePronunciation() const
-  Returns the pronunciation of the contacts last name.
+  Returns the pronunciation of the contact's last name.
 */
 
 /*! \fn void QContact::setCompanyPronunciation( const QString &str )
-  Sets the pronunciation of the contacts company name to \a str.
+  Sets the pronunciation of the contact's company name to \a str.
 */
 
 /*!
   \fn QString QContact::companyPronunciation() const
-  Returns the pronunciation of the contacts company name.
+  Returns the pronunciation of the contact's company name.
 */
 
 /*! \fn void QContact::setSuffix( const QString &str )
@@ -2145,7 +2188,7 @@ void QContact::setBusinessCountry( const QString &str )
 */
 
 /*! \fn QString QContact::nameTitle() const
-  Returns the title of the contact.
+  Returns the title of the contact (e.g. Dr., Prof.)
 */
 
 /*! \fn QString QContact::firstName() const
@@ -2286,6 +2329,9 @@ void QContact::setBusinessCountry( const QString &str )
 
 /*! \fn QString QContact::portraitFile() const
   Returns the path for the portrait file of the contact.
+  This is either a resource file path (e.g. \c ":icon/happyface") or
+  the name of a file that is stored in the "addressbook/contactimages"
+  directory in the Qtopia application data storage directory.
 */
 
 /*! \fn QString QContact::notes() const
@@ -2294,6 +2340,7 @@ void QContact::setBusinessCountry( const QString &str )
 
 /*!
    \class QContactAddress
+  \mainclass
    \module qpepim
    \ingroup pim
    \brief The QContactAddress class contains an address of a QContact.

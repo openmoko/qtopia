@@ -135,5 +135,5 @@ void QtopiaPowerManagerService::setConstraint( int constraint, QString app )
 {
     QtopiaPowerConstraintManager *man = QtopiaPowerConstraintManager::instance();
     if ( man )
-        man->setConstraint( constraint, app );
+        man->setConstraint( (QtopiaApplication::PowerConstraint) constraint, app );
 }

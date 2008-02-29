@@ -33,6 +33,29 @@
 #include <qsoftmenubar.h>
 #endif
 
+
+/*!
+  \class IPPage
+  \brief The IPPage class provides the user interface for IP configurations.
+  \mainclass
+
+  \internal
+
+  The IPPage widget is exclusively used by the Qtopia network plug-ins. It 
+  allows the user to edit the following IP details:
+
+  \list
+    \o IP address
+    \o 1st DNS server
+    \o 2nd DNS server
+    \o broadcast address
+    \o subnet mask
+    \o gateway address
+  \endlist
+  
+  This is not a public class.
+*/
+
 IPPage::IPPage( const QtopiaNetworkProperties& prop, QWidget* parent, Qt::WFlags flags)
     : QWidget(parent, flags)
 {

@@ -101,8 +101,11 @@ void QImageDocumentSelectorPrivate::init()
              thumbnail_view, SLOT(repaintThumbnail(const ThumbnailRequest&)) );
     connect( thumbnail_view, SIGNAL(selected()), this, SLOT(emitSelected()) );
     thumbnail_view->setViewMode( QListView::IconMode );
-    thumbnail_view->setIconSize( QSize( 65, 65 ) );
-    thumbnail_view->setSpacing( 4 );
+    thumbnail_view->setIconSize( QSize( 64, 64 ) );
+    thumbnail_view->setSpacing( 2 );
+    thumbnail_view->setLayoutMode( QListView::Batched );
+    thumbnail_view->setBatchSize( 20 );
+    thumbnail_view->setUniformItemSizes( true );
 
     // Construct thumbnail delegate
     ThumbnailDelegate *delegate = new ThumbnailDelegate( repository, this );

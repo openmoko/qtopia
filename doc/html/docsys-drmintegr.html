@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Document System: DRM Integration</title>
+  <title>Document System: DRM Integration</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document System: DRM Integration<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document System: DRM Integration<br /><span class="subtitle"></span>
+</h1>
 <ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#rendering-drm-content">Rendering DRM Content</a></li>
 <li><a href="#downloading-and-receiving-drm-files">Downloading and Receiving DRM Files</a></li>
@@ -37,9 +40,9 @@
 <p>Received DRM files may be content files, or rights objects or triggers. DRM content files is saved to the file system and registered with the document system like any other content. The preferred method of saving content is to construct a new <a href="qcontent.html">QContent</a> and assign it the name and type of the received file and then write the file to the <a href="qcontent.html">QContent</a> using either the <a href="qcontent.html#save">QContent::save</a>() or by opening a write only <a href="qiodevice.html">QIODevice</a> using <a href="qcontent.html#open">QContent::open</a>() and writing to it. If the IO device is used it is important to commit the <a href="qcontent.html">QContent</a> after closing the IO device to ensure the <a href="qcontent.html">QContent</a> is saved.</p>
 <p>If the file is rights object or trigger it shouldn't be saved to the file system, instead a <a href="datasharing.html">Qtopia Data Sharing (QDS)</a> service which handles the type of the file should be invoked. File types that should be handled in this manner can be identified by performing a search for a service with the request type that of the recieved file, no response type and the attribute 'handle', the 'drm' attribute may also optionally be used to only invoke services for DRM file types.</p>
 <p>The example below checks for a service which handle the mime type of received data and invokes it if found, if not found it saves the data and invokes the default application for handling it.</p>
-<pre>&nbsp;   void receive( const QString &amp;name, const QString &amp;type, const QByteArray &amp;data )
+<pre>    void receive( const QString &amp;name, const QString &amp;type, const QByteArray &amp;data )
     {
-        // First check if the mime type is handled by a QDS service.
+        <span class="comment">// First check if the mime type is handled by a QDS service.</span>
         QDSServices services( type, QString(), QStringList() &lt;&lt; &quot;handle&quot; );
 
         if( !services.isEmpty() )
@@ -50,14 +53,14 @@
 
             action.exec( QDSData( data, QMimeType( type ) ) );
         }
-        else // Not handled by a QDS service so save to the file system and open in the default application.
+        else <span class="comment">// Not handled by a QDS service so save to the file system and open in the default application.</span>
         {
             QContent content;
 
             content.setName( name );
             content.setType( type );
             content.save( data );
-            content.commit();  // Not really necessary in this case as save() will call commit() after writing the data.
+            content.commit();  <span class="comment">// Not really necessary in this case as save() will call commit() after writing the data.</span>
             content.execute();
         }
     }</pre>
@@ -70,8 +73,8 @@
 <p>Under OMA DRM Version 1.0 devices which only comply with <i>Forward Lock</i> provisions can still be said to be standards compliant - these are the only provisions with the MUST keyword, the others are MAY. <i>Forward Lock</i> does not use any rights object and thus is the simplest to implement.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

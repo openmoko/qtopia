@@ -52,6 +52,7 @@ private:
     void doShutdown();
 
 #ifndef QT_NO_SXE
+    bool isShutdown;
     static QString sxemonitorExecutable();
     QProcess *m_sxeMonitorProcess;
 #endif

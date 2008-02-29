@@ -37,13 +37,21 @@
 
 /*!
     \class QtopiaAbstractService
+    \mainclass
     \brief The QtopiaAbstractService class provides an interface to messages on a QCop service
     which simplifies remote slot invocations
 
-    The QtopiaAbstractService class provides an interface for publishing services
-    for remote invocation.
+    Service messages in Qtopia are sent with QtopiaServiceRequest.  They consist
+    of a service name, a message name, and a list of parameter values.  Qtopia
+    dispatches service messages to the applications associated with the service
+    name, on the application's \c{QPE/Application/appname} channel, where
+    \c{appname} is the application's name.
 
-    The use of this class will be demonstrated using the Qtopia \c{Time}
+    Client applications can listen for service messages on the application
+    channel directly, using QtopiaChannel, but it is cleaner and less error-prone
+    to create an instance of QtopiaAbstractService instead.
+
+    The use of QtopiaAbstractService will be demonstrated using the Qtopia \c{Time}
     service.  This has a single message called \c{editTime()} which asks
     the service to pop up a dialog allowing the user to edit the current time.
 
@@ -69,8 +77,7 @@
     to be automatically registered as Service messages.  This can be
     useful if the service has many message types.
 
-    The client can send a request to the service by use of the
-    QtopiaServiceRequest class, as in previous versions of Qtopia:
+    The client can send a request to the service using QtopiaServiceRequest:
 
     \code
     QtopiaServiceRequest req( "Time", "editTime()" );
@@ -78,6 +85,7 @@
     \endcode
 
     \sa QtopiaService, QtopiaIpcAdaptor, QtopiaIpcEnvelope, QtopiaServiceRequest
+    \sa QtopiaChannel
 
     \ingroup ipc
 */
@@ -125,29 +133,16 @@ ServiceQtopiaIpcAdaptorProxy::ServiceQtopiaIpcAdaptorProxy(const QString &channe
 
 }
 
-/*!
-    \reimp
- */
 QString ServiceQtopiaIpcAdaptorProxy::memberToMessage( const QByteArray& member )
 {
     return m_channel + "::" + QtopiaIpcAdaptor::memberToMessage( member );
 }
 
-/*!
-    Convert \a channel into a list of new names to use for sending messages.
-    This override interprets \a channel as a service name and looks
-    up the actual QCop channels associated with the service.
- */
 QStringList ServiceQtopiaIpcAdaptorProxy::sendChannels( const QString& channel )
 {
     return QtopiaService::channels( channel );
 }
 
-/*!
-    Convert \a channel into a new name to use for receiving messages.
-    This override returns an empty string, which indicates that
-    messages should be received on the application's main message channel.
- */
 QString ServiceQtopiaIpcAdaptorProxy::receiveChannel( const QString& )
 {
     return QString();
@@ -196,7 +191,7 @@ QtopiaAbstractService::~QtopiaAbstractService()
 #if defined(QTOPIA_DBUS_IPC)
     QDBusConnection dbc = QDBus::sessionBus();
     if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
     }
 
@@ -219,7 +214,7 @@ QtopiaAbstractService::~QtopiaAbstractService()
 }
 
 /*!
-    Publish all slots on this object within subclasses of QtopiaAbstractService.
+    Publishes all slots on this object within subclasses of QtopiaAbstractService.
     This is typically called from a subclass constructor.
 */
 void QtopiaAbstractService::publishAll()
@@ -227,7 +222,7 @@ void QtopiaAbstractService::publishAll()
 #if defined(QTOPIA_DBUS_IPC)
     QDBusConnection dbc = QDBus::sessionBus();
     if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
     }
 

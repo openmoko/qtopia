@@ -1,14 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>  Calendar </title>
+  <title>  Calendar </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Calendar <br><small>Functional Description</small></h1>
 <p />
 The <strong>Calendar</strong> application allows a user to plan their schedule. This includes the scheduling of timed events such as meetings,
@@ -16,7 +18,9 @@ day events such as birthdays, and multi-day events such as workshops. The applic
 <p />
 
 <p />
-<h2><a name="Data"></a> Data </h2>
+<h2><a name="Features"></a> Features </h2>
+<p />
+<h3><a name="Data_Model"></a> Data Model </h3>
 <p />
 An event consists of the following:
 <p /> <ul>
@@ -68,7 +72,7 @@ If a repeated event falls on a day not included in a particular month, the event
 <p />
 This event happens once each year. In the advanced options the user is able to specify how many years apart each repeating event will occur.
 <p />
-<h2><a name="Application_Views"></a> Application Views </h2>
+<h3><a name="Calendar_Views"></a> Calendar Views </h3>
 <p />
 It is possible to view the events in the following ways:
 <p /> <ul>
@@ -79,7 +83,7 @@ It is possible to view the events in the following ways:
 </li></ul> 
 <p />
 <p />
-<h3><a name="Day_View"></a> Day View </h3>
+<h4><a name="Day_View"></a> Day View </h4>
 <p />
 This shows the events that occur for a particular date. Repeating events are shown in pale blue and non-repeating events are shown in pale red. All day events are shown at the top of the view.
 The view also adjusts the height of hours through the
@@ -91,7 +95,7 @@ The user is able to edit the general settings such as the default alarm preset a
 <p />
 The user is able to change to the month view, a detailed view of the current event or add a new event.
 <p />
-<h3><a name="Month_View"></a> Month View </h3>
+<h4><a name="Month_View"></a> Month View </h4>
 <p />
 This shows the events that occur for a particular month. Repeating events are shown in blue, non-repeating events in red.
 <p />
@@ -105,7 +109,7 @@ The user is able to edit the general settings such as the default alarm preset a
 <p />
 The user is also able to show the details for a particular day or add a new event.
 <p />
-<h3><a name="Detailed_View"></a> Detailed View </h3>
+<h4><a name="Detailed_View"></a> Detailed View </h4>
 <p />
 The detailed view of an event displays the data for a single event. This is shown as rich text. All the information for the event is shown formatted for optimum readability.
 <p />
@@ -117,7 +121,7 @@ From the detailed list view the user is able to:
 </li></ul> 
 <p />
 <p />
-<h3><a name="Edit_View"></a> Edit View </h3>
+<h4><a name="Edit_View"></a> Edit View </h4>
 <p />
 The edit view of an event allows the user to specify the data for a new event
 or modify that of an existing event.
@@ -125,8 +129,6 @@ or modify that of an existing event.
 Non-applicable values are disabled. For example, the start time entry are disabled if the event is marked as an all day event.
 <p />
 When the editing has been completed the user is able to either accept or cancel the changes they have made.
-<p />
-<h2><a name="Features"></a> Features </h2>
 <p />
 <h3><a name="Add_Event"></a> Add Event </h3>
 <p />
@@ -176,41 +178,10 @@ It is possible to access occurrences of events from other applications using the
 QDL links are embedded into the notes of an event. When in the Detailed View,
 clicking on a QDL link activates the link's application.
 <p />
-<h2><a name="Files"></a> Files </h2>
-<p />
-The Calendar application has two data files.
-<p />
-<p /> <ul>
-<li> <code>$HOME/Applications/datebook/datebook.xml</code> - main list of tasks data.
-</li> <li> <code>$HOME/.caljournal</code> - journal of changes to list of tasks since application started.
-</li></ul> 
-<p />
-<p />
-Both files are in an xml-like format. <code>datebook.xml</code> contains the main list of events, and is the file sent to <strong>Qtopia Desktop</strong> on syncing. <code>.caljournal</code> contains a list of adds,
-edits and deletes made to the list of events since the <strong>Calendar</strong> application started.
-<p />
-<h2><a name="Config"></a> Config </h2>
-<p />
-The settings for <strong>Calendar</strong> are stored in <code>$HOME/Settings/DateBook.conf</code> .
-<p /> <ul>
-<li> [Main]
-</li> <li> startviewtime - preferred start hour for the day in Day View.
-</li> <li> alarmpreset - true if an alarm is set by default when creating a new event.
-</li> <li> presettime - if alarmpreset is true, the number of minutes the alarm preset is by default when creating a new event.
-</li></ul> 
-<p />
-<h2><a name="Services"></a> Services </h2>
-<p />
-<p /> <ul>
-<li> IR Receive text/x-vCalendar-Events
-</li> <li> Calendar - allows editing of events via <a href="fd-PIM.html" class="twikiLink">PIM</a> Library interface.
-</li> <li> TimeMonitor - accepts notifications of time modification (timezone, time setting, time format)
-</li> <li> QDL
-</li></ul> 
 <p />
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div>

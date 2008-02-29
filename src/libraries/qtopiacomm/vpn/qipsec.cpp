@@ -26,6 +26,7 @@
 /*!
   \internal
   \class QIPSec
+  \mainclass
   \internal This class represents an OpenVPN network.
 
   An QIPSec objects operates in two distinct modes.
@@ -91,7 +92,7 @@ void QIPSec::disconnect()
   Returns a configuration dialog for this IPSec network. The caller is responsible
   for the deletion of the returned pointer.
   */
-QDialog* QIPSec::configure( QWidget* parent )
+QDialog* QIPSec::configure( QWidget* /*parent*/ )
 {
     //TODO
     return 0;

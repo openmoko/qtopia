@@ -1,14 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>  Bluetooth </title>
+  <title>  Bluetooth </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Bluetooth <br><small>Functional Description</small></h1>
 <p />
 Bluetooth is a wireless communications protocol which allows short range communication of typically 10 to 100 meters, between  Bluetooth-equipped devices.  The protocol supports authentication, service discovery and various forms of data transfer.  Typically this is used for file transfer, wireless headsets (audio), synchronization, dial-up networking, printing and other capabilities.  The services provided by the Bluetooth device are generally referred to as Profiles.  Qtopia Bluetooth support can be enabled for any device with a Linux BlueZ compatible Bluetooth host adapter.  
@@ -44,14 +46,20 @@ The following device configuration is available: <ol>
 Other attributes can also be viewed by the user, such as the device manufacturer and the Bluetooth protocol version the device supports and the user can scan
 for services(profiles) supported by the device.
 <p />
-<strong>Note:</strong>  The only service currently supported by Qtopia is Object Push.
+<h3><a name="Bluetooth_Sockets_API"></a> Bluetooth Sockets API </h3>
+<p />
+Qtopia supports RFCOMM, L2CAP and SCO sockets.  RFCOMM sockets are STREAM based sockets, similar to TCP sockets.  SCO and L2CAP sockets
+are SEQPACKET type sockets.  In general, they act similarly to TCP sockets, however the SEQPACKET type sockets preserve record boundaries.
+Finally, DGRAM type L2CAP sockets are also supported.  These sockets are similar to UDP sockets.
+<p />
+<h3><a name="Bluetooth_service_framework"></a> Bluetooth service framework </h3>
+<p />
+A generic management framework for Bluetooth services allows Bluetooth services to be registered and handled under a common set of practices. For example, a service registered under this framework will automatically be able to be controlled through the BTSettings GUI application. Third-party developers will also be able to make use of this framework to integrate their own Bluetooth services into the system environment.
 <p />
 <h3><a name="OPP"></a> OPP </h3>
 <p />
 Object Push Profile supports both client and server modes for applications that use the object push model of interaction.
 The client mode is used to initiate an object push request to a remote device.  
-<p />
-<strong>Note:</strong>  While the standard defines Business Card Pull and Business Card Exchange features, they are optional, and are currently not supported.  If a remote device initiates a Business Card Pull or a Business Card Exchange with the local OPP service, the request will fail and the service returns an object not found response.
 <p />
 <h3><a name="Sending_and_Receiving_over_Bluet"></a> Sending and Receiving over Bluetooth </h3>
 <p />
@@ -61,7 +69,15 @@ The user can send and receive files over Bluetooth.  If a file is received, the 
 <p />
 Dial-up Networking allows the user to connect to the Internet via third party Bluetooth devices (client profile) and Qtopia devices themselves can provide dial-up connections to third party Bluetooth devices (server profile). Essentially requests from the client are forwarded directly to the hardware modem.  Thus no PPP server is running on the server side.
 <p />
-<h2><a name="Dependencies"></a> Dependencies </h2>
+<h3><a name="Headset_Profile_HSP"></a><a name="Headset_Profile_HSP_"></a> Headset Profile (HSP) </h3>
+<p />
+Headset profile is supported using the Headset Bluetooth service and integrated into the Bluetooth service framework.  The user is able to control the volume of the speaker and microphone of the Bluetooth headset.  The user is also able to connect, disconnect, pair and unpair the Bluetooth headset device.  On the desktop, ALSA snd-bt-sco module is required to provide an Audio Device.  The snd-bt-sco kernel module depends on ALSA support in the kernel.  The btsco module creates a new ALSA sound device, which supports full-duplex audio.  The reference implementation will not support seamless transfer of audio between the headset and the device.  Thus on the desktop only VOIP application can utilize the Bluetooth Audio device.  The Greenphone platform fully supports Bluetooth Audio.
+<p />
+<h3><a name="Hands_Free_Profile_HFP"></a><a name="Hands_Free_Profile_HFP_"></a> Hands-Free Profile (HFP) </h3>
+<p />
+The Hands Free Profile is an expanded set of functionality compared to the headset profile.  Qtopia supports the Hands-free profile functionality in the Modem Emulator module.  All control mechanisms available for HSP profile are also available for HFP profile. 
+<p />
+<h3><a name="Dependencies"></a> Dependencies </h3>
 <p />
 Bluetooth uses uses services provided by Contacts for: <ul>
 <li> Sending a business card over Bluetooth
@@ -70,7 +86,7 @@ Bluetooth uses uses services provided by Contacts for: <ul>
 <p />
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div>

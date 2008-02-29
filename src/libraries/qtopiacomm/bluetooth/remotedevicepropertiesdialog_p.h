@@ -61,8 +61,6 @@ private slots:
 private:
     void initMainInfo();
 
-    static const QString SERVICE_ERROR_MSG;
-
     QBluetoothRemoteDevice m_remote;
     QBluetoothLocalDevice *m_local;
 

@@ -113,7 +113,7 @@ QObexPushServicePrivate::QObexPushServicePrivate(QObexSocket *socket, QObexPushS
     OBEX_SetUserCallBack(m_self, qobex_receiver_callback, this);
     OBEX_SetUserData(m_self, this);
 
-    m_notifier = new QSocketNotifier( OBEX_GetFD( m_self ),
+    m_notifier = new QSocketNotifier( m_socket->socketDescriptor(),
                                       QSocketNotifier::Read,
                                       this );
     connect( m_notifier, SIGNAL(activated(int)), this, SLOT(processInput()) );
@@ -480,12 +480,35 @@ void QObexPushServicePrivate::abortFileTransfer()
 
 /*!
     \class QObexPushService
-    \brief The QObexPushService class encapsulates an OBEX PUSH service.
+    \mainclass
+    \brief The QObexPushService class encapsulates an OBEX Push service.
 
     The QObexPushService class can be used to provide OBEX Push services
     over Bluetooth, Infrared or any other OBEX capable transport.
     This class implements the Bluetooth Object Push Profile, and can also
     be used to implement the Infrared IrXfer service.
+
+    When using QObexPushService, you should call
+    setIncomingDirectory() to set the incoming directory for received files.
+    If you want to control whether an incoming file should be accepted,
+    subclass QObexPushService and override the acceptFile() function.
+    Subclasses can also override businessCard() to provide the default
+    business card object that may be requested by an OBEX Push client.
+
+    When an OBEX client sends a file to the service, the acceptFile() function
+    is called to determine whether the file transfer should be allowed. If
+    the transfer is accepted, the putRequest() signal is emitted with
+    the details of the incoming file, and the progress() signal will be
+    emitted at intervals to show the progress of the file transfer operation.
+    The requestComplete() signal is emitted when the transfer is complete.
+
+    Similarly, when an OBEX client requests a file (such as the default
+    business card), the getRequest() signal is emitted, and the
+    progress() signal will be emitted at intervals. The requestComplete()
+    signal is emitted when the transfer is complete.
+
+    Finally, the done() signal is emitted when the OBEX client disconnects or
+    if the connection is terminated.
 
     \ingroup qtopiaobex
     \sa QObexServer
@@ -513,10 +536,14 @@ void QObexPushServicePrivate::abortFileTransfer()
  */
 
 /*!
-    Constructor for QObexPushService.  The \a socket parameter specifies the
-    OBEX socket to use.  The socket is assumed to have been obtained from a
-    \c QObexServer::nextPendingConnection() call.  The \a parent specifies
+    Constructs an OBEX Push service.  The \a socket parameter specifies the
+    OBEX socket to use for the transport connection. The \a parent specifies
     the parent object.
+
+    The socket must be connected; that is, you have either called 
+    QObexSocket::connect() on the socket, or the socket has been obtained from 
+    \c QObexServer::nextPendingConnection(). Otherwise, the service
+    will not be able to receive client requests.
 */
 QObexPushService::QObexPushService(QObexSocket *socket, QObject *parent)
     : QObject(parent)
@@ -536,7 +563,7 @@ QObexPushService::QObexPushService(QObexSocket *socket, QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the service.
 */
 QObexPushService::~QObexPushService()
 {
@@ -546,8 +573,8 @@ QObexPushService::~QObexPushService()
 
 /*!
     Closes the service and sets the state to Closed. If an operation is in
-    progress, the commandFinished() and done() signals will be emitted with
-    their \c error arguments set to \c true.
+    progress, the requestComplete() and done() signals will be emitted with
+    their \c error argument set to \c true.
 */
 void QObexPushService::close()
 {
@@ -555,7 +582,7 @@ void QObexPushService::close()
 }
 
 /*!
-    Returns the last error that has occurred.
+    Returns the last error that occurred.
 */
 QObexPushService::Error QObexPushService::error() const
 {
@@ -563,7 +590,7 @@ QObexPushService::Error QObexPushService::error() const
 }
 
 /*!
-    Returns the current connection state of the object.
+    Returns the current state of the service.
 */
 QObexPushService::State QObexPushService::state() const
 {
@@ -571,8 +598,10 @@ QObexPushService::State QObexPushService::state() const
 }
 
 /*!
-    Sets the incomding directory to \a dir.  This directory will be used to place all files
+    Sets the incoming directory to \a dir.  This directory will be used to place all files
     which are being received by the service.
+
+    \sa incomingDirectory(), acceptFile()
 */
 void QObexPushService::setIncomingDirectory(const QString &dir)
 {
@@ -583,6 +612,8 @@ void QObexPushService::setIncomingDirectory(const QString &dir)
 
 /*!
     Returns the incoming directory.
+
+    \sa setIncomingDirectory()
 */
 const QString &QObexPushService::incomingDirectory() const
 {
@@ -598,6 +629,8 @@ const QString &QObexPushService::incomingDirectory() const
     The \a size parameter holds the size of the file.
 
     The default implementation accepts all files unless no incoming directory is set.
+
+    Returns true on success; otherwise returns false.
 */
 bool QObexPushService::acceptFile(const QString &filename, const QString &mimetype, qint64 size)
 {
@@ -612,10 +645,13 @@ bool QObexPushService::acceptFile(const QString &filename, const QString &mimety
 }
 
 /*!
-    Clients should override this function to provide personal business card data
-    in vCard format.  This is required for Business Card exchange feature of the
-    Bluetooth Object Push Profile.  If an empty byte array is returned, the
-    request for a business card will be rejected.
+    Returns the business card that will be sent to OBEX clients who request
+    it, as per the Business Card exchange feature of the Bluetooth Object Push
+    Profile.
+
+    Subclasses should override this function to provide their personal
+    business card data in vCard format. If an empty byte array is returned, 
+    all requests for business cards will be rejected.
 */
 QByteArray QObexPushService::businessCard() const
 {
@@ -633,48 +669,50 @@ QObexSocket *QObexPushService::socket()
 /*!
     \fn void QObexPushService::done(bool error);
 
-    This signal is emitted whenever the client has disconnected from the service
-    or the connection has been terminated.  The \a error parameter reports whether
-    an error occurred during processing.
+    This signal is emitted when the OBEX client has disconnected from the service
+    or if the connection has been terminated. The \a error value is \c true if an
+    error occurred during the processing; otherwise \a error is \c false.
  */
 
 /*!
     \fn void QObexPushService::progress(qint64 completed, qint64 total);
 
-    This signal is emitted reports the progress of the file send operation.
-    The \a completed parameter reports how many bytes were sent, and \a total
-    parameter reports the total number of bytes to send.
+    This signal is emitted during file transfer operations to
+    indicate the progress of the transfer. The \a completed value is the
+    number of bytes that have been sent or received so far, and \a total
+    is the total number of bytes to be sent or received.
  */
 
 /*!
     \fn void QObexPushService::stateChanged(QObexPushService::State state)
 
-    This signal is emitted whenever a service object changes state.  The \a state
-    parameter holds the current state.
+    This signal is emitted when the state of the service changes. The \a state
+    is the new state of the client.
  */
 
 /*!
     \fn void QObexPushService::putRequest(const QString &filename, const QString &mimetype)
 
-    This signal is emitted whenever a new put request comes in from the client.
-    The \a filename parameter contains the filename, and \a mimetype contains
-    the mimetype of the request.
+    This signal is emitted when an OBEX client makes a \c Put request to
+    send a file to the service. The \a filename parameter contains the
+    filename for the request, and \a mimetype contains the mimetype.
 */
 
 /*!
     \fn void QObexPushService::getRequest(const QString &filename, const QString &mimetype)
 
-    This signal is emitted whenever a new get request comes in from the client.
-    The only requests supported by the OBEX Push Service are for the Business Card.
-    As such, the \a filename will parameter will always be a null string, and the
-    \a mimetype will always be "text/x-vCard"
+    This signal is emitted when an OBEX client makes a \c Get request to
+    request a file from the service. The OBEX Push service only supports
+    requests for business cards; as such, the \a filename will always be
+    an empty string, and the \a mimetype will always be "text/x-vCard".
 */
 
 /*!
     \fn void QObexPushService::requestComplete(bool error)
 
-    This signal is emitted whenever a request has been completed.  The \a error parameter
-    holds whether an error has occurred during a request
+    This signal is emitted when a client request is completed. The \a error
+    value is \c true if an error occurred during the request; otherwise
+    \a error is \c false.
 */
 
 

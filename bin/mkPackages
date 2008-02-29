@@ -54,7 +54,7 @@ else
     if [ -z $ip ]; then
         die "URL looked wrong: $URL"
     fi
-    ping -c 1 -W 1 $ip | grep " 0% packet loss" 2>&1 >/dev/null || die "Something is wrong with the URL: $URL"
+    ping -c 1 -W 1 $ip | grep " 0% packet loss" 2>&1 >/dev/null || echo "Something is wrong with the URL: $URL. Could not ping $ip"
 fi
 
 # See if there's packages in this directory to be installed in the 

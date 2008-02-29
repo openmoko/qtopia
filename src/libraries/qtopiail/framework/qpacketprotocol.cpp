@@ -26,8 +26,12 @@
 
 /*!
   \class QPacketProtocol
+  \mainclass
   \brief The QPacketProtocol class encapsulates communicating discrete packets
   across fragmented IO channels, such as TCP sockets.
+
+  QPacketProtocol makes it simple to send arbitrary sized data "packets" across 
+  fragmented transports such as TCP and UDP.
 
   As transmission boundaries are not respected, sending packets over protocols
   like TCP frequently involves "stitching" them back together at the receiver.
@@ -51,11 +55,11 @@
   QPacketProtocol protocol(&socket);
 
   // Send packet the quick way
-  protocol.send() << 12 << "Hello world";
+  protocol.send() << "Hello world" << 123;
 
   // Send packet the longer way
   QPacket packet;
-  packet << 12 << "Hello world";
+  packet << "Hello world" << 123;
   protocol.send(packet);
   \endcode
 
@@ -75,6 +79,9 @@
   QPacket packet = protocol.read();
   p >> a >> b;
   \endcode
+
+  \ingroup io
+  \sa QPacket
 */
 
 class QPacketProtocolPrivate : public QObject
@@ -204,7 +211,9 @@ QPacketProtocol::~QPacketProtocol()
 
 /*!
   Returns the maximum packet size allowed.  By default this is
-  2,147,483,647 bytes.  If a packet claiming to be larger than this is received,
+  2,147,483,647 bytes.  
+  
+  If a packet claiming to be larger than the maximum packet size is received,
   the QPacketProtocol::invalidPacket() signal is emitted.
 
   \sa QPacketProtocol::setMaximumPacketSize()
@@ -230,8 +239,11 @@ qint32 QPacketProtocol::setMaximumPacketSize(qint32 max)
   Returns a streamable object that is transmitted on destruction.  For example
 
   \code
-  protocol.send() << 10 << "Hello world";
+  protocol.send() << "Hello world" << 123;
   \endcode
+
+  will send a packet containing "Hello world" and 123.  To construct more 
+  complex packets, explicitly construct a QPacket instance.
  */
 QPacketAutoSend QPacketProtocol::send()
 {
@@ -240,6 +252,7 @@ QPacketAutoSend QPacketProtocol::send()
 
 /*!
   \fn void QPacketProtocol::send(const QPacket & packet)
+
   Transmit the \a packet.
  */
 void QPacketProtocol::send(const QPacket & p)
@@ -318,8 +331,13 @@ QIODevice * QPacketProtocol::device()
 
 /*!
   \class QPacket
+  \mainclass
   \brief The QPacket class encapsulates an unfragmentable packet of data to be
   transmitted by QPacketProtocol.
+
+  The QPacket class works together with QPacketProtocol to make it simple to
+  send arbitrary sized data "packets" across fragmented transports such as TCP
+  and UDP.
 
   QPacket provides a QDataStream interface to an unfragmentable packet.
   Applications should construct a QPacket, propagate it with data and then
@@ -328,7 +346,7 @@ QIODevice * QPacketProtocol::device()
   QPacketProtocol protocol(...);
 
   QPacket myPacket;
-  myPacket << 10 << "Hello world!";
+  myPacket << "Hello world!" << 123;
   protocol.send(myPacket);
   \endcode
 
@@ -337,13 +355,21 @@ QIODevice * QPacketProtocol::device()
   ready for extraction.
 
   \code
-  int a;
-  QByteArray b;
+  QByteArray greeting;
+  int count;
 
-  myPacket >> a >> b;
+  QPacket myPacket = protocol.read();
+
+  myPacket >> greeting >> count;
   \endcode
 
-  Only packets returned by QPacketProtocol may be read from.
+  Only packets returned from QPacketProtocol::read() may be read from.  QPacket
+  instances constructed by directly by applications are for transmission only 
+  and are considered "write only".  Attempting to read data from them will 
+  result in undefined behaviour.
+
+  \ingroup io
+  \sa QPacketProtocol
  */
 
 /*!
@@ -407,11 +433,11 @@ bool QPacket::isEmpty() const
 
   QPacket packet;
 
-  packet << 10 << "Hello world!";
+  packet << "Hello world!" << 123;
   protocol.send(packet);
 
   packet.clear();
-  packet << 11 << "Goodbyte world!";
+  packet << "Goodbyte world!" << 789;
   protocol.send(packet);
   \endcode
  */
@@ -426,6 +452,7 @@ void QPacket::clear()
 
 /*!
   \class QPacketAutoSend
+  \mainclass
   \internal
   */
 QPacketAutoSend::QPacketAutoSend(QPacketProtocol * _p)

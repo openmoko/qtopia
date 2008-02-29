@@ -22,17 +22,19 @@
 #ifndef __QTOPIA_MEDIALIBRARY_MEDIACONTENTPLAYER_H
 #define __QTOPIA_MEDIALIBRARY_MEDIACONTENTPLAYER_H
 
-#include <qstring.h>
-#include <qcontent.h>
+
+#include <QString>
+#include <QUrl>
+#include <QContent>
+
 
 class QMediaContent;
 class QMediaContentPlayerPrivate;
 
-
 class QMediaContentPlayer
 {
 public:
-    explicit QMediaContentPlayer(QString const& url,
+    explicit QMediaContentPlayer(QUrl const& url,
                                  QString const& domain = QLatin1String("default"));
     explicit QMediaContentPlayer(QContent const& content,
                                  QString const& domain = QLatin1String("default"));

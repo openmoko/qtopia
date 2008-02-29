@@ -37,7 +37,6 @@ public:
 };
 QSet<QString> QDeviceIndicatorsProviderPrivate::providedIndicators;
 
-// define QDeviceIndicatorsProvider
 /*!
   \class QDeviceIndicatorsProvider
   \ingroup QtopiaServer
@@ -45,7 +44,15 @@ QSet<QString> QDeviceIndicatorsProviderPrivate::providedIndicators;
 
   QDeviceIndicatorsProvider derived types control the status of device
   indicators.  During construction, derived types usually call
-  setSupportedIndicators() to set the indicators they provide.
+  setSupportedIndicators() to set the indicators they provide. Derived classes
+  must implement the changeIndicatorState() function which performs the actual hardware
+  operation involved.
+
+  This class is part of the Qtopia server and a specific implementation should be provided
+  as part of a server task.
+
+  \sa QDeviceIndicators
+
  */
 
 /*!
@@ -129,5 +136,6 @@ void QDeviceIndicatorsProvider::setIndicatorState(const QString &indicator, QDev
     \fn void QDeviceIndicatorsProvider::changeIndicatorState(const QString &indicator, QDeviceIndicators::IndicatorState state) = 0
 
     Called when the \a indicator should be set to \a state.  This is usually
-    in response to a QDeviceIndicators::setIndicatorState() call.
+    in response to a QDeviceIndicators::setIndicatorState() call. Subclasses should implement 
+    hardware specific operation in this function.
  */

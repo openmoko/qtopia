@@ -52,6 +52,10 @@ static QMultiHash<QString, QtopiaServiceDescription*>* recs=0;
 static QString recs_filename;
 static QDateTime recs_ts;
 
+/*!
+  \internal
+  Removes all input and service mapping.
+*/
 static void clearReqs()
 {
     if(recs)
@@ -61,6 +65,10 @@ static void clearReqs()
     }
 }
 
+/*!
+  \internal
+  Reads the configuration file and populates recs.
+*/
 static void updateReqs()
 {
     // recs_filename may not exist (never written), in which case, must
@@ -119,6 +127,10 @@ static void updateReqs()
     }
 }
 
+/*!
+  \internal
+  Writes the current recs to the configuration file.
+*/
 static void writeReqs(const QString& changed)
 {
     QSettings cfg(QLatin1String("Trolltech"),QLatin1String("SpeedDial"));
@@ -161,6 +173,10 @@ static void writeReqs(const QString& changed)
         recs_ts = QFileInfo(recs_filename).lastModified();
 }
 
+/*!
+  \internal
+  Finds the first available input slot to highlight.
+*/
 int firstAvailableSlot()
 {
     // possible slots - 1 ~ 99
@@ -332,7 +348,9 @@ private slots:
 
 
 
-
+/*!
+  Constructs a QSpeedDialItem object.
+*/
 QSpeedDialItem::QSpeedDialItem(const QString& i, const QtopiaServiceDescription& rec, QListView* parent) :
     _input(i),
     _record(rec)
@@ -340,13 +358,18 @@ QSpeedDialItem::QSpeedDialItem(const QString& i, const QtopiaServiceDescription&
     ((QSpeedDialModel*)parent->model())->addItem(this);
 }
 
+/*!
+  Updates service description for this item.
+*/
 void QSpeedDialItem::changeRecord(QtopiaServiceDescription* src)
 {
     _record = *src;
 }
 
 
-
+/*!
+  Constructs a QSpeedDialDialog object.
+*/
 QSpeedDialDialog::QSpeedDialDialog(const QString& l, const QString& ic,
     const QtopiaServiceRequest& a, QWidget* parent) :
     QDialog(parent),
@@ -379,11 +402,17 @@ QSpeedDialDialog::QSpeedDialDialog(const QString& l, const QString& ic,
 #endif
 }
 
+/*!
+  Returns the selected input.
+*/
 QString QSpeedDialDialog::choice()
 {
     return userChoice;
 }
 
+/*!
+  Saves the service description at the input slot selected by the user.
+*/
 void QSpeedDialDialog::store(const int item)
 {
     userChoice = list->rowInput(item);
@@ -395,11 +424,21 @@ void QSpeedDialDialog::store(const int item)
 
 /*!
   \class QSpeedDialList
+  \mainclass
   \brief The QSpeedDialList class provides a list widget for editing Speed Dial entries.
 
   If you need a dialog that allows the user to select a spot to insert an already selected
-  action (eg. adding a QContact's phone number to Speed Dial list), use
-  QSpeedDial::addWithDialog.
+  action (for example, adding a QContact's phone number to Speed Dial list), use
+  QSpeedDial::addWithDialog().
+
+  Use editItem() to edit selected entry.
+  This will open QtopiaServiceSelector which provides a list of predefined services.
+
+  Use clearItem() to remove the entry.
+
+  \image qspeeddiallist.png "Editing Speed Dial Entries"
+
+  \sa QSpeedDial, QtopiaServiceSelector
 
   \ingroup userinput
 */
@@ -407,20 +446,20 @@ void QSpeedDialDialog::store(const int item)
 /*!
   \fn QSpeedDialList::currentRowChanged(int row)
 
-  This signal is emitted when the user selects a different row (either with the keypad or the mouse).
-  \a row contains the newly selected row.
+  This signal is emitted whenever the user selects
+  a different \a row (either with the keypad or the mouse).
 */
 
 /*!
   \fn QSpeedDialList::rowClicked(int row)
 
-  This signals is emitted when the user either clicks on a row with the mouse, or presses the keypad
+  This signals is emitted whenever the user
+  either clicks on a different \a row with the mouse, or presses the keypad
   Select key while a row is selected.
-  \a row contains the newly selected row.
 */
 
 /*!
-  Constructs a QSpeedDialList with parent \a parent.
+  Constructs a QSpeedDialList object with the given \a parent.
 */
 QSpeedDialList::QSpeedDialList(QWidget* parent) :
     QListView(parent)
@@ -445,10 +484,12 @@ QSpeedDialList::QSpeedDialList(QWidget* parent) :
     connect(this, SIGNAL(rowClicked(int)), this, SLOT(editItem(int)));
     connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
             this, SLOT(selectionChanged()));
+
+    setWindowTitle( tr( "Speed Dial" ) );
 }
 
 /*!
-  Destructs the QSpeedDialList.
+  Destroys the QSpeedDialList object.
 */
 QSpeedDialList::~QSpeedDialList()
 {
@@ -466,11 +507,13 @@ QSpeedDialList::QSpeedDialList(const QString& label, const QString& icon, QWidge
     updateReqs();
     init(QString());
 
+    setWindowTitle( tr( "Speed Dial" ) );
+
     d->setSelectionDetails(label, icon);
 }
 
 /*!
-  Removes the Speed Dial in the list at row \a row.
+  Removes the Speed Dial entry in the list at \a row.
 */
 void QSpeedDialList::clearItem(int row)
 {
@@ -484,7 +527,7 @@ void QSpeedDialList::clearItem(int row)
 /*!
   \overload
 
-  Clears the item at the currently selected row.
+  Removes the Speed Dial entry at the currently selected row.
 */
 void QSpeedDialList::clearItem()
 {
@@ -496,8 +539,12 @@ void QSpeedDialList::clearItem()
 }
 
 /*!
-  Presents the a dialog for the user to select an action performed for
-  the Speed Dial entry at row \a row.
+  Edits the Speed Dial entry at \a row.
+
+  Presents the a QtopiaServiceSelector for the user
+  to select an service performed when the input at \a row is triggered.
+
+  \sa QtopiaServiceSelector
 */
 void QSpeedDialList::editItem(int row)
 {
@@ -511,6 +558,8 @@ void QSpeedDialList::editItem(int row)
                 QSpeedDial::set(item->input(), desc);
             }
             reload(item->input());
+            // force a reload of the context menu
+            emit activated(currentIndex());
         }
     }
 }
@@ -518,7 +567,7 @@ void QSpeedDialList::editItem(int row)
 /*!
   \overload
 
-  Allows the user to edit the item at the currently selected row.
+  Edits the Speed Dial entry at the currently selected row.
 */
 void QSpeedDialList::editItem()
 {
@@ -586,16 +635,15 @@ void QSpeedDialList::init(const QString& f)
             this,SLOT(click(const QModelIndex&)));
 }
 
-/*!
-  Selects the Speed Dial entry on row \a row.
-*/
 void QSpeedDialList::setCurrentRow(int row)
 {
     setCurrentIndex(model()->index(row, 0));
 }
 
 /*!
-  Selects the row from the list that corresponds to the Speed Dial input, \a sd.
+  \fn void QSpeedDialList::setCurrentInput(const QString& input)
+
+  Selects the row from the list that corresponds to the Speed Dial \a input.
 */
 void QSpeedDialList::setCurrentInput(const QString& sd)
 {
@@ -611,7 +659,9 @@ void QSpeedDialList::setCurrentInput(const QString& sd)
 
 
 /*!
-  Forces the entry for Speed Dial input \a sd to be refreshed from the source.
+  \fn void QSpeedDialList::reload(const QString& input)
+
+  Forces the entry for Speed Dial at \a input to be refreshed from the source.
 */
 void QSpeedDialList::reload(const QString& sd)
 {
@@ -647,7 +697,7 @@ void QSpeedDialList::reload(const QString& sd)
   \internal
 
   Catches selection events and emits an event more meaningful to outside this class
-  (emits a row isntead of a QModelIndex)
+  (emits a row instead of a QModelIndex)
 */
 void QSpeedDialList::selectionChanged()
 {
@@ -658,7 +708,7 @@ void QSpeedDialList::selectionChanged()
   \internal
 
   Catches selection events and emits an event more meaningful to outside this class
-  (emits a row isntead of a QModelIndex)
+  (emits a row instead of a QModelIndex)
 */
 void QSpeedDialList::select(const QModelIndex& index)
 {
@@ -669,7 +719,7 @@ void QSpeedDialList::select(const QModelIndex& index)
   \internal
 
   Catches click events and emits an event more meaningful to outside this class
-  (emits a row isntead of a QModelIndex)
+  (emits a row instead of a QModelIndex)
 */
 void QSpeedDialList::click(const QModelIndex& index)
 {
@@ -678,7 +728,7 @@ void QSpeedDialList::click(const QModelIndex& index)
 }
 
 /*!
-  Returns the input required to trigger the Speed Dial entry at Row \a row.
+  Returns the input required to trigger the Speed Dial entry at \a row.
 */
 QString QSpeedDialList::rowInput(int row) const
 {
@@ -689,7 +739,9 @@ QString QSpeedDialList::rowInput(int row) const
 }
 
 /*!
-  Returns the input required for the currently selected Speed Dial entry.
+  \property QSpeedDialList::currentInput
+  \brief the input required for the currently selected Speed Dial entry if exists;
+  otherwise returns an empty string
 */
 QString QSpeedDialList::currentInput() const
 {
@@ -764,7 +816,8 @@ void QSpeedDialList::scrollContentsBy(int dx, int dy)
 }
 
 /*!
-  Returns the number of rows in the list.
+  \property QSpeedDialList::count
+  \brief the number of rows in the list
 */
 int QSpeedDialList::count() const
 {
@@ -772,7 +825,8 @@ int QSpeedDialList::count() const
 }
 
 /*!
-  Returns the currently selected row number.
+  \property QSpeedDialList::currentRow
+  \brief the currently selected row number
 */
 int QSpeedDialList::currentRow() const
 {
@@ -784,14 +838,20 @@ int QSpeedDialList::currentRow() const
 
 /*!
   \class QSpeedDial
+  \mainclass
   \brief The QSpeedDial class provides access to the Speed Dial settings.
 
   The QSpeedDial class includes a set of static functions that give access to the
   Speed Dial settings. This class should not be instantiated.
 
-  To allow the user to select an input for a given action, use addWithDialog().
+  The input range is from 1 to 99. To allow the user to select
+  an input for a given action, use addWithDialog().
+  \image qspeeddial.png "Add with Dialog"
+
   To directly modify the Speed Dial settings, use remove() and set().
   Use find() to retrieve the assigned action for a given input.
+
+  \sa QSpeedDialList
 
   \ingroup userinput
 */
@@ -819,7 +879,7 @@ QString QSpeedDial::addWithDialog(const QString& label, const QString& icon,
 }
 
 /*!
-  Returns a QtopiaServiceDescription for the given Speed Dial input, \a input.
+  Returns a QtopiaServiceDescription for the given Speed Dial \a input.
 */
 QtopiaServiceDescription* QSpeedDial::find(const QString& input)
 {
@@ -839,7 +899,7 @@ QtopiaServiceDescription* QSpeedDial::find(const QString& input)
 }
 
 /*!
-  Removes the action currently associated with the given Speed Dial input, \a input.
+  Removes the action currently associated with the given Speed Dial \a input.
 */
 void QSpeedDial::remove(const QString& input)
 {
@@ -850,7 +910,7 @@ void QSpeedDial::remove(const QString& input)
 
 /*!
   Assigns the given QtopiaServiceDescription, \a r, as the action to perform when the given
-  Speed Dial input, \a input, is detected.
+  Speed Dial \a input, is detected.
 */
 void QSpeedDial::set(const QString& input, const QtopiaServiceDescription& r)
 {

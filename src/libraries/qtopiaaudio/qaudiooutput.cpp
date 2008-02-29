@@ -44,13 +44,24 @@
 
 /*!
     \class QAudioOutput
-    \brief The QAudioOutput class provides an interface for sending live audio samples to the default output device.
+    \mainclass
+    \brief The QAudioOutput class provides an interface for sending live audio samples to the default audio output device.
 
     The QAudioOutput class provides an interface for sending live audio
     samples to the default output device.  It is intended for use by
     media streaming applications that can produce a stream of 8-bit unsigned
     or 16-bit signed audio samples.  The sound output will be mixed with
     audio data from other applications.
+
+    The usual sequence for opening the default audio output device is as follows:
+
+    \code
+    QAudioOutput *audio = new QAudioOutput();
+    audio->setFrequency( 11025 );
+    audio->setChannels( 1 );
+    audio->setBitsPerSample( 8 );
+    audio->open( QIODevice::WriteOnly );
+    \endcode
 
     \sa QAudioInput
     \ingroup multimedia
@@ -165,6 +176,63 @@ public:
 
         //snd_pcm_uframes_t chunk_size;
         //snd_pcm_hw_params_get_period_size(hwparams, &chunk_size, 0);
+
+        int                  dir;
+        unsigned int         vval, vval2;
+	snd_pcm_uframes_t    size;
+        snd_pcm_uframes_t    frames;
+        
+
+        qDebug("QAudioOutput: PCM handle name = '%s'\n",snd_pcm_name(handle));
+        qDebug("PCM state = %s",snd_pcm_state_name(snd_pcm_state(handle)));
+        snd_pcm_hw_params_get_access(hwparams,(snd_pcm_access_t *) &vval);
+        qDebug("access type = %s",snd_pcm_access_name((snd_pcm_access_t)vval));
+        snd_pcm_hw_params_get_format(hwparams, (snd_pcm_format_t *) &vval);
+        qDebug("format = '%s' (%s)",snd_pcm_format_name((snd_pcm_format_t)vval),
+                  snd_pcm_format_description((snd_pcm_format_t)vval));
+        snd_pcm_hw_params_get_subformat(hwparams,(snd_pcm_subformat_t *)&vval);
+        qDebug("subformat = '%s' (%s)",snd_pcm_subformat_name((snd_pcm_subformat_t)vval),
+                  snd_pcm_subformat_description((snd_pcm_subformat_t)vval));
+        snd_pcm_hw_params_get_channels(hwparams, &vval);
+        qDebug("channels = %d", vval);
+        snd_pcm_hw_params_get_rate(hwparams, &vval, &dir);
+        qDebug("rate = %d bps", vval);
+        snd_pcm_hw_params_get_period_time(hwparams,&vval, &dir);
+        qDebug("period time = %d us", vval);
+        snd_pcm_hw_params_get_period_size(hwparams,&frames, &dir);
+        qDebug("period size = %d frames", (int)frames);
+        snd_pcm_hw_params_get_buffer_time(hwparams,&vval, &dir);
+        qDebug("buffer time = %d us", vval);
+        snd_pcm_hw_params_get_buffer_size(hwparams,(snd_pcm_uframes_t *) &vval);
+        qDebug("buffer size = %d frames", vval);
+        snd_pcm_hw_params_get_periods(hwparams, &vval, &dir);
+        qDebug("periods per buffer = %d frames", vval);
+        snd_pcm_hw_params_get_rate_numden(hwparams, &vval, &vval2);
+        qDebug("exact rate = %d/%d bps", vval, vval2);
+        val = snd_pcm_hw_params_get_sbits(hwparams);
+        qDebug("significant bits = %d", vval);
+        snd_pcm_hw_params_get_tick_time(hwparams,&vval, &dir);
+        qDebug("tick time = %d us", vval);
+        vval = snd_pcm_hw_params_is_batch(hwparams);
+        qDebug("is batch = %d", vval);
+        vval = snd_pcm_hw_params_is_block_transfer(hwparams);
+        qDebug("is block transfer = %d", vval);
+        vval = snd_pcm_hw_params_is_double(hwparams);
+        qDebug("is double = %d", vval);
+        vval = snd_pcm_hw_params_is_half_duplex(hwparams);
+        qDebug("is half duplex = %d", vval);
+        vval = snd_pcm_hw_params_is_joint_duplex(hwparams);
+        qDebug("is joint duplex = %d", vval);
+        vval = snd_pcm_hw_params_can_overrange(hwparams);
+        qDebug("can overrange = %d", vval);
+        vval = snd_pcm_hw_params_can_mmap_sample_resolution(hwparams);
+        qDebug("can mmap = %d", vval);
+        vval = snd_pcm_hw_params_can_pause(hwparams);
+        qDebug("can pause = %d", vval);
+        vval = snd_pcm_hw_params_can_resume(hwparams);
+        qDebug("can resume = %d", vval);
+        vval = snd_pcm_hw_params_can_sync_start(hwparams);
+        qDebug("can sync start = %d", vval);
 
         // Prepare for audio output.
         snd_pcm_prepare( handle );
@@ -363,9 +431,13 @@ public:
 /*!
     Construct a new audio output stream and attach it to \a parent.
     The default parameters are 44100 Hz Stereo, with 16-bit samples.
-    The device to be opened is specified by \a device.  The device
-    parameter is implementation specific, and might not be honored
-    by all implementations.
+
+    The device parameter is implementation-specific, and might
+    not be honored by all implementations.  It is usually an Alsa
+    device name such as \c{plughw:0,0}.  The string \c{default}
+    can be passed for \a device if the client application wishes
+    to use the default device and is not concerned with what
+    that default device may be called.
  */
 QAudioOutput::QAudioOutput( const QByteArray &device, QObject *parent )
     : QIODevice( parent )
@@ -395,13 +467,18 @@ QAudioOutput::QAudioOutput( QObject *parent )
 #endif
 }
 
+/*!
+    Destroy this audio output stream.
+*/
 QAudioOutput::~QAudioOutput()
 {
     delete d;
 }
 
 /*!
-    Get the current frequency of audio samples.  The default value is 44100.
+    Returns the current frequency of audio samples.  The default value is 44100.
+
+    \sa setFrequency()
 */
 int QAudioOutput::frequency() const
 {
@@ -409,8 +486,10 @@ int QAudioOutput::frequency() const
 }
 
 /*!
-    Set the frequency of audio samples to \a value.  Should be called
+    Sets the frequency of audio samples to \a value.  Should be called
     before open().
+
+    \sa frequency()
 */
 void QAudioOutput::setFrequency( int value )
 {
@@ -418,7 +497,9 @@ void QAudioOutput::setFrequency( int value )
 }
 
 /*!
-    Get the number of playback channels.  The default value is 2.
+    Returns the number of playback channels.  The default value is 2.
+
+    \sa setChannels()
 */
 int QAudioOutput::channels() const
 {
@@ -426,8 +507,10 @@ int QAudioOutput::channels() const
 }
 
 /*!
-    Set the number of playback channels to \a value.  Should be called
+    Sets the number of playback channels to \a value.  Should be called
     before open().
+
+    \sa channels()
 */
 void QAudioOutput::setChannels( int value )
 {
@@ -435,7 +518,11 @@ void QAudioOutput::setChannels( int value )
 }
 
 /*!
-    Get the number of bits per sample (8 or 16).  The default value is 16.
+    Returns the number of bits per sample (8 or 16).  If the value is 16, the samples
+    must be signed and in host byte order.  If bitsPerSample() is 8, the samples must
+    be unsigned.
+
+    \sa setBitsPerSample()
 */
 int QAudioOutput::bitsPerSample() const
 {
@@ -443,8 +530,11 @@ int QAudioOutput::bitsPerSample() const
 }
 
 /*!
-    Set the number of bits per sample to \a value (8 or 16).  Should be
-    called before open().
+    Sets the number of bits per sample to \a value (8 or 16).  Should be
+    called before open().  If the value is 16, the samples must be signed
+    and in host byte order.  If bitsPerSample() is 8, the samples must be unsigned.
+
+    \sa bitsPerSample()
 */
 void QAudioOutput::setBitsPerSample( int value )
 {
@@ -452,7 +542,7 @@ void QAudioOutput::setBitsPerSample( int value )
 }
 
 /*!
-    Open this audio output stream in \a mode.
+    Opens this audio output stream in \a mode.
 */
 bool QAudioOutput::open( QIODevice::OpenMode mode )
 {
@@ -465,7 +555,7 @@ bool QAudioOutput::open( QIODevice::OpenMode mode )
 }
 
 /*!
-    Close this audio output stream.
+    Closes this audio output stream.
 */
 void QAudioOutput::close()
 {
@@ -474,7 +564,7 @@ void QAudioOutput::close()
 }
 
 /*!
-    Determine if this QIODevice is sequential.  Always returns true.
+    Determines if this QIODevice is sequential.  Always returns true.
 */
 bool QAudioOutput::isSequential() const
 {
@@ -482,7 +572,7 @@ bool QAudioOutput::isSequential() const
 }
 
 /*!
-    Read up to \a maxlen bytes into \a data.  Not used for audio
+    Reads up to \a maxlen bytes into \a data.  Not used for audio
     output devices.
 */
 qint64 QAudioOutput::readData( char *, qint64 )
@@ -492,7 +582,10 @@ qint64 QAudioOutput::readData( char *, qint64 )
 }
 
 /*!
-    Write \a len bytes from \a data to the audio output stream.
+    Writes \a len bytes from \a data to the audio output stream.
+
+    If bitsPerSample() is 16, the samples must be signed and in host byte order.
+    If bitsPerSample() is 8, the samples must be unsigned.
 */
 qint64 QAudioOutput::writeData( const char *data, qint64 len )
 {

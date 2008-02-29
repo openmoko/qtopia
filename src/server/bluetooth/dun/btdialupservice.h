@@ -28,19 +28,16 @@
 #include <qtopiaserverapplication.h>
 
 class BtDialupServiceProvider;
-class BtDialupService : public QObject
+class BtDialupServiceTask : public QObject
 {
     Q_OBJECT
 public:
-    BtDialupService( QObject* parent = 0 );
-    ~BtDialupService();
+    BtDialupServiceTask( QObject* parent = 0 );
+    ~BtDialupServiceTask();
 
 private:
     BtDialupServiceProvider* d;
     friend class BtDialupServiceProvider;
 };
-
-QTOPIA_TASK_INTERFACE(BtDialupService);
-
 
 #endif //BT_DIALUP_SERVICE_h

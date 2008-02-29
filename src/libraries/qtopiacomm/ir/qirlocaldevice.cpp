@@ -417,17 +417,31 @@ error:
 
 /*!
     \class QIrLocalDevice
+    \mainclass
     \brief The QIrLocalDevice class encapsulates a local Infrared (IrDA) device.
 
     The QIrLocalDevice class can be used to control the state of the local
-    IrDA device and query for remote devices.
+    IrDA device and query for remote Infrared devices.
+
+    The user can control the state of the device by using the bringUp()
+    and bringDown() functions.  The isUp() function returns the state of
+    the device.
+
+    The local infrared device can be used to discover remote infrared devices
+    by calling the discoverRemoteDevices() function and hooking onto the
+    remoteDeviceFound() or remoteDevicesFound() signals.
+
+    This class can also be used to query the remote IAS database.
 
     \ingroup qtopiair
+    \sa QIrIasDatabase
  */
 
 /*!
-    Constructor.  This will construct the device handle for a given device name
-    \a device. This is usually of the form irdaN, e.g. irda0.
+    Constructs a local device for the given device name \a device. The
+    \a device is usually of the form irdaN, e.g. irda0.
+
+    \sa devices()
 */
 QIrLocalDevice::QIrLocalDevice(const QString &device)
 {
@@ -435,7 +449,7 @@ QIrLocalDevice::QIrLocalDevice(const QString &device)
 }
 
 /*!
-    Destructor.
+    Destroys the device object.
 */
 QIrLocalDevice::~QIrLocalDevice()
 {
@@ -453,6 +467,8 @@ const QString &QIrLocalDevice::deviceName() const
 
 /*!
     Returns true if the infrared device is up and running.
+
+    \sa bringUp(), bringDown()
 */
 bool QIrLocalDevice::isUp() const
 {
@@ -464,6 +480,8 @@ bool QIrLocalDevice::isUp() const
     could be brought up successfully, and false otherwise.
 
     NOTE: Under linux this function requires administrator privileges.
+
+    \sa isUp(), bringDown()
 */
 bool QIrLocalDevice::bringUp()
 {
@@ -475,6 +493,8 @@ bool QIrLocalDevice::bringUp()
     could be brought down successfully, and false otherwise.
 
     NOTE: Under linux this function requires administrator privileges.
+
+    \sa isUp(), bringUp()
 */
 bool QIrLocalDevice::bringDown()
 {
@@ -505,6 +525,7 @@ QStringList QIrLocalDevice::devices()
     The above code would attempt to query the remote device given by \c remote
     for whether it supports the OBEX service.
 
+    \sa QIrIasDatabase
 */
 QVariant QIrLocalDevice::queryRemoteAttribute(const QIrRemoteDevice &remote,
                                           const QString &className,
@@ -517,8 +538,18 @@ QVariant QIrLocalDevice::queryRemoteAttribute(const QIrRemoteDevice &remote,
     Starts a discovery of remote infrared devices.  The \a classes parameter
     specifies a filtering set.  Thus a client can request that only remote
     devices which have at least one device class present in the filter set
-    be discovered.  Returns true if the discovery  could be performed
-    successfully, and false otherwise.
+    be discovered.
+
+    The clients can subscribe to the discovery information in one of two ways.
+    If the client wants to receive information about a device as it is received,
+    they should subscribe to the remoteDeviceFound() signal.  If the clients
+    wish to receive the information wholesale, they should subscribe
+    to the remoteDevicesFound() signal.
+
+    Returns true if the discovery could be started successfully, and false
+    otherwise.
+
+    \sa discoveryStarted(), discoveryCompleted()
 */
 bool QIrLocalDevice::discoverRemoteDevices(QIr::DeviceClasses classes)
 {

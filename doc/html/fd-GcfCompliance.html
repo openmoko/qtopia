@@ -1,14 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>  GCF Compliance </title>
+  <title>  GCF Compliance </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  GCF Compliance <br><small>Functional Description</small></h1>
 <p />
 
@@ -16,25 +18,26 @@
 <h2><a name="Introduction"></a><a name="_Introduction"></a>  Introduction </h2>
 <p />
 GCF stands for "Global Certification Forum". GCF is a partnership between network operators and
-terminal manufacturers that has been formed with the objective of establishing an independent program to ensure global interoperability of GSM terminals. 
+terminal manufacturers that has been formed with the objective of establishing an independent
+program to ensure global interoperability of GSM terminals. 
 <p />
-The GCF specifications are huge, covering many areas from the behavior of the
-radio in the modem to user-interface requirements.  Much of this would be tested
-by the handset and modem manufacturers, and not us, but there may be implications
-for Qtopia.  e.g. A GCF test that checks if multi-party calls can be done by the modem
-according to the radio requirements isn't very useful if there is no UI to access the feature.
+The main technical GSM specification is <a href="http://www.3gpp.org/ftp/Specs/html-info/51-series.htm" target="_top">3GPP TS 51.010</a>,
+which summarizes the requirements in the form of test cases.  These test cases cover many
+areas, from the behavior of the radio in the modem to user-interface requirements.
 <p />
-The <a href="http://twiki.troll.no/twiki/bin/view/Munich/CertificationInfos" target="_top">Munich Wiki</a>
-has quite a bit of information about GCF, and the work that has been done so far
-to get a handle on how well Qtopia supports it.
+Qtopia is mainly concerned with the user-interface requirements of GCF, with the radio
+aspects handled by the modem.  The user-interface requirements are documented in
+a number of GSM specifications, including:
+<p /> <ul>
+<li> Mobile Station (MS) Features (<a href="http://www.3gpp.org/ftp/Specs/html-info/0207.htm" target="_top">3GPP TS 02.07</a>)
+</li> <li> Man-Machine Interface (MMI) of the User Equipment (UE) (<a href="http://www.3gpp.org/ftp/Specs/html-info/0230.htm" target="_top">3GPP TS 02.30</a>,      <a href="http://www.3gpp.org/ftp/Specs/html-info/22030.htm" target="_top">3GPP TS 22.030</a>)
+</li></ul> 
 <p />
-This goal of this specification page is to bring together the various pieces of information
-that are relevant to Qtopia development to generate requirements for other areas of
-the specification.
+Qtopia currently conforms to a subset of these specifications. For full details of compliance in specific versions, contact Trolltech.
 <p />
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div>

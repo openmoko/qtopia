@@ -255,17 +255,6 @@ defineTest(qtopia_project) {
     return(1)
 }
 
-# run_qdoc() this function registers the current project as a public library and runs
-# qdoc to check for documentation warnings/errors (if Qtopia is being built from the depot)
-# This only works if qdoc was enabled in configure
-defineTest(run_qdoc) {
-    qdoc {
-        CONFIG+=run_qdoc
-        export(CONFIG)
-        depends(tools/qt/qdoc3)
-    }
-}
-
 # Turn a value as it appears in the QT variable into the Qt library name it represents
 defineReplace(resolveqt) {
     equals(1,core):return(QtCore)
@@ -275,6 +264,7 @@ defineReplace(resolveqt) {
     else:equals(1,sql):return(QtSql)
     else:equals(1,svg):return(QtSvg)
     else:equals(1,opengl):return(QtOpenGL)
+    else:equals(1,qtestlib):return(QtTest)
     else:equals(1,winmain):return(qtmain)
     else:equals(1,control):return(QAxServer)
     else:equals(1,container):return(QAxContainer)
@@ -447,5 +437,15 @@ defineTest(createHeader) {
     export($${c}.depends)
     export(QMAKE_EXTRA_COMPILERS)
     export(ALL_DEPS)
+}
+
+# Create a raw Makefile dependency
+defineTest(create_raw_dependency) {
+    var=$$1
+    dep=$$2
+    eval($${var}.depends*=\$$dep)
+    export($${var}.depends)
+    QMAKE_EXTRA_TARGETS*=$$var
+    export(QMAKE_EXTRA_TARGETS)
 }
 

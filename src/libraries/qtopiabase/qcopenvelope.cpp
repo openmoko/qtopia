@@ -42,8 +42,13 @@
 
 /*!
   \class QCopEnvelope
-  \brief The QCopEnvelope class encapsulates and sends QCop messages
-  over QCopChannels.
+  \mainclass
+  \brief The QCopEnvelope class encapsulates and sends QCop messages.
+
+  This class is obsolete, and its direct equivalent is QtopiaIpcEnvelope.
+  Consider using QtopiaIpcAdaptor or QtopiaServiceRequest instead of
+  QtopiaIpcEnvelope, as they provide a better interface for sending
+  QCop messages.
 
   QCop messages allow applications to communicate with each other by
   sending messages using \c QCopEnvelope and receiving messages by connecting
@@ -63,7 +68,7 @@
   \list
   \o \c{channelname} is the channel name within Qtopia, commencing with "QPE/".
   \o \c{messagename} is a function identifier followed by a list of types
-  in parentheses. No whitespace is permitted.
+  in parentheses. No white space is permitted.
   \endlist
 
   Note: Do not try to simplify this further as it may confuse some
@@ -83,6 +88,8 @@
   See also: \l {Qtopia IPC Layer}{Qtopia IPC} and \l {Services}{Services}.
 
   \ingroup ipc
+
+  \sa QtopiaIpcAdaptor, QtopiaServiceRequest
 */
 
 /*!

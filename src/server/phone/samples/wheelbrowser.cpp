@@ -70,7 +70,6 @@ WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
     const int menur = cfg.value("Rows",3).toInt();
     const int menuc = cfg.value("Columns",3).toInt();
     QString menuKeyMap = cfg.value("Map","123456789").toString();
-    QString dir = QMimeType::appsFolderName();
 
     for (int i = 0; i < menur*menuc; i++) {
         QChar key = menuKeyMap[i];
@@ -80,7 +79,7 @@ WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
             QContent *app = readLauncherMenuItem(entries.first());
 
             if(app) {
-                QString file = app->file();
+                QString file = app->fileKnown() ? app->file() : QString("");
                 QString name = app->name();
                 if(app->type().startsWith("Folder/") )
                     file = app->type();
@@ -265,12 +264,18 @@ void WheelBrowserScreen::moveToView(const QString &name)
 
 QContent *WheelBrowserScreen::readLauncherMenuItem(const QString &entry)
 {
-    QString dir = QMimeType::appsFolderName();
     QContent *applnk = 0;
 
     if (entry.right(8)==".desktop") {
-        applnk = new QContent(dir+"/"+entry);
-        if ( !applnk->isValid() || applnk->type() == "Separator" ) { // No tr
+        // There used to be a quick way to locate a .desktop file
+        // Now we have to create a QContentSet and iterate over the items
+
+        // The path to the apps folder (which only exists in the database)
+        QString apps = Qtopia::qtopiaDir()+"apps/";
+        // We need the full path to the entry to compare against the items we get from QContentSet
+        QString entryPath = apps+entry;
+        applnk = new QContent( entryPath, false );
+        if ( applnk->id() == QContent::InvalidId ) {
             delete applnk;
             applnk = 0;
         }

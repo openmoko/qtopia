@@ -189,14 +189,21 @@ void QtopiaSendViaDialog::serverClicked(QListWidgetItem *item)
     accept();
 }
 
-QtopiaSendVia::QtopiaSendVia()
-{
-}
+/*!
+    \class QtopiaSendVia
+    \brief The QtopiaSendVia class provides an easy way of sending files via communications services.
 
-QtopiaSendVia::~QtopiaSendVia()
-{
-}
+    QtopiaSendVia makes it easy to send files, business cards,
+    tasks and calendar items to other devices via supported
+    communications protocols, e.g. Bluetooth, Infrared, SMS, Email, etc.
+*/
 
+/*!
+    Returns true if there is a handler in the system that can
+    handle sending the \a mimetype.
+
+    \sa isFileSupported()
+*/
 bool QtopiaSendVia::isDataSupported(const QString &mimetype)
 {
     QDSServices services(mimetype,
@@ -206,6 +213,13 @@ bool QtopiaSendVia::isDataSupported(const QString &mimetype)
     return services.count() > 0;
 }
 
+/*!
+    Returns true if there is a handler in the system that
+    can handle sending files.  Not all services can send
+    files, but some, like Bluetooth and Infrared can.
+
+    \sa isDataSupported()
+*/
 bool QtopiaSendVia::isFileSupported()
 {
 #if defined(QTOPIA_BLUETOOTH)
@@ -221,8 +235,27 @@ bool QtopiaSendVia::isFileSupported()
     return false;
 }
 
+/*!
+    Send \a data with \a mimetype via a communications link.  The
+    user will first be asked what communications medium to use
+    via a standard dialog.  Once the user has made their choice,
+    the appropriate handler will be invoked and the data will be
+    sent.  The \a parent specifies the parent widget for the dialog.
+    If the \a parent is NULL, then the choice dialog is constructed as
+    a top level dialog.
+
+    The user should use isDataSupported() to check that the
+    data can be sent.
+
+    Returns true if the request could be started, and false otherwise.
+
+    \sa sendFile(), isDataSupported(), QDialog
+*/
 bool QtopiaSendVia::sendData(QWidget *parent, const QByteArray &data, const QString &mimetype)
 {
+    if (!isDataSupported(mimetype))
+        return false;
+
     QtopiaSendViaDialog *dlg = new QtopiaSendViaDialog(data, mimetype, parent);
 
 # ifdef QTOPIA_PHONE
@@ -234,10 +267,35 @@ bool QtopiaSendVia::sendData(QWidget *parent, const QByteArray &data, const QStr
     return true;
 }
 
+/*!
+    Send \a filename with \a mimetype via a communications link.  The
+    user will first be asked what communications medium to use
+    via a standard dialog.  Once the user has made their choice, the
+    appropriate handler will be invoked and the data will be sent.
+
+    The \a parent specifies the parent widget for the dialog.  If the
+    \a parent is NULL, then the choice dialog is constructed as a top
+    level dialog.
+
+    Set \a autodelete to true if the file is a temporary file.  The
+    invoked handler will take care of deleting the file once it has
+    been sent.  If you do not wish the file to be deleted, set
+    \a autodelete to false.
+
+    The user should use isFileSupported() first to find out whether
+    file sending is supported.
+
+    Returns true if the request could be started, and false otherwise.
+
+    \sa isFileSupported(), sendData(), QDialog
+*/
 bool QtopiaSendVia::sendFile(QWidget *parent, const QString &filename, const QString &mimetype,
                              bool autodelete)
 {
 #if defined(QTOPIA_BLUETOOTH) || defined(QTOPIA_INFRARED)
+    if (!isFileSupported())
+        return false;
+
     QtopiaSendFileDialog *dlg = new QtopiaSendFileDialog(parent, filename, mimetype, autodelete);
 
 #ifdef QTOPIA_PHONE
@@ -255,6 +313,17 @@ bool QtopiaSendVia::sendFile(QWidget *parent, const QString &filename, const QSt
     return true;
 }
 
+/*!
+    This is an overloaded member function, provided for convenience.
+
+    This version works on QContent objects.
+
+    The file to send is given by \a content.  Set \a autodelete to
+    true if the file should be deleted once
+    the request is processed.  The \a parent holds the parent widget
+    for the dialog that will be shown to the user.
+
+*/
 bool QtopiaSendVia::sendFile(QWidget *parent, const QContent &content, bool autodelete)
 {
     QMimeType mime(content);

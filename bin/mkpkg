@@ -99,6 +99,7 @@ if ( $format eq "ipk" )
 }
 else # $format is "qpk"
 {
+
     $control_path = "$working_path";
 }
 my $control_file = "$control_path/control";
@@ -212,7 +213,7 @@ sub make_pkg
         if ( $format eq "qpk" )
         {
             print OUT "Domain: $domain\n";
-            print OUT "QtopiaVersion: ".opt("version", "qtopia")."\n";
+            print OUT "QtopiaVersion: ".get_compat_vers()."\n";
         }
         print OUT "Files: ".join(" ", @files)."\n";
         print OUT "Installed-Size: ".`du -sh $path | awk '{print \$1}'`;
@@ -286,5 +287,23 @@ sub make_pkg
             print "Created $pkg_path/".basename($rpm)."\n";
         }
     }
+}
+
+sub get_compat_vers
+{
+    my $verfile = resolveHeader("$QPEDIR/include/qtopiabase/version.h");
+    my $vers = "";
+    open IN, $verfile or die "Can't read $verfile";
+    while ( defined($_ = <IN>) ) {
+        if ( /COMPATIBLE_VERSIONS\s+"(.*)"/ ) {
+            $vers = $1;
+            last;
+        }
+    }
+    close IN;
+    if ( $vers eq "" ) {
+        die "ERROR: Couldn't read binary compatible versions from ".fixpath($verfile)."\n";
+    }
+    return $vers; 
 }
 

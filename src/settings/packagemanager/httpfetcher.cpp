@@ -21,6 +21,7 @@
 
 #include <QBuffer>
 #include <QSettings>
+#include <QString>
 
 #include "httpfetcher.h"
 #include "packageinformationreader.h"
@@ -28,7 +29,6 @@
 #include <qtopialog.h>
 #include <qtopianamespace.h>
 
-#include <qdebug.h>
 
 #define DEFAULT_MAX_PACKAGES 100
 #define MAX_PACKAGES_LIST_BYTES 50000
@@ -57,37 +57,23 @@ const int HttpFetcher::maxProgress = 100;
 
 void HttpFetcher::run()
 {
-    QString server;
-    QString path;
     QString fetchFile;
 
     // if no file set, assume fetching package list
     fetchFile = file.isEmpty() ? AbstractPackageController::PACKAGE_SUMMARY_FILE : file;
-    if ( url.startsWith( "http://" ))
-        url = url.mid( 7 );
-    int firstSlash = url.indexOf( "/" );
-    if ( firstSlash < 0 )  // no path
-    {
-        server = url;
-        if ( file.isEmpty() ) // assume fetching package list
-            path = QString( "/%1" ).arg( fetchFile );
-    }
+
+    if(url.path().endsWith("/"))
+        url.setPath(url.path() + fetchFile);
     else
-    {
-        server = url.left( firstSlash );
-        path = url.mid( firstSlash );
-        if ( path.endsWith( "/" ))
-            path += fetchFile;
-        else
-            path += QString( "/%1" ).arg( fetchFile );
-    }
+        url.setPath(url.path() + "/" + fetchFile);
+
     if ( http == 0 ) http = new QHttp();
     connect( this, SIGNAL(httpAbort()),
             http, SLOT(abort()) );
 
+    QString query;
     HttpFileReceiver *hr;
     Md5File *md5File = 0;
-    const QString tmp="tmp/";
     QDir packagePathDir( Qtopia::packagePath() );
     if ( file.isEmpty() ) // getting package list
     {
@@ -95,32 +81,17 @@ void HttpFetcher::run()
         QSettings packageServersConf( "Trolltech", "PackageServers" );
         packageServersConf.beginGroup( "DeviceType" );
         QString device( packageServersConf.value( "device", "unknown" ).toString() );
-        path.append("?device=").append(device);
+        query = "?device=" + device;
         packageServersConf.endGroup(); 
 
         if ( packageData == 0 ) packageData = new QBuffer();
         hr = new HttpInfoReceiver;
         connect( packageData, SIGNAL(bytesWritten(qint64)),
                 hr, SLOT(packageDataWritten(qint64)));
-        
-        if ( packagePathDir.exists(tmp) )
-        {
-            QDir packageTmpDir( Qtopia::packagePath() + tmp );
-            QFileInfoList fileList= packageTmpDir.entryInfoList( QDir::Files );
-            QFile f;
-            foreach( QFileInfo fi, fileList )
-            {
-                f.setFileName( fi.absoluteFilePath() );
-                f.remove();
-            }
-        }
     }
     else                  // getting a file
     {
-        if ( !packagePathDir.exists(tmp) )
-            packagePathDir.mkdir( tmp );
-
-        md5File = new Md5File( file.prepend( Qtopia::packagePath() + tmp ) );
+        md5File = new Md5File( file.prepend( Qtopia::tempDir() ) );
         // qDebug() << "http fetching" << md5File->fileName();
         if ( md5File->exists() )
             md5File->remove();
@@ -138,10 +109,10 @@ void HttpFetcher::run()
             hr, SLOT(httpRequestFinished(int,bool)));
 
     // qDebug() << "set host" << server;
-    http->setHost( server, 80 );
+    http->setHost( url.host() , url.port(80));
     packageData->open( QIODevice::WriteOnly );
     // qDebug() << "get data" << path;
-    httpGetId = http->get( path, packageData );
+    httpGetId = http->get( url.path() + query, packageData );
 
     // show some progress now that we've set everything up
     curProgValue = initProgress;
@@ -322,7 +293,8 @@ void HttpInfoReceiver::packageComplete()
     NetworkPackageController *npc = static_cast<NetworkPackageController*>(fetcher->pkgController);
     if ( npc->numberPackages() < maxPackagesList )
     {
-        if ( VersionUtil::checkVersion( reader->package().qtopiaVersion ) )
+        //do not display packages which are not compatible with this version of qtopia
+        if ( VersionUtil::checkVersionLists(Qtopia::compatibleVersions(), reader->package().qtopiaVersion ) )
                 npc->addPackage( reader->package() );
     }
     else

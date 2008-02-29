@@ -47,6 +47,17 @@ DBUSQtopiaApplicationChannelAdaptor::DBUSQtopiaApplicationChannelAdaptor(QObject
 
 }
 
+/*!
+    \class DBUSQtopiaApplicationChannel
+    \brief The DBUSQtopiaApplicationChannel class implements Qtopia application channels over DBUS.
+
+    \internal
+
+    This class is an implementation detail and should not be used.
+
+    It is exported for use by libqtopia and the qpe server.
+*/
+
 DBUSQtopiaApplicationChannel::DBUSQtopiaApplicationChannel(const QString &appName,
                                                            QObject *parent) :
         QObject(parent),
@@ -59,7 +70,7 @@ DBUSQtopiaApplicationChannel::DBUSQtopiaApplicationChannel(const QString &appNam
 
     QDBusConnection dbc = QDBus::sessionBus();
     if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
     }
 
@@ -82,6 +93,9 @@ DBUSQtopiaApplicationChannel::DBUSQtopiaApplicationChannel(const QString &appNam
     }
 }
 
+/*!
+    Destructor.
+*/
 DBUSQtopiaApplicationChannel::~DBUSQtopiaApplicationChannel()
 {
     QDBusConnection dbc = QDBus::sessionBus();
@@ -94,6 +108,9 @@ DBUSQtopiaApplicationChannel::~DBUSQtopiaApplicationChannel()
     iface->unregisterService(m_serviceName);
 }
 
+/*!
+    Implement the appMessage.
+*/
 void DBUSQtopiaApplicationChannel::appMessage(const QString &msg, const QByteArray &data)
 {
     QFile f("/home/dkenzior/foobar");
@@ -103,11 +120,6 @@ void DBUSQtopiaApplicationChannel::appMessage(const QString &msg, const QByteArr
     f.close();
     qLog(DBUS) << "DBUSQtopiaApplicationChannel Received message:" << msg;
     emit received(msg, data);
-}
-
-void DBUSQtopiaApplicationChannel::foobar()
-{
-    qLog(DBUS) << "Foobar called on application channel!";
 }
 
 #include "dbusapplicationchannel_p.moc"

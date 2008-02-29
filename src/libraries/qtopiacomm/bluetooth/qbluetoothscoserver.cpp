@@ -47,9 +47,30 @@ public:
 
 /*!
     \class QBluetoothScoServer
+    \mainclass
     \brief The QBluetoothScoServer class represents a SCO server socket.
 
     This class makes it possible to accept incoming SCO connections.
+    Synchronous Connection Oriented connections are used to transfer
+    audio data over a Bluetooth link.  The audio data is usually
+    compressed by a lossy codec and should not be used to transfer
+    bulk data.
+
+    Call listen() to make the server listen for new connections.  The
+    newConnection() signal will be emmited each time a client connects
+    to the server.
+
+    Call nextPendingConnection() to accept the pending client connection.
+
+    When listening for connections, server address is available by
+    calling serverAddress().
+
+    Calling close() will make the QBluetoothScoServer stop listening
+    for connections and delete all pending connections.
+
+    \sa QBluetoothScoSocket
+
+    \ingroup qtopiabluetooth
  */
 
 /*!
@@ -63,8 +84,8 @@ QBluetoothScoServer::QBluetoothScoServer(QObject *parent)
 }
 
 /*!
-    Destructor.
- */
+    Destroys the server.
+*/
 QBluetoothScoServer::~QBluetoothScoServer()
 {
     if (m_data)

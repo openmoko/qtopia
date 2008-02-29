@@ -35,7 +35,6 @@ public:
     ExampleMouseHandler();
     ~ExampleMouseHandler();
 
-    void calibrate( QWSPointerCalibrationData * );
     void suspend();
     void resume();
 
@@ -44,9 +43,8 @@ private:
     void closeTs();
 
 private:
-    bool m_raw : 1;
-    int  totX,totY,nX,nY;
-    int  sx[TS_SAMPLES+3], sy[TS_SAMPLES+3], ss;
+    int  nX,nY;
+    int  sx[TS_SAMPLES+3], sy[TS_SAMPLES+3];
     int  index_x1, index_x2, index_y1, index_y2, min_x, min_y;
     int  mouseFD;
     int  mouseIdx;

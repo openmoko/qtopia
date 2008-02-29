@@ -100,7 +100,7 @@ const QUuid QUniqueIdTracker::device("802be8cf-25d6-43eb-88ec-1b2204ec668c");
 
 static QUniqueIdTracker *result = 0;
 
-static void clean_uniqueIDTracker()
+static void clean_uniqueIdTracker()
 {
     if ( result )
         delete result;
@@ -111,7 +111,7 @@ static QUniqueIdTracker &uniqueIdTracker()
 {
     if (!result) {
         result = new QUniqueIdTracker(Qtopia::applicationFileName("Qtopia", "QUniqueIdTrackerFile"));
-        qAddPostRoutine( clean_uniqueIDTracker );
+        qAddPostRoutine( clean_uniqueIdTracker );
     }
     return *result;
 }
@@ -314,42 +314,52 @@ template <typename Stream> void QUniqueId::deserialize(Stream &stream)
 }
 
 
+
 QUuid QUniqueId::legacyIdContext()
 {
     return QUuid("35a20342-a280-40d5-a18f-f45cd9d92e7d");
 }
 
-QUuid QUniqueId::temporaryIDContext()
+QUuid QUniqueId::temporaryIdContext()
 {
     return QUuid("f3ed326a-f37a-4aa0-bad3-f7968e9ecd60");
 }
 
+/*
+  \obsolete
+  Replaced by QUniqueIdGenerator::createTemporaryId().
+*/
+QUniqueId QUniqueId::constructApplicationLocalUniqueId()
+{
+    return QUniqueIdGenerator::createTemporaryId();
+}
+
 /*!
   \class QUniqueIdGenerator
+  \mainclass
   \brief The QUniqueIdGenerator class provides a generator of unique identifiers.
 
-  The QUniqueIdGenerator class provides a generator of unique identifiers.  They are
-  32 bits, 4 bits of which make up a context and the remaining 24 bits an index component.
-  This allows separate contexts to generated ids to be stored in a single list.  Unlike
-  QUUid, QUniqueId is only unique upon a single device.
+  The unique identifiers that are generated are 32 bits and are unique within the device
+  they are created upon. If you require an identifier that is unique across multiple
+  devices use QUuid instead.
 
-  Ids are generated with a QUuid Context identifier and an index.
-  The context identifier should be generated with a program such as \a quuid and represent
-  the data store or context within which the id is generated.  For example, XML, SQL , and SIM
-  card storage for QContacts each have their own Context Identifier.  The Context is mapped
-  to a 4bit value allowing for 255 contexts for a single device.
+  The identifiers are are generated with a QUuid context identifier and an index.
+  The context should be generated with a program such as \a uuidgen and represent
+  the data store or context within which the identifier is generated.  For example  SQL and SIM
+  card storage for QContacts each have their own context.  The context is mapped
+  to a 8 bit value allowing for 255 contexts for a single device.
 
   The usual approach to constructing QUniqueIds is:
 
 \code
-  QUniqueIdGenerator g(myContext());
-  id = g.createId();
+  QUniqueIdGenerator generator(myContext);
+  id = generator.createId();
 \endcode
 
   QUniqueIdGenerator is suitable in cases where you need to generate an average of 100 identifiers
   a day or less and require a low number of bits when stored.  If your program is likely to need
   more than 100 unique identifiers a day or does not benefit from the low 32bit storage size it is
-  recommended you look at another type of unique id, such as QUuid.
+  recommended you look at another type of unique id such as QUuid.
 
   \ingroup misc
 */
@@ -358,16 +368,25 @@ QUuid QUniqueId::temporaryIDContext()
   \fn bool QUniqueIdGenerator::isValid() const
 
   Returns true if the generator is valid and can be used to create or construct
-  unique ids.  Otherwise returns false.
+  unique identifers.  Otherwise returns false.
 
   This function should only be needed during debugging as only a generator
   constructed using null QUuids will be invalid.
 */
 
 /*!
-  Create a QUniqueIdGenerator with the scope \a context.
-  It is recommended that the context be hard coded into your application.  Generating
-  \a context at run time is redundant.
+  Constructs a QUniqueIdGenerator with the given \a context.
+  It is recommended that the context be hard coded into your application.
+
+  Example:
+  \code
+  QUniqueIdGenerator(QUUid("bd668b78-d892-4345-b0a3-77502d684f06"));
+  \endcode
+
+  You can generate the context string using the \c uuidgen program.
+  As there are  only 255 available contexts, you should generate the
+  context when developing your application, not as part of the
+  application's execution.
 */
 QUniqueIdGenerator::QUniqueIdGenerator(const QUuid &context)
     : mLastId(0), mReserved(0)
@@ -376,7 +395,7 @@ QUniqueIdGenerator::QUniqueIdGenerator(const QUuid &context)
 }
 
 /*!
-  Create a deep copy from \a other.
+  Constructs a copy of \a other.
 */
 QUniqueIdGenerator::QUniqueIdGenerator(const QUniqueIdGenerator &other)
     : mContext(other.mContext), mLastId(other.mLastId), mReserved(0)
@@ -384,13 +403,13 @@ QUniqueIdGenerator::QUniqueIdGenerator(const QUniqueIdGenerator &other)
 }
 
 /*!
-  Destroy QUniqueIdGenerator.
+  Destroys the QUniqueIdGenerator.
 */
 QUniqueIdGenerator::~QUniqueIdGenerator() { }
 
 /*!
-   Returns a locally mapped int for \a context, suitable for
-   checking if a QUniqueId was generated from an equivalent
+   Returns a locally mapped integer value for \a context suitable for
+   efficiently checking if a QUniqueId was generated from an equivalent
    QUniqueIdGenerator.
 
    \sa QUniqueId::mappedContext()
@@ -401,22 +420,49 @@ uint QUniqueIdGenerator::mappedContext(const QUuid &context)
 }
 
 /*!
-  Creates a temporary identity based on \a index.
+  Returns a identifier that is valid only within a single application.  This
+  identifier should not be shared or persisted between different applications or
+  different executions of the same application.
 
-  Temporary identifiers are scoped so as not to conflict
-  with other identifiers.
+  This function is not threadsafe.
 */
-QUniqueId QUniqueIdGenerator::temporaryID(uint index)
+QUniqueId QUniqueIdGenerator::createTemporaryId()
 {
-    QUniqueId i;
-    uint context = uniqueIdTracker().reserveContext(QUniqueId::temporaryIDContext());
-    i.setIdentity(context, index);
-    return i;
+    static unsigned int nextId = 0;
+    return constructTemporaryId(++nextId);
 }
 
 /*!
-  Generate and return a new identifier.  The identifier will be unique from other ids generated with
-  this function.
+  Returns an identifier that is valid only within a single application with the given \a index component.
+  This identifier should not be shared or persisted between different applications or
+  different executions of the same application. 
+  This function does not ensure the constructed identifier is not in conflict with past or future QUniqueId objects.
+
+  This function is not threadsafe.
+*/
+QUniqueId QUniqueIdGenerator::constructTemporaryId(uint index)
+{
+    static uint context(uniqueIdTracker().reserveContext(QUniqueId::temporaryIdContext()));
+    QUniqueId id;
+    id.setIdentity(context, index);
+    return id;
+}
+
+/*!
+  \obsolete
+  Replaced by constructTemporaryId().
+*/
+QUniqueId QUniqueIdGenerator::temporaryID(uint index)
+{
+    return constructTemporaryId(index);
+}
+
+
+
+/*!
+  Returns an identifier with the same context component as the generator and
+  an index component that is unique against other identifiers generated with
+  this function for the same context and device.
 
   \sa constructUniqueId()
 */
@@ -443,8 +489,8 @@ QUniqueId QUniqueIdGenerator::createUniqueId()
 }
 
 /*!
-  Constructs a identifier based on \a index for the context of the generator.
-  Does not ensure the constructed id is not in conflict with past or future QUniqueId objects.
+  Returns a identifier with the given \a index component.
+  Does not ensure the constructed identifier is not in conflict with past or future QUniqueId objects.
 
   \sa createUniqueId()
 */
@@ -466,30 +512,33 @@ QUniqueId QUniqueIdGenerator::constructUniqueId(uint index)
 
   Temporary identifiers are scoped so as not to conflict with other identifiers.
 
-  They are suitable for working with data sets when the ids are not
+  They are suitable for working with data sets when the identifiers are not
   intended to be permanent.
 */
 bool QUniqueId::isTemporary() const
 {
     // faster to look up via context.
     QUuid c = uniqueIdTracker().right(mappedContext());
-    return c == temporaryIDContext();
+    return c == temporaryIdContext();
 }
 
 /*!
   \class QUniqueId
+  \mainclass
   \brief The QUniqueId class provides an identifier that is unique and yet can be stored
   efficiently.
 
-  The QUniqueId class provides a 32 bit identifier that is unique to the device it is created
-  on.  The are composed of an 8 bit context representing the data source that created them
-  and a 24 bit index component.  They are intended for the case of record identifiers for
-  data such as contacts, however given the limited space of identifiers they are unsuitable
-  for use as identifiers that might get created on the order of thousands per day.
+  The unique identifiers are 32 bits and are unique within the device they is created
+  upon.  If you require an identifier that is unique across multiple
+  devices use QUuid instead. The QUniqueId objects are composed of an 8 bit context
+  representing the data source that created them and a 24 bit index component.
+  The unique identifiers are intended for record identifiers such as user contacts.
+  Given the limited space of identifiers they are unsuitable for use as identifiers that
+  might get created on the order of thousands per day.
 
-  The context identifier should be generated with a program such as \a quuid and represent
-  the data store or context within which the id is generated.  For example, XML, SQL, and SIM
-  card storage for QContacts each have their own Context Identifier.
+  The context identifier should be generated with a program such as \a uuidgen and represent
+  the data store or context within which the identifier is generated.  For example SQL, and SIM
+  card storage for QContacts each have their own context.
 
   \sa QUniqueIdGenerator
 
@@ -497,8 +546,8 @@ bool QUniqueId::isTemporary() const
 */
 
 /*!
-   Returns a locally mapped int for the context of the id.
-   This is useful checking if a QUniqueId was generated from an equivalent
+   Returns a locally mapped integer value for the context of the id.
+   This is useful for efficiently checking if a QUniqueId was generated from an equivalent
    QUniqueIdGenerator.
 
    \sa QUniqueIdGenerator::mappedContext()
@@ -510,39 +559,39 @@ uint QUniqueId::mappedContext() const
 }
 
 /*!
-  \fn bool QUniqueId::operator==(const QUniqueId &o) const
+  \fn bool QUniqueId::operator==(const QUniqueId &i) const
 
-  Returns true if the identifier is equal to \a o.  Otherwise returns false.
+  Returns true if the identifier is equal to \a i.  Otherwise returns false.
 */
 
 /*!
-  \fn bool QUniqueId::operator!=(const QUniqueId &o) const
+  \fn bool QUniqueId::operator!=(const QUniqueId &i) const
 
-  Returns true if the identifier is not equal to \a o.  Otherwise returns false.
+  Returns true if the identifier is not equal to \a i.  Otherwise returns false.
 */
 
 /*!
-  \fn bool QUniqueId::operator<(QUniqueId o) const
+  \fn bool QUniqueId::operator<(QUniqueId i) const
 
-  Returns true if the identifier is less than \a o.  Otherwise returns false.
+  Returns true if the identifier is less than \a i.  Otherwise returns false.
 */
 
 /*!
-  \fn bool QUniqueId::operator>(QUniqueId o) const
+  \fn bool QUniqueId::operator>(QUniqueId i) const
 
-  Returns true if the identifier is greater than \a o.  Otherwise returns false.
+  Returns true if the identifier is greater than \a i.  Otherwise returns false.
 */
 
 /*!
-  \fn bool QUniqueId::operator<=(QUniqueId o) const
+  \fn bool QUniqueId::operator<=(QUniqueId i) const
 
-  Returns true if the identifier is less than or equal to \a o.  Otherwise returns false.
+  Returns true if the identifier is less than or equal to \a i.  Otherwise returns false.
 */
 
 /*!
-  \fn bool QUniqueId::operator>=(QUniqueId o) const
+  \fn bool QUniqueId::operator>=(QUniqueId i) const
 
-  Returns true if the identifier is greater than or equal to \a o.  Otherwise returns false.
+  Returns true if the identifier is greater than or equal to \a i.  Otherwise returns false.
 */
 
 /*!
@@ -552,22 +601,22 @@ uint QUniqueId::mappedContext() const
 */
 
 /*!
-  Constructs A QUniqueId based on the string \a s.
+  Constructs a QUniqueId based on the given \a string.
 */
-QUniqueId::QUniqueId(const QString &s)
+QUniqueId::QUniqueId(const QString &string)
 {
-    int pos = s.indexOf(':');
+    int pos = string.indexOf(':');
     if (pos < 0) {
         // then is short version
-        pos = s.indexOf('-');
-        uint context = s.left(pos).toInt();
-        uint id = s.mid(pos+1).toInt();
+        pos = string.indexOf('-');
+        uint context = string.left(pos).toInt();
+        uint id = string.mid(pos+1).toInt();
         setIdentity(context, id);
     } else {
         // long version
         // reads both uid:uid:index and uid:index, the later containing no device id.
 
-        QStringList sl = s.split(':');
+        QStringList sl = string.split(':');
 
         if (sl.count() == 3) {
             // Old format, ignore the first uid (device id)
@@ -590,12 +639,12 @@ QUniqueId::QUniqueId(const QString &s)
 QUniqueId::QUniqueId() : mId(0) {}
 
 /*!
-  Constructs a deep copy of \a o.
+  Constructs a copy of \a other.
 */
-QUniqueId::QUniqueId(const QUniqueId &o) : mId(o.mId) {}
+QUniqueId::QUniqueId(const QUniqueId &other) : mId(other.mId) {}
 
 /*!
-  Constructs A QUniqueId based on the byte array \a array.
+  Constructs a QUniqueId based on the given \a array.
 */
 QUniqueId::QUniqueId(const QByteArray &array)
 {
@@ -632,7 +681,7 @@ uint QUniqueId::index() const
 }
 
 /*!
-  Sets the context component of the id to \a context.
+  Sets the \a context component of the identifier.
  */
 void QUniqueId::setContext(uint context)
 {
@@ -641,7 +690,7 @@ void QUniqueId::setContext(uint context)
 }
 
 /*!
-  Sets the index component of the id to \a index.
+  Sets the \a index component of the identifier.
  */
 void QUniqueId::setIndex(uint index)
 {
@@ -667,10 +716,11 @@ QUuid QUniqueId::context() const
 }
 
 /*!
-  Returns the id formatted as a string.  This string will only include \i latin1 characters and
-  contains the expanded form of the context.
-  This allows the id to be backed up independent
+  Converts the identifier to a string.  This string will only include \i latin1 characters and
+  contains the expanded form of the context.  This allows the identifier to be backed up independent
   of the internal mapping of context QUuid to the internal context component.
+
+  \sa toLocalContextString()
 */
 QString QUniqueId::toString() const
 {
@@ -681,9 +731,12 @@ QString QUniqueId::toString() const
 }
 
 /*!
-  Returns the id formatted as a byte array.  The byte array contains the expanded form of the
-  context.  This allows the id to be backed up independent
-  of the internal mapping of context QUuid to the internal context component.
+  Converts the identifier to a byte array. The byte array contains the
+  expanded form of the context.  This allows the identifier to be backed
+  up independent of the internal mapping of context QUuid to the internal
+  context component.
+
+  \sa toLocalContextByteArray()
 */
 QByteArray QUniqueId::toByteArray() const
 {
@@ -694,7 +747,9 @@ QByteArray QUniqueId::toByteArray() const
 }
 
 /*!
-  Returns the id packed as a 32 bit uint.  This contains both the context and the index components of the id.
+  Converts the identifier to a packed value containing both the context and index components of the identifier.
+
+  \sa fromUInt()
 */
 uint QUniqueId::toUInt() const
 {
@@ -702,17 +757,19 @@ uint QUniqueId::toUInt() const
 }
 
 /*!
-  Returns the QUniqueId represented by the packed value \a identifier.
+  Converts the packed \a value to a QUniqueId,
+
+  \sa toUInt()
 */
-QUniqueId QUniqueId::fromUInt(uint identifier)
+QUniqueId QUniqueId::fromUInt(uint value)
 {
     QUniqueId id;
-    id.mId = identifier;
+    id.mId = value;
     return id;
 }
 
 /*!
-  Returns the id formatted as a string.  This string will only include \i latin1 characters,
+  Converts the identifier to a string.  This string will only include \i latin1 characters,
   and will contains the mapped context.  If the tracking or generating file is reset this
   string won't be usable to gain the original id.
 
@@ -724,22 +781,7 @@ QString QUniqueId::toLocalContextString() const
 }
 
 /*!
-  Returns a QUniqueId that is valid only within a single application.  This
-  QUniqueId should not be shared or persisted between different applications or
-  even different executions of the same application.
-
-  This function is not threadsafe.
- */
-QUniqueId QUniqueId::constructApplicationLocalUniqueId()
-{
-    static unsigned int nextId = 0;
-    QUniqueId id;
-    id.setIdentity(0, ++nextId);
-    return id;
-}
-
-/*!
-  Returns the id formatted as a byte array.  The mapped representation of the context
+  Converts the identifier to a byte array. The mapped representation of the context
   will be written rather than the expanded QUuid.  If the tracking or generating file is
   reset this byte array won't be usable to gain the original id.
 
@@ -753,25 +795,29 @@ QByteArray QUniqueId::toLocalContextByteArray() const
 
 #ifndef QT_NO_DATASTREAM
 /*!
-  Streams the id from the data stream \a s.  This function is not suitable for streaming data
-  from another device or from a file that may have been transferred.
+    Reads the identifier from the given \a stream, and returns a reference
+    to the stream.  This function is not suitable for streaming data
+    from another device or from a file that may have been transferred from
+    another device.
 */
-QDataStream &QUniqueId::fromLocalContextDataStream( QDataStream &s )
+QDataStream &QUniqueId::fromLocalContextDataStream( QDataStream &stream )
 {
     quint32 a;
-    s >> a;
+    stream >> a;
     mId = a;
-    return s;
+    return stream;
 }
 
 /*!
-  Streams the id to the data stream \a s.  This function is not suitable for streaming data
-  to another device or to a file that may be transferred.
+    Writes the identifier to the given \a stream, and returns a reference
+    to the stream.  This function is not suitable for streaming data
+    to another device or to a file that may be transferred to
+    another device.
 */
-QDataStream &QUniqueId::toLocalContextDataStream( QDataStream &s ) const
+QDataStream &QUniqueId::toLocalContextDataStream( QDataStream &stream ) const
 {
-    s << (quint32) mId;
-    return s;
+    stream << (quint32) mId;
+    return stream;
 }
 #endif
 

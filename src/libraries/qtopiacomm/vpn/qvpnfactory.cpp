@@ -31,16 +31,21 @@
 
 /*!
   \class QVPNFactory
-  \brief The QVPNFactory class creates QVPNClient objects.
+  \mainclass
+  \brief The QVPNFactory class creates QVPNClient instances.
 
   \ingroup io
 
-  The virtual private network factory creates a QVPNCLient object
-  for a given ID or type with QVPNFactory::create().
+  The virtual private network factory provides access to QVPNClient instances.
+  create() should be used when a new VPN connection is required and instance() 
+  should be used to obtain a reference to an already existing VPN connection.
+  
+  In addition QVPNFactory provides functionality to lookup and resolve VPN identifier.
+  vpnIDs() returns a list of all known virtual private network connections known to Qtopia
+  and name() returns the human-readable name of a given connection.
 
-
-
-  vpnIDs() returns a list of all known virtual private networks.
+  QVPNFactory follows the factory pattern and creates QVPNClient instances. types() should
+  be used to determine what types of VPN's are supported by a particular build of Qtopia.
 
   \sa QVPNClient
 
@@ -56,11 +61,11 @@ QVPNFactory::QVPNFactory()
 
 
 /*!
-  Creates and returns a QVPNClient object for the virtual private network
-  specified by \a vpnID with the given \a parent. If no network with \a vpnID
+  Instanciates a QVPNClient object for the virtual private network
+  specified by \a vpnID with the given \a parent. If no VPN with \a vpnID
   exists this function returns a null pointer.
 */
-QVPNClient* QVPNFactory::create( uint vpnID,  QObject* parent )
+QVPNClient* QVPNFactory::instance( uint vpnID,  QObject* parent )
 {
     QVPNClient* result = 0;
 
@@ -100,9 +105,9 @@ QVPNClient* QVPNFactory::create( uint vpnID,  QObject* parent )
 }
 
 /*!
-  Creates and returns a QVPNClient object for a virtual private network
-  of type \a type with the given \a parent. If \a type is unknown this function returns
-  a null pointer.
+  Requests a new virtual private network of \a type with the given \a parent.
+  The returned VPN is a newly created and requires detailed configuration.
+  If \a type is unknown this function returns a null pointer.
   */
 QVPNClient* QVPNFactory::create( QVPNClient::Type type, QObject* parent )
 {
@@ -176,7 +181,7 @@ QSet<uint> QVPNFactory::vpnIDs()
 
 /*!
   \internal
-  The QVPNManager is the only instance that actually starts and stops a virtual private network.
+  The QtopiaVPNManager is the only instance that actually starts and stops a virtual private network.
   Any QVPNClient which is created in non-server mode forwards start/stop requests to the QVPNManager.
   */
 void QVPNFactory::setServerMode( bool enable )

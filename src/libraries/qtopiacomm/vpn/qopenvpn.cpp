@@ -47,6 +47,7 @@
 /*!
   \internal
   \class QOpenVPN
+  \mainclass
   \internal This class represents an OpenVPN network.
 
   An QOpenVPN objects operates in two distinct modes.

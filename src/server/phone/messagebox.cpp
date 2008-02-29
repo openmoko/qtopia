@@ -64,7 +64,21 @@ public:
     int yesKey;
 };
 
-// define PhoneMessageBox
+
+/*!
+  \class PhoneMessageBox
+  \brief The PhoneMessageBox class implements the Qtopia Phone message box.
+  \ingroup QtopiaServer::PhoneUI
+  
+  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+
+  \sa QAbstractServerInterface, QAbstractMessageBox
+  */
+
+/*!
+  Constructs a new PhoneMessageBox instance with the specified \a parent
+  and widget \a flags.
+  */
 PhoneMessageBox::PhoneMessageBox(QWidget *parent, Qt::WFlags flags)
 : QAbstractMessageBox(parent, flags)
 {
@@ -85,6 +99,9 @@ PhoneMessageBox::PhoneMessageBox(QWidget *parent, Qt::WFlags flags)
         parent->installEventFilter(this);
 }
 
+/*!
+  \reimp
+  */
 void PhoneMessageBox::setButtons(Button button0, Button button1)
 {
     d->btn0 = button0;
@@ -108,6 +125,9 @@ void PhoneMessageBox::setButtons(Button button0, Button button1)
     }
 }
 
+/*!
+  \reimp
+  */
 void PhoneMessageBox::setButtons(const QString &button0Text, const QString &button1Text, const QString &button2Text,
         int defaultButtonNumber, int escapeButtonNumber)
 {
@@ -142,22 +162,34 @@ void PhoneMessageBox::setButtons(const QString &button0Text, const QString &butt
     }
 }
 
+/*!
+  \reimp
+  */
 QString PhoneMessageBox::title() const
 {
     return d->title;
 }
 
+/*!
+  \reimp
+  */
 void PhoneMessageBox::setTitle(const QString &title)
 {
     d->title = title;
     setWindowTitle(title);
 }
 
+/*!
+  \reimp
+  */
 PhoneMessageBox::Icon PhoneMessageBox::icon() const
 {
     return d->icon;
 }
 
+/*!
+  \reimp
+  */
 void PhoneMessageBox::setIcon(Icon i)
 {
     d->icon = i;
@@ -176,16 +208,25 @@ void PhoneMessageBox::setIcon(Icon i)
     d->iconLabel->setPixmap(pm);
 }
 
+/*!
+  \reimp
+  */
 QString PhoneMessageBox::text() const
 {
     return d->msg->text();
 }
 
+/*!
+  \reimp
+  */
 void PhoneMessageBox::setText(const QString &text)
 {
     d->msg->setText(text);
 }
 
+/*!
+  \internal
+  */
 void PhoneMessageBox::keyPressEvent(QKeyEvent *ke)
 {
     if (d->customButton) {
@@ -238,6 +279,9 @@ void PhoneMessageBox::keyPressEvent(QKeyEvent *ke)
     }
 }
 
+/*!
+  \internal
+  */
 bool PhoneMessageBox::eventFilter(QObject *, QEvent *e)
 {
     if (e->type() == QEvent::WindowActivate && isVisible()) {

@@ -21,7 +21,6 @@
 
 #include <qfile.h>
 #include <QtAlgorithms>
-// #include <qtl.h>
 #include <math.h>
 #include <limits.h>
 #include <qdatastream.h>
@@ -31,37 +30,55 @@
 
 /*!
   \class QIMPenStroke
-  \brief The QIMPenStroke class handles a single stroke.
+  \mainclass
+  \brief The QIMPenStroke class represents a single stroke.
+  \internal
 
-  Can calculate closeness of match to
-  another stroke.
+  The QIMPenStroke class is used to store the points that represent a
+  stroke, and to compare two strokes to determine closeness of match.
+
   \ingroup userinput
 */
 
 bool QIMPenStroke::useVertPos = true;
 
+/*!
+    Constructs an empty stroke.
+
+    Points can be added to the stroke using beginInput() and addPoint().
+*/
 QIMPenStroke::QIMPenStroke() : cheight(75)
 {
 }
 
-QIMPenStroke::QIMPenStroke( const QIMPenStroke &st )
-    : startPoint( st.startPoint ), lastPoint( st.lastPoint ),
-    links( st.links ), cheight(st.cheight)
+/*!
+    Constructs a copy of \a stroke.
+*/
+QIMPenStroke::QIMPenStroke( const QIMPenStroke &stroke )
+    : startPoint( stroke.startPoint ), lastPoint( stroke.lastPoint ),
+    links( stroke.links ), cheight(stroke.cheight)
 {
 }
 
-QIMPenStroke &QIMPenStroke::operator=( const QIMPenStroke &s )
+/*!
+    Assigns \a stroke to this and returns this.
+*/
+QIMPenStroke &QIMPenStroke::operator=( const QIMPenStroke &stroke )
 {
     clear();
-    startPoint = s.startPoint;
-    lastPoint = s.lastPoint;
-    qCopy( s.links.begin(), s.links.end(), this->links.begin() );
-    // links = s.links.copy();
-    cheight = s.cheight;
+    startPoint = stroke.startPoint;
+    lastPoint = stroke.lastPoint;
+    qCopy( stroke.links.begin(), stroke.links.end(), this->links.begin() );
+    // links = stroke.links.copy();
+    cheight = stroke.cheight;
 
     return *this;
 }
 
+/*!
+    Clears all data associated with a stroke, including all points and
+    signatures.
+*/
 void QIMPenStroke::clear()
 {
     startPoint = QPoint(0,0);
@@ -74,6 +91,8 @@ void QIMPenStroke::clear()
 
 /*!
   Begin inputting a new stroke at position \a p.
+
+  \sa endInput(), addPoint()
 */
 void QIMPenStroke::beginInput( QPoint p )
 {
@@ -86,6 +105,8 @@ void QIMPenStroke::beginInput( QPoint p )
 /*!
   Add a point \a p to the stroke's shape.
   Returns true if the point was successfully added.
+
+  \sa beginInput(), endInput()
 */
 bool QIMPenStroke::addPoint( QPoint p )
 {
@@ -143,6 +164,8 @@ bool QIMPenStroke::addPoint( QPoint p )
 
 /*!
   Finish inputting a stroke.
+
+  \sa beginInput(), addPoint()
 */
 void QIMPenStroke::endInput()
 {
@@ -322,7 +345,7 @@ void QIMPenStroke::internalAddPoint( QPoint p )
 }
 
 /*!
-  Calculate the center of gravity of the stroke.
+  Returns the center of gravity of the stroke.
 */
 QPoint QIMPenStroke::center() const
 {
@@ -342,41 +365,43 @@ QPoint QIMPenStroke::center() const
 
     return QPoint( ax, ay );
 }
+
+
 /*!
-  Write the character's data to the stream.
+  Write stroke \a ws to \a stream.
 */
-QDataStream &operator<< (QDataStream &s, const QIMPenStroke &ws)
+QDataStream &operator<< (QDataStream &stream, const QIMPenStroke &ws)
 {
-    s << ws.startPoint;
-    s << ws.links.count();
+    stream << ws.startPoint;
+    stream << ws.links.count();
     for ( int i = 0; i < (int)ws.links.count(); i++ ) {
-        s << (qint8)ws.links[i].dx;
-        s << (qint8)ws.links[i].dy;
+        stream << (qint8)ws.links[i].dx;
+        stream << (qint8)ws.links[i].dy;
     }
 
-    return s;
+    return stream;
 }
 
 /*!
-  Read the character's data from the stream.
+  Read stroke \a ws from \a stream.
 */
-QDataStream &operator>> (QDataStream &s, QIMPenStroke &ws)
+QDataStream &operator>> (QDataStream &stream, QIMPenStroke &ws)
 {
     qint8 i8;
-    s >> ws.startPoint;
+    stream >> ws.startPoint;
     ws.lastPoint = ws.startPoint;
     unsigned size;
-    s >> size;
+    stream >> size;
     ws.links.resize( size );
     for ( int i = 0; i < (int)size; i++ ) {
-        s >> i8;
+        stream >> i8;
         ws.links[i].dx = i8;
-        s >> i8;
+        stream >> i8;
         ws.links[i].dy = i8;
         ws.lastPoint += QPoint( ws.links[i].dx, ws.links[i].dy );
     }
 
-    return s;
+    return stream;
 }
 
 

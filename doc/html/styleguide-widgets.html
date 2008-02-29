@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Qtopia Style Guide: Widgets</title>
+  <title>Qtopia Style Guide: Widgets</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Style Guide: Widgets<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Style Guide: Widgets<br /><span class="subtitle"></span>
+</h1>
 <ul><li><a href="#labels">Labels</a></li>
 <li><a href="#buttons">Buttons</a></li>
 <li><a href="#input-fields">Input Fields</a></li>
@@ -67,7 +70,7 @@
 <li>A list is displayed as an icon while it is not selected but when the list is opened the icon and label display with the icon displayed.</li>
 <li>The default focus when opening a list should be on the item that the list was set to prior to opening.</li>
 <li>If the list allows the user to select a blank item then the blank item should be listed as blank that is, not use a label such as <i>blank</i> or <i>&lt;none&gt;</i>.</li>
-<li>List items that display additional dialogs when they are selected should simple list a &quot;...&quot; option.</li>
+<li>List items that display additional dialogs when they are selected should simple list a &quot;..&#x2e;&quot; option.</li>
 </ul>
 <a name="menus"></a>
 <h2>Menus</h2>
@@ -75,19 +78,19 @@
 <ul>
 <li>New</li>
 <li>Edit</li>
-<li>Modify commands, e.g. <tt>Crop</tt></li>
+<li>Modify commands, e.g&#x2e; <tt>Crop</tt></li>
 <li>Delete</li>
-<li>Action commands, e.g. <tt>Beam</tt>, <tt>Duplicate</tt>, <tt>Copy</tt>, <tt>Paste</tt></li>
-<li>View commands, e.g. <tt>Today</tt>, <tt>View</tt> Category...</li>
-<li>Options commands, e.g. <tt>Settings</tt></li>
+<li>Action commands, e.g&#x2e; <tt>Beam</tt>, <tt>Duplicate</tt>, <tt>Copy</tt>, <tt>Paste</tt></li>
+<li>View commands, e.g&#x2e; <tt>Today</tt>, <tt>View</tt> Category..&#x2e;</li>
+<li>Options commands, e.g&#x2e; <tt>Settings</tt></li>
 <li>(separator)</li>
 <li>Help (added by system)</li>
 <li>Cancel</li>
 </ul>
 <p>When the selection of a menu item leads to a new dialog:</p>
 <ul>
-<li>the menu item label should only be suffixed with &quot;...&quot; if the command is being further refined. That is, the &quot;...&quot; extension should only be placed on the end of menu names when a selection of items is going to be offered or additional commands have to be specified.</li>
-<li>No space should be left between the first '.' and the last character of the menu name. Please refer to <a href="styleguide-naming.html#usingdotdotdot">Using the &quot;...&quot; label </a> label for a full explanation.</li>
+<li>the menu item label should only be suffixed with &quot;..&#x2e;&quot; if the command is being further refined. That is, the &quot;..&#x2e;&quot; extension should only be placed on the end of menu names when a selection of items is going to be offered or additional commands have to be specified.</li>
+<li>No space should be left between the first '.' and the last character of the menu name. Please refer to <a href="styleguide-naming.html#usingdotdotdot">Using the &quot;..&#x2e;&quot; label </a> label for a full explanation.</li>
 </ul>
 <p><b>:</b> {Note:} Application menu labels should not be appended with the type of item on which they are performing the action. For example, only <i>Edit</i> is required on the menu label, not <i>Edit Event</i>.</p>
 <ul>
@@ -111,13 +114,13 @@
 <li>The <tt>ContextBar</tt> icon for <tt>Key_Back</tt> should be <tt>Cancel</tt>, not the usual <tt>Back</tt>.</li>
 </ul>
 <p>To assist in creating Menu-like dialogs use the function</p>
-<pre>&nbsp;   QtopiaApplication::setMenuLike();</pre>
+<pre>    QtopiaApplication::setMenuLike();</pre>
 <p>which maps the context bar and menu correctly for the dialog.</p>
 <p>If the dialog has a menu, consider having <tt>Activate</tt>, or <tt>Select</tt> in the menu, but ensure this command does <i>not</i> close the dialog.</p>
 <p>Examples include: Profile selection, Speed dial action selection.</p>
 <a name="dialogs"></a>
 <h2>Dialogs</h2>
-<p>A <tt>Dialogs</tt> title should describe the process that is currently taking place in the dialog. For example, <i>Editing event</i>, <i>Creating event</i>. A dialog title should not have its text appended with &quot;...&quot;.</p>
+<p>A <tt>Dialogs</tt> title should describe the process that is currently taking place in the dialog. For example, <i>Editing event</i>, <i>Creating event</i>. A dialog title should not have its text appended with &quot;..&#x2e;&quot;&#x2e;</p>
 <p>Message dialogs that allow a positive or negative response should be phrased such that the user can answer <i>Yes</i> or <i>No</i>, rather than <tt>OK</tt> or <tt>Cancel</tt>.</p>
 <p>Informative Message dialogs should only allow the <tt>Back</tt> <tt>Done</tt> context bar option.</p>
 <a name="custom-widgets"></a>
@@ -125,8 +128,8 @@
 <p>Well-defined widgets, that is, those defined in Qt, should always be used where possible. If a custom widget must be used, make sure that such a widget does not already exist.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

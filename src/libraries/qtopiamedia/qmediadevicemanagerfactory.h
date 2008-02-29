@@ -28,6 +28,11 @@
 class QMediaDeviceManager;
 
 
+/*!
+    \class QMediaDeviceManagerFactory
+    \internal
+*/
+
 class QMediaDeviceManagerFactory
 {
 public:

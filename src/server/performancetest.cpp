@@ -21,7 +21,6 @@
 
 #include "performancetest.h"
 #include <QtopiaChannel>
-//#include <perftest.h>
 #include <QtopiaIpcEnvelope>
 #include <unistd.h>
 #include <stdlib.h>
@@ -42,6 +41,10 @@
   test, but the server continues running.
  */
 
+/*! \internal
+    \fn void QAPerformanceTest::shutdown( QtopiaServerApplication::ShutdownType )
+*/
+
 /*! \internal */
 QAPerformanceTest::QAPerformanceTest()
 : m_willQuit(false)
@@ -56,9 +59,15 @@ void QAPerformanceTest::perfMsg(const QString &msg, const QByteArray &)
 {
     if(msg == "runPerfTest()") {
         m_willQuit = true;
+        m_closeApps = true;
         runPerformanceTest();
     } else if(msg == "runPerfTestNoQuit()") {
         m_willQuit = false;
+        m_closeApps = true;
+        runPerformanceTest();
+    } else if(msg == "runAllApps()") {
+        m_willQuit = false;
+        m_closeApps = false;
         runPerformanceTest();
     }
 }
@@ -67,7 +76,7 @@ void QAPerformanceTest::perfMsg(const QString &msg, const QByteArray &)
 void QAPerformanceTest::runPerformanceTest()
 {
     static int step = 0;
-    static const int stepTime = 10000;
+    static const int stepTime = 7000;
     static const char * const testApps[] = {
         // Applications
         "calculator",
@@ -99,7 +108,6 @@ void QAPerformanceTest::runPerformanceTest()
         "netsetup",          // Internet
         "language",
         "light-and-power",   // Power Management
-        "taskmanager",
         "sipsettings",       // VoIP
         "logging",
 #ifdef QTOPIA_PHONE
@@ -119,17 +127,21 @@ void QAPerformanceTest::runPerformanceTest()
         "fifteen",
         "minesweep",
         "qasteroids",
-        "snake" };
+        "snake", 
+
+        // Test Apps
+        "emptyapp" };
 
     static const int numTestApps = sizeof(testApps)/sizeof(char *);
-
+/*
     if (step >= numTestApps * 2)
     {
         if(m_willQuit) {
             // Test is finished - shutdown Qtopia
             qLog(Performance) << "QtopiaServer : " << "Shutting down Qtopia : "
                               << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
-            ::exit(0);
+            //::exit(0);
+            emit shutdown( QtopiaServerApplication::RebootSystem );
         }
 
         return;
@@ -138,21 +150,24 @@ void QAPerformanceTest::runPerformanceTest()
     else if (step % 2 == 0)
     {
         // Even step - start the next application
-        qLog(Performance) << "Application : " << "Launching " << testApps[step/2] << " : "
+        qLog(Performance) << "Application : " << "Launching" << testApps[step/2] << " : "
                           << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
         Qtopia::execute(testApps[step/2]);
     }
     else
     {
-        // Odd step - stop the current application
-        qLog(Performance) << "Application : " << "Closing " << testApps[step/2] << " : "
-                          << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
-        QtopiaIpcEnvelope closeApp( QString("QPE/Application/") + testApps[step/2], "close()" );
+        if (m_closeApps == true) {
+            // Odd step - stop the current application
+            qLog(Performance) << "Application : " << "Closing " << testApps[step/2] << " : "
+                              << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+            QtopiaIpcEnvelope closeApp( QString("QPE/Application/") + testApps[step/2], "close()" );
+        }
     }
 
     // Setup timer to bring us back again
     QTimer::singleShot( stepTime, this, SLOT(runPerformanceTest()) );
     step++;
+*/
 }
 
 QTOPIA_TASK(QAPerformanceTest, QAPerformanceTest);

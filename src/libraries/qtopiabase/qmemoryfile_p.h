@@ -40,7 +40,7 @@
 
 class QMemoryFileData;
 
-class QMemoryFile
+class QTOPIA_AUTOTEST_EXPORT QMemoryFile
 {
 public:
 

@@ -44,10 +44,8 @@
 
 
 /*
-    \internal
-    \class Messenger
-    Passes messages (over IPC) between a QBluetoothAbstractService and the
-    BluetoothServiceManager (in the QPE server).
+    This class passes messages (over IPC) between a QBluetoothAbstractService 
+    and the BluetoothServiceManager (in the QPE server).
  */
 class Messenger : public QtopiaIpcAdaptor
 {
@@ -190,26 +188,25 @@ bool QBluetoothAbstractServicePrivate::unregisterRecord(quint32 handle)
 
 /*!
     \class QBluetoothAbstractService
-    \brief  The QBluetoothAbstractService class provides a base class for Bluetooth services within Qtopia.
+    \mainclass
+    \brief  The QBluetoothAbstractService class provides a base interface class for Bluetooth services within Qtopia.
 
-    This class provides the common functionality for running Bluetooth
-    services within the Qtopia Bluetooth framework. Each subclass provides
-    the specific implementation for running a particular Bluetooth service.
-
-    If you create a Bluetooth service by subclassing QBluetoothAbstractService,
-    the service is automatically registered and accessible as a system
-    Bluetooth service. The service can then be accessed externally by
+    This class makes it easier to implement Qtopia Bluetooth services. If you
+    subclass QBluetoothAbstractService to create a Bluetooth service, the
+    service is automatically registered and accessible as a system Bluetooth 
+    service within Qtopia. The service can then be accessed externally by
     programmers through the QBluetoothServiceController class. It will also be
     listed in the system Bluetooth settings application, allowing end users to
     modify the service's settings.
 
-    Here is an example of creating a custom Bluetooth service using a class
-    named \c MyBluetoothService. The service will advertise the Serial
-    Port Profile, and the service will be named "MySerialPortService".
+    Following is an example of a Qtopia Bluetooth service that is created by
+    subclassing QBluetoothAbstractService. The service will publish the Serial
+    Port Profile, and the service name will be "MySerialPortService".
 
-    The interface of the class will look like this:
+    This is the interface for the class:
+
     \code
-    class MyBluetoothService : public QObject
+    class MyBluetoothService : public QBluetoothAbstractService
     {
         Q_OBJECT
     public:
@@ -251,31 +248,31 @@ bool QBluetoothAbstractServicePrivate::unregisterRecord(quint32 handle)
     Then, to implement the start() method:
 
     \code
-        void MyBluetoothService::start()
-        {
-            // Register an SDP service for this Bluetooth service
-            quint32 handle = registerRecord("SerialPortService.xml");
-            if (handle == 0) {
-                // registration failed
-                emit started(true, tr("Error registering the SDP service"));
-                return;
-            }
-
-            // Call some method to start the service
-            if (!startMyService()) {
-                // The service failed to start, so unregister the SDP service
-                // that was previously registered
-                unregisterRecord(handle);
-
-                // notify the system that the service was not started
-                emit started(true, tr("Unable to start MySerialPortService"));
-                return;
-            }
-
-            // The service was successfully started
-            m_serviceRecordHandle = handle;
-            emit started(false, QString());
+    void MyBluetoothService::start()
+    {
+        // Register an SDP service for this Bluetooth service
+        quint32 handle = registerRecord("SerialPortService.xml");
+        if (handle == 0) {
+            // registration failed
+            emit started(true, tr("Error registering the SDP service"));
+            return;
         }
+
+        // Call some method to start the service
+        if (!startMyService()) {
+            // The service failed to start, so unregister the SDP service
+            // that was previously registered
+            unregisterRecord(handle);
+
+            // notify the system that the service was not started
+            emit started(true, tr("Unable to start MySerialPortService"));
+            return;
+        }
+
+        // The service was successfully started
+        m_serviceRecordHandle = handle;
+        emit started(false, QString());
+    }
     \endcode
 
     The start() method is called by Qtopia when the service should be started.
@@ -285,17 +282,17 @@ bool QBluetoothAbstractServicePrivate::unregisterRecord(quint32 handle)
     The class also needs to have a stop() method:
 
     \code
-        void MyBluetoothService::stop()
-        {
-            // call some method to shut down the service
-            stopMyService();
+    void MyBluetoothService::stop()
+    {
+        // call some method to shut down the service
+        stopMyService();
 
-            if (!unregisterRecord(m_serviceRecordHandle))
-                qDebug() << "Error unregistering the SDP service";
+        if (!unregisterRecord(m_serviceRecordHandle))
+            qWarning() << "Error unregistering the SDP service";
 
-            // notify the system that the service has stopped
-            emit stopped();
-        }
+        // notify the system that the service has stopped
+        emit stopped();
+    }
     \endcode
 
     Finally, the class will need to implement the setSecurityOptions() method
@@ -306,7 +303,7 @@ bool QBluetoothAbstractServicePrivate::unregisterRecord(quint32 handle)
 
 
 /*!
-    Construct a Bluetooth service. The \a name is a unique name that identifies
+    Constructs a Bluetooth service. The \a name is a unique name that identifies
     the service, and \a displayName is a user-friendly, internationalized name
     for this service that can be displayed to the end user. The \a parent is
     the QObject parent for this service.
@@ -329,6 +326,8 @@ QBluetoothAbstractService::~QBluetoothAbstractService()
     Registers the SDP service record \a record for this Bluetooth service
     and returns the service record handle of the newly registered service.
     Returns zero if the registration failed.
+
+    \sa unregisterRecord()
  */
 quint32 QBluetoothAbstractService::registerRecord(const QBluetoothSdpRecord &record)
 {
@@ -356,7 +355,9 @@ quint32 QBluetoothAbstractService::registerRecord(const QBluetoothSdpRecord &rec
     the newly registered service. Returns zero if the registration failed.
 
     An example of the required XML data structure can be seen by running the 
-    \c {sdptool get --xml} command in a terminal shell:
+    \c {sdptool get --xml} command in a terminal shell. For example, this will
+    add an Object Push service, look up the service to find its service record
+    handle, and then use \c {sdptool get --xml} to show the XML structure:
     \code
         $> sdptool add OPUSH
         $> sdptool browse local
@@ -378,9 +379,9 @@ quint32 QBluetoothAbstractService::registerRecord(const QBluetoothSdpRecord &rec
     \endcode
 
     \bold {Note:} If you use \c {sdptool get --xml} to generate the SDP record 
-    XML file, you \bold must remove the XML element containing the service 
-    record handle. This element is usually near the start of the XML output and 
-    will look similar to this:
+    XML file, you \bold must remove the service record handle XML element from 
+    the generated output before passing it to this function. This element is 
+    usually near the start of the XML output and will look similar to this:
 
     \code
         <attribute id="0x0000">
@@ -393,6 +394,8 @@ quint32 QBluetoothAbstractService::registerRecord(const QBluetoothSdpRecord &rec
     and should not be provided by the programmer.
 
     \warning The given file must be UTF-8 encoded to be parsed correctly.
+
+    \sa unregisterRecord()
  */
 quint32 QBluetoothAbstractService::registerRecord(const QString &filename)
 {
@@ -444,6 +447,8 @@ quint32 QBluetoothAbstractService::registerRecord(const QString &filename)
     \a handle.
 
     Returns whether the record was successfully unregistered.
+
+    \sa registerRecord()
  */
 bool QBluetoothAbstractService::unregisterRecord(quint32 handle)
 {
@@ -481,15 +486,15 @@ QString QBluetoothAbstractService::displayName() const
     Bluetooth Settings application) or because Qtopia has been configured to
     start the service automatically.
 
-    Subclasses must override this to start the service appropriately. A
-    subclass must emit started() when the service has started (i.e. at the
-    end of this method), or failed while trying to start.
+    Subclasses must override this to start the service appropriately. The
+    subclass must emit started() when the service has started, or failed
+    while trying to start, to announce the result of the start() invocation.
 
     \warning This function must be implementated in such a way that any intermediate
     objects (which have been created up to the point where the error occured)
     are cleaned up before the error signal is emitted.
 
-    \sa started()
+    \sa started(), stop()
  */
 
 /*!
@@ -499,10 +504,10 @@ QString QBluetoothAbstractService::displayName() const
 
     This method will be called by Qtopia when the service should be stopped.
 
-    Subclasses must override this to stop the service appropriately. A
-    subclass must emit stopped() when the service has stopped.
+    Subclasses must override this to stop the service appropriately. The
+    subclass must emit stopped() to announce that the service has stopped.
 
-    \sa stopped()
+    \sa stopped(), start()
  */
 
 /*!
@@ -519,18 +524,24 @@ QString QBluetoothAbstractService::displayName() const
 /*!
     \fn void QBluetoothAbstractService::started(bool error, const QString &description)
 
-    This signal should be emitted when the service has started or failed while
-    attempting to start.
+    When implementing the start() function, this signal must be emitted by the
+    subclass when the service has started or failed while attempting to start,
+    to announce the result of the start() invocation.
 
-    If there was a failure, \a error should be true and \a description should
-    be a human-readable description of the error. Otherwise, \a error should be
-    false and \a description should be a null QString.
+    If the service failed to start, \a error should be true and \a description 
+    should be a human-readable description of the error. Otherwise, \a error 
+    should be false and \a description should be a null QString.
+
+    \sa start(), stopped()
  */
 
 /*!
     \fn void QBluetoothAbstractService::stopped()
 
-    This signal should be emitted when the service has stopped.
+    This signal must be emitted by the subclass inside the implementation of
+    the stop() function, to announce that the service has stopped.
+
+    \sa started(), stop()
  */
 
 #include "qbluetoothabstractservice.moc"

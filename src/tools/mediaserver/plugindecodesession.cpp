@@ -21,7 +21,6 @@
 
 #include <qstring.h>
 #include <qiodevice.h>
-#include <qdebug.h>
 
 #include <qcontent.h>
 
@@ -131,7 +130,6 @@ void PluginDecodeSession::suspend()
 
 void PluginDecodeSession::resume()
 {
-    qDebug() << "plugindecodesession::resume";
     d->mediaDecoder->start();
 }
 

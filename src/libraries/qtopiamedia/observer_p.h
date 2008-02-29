@@ -1,0 +1,69 @@
+/****************************************************************************
+**
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+**
+** This file is part of the Phone Edition of the Qtopia Toolkit.
+**
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#ifndef OBSERVER_H
+#define OBSERVER_H
+
+#include <QtCore>
+
+class Subject;
+
+class Observer
+{
+public:
+    virtual ~Observer() { };
+    virtual void update( Subject* subject ) = 0;
+};
+
+class Subject
+{
+public:
+    virtual ~Subject() { };
+
+    virtual void attach( Observer* observer );
+    virtual void detach( Observer* observer );
+    virtual void notify();
+
+protected:
+    Subject() { };
+
+private:
+    QList<Observer*> m_observers;
+};
+
+inline void Subject::attach( Observer* observer )
+{
+    m_observers.append( observer );
+}
+
+inline void Subject::detach( Observer* observer )
+{
+    m_observers.removeAll( observer );
+}
+
+inline void Subject::notify()
+{
+    foreach( Observer *observer, m_observers ) {
+        observer->update( this );
+    }
+}
+
+#endif // OBSERVER_H

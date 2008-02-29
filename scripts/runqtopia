@@ -94,7 +94,7 @@ set_optvar( "rotation", +{
 });
 
 set_optvar( "home", +{
-    "set" => [ "%=s", "Use HOME <home>" ],
+    "set" => [ "%=s", "Use HOME <home>, defaults to \$QPEHOME if set; otherwise defaults to \$QPEDIR/home" ],
     "arg" => "home",
     "default" => sub {
         my $def;
@@ -109,7 +109,7 @@ set_optvar( "home", +{
 });
 
 set_optvar( "sxe_discovery", +{
-    "set" => [ "%", "Enable SXE_DISCOVERY_MODE." ],
+    "set" => [ "%", "Enable SXE_DISCOVERY_MODE (has no effect for GPL editions of Qtopia)." ],
     "default" => "0",
 });
 
@@ -123,11 +123,24 @@ set_optvar( "qvfb_only", +{
     "default" => 0,
 });
 
-add_note("For arguments to the 'runqpe' part of this script, use [script arguments] -- [runqpe arguments]");
+add_note("For arguments to the 'runqpe' part of this script, use -- [runqpe arguments], see also 'runqtopia -- -help'");
 
 opt_get_options();
 opt_apply_defaults();
 opt_print_autodetect();
+
+my $script = "/tmp/runqtopia.$$";
+
+sub kill_children {
+    $SIG{INT} = "DEFAULT";
+    $SIG{TERM} = "DEFAULT";
+    unlink($script);
+    my $GID=getpgrp 0;
+    kill "TERM", -$GID;
+    exit(0);
+}
+$SIG{INT} = \&kill_children;
+$SIG{TERM} = $SIG{INT};
 
 
 my $skin;
@@ -236,7 +249,6 @@ sub run_qtopia
 
     chdir($prefix);
 
-    my $script = "/tmp/runqtopia.$$";
     open OUT, ">$script" or die $!;
     print OUT <<'END';
 #!/bin/sh
@@ -264,8 +276,20 @@ if [ -f bin/qtopia-dbus-daemon ]; then
    export DBUS_SESSION_BUS_ADDRESS=`qtopia-dbus-daemon`
    echo "DBUS address is: $DBUS_SESSION_BUS_ADDRESS"
 fi
+if [ "$1" = "-help" ]; then
+    echo "The following \"runqpe arguments\" are provided for backward script compatability but are not unsupported"
+    echo "     -exec <command> ..........  Run <command> instead of qpe"
+    echo "     -gdb .....................  Run qpe in gdb"
+    echo "     -gdb -exec <command>......  Run command in gdb"
+    echo "     -profile .................  Enable printing of profiling information"
+    echo "     -qtopiatest-overrides.....  Run qpe with the qtopiatestoverides library preloaded"
+    echo "     -valgrind ................  Run qpe with valgrind"
+    echo "     -strace ..................  Enable printing of strace informatation"
+    echo "     -strace -exec <command> ..  Run <command> with strace enabled"
+    echo "     -performance  ............  Run qpe printing performance indicators"
 
-if [ "$1" = "-exec" ]; then
+    exit 1
+elif [ "$1" = "-exec" ]; then
     shift
     export PATH=$QTOPIA_PREFIX/bin:$PATH
     echo exec "$@"
@@ -284,12 +308,12 @@ elif [ "$1" = "-profile" ]; then
     LD_PRELOAD=$PREFIX/lib/gprof-helper.so bin/qpe
 elif [ "$1" = "-callgrind" ]; then
     shift
-    echo callgrind "$@" bin/qpe
-    callgrind "$@" bin/qpe
+    echo valgrind --tool=callgrind "$@" bin/qpe
+    valgrind --tool=callgrind  "$@" bin/qpe
 elif [ "$1" = "-qtopiatest-overrides" ]; then
     shift
     rm -f /tmp/qtopiatest_cmds
-    run_until_no_restart 'eval `cat /tmp/qtopiatest_cmds 2>/dev/null`; LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so eval bin/qpe' "$@"
+    run_until_no_restart '( eval `cat /tmp/qtopiatest_cmds 2>/dev/null`; LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so eval bin/qpe' "$@"'; )'
 elif [ "$1" = "-valgrind" ]; then
     shift
     echo valgrind --tool=memcheck "$@" bin/qpe
@@ -316,13 +340,8 @@ END
     close OUT;
     chmod 0755, $script;
     my @args = @ARGV;
-    my $remote = opt("remote");
-    Qtopia::Opt::read_config_cache();
-    if ( opt("test") ) {
-        push(@args, "-qtopiatest-overrides");
-    }
-    if ( $remote ) {
-        push(@args, "-remote", $remote);
+    if ( opt("remote") ) {
+        push(@args, "-remote", opt("remote"));
     }
     system($script." ".join(" ", @args));
     unlink $script;

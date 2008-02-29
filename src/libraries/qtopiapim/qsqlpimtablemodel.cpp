@@ -111,7 +111,10 @@ QString QSqlPimTableModel::selectText(const QString &retrieve, const QStringList
 
     QStringList j = joins();
     foreach(QString join, j) {
-        qtext += " JOIN " + join + " ON (t1.recid = " + join + ".recid) ";
+        if (join == "simcardidmap")
+            qtext += " JOIN simcardidmap ON (t1.recid = simcardidmap.sqlid) ";
+        else
+            qtext += " JOIN " + join + " ON (t1.recid = " + join + ".recid) ";
     }
 
     /* THE JOINS */

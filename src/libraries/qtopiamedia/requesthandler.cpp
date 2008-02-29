@@ -19,12 +19,21 @@
 **
 ****************************************************************************/
 
-#include "requesthandler.h"
+#include "requesthandler_p.h"
 
 #include <qtopialog.h>
 
 #include <QtCore>
 
+/*!
+    \class RequestHandler
+    \internal
+*/
+
+/*!
+    \fn RequestHandler::execute( ServiceRequest* request )
+    \internal
+*/
 void RequestHandler::execute( ServiceRequest* request )
 {
     // If successor exists, pass request to successor

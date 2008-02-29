@@ -179,6 +179,7 @@ private:
 
 /*!
     \class QDrmContentLicense
+    \mainclass
     \brief The QDrmContentLicense class provides an interface for DRM agents to monitor the consumption of DRM content.
 
     A DRM content license provides the interface through which a consuming application will notify a DRM agent
@@ -220,6 +221,8 @@ QDrmContentLicense::~QDrmContentLicense()
 
     Notifies the drm agent that the render state of  \a content has changed to \a state and the
     rights should be updated accordingly.
+
+   \sa renderState()
 */
 
 /*!
@@ -244,6 +247,8 @@ QDrmContentLicense::~QDrmContentLicense()
     \fn QDrmContentLicense::renderState() const
 
     Returns the current render state of the content the license has been granted for.
+
+    \sa renderStateChanged()
 */
 
 class QDrmContentPluginPrivate
@@ -254,6 +259,7 @@ public:
 
 /*!
     \class QDrmContentPlugin
+    \mainclass
     \brief The QDrmContentPlugin class is the primary interface between DRM agents and the Qtopia document system.
 
     QDrmContentPlugin allows the document system to present the license state and meta-info of DRM protected files,
@@ -268,7 +274,7 @@ public:
 
     Once a QContent has been identified as being DRM protected the document system will identify the plugin by looking up the
     file extension in the list returned by \l keys().  If a file passed to \l installContent() is DRM protected but does not have
-    a correct extension it should be renamed by the plugin when it installed.  Likewise if a DRM format has separate transport
+    a correct extension it should be renamed by the plugin when it is installed.  Likewise if a DRM format has separate transport
     and storage formats the plugin should convert from the transport format to the storage format when it is installed.
 
     \section1 DRM File Access
@@ -290,6 +296,7 @@ public:
     \sa QDrmContent
 
     \ingroup drm
+    \ingroup plugins
 */
 
 /*!
@@ -358,9 +365,10 @@ QList< QPair< QString, QString > > QDrmContentPlugin::httpHeaders() const
     current rights a pointer to a new content license is returned otherwise a null pointer is returned.  The initial
     state of the content license is determined by the license \a options.
 
-    New content licenses are registered with the plugin using \l registerLicense() and are automatically unregistered
-    when destroyed.  Once a license has been granted and registered with the plugin access to the unencrypted content
-    of the DRM protected file will become available through the Qt file API for the duration of the license's lifetime.
+    Implementing classes should register new content licenses with the plugin using \l registerLicense(), the content licenses
+    are unregistered automatically when destroyed.  Once a license has been granted and registered with the plugin access to
+    the unencrypted content of the DRM protected file will become available through the Qt file API for the duration of the
+    license's lifetime.
  */
 QDrmContentLicense *QDrmContentPlugin::requestContentLicense( const QContent &content, QDrmRights::Permission permission, QDrmContent::LicenseOptions options )
 {
@@ -573,12 +581,13 @@ void QDrmContentPlugin::initialize()
 
 /*!
     \class QDrmAgentPlugin
+    \mainclass
     \brief The QDrmAgentPlugin class initializes the various services provided by a DRM agent.
 
     In addition to integration with the Qtopia document system DRM agents may need to provide application services and
-    license management facilities.  QDrmAgentPlugin allows agents to implement a single plugin that instantiates a regular
-    QDrmContentPlugin in DRM enabled applications and a Qtopia service and license management and settings widgets in a common
-    DRM management application.
+    license management facilities.  QDrmAgentPlugin allows agents to implement a single plugin that instantiates a Qtopia
+    service for rights acquisition and user notification services, a series of widgets for a DRM management application
+    and a regular QDrmContentPlugin for use in DRM enabled applications.
 
     \ingroup drm
 */
@@ -593,13 +602,13 @@ QDrmAgentPlugin::~QDrmAgentPlugin()
 /*!
     \fn QDrmAgentPlugin::createDrmContentPlugin()
 
-    Constructs an instance of a QDrmContentPlugin.
+    Returns an instance of a QDrmContentPlugin.
 */
 
 /*!
     \fn QDrmAgentPlugin::createService( QObject *parent )
 
-    Constructs an instance of a qtopia service with the given \a parent to provide rights acquisition and
+    Returns a new instance of a qtopia service with the given \a parent to provide rights acquisition and
     user notification services.
 */
 

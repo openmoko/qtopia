@@ -33,7 +33,6 @@
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothlocaldevicemanager.h>
 #include <qcommdevicecontroller.h>
-#include <qtopiacomm/private/remotedevicepropertiesdialog_p.h>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
 

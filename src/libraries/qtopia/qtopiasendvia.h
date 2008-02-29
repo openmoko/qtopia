@@ -32,8 +32,6 @@ class QContent;
 class QTOPIA_EXPORT QtopiaSendVia
 {
 public:
-    ~QtopiaSendVia();
-
     static bool isDataSupported(const QString &metatype);
     static bool isFileSupported();
 
@@ -41,9 +39,6 @@ public:
     static bool sendFile(QWidget *parent, const QString &filename,
                          const QString &mimetype, bool autodelete = false);
     static bool sendFile(QWidget *parent, const QContent &content, bool autodelete = false);
-
-private:
-    QtopiaSendVia();
 };
 
 #endif

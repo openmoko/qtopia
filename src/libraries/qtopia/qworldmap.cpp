@@ -372,6 +372,7 @@ bool QWorldmapPrivate::winToZone(
 
 /*!
     \class QWorldmap
+    \mainclass
     \brief The QWorldmap widget displays a worldmap for time zone selection
 
     The QWorldmap widget displays a worldmap for time zone selection.

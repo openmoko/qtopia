@@ -49,11 +49,19 @@ public:
     bool m_idle;
 };
 
-/*!
+/*
     \class PrintServer
-    \brief The class PrintServer receives print jobs from applications and distributes the jobs to printer plugins.
+    \brief the PrintServer class allows the user to choose printing mechnism and dispatch the print job.
+
+    The class PrintServer receives print jobs from applications via PrintService and distributes the jobs to the selected printer plugins.
     PrintServer displays available printing mechanisms to the user and pass the print job to a plugin that handles printing.
+
+    \sa PrintService
 */
+
+/*!
+  Constructs a new print server with given \a parent.
+  */
 PrintServer::PrintServer(QObject *parent)
     :QObject(parent)
 {
@@ -72,6 +80,9 @@ PrintServer::PrintServer(QObject *parent)
     new PrintService( this );
 }
 
+/*!
+  Destroys the print server object.
+  */
 PrintServer::~PrintServer()
 {
     delete d;
@@ -110,9 +121,9 @@ void PrintServer::receive(const QString &message, const QByteArray &data)
 
 /*!
     \internal
-    Createas and queues a print job and dispatchs it if printer is idle.
+    Creates and queues a print job and dispatches it if printer is idle.
     \a properties contains QPrintEngine::PrintEnginePropertyKeys and associated values.
-    To retreive values parse \a properties as following.
+    To retrieve values parse \a properties as following.
 
     \code
     QMap<QString,QVariant> PPK_values = properties.toMap();
@@ -136,7 +147,7 @@ void PrintServer::enqueuePPKPrintJob(const QVariant &properties)
 
 /*!
     \internal
-    Creates and queues a print job and dispatchs it if printer is idle.
+    Creates and queues a print job and dispatches it if printer is idle.
     Properties of print job includes only \a fileName and marked as File type print job.
     Properties should be parsed accordingly when dispatched.
 */
@@ -158,7 +169,7 @@ void PrintServer::enqueueFilePrintJob(const QString &fileName)
 
 /*!
     \internal
-    Creates and queues a print job and dispatchs it if printer is idle.
+    Creates and queues a print job and dispatches it if printer is idle.
     Properties of print job includes only \a fileName and \a mimeType.
     This print job also marked as File type print job.
     Properties should be parsed accordingly when dispatched.
@@ -182,7 +193,7 @@ void PrintServer::enqueueFilePrintJob(const QString &fileName, const QString &mi
 
 /*!
     \internal
-    Creates and queues a print job and dispatchs it if printer is idle.
+    Creates and queues a print job and dispatches it if printer is idle.
     Properties of print job includes only \a html and marked as Html type print job.
     Properties should be parsed accordingly when dispatched.
 */
@@ -203,7 +214,7 @@ void PrintServer::enqueueHtmlPrintJob(const QString &html)
 
 /*!
     \internal
-    Load plugins
+    Load plug-ins
 */
 void PrintServer::selectPrinterPlugin()
 {
@@ -257,7 +268,7 @@ void PrintServer::pluginSelected( QListWidgetItem *item )
 
 /*!
     \internal
-    Distribute the job to the selected printing machanism.
+    Distribute the job to the selected printing mechanism.
 */
 void PrintServer::dispatchPrintJob( QtopiaPrinterInterface *plugin )
 {
@@ -319,7 +330,20 @@ void PrintServer::done( bool error )
 /*!
     \service PrintService PrintServer
     \brief The class PrintService provides the Qtopia Printing service.
+
+    To print a file for example:
+    \code
+        QtopiaServiceRequest service( "Print", "print(QString)" );
+        service << fileName;
+        service.send();
+    \endcode
+
+    The Print service creates a print job and puts in a queue in the print server.
 */
+
+/*!
+  Destroys a print service object.
+  */
 PrintService::~PrintService()
 {
 }

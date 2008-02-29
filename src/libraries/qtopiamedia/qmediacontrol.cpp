@@ -126,6 +126,7 @@ public:
 
 /*!
     \class QMediaControl
+    \mainclass
     \brief The QMediaControl class is used to manipulate a media resource in the
     Qtopia media system.
 

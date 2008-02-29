@@ -45,6 +45,13 @@ if ! md5sum -c /mnt/user/.user_tools.md5 -s 2>/dev/null; then
     fi
 fi
 
+BDADDR=`/mnt/user/tools/tat bdaddr`
+if [ $BDADDR != "" ] && [ ! -f /mnt/user/lib/bluetooth/$BDADDR/config ] ; then
+    echo "TROLL: Creating default Bluetooth configuration"
+    mkdir -p /mnt/user/lib/bluetooth/$BDADDR
+    echo "mode off" > /mnt/user/lib/bluetooth/$BDADDR/config
+fi
+
 # Make sure /mnt/user_local is mounted
 if ! grep '^[^ ].* /mnt/user_local ' /proc/mounts >/dev/null; then
     splash -p - "Rebuilding" "/mnt/user_local"

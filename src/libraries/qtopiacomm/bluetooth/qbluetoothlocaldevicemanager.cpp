@@ -84,10 +84,28 @@ void QBluetoothLocalDeviceManager_Private::defaultDeviceChanged(const QString &d
 }
 
 /*!
-  \class QBluetoothLocalDeviceManager
-  \brief The QBluetoothLocalDeviceManager class provides access to local Bluetooth devices.
+    \class QBluetoothLocalDeviceManager
+    \mainclass
+    \brief The QBluetoothLocalDeviceManager class provides access to local Bluetooth devices.
 
+    The purpose of the QBluetoothLocalDeviceManager is to enumerate all
+    local Bluetooth adapters on the system.  This class can also notify
+    the user when a Bluetooth adapter has been added or removed.  The
+    values returned by devices() can be used to construct
+    QBluetoothLocalDevice objects that refer to the particular
+    local device.
 
+    On Linux, each Bluetooth device on the system has a Bluetooth device
+    name and an address associated with it.  The Bluetooth device name
+    is of the form hciXX where XX is a number between 0 and 31.
+
+    Use deviceRemoved() and deviceAdded() signals to subscribe to device
+    removed and device added events, respectively.  Use defaultDeviceChanged()
+    signal to get notification of the default device change. 
+
+    \sa QBluetoothLocalDevice
+
+    \ingroup qtopiabluetooth
 */
 
 /*!
@@ -101,7 +119,7 @@ QBluetoothLocalDeviceManager::QBluetoothLocalDeviceManager(QObject *parent) :
 }
 
 /*!
-    Destructor.
+    Destroys the device manager.
 */
 QBluetoothLocalDeviceManager::~QBluetoothLocalDeviceManager()
 {
@@ -113,6 +131,8 @@ QBluetoothLocalDeviceManager::~QBluetoothLocalDeviceManager()
     Returns a list of all Bluetooth devices found on the system.  The list
     typically consists of hci0, hci1, ..., hciN, depending on the number of
     devices.
+
+    \sa defaultDevice()
  */
 QStringList QBluetoothLocalDeviceManager::devices()
 {
@@ -137,6 +157,12 @@ QStringList QBluetoothLocalDeviceManager::devices()
 /*!
     Returns a device name of the default Bluetooth adapter.  This is
     typically 'hci0'.  Returns a null string if no device is installed.
+
+    The QBluetoothLocalDevice default constructor can be used to
+    construct an instance of the default local device.
+
+    \sa QBluetoothLocalDevice::QBluetoothLocalDevice(), devices()
+    \sa defaultDeviceChanged()
  */
 QString QBluetoothLocalDeviceManager::defaultDevice()
 {
@@ -159,7 +185,7 @@ QString QBluetoothLocalDeviceManager::defaultDevice()
     The \a device parameter contains the representation of the device which can be
     passed to the QBluetoothLocalDevice constructor.
 
-    \sa QBluetoothLocalDevice
+    \sa QBluetoothLocalDevice, devices()
  */
 
 /*!
@@ -168,6 +194,8 @@ QString QBluetoothLocalDeviceManager::defaultDevice()
     This signal is emitted whenever a device has been removed from the system.
     The \a device parameter contains the representation of the device which
     was removed.
+
+    \sa QBluetoothLocalDevice, devices()
  */
 
 /*!
@@ -175,6 +203,8 @@ QString QBluetoothLocalDeviceManager::defaultDevice()
 
     This signal is emitted whenever the default device has changed.  The \a device 
     parameter contains the representation of the new default device.
+
+    \sa QBluetoothLocalDevice, defaultDevice()
 */
 
 #include "qbluetoothlocaldevicemanager.moc"

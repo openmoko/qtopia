@@ -63,6 +63,14 @@ int arcTan( int dy, int dx )
     return 0;
 }
 
+/*!
+    \class QIMPenSignature
+    \internal
+    \brief The QIMPenSignature class allows correlations of strokes.
+
+    Strokes are compared using a variety of "signatures" that describe
+    features of the stroke.
+*/
 QIMPenSignature::QIMPenSignature() : QVector<int>()
 {
 }
@@ -193,6 +201,9 @@ int QIMPenSignature::calcError(const QVector<int> &base,
     return err / win.count();
 }
 
+/*
+    Creates a signature of the tangent to the points on the stroke.
+*/
 TanSignature::TanSignature(const QIMPenStroke &stroke)
 {
     setStroke(stroke);
@@ -229,6 +240,10 @@ void TanSignature::calcSignature(const QIMPenStroke &stroke)
     }
 }
 
+/*
+    Creates a signature of the tan of the angle from the centre of gravity
+    of the stroke to the points on the stroke.
+*/
 AngleSignature::AngleSignature(const QIMPenStroke &stroke)
 {
     setStroke(stroke);
@@ -264,6 +279,10 @@ void AngleSignature::calcSignature(const QIMPenStroke &stroke)
     }
 }
 
+/*
+    Creates a signature of the distance from the centre of gravity
+    of the stroke to the points on the stroke.
+*/
 DistSignature::DistSignature(const QIMPenStroke &stroke)
 {
     setStroke(stroke);

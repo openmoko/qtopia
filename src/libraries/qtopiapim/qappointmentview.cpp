@@ -33,7 +33,80 @@
 #include <QDebug>
 
 /*!
-  Constructs a QAppointmentModelDelegate with parent \a parent.
+  \class QAppointmentDelegate
+  \mainclass
+  \module qpepim
+  \ingroup pim
+  \brief The QAppointmentDelegate class provides drawing of QAppointmentModel items (\l {QAppointment}{QAppointments}).
+
+  By using QAppointmentDelegate, applications dealing with QAppointments can achieve a consistent
+  look and feel.
+
+  QAppointments are drawn with two sections per item.  There are optional icons on
+  the right side of the rendered item, and text on the left.  The text and icons are rendered
+  vertically centred within the item if there is enough space.  The icons are
+  rendered starting at the top right, in a top-to-bottom, right-to-left fashion.
+
+  The following image illustrates a collection of \l{QAppointment}{QAppointments} being displayed
+  by an application.
+
+  \image qappointmentdelegate.png "View of QAppointments"
+
+  It is assumed that the model is a QAppointmentModel.  The roles used to draw the items include:
+
+  \table 80 %
+   \header
+    \o Role
+    \o Data Type
+    \o Description
+   \row
+    \o Qt::DisplayRole
+    \o QString
+    \o Plain unformatted text drawn on the left of the icon, wrapped to any icons.
+   \row
+    \o Qt::DecorationRole
+    \o QList<QIcon>
+    \o Optional. Drawn on the right side of the item, top-to-bottom, right-to-left
+   \row
+    \o Qt::BackgroundColorRole
+    \o QColor
+    \o Background color of the item.
+  \endtable
+
+  The four appointments shown in the picture above have the following data in the model:
+  \table 80 %
+   \header
+    \o DisplayRole
+    \o DecorationRole
+    \o BackgroundColorRole
+   \row
+    \o Status meeting
+    \o List with a single icon for recurrence
+    \o Blue
+   \row
+    \o Lunch at Moe's
+    \o List with a single icon for a reminder
+    \o Red
+   \row
+    \o School play
+    \o <empty list>
+    \o Red
+   \row
+    \o Oslo conf.
+    \o List with two icons:
+       \list
+        \o a recurrence icon
+        \o a timezone icon
+       \endlist
+    \o Red (note that this is the selected appointment, and it is
+       rendered with the current palette's \c Highlight color)
+  \endtable
+
+  \sa QAppointment, QAppointmentModel
+*/
+
+/*!
+  Constructs a QAppointmentDelegate with the given \a parent.
 */
 QAppointmentDelegate::QAppointmentDelegate( QObject * parent )
     : QAbstractItemDelegate(parent)
@@ -42,7 +115,7 @@ QAppointmentDelegate::QAppointmentDelegate( QObject * parent )
 }
 
 /*!
-  Destroys a QAppointmentModelDelegate.
+  Destroys a QAppointmentDelegate.
 */
 QAppointmentDelegate::~QAppointmentDelegate() {}
 
@@ -71,6 +144,7 @@ QFont QAppointmentDelegate::differentFont(const QFont& start, int step) const
 }
 
 /*!
+  \internal
   Returns the font to use for painting the main label text of the item.
   Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
   ignored.  These attributes can be set by the text returned for
@@ -84,6 +158,7 @@ QFont QAppointmentDelegate::mainFont(const QStyleOptionViewItem &o) const
 }
 
 /*!
+  \internal
   Returns the font to use for painting the sub label text of the item.
   Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
   ignored.  These attributes can be set by the text returned for
@@ -98,9 +173,7 @@ QFont QAppointmentDelegate::secondaryFont(const QStyleOptionViewItem &o) const
 }
 
 /*!
-  \overload
-
-  Paints the element at \a index using \a painter with style options \a option.
+  \reimp
 */
 void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem & option,
         const QModelIndex & index) const
@@ -198,9 +271,7 @@ void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 }
 
 /*!
-   \overload
-
-   Returns the size hint for objects drawn with the delegate with style options \a option for item at \a index.
+   \reimp
 */
 QSize QAppointmentDelegate::sizeHint(const QStyleOptionViewItem & option,
         const QModelIndex &index) const

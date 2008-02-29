@@ -35,10 +35,12 @@
 #include <private/qcontent_p.h>
 
 /*
+  \class QContentSetPrivate
+  \internal
   QContentSetPrivate is a helper class for QContentSet
 
   \c explicitLinks contains a list of pointers to \c QContent objects
-  which have been explicitly added to the set, for example, using \c add(...)
+  which have been explicitly added to the set, for example, using QContentSet::add()
 
   If no objects have been explicitly added this list will be empty.
 
@@ -71,10 +73,9 @@
      \o a new object is constructed based on the record number
      \o the new object is stored in the cache and returned.
      \endlist
-  \o If this list is in process with the server, the server maintains a
-  pointer to it and requests it to update itself by calling \c updateIfMatch(...)
-  \o If this list is in another process then it listens for \c QCop messages
-  connected to the serverMessage slot.
+  \o The application maintains a pointer to it and requests it to update
+  itself by calling \c updateIfMatch(...) when the QApplication::contentChanged()
+  signal is received.
   \endlist
 */
 class QContentSetPrivate
@@ -112,6 +113,8 @@ private:
 QMutex QContentSetPrivate::mutex(QMutex::Recursive);
 
 /*
+    \class FilteredLessThanFunctor
+    \internal
     FilteredLessThanFunctor is a private functor class to allow qSort to be used to sort QContent objects into
     order based upon the filter sort criteria supplied in the constructor.
 */
@@ -265,17 +268,31 @@ int FilteredLessThanFunctor::timeCompareDescending(const QContent& left, const Q
 // QContentSet implementation
 
 /*!
+    \relates QContentSet
+    \typedef QContentList
+
+    Synonym for QList<QContent>.
+*/
+
+/*!
   \class QContentSet
+  \mainclass
   \brief The QContentSet class represents a set of QContent objects.
 
-  When building GUI elements representing a collection of \c QContent
+  When building GUI elements representing a collection of QContent
   objects perform the following:
   \list
-  \o create a new \c QContent set with a suitable filter
-  \o create a \c QContentSetModel() model to display in the GUI.
+    \o create a new QContentSet with a suitable filter.
+    \o create a QContentSetModel to display in the GUI using \l {model-view-programming.html}{Model/View classes}.
   \endlist
-  As the model is automatically kept up-to-date, this is preferable to accessing a
-  list of \c QContent.
+  Example:
+  \code
+  QContentSet set(QContentFilter::Role, "Document");
+  QContentSetModel model(&set);
+  \endcode
+
+  As the model is automatically kept up-to-date, this is preferable method of accessing a
+  list of QContent objects
 
   The set is synchronized so that the data is as up-to-date as
   possible when new storage media (such as CF or SD cards) are inserted
@@ -283,21 +300,16 @@ int FilteredLessThanFunctor::timeCompareDescending(const QContent& left, const Q
 
   The mechanism for this synchronization is as follows:
   \list
-  \o Accesses and changes to the metadata backing store must be via
-  the QContent API.
-  \o If customizing Qtopia, directly altering the backing store ,for examply via SQL statemenst, is not supported.
-  \o When a \c QContentSet object is created it opens
-  a  \c QCop listener on the \c QContent channel internally.
-  \o If a call to the API changes one or more metadata records, a message is sent on
-  the \c QContent channel containing a datastream of all the record numbers
-  affected.
-  \o If a \c QContentSet receives a message on the \c QCop channel
-  reflecting a change in a record held in the set, or it makes a change to
-  such a record itself, then the following signal is emitted:
-     \list
-     \o the changed QContentIdList signal - for a change affecting one or more specific records.
-     \o the changed() signal - for a change affecting many records.
-     \endlist
+    \o Accesses and changes to the metadata backing store must be via the QContent API.
+    \o If customizing Qtopia, directly altering the backing store, for example via direct
+        SQL statements, is not supported.
+    \o When a QContentSet object is created it opens a QCopChannel listener on the QContent
+        channel internally.
+    \o If a call to the API changes one or more metadata records, a message is sent on the
+        QContent channel containing a datastream of all the record numbers affected.
+    \o If a QContentSet receives a message on the QCopChannel reflecting a change in a
+        record held in the set, or it makes a change to such a record itself, then the
+        \l {QContentSet::}{changed()} signal is emitted.
   \endlist
 
   \ingroup content
@@ -315,7 +327,7 @@ int FilteredLessThanFunctor::timeCompareDescending(const QContent& left, const Q
 */
 
 /*!
-  Create a new empty \c QContentSet with parent \a parent.
+  Constructs a new unfiltered QContentSet with the specified \a parent.
 */
 QContentSet::QContentSet( QObject *parent )
     : QObject( parent )
@@ -325,8 +337,8 @@ QContentSet::QContentSet( QObject *parent )
 }
 
 /*!
-  Create a new \c QContentSet with parent \a parent, containing all records
-  from the backing store which pass all the filters listed in \a catFilters.
+  Constructs a new QContentSet with the specified \a parent, containing all records
+  from the backing store which match the filters listed in \a catFilters.
  */
 QContentSet::QContentSet( const QContentFilter &catFilters, QObject *parent )
     : QObject( parent )
@@ -338,8 +350,8 @@ QContentSet::QContentSet( const QContentFilter &catFilters, QObject *parent )
 
 
 /*!
-  Create a new \c QContentSet with parent \a parent, containing all records
-  from the backing store which pass all the filters listed in \a catFilters
+  Constructs a new QContentSet with the specified \a parent, containing all records
+  from the backing store which match the filters listed in \a catFilters
   sorted by \a sortOrder.
  */
 QContentSet::QContentSet( const QContentFilter &catFilters, const QStringList &sortOrder, QObject *parent )
@@ -353,7 +365,7 @@ QContentSet::QContentSet( const QContentFilter &catFilters, const QStringList &s
 
 
 /*!
-  Create a new \c QContentSet with parent \a parent, containing all records
+  Constructs a new QContentSet with the specified \a parent, containing all records
   from \a original.
 */
 QContentSet::QContentSet( const QContentSet &original, QObject *parent)
@@ -366,8 +378,8 @@ QContentSet::QContentSet( const QContentSet &original, QObject *parent)
 }
 
 /*!
-    Create a new \c QContentSet with parent \a parent, containing all records
-    from the backing store which pass the filtering criteria specified by \a tag and \a filter.
+    Constructs a new QContentSet with the specified \a parent, containing all records
+    from the backing store which match the filtering criteria specified by \a tag and \a filter.
  */
 
 QContentSet::QContentSet( QContentFilter::FilterType tag, const QString& filter, QObject *parent )
@@ -380,8 +392,8 @@ QContentSet::QContentSet( QContentFilter::FilterType tag, const QString& filter,
 
 
 /*!
-    Create a new \c QContentSet with parent \a parent, containing all records
-    from the backing store which pass the filtering criteria specified by \a tag and \a filter
+    Constructs a new QContentSet with the specified \a parent, containing all records
+    from the backing store which match the filtering criteria specified by \a tag and \a filter
     and sorted by \a sortOrder.
  */
 
@@ -394,7 +406,10 @@ QContentSet::QContentSet( QContentFilter::FilterType tag, const QString& filter,
     sync();
 }
 
-
+/*!
+    \internal
+    offload common initiliastion functionality.
+*/
 void QContentSet::init()
 {
     d = new QContentSetPrivate;
@@ -410,15 +425,16 @@ void QContentSet::init()
 }
 
 /*!
-  Destroy the QContentSet object.
+  Destroys the QContentSet.
 */
 QContentSet::~QContentSet()
 {
 }
 
 /*!
-    Scan for added/removed content in \a path with priority \a priority.
-    Directories will be scanned recusively in the background.
+    Scan for added/removed content in \a path with the specified \a priority.
+    Directories will be scanned recusively in a background thread located in the
+    server process.
 */
 void QContentSet::scan( const QString &path, Priority priority )
 {
@@ -428,7 +444,7 @@ void QContentSet::scan( const QString &path, Priority priority )
 
 /*!
   Finds all documents in the system's document directories which
-  match the filter \a mimefilter, and appends the resulting \l QContent objects to \a folder.
+  match the filter \a mimefilter, and appends the resulting QContent objects to \a folder.
 */
 void QContentSet::findDocuments(QContentSet* folder, const QString &mimefilter)
 {
@@ -456,9 +472,7 @@ void QContentSet::findDocuments(QContentSet* folder, const QString &mimefilter)
   \o if it matches the filter expression.
   \endlist
 
-  \internal
-  If the object is not in the internal lists, but is a valid object
-  and matches the current filter expression it is added.
+  \sa add(), remove(), clear()
 */
 bool QContentSet::contains( const QContent &content ) const
 {
@@ -472,18 +486,18 @@ bool QContentSet::contains( const QContent &content ) const
 }
 
 /*!
-  Explicitly add the \c QContent object \a content to this set but not to the
-  backing store.  \c QContentSet::contains() is called first
-  and does not add if the object is already present.
+  Explicitly add the QContent object \a content to this set but not to the backing store.
+  \l contains() is called first to test if the content already exists in
+  the set, and does not add it if it is already present.
 
-  If using this method and \c QContentSet::remove(), a filter
-  expression is not used.   This is useful for building up a set
-  of \c Content objects to display or to perform bulk operations
-  such as moving to a new location.
+  If using this method and \l {QContentSet::}{remove()}, a filter expression is not used
+  for these items. This is useful for building up a set of QContent objects to display
+  or to perform bulk operations upon, such as moving to a new location.
 
-  If a filter expression is used and the object added matches it,  this
-  method is effectively a null operation - although it will update the
-  internal cache.
+  If a filter expression is used and the object added matches it, this method is
+  effectively a null operation - although it will update the internal cache.
+
+  \sa remove(), contains(), clear()
 */
 
 void QContentSet::add( const QContent &content )
@@ -503,15 +517,15 @@ void QContentSet::add( const QContent &content )
 }
 
 /*!
-  Remove the \c QContent object \a cl from this set.  Note:  This does not remove the
+  Remove the QContent object \a cl from this set. This does not remove the
   object from the backing store.  This is useful for trimming down a set
-  of \c Content objects to display to the user, or perform bulk operations
+  of QContent objects to display to the user, or perform bulk operations
   on such as moving to a new location.
 
   The method cannot remove an object that matches the filter expression, if one is
   set.
 
-  \sa  QContentSet::add()
+  \sa add(), contains(), clear()
 */
 void QContentSet::remove( const QContent &cl )
 {
@@ -527,7 +541,8 @@ void QContentSet::remove( const QContent &cl )
 }
 
 /*!
-    Remove all content from this set.
+    Remove all filters and explicitly added QContent objects from this set.
+    \sa add(), remove(), contains()
 */
 void QContentSet::clear()
 {
@@ -539,6 +554,7 @@ void QContentSet::clear()
 /*!
   Store the meta information objects into the backing store, and create a file on the
   file system if the content type is appropriate.
+  \sa uninstallContent()
 */
 void QContentSet::installContent()
 {
@@ -549,6 +565,8 @@ void QContentSet::installContent()
   Remove the meta information objects in this set from the backing store,
   and remove any files from the file system if the content type is appropriate.
   In the case of DRM controlled files this will also remove any rights objects.
+
+  \sa installContent()
 */
 void QContentSet::uninstallContent()
 {
@@ -556,15 +574,19 @@ void QContentSet::uninstallContent()
 }
 
 /*!
-  Return a \c QList<QContent> of items in this set.  Note:  This is a
-  relatively expensive operation, and generally should not be used unless
-  it is known that only a few items will be returned.
+  Return a QContentList of items in this set.
+
+  This is a relatively expensive operation, and generally should not be used unless it is
+  known that only a few items will be returned.
 
   It is also a snapshot of the currently known items in the list,
-  which could go out of date immediately after it is obtained.
+  which has a possibility of going out of date immediately after it is obtained.
 
-  When considering using this method first examine the process of
-  retrieving a pointer to the internal model and using an MVC solution.
+  When considering use of this method first examine the process of
+  retrieving a pointer to the internal model and using a
+  \l {model-view-programming.html}{Model/View} solution.
+
+  \sa QContentSetModel, itemIds()
 */
 QContentList QContentSet::items() const
 {
@@ -576,15 +598,19 @@ QContentList QContentSet::items() const
 }
 
 /*!
-  Return a \c QContentIdList of content Ids in this set.
+  Return a QContentIdList of content Ids in this set.
 
-  It is a snapshot of the currently known content in the list,
-  which could go out of date immediately after it is obtained.
+  This is a relatively expensive operation, and generally should not be used unless it is
+  known that only a few items will be returned.
 
-  When considering using this method first examine the process of
-  retrieving a pointer to the internal model and using an MVC solution.
+  It is also a snapshot of the currently known items in the list,
+  which has a possibility of going out of date immediately after it is obtained.
 
-  \sa QContentSet::items()
+  When considering use of this method first examine the process of
+  retrieving a pointer to the internal model and using a
+  \l {model-view-programming.html}{Model/View} solution.
+
+  \sa QContentSetModel, items()
 */
 QContentIdList QContentSet::itemIds() const
 {
@@ -598,65 +624,74 @@ QContentIdList QContentSet::itemIds() const
 /*!
   \fn void QContentSet::changed(const QContentIdList &idList, QContent::ChangeType type)
 
-  This signal is emitted when \c QContent with Ids \a idList, included in the
-  filter expression for this \c QContentSet are changed, for example,
-  by another application.
+  This signal is emitted when QContent included in the filter expression for this
+  QContentSet are changed by another application, or by removable media being inserted
+  or removed.
 
-  \a type specifies the type of change \l{QContent::ChangeType}.
+  \a idList contains a list of the Ids of QContent items that have changed.
+  
+  \a type specifies the type of change that is being signalled.
 */
 
 /*!
   \fn void QContentSet::changed()
 
-  Emitted when a number of \c QContent objects included in the filter
-  expression for this \c QContentSet are changed
-  by another application or by removable media being inserted or removed.
+  This signal is emitted when a large number of QContent objects included in the filter
+  expression for this QContentSet are changed by another application or by removable media
+  being inserted or removed.
 */
 
 /*!
     \fn QContentSet::aboutToSort()
 
-    This signal is emitted when this \c QContentSet is about to be sorted.
+    This signal is emitted when this QContentSet is about to be sorted.
 */
 
 /*!
     \fn QContentSet::sorted()
 
-    This signal is emitted when this \c QContentSet has been sorted.
+    This signal is emitted when this QContentSet has been sorted.
  */
 
 /*!
     \fn QContentSet::contentChanged(int start, int end)
 
-    This signal is emitted when content items between the \a start and \a end indexes have changed.
+    This signal is emitted when content items between the \a start and \a end indexes
+    have changed.
 */
 
 /*!
     \fn QContentSet::contentAboutToBeRemoved(int start, int end)
 
-    This signal is emitted when content items between the \a start and \a end indexes are about to be removed.
+    This signal is emitted when content items between the \a start and \a end indexes
+    are about to be removed.
 */
 
 /*!
     \fn QContentSet::contentRemoved()
 
-    This signal is emitted when the content removal indicated by \c{QContentSet::contentAboutToBeRemoved(int start, int end)}
+    This signal is emitted when the content removal indicated by contentAboutToBeRemoved()
     has been completed.
 */
 
 /*!
     \fn QContentSet::contentAboutToBeInserted(int start, int end)
 
-    This signal is emitted when content items are about to be inserted between the \a start and \a end indexes.
+    This signal is emitted when content items are about to be inserted between the \a start
+    and \a end indexes.
 */
 
 /*!
     \fn QContentSet::contentInserted()
 
-    This signal is emitted when the content insertion indicated by \c{QContentSet::contentAboutToBeInserted(int start, int end)}
+    This signal is emitted when the content insertion indicated by contentAboutToBeInserted()
     has been completed.
 */
 
+/*!
+    \internal
+    Check the internal explicit list, and if \a id is contained, remove it from there.
+*/
 bool QContentSet::removeId(QContentId id)
 {
     QMutexLocker lock(&d->mutex);
@@ -674,7 +709,7 @@ bool QContentSet::removeId(QContentId id)
 }
 
 /*!
-    Returns true if this set is empty; otherwise false.
+    Returns true if this set is empty.
 */
 bool QContentSet::isEmpty() const
 {
@@ -683,8 +718,9 @@ bool QContentSet::isEmpty() const
 }
 
 /*!
-    Appends the contents of \a other to this \c QContentSet.
-    Currently it appends them as explicit items to the current QContenSet, in the future, it will concatenate the two filter sets to create a new aggregate filter set.
+    Appends the contents of \a other to this QContentSet.
+    Currently it appends them as explicit items to the current QContenSet, in the future,
+    it will concatenate the two filter sets to create a new aggregate filter set.
 */
 void QContentSet::appendFrom( QContentSet& other )
 {
@@ -697,7 +733,7 @@ void QContentSet::appendFrom( QContentSet& other )
 }
 
 /*!
-    Return the number of \c QContent objects in this set.
+    Return the number of QContent objects in this set.
 */
 int QContentSet::count() const
 {
@@ -706,8 +742,9 @@ int QContentSet::count() const
 }
 
 /*!
-    Find a \c QContent object for the executable \a exec in the current QContentSet.
+    Find a QContent object for the executable \a exec in the current QContentSet.
     Returns an empty/invalid QContent if unsuccessful.
+    \sa QContent::InvalidId
 */
 QContent QContentSet::findExecutable( const QString& exec ) const
 {
@@ -719,17 +756,19 @@ QContent QContentSet::findExecutable( const QString& exec ) const
 }
 
 /*!
-    Find a \c QContent object for the \a filename in the current QContentSet.
+    Find a QContent object for the \a filename in the current QContentSet.
     Returns an empty/invalid QContent if unsuccessful.
 
-    Paths are not acceptable in \a filename, ie the \c QString \a filename must
+    Paths are not acceptable in \a filename, ie the \a filename must
     not contain any "/" characters.
 
     Note that if more than one item with the \a filename exists in the QContentSet
-    no guarantee is provided of which is returned.
+    no guarantee is provided as to which one is returned.
 
     This method is typically used with filters such that only one \a filename item
     exists in the filtered set.
+
+    \sa QContent::InvalidId
 */
 QContent QContentSet::findFileName( const QString& filename ) const
 {
@@ -745,12 +784,12 @@ QContent QContentSet::findFileName( const QString& filename ) const
 }
 
 /*!
-  \fn QStringList QContentSet::types() const
+    Returns the list of mime-types contained in this set.
 
-  Returns the list of types in the set.
+    For applications, games and settings the type is application/x-executable.
 
-    For applications, games and settings the type is application/x-executable
-    for documents the type is the document's MIME type, or application/octet-stream if unknown.
+    For documents the type is the document's MIME type, or application/octet-stream
+    if the file type is unknown.
 
 */
 
@@ -768,17 +807,23 @@ QStringList QContentSet::types() const
 
 
 /*!
-    Assigns the given \a content to this QContent and returns a reference
-    to this QContent.
+    Assigns the given \a contentset to this QContentSet and returns a reference
+    to this QContentSet.
 */
-QContentSet &QContentSet::operator=(const QContentSet& content)
+QContentSet &QContentSet::operator=(const QContentSet& contentset)
 {
-    *d = *content.d;
+    *d = *contentset.d;
     d->q = this;
     sync();
     emit changed();
     return *this;
 }
+
+/*!
+    \internal
+    This slot is hooked up to the QtopiaApplication::contentChanged() signal to enable
+    notification to this contentset of modifications to the the content system.
+*/
 
 void QContentSet::contentChanged(const QContentIdList &ids, QContent::ChangeType ct)
 {
@@ -864,7 +909,7 @@ void QContentSet::contentChanged(const QContentIdList &ids, QContent::ChangeType
 }
 
 /*!
-  Clear the current filter expression on the set
+  Clears the current filter expression on the set
  */
 void QContentSet::clearFilter()
 {
@@ -874,7 +919,8 @@ void QContentSet::clearFilter()
 }
 
 /*!
-    Joins a filtering criteria of \c FilterType \a kind and value \a filter to the current filter set using the given \a operand.
+    Joins a filtering criteria of filter type \a kind and value \a filter to the current
+    filter set using the given \a operand.
 */
 void QContentSet::addCriteria( QContentFilter::FilterType kind, const QString &filter, QContentFilter::Operand operand )
 {
@@ -885,7 +931,8 @@ void QContentSet::addCriteria( QContentFilter::FilterType kind, const QString &f
 
 /*!
     \overload
-    Joins a group of filtering criteria \a filters to the current filter set using the given \a operand.
+    Joins a group of filtering criteria \a filters to the current filter set using the
+    given \a operand.
  */
 void QContentSet::addCriteria(const QContentFilter& filters, QContentFilter::Operand operand )
 {
@@ -895,7 +942,8 @@ void QContentSet::addCriteria(const QContentFilter& filters, QContentFilter::Ope
 }
 
 /*!
-    Sets a filtering criteria of \c FilterType \a kind and value \a filter to the current filter set.
+    Sets a filtering criteria of \c FilterType \a kind and value \a filter to the current
+    filter set. This operation will replace all previously specified filters.
  */
 void QContentSet::setCriteria(QContentFilter::FilterType kind, const QString &filter)
 {
@@ -908,6 +956,7 @@ void QContentSet::setCriteria(QContentFilter::FilterType kind, const QString &fi
 /*!
     \overload
     Sets a group of filtering criteria \a filters to the current filter set.
+    This operation will replace all previously specified filters.
  */
 void QContentSet::setCriteria(const QContentFilter& filters)
 {
@@ -918,7 +967,7 @@ void QContentSet::setCriteria(const QContentFilter& filters)
 }
 
 /*!
-    Returns a copy of the current filter for this \c QContentSet.
+    Returns a copy of the current filter set for this \c QContentSet.
 */
 QContentFilter QContentSet::filter() const
 {
@@ -926,7 +975,7 @@ QContentFilter QContentSet::filter() const
 }
 
 /*!
-    Sets the attributes content is ordered by to \a sortOrder.
+    Sets the attribute(s) that content in this QContentSet is ordered by to \a sortOrder.
  */
 void QContentSet::setSortOrder( const QStringList &sortOrder )
 {
@@ -936,7 +985,7 @@ void QContentSet::setSortOrder( const QStringList &sortOrder )
 }
 
 /*!
-    Returns the attributes the content is ordered by.
+    Returns the attribute(s) the content in this QContentSet is ordered by.
  */
 QStringList QContentSet::sortOrder() const
 {
@@ -953,6 +1002,12 @@ void QContentSet::timerEvent(QTimerEvent *e)
         d->syncTimer.stop();
     }
 }
+
+/*!
+    \internal
+    Synchronised the internal information about this contentset, requerying the database if
+    necessary, and executing a \a resort if forced to.
+*/
 
 bool QContentSet::sync( bool resort )
 {
@@ -975,6 +1030,13 @@ bool QContentSet::sync( bool resort )
 
     return false;
 }
+
+/*!
+  \internal
+  Given a new set of implicits (matching our filter criteria), generate a set of signals to
+  be emitted to give our listeners an idea of which have been added and removed (so that they
+  can incrementally update their view/display, without having to clear/restart).
+*/
 
 void QContentSet::updateImplicits( const QContentIdList &implicits )
 {
@@ -1065,6 +1127,10 @@ void QContentSet::updateImplicits( const QContentIdList &implicits )
     }
 }
 
+/*!
+  \internal
+  Force a refresh/resynch of the implicits.
+*/
 void QContentSet::refreshRequested()
 {
     d->implicitLinksNeedsFlush = true;
@@ -1092,6 +1158,7 @@ public:
 
 /*!
   \class QContentSetModel
+  \mainclass
   QAbstractItemModel subclass
 
   The QContentSetModel provides a model to represent the data in a QContentSet.
@@ -1137,7 +1204,7 @@ QContentSetModel::~QContentSetModel()
   Return the number of rows in the model - since this is a flat list the
   \a parent argument will always be the default null index, indicating a
   top level item.  The result is the count of the items in the backing
-  store which match the filter expression, and/or any explicitly added
+  store which match the filter expression plus any explicitly added
   non-matching items.
 */
 int QContentSetModel::rowCount( const QModelIndex & /* parent */ ) const
@@ -1149,10 +1216,10 @@ int QContentSetModel::rowCount( const QModelIndex & /* parent */ ) const
 
 /*!
   Return the appropriate QVariant data from the model for the given \a index.
-  Depending on the \a role the QVariant will contain the name of the QContent
-  object at that index, or its Icon, or relevant ToolTip text.  The "ToolTip"
+  Depending upon the \a role, the QVariant will contain the name of the QContent
+  object at that index, its icon, or relevant tooltip text.  The "ToolTip"
   text is shown when the user hovers the cursor over the item in the
-  model view.  The tooltip text will the comment() field from the
+  model view.  The tooltip text will display the comment() field from the
   QContent object, or if error() is true, the error text.  Additionally
   the drm rights in summary form will be shown.
 */
@@ -1198,7 +1265,7 @@ Qt::ItemFlags QContentSetModel::flags( const QModelIndex &index ) const
 }
 
 /*!
-  Returns the QContent for row \a row.
+  Returns the QContent for the requested \a row.
 */
 QContent QContentSetModel::content( uint row ) const
 {
@@ -1232,7 +1299,7 @@ QContent QContentSetModel::content( uint row ) const
 }
 
 /*!
-  Returns the QContent for model index \a index.
+  Returns the QContent for the requested \a index.
  */
 
 QContent QContentSetModel::content( const QModelIndex & index ) const
@@ -1241,7 +1308,7 @@ QContent QContentSetModel::content( const QModelIndex & index ) const
 }
 
 /*!
-  Returns the QContentId for model index \a index.
+  Returns the QContentId for the requested \a index.
  */
 
 QContentId QContentSetModel::contentId( const QModelIndex & index ) const
@@ -1254,10 +1321,9 @@ QContentId QContentSetModel::contentId( const QModelIndex & index ) const
 }
 
 /*!
-  Returns the QContentId for row \a row.
-
-  Note that the value returned may be QContent::InvalidId if the
-  QContent has not been committed to the backing store.
+  Returns the QContentId for the requested \a row. The value returned may be
+  QContent::InvalidId if the QContent has not been committed to the backing store, or there
+  is no associated QContentSet for the model.
 */
 QContentId QContentSetModel::contentId( uint row ) const
 {
@@ -1269,10 +1335,12 @@ QContentId QContentSetModel::contentId( uint row ) const
 }
 
 /*!
-    Sets the \a permissions a QContent must have to in order to be selectable in the content model.
+    Sets the \a permissions a QContent must have to in order to be selectable in the content
+    model.
 
-    If a row in the model doesn't have all the mandatory permissions the Qt::ItemIsEnabled and Qt::ItemIsSelectable
-    flags will be cleared.
+    If a row in the model doesn't have all the mandatory permissions the
+    Qt::ItemIsEnabled and Qt::ItemIsSelectable flags will be cleared.
+    \sa QDrmRights, mandatoryPermissions()
 */
 void QContentSetModel::setMandatoryPermissions( QDrmRights::Permissions permissions )
 {
@@ -1282,7 +1350,9 @@ void QContentSetModel::setMandatoryPermissions( QDrmRights::Permissions permissi
 }
 
 /*!
-    Returns the permissions a QContent must have in order to be selectable in the content model.
+    Returns the permissions a QContent must have in order to be selectable in the content
+    model.
+    \sa QDrmRights, setMandatoryPermissions()
 */
 QDrmRights::Permissions QContentSetModel::mandatoryPermissions() const
 {
@@ -1290,11 +1360,13 @@ QDrmRights::Permissions QContentSetModel::mandatoryPermissions() const
 }
 
 /*!
-    Sets the \a permission which indicates the intended usage of the content in the model
+    Sets the \a permission which indicates the intended usage of the content in the model.
+    Content in the model which doesn't have the selected permission will be displayed with
+    an invalid rights icon.
 
-    Content in the model which doesn't have the select permission will be displayed with an invalid rights icon.
-
-    If the permission is QDrmRights::InvalidPermission the default permission for the content is used.
+    If the permission is QDrmRights::InvalidPermission the default permission for the
+    content is used.
+    \sa QDrmRights, selectPermission()
 */
 void QContentSetModel::setSelectPermission( QDrmRights::Permission permission )
 {
@@ -1304,16 +1376,18 @@ void QContentSetModel::setSelectPermission( QDrmRights::Permission permission )
 }
 
 /*!
-    Returns the permssion which indicated the intended usage of the content in the model.
+    Returns the permssion which indicates the intended usage of the content in the model.
+    \sa QDrmRights, setSelectPermission()
 */
 QDrmRights::Permission QContentSetModel::selectPermission() const
 {
     return d->selectPermission;
 }
 
-/*
-    Determine the row that a given Content ID belongs to
-    Returns -1 if not found
+/*!
+    \internal
+    Determine the row that a given \a contentid belongs to
+    Returns -1 if not found.
 */
 int QContentSetModel::rowForContentId(QContentId contentId)
 {
@@ -1515,6 +1589,15 @@ template <typename Stream> void QContentSet::deserialize(Stream &stream)
     foreach( const QContentId &id, explicitIds )
         add( QContent( id ) );
 }
+
+/*!
+    \fn QDataStream &operator << ( QDataStream &ds, const QContentSet &set )
+    \internal
+*/
+/*!
+    \fn QDataStream &operator >> ( QDataStream &ds, QContentSet &set )
+    \internal
+*/
 
 Q_IMPLEMENT_USER_METATYPE(QContentSet)
 

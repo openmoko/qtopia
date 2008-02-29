@@ -20,7 +20,7 @@ greenphone_devnode()
 
 host_devnode()
 {
-	route -n | awk 'BEGIN{FS=" "}{print $4, $8}' | grep UG | awk 'BEGIN{FS=" "}{print $2}'
+    /sbin/route -n | awk 'BEGIN{FS=" "}{print $4, $8}' | grep UG | awk 'BEGIN{FS=" "}{print $2}'
 }
 
 hostip()

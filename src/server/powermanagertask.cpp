@@ -25,16 +25,17 @@
 #include <QPowerStatus>
 #include <QPowerStatusManager>
 
-// FIXME
 // define PowerManagerTask
 /*!
   \class PowerManagerTask
+  \internal
   \ingroup QtopiaServer::Task
   \brief The PowerManagerTask class implements the device's power management functionality.
 
   The PowerManagerTask class provides the \c {PowerManager} task.
-  Qtopia's Light-and-power application configures the functionality implemented by the \c {PowerManager} task.
-  The PowerManagerTask monitors QPowerStatusManager and calls powerStatusChanged() whenever the power status changes.
+  Qtopia's Light-and-power application configures the functionality implemented 
+  by the \c {PowerManager} task. The PowerManagerTask monitors QPowerStatusManager 
+  and calls powerStatusChanged() whenever the power status changes.
 
   \sa QtopiaPowerManager, {Hardware Configuration}
  */
@@ -61,5 +62,3 @@ void PowerManagerTask::powerStatusChanged(const QPowerStatus &ps)
 {
     Q_UNUSED(ps);
 }
-
-QTOPIA_TASK(PowerManagerTask, PowerManagerTask)

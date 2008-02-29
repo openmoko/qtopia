@@ -89,7 +89,7 @@ public:
 
     bool test( const QContent &content ) const;
 
-    QStringList argumentMatches( FilterType type, const QString &subType ) const;
+    QStringList argumentMatches( FilterType type, const QString &scope ) const;
 
     template <typename Stream> void serialize(Stream &stream) const;
     template <typename Stream> void deserialize(Stream &stream);

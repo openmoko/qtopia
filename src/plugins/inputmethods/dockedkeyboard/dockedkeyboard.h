@@ -26,7 +26,7 @@
 #include <QDebug> //tmp
 
 /*
-    DockedKeyboard is an input method for Qtopia.  DockedKeyboard docks a popup widget depiciting keys on the bottom of the screen and reduces the available screen for other widgets by this space.  The popup widget (KeyboardFrame), interprets mouse events and converts them into key events.
+    DockedKeyboard is an input method for Qtopia.  DockedKeyboard docks a popup widget depicting keys on the bottom of the screen and reduces the available screen for other widgets by this space.  The popup widget (KeyboardFrame), interprets mouse events and converts them into key events.
 
 */
 

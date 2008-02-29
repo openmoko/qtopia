@@ -290,11 +290,15 @@ start()
     
     case $MODE in
         dhcp)
-            /sbin/udhcpc -i $1
+            # if you add parameters to /sbin/udhcpc below, alway leave "-i $1" last
+            if ! /sbin/udhcpc -n -t 10 -i $1; then
+                # failed to get a lease after 10 tries
+                stop $1
+            fi
             ;;
         static)
             /sbin/ifconfig $1 netmask $NETMASK broadcast $BROADCAST $IPADDR up
-            /sbin/route del default
+            /sbin/route del default 2>/dev/null
             /sbin/route add default gw $GATEWAY
             ;;
         *)
@@ -310,7 +314,7 @@ stop()
     print_debug "stopping interface $1";
 
     # stop udhcpc for interface
-    DHCP_PIDS=$( ps | grep "[u]dhcpc -i $1" | awk '{print $1}' )
+    DHCP_PIDS=$( ps | grep "[u]dhcpc .*-i $1" | awk '{print $1}' )
     [ -n "$DHCP_PIDS" ] && kill $DHCP_PIDS 2>&1 >/dev/null
 
     # stop wpa_supplicant for interface
@@ -346,12 +350,15 @@ route()
         gateway=$3
     else
         echo "Using DHCP information to find gateway IP";
-        ## ADD CODE HERE ##
+
+        # renew udhcpc for interface
+        DHCP_PIDS=$( ps | grep "[u]dhcpc .*-i $1" | awk '{print $1}' )
+        [ -n "$DHCP_PIDS" ] && kill -s SIGUSR1 $DHCP_PIDS 2>&1 >/dev/null
     fi
 
     if [ -n "$gateway" ]; then
         print_debug "removing old default route";
-        /sbin/route del default;
+        /sbin/route del default 2>/dev/null;
         print_debug "adding new default route via $1";
         /sbin/route add default gw $gateway;
     fi
@@ -385,3 +392,4 @@ case $ACTION in
         exit 1;
         ;;
 esac
+

@@ -34,6 +34,7 @@ class QFileInfo;
 
 /*!
   \class ContentLinkPrivate
+  \mainclass
   \internal
   A normal document object managed by the QContent system (not
   an application, and not DRM controlled).
@@ -180,6 +181,7 @@ inline bool ContentLinkPrivate::operator==(const ContentLinkPrivate &other) cons
 
 /*!
   \class ContentLinkPrivateDRM
+  \mainclass
   \internal
   A DRM controlled content object managed by the QContent system
   (possibly an application, eg Java midlet).

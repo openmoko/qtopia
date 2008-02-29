@@ -219,6 +219,7 @@ bool AppearanceSettings::eventFilter(QObject *o, QEvent *e)
             // focus moves between list items.
             else {
                 list->setEditFocus(true);
+                processKeyRelease = false;
             }
             return false;
         }

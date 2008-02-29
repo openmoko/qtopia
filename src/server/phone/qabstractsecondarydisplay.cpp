@@ -19,3 +19,28 @@
 **
 ****************************************************************************/
 
+#include "qabstractsecondarydisplay.h"
+
+/*!
+  \class QAbstractSecondaryDisplay
+  \brief The QAbstractSecondaryDisplay class allows developers to replace the "secondary screen" portion of the Phone UI.
+
+
+  The QAbstractSecondaryDisplay interface is part of is part of the 
+  \l {QtopiaServerApplication#qtopia-server-widgets}{server widgets framework}
+  and represents the portion of the phone UI that is shown on a smaller
+  utility screen such as on clam shell phones.
+  
+  A small tutorial on how to develop new server widgets using one of the abstract widgets as base can
+  be found in QAbstractServerInterface class documentation.
+
+  \ingroup QtopiaServer::PhoneUI::TTSmartPhone
+
+  */
+
+/*! \fn QAbstractSecondaryDisplay::QAbstractSecondaryDisplay(QWidget *parent, Qt::WFlags flags)
+
+  Construct a new QAbstractSecondaryDisplay with the specified \a parent and
+  widget \a flags.
+ */
+

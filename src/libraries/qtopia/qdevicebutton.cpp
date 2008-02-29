@@ -24,11 +24,14 @@
 #include "qdevicebutton.h"
 
 /*! \class QDeviceButton
+    \mainclass
     \brief The QDeviceButton class represents a user-programmable button on a Qtopia device.
 
     This class represents a physical special-function button on a Qtopia device.
     The location and number of buttons will vary from device to
     device and the button is described in the help documentation by \c userText() and \c pixmap().
+
+    QDeviceButton objects are only usefully obtained from QDeviceButtonManager::buttonForKeycode().
 
     \ingroup userinput
 */
@@ -51,7 +54,7 @@ QDeviceButton::~QDeviceButton()
 }
 
 /*!
-  Returns the button keycode.
+  Returns the button keycode. See the Qt::Key enum for the values.
  */
 int QDeviceButton::keycode() const
 {
@@ -61,7 +64,10 @@ int QDeviceButton::keycode() const
 
 /*!
   Returns the button context. If the context is empty, then the button
-  applies in all contexts. The semantics of non-empty contexts is device specific.
+  applies in all contexts. The semantics of non-empty contexts is device specific,
+  but in general the meaning of a context is a certain device state. The Qtopia
+  server defines the context "HomeScreen" such that device button mappings can
+  be made that only apply on the device home screen.
  */
 QString QDeviceButton::context() const
 {
@@ -78,8 +84,8 @@ QString QDeviceButton::userText() const
 }
 
 /*!
-  Returns the pixmap for this button.    If there isn't one
-  it will return an empty (null) pixmap.
+  Returns the pixmap for this button, or 
+  an empty (null) pixmap if none is defined.
  */
 QPixmap QDeviceButton::pixmap() const
 {
@@ -117,6 +123,8 @@ void QDeviceButton::setKeycode(int keycode)
 
 /*!
   Sets the \a context where the keycode applies.
+
+  \sa context()
 */
 void QDeviceButton::setContext(const QString& context)
 {

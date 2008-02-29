@@ -207,7 +207,19 @@ void DialerServiceProxy::showDialer( const QString& digits )
 }
 #endif
 
-// define PhoneLauncher
+/*!
+  \class PhoneLauncher
+  \brief The PhoneLauncher class implments the main UI widget for the Qtopia Phone Edition.
+  \ingroup QtopiaServer::PhoneUI
+
+  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+
+  \sa QAbstractServerInterface
+  */
+
+/*!
+  \internal
+  */
 PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     : QAbstractServerInterface(parent, fl), updateTid(0), m_header(0),
       m_context(0), stack(0), documentsMenu(0), 
@@ -402,6 +414,9 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     loadTheme();
 }
 
+/*!
+  \internal
+  */
 PhoneLauncher::~PhoneLauncher()
 {
     delete stack;
@@ -419,6 +434,9 @@ PhoneLauncher::~PhoneLauncher()
         delete secondDisplay;
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::showEvent(QShowEvent *e)
 {
     QTimer::singleShot(0, homeScreen, SLOT(show()));
@@ -431,6 +449,9 @@ void PhoneLauncher::showEvent(QShowEvent *e)
     QWidget::showEvent(e);
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::callPressed()
 {
 #ifdef QTOPIA_PHONEUI
@@ -441,6 +462,9 @@ void PhoneLauncher::callPressed()
         delete warningBox;
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::hangupPressed()
 {
     // Called if server windows are not on top
@@ -462,6 +486,9 @@ void PhoneLauncher::hangupPressed()
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::multitaskPressed()
 {
     // When pressed, home screen is shown (without quiting apps).
@@ -504,6 +531,9 @@ void PhoneLauncher::multitaskPressed()
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::showRunningTasks()
 {
     QStringList runningApps = appMon.runningApplications();
@@ -523,6 +553,9 @@ void PhoneLauncher::showRunningTasks()
     //}
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::showContentSet()
 {
     hideAll();
@@ -532,6 +565,9 @@ void PhoneLauncher::showContentSet()
     phoneBrowser()->activateWindow();
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::loadTheme()
 {
     bool v = isVisible();
@@ -585,12 +621,16 @@ void PhoneLauncher::loadTheme()
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void PhoneLauncher::showMissedCalls()
 {
     showCallHistory(true);
 }
 
 /*!
+  \internal
   Displays the call screen.
 */
 void PhoneLauncher::showCallScreen()
@@ -604,6 +644,9 @@ void PhoneLauncher::showCallScreen()
 }
 #endif
 
+/*!
+  \internal
+  */
 void PhoneLauncher::initInfo()
 {
     AlarmControl::instance();
@@ -619,11 +662,17 @@ void PhoneLauncher::initInfo()
 #endif
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::resizeEvent(QResizeEvent *e)
 {
     QWidget::resizeEvent(e);
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
 {
     QDataStream stream( data );
@@ -662,13 +711,21 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
     }
 }
 
-#include "../contentserver.h"
-
+/*!
+  \fn void PhoneLauncher::windowRaised( QWSWindow *win )
+  \internal
+  */
+/*!
+  \internal
+  */
 void PhoneLauncher::launchType(const QString& type)
 {
     phoneBrowser()->resetToView(type);
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::showMessageBox(const QString& title, const QString& text, QAbstractMessageBox::Icon icon)
 {
     if (!warningBox) {
@@ -679,6 +736,9 @@ void PhoneLauncher::showMessageBox(const QString& title, const QString& text, QA
     QtopiaApplication::showDialog(warningBox);
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::showHomeScreen(int state)
 {
     // state: 0 -> no screensaver calls
@@ -723,6 +783,9 @@ void PhoneLauncher::showHomeScreen(int state)
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::rejectModalDialog()
 {
     // Last resort.  We shouldn't have modal dialogs in the server, but
@@ -751,6 +814,9 @@ void PhoneLauncher::rejectModalDialog()
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::showPhoneLauncher()
 {
     phoneBrowser()->resetToView("Main");
@@ -763,6 +829,9 @@ void PhoneLauncher::showPhoneLauncher()
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void PhoneLauncher::missedCount(int count)
 {
     homeScreen->setMissedCalls(count);
@@ -772,6 +841,9 @@ void PhoneLauncher::missedCount(int count)
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::messageCountChanged(int count, bool full, bool fromSystem, bool notify)
 {
     alertedMessageCount = 0;
@@ -785,6 +857,9 @@ void PhoneLauncher::messageCountChanged(int count, bool full, bool fromSystem, b
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::messageRejected()
 {
     showWarning(tr("Incoming Message Rejected"),
@@ -792,11 +867,17 @@ void PhoneLauncher::messageRejected()
                    "there is insufficient space to store it.</qt>"));
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::activeCallCount(int count)
 {
     activeCalls = count;
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::registrationChanged()
 {
 
@@ -893,6 +974,9 @@ void PhoneLauncher::registrationChanged()
 
 #endif
 
+/*!
+  \internal
+  */
 void PhoneLauncher::timerEvent(QTimerEvent * tev)
 {
     if(tev && tev->timerId() == updateTid) {
@@ -919,6 +1003,7 @@ void PhoneLauncher::timerEvent(QTimerEvent * tev)
 
 #ifdef QTOPIA_PHONEUI
 /*!
+  \internal
   Shows the Missed Calls dialog if there are any missed calls.  If there
   are no missed calls but there are new messages then the New Mesages
   dialog is shown.
@@ -971,6 +1056,9 @@ void PhoneLauncher::showAlertDialogs()
 }
 #endif
 
+/*!
+  \internal
+  */
 void PhoneLauncher::keyStateChanged(bool locked)
 {
 #ifdef QTOPIA_PHONEUI
@@ -981,6 +1069,9 @@ void PhoneLauncher::keyStateChanged(bool locked)
 #endif
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::updateBackground()
 {
 #ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
@@ -1014,6 +1105,9 @@ void PhoneLauncher::updateBackground()
 }
 
 
+/*!
+  \internal
+  */
 void PhoneLauncher::polishWindows()
 {
     QApplication::setPalette(QApplication::palette());
@@ -1028,6 +1122,9 @@ void PhoneLauncher::polishWindows()
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::paintEvent(QPaintEvent *)
 {
     QPixmap pm(":image/qpelogo");
@@ -1035,11 +1132,17 @@ void PhoneLauncher::paintEvent(QPaintEvent *)
     p.drawPixmap((width()-pm.width())/2,( height()-pm.height())/2, pm);
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::updateLauncherIconSize()
 {
 }
 
 // Creation methods
+/*!
+  \internal
+  */
 PhoneHeader *PhoneLauncher::header()
 {
     if(!m_header) {
@@ -1054,6 +1157,9 @@ PhoneHeader *PhoneLauncher::header()
     return m_header;
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::createContext()
 {
     Q_ASSERT(!m_context);
@@ -1071,6 +1177,9 @@ void PhoneLauncher::createContext()
                     m_context->height());
 }
 
+/*!
+  \internal
+  */
 ContextLabel *PhoneLauncher::context()
 {
     Q_ASSERT(m_context);
@@ -1078,12 +1187,16 @@ ContextLabel *PhoneLauncher::context()
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void PhoneLauncher::showSpeedDialer(const QString &digits)
 {
     showDialer(digits, true);
 }
 
 /*!
+  \internal
   Displays the dialer, preloaded with \a digits.  If \a speedDial
   is true, the digits will be considered for use in speed dial (press and
   hold).
@@ -1105,6 +1218,7 @@ void PhoneLauncher::showDialer(const QString &digits, bool speedDial)
 }
 
 /*!
+  \internal
   Displays the call history window.  If \a missed is true, the missed
   calls tab will be on top.  If \a hint is not empty, it is used to
   highlight a matching call.
@@ -1145,6 +1259,9 @@ void PhoneLauncher::showCallHistory(bool missed, const QString &hint)
 
 #ifdef QTOPIA_CELL
 
+/*!
+  \internal
+  */
 void PhoneLauncher::unstructuredNotification
     ( QSupplementaryServices::UnstructuredAction action, const QString& data )
 {
@@ -1180,6 +1297,9 @@ void PhoneLauncher::unstructuredNotification
 #endif // QTOPIA_CELL
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void PhoneLauncher::ussdMessage(const QString &text)
 {
     QString title = tr("Service request");
@@ -1197,6 +1317,9 @@ void PhoneLauncher::ussdMessage(const QString &text)
 
 #ifdef QTOPIA_CELL
 
+/*!
+  \internal
+  */
 void PhoneLauncher::cellBroadcast(CellBroadcastControl::Type type,
                                   const QString &chan, const QString &text)
 {
@@ -1218,6 +1341,7 @@ void PhoneLauncher::cellBroadcast(CellBroadcastControl::Type type,
 #endif // QTOPIA_CELL
 
 /*!
+  \internal
   Increases the earpiece volume.
 
   Note: this affects the user interface only.  Hardware specific code
@@ -1232,6 +1356,7 @@ void PhoneLauncher::increaseEarVolume()
 }
 
 /*!
+  \internal
   Decreases the earpiece volume.
 
   Note: this affects the user interface only.  Hardware specific code
@@ -1246,6 +1371,7 @@ void PhoneLauncher::decreaseEarVolume()
 }
 
 /*!
+  \internal
   Shows the Profile settings application.
 */
 void PhoneLauncher::showProfileSelector()
@@ -1256,6 +1382,7 @@ void PhoneLauncher::showProfileSelector()
 
 
 /*!
+  \internal
   Hides the Call History, Dialer and Call Screen.
 */
 void PhoneLauncher::hideAll()
@@ -1271,6 +1398,9 @@ void PhoneLauncher::hideAll()
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void PhoneLauncher::stateChanged()
 {
     callScreen()->stateChanged(); // We must know that this is updated before we continue
@@ -1315,6 +1445,9 @@ void PhoneLauncher::stateChanged()
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::acceptIncoming()
 {
     if (DialerControl::instance()->hasIncomingCall()) {
@@ -1338,6 +1471,7 @@ void PhoneLauncher::acceptIncoming()
 }
 
 /*!
+  \internal
   Accepts an incoming call.  Has no affect if an incoming call is not
   currently available.
 */
@@ -1417,6 +1551,9 @@ void PhoneLauncher::messageBoxDone(int r)
 }
 #endif
 
+/*!
+  \internal
+  */
 void PhoneLauncher::showWarning(const QString &title, const QString &text)
 {
     if (!warningMsgBox)
@@ -1433,6 +1570,7 @@ void PhoneLauncher::showWarning(const QString &title, const QString &text)
   that it is possible to make a call.  If it is not possible to make a
   call, the user will be notified, otherwise the call screen will be shown
   and the call initiated.
+  \internal
 */
 void PhoneLauncher::dialNumber(const QString &n, const QUniqueId &c, const QString &callType)
 {
@@ -1458,6 +1596,9 @@ void PhoneLauncher::dialNumber(const QString &n, const QUniqueId &c, const QStri
     }
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::requestDial(const QString &n, const QUniqueId &c)
 {
     if (n.isEmpty())
@@ -1552,6 +1693,9 @@ void PhoneLauncher::requestDial(const QString &n, const QUniqueId &c)
     dialNumber(queuedCall, queuedCallContact, queuedCallType);
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::serviceNumber(QServiceNumbers::NumberId id, const QString& number)
 {
     if ( id == QServiceNumbers::VoiceMail ) {
@@ -1571,6 +1715,7 @@ void PhoneLauncher::serviceNumber(QServiceNumbers::NumberId id, const QString& n
 }
 
 /*!
+  \internal
     Dial the voice mail number in the SIM.
 */
 void PhoneLauncher::dialVoiceMail()
@@ -1582,12 +1727,18 @@ void PhoneLauncher::dialVoiceMail()
         serviceNumber( QServiceNumbers::VoiceMail, QString() );
 }
 
+/*!
+  \internal
+  */
 void PhoneLauncher::resetMissedCalls()
 {
     alertedMissed = 0;
 }
 
 
+/*!
+  \internal
+  */
 QAbstractDialerScreen *PhoneLauncher::dialer(bool create) const
 {
     if(create && !m_dialer) {
@@ -1610,6 +1761,9 @@ QAbstractDialerScreen *PhoneLauncher::dialer(bool create) const
     return m_dialer;
 }
 
+/*!
+  \internal
+  */
 CallScreen *PhoneLauncher::callScreen(bool create) const
 {
     if(create && !mCallScreen) {
@@ -1645,6 +1799,9 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
 }
 #endif
 
+/*!
+  \internal
+  */
 void PhoneLauncher::speedDial( const QString& input )
 {
     activateSpeedDial(input);
@@ -1655,6 +1812,7 @@ void PhoneLauncher::speedDial( const QString& input )
 }
 
 /*!
+  \internal
   Activate speed dial associated with \a input.
  */
 bool PhoneLauncher::activateSpeedDial( const QString& input )
@@ -1676,6 +1834,9 @@ bool PhoneLauncher::activateSpeedDial( const QString& input )
 }
 
 
+/*!
+  \internal
+  */
 QAbstractBrowserScreen *PhoneLauncher::phoneBrowser(bool create) const
 {
     if(!stack && create) {
@@ -1686,6 +1847,9 @@ QAbstractBrowserScreen *PhoneLauncher::phoneBrowser(bool create) const
     return stack;
 }
 
+/*!
+  \internal
+  */
 QAbstractSecondaryDisplay *PhoneLauncher::secondaryDisplay(bool create) const
 {
     QDesktopWidget *desktop = QApplication::desktop();

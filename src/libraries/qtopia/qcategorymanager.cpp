@@ -34,6 +34,8 @@
 #include <QSqlError>
 #include <QDebug>
 
+#include <limits.h>
+
 class QCategoryFilterData : public QSharedData
 {
 public:
@@ -45,21 +47,26 @@ public:
 
 /*!
   \class QCategoryFilter
-  \brief The QCategoryFilter class filters category sets.
-
-  The QCategoryFilter class allows consistent filtering of records or objects
-  that have a set of categories assigned.  It also provides methods to store
-  the current filtering method in a QSettings file.
-
+  \mainclass
   \ingroup categories
+  \brief The QCategoryFilter class allows consistent filtering of records or objects
+  that have a set of categories assigned.
+
+  QCategoryFilter is used to represent selected categories. Unlike a list of category
+  ids, QCategoryFilter handles the \c All and \c Unfiled
+  cases so it allows unambiguous behaviour when new categories are added to the system.
+  It is most useful when filtering items by category to create a QCategoryFilter and use
+  the \l accepted() function.
+
+  \sa Categories
 */
 
 /*!
   \enum QCategoryFilter::FilterType
 
-  \value List Only accept category sets that contain all of the required categories.
-  \value Unfiled Only accept empty category sets.
-  \value All Accept all category sets.
+  \value List Only accepts category sets that contain all of the required categories.
+  \value Unfiled Only accepts empty category sets.
+  \value All Accepts all category sets.
 */
 
 /*!
@@ -72,7 +79,7 @@ QCategoryFilter::QCategoryFilter()
 }
 
 /*!
-  Constructs a QCategoryFilter object of the type \a t.
+  Constructs a QCategoryFilter object of type \a t.
 
   \sa FilterType
 */
@@ -84,7 +91,7 @@ QCategoryFilter::QCategoryFilter(FilterType t)
 
 /*!
   Constructs a QCategoryFilter object that only accepts category sets containing
-  all the categories listed in \a set.
+  all of the category ids listed in \a set. The type is set to \l QCategoryFilter::List.
 */
 QCategoryFilter::QCategoryFilter(const QList<QString>&set)
 {
@@ -94,8 +101,8 @@ QCategoryFilter::QCategoryFilter(const QList<QString>&set)
 }
 
 /*!
-  Constructs a QCategoryFilter object that only accepts category sets containing the category
-  \a c.
+  Constructs a QCategoryFilter object that only accepts category sets containing category id \a c.
+  The type is set to \l QCategoryFilter::List.
 */
 QCategoryFilter::QCategoryFilter(const QString &c)
 {
@@ -147,6 +154,7 @@ bool QCategoryFilter::accepted(const QList<QString> &list) const
 /*!
   Returns true if the QCategoryFilterObject accepts all category sets.
   Otherwise returns false.
+  \sa QCategoryFilter::requiredCategories()
 */
 bool QCategoryFilter::acceptAll() const
 {
@@ -164,6 +172,17 @@ bool QCategoryFilter::acceptUnfiledOnly() const
 
 /*!
   Returns the list of categories that must be in a set for the set to be accepted.
+  Note that this only returns a list of the QCategoryFilter object is of type
+  \l QCategoryFilter::List. To get the list of categories corresponding to
+  \l QCategoryFilter::All you must create a QCategoryManager.
+
+  \code
+    QStringList categories;
+    if ( filter.acceptAll() )
+        categories = QCategoryManager(scope).categoryIds();
+    else
+        categories = filter.requiredCategories(); // returns empty list for Unfiled
+  \endcode
 */
 QList<QString> QCategoryFilter::requiredCategories() const
 {
@@ -177,7 +196,13 @@ static const QString QCategoryFilter_RequireEmpty = "RequireEmpty";// no tr
 static const QString QCategoryFilter_RequireList = "RequireList";// no tr
 
 /*!
-  Writes the QCategoryFilter to the QSettings file \a c using the key \a key.
+  Writes the QCategoryFilter to field \a key in \a c.
+
+  \code
+    QCategoryFilter filter("mycategory");
+    QSettings settings("mycompany", "myapp");
+    filter.writeConfig(settings,"filter");
+  \endcode
 
   \sa readConfig()
 */
@@ -203,7 +228,13 @@ void QCategoryFilter::writeConfig(QSettings &c, const QString &key) const
 }
 
 /*!
-  Reads the QCategoryFilter from the QSettings file \a c using the key \a key.
+  Reads the QCategoryFilter from field \a key in \a c.
+
+  \code
+    QSettings settings("mycompany", "myapp");
+    QCategoryFilter filter;
+    filter.readConfig(settings,"filter");
+  \endcode
 
   \sa writeConfig()
 */
@@ -231,8 +262,15 @@ void QCategoryFilter::readConfig(const QSettings &c, const QString &key)
 }
 
 /*!
-  Returns a translated string that briefly describe the QCategoryFilter object.
-  \a scope specifies the scope in which to search for the label.
+  Returns a translated string that briefly describes the QCategoryFilter object.
+  If specified, \a scope specifies the scope in which to search for the label.
+
+  This is useful when displaying a string describing the categories the QCategoryFilter
+  allows.
+
+  \code
+    currentCategoryLabel->setText( catetoryFilter->label() );
+  \endcode
 */
 QString QCategoryFilter::label(const QString &scope) const
 {
@@ -282,25 +320,22 @@ public:
 
 /*!
   \class QCategoryManager
-  \brief The QCategoryManager class provides functionality for modifying the set of available Categories.
-
-  The QCategoryManager class provides a set of functions to create, modify, and remove
-  Categories.  It also provides signals to notify when another program or object has
-  modified the set of available Categories.
-
+  \mainclass
   \ingroup categories
+  \brief The QCategoryManager class provides a set of functions to create, modify, and remove categories.
+
+  \sa Categories
 */
 
 /*!
   \fn void QCategoryManager::categoriesChanged()
 
-  This signal is emitted when any change are made to any global categories or any
-  category in the scope of the QCategoryManager object.
+  This signal is emitted when any changes are made to categories.
 */
 
 /*!
   Constructs a QCategoryManager object with parent \a parent.
-  Only global categories will be managed by the QCategoryManager object.
+  It will only see categories in the global scope.
 */
 QCategoryManager::QCategoryManager(QObject *parent)
     : QObject(parent)
@@ -314,8 +349,8 @@ QCategoryManager::QCategoryManager(QObject *parent)
 
 /*!
   Constructs a QCategoryManager object with parent \a parent.
-  If \a scope is null then only global categories will be managed by the QCategoryManager object.
-  Otherwise will manage both global categories and categories restricted to \a scope.
+  If \a scope is null then only categories in the global scope will be seen.
+  Otherwise both global categories and categories restricted to \a scope will be seen.
 */
 QCategoryManager::QCategoryManager(const QString &scope, QObject *parent)
     : QObject(parent)
@@ -328,7 +363,7 @@ QCategoryManager::QCategoryManager(const QString &scope, QObject *parent)
 }
 
 /*!
-  Destroys a CategoryManager object.
+  Destroys a QCategoryManager object.
 */
 QCategoryManager::~QCategoryManager()
 {
@@ -337,8 +372,13 @@ QCategoryManager::~QCategoryManager()
 
 /*!
   If there is a category id \a id in the scope of the QCategoryManager
-  returns the translated label for the category id.  Otherwise returns a
+  returns the display label for the category id.  Otherwise returns a
   null string.
+
+  User categories have a display label set by the user. System categories
+  have a string that is translated to obtain the display label.
+
+  \sa {User Categories}, {System Categories}
 */
 QString QCategoryManager::label(const QString &id) const
 {
@@ -419,6 +459,7 @@ QString QCategoryManager::iconFile(const QString &id) const
   category id in the list \a l that is in the scope of the QCategoryManager.
   The list returned will have a count smaller than the list if id's \a l
   if one or more of the ids in the list \a l are not in the scope of the QCategoryManager.
+  \sa label()
 */
 QList<QString> QCategoryManager::labels(const QList<QString> &l) const
 {
@@ -456,7 +497,7 @@ QString QCategoryManager::multiLabel()
 }
 
 /*!
-  Returns true if the category for id \a id is unscoped.
+  Returns true if the category id \a id is in the global scope.
 */
 bool QCategoryManager::isGlobal(const QString &id) const
 {
@@ -480,6 +521,7 @@ bool QCategoryManager::isGlobal(const QString &id) const
 /*!
   Returns true if the category identified by \a id is a system category.
   Otherwise returns false.
+  \sa {System Categories}
 */
 bool QCategoryManager::isSystem(const QString &id) const
 {
@@ -501,9 +543,12 @@ bool QCategoryManager::isSystem(const QString &id) const
 }
 
 /*!
-    Sets the category with category id \a id to be a system category.
-    Doing this will make the category read only and undeleteable. Use with care.
- */
+  \obsolete
+  Sets the category with category id \a id to be a system category. Returns true on success; otherwise returns false.
+  Doing this will make the category read only and undeleteable. Use with care.
+
+  System categories should be created using the \l ensureSystemCategory() function.
+*/
 bool QCategoryManager::setSystem(const QString &id)
 {
     static const QString systemquery = QLatin1String("udpate categories set flags=flags|1 where categoryid=:id");
@@ -526,9 +571,10 @@ bool QCategoryManager::setSystem(const QString &id)
 }
 
 /*!
-  If \a global is true, sets the category with category id \a id to be a global category.
-  Otherwise if there is a global category with category id \a id will make that category
-  scoped to the current QCategoryManager object's scope.
+  Sets the category with category id \a id to the global scope if \a global is true or to the scope of
+  QCategoryManager otherwise. Returns true on success. Returns false if the category does
+  not exist, if \a global is false and QCategoryManager does not have a scope or if there
+  is a database failure.
 */
 bool QCategoryManager::setGlobal(const QString &id, bool global)
 {
@@ -583,15 +629,15 @@ bool QCategoryManager::setGlobal(const QString &id, bool global)
   Creates a new category with the user-supplied label \a trLabel and icon \a icon.
   The category is created in the scope of the QCategoryManager unless \a forceGlobal
   is true, when it will be created in the global scope.
-  If the QCategoryManager does not have a scope, the category will be created in the global scope.
 
   Returns the id of the new category if the new category is successfully added.
   Otherwise returns the null string.
 
   Note that this function is not suitable for applications wishing to create categories
   programmatically. Instead, a system category should be created, using
-  the \link addCategory() \endlink
-  function.
+  the \l ensureSystemCategory() function.
+
+  \sa {User Categories}, {System Categories}
 */
 QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool forceGlobal )
 {
@@ -599,6 +645,8 @@ QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool
     if ( id.isEmpty() ) {
         id = "empty";
     }
+    // Prepend user. to the id to avoid conflicts with system category ids
+    id = QString("user.%1").arg(id);
 
     if ( !contains(id) ) {
         if ( addCategory(id, trLabel, icon, forceGlobal) )
@@ -607,8 +655,9 @@ QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool
             return QString();
     }
 
+    // The id is already in use... try to generate a new one
     QString key;
-    for ( int i = 1; i < 1000; i++ ) {
+    for ( int i = 0; i < INT_MAX; i++ ) {
         key = QString("%1_%2").arg(id).arg(i);
         if ( !contains(key) ) {
             if ( addCategory(key, trLabel, icon, forceGlobal) )
@@ -622,30 +671,17 @@ QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool
 }
 
 /*!
-  Creates a new category with id \a id, the user-supplied label \a trLabel and icon \a icon
-  in the classes scope. If \a forceGlobal is true, when the category is created it will be
+  \obsolete
+  Creates a new category with category id \a id, the user-supplied label \a trLabel and icon \a icon
+  in the scope of the QCategoryManager. If \a forceGlobal is true, when the category is created it will be
   created as a global category (ie with no scope). If the scope the class was created with is
   null the category will be global also. If \a isSystem is set to true, will set the system
   flag on the category, and will make it unmodifiable, and unremovable.
 
-  QCategoryManager handles 2 types of categories.
-
-  User categories have an id that does not start with an underscore. They use the trLabel field
-  as a translated string which will not change when the user changes languages. The user can edit
-  and delete user categories.
-
-  System categories can only be created programmatically. The user cannot edit or delete
-  system categories. System categories use the trLabel field as an untranslated string that
-  is passed through the translation engine by QCategoryManager, allowing the text to change
-  when the user changes languages. The translations should be installed by the application
-  with a name like Categories-myapp.qm so that QCategoryManager can load them.
-
-  Note that the \a id must be unique. Unless the category is intended to be used by multiple
-  applications, it is recommended to prepend a unique string (eg. the binary name) to the id.
+  For creating categories on behalf of the user use the \l add() function. For creating system
+  categories use the \l ensureSystemCategory() function.
 
   Returns true if the new category is successfully added.  Otherwise returns false.
-
-  \sa QCategoryManager()
 */
 bool QCategoryManager::addCategory( const QString &id, const QString &trLabel, const QString &icon, bool forceGlobal, bool isSystem )
 {
@@ -677,10 +713,70 @@ bool QCategoryManager::addCategory( const QString &id, const QString &trLabel, c
 }
 
 /*!
+  Creates a new system category with category id \a id, translatable label \a trLabel and icon \a icon
+  in the scope of the QCategoryManager. If \a forceGlobal is true or the QCategoryManager has no scope
+  the category will be created in the global scope.
+
+  Note that \a id must be unique. If the id already exists and the existing category does not match the
+  arguments the existing category is removed and re-created using the arguments.
+
+  Returns true if the new category is successfully added or a matching system category already exists.
+  Otherwise returns false.
+
+  Note that applications wishing to create categories on behalf of the user should use the \l add() function.
+
+  \sa {User Categories}, {System Categories}
+*/
+bool QCategoryManager::ensureSystemCategory( const QString &id, const QString &trLabel, const QString &icon, bool forceGlobal )
+{
+    // You cannot create a system category id starting with "user." as that is reserved for user categories
+    if ( id.startsWith("user.") )
+        return false;
+
+    if ( exists(id) ) {
+        // Simple case, the system category already exists as described by the arguments
+        if ( isSystem(id) ) {
+            QString scope = d->scope;
+            if ( forceGlobal )
+                scope = QString();
+            QCategoryManager test( scope );
+            if ( trLabel == test.label(id) && icon == test.iconFile(id) )
+                return true;
+        }
+
+        // To ensure the category described by the arguments exists, remove the existing
+        // category and re-add using the arguments. We need to use the SQL directly because
+        // the API does not let you remove system categories.
+        static const QString remquery = QLatin1String("DELETE FROM categories WHERE categoryid = :id");
+
+        bool allSucceeded = true;
+
+        foreach(const QSqlDatabase &db, QtopiaSql::databases())
+        {
+            QSqlQuery q(db);
+            q.prepare(remquery);
+            q.bindValue(":id", id);
+
+            QtopiaSql::logQuery( q );
+            if (!q.exec()) {
+                qWarning() << "QCategoryManager::ensureSystemCategory failed:" << q.lastError();
+                allSucceeded = false;
+            }
+        }
+        if ( !allSucceeded )
+            return false;
+    }
+
+    return addCategory( id, trLabel, icon, forceGlobal, true );
+}
+
+/*!
   Attempts to remove the category with category id \a id as long as the category is either
   global or in the scope of the QCategoryManager object.
   Returns true If the category is successfully removed.
   Otherwise returns false.
+
+  Note that this will always fail if \a id is a system category.
 */
 bool QCategoryManager::remove( const QString &id )
 {
@@ -711,6 +807,8 @@ bool QCategoryManager::remove( const QString &id )
   Attempts to rename the category with category id \a id to have the translated label \a trLabel.
   Returns true If the category is successfully renamed.
   Otherwise returns false.
+
+  Note that this will always fail if \a id is a system category.
 */
 bool QCategoryManager::setLabel( const QString &id, const QString &trLabel )
 {
@@ -744,6 +842,8 @@ bool QCategoryManager::setLabel( const QString &id, const QString &trLabel )
   Attempts to set the icon for the category with category id \a id to \a icon.
   Returns true If the category icon is changed successfully.
   Otherwise returns false.
+
+  Note that this will always fail if \a id is a system category.
 */
 bool QCategoryManager::setIcon( const QString &id, const QString &icon )
 {
@@ -771,8 +871,8 @@ bool QCategoryManager::setIcon( const QString &id, const QString &icon )
 }
 
 /*!
-  Returns true if there is a global category or a category within the
-  scope of the QCategoryManager with the category id \a id.  Otherwise returns false.
+  Returns true if there is a category in the global scope or the scope of
+  QCategoryManager with category id \a id.  Otherwise returns false.
 */
 bool QCategoryManager::contains(const QString &id) const
 {
@@ -803,7 +903,7 @@ bool QCategoryManager::contains(const QString &id) const
 }
 
 /*!
-    Returns true if there is a category in any scope with the category id \a id.
+    Returns true if there is a category in any scope with category id \a id.
 */
 bool QCategoryManager::exists( const QString &id ) const
 {
@@ -826,10 +926,12 @@ bool QCategoryManager::exists( const QString &id ) const
 }
 
 /*!
-  Returns true if there is a global category or a category within the
-  scope of the QCategoryManager with the label \a label.  Otherwise returns false.
-  Note that this may produce unexpected results for system categories, in this case, set
-  \a forceGlobal to true to detect the presence of global categories as well.
+  Returns true if there is a category in the global scope or the scope of
+  QCategoryManager with text \a label.  Otherwise returns false.
+  Set \a forceGlobal to true to limit the search to categories in the global scope.
+
+  Note that this searches on the text stored which may not match what is returned by
+  \l label() for system categories.
  */
 bool QCategoryManager::containsLabel(const QString &label, bool forceGlobal) const
 {
@@ -858,11 +960,11 @@ bool QCategoryManager::containsLabel(const QString &label, bool forceGlobal) con
 }
 
 /*!
-  Returns the category ID if there is a global category or a category within the
-  scope of the QCategoryManager with the label \a label.  Otherwise returns
-  an empty string.
+  Returns the category id for a category with text \a label in the global scope or the
+  scope of QCategoryManager. Otherwise returns an empty string.
 
-  Note that this may produce unexpected results for system categories.
+  Note that this searches on the text stored which may not match what is returned by
+  \l label() for system categories.
  */
 QString QCategoryManager::idForLabel(const QString &label) const
 {
@@ -887,8 +989,7 @@ QString QCategoryManager::idForLabel(const QString &label) const
 }
 
 /*!
-  Returns the set of global categories joined with the set of categories contained
-  within the scope of the QCategoryManager object.
+  Returns the set of category ids that QCategoryManager can see.
 */
 QList<QString> QCategoryManager::categoryIds() const
 {
@@ -921,7 +1022,12 @@ QList<QString> QCategoryManager::categoryIds() const
     return result.values();
 }
 
+/*!
+  \internal
+  Emit the categoriesChanged() signal.
+*/
 void QCategoryManager::reloadCategories()
 {
     emit categoriesChanged();
 }
+

@@ -556,6 +556,7 @@ void TodoWindow::editCurrentEntry()
         model->updateTask( todo );
         todo = model->task(todo.uid());
         showDetailView(todo);
+        currentEntryChanged();
     }
 
     delete edit;
@@ -1068,7 +1069,9 @@ void TasksService::removeTask( const QTask& task )
 void TasksService::showTask( const QUniqueId& uid )
 {
     QCategoryFilter allCat = QCategoryFilter(QCategoryFilter::All);
+#ifndef QTOPIA_PHONE
     todo->catSelect->selectFilter(allCat);
+#endif
     todo->catSelected(allCat);
     todo->table->setCurrentIndex(todo->model->index(uid));
 }

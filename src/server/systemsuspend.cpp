@@ -27,18 +27,45 @@
   \brief The SystemSuspend class manages entering and leaving system suspend.
   \ingroup QtopiaServer::Task
 
+  The SystemSuspend provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o SystemSuspend
+  \row \o Interfaces \o SystemSuspend
+  \row \o Services \o Suspend
+  \endtable
+
+  Server components may directly use the SystemSuspend interface to enter and 
+  monitor the suspend state.  Non-server based applications should use the 
+  SuspendService to do the same.
+
   The system suspend state is expected to be a very low, but non-destructive,
-  power saving state.
+  power saving state.  As some hardware devices may need to be shutdown before 
+  or reinitialized after entry into the suspend state, integrators can provide 
+  objects that implement the SystemSuspendHandler interface that will be called
+  before the system enters suspend and after the system leaves it.
 
-  Some hardware devices may need to be shutdown before or reinitialized after
-  entry into the suspend state.  Integrators can provide objects that implement
-  the SystemSuspendHandler interface that will be called before the system
-  enters suspend and after the system leaves it.
+  As SystemSuspend is a server task, and not a class, components within the 
+  server must access it as such.  For example, for a server component to 
+  put the device into suspend,
 
-  While the SystemSuspend class is an abstract interface - that conceivably
-  allows replacement of the suspend sub-system - a default implementation is
-  provided under the task name \c SystemSuspend which should generally be
-  adequate.
+  \code
+  SystemSuspend *suspend = qtopiaTask<SystemSuspend>();
+  qWarning() << "About to suspend!";
+  if(suspend->syspendSystem())
+    qWarning() << "Resumed from suspend!";
+  else
+    qWarning() << "Suspend failed";
+  \endcode
+
+  As applications cannot access server tasks directly, they may use the Suspend
+  service.
+
+  \code
+  QtopiaServiceRequest req("Suspend", "suspend()");
+  req.send();
+  \endcode
 
   \sa SystemSuspendHandler, SuspendService
  */
@@ -47,6 +74,7 @@
   \fn SystemSuspend::SystemSuspend(QObject *parent = 0)
 
   Construct a new SystemSuspend instance with the given \a parent.
+  \internal
  */
 
 /*!
@@ -110,10 +138,20 @@
          provide system suspension or resumption functionality.
   \ingroup QtopiaServer::Task::Interfaces
 
+  The SystemSuspendHandler provides a Qtopia Server Task interface.  Qtopia 
+  Server Tasks are documented in full in the QtopiaServerApplication class 
+  documentation.
+
+  Server components can use the SystemSuspendHandler to integrate into Qtopia's
+  suspend mechanism.
+
   Tasks that provide the SystemSuspendHandler interface will be called whenever
   a system suspend is requested through the SystemSuspend class.  More
-  information on how a system suspend proceeds is available in the documentation
-  for that class.
+  information on how a system suspend proceeds, including the order in which
+  SystemSuspendHandler implementers are called, is available in the 
+  documentation for that class.
+
+  \sa SystemSuspend
  */
 
 /*!

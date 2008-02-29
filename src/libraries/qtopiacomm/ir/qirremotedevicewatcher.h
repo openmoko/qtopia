@@ -24,10 +24,11 @@
 
 #include <QObject>
 #include <qirnamespace.h>
+#include <qtopiaglobal.h>
 
 class QIrRemoteDeviceWatcher_Private;
 
-class QIrRemoteDeviceWatcher : public QObject
+class QTOPIACOMM_EXPORT QIrRemoteDeviceWatcher : public QObject
 {
     Q_OBJECT
     friend class QIrRemoteDeviceWatcher_Private;

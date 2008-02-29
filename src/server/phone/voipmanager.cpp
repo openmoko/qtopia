@@ -37,7 +37,22 @@ public:
     QValueSpaceObject *status;
 };
 
+/*!
+    \class VoIPManager
+    \ingroup QtopiaServer
+    \brief The VoIPManager class maintains information about the active VoIP telephony service.
 
+    This class provides access to some of the common facilities of the \c{voip} telephony
+    service, if it is running within the system, to ease the implementation of VoIP-specific
+    user interfaces in the server.  The telephony service itself is started by PhoneServer
+    at system start up.
+
+    \sa PhoneServer
+*/
+
+/*!
+    Returns the VoIPManager instance.
+*/
 VoIPManager * VoIPManager::instance()
 {
     static VoIPManager *manager = 0;
@@ -46,6 +61,11 @@ VoIPManager * VoIPManager::instance()
     return manager;
 }
 
+/*!
+    Returns the current VoIP registration state.
+
+    \sa registrationChanged()
+*/
 QTelephony::RegistrationState VoIPManager::registrationState() const
 {
     if ( d->netReg )
@@ -54,6 +74,19 @@ QTelephony::RegistrationState VoIPManager::registrationState() const
         return QTelephony::RegistrationNone;
 }
 
+/*!
+    \fn void VoIPManager::registrationChanged(QTelephony::RegistrationState state);
+
+    Signal that is emitted when registrationState() changes to \a state.
+
+    \sa registrationState()
+*/
+
+/*!
+    Returns the presence status of the local user.
+
+    \sa localPresenceChanged()
+*/
 QPresence::Status VoIPManager::localPresence() const
 {
     if ( d->presence )
@@ -62,10 +95,33 @@ QPresence::Status VoIPManager::localPresence() const
         return QPresence::Unavailable;
 }
 
+/*!
+    \fn void VoIPManager::localPresenceChanged(QPresence::Status status)
+
+    Signal that is emitted when localPresence() changes to \a status.
+
+    \sa localPresence()
+*/
+
+/*!
+    Returns true if the VoIP user associated with \a uri is available for calling;
+    false otherwise.
+
+    \sa monitoredPresenceChanged(), startMonitoring()
+*/
 bool VoIPManager::isAvailable( const QString &uri )
 {
     return d->presence->monitoredUriStatus( uri ) == QPresence::Available;
 }
+
+/*!
+    \fn void VoIPManager::monitoredPresenceChanged(const QString& uri, bool available)
+
+    Signal that is emitted when the presence of the user identified by \a uri
+    changes to \a available.
+
+    \sa isAvailable(), startMonitoring()
+*/
 
 VoIPManager::VoIPManager()
 {
@@ -169,6 +225,14 @@ void VoIPManager::serviceStopped()
 #endif
 }
 
+/*!
+    Start monitoring all contacts in the user's contact list that have
+    associated VoIP identities.  The monitoredPresenceChanged() signal
+    will be emitted whenever the presence information for a monitored
+    contact changes.
+
+    \sa isAvailable(), monitoredPresenceChanged()
+*/
 void VoIPManager::startMonitoring()
 {
 #ifdef QTOPIA_VOIP

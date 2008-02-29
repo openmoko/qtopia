@@ -39,7 +39,7 @@
     textArea = new QTextEdit(this);
     textArea->setReadOnly(true);
     setCentralWidget(textArea);
-    docSelector = new QDocumentSelector(QContentSet());
+    docSelector = new QDocumentSelector();
 
     QAction *actionOpen = new QAction(tr("Open Document"), this );
     connect(actionOpen, SIGNAL(triggered()), this, SLOT(openDocument()));
@@ -80,24 +80,9 @@ void TextViewer::keyPressEvent(QKeyEvent *e)
 
 void TextViewer::openDocument()
 {
-    // In this function we demonstrate two methods to set the file filter
-    //  to be used with QDocumentSelector. The second method
-    //  can be tested by uncomment the following #define
-
-// #define USE_SORTEDFILTER
-
-#ifndef USE_SORTEDFILTER
-    // request all documents of mimetype text
-    QContentSet docSet(QContentSet::MimeType, "text/*");
-    docSelector->setDocuments(docSet);
-#else
     // request that the matching documents be sorted in reverse alphanumeric order
-    QContentSet::QContentFilter docFilter;
-    docFilter.insert(QContentSet::SortOrder, "name desc");
-    docFilter.insert(QContentSet::SortOrder, "text/*");
+    QContentFilter docFilter = QContentFilter(QContentFilter::MimeType, "text/*");
     docSelector->setFilter(docFilter);
-#endif
-
     docSelector->showMaximized();
 }
 

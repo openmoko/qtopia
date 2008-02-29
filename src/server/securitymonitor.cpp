@@ -22,30 +22,59 @@
 #include "securitymonitor.h"
 #include <QTimer>
 
+/*!
+    \class SecurityMonitorTask
+    \mainclass
+    \ingroup QtopiaServer::Task
+    \brief The SecurityMonitorTask class manages the lifetime of the SXE monitor process.
+
+    The SXE monitor process responds to security policy breaches.
+
+    The SecurityMonitorTask class provides the \c {SecurityMonitor} task.
+*/    
+    
+/*!
+    \internal
+    Construct a new SecurityMonitorTask and launch the SXE monitor process
+*/ 
 SecurityMonitorTask::SecurityMonitorTask()
 {
 #ifndef QT_NO_SXE
+    isShutdown = false;
     // No point starting in less than 10secs - the server will take at least
     // that long to startup.
     QTimer::singleShot(10000, this, SLOT(startNewSxeMonitor()));
 #endif
 }
 
+
+/*!
+    \reimp
+    Handle cleanup tasks in the event of system restarting.
+
+    Returns true if all cleanup tasks were successful, otherwise return false.
+*/
 bool SecurityMonitorTask::systemRestart()
 {
 #ifndef QT_NO_SXE
     doShutdown();
-    return false;
+    return true;
 #else
     return true;
 #endif
 }
 
+/*!
+    \reimp
+    Handle cleanup tasks in the event of system shutdown.
+
+    Returns true if all cleanup tasks were successful, otherwise return false. 
+*/
 bool SecurityMonitorTask::systemShutdown()
 {
 #ifndef QT_NO_SXE
     doShutdown();
-    return false;
+    return true;
 #else
     return true;
 #endif
@@ -53,6 +82,7 @@ bool SecurityMonitorTask::systemShutdown()
 
 void SecurityMonitorTask::doShutdown()
 {
+    isShutdown = true;
 }
 
 void SecurityMonitorTask::finished()
@@ -62,6 +92,7 @@ void SecurityMonitorTask::finished()
 #ifndef QT_NO_SXE
 void SecurityMonitorTask::startNewSxeMonitor()
 {
+    if ( isShutdown ) return;
     m_sxeMonitorProcess = new QProcess(this);
     m_sxeMonitorProcess->setProcessChannelMode(QProcess::ForwardedChannels);
     m_sxeMonitorProcess->closeWriteChannel();

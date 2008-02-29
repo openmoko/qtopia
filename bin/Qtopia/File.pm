@@ -107,14 +107,18 @@ sub symlink_file
 sub rmrf
 {
     my ( $path ) = @_;
-    for ( glob("$path/*") ) {
-	if ( -d $_ && ! -l $_ ) {
-	    rmrf($_);
-	} else {
-	    unlink($_);
-	}
+    if ( -d $path && ! -l $path ) {
+        for ( glob("$path/*") ) {
+            if ( -d $_ && ! -l $_ ) {
+                rmrf($_);
+            } else {
+                unlink($_);
+            }
+        }
+        rmdir $path;
+    } else {
+        unlink($path);
     }
-    rmdir $path;
 }
 
 # Track down a "real" header

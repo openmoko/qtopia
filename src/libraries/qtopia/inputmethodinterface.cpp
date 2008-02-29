@@ -26,8 +26,8 @@
 //  W A R N I N G
 //  -------------
 //
-// This class (QIMActionDescriptionPrivate) is not part of the Qtopia API.  
-// It exists purely as an implementation detail.  This header file may 
+// This class (QIMActionDescriptionPrivate) is not part of the Qtopia API.
+// It exists purely as an implementation detail.  This header file may
 // change from version to version without notice, or even be removed.
 //
 // We mean it.
@@ -35,8 +35,11 @@
 
 /*!
     \class QIMActionDescription
+    \mainclass
+    \preliminary
+    \brief The QIMActionDescription class provides a way to define a QAction for a QtopiaInputMethod in the QSoftMenuBar QMenu.
 
-    The menu in which inputmethod actions will eventually displayed will
+    The menu in which QtopiaInputMethod actions will eventually displayed will
     typically be in a different process from the input method itself
     (which runs in the server).
     In order to avoid confusion, the simple QIMActionDescription is used
@@ -51,21 +54,19 @@
 
     The \a id attribute will be passed back to the input method via
     \c menuActionActivated(), in order to differentiate different actions,
-    so the id field must be unique for each action in an input-method. 
+    so the id field must be unique for each action in an input-method.
 
-    \bold {Note:} 0 is reserved for an unkown or unrecognised menu actions,
+    \bold {Note:} 0 is reserved for an unknown or unrecognised menu actions,
     and negative id values are reserved for system menus.  Using these values
     is not recommended.
 
-    As a simple data storage class the data fields are public (like a struct).
-    
     IMActionDescriptions should be created on the heap.
-    The server expects lists of pointers to QIMActionDescriptions, and will 
-    delete them when it is finished with them.  If constructing the 
-    QIMActionDescriptions is expensive for some reason, the copy constructor 
+    The server expects lists of pointers to QIMActionDescriptions, and will
+    delete them when it is finished with them.  If constructing the
+    QIMActionDescription is expensive, the copy constructor
     is very fast, and can be used safely.
 
-    \sa QtopiaInputMethod
+    \sa QtopiaInputMethod, QIMActionDescription()
 
   \ingroup userinput
 */
@@ -87,7 +88,7 @@ QIMActionDescriptionPrivate::QIMActionDescriptionPrivate(int id,
 {
 }
 /*!
-    The QIMActionDescription takes an \a id, a unique identifier, used in 
+    The QIMActionDescription takes an \a id, a unique identifier used in 
     notification to differentiate the menu icons.  The \a iconFileName argument 
     is a QString used to find the picture for the action.  
     Note that the file name must be fully 
@@ -109,7 +110,7 @@ QIMActionDescription::QIMActionDescription(int id, QString label, QString iconFi
 
 /*!
 Constructs a shallow copy of the given QIMActionDescription \a original.
-For more information about shallow copies, see the Implicit Data Sharing documentation.
+For more information about shallow copies, see the Implicitly Shared Classes Qt documentation.
 */
 
 QIMActionDescription::QIMActionDescription(const QIMActionDescription& original){
@@ -125,7 +126,7 @@ QIMActionDescription::QIMActionDescription(QIMActionDescriptionPrivate &dd){
 }
 
 /*!
-Destroys the action description and cleans up
+  Destroys the action description and cleans up
 */
 QIMActionDescription::~QIMActionDescription()
 {
@@ -134,6 +135,7 @@ QIMActionDescription::~QIMActionDescription()
 /*!
     Returns the identifier for this menu action, used to differentiate 
     actions in the one input method menu.
+    \sa setId()
 */
 int QIMActionDescription::id() const{return d->m_id;};
 
@@ -141,18 +143,26 @@ int QIMActionDescription::id() const{return d->m_id;};
     Sets the identifier for this menu action to the given \a id.
     This value is used to differentiate the actions in the input method 
     menu.
+    \sa id()
 */
 void QIMActionDescription::setId(const int id){d->m_id = id;};
 
-/*! Returns the user-visible label to be displayed by this menu action. */
+/*! 
+    Returns the user-visible label to be displayed by this menu action. 
+    \sa setLabel()
+*/
 QString QIMActionDescription::label() const {return d->m_label;};
 
-/*! Sets the user-visible label to be displayed by this menu action to the given \a string. */
+/*! 
+    Sets the user-visible label to be displayed by this menu action to the given \a string.
+    \sa label()
+*/
 void QIMActionDescription::setLabel(const QString &string) {d->m_label = string;};
 
 /*! 
     Returns the fully-qualified file name used to create the icon for 
     this menu item.
+
 */
 QString QIMActionDescription::iconFileName() const {return d->m_iconFileName;};
 
@@ -166,6 +176,7 @@ void QIMActionDescription::setIconFileName(const QString &string) {d->m_iconFile
 
 /*!
   \class QtopiaInputMethod
+  \mainclass
     \brief The QtopiaInputMethod class describes the minimum interface that an input method plug-in must provide.
 
     Input Methods may be added to Qtopia via plug-ins.  In
@@ -173,7 +184,7 @@ void QIMActionDescription::setIconFileName(const QString &string) {d->m_iconFile
     interface for your plug-in by deriving from the
     QtopiaInputMethod class.
 
-    At a minimum you will need to provide the methods name(),
+    At a minimum you will need to implement the methods name(),
     identifier(), version(), state(), properties(), icon()
     and reset().
 
@@ -183,9 +194,10 @@ void QIMActionDescription::setIconFileName(const QString &string) {d->m_iconFile
     Filtering input methods that need to filter application pen
     or keyboard events can do so by overriding inputModifier()
 
-    \sa {Tutorial: Create an Input method Plug-in that Modifies Keyboard Input}
+    \sa {Tutorial: Create an Input method Plug-in that Modifies Keyboard Input}, QWSInputMethod()
 
   \ingroup userinput
+  \ingroup plugins
 */
 
 /*!
@@ -442,7 +454,7 @@ bool QtopiaInputMethod::testProperty(int p) const
     This function is called by the system to notify it that focus has changed.
     Focus changes will usually trigger a new hint as well.
 
-    See Also: setHint
+    \sa setHint()
 */
 void QtopiaInputMethod::focusChanged(){
 }
@@ -471,7 +483,7 @@ void QtopiaInputMethod::menuActionActivated(int data){Q_UNUSED(data)};
 
 
 /*!
-    Implement this function in a derived class to returns a description of
+    Implement this function in a derived class to return a description of
     the menu that should be installed on the input methods behalf.
 
     This function is called by Qtopia when the input methods menu is shown,
@@ -499,16 +511,15 @@ void QtopiaInputMethod::menuActionActivated(int data){Q_UNUSED(data)};
 
    see also: QIMActionDescription
 */
-QList<QIMActionDescription*> QtopiaInputMethod::menuDescription(){
-    return QList<QIMActionDescription*>();};
+QList<QIMActionDescription*> QtopiaInputMethod::menuDescription() {
+    return QList<QIMActionDescription*>();
+};
 
+template <typename T>
 /*!
-  \fn QIMActionDescription::serialize(T& stream) const
-  \internal
   Convert data from  an action description to \a stream.
   Used in converting QIMActionDescription to QVariant.
 */
-template <typename T>
 void QIMActionDescription::serialize(T &stream) const
 {
     stream<< d->m_id; 
@@ -517,9 +528,7 @@ void QIMActionDescription::serialize(T &stream) const
 };
 
 template <typename T>
-  //\fn QIMActionDescription::deserialize(T& stream)
 /*! 
-  \internal
   Convert data from \a stream to an action description.  
   Used in converting QIMActionDescription from QVariant.
 */

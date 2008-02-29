@@ -159,22 +159,23 @@ void QDSHeartBeat::beat()
 
 /*!
     \class QDSActionRequest
+    \mainclass
     \brief The QDSActionRequest class encapsulates a received action request.
 
-    A QDS service provider uses the QDSActionRequest class to capture the
-    context of received requests, and as an interface to respond to the request.
+    A Qtopia Data Sharing (QDS) service provider can use the QDSActionRequest class
+    to capture the context of received requests, and as an interface to respond to the request.
 
-    Applications seeking to utilise QDS services use the QDSAction class to
-    request a service, the QDSAction class will then create QDSActionRequest class
+    Applications seeking to utilise QDS services should use the QDSAction class to
+    request a service; the QDSAction class will then create a QDSActionRequest instance
     and send it to the QDS service for processing.
 
-    \sa QDSAction, QDSServiceInfo
+    \sa QDSAction, QDSServiceInfo, {Qtopia Data Sharing (QDS)}
 
     \ingroup ipc
 */
 
 /*!
-    Default constructor which creates an empty request and attaches it to \a parent.
+    Constructs an empty request and attaches it to \a parent.
 */
 QDSActionRequest::QDSActionRequest( QObject* parent )
 :   QObject( parent ),
@@ -184,7 +185,7 @@ QDSActionRequest::QDSActionRequest( QObject* parent )
 }
 
 /*!
-    Copy constructor which creates a deep copy of \a other
+    Constructs a deep copy of \a other.
 */
 QDSActionRequest::QDSActionRequest( const QDSActionRequest& other )
 :   QObject(),
@@ -194,7 +195,7 @@ QDSActionRequest::QDSActionRequest( const QDSActionRequest& other )
 }
 
 /*!
-    Creates an action request for a service with no request data. The service
+    Constructs an action request for a service with no request data. The service
     responding to the request is provided in \a serviceInfo and the channel
     for responding to the client is provided in \a channel. The request is
     attached to \a parent.
@@ -212,10 +213,9 @@ QDSActionRequest::QDSActionRequest( const QDSServiceInfo& serviceInfo,
 }
 
 /*!
-    Creates an action request for a service with request data. The service
-    responding to the request is provided in \a serviceInfo, the request data
-    to process in the request is provided in \a requestData and the channel
-    for responding to the client is provided in \a channel, \a auxiliary data
+    Constructs an action request for a service with \a requestData. The service
+    responding to the request is provided in \a serviceInfo and the channel
+    for responding to the client is provided in \a channel. \a auxiliary data
     can also be attached to the request. The request is attached to \a parent.
 */
 QDSActionRequest::QDSActionRequest( const QDSServiceInfo& serviceInfo,
@@ -242,7 +242,8 @@ QDSActionRequest::~QDSActionRequest()
 }
 
 /*!
-    Assignment operator which deep copies \a other.
+    Makes a deep copy of \a other and assigns it to this QDSActionRequest object.
+    Returns a reference to this QDSActionRequest object.
 */
 const QDSActionRequest& QDSActionRequest::operator=( const QDSActionRequest& other )
 {
@@ -258,7 +259,7 @@ const QDSActionRequest& QDSActionRequest::operator=( const QDSActionRequest& oth
 }
 
 /*!
-    Returns the description of the service requested
+    Returns the description of the service requested.
 */
 const QDSServiceInfo& QDSActionRequest::serviceInfo() const
 {
@@ -266,7 +267,7 @@ const QDSServiceInfo& QDSActionRequest::serviceInfo() const
 }
 
 /*!
-    Returns the validity of the request
+    Returns the validity of the request.
 */
 bool QDSActionRequest::isValid() const
 {
@@ -279,8 +280,8 @@ bool QDSActionRequest::isValid() const
 }
 
 /*!
-    Determines if the request processing has been completed and a response
-    has been sent to the client.
+    Returns true if the request has been completely processed and a response
+    has been sent to the client; otherwise returns false.
 */
 bool QDSActionRequest::isComplete() const
 {
@@ -312,7 +313,8 @@ const QByteArray& QDSActionRequest::auxiliaryData() const
 }
 
 /*!
-    Returns the error message generated during the request.
+    Returns any error message generated during the request. 
+    If no error has been reported a null string will be returned.
 */
 QString QDSActionRequest::errorMessage() const
 {
@@ -324,8 +326,8 @@ QString QDSActionRequest::errorMessage() const
     been processed correctly. This method is to be used for services which
     don't have response data.
 
-    If true is returned the response was sent correctly. False is returned
-    if a response has already been sent or the service requires response data.
+    Returns false if a response has already been sent or the service requires
+    response data; otherwise returns true.
 */
 bool QDSActionRequest::respond()
 {
@@ -346,9 +348,8 @@ bool QDSActionRequest::respond()
     been processed correctly. This method is to be used for services which
     have response data.
 
-    If true is returned the response was sent correctly. False is returned
-    if a response has already been sent or the service doesn't require
-    response data.
+    Returns false if a response has already been sent or the service doesn't require
+    response data; otherwise returns true.
 */
 bool QDSActionRequest::respond( const QDSData &responseData )
 {
@@ -369,8 +370,7 @@ bool QDSActionRequest::respond( const QDSData &responseData )
     Sends the error message \a message back to the client to indicate that
     an error has occured.
 
-    If true is returned the message was sent correctly. False is returned
-    if a response has already been sent.
+    Returns false if a response has already been sent; otherwise returns true.
 */
 bool QDSActionRequest::respond( const QString& message )
 {

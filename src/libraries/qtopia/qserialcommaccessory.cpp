@@ -34,6 +34,7 @@ static const char* const QSERIALCOMMACCESSORY_CONTYPE = "connectionType";
 
 /*!
     \class QSerialCommAccessory
+    \mainclass
     \brief The QSerialCommAccessory class provides access to a serial communication accessory on the device.
 
     The QSerialCommAccessory class provides access to an serial communication accessory
@@ -56,17 +57,17 @@ static const char* const QSERIALCOMMACCESSORY_CONTYPE = "connectionType";
 */
 
 /*!
-    Construct a new serial communication acessory object for \a id and attach
+    Construct a new serial communication acessory object for provider \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the default
-    accessory that supports the serial communication interface.  If there is more
+    accessory provider that supports the serial communication interface.  If there is more
     than one service that supports the serial communication interface, the caller
-    should enumerate them with QHardwareManager::supports()
+    should enumerate them with QHardwareManager::providers()
     and create separate QSerialCommAccessory objects for each.
 
-    \sa QHardwareManager::supports()
+    \sa QHardwareManager::providers()
 */
 QSerialCommAccessory::QSerialCommAccessory(
     const QString& id,
@@ -102,6 +103,7 @@ QSerialCommAccessory::connectionType() const
 
 /*!
     \class QSerialCommAccessoryProvider
+    \mainclass
     \brief The QSerialCommAccessoryProvider class provides an interface for serial communication devices to integrate into Qtopia.
 
     The QSerialCommAccessoryProvider class provides an interface for
@@ -110,11 +112,11 @@ QSerialCommAccessory::connectionType() const
     level of functionality that is supported.
 
     \sa QSerialCommAccessory
-  \ingroup hardware
+    \ingroup hardware
 */
 
 /*!
-    Create a serial communication accessory called \a id and attach it to
+    Create a serial communication accessory provider called \a id and attaches it to
     \a parent.
 */
 QSerialCommAccessoryProvider::QSerialCommAccessoryProvider(

@@ -65,6 +65,7 @@ install()
             #install a new peer file
             print_debug "installing $2 to /etc/ppp/peers"
             ##ADD CODE HERE##
+            mkdir /etc/ppp/peers
             cp -f $2 /etc/ppp/peers
             ;;
         dns)

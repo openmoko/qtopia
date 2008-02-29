@@ -82,7 +82,7 @@ QDSActionPrivate::QDSActionPrivate( const QString& name,
     mErrorMsg(),
     mResponseCode( QDSAction::Invalid )
 {
-    mId = QUniqueId::constructApplicationLocalUniqueId();
+    mId = QUniqueIdGenerator::createTemporaryId();
 }
 
 QDSActionPrivate::QDSActionPrivate( const QDSServiceInfo& serviceInfo )
@@ -96,7 +96,7 @@ QDSActionPrivate::QDSActionPrivate( const QDSServiceInfo& serviceInfo )
     mErrorMsg(),
     mResponseCode( QDSAction::Invalid )
 {
-    mId = QUniqueId::constructApplicationLocalUniqueId();
+    mId = QUniqueIdGenerator::createTemporaryId();
 }
 
 QDSActionPrivate::~QDSActionPrivate()
@@ -296,14 +296,15 @@ void QDSActionPrivate::connectToAction( QDSAction* action )
 
 /*!
     \class QDSAction
-    \brief The QDSAction class provides an interface for requesting QDS
+    \mainclass
+    \brief The QDSAction class provides an interface for requesting Qtopia Data Sharing (QDS)
     services.
 
-    Applications use the QDSAction class to make a request for a QDS service.
-    The request can be made either synchronously or asynchronously by using
-    either QDSData::exec() or QDSData::invoke().
+    Applications can use the QDSAction class to make a request for a QDS service.
+    The request can be made either synchronously (using QDSAction::exec())
+    or asynchronously (using QDSAction::invoke()).
 
-    \sa QDSServiceInfo
+    \sa QDSServiceInfo, {Qtopia Data Sharing (QDS)}
 
     \ingroup ipc
 */
@@ -311,29 +312,29 @@ void QDSActionPrivate::connectToAction( QDSAction* action )
 /*!
     \fn void QDSAction::response( const QUniqueId& actionId )
 
-    Signal that is emitted when a response is received from the service provider
-    for action identified by \a actionId.
+    This signal is emitted when a response is received from the service provider
+    for the action identified by \a actionId.
 */
 
 /*!
     \fn void QDSAction::response( const QUniqueId& actionId, const QDSData&
     responseData )
 
-    Signal that is emitted when a response is received from the service provider,
-    which contains the response data \a responseData for action identified by
+    This signal is emitted when a response is received from the service provider
+    which contains the response data \a responseData for the action identified by
     \a actionId.
 */
 
 /*!
     \fn void QDSAction::error( const QUniqueId& actionId, const QString& message )
 
-    Signal that is emitted when a error message \a message is received for the
+    This signal is emitted when an error message \a message is received for the
     action identified by \a actionId.
 */
 
 /*!
     \enum QDSAction::ResponseCode
-    Response code for synchronous requests.
+    This enum describes response codes for synchronous requests.
 
     \value Invalid Response code has not been set.
     \value Complete The request was processed correctly.
@@ -344,8 +345,7 @@ void QDSActionPrivate::connectToAction( QDSAction* action )
 */
 
 /*!
-    Default constructor which creates an empty QDSAction and attaches it to
-    \a parent.
+    Constructs an empty QDSAction object and attaches it to \a parent.
 */
 QDSAction::QDSAction( QObject* parent )
 :   QObject( parent ),
@@ -357,7 +357,7 @@ QDSAction::QDSAction( QObject* parent )
 }
 
 /*!
-    Copy constructor which creates a deep copy of \a other
+    Constructs a deep copy of \a other.
 */
 QDSAction::QDSAction( const QDSAction& other )
 :   QObject(),
@@ -369,8 +369,8 @@ QDSAction::QDSAction( const QDSAction& other )
 }
 
 /*!
-    Constructor for the QDS service \a name and Qtopia service \a service.
-    The action is attached to \a parent.
+    Constructs a QDSAction object for the QDS service \a name and the Qtopia service
+    \a service. The action is attached to \a parent.
 */
 QDSAction::QDSAction( const QString& name,
                       const QString& service,
@@ -384,7 +384,7 @@ QDSAction::QDSAction( const QString& name,
 }
 
 /*!
-    Constructor which accesses the service in \a serviceInfo and attaches to
+    Constructs a QDSAction object for the service described in \a serviceInfo and attaches to
     \a parent.
 */
 QDSAction::QDSAction( const QDSServiceInfo& serviceInfo, QObject* parent )
@@ -397,7 +397,7 @@ QDSAction::QDSAction( const QDSServiceInfo& serviceInfo, QObject* parent )
 }
 
 /*!
-    Destructor.
+    Destroys the action.
 */
 QDSAction::~QDSAction()
 {
@@ -408,7 +408,8 @@ QDSAction::~QDSAction()
 }
 
 /*!
-    Assignment operator which deep copies \a other.
+    Makes a deep copy of \a other and assigns it to this QDSAction object.
+    Returns a reference to this QDSAction object.
 */
 const QDSAction& QDSAction::operator=( const QDSAction& other )
 {
@@ -425,7 +426,7 @@ const QDSAction& QDSAction::operator=( const QDSAction& other )
 }
 
 /*!
-    Determines if the QDSAction object represents a valid QDS service.
+    Returns true if the QDSAction object represents a valid QDS service; otherwise returns false.
     The requirements of a valid QDS service are discussed in QDSServiceInfo.
 */
 bool QDSAction::isValid() const
@@ -434,7 +435,7 @@ bool QDSAction::isValid() const
 }
 
 /*!
-    Determines if the QDSAction object represents an available QDS service.
+    Returns true if the QDSAction object represents an available QDS service; otherwise returns false.
     The requirements of an available QDS service are discussed in QDSServiceInfo.
 */
 bool QDSAction::isAvailable() const
@@ -443,8 +444,8 @@ bool QDSAction::isAvailable() const
 }
 
 /*!
-    Determines if the request is still being processed by the QDS service
-    provider.
+    Returns true if the request is still being processed by the QDS service
+    provider; otherwise returns false.
 */
 bool QDSAction::isActive() const
 {
@@ -460,7 +461,7 @@ QUniqueId QDSAction::id() const
 }
 
 /*!
-    Returns QDSServiceInfo object which describes the QDS service being
+    Returns the QDSServiceInfo object which describes the QDS service being
     utilised.
 */
 const QDSServiceInfo& QDSAction::serviceInfo() const
@@ -469,7 +470,7 @@ const QDSServiceInfo& QDSAction::serviceInfo() const
 }
 
 /*!
-    Returns the QDSData which was generated by the request.
+    Returns the QDSData generated by the request.
 */
 QDSData QDSAction::responseData() const
 {
@@ -477,10 +478,10 @@ QDSData QDSAction::responseData() const
 }
 
 /*!
-    Returns any error message that was generated during the request. Errors
+    Returns any error message generated during the request. Errors
     are reported from either QDSAction or the provider application, and are
     reported through QDSData::error() or the return value of
-    QDSData::exec(). If no error has been reported QString() will be
+    QDSData::exec(). If no error has been reported a null string will be
     returned.
 */
 QString QDSAction::errorMessage() const
@@ -489,16 +490,18 @@ QString QDSAction::errorMessage() const
 }
 
 /*!
-    Initiates the QDS service request with \a requestData asynchronously. Depending
+    Asynchronously initiates the QDS service request with \a requestData. Depending
     on the outcome of the request, the response from the QDS service provider
     is given by one of QDSData::response() or QDSData::error() signals.
 
     The request may also contain \a auxiliary data for supplementary
-    information which may be  required for the request but does not
-    conceptionally belong to \a requestData.
+    information, which may be required for the request but does not
+    conceptually belong to \a requestData.
 
     This method should only be used for QDS services which have request data, as
     discussed in QDSServiceInfo, otherwise an error will be generated.
+
+    Returns true on successful completion of the request; otherwise returns false.
 */
 bool QDSAction::invoke( const QDSData &requestData, const QByteArray& auxiliary )
 {
@@ -524,12 +527,14 @@ bool QDSAction::invoke( const QDSData &requestData, const QByteArray& auxiliary 
 }
 
 /*!
-    Initiates the QDS service request asynchronously. Depending on the outcome
+    Asynchronously initiates the QDS service request. Depending on the outcome
     of the request, the response from the QDS service provider is given by one
     of QDSData::response() or QDSData::error() signals.
 
     This method should only be used for QDS services which don't have request
     data, as discussed in QDSServiceInfo, otherwise an error will be generated.
+
+    Returns true on successful completion of the request; otherwise returns false.
 */
 bool QDSAction::invoke()
 {
@@ -555,14 +560,15 @@ bool QDSAction::invoke()
 }
 
 /*!
-    Performs the QDS service request synchronously. The return value provides
-    the result of the request, see QDSAction::ResponseCode. Beware, this call
-    will block until the response has been received from the QDS service
-    or the request times out.
+    Synchronously performs the QDS service request. The return value provides
+    the result of the request, see QDSAction::ResponseCode.
 
     This method should only be used for QDS services which don't have request
     data, as discussed in QDSServiceInfo, otherwise an error will be
     generated.
+
+    \warning This call will block until a response has been received from the QDS service
+    or the request times out.
 */
 int QDSAction::exec()
 {
@@ -600,17 +606,19 @@ int QDSAction::exec()
 }
 
 /*!
-    Performs the QDS service request with \a requestData synchronously. The return
+    Synchronously performs the QDS service request with \a requestData. The return
     value provides the result of the request, see QDSAction::ResponseCode.
-    Beware, this call will block until the response has been received from the
-    QDS service or the request times out.
 
     The request may also contain \a auxiliary data for supplementary
-    information which may be  required for the request but does not
-    conceptionally belong to \a requestData.
+    information which may be required for the request but does not
+    conceptually belong to \a requestData.
 
     This method should only be used for QDS services which have request data,
     as discussed in QDSServiceInfo, otherwise an error will be generated.
+
+    \warning This call will block until the response has been received from the
+    QDS service or the request times out.
+
 */
 int QDSAction::exec( const QDSData& requestData, const QByteArray& auxiliary )
 {

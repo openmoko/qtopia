@@ -38,17 +38,19 @@ public:
 
 /*!
     \class QIrRemoteDeviceWatcher
+    \mainclass
     \brief The QIrRemoteDeviceWatcher class watches for remote devices.
 
     QIrRemoteDeviceWatcher can be used to wait for remote infrared devices
     to come into range, and notify the user.  Using this class, a system
-    can alert the user that another infrared device is available for communication
+    can alert the user that another infrared device is available for communication.
 
     \ingroup qtopiair
  */
 
 /*!
-    Constructor.  The \a parent parameter specifies the object's parent.
+    Constructs a remote device watcher.  The \a parent parameter specifies 
+    the object's parent.
 */
 QIrRemoteDeviceWatcher::QIrRemoteDeviceWatcher(QObject *parent)
     : QObject(parent)
@@ -58,7 +60,7 @@ QIrRemoteDeviceWatcher::QIrRemoteDeviceWatcher(QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the device watcher.  
 */
 QIrRemoteDeviceWatcher::~QIrRemoteDeviceWatcher()
 {
@@ -86,6 +88,8 @@ QIrRemoteDeviceWatcher::~QIrRemoteDeviceWatcher()
     designed to be used as a low-power, passive watcher of remote
     devices, such that a user can be notified when a new device has come
     into range.
+
+    \sa deviceFound()
 */
 bool QIrRemoteDeviceWatcher::watch(int ms, QIr::DeviceClasses classes)
 {

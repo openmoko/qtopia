@@ -99,7 +99,8 @@ for my $source ( @ARGV ) {
             open IN, $source or die "Can't open ".fixpath($source)."\n";
             while ( defined($_ = <IN>) ) {
                 if ( /^\s*class\s+.*_EXPORT\s+([^\s:]+)/ ||
-                     ( /^\s*class\s+([^\s:]+)/ && index($_, ";") == -1 ) ) {
+                     ( /^\s*class\s+([^\s:]+)/ && index($_, ";") == -1 ) ||
+                     /^\s*namespace\s+([^\s:]+)/ ) {
                     $found = 1;
                     my $filename = $1;
                     my $dest = fixpath("$targetdir/$filename");

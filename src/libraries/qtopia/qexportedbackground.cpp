@@ -72,12 +72,60 @@ public:
     int screen;
 };
 
-QExportedBackground::QExportedBackground(int scr, QObject *parent)
+
+/*!
+    \class QExportedBackground
+    \mainclass
+    \brief The QExportedBackground class provides access to the system
+    background.
+
+    Qtopia provides a global background to all windows in order to
+    give the impression that windows are transparent.  This
+    background is automatically available in all windows due to
+    QPhoneStyle setting appropriate palettes for all widgets.  In some
+    cases it is desireable to use the background directly, or to be
+    notified that the background pixmap has changed.  QExportedBackground
+    provides this functionality.
+*/
+
+/*!
+    \fn void QExportedBackground::changed()
+
+    This signal is emitted when the exported background changes.
+*/
+
+/*!
+    \fn void QExportedBackground::changed(const QPixmap &background)
+
+    This signal is emitted when the exported background changes.  The
+    \a background argument is the new background.
+*/
+
+/*!
+    \fn void QExportedBackground::wallpaperChanged()
+
+    This signal is emitted when the wallpaper changes.
+
+    \sa wallpaper()
+*/
+
+/*!
+    Constructs a QExportedBackground for screen number \a screen with
+    the given \a parent.
+
+    Qt supports multiple screens.  This is commonly seen in flip phones
+    with both internal and external screens.  The background for each screen
+    may be different.  Qtopia assumes that the primary screen
+    is screen number \c 0 and the secondary screen is screen number \c 1.
+
+    \sa QDesktopWidget
+*/
+QExportedBackground::QExportedBackground(int screen, QObject *parent)
     : QObject(parent)
 {
     d = new QExportedBackgroundPrivate;
-    d->screen = scr;
-    if (scr >= 0 && scr < MaxScreens) {
+    d->screen = screen;
+    if (screen >= 0 && screen < MaxScreens) {
         QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
         connect( sysChannel, SIGNAL(received(const QString&,const QByteArray&)),
                 this, SLOT(sysMessage(const QString&,const QByteArray&)) );
@@ -86,6 +134,10 @@ QExportedBackground::QExportedBackground(int scr, QObject *parent)
     localInfo()->localInstance.insert(this);
 }
 
+/*!
+    Constructs a QExportedBackground for the default screen with the
+    given \a parent.
+*/
 QExportedBackground::QExportedBackground(QObject *parent)
     : QObject(parent)
 {
@@ -101,6 +153,9 @@ QExportedBackground::QExportedBackground(QObject *parent)
     localInfo()->localInstance.insert(this);
 }
 
+/*!
+    Destroys a QExportedBackground.
+*/
 QExportedBackground::~QExportedBackground()
 {
     if ( d )
@@ -109,6 +164,14 @@ QExportedBackground::~QExportedBackground()
     localInfo()->localInstance.remove(this);
 }
 
+/*!
+    Returns the wallpaper.
+    
+    The wallpaper is set by the user, for example
+    a photo from the camera.  It is most commonly displayed only
+    in the homescreen but some themes also export the wallpaper as the
+    background.
+*/
 QPixmap QExportedBackground::wallpaper() const
 {
     if (d->wallpaper.isEmpty())
@@ -116,11 +179,17 @@ QPixmap QExportedBackground::wallpaper() const
     return QPixmap(d->wallpaper);
 }
 
+/*!
+    Returns the exported background.
+*/
 const QPixmap &QExportedBackground::background() const
 {
     return d->bg;
 }
 
+/*!
+    Returns whether an exported background is available.
+*/
 bool QExportedBackground::isAvailable() const
 {
     return (!d->state.isNull() && *d->state.qwsBits() && !d->bg.isNull());
@@ -152,6 +221,10 @@ void QExportedBackground::getPixmaps()
 }
 
 // Server side
+
+/*!
+    \internal
+*/
 void QExportedBackground::initExportedBackground(int width, int height, int screen)
 {
     if (screen < 0 || screen >= MaxScreens)
@@ -191,6 +264,9 @@ void QExportedBackground::initExportedBackground(int width, int height, int scre
     QtopiaIpcEnvelope e("QPE/System", "backgroundChanged()");
 }
 
+/*!
+    \internal
+*/
 void QExportedBackground::clearExportedBackground(int screen)
 {
     if (screen < 0 || screen >= MaxScreens)
@@ -206,11 +282,17 @@ void QExportedBackground::clearExportedBackground(int screen)
         bg->getPixmaps();
 }
 
+/*!
+    \internal
+*/
 void QExportedBackground::setExportedBackgroundTint(int tint)
 {
     localInfo()->tintAmount = tint;
 }
 
+/*!
+    \internal
+*/
 void QExportedBackground::setExportedBackground(const QPixmap &image, int screen)
 {
     if (screen < 0 || screen >= MaxScreens)
@@ -242,6 +324,14 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
     colour.getRgb(&sr, &sg, &sb);
     int div =level+1;
     QSize dataSize = qt_screen->mapToDevice(QSize(src.width(),src.height()));
+    if(qt_screen->isTransformed()) {
+        int rot = qt_screen->transformOrientation();
+        if(rot == 1 || rot == 3) {
+            rot = dataSize.width();
+            dataSize.setWidth(dataSize.height());
+            dataSize.setHeight(rot);
+        }
+    }
     if (src.depth() == 16 && dest.depth() == 16) {
         sr = (sr << 8) & 0xF800;
         sg = (sg << 3) & 0x07e0;

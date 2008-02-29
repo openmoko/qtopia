@@ -24,14 +24,21 @@
 
 typedef QMap<QString, QVariant> Options;
 
+// {{{ QMediaCodecRepPrivate
 class QMediaCodecRepPrivate
 {
 public:
     QString      id;
     Options      options;
 };
+// }}}
 
+/*!
+    \class QMediaCodecRep
+    \internal
+*/
 
+// {{{ QMediaCodecRep
 QMediaCodecRep::QMediaCodecRep()
 {
 }
@@ -68,6 +75,10 @@ QVariant QMediaCodecRep::value(QString const& name) const
 }
 
 // {{{ Serialization
+/*!
+    \fn void QMediaCodecRep::serialize(S& stream) const
+    \internal
+*/
 template <typename S>
 void QMediaCodecRep::serialize(S& stream) const
 {
@@ -75,12 +86,18 @@ void QMediaCodecRep::serialize(S& stream) const
     stream << d->options;
 }
 
+/*!
+    \fn void QMediaCodecRep::deserialize(S& stream)
+    \internal
+*/
 template <typename S>
 void QMediaCodecRep::deserialize(S& stream)
 {
     stream >> d->id;
     stream >> d->options;
 }
+// }}}
+
 // }}}
 
 Q_IMPLEMENT_USER_METATYPE(QMediaCodecRep);

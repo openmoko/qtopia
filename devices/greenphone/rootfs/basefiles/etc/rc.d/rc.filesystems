@@ -1,6 +1,6 @@
 #!/bin/sh
 
-splash "Mounting virtual" "filesystems"
+splash -now "Mounting virtual" "filesystems"
 
 mount /proc
 

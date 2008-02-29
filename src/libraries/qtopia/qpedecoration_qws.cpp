@@ -55,59 +55,7 @@
 #include "phonedecoration_p.h"
 #endif
 
-#define WHATSTHIS_MODE
-
 #ifndef QT_NO_QWS_QPE_WM_STYLE
-
-#ifndef QT_NO_IMAGEIO_XPM
-
-/* XPM */
-static const char * const qpe_close_xpm[] = {
-"16 16 3 1",
-"       c None",
-".      c #FFFFFF",
-"+      c #000000",
-"                ",
-"                ",
-"      .....     ",
-"    ..+++++..   ",
-"   .+++++++++.  ",
-"   .+..+++..+.  ",
-"  .++...+...++. ",
-"  .+++.....+++. ",
-"  .++++...++++. ",
-"  .+++.....+++. ",
-"  .++...+...++. ",
-"   .+..+++..+.  ",
-"   .+++++++++.  ",
-"    ..+++++..   ",
-"      .....     ",
-"                "};
-
-/* XPM */
-static const char * const qpe_accept_xpm[] = {
-"16 16 3 1",
-"       c None",
-".      c #FFFFFF",
-"+      c #000000",
-"                ",
-"                ",
-"      .....     ",
-"    ..+++++..   ",
-"   .+++++++++.  ",
-"   .+++++++++.  ",
-"  .+++++++..++. ",
-"  .++.+++...++. ",
-"  .+...+...+++. ",
-"  .+......++++. ",
-"  .++....+++++. ",
-"   .++..+++++.  ",
-"   .+++++++++.  ",
-"    ..+++++..   ",
-"      .....     ",
-"                "};
-
-#endif // QT_NO_IMAGEIO_XPM
 
 class DecorHackWidget : public QWidget
 {
@@ -302,6 +250,13 @@ static QWindowDecorationInterface *wdiface = 0;
 static QPluginManager *wdLoader = 0;
 
 //===========================================================================
+
+/*!
+    \class QtopiaDecoration
+    \internal
+
+    Supports Qtopia window decoration plugins.
+*/
 bool QtopiaDecoration::helpExists() const
 {
     if ( helpFile.isNull() ) {
@@ -334,9 +289,6 @@ QtopiaDecoration::QtopiaDecoration()
 #endif
 
     helpexists = false; // We don't know (flagged by helpFile being null)
-#ifdef QTOPIA4_TODO
-    qpeManager = new QPEManager( this );
-#endif
     imageOk = QImage( ":image/qpe/pda/OKButton" );
     imageClose = QImage( ":image/qpe/pda/CloseButton" );
     imageHelp = QImage( ":image/qpe/pda/HelpButton" );
@@ -381,44 +333,14 @@ QtopiaDecoration::QtopiaDecoration( const QString &
     }
 #endif
     helpexists = false; // We don't know (flagged by helpFile being null)
-#ifdef QTOPIA4_TODO
-    qpeManager = new QPEManager( this );
-#endif
     QDesktopWidget *desktop = QApplication::desktop();
     desktopRect = desktop->screenGeometry(desktop->primaryScreen());
 }
 
 QtopiaDecoration::~QtopiaDecoration()
 {
-#ifdef QTOPIA4_TODO
-    delete qpeManager;
-#endif
 }
 
-const char **QtopiaDecoration::menuPixmap()
-{
-    return (const char **)0;
-}
-
-const char **QtopiaDecoration::closePixmap()
-{
-    return (const char **)qpe_close_xpm;
-}
-
-const char **QtopiaDecoration::minimizePixmap()
-{
-    return (const char **)qpe_accept_xpm;
-}
-
-const char **QtopiaDecoration::maximizePixmap()
-{
-    return (const char **)0;
-}
-
-const char **QtopiaDecoration::normalizePixmap()
-{
-    return (const char **)0;
-}
 
 int QtopiaDecoration::getTitleHeight( const QWidget *w )
 {
@@ -432,10 +354,6 @@ int QtopiaDecoration::getTitleHeight( const QWidget *w )
 */
 QRegion QtopiaDecoration::region(const QWidget *widget, const QRect &rect, int type)
 {
-#ifdef QTOPIA4_TODO
-    qpeManager->updateActive();
-#endif
-
     QWindowDecorationInterface::WindowData wd;
     windowData( widget, wd );
     wd.rect = rect;
@@ -876,12 +794,7 @@ void QtopiaDecoration::windowData( const QWidget *w, QWindowDecorationInterface:
 {
     wd.window = w;
     wd.rect = w->rect();
-#ifdef QTOPIA4_TODO
-    if ( qpeManager->whatsThisWidget() == w )
-        wd.caption = qApp->translate("QtopiaDecoration","What's this..." );
-    else
-#endif
-        wd.caption = w->windowTitle();
+    wd.caption = w->windowTitle();
     wd.palette = qApp->palette();
     wd.flags = 0;
     wd.flags |= w->isMaximized() ? QWindowDecorationInterface::WindowData::Maximized : 0;

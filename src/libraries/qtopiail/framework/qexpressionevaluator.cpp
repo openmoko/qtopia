@@ -2814,7 +2814,12 @@ bool ExpressionMachine::stackBool() {
 
 /*!
 \class QExpressionEvaluator
+\mainclass
 \brief The QExpressionEvaluator class computes the results of arithmetic, logical and string based expressions.
+
+Most interestingly, the expression evaluator has the ability to use values
+from the Qtopia valuespace in its expressions and signal when the resulting
+expression changes through termsChanged().
 
 \section1 Overview
 It takes as input through setExpression() an expression such as "2 + 2" and calculates the result.
@@ -2933,9 +2938,16 @@ The expression evaluator has the ability to use values from the Qtopia valuespac
 
 The above code would add 2 and the value for /Value/Space/Key in the valuespace.
 
-The '@' character uniquely identifies the proceeding characters as a valuespace key to the expression evaluator.
+The '@' character uniquely identifies the subsequent characters as a valuespace key to the expression evaluator.
 
-In the above example, /Value/Space/Key must return data that can be converted to an integer. If conversion fails, a run-time error will occur and evaluate() will return false.
+In the above example, /Value/Space/Key must return data that can be
+converted to an integer. If conversion fails, a run-time error will
+occur and evaluate() will return false.
+
+If a value in the valuespace changes, expressions which use that value will
+emit the termsChanged() signal.
+
+\ingroup misc
 */
 
 /*
@@ -3100,9 +3112,11 @@ QExpressionEvaluator::FloatingPointFormat QExpressionEvaluator::floatingPointFor
 }
 
 /*!
-  Sets the expression for the evaluator to be \a expr.
+  Sets the expression for the evaluator to be \a expr
 
-  \a expr is parsed and semantically checked immediately.
+  \a expr is parsed and semantically checked immediat
+
+  Returns true on success; otherwise returns false.
 
  You should call isValid() after this function to determine whether
     the setup phase was completed successfully.

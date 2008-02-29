@@ -157,7 +157,7 @@ private slots:
         if ( !toBeAdded.isEmpty() ) {
             beginInsertRows( QModelIndex(), vpnIDList.count(), toBeAdded.count() );
             foreach( uint vpnID, toBeAdded ) {
-                QVPNClient* newVPN = factory.create( vpnID, this );
+                QVPNClient* newVPN = factory.instance( vpnID, this );
                 if ( !newVPN )
                     continue;
                 connect( newVPN, SIGNAL(connectionStateChanged(bool)), this, SLOT(vpnStateChanged(bool)) );

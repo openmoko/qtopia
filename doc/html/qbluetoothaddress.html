@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QBluetoothAddress Class Reference</title>
+  <title>QBluetoothAddress Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothAddress Class Reference</h1>
 <p>The QBluetoothAddress class represents a bluetooth address. <a href="#details">More...</a></p>
-<pre>#include &lt;QBluetoothAddress&gt;</pre><ul>
+<pre>    #include &lt;QBluetoothAddress&gt;</pre><ul>
 <li><a href="qbluetoothaddress-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -39,7 +41,10 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QBluetoothAddress class represents a bluetooth address.</p>
-<p>The QBluetoothAddress class refers to a single Bluetooth address. Each Bluetooth device can have one and only one address. There are certain special addresses defined. Namely <b>any</b>, <b>local</b>, <b>all</b>.</p>
+<p>Each Bluetooth device can have one and only one address. There are certain special addresses defined. Namely <tt>any</tt>, <tt>local</tt>, <tt>all</tt>.</p>
+<p>The Bluetooth address can be constructed from a string representation. For instance,</p>
+<pre>    QBluetoothAddress addr(&quot;00:00:FF:FF:00:00&quot;);</pre>
+<p>If the address is a valid Bluetooth address, then <a href="qbluetoothaddress.html#isValid">isValid</a>() will return true, and false otherwise.</p>
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> and <a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -60,7 +65,7 @@
 <h3 class="fn"><a name="operator-eq"></a>QBluetoothAddress &amp; QBluetoothAddress::operator= ( const QBluetoothAddress &amp; <i>other</i> )</h3>
 <p>Assigns the contents of the Bluetooth address <i>other</i> to the current address.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QBluetoothAddress::operator== ( const QBluetoothAddress &amp; <i>other</i> ) const</h3>
-<p>Compares the current Bluetooth address against a Bluetooth address given by <i>other</i>.</p>
+<p>Returns the result of comparing the current Bluetooth address against a Bluetooth address given by <i>other</i>.</p>
 <hr />
 <h2>Member Variable Documentation</h2>
 <h3 class="fn"><a name="all-var"></a>const QBluetoothAddress QBluetoothAddress::all</h3>
@@ -73,8 +78,8 @@
 <p>Bluetooth address that represents a special address <b>local</b></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

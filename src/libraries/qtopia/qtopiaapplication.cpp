@@ -152,6 +152,12 @@ bool mousePreferred = false;
 
 #include "qcontent_p.h"
 
+#if defined QTOPIA_TEST && ! defined QTOPIA_CONTENT_INSTALLER
+# include <QtopiaSystemTestSlave>
+#endif
+
+
+
 #ifdef QTOPIA_KEYPAD_NAVIGATION
 enum QPEWidgetFlagsEnum {
     MenuLikeDialog = 0x01,
@@ -165,6 +171,7 @@ QMap<const QWidget *, int> qpeWidgetFlags;
 /*
   \internal
   \class QtopiaApplicationLifeCycle
+  \mainclass
   \brief The QtopiaApplicationLifeCycle class controls the lifecycle of a QtopiaApplication based application.
 
   Applications in Qtopia are launched either directly through executable
@@ -327,9 +334,9 @@ void QtopiaApplicationLifeCycle::registerRunningTask(const QString &name,
     Q_ASSERT(name != "UI");
 
     if (m_runningTasks.contains(name)) {
-        QObject *obj = m_runningTasks.value(name);
-        if (obj)
-            QObject::disconnect(obj, SIGNAL(destroyed(QObject *)),
+        QObject *oldObj = m_runningTasks.value(name);
+        if (oldObj)
+            QObject::disconnect(oldObj, SIGNAL(destroyed(QObject *)),
                     this, SLOT(unregisterRunningTask(QObject *)));
         m_runningTasks[name] = obj;
     } else {
@@ -1019,6 +1026,9 @@ public:
     int skiptimechanged;
     QtopiaSystemLocale *qpe_system_locale;
     QtopiaApplicationLifeCycle *lifeCycle;
+#if defined QTOPIA_TEST && ! defined QTOPIA_CONTENT_INSTALLER
+    QtopiaSystemTestSlave app_slave;
+#endif
 
 #ifdef QTOPIA_DBUS_IPC
     DBUSQtopiaApplicationChannel *m_appChannel;
@@ -1460,6 +1470,7 @@ static void setVolume(int t=0, int percent=-1)
 
 /*!
   \class QtopiaApplication
+  \mainclass
   \brief The QtopiaApplication class implements the system services
    available to all Qtopia applications.
 
@@ -1473,7 +1484,7 @@ static void setVolume(int t=0, int percent=-1)
   application.  Applications are automatically started by Qtopia when a QCop 
   message or service request is sent to their application channel.  The QCop
   application channel is an implicit, application specific channel of the form 
-  \c QPE/Application/<application name>.
+  \c {QPE/Application/<application name>}.
 
   Conceptually a Qtopia application will continue running as long as it has 
   work to do.  Concretely, it will not terminate so long as;
@@ -1503,11 +1514,12 @@ static void setVolume(int t=0, int percent=-1)
   may register and unregister tasks at any time by calling the 
   registerRunningTask() and unregisterRunningTask() methods.
 
-  There are two optimizations, to the conceptual life cycle model.  To improve 
+  There are two optimizations to the conceptual life cycle model.  To improve 
   system performance, Qtopia supports preloaded applications and a special 
   termination mode known as lazy application shutdown.  Preloaded applications 
-  are automatically launched at system startup and remain running, but hidden, 
-  continuously.  Applications may be marked as preloaded by adding their name 
+  are automatically launched at system startup and remain running.  The
+  applications are never shutdown, only hidden. 
+  Applications may be marked as preloaded by adding their name 
   to the \c {AppLoading\PreloadApps} list in the \c {Trolltech/Launcher} 
   configuration file.  For example, the following would preload the 
   \c addressbook and \c qtmail applications.
@@ -1561,6 +1573,8 @@ static void setVolume(int t=0, int percent=-1)
   \fn void QtopiaApplication::categoriesChanged();
 
   This signal is emitted whenever a category is added, removed or edited.
+
+  \sa QCategoryManager
 */
 
 /*!
@@ -1569,20 +1583,24 @@ static void setVolume(int t=0, int percent=-1)
   This signal is emitted whenever one or more QContent is stored, removed or edited.
   \a ids contains the list of Id's of the content that is being modified.
   \a type contains the type of change.
+
+  \sa {Document System}
 */
 
 /*!
   \fn void QtopiaApplication::resetContent()
 
-  This signal is emitted whenever a new media database is attached, or the system needs to generallt reset
-  the QContentSets to refresh their list of items.
+  This signal is emitted whenever a new media database is attached, or the
+  system needs to reset QContentSet instances to refresh their list of items.
+
+  \sa {Document System}
  */
 
 /*!
   \fn void QtopiaApplication::clockChanged( bool ampm );
 
   This signal is emitted when the clock style is changed. If
-  \a ampm is true, the clock style is a 12-hour AM/PM clock, otherwise,
+  \a ampm is true, the clock style is a 12-hour AM/PM clock, otherwise
   it is a 24-hour clock.
 
   \warning When using the QTimeString functions all strings obtained by QTimeString
@@ -1635,8 +1653,8 @@ static void setVolume(int t=0, int percent=-1)
   This signal is emitted when a message is received on the
   application's QPE/Application/\i{appname}  \l {Qtopia IPC Layer}{Qtopia} channel.
 
-  The slot to which you connect this signal uses \a msg and \a data
-  in the following way:
+  The slot to which you connect uses \a msg and \a data
+  as follows:
 
 \code
     void MyWidget::receive( const QString& msg, const QByteArray& data )
@@ -1652,13 +1670,11 @@ static void setVolume(int t=0, int percent=-1)
     }
 \endcode
 
-   \bold{Note:} Messages received here may be processed by QtopiaApplication
-   and emitted as signals, such as flush() and reload().
 */
 
 /*!
-    Determine if this application will keep running because there are
-    widgets or tasks still being used.
+    Returns true if this application will keep running because there are
+    visible widgets or registered tasks; otherwise returns false.
 */
 bool QtopiaApplication::willKeepRunning() const
 {
@@ -1676,13 +1692,13 @@ bool QtopiaApplication::willKeepRunning() const
 /*!
   Register the task \a name as running.  If \a taskObj is supplied, the task
   will be automatically unregistered when \a taskObj is destroyed.  Tasks may
-  always be manually unregistered by calling unregisterRunningTask().  For a
+  be manually unregistered by calling unregisterRunningTask().  For a
   broader discussion of tasks, please refer to the QtopiaApplication overview
   documentation.
 
-  It is illegal to attempt to register two tasks with the same \a name
-  simultaneously.  Attempting to do so will cause the application to assert in
-  debuging mode and misbehave in release mode.
+  It is not possible to register two tasks with the same \a name
+  simultaneously.  The last registration with \a name will
+  replace the previous registration.
 
   Certain task names are reserved for use by the system and should not be used
   directly by application programmers.  The following table describes the list
@@ -1706,7 +1722,7 @@ void QtopiaApplication::registerRunningTask(const QString &name,
 
 /*!
   Unregister the task \a name previously registered with registerRunningTask().
-  Attempting to register a task that is not running has no effect.
+  Attempting to unregister a task that has not been registered has no effect.
  */
 void QtopiaApplication::unregisterRunningTask(const QString &name)
 {
@@ -1718,8 +1734,8 @@ void QtopiaApplication::unregisterRunningTask(const QString &name)
 
 /*!
   Unregister the task \a taskObj previously registered with
-  registerRunningTask().  Attempting to register a task that is not running has
-  no effect.
+  registerRunningTask().  Attempting to unregister a task that has not been
+  registered has no effect.
  */
 void QtopiaApplication::unregisterRunningTask(QObject *taskObj)
 {
@@ -1795,7 +1811,6 @@ void QtopiaApplication::loadTranslations( const QString& qms )
 
 
 /*!
-  This is an overloaded member function, provided for convenience.
   It behaves essentially like the above function.
 
   It is the same as calling \c{loadTranslations(QString)} for each entry of \a qms.
@@ -1891,6 +1906,17 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
     }
 #endif
 #endif
+    
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    //NOTE: need to figure out keypad navigation before calling applyStyle
+    QSettings config(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
+    config.beginGroup( QLatin1String("Device") );
+    QString pi = config.value( QLatin1String("PrimaryInput"), QLatin1String("Keypad") ).toString().toLower();
+    // anything other than touchscreen means keypad modal editing gets enabled
+    bool keypadNavigation = pi != QLatin1String("touchscreen");
+    QApplication::setKeypadNavigationEnabled(keypadNavigation);
+    mousePreferred = !keypadNavigation;
+#endif
 
     d = new QtopiaApplicationData;
 
@@ -1932,19 +1958,9 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
     // Connect to the session bus as early as possible
     QDBusConnection dbc = QDBus::sessionBus();
     if (!dbc.isConnected()) {
-        qFatal( QString( "Unable to connect do D-BUS: %1")
+        qFatal( QString( "Unable to connect to D-BUS: %1")
                 .arg( dbc.lastError().message()).toLatin1().constData() );
     }
-#endif
-
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-    QSettings config(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
-    config.beginGroup( QLatin1String("Device") );
-    QString pi = config.value( QLatin1String("PrimaryInput"), QLatin1String("Keypad") ).toString().toLower();
-    // anything other than touchscreen means keypad modal editing gets enabled
-    bool keypadNavigation = pi != QLatin1String("touchscreen");
-    QApplication::setKeypadNavigationEnabled(keypadNavigation);
-    mousePreferred = !keypadNavigation;
 #endif
 
     QPixmapCache::setCacheLimit(256);  // sensible default for smaller devices.
@@ -2092,30 +2108,31 @@ static void createInputMethodDict()
 }
 
 /*!
-  Returns the currently set hint to the system as to whether
-  widget \a w has any use for text input methods.
+  Returns the currently set Input Method hint for \a widget.
+
+  Returns QtopiaApplication::Normal if no hint has been set.
 
   \sa setInputMethodHint(), InputMethodHint
 */
-QtopiaApplication::InputMethodHint QtopiaApplication::inputMethodHint( QWidget* w )
+QtopiaApplication::InputMethodHint QtopiaApplication::inputMethodHint( QWidget* widget )
 {
-    if (inputMethodDict && w && inputMethodDict->contains(w)) {
-        InputMethodHintRec *r = inputMethodDict->value(w);
+    if (inputMethodDict && widget && inputMethodDict->contains(widget)) {
+        InputMethodHintRec *r = inputMethodDict->value(widget);
         return r->hint;
     }
     return Normal;
 }
 
 /*!
-  Returns the currently set hint parameter for
-  widget \a w.
+  Returns the currently set hint parameter for \a widget with Named
+  input method hint.
 
   \sa setInputMethodHint(), InputMethodHint
 */
-QString QtopiaApplication::inputMethodHintParam( QWidget* w )
+QString QtopiaApplication::inputMethodHintParam( QWidget* widget )
 {
-    if ( inputMethodDict && w && inputMethodDict->contains(w)) {
-        InputMethodHintRec* r = inputMethodDict->value(w);
+    if ( inputMethodDict && widget && inputMethodDict->contains(widget)) {
+        InputMethodHintRec* r = inputMethodDict->value(widget);
         return r->param;
     }
     return QString();
@@ -2131,7 +2148,7 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* w )
     \value PhoneNumber the widget needs phone-style numeric input.
     \value Words the widget needs word input.
     \value Text the widget needs non-word input.
-    \value Named the widget needs special input, defined by param.
+    \value Named the widget needs special input, defined by \c param.
         Each input method may support a different range of special
         input types, but will default to Text if they do not know the
         type.
@@ -2165,12 +2182,12 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* w )
 */
 
 /*!
-  Hints to the system that widget \a w has use for the text input method
+  Provides a hint to the system that \a widget has use for the text input method
   specified by \a named. Such methods are input-method-specific and
   are defined by the files in [qt_prefix]/etc/im/ for each input method.
 
   For example, the phone key input method includes support for the
-  names input methods:
+  named input methods:
 
 \list
   \o email
@@ -2179,7 +2196,7 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* w )
 \endlist
 
   The effect in the phone key input method is to modify the binding of
-  phone keys to characters (such as making "@" easier to input), and to
+  phone keys to characters (such as making "\c{@}" easier to input), and to
   add additional \i words to the recognition word lists, such as: \i www.
 
   If the current input method doesn't understand the hint, it will be
@@ -2187,43 +2204,43 @@ QString QtopiaApplication::inputMethodHintParam( QWidget* w )
 
   \sa inputMethodHint(), InputMethodHint
 */
-void QtopiaApplication::setInputMethodHint( QWidget *w, const QString& named )
+void QtopiaApplication::setInputMethodHint( QWidget *widget, const QString& named )
 {
-    setInputMethodHint(w,Named,named);
+    setInputMethodHint(widget,Named,named);
 }
 
 /*!
-  Hints to the system that widget \a w has use for text input methods
+  Hints to the system that \a widget has use for text input methods
   as specified by \a mode.  If \a mode is \c Named, then \a param
   specifies the name.
 
   \sa inputMethodHint(), InputMethodHint
 */
-void QtopiaApplication::setInputMethodHint( QWidget* w, InputMethodHint mode, const QString& param )
+void QtopiaApplication::setInputMethodHint( QWidget* widget, InputMethodHint mode, const QString& param )
 {
     createInputMethodDict();
     if ( mode == Normal ) {
-        if (inputMethodDict->contains(w))
-            delete inputMethodDict->take(w);
-    } else if (inputMethodDict->contains(w)) {
-        InputMethodHintRec *r = (*inputMethodDict)[w];
+        if (inputMethodDict->contains(widget))
+            delete inputMethodDict->take(widget);
+    } else if (inputMethodDict->contains(widget)) {
+        InputMethodHintRec *r = (*inputMethodDict)[widget];
         r->hint = mode;
         r->param = param;
     } else {
-        inputMethodDict->insert(w, new InputMethodHintRec(mode,param));
-        connect(w, SIGNAL(destroyed(QObject*)), qApp, SLOT(removeSenderFromIMDict()));
+        inputMethodDict->insert(widget, new InputMethodHintRec(mode,param));
+        connect(widget, SIGNAL(destroyed(QObject*)), qApp, SLOT(removeSenderFromIMDict()));
     }
-    if ( w->hasFocus() )
-        sendInputHintFor(w,QEvent::None);
+    if ( widget->hasFocus() )
+        sendInputHintFor(widget,QEvent::None);
 }
 
 /*!
   Explicitly show the current input method.
 
-  Input methods are indicated in the taskbar by a small icon. If the
-  input method is activated (shown) then it takes up some proportion
-  of the bottom of the screen, to allow the user to interact (input
-  characters) with it.
+  Input methods are indicated in the title by a small icon. If the
+  input method is activated (shown) and it has a visible input window
+  (such as a virtual keyboard) then it takes up some proportion
+  of the bottom of the screen, to allow the user to interact.
 
   \sa hideInputMethod()
 */
@@ -2235,8 +2252,11 @@ void QtopiaApplication::showInputMethod()
 /*!
   Explicitly hide the current input method.
 
-  The current input method is still indicated in the taskbar, but no
+  The current input method is still indicated in the title, but no
   longer takes up screen space, and can no longer be interacted with.
+
+  This function only applies to input methods that have a visible
+  input window, such as a virtual keyboard.
 
   \sa showInputMethod()
 */
@@ -2858,11 +2878,11 @@ void QtopiaApplication::pidMessage( const QString &msg, const QByteArray & data)
         stream >> doc;
         QWidget *mw;
 
-    mw = d->qpe_main_widget;
-    // can be multiple top level widgets
-    if( !mw && topLevelWidgets().count() > 0 ) {
-           mw = topLevelWidgets()[0];
-    }
+        mw = d->qpe_main_widget;
+        // can be multiple top level widgets
+        if( !mw && topLevelWidgets().count() > 0 ) {
+            mw = topLevelWidgets()[0];
+        }
 
         if ( mw ) {
             QMetaObject::invokeMethod(mw, "setDocument", Q_ARG(QString, doc));
@@ -2913,7 +2933,7 @@ void QtopiaApplication::dotpidMessage( const QString &msg, const QByteArray & )
 #endif
 
 /*!
-    Get the main widget of this application.
+    Returns the main widget of this application.
 */
 QWidget* QtopiaApplication::mainWidget() const
 {
@@ -2921,18 +2941,20 @@ QWidget* QtopiaApplication::mainWidget() const
 }
 
 /*!
-    Set the main widget for this application to \a wid.  If \a nomax is
-    true, then do not maximize it.
+    Set the main widget for this application to \a widget.  If \a noMaximize is
+    true, then the widget will not be maximized.
 */
-void QtopiaApplication::setMainWidget(QWidget *wid, bool nomax)
+void QtopiaApplication::setMainWidget(QWidget *widget, bool noMaximize)
 {
-    Q_ASSERT(wid->isTopLevel());
-    d->qpe_main_widget = wid;
-    d->nomaximize = nomax;
+    Q_ASSERT(widget->isTopLevel());
+    d->qpe_main_widget = widget;
+    d->nomaximize = noMaximize;
 }
 
 /*!
     Show the main widget for this application.
+
+    \sa showMainDocumentWidget()
 */
 void QtopiaApplication::showMainWidget()
 {
@@ -2946,8 +2968,15 @@ void QtopiaApplication::showMainWidget()
 }
 
 /*!
-    Show the main widget for this application and ask it to show
+    Show the main widget for this application and ask it to load
     the document specified on the command-line.
+
+    This call assumes that the application is
+    a \l {Qtopia - Main Document Widget}{document-oriented} application.
+    The main widget must implement a \c{setDocument(const QString &filename)}
+    slot in order to receive the filename of the document to load.
+
+    \sa showMainWidget()
 */
 void QtopiaApplication::showMainDocumentWidget()
 {
@@ -2960,31 +2989,37 @@ void QtopiaApplication::showMainDocumentWidget()
 }
 
 /*!
-  Sets widget \a mw as the mainWidget() and shows it. For small windows,
-  consider passing true for \a nomaximize rather than the default false.
+    Sets \a widget as the mainWidget() and shows it.
 
-  \sa showMainDocumentWidget()
+    If \a noMaximize is true then the main widget may not be maximized.  This
+    is usually unnecessary and it is recommended that the system is allowed to
+    decide how the widget is displayed by passing false for \a noMaximize.
+
+    \sa showMainDocumentWidget()
 */
-void QtopiaApplication::showMainWidget( QWidget* mw, bool nomaximize )
+void QtopiaApplication::showMainWidget( QWidget* widget, bool noMaximize )
 {
-    setMainWidget(mw, nomaximize);
+    setMainWidget(widget, noMaximize);
     showMainWidget();
 }
 
 /*!
-  Sets widget \a mw as the mainWidget() and shows it. For small windows,
-  consider passing true for \a nomaximize rather than the default false.
+    Sets widget \a widget as the mainWidget() and shows it.
 
-  This calls designates the application as
-  a \l {Qtopia - Main Document Widget}{document-oriented} application.
+    If \a noMaximize is true then the main widget may not be maximized.  This
+    is usually unnecessary and it is recommended that the system is allowed to
+    decide how the widget is displayed by passing false for \a noMaximize.
 
-  The \a mw widget \i must have this slot: setDocument(const QString&).
+    This call assumes that the application is
+    a \l {Qtopia - Main Document Widget}{document-oriented} application.
+    The main widget must implement a \c{setDocument(const QString &filename)}
+    slot in order to receive the filename of the document to load.
 
-  \sa showMainWidget()
+    \sa showMainWidget()
 */
-void QtopiaApplication::showMainDocumentWidget( QWidget* mw, bool nomaximize )
+void QtopiaApplication::showMainDocumentWidget( QWidget* widget, bool noMaximize )
 {
-    setMainWidget(mw, nomaximize);
+    setMainWidget(widget, noMaximize);
     showMainDocumentWidget();
 }
 
@@ -3093,19 +3128,23 @@ QtopiaApplication::StylusMode QtopiaApplication::stylusOperation( QWidget* w )
 */
 
 /*!
-  Causes widget \a w to receive mouse events according to the stylus
+  Allows \a widget to receive mouse events according to the stylus
   \a mode.
+
+  Setting the stylus mode to RightOnHold causes right mouse button events
+  to be generated when the stylus is held pressed for 500ms.
+  The default mode is LeftOnly.
 
   \sa stylusOperation(), StylusMode
 */
-void QtopiaApplication::setStylusOperation( QWidget* w, StylusMode mode )
+void QtopiaApplication::setStylusOperation( QWidget* widget, StylusMode mode )
 {
     createDict();
     if ( mode == LeftOnly ) {
-        stylusDict->remove(w);
+        stylusDict->remove(widget);
     } else {
-        stylusDict->insert(w,mode);
-        connect(w,SIGNAL(destroyed()),qApp,SLOT(removeSenderFromStylusDict()));
+        stylusDict->insert(widget,mode);
+        connect(widget,SIGNAL(destroyed()),qApp,SLOT(removeSenderFromStylusDict()));
     }
 }
 
@@ -3216,16 +3255,6 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
 
         QWidget *w = (QWidget *)o;
 
-        if (e->type() == QEvent::LeaveEditFocus) {
-/*
-            qDebug() << "QEvent::LeaveEditFocus" << w;
-        } else if (e->type() == QEvent::EnterEditFocus) {
-            qDebug() << "QEvent::EnterEditFocus" << w;
-        } else {
-            qDebug() << "QEvent::FocusIn" << w;
-*/
-        }
-
 #ifdef QTOPIA_KEYPAD_NAVIGATION
         if (e->type() == QEvent::FocusIn && !mousePreferred
             && w->focusPolicy() != Qt::NoFocus) {
@@ -3302,8 +3331,17 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
         }
     } else if (e->type() == QEvent::Show) {
         QMessageBox *mb = 0;
-        if (((QWidget*)o)->testAttribute(Qt::WA_ShowModal))
+        if (((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
             mb = qobject_cast<QMessageBox*>(o);
+#ifdef QTOPIA_TEST
+            if (mb != 0) {
+                QTestMessage msg("show_messagebox");
+                msg["title"] = mb->windowTitle();
+                msg["text"] = mb->text();
+                d->app_slave.postMessage( msg );
+            }
+#endif
+        }
         QDialog *dlg = qobject_cast<QDialog*>(o);
         if (!mb && dlg && !Qtopia::hasKey(Qt::Key_No)) { // no context menu for QMessageBox
             if (!isMenuLike(dlg)) {
@@ -3368,11 +3406,6 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 shadow->deleteLater();
             }
         }
-/*
-    } else if (e->type() == QEvent::Paint) {
-        QPaintEvent *pe = (QPaintEvent*)e;
-        qDebug() << "Paint event for" << qobject_cast<QWidget *>(o) << pe->rect();
-*/
     }
 #endif  // QTOPIA_KEYPAD_NAVIGATION
 
@@ -3736,8 +3769,8 @@ bool QtopiaApplication::keyboardGrabbed() const
 
 
 /*!
-  Reverses the effect of grabKeyboard(). This is called automatically
-  on program exit.
+  Releases the keyboard previously grabbed by grabKeyboard(). The keyboard
+  is automatically ungrabbed on application exit.
 */
 void QtopiaApplication::ungrabKeyboard()
 {
@@ -3751,11 +3784,10 @@ void QtopiaApplication::ungrabKeyboard()
 }
 
 /*!
-  Grabs the physical keyboard keys, e.g. the application's launching
-  keys. Instead of launching applications when these keys are pressed
-  the signals emitted are sent to this application instead. Some games
-  programs take over the launch keys in this way to make interaction
-  easier.
+  Grabs the physical keyboard keys, including keys which would otherwise
+  be acted on by the system.  This is usually unnecessary and leads
+  to an inconsistent user experience, however some games
+  grab system keys to make interaction easier.
 
   Under Qtopia Phone Edition this function does nothing.  It is not
   possible to grab the keyboard under Qtopia Phone Edition.
@@ -3902,37 +3934,41 @@ void QtopiaApplication::updateDialogGeometry()
 
 
 /*!
-    \fn void QtopiaApplication::showDialog( QDialog* dialog, bool nomax )
+    Shows \a dialog. A heuristic approach is taken to
+    determine the size of the dialog and whether it is maximized.
 
-    Shows \a dialog. An heuristic approach is taken to
-    determine the size and maximization of the dialog.
+    If \a noMaximize is true then the dialog may not be maximized.  This
+    is usually unnecessary and it is recommended that the system be allowed
+    to decide how the dialog is displayed by passing false for \a noMaximize.
 
-    \a nomax forces it to not be maximized.
+    \sa execDialog()
 */
-void QtopiaApplication::showDialog( QDialog* d, bool nomax )
+void QtopiaApplication::showDialog( QDialog* dialog, bool noMaximize )
 {
-    QtopiaApplicationData::qpe_show_dialog( d, nomax );
+    QtopiaApplicationData::qpe_show_dialog( dialog, noMaximize );
 }
 
 
 /*!
-    \fn int QtopiaApplication::execDialog( QDialog* dialog, bool nomax )
+    Shows and calls exec() on \a dialog. A heuristic approach is taken to
+    determine the size of the dialog and whether it is maximized.
 
-    Shows and calls exec() on \a dialog. An heuristic approach is taken to
-    determine the size and maximization of the dialog.
+    If \a noMaximize is true then the dialog may not be maximized.  This
+    is usually unnecessary and it is recommended that the system be allowed
+    to decide how the dialog is displayed by passing false for \a noMaximize.
 
-    \a nomax forces it to not be maximized.
+    \sa showDialog()
 */
-int QtopiaApplication::execDialog( QDialog* d, bool nomax )
+int QtopiaApplication::execDialog( QDialog* dialog, bool noMaximize )
 {
     // Important to set WA_ShowModal before showing to maintain the
     // same behaviour as QDialog::exec() - i.e. flag is set when show()
     // happens.
-    bool wasShowModal = d->testAttribute(Qt::WA_ShowModal);
-    d->setAttribute(Qt::WA_ShowModal, true);
-    showDialog(d,nomax);
-    int rv = d->exec();
-    d->setAttribute(Qt::WA_ShowModal, wasShowModal);
+    bool wasShowModal = dialog->testAttribute(Qt::WA_ShowModal);
+    dialog->setAttribute(Qt::WA_ShowModal, true);
+    showDialog(dialog,noMaximize);
+    int rv = dialog->exec();
+    dialog->setAttribute(Qt::WA_ShowModal, wasShowModal);
     return rv;
 }
 
@@ -3940,6 +3976,9 @@ int QtopiaApplication::execDialog( QDialog* d, bool nomax )
   This method temporarily overrides the current global power manager with
   the PowerConstraint \a constraint, allowing applications to control power saving
   functions during their execution.
+
+  Calling this function will access Qtopia's power management via the 
+  QtopiaPowerManagerService.
 
   \sa PowerConstraint
 */
@@ -3951,8 +3990,9 @@ void QtopiaApplication::setPowerConstraint(PowerConstraint constraint)
 }
 
 #ifdef Q_OS_WIN32
-/*
-  Provides minimal support for setting environment variables
+/*!
+  \internal
+  Provides minimal support for setting environment variables.
  */
 int setenv(const char* name, const char* value, int /*overwrite*/)
 {
@@ -3963,8 +4003,9 @@ int setenv(const char* name, const char* value, int /*overwrite*/)
   return _putenv(envValue);
 }
 
-/*
-  Provides minimal support for clearing environment variables
+/*!
+  \internal
+  Provides minimal support for clearing environment variables.
  */
 void unsetenv(const char *name)
 {
@@ -4029,57 +4070,92 @@ void operator delete(void* p, size_t /*size*/)
 
 #ifdef QTOPIA_KEYPAD_NAVIGATION
 /*!
-  \a b equal to true sets the dialog \a diag to have MenuLike behaviour when executed,
-  otherwise sets dialog to have default dialog behaviour.
-
-  MenuLike dialogs typically have a single list of options, and
-  should accept the dialog when the select key is pressed on the appropriate item,
-  and when a mouse/stylus is used to click on an item. Key focus should be accepted by only one widget.
-
-  By marking a dialog as MenuLike Qtopia will map the Back key to reject the dialog
-  and will not map any key to accept the dialog - that must be user-defined.
+  In some cases dialogs are easier to interact with if they behave in a
+  similar fashion to menus.
 
   The default dialog behaviour is to include a cancel menu option in the context
-  menu to reject the dialog and to map the Back key to accept the dialog.
+  menu in order to reject the dialog and map Key_Back to accept the dialog.
+
+  Setting \a menuLike to true instructs the \a dialog to have MenuLike
+  behaviour when executed.
+
+  A MenuLike dialog will map Key_Back key to
+  reject the dialog and will not map any key to accept the dialog - the
+  accept action must be implemented by the developer.
+
+  MenuLike dialogs typically have a single list of options, and accept
+  the dialog when the select key is pressed on the appropriate item,
+  or when a mouse/stylus is used to click on an item. Key focus should
+  be accepted by only one widget.
 
   \sa isMenuLike()
 */
-void QtopiaApplication::setMenuLike( QDialog *diag, bool b )
+void QtopiaApplication::setMenuLike( QDialog *dialog, bool menuLike )
 {
-    if (b == isMenuLike(diag))
+    if (menuLike == isMenuLike(dialog))
         return;
 
     // can't do here, if QDialog is const..... but it doesn't need to be.
-    if (b)
-        QSoftMenuBar::setLabel(diag, Qt::Key_Back, QSoftMenuBar::Cancel);
+    if (menuLike)
+        QSoftMenuBar::setLabel(dialog, Qt::Key_Back, QSoftMenuBar::Cancel);
     else
-        QSoftMenuBar::setLabel(diag, Qt::Key_Back, QSoftMenuBar::Back);
+        QSoftMenuBar::setLabel(dialog, Qt::Key_Back, QSoftMenuBar::Back);
 
-    if (qpeWidgetFlags.contains(diag)) {
-        qpeWidgetFlags[diag] = qpeWidgetFlags[diag] ^ MenuLikeDialog;
+    if (qpeWidgetFlags.contains(dialog)) {
+        qpeWidgetFlags[dialog] = qpeWidgetFlags[dialog] ^ MenuLikeDialog;
     } else {
-        // the ternery below is actually null.  if b is false, and flags
-        // not present, then will never get here, hence b is always
+        // the ternery below is actually null.  if menuLike is false, and flags
+        // not present, then will never get here, hence menuLike is always
         // true at this point.  Leave in though incase that logic
         // changes.
-        qpeWidgetFlags.insert(diag, b ? MenuLikeDialog : 0);
+        qpeWidgetFlags.insert(dialog, menuLike ? MenuLikeDialog : 0);
         // connect to destructed signal.
-        connect(diag, SIGNAL(destroyed()), qApp, SLOT(removeFromWidgetFlags()));
+        connect(dialog, SIGNAL(destroyed()), qApp, SLOT(removeFromWidgetFlags()));
     }
 }
 
 /*!
-  Returns true if the dialog \a diag is set to have MenuLike behaviour when executed,
-  otherwise returns false.
+  Returns true if the \a dialog is set to have MenuLike behaviour when
+  executed; otherwise returns false.
 
   \sa setMenuLike()
 */
-bool QtopiaApplication::isMenuLike( const QDialog *diag)
+bool QtopiaApplication::isMenuLike( const QDialog *dialog)
 {
-    if (qpeWidgetFlags.contains(diag))
-        return (qpeWidgetFlags[diag] & MenuLikeDialog == MenuLikeDialog);
+    if (qpeWidgetFlags.contains(dialog))
+        return (qpeWidgetFlags[dialog] & MenuLikeDialog == MenuLikeDialog);
     return false; // default.
 }
 #endif
+
+/*!
+  \macro QTOPIA_ADD_APPLICATION(name,classname)
+  \relates QtopiaApplication
+
+  This macro registers the application uniquely identified by \a name with
+  the main widget \a classname. This macro is used to simplify switching between quicklaunch and normal
+  launching.
+
+  In singleexec builds, this macro is used to indicate the name of the main function rather than
+  specifying the class to instantiate.
+
+  /sa Applications, {Writing Applications that Startup Quickly}
+*/
+
+/*!
+  \macro QTOPIA_MAIN
+  \relates QtopiaApplication
+
+  This macro inserts an appropriate main function when normal launching is used.
+*/
+
+/*!
+  \macro QTOPIA_EXPORT_PLUGIN(classname)
+  \relates QtopiaApplication
+
+  This macro causes a QObject-derived \a classname to be made available from a
+  plugin file (eg foo.so). This plugin should be used instead of Q_EXPORT_PLUGIN because it
+  works correctly in both dynamic and singleexec builds.
+*/
 
 #include "qtopiaapplication.moc"

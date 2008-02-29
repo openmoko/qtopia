@@ -733,8 +733,8 @@ set_optvar( "extraBuildPaths", +{
 });
 add_separator();
 set_optvar( "qdoc", +{
-    "set" => [ "run-%", "Run qdoc at make time to provide documentation warnings and errors." ],
-    "unset" => [ "no-run-%", "Do not run qdoc at make time." ],
+    "set" => [ "run-%", "Automatically build class documentation to provide documentation errors and warnings at compile time." ],
+    "unset" => [ "no-run-%", "Do not automatically build class documentation." ],
     "default" => 0,
     "visible" => sub { configopt("depot") },
     "config_pri" => "CONFIG+=qdoc",
@@ -1528,8 +1528,8 @@ if ( $shadow ) {
     mkpath("$QPEDIR/etc/themes");
 
     mkpath("$QPEDIR/src/build");
-    symlink_file($depotpath."/doc",$QPEDIR."/doc");
     symlink_file($depotpath."/apps",$QPEDIR."/apps");
+    symlink_file($depotpath."/doc",$QPEDIR."/doc");
     symlink_file($depotpath."/pics",$QPEDIR."/pics");
     symlink_file($depotpath."/services",$QPEDIR."/services");
     symlink_file($depotpath."/sounds",$QPEDIR."/sounds");
@@ -2361,7 +2361,7 @@ if ( opt("edition") && !opt("qte_config") ) {
     my $args = "-embedded ".opt("arch")." -platform $qt_platform -xplatform $qt_xplatform ".
                "-depths 16,32 -DQT_KEYPAD_NAVIGATION ".
                "-prefix ".fixpath(opt("sdkroot")."/qtopiacore/target")." ".
-               "-no-stl -no-exceptions -no-qt3support -make src ".
+               "-no-stl -no-exceptions -no-qt3support -make src -make tools ".
                "-qconfig $qconfig -fast -no-glib -no-cups -no-qdbus ".
                "-DQT_NO_PLUGIN_CHECK -DQT_EXTERNAL_SOUND_SERVER -DQT_QWS_KEYEVENT_SINGLECLIENT ".
                "-confirm-license";
@@ -2885,7 +2885,6 @@ sub configure_qt
             die "Can not read $qt_depot_path/bin/syncqt\n";
     my @data = <IN>;
     close IN;
-    @data = grep { !/qtestlib/ } @data;
     @data = grep { !/ActiveQt/ } @data;
     mkpath("$QPEDIR/bin");
     open OUT, ">$QPEDIR/bin/syncqt" or die "Can not write $QPEDIR/bin/syncqt\n";
@@ -2960,7 +2959,7 @@ sub configure_qt
     # when we pass a value to -xplatform that isn't in the Qt source tree.
     # Work around it by forcing the correct location to be searched.
     $ENV{QMAKEPATH} = "$qt_depot_path";
-
+    
     # Go ahead and configure
     filter_system(fixpath("$qt_depot_path/configure")." ".opt("$qt_config")." 2>&1", sub {
         return 0 if ( /Qt is now configured for building/ );

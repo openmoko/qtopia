@@ -29,7 +29,7 @@
 #include "dialercontrol.h"
 #include "dialerservice.h"
 #include "phoneserver.h"
-
+#include "qperformancelog.h"
 
 #include <qtopialog.h>
 #include <qspeeddial.h>
@@ -99,7 +99,16 @@ public:
 /*!
   \class CellModemManager
   \brief The CellModemManager class simplifies the initialization and monitoring of a cellular phone modem.
-  \ingroup QtopiaServer
+  \ingroup QtopiaServer::Task
+
+  The CellModeManager provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o CellModem
+  \row \o Interfaces \o CellModemManager
+  \row \o Services \o Suspend
+  \endtable
 
   The CellModemManager class provides a simplified goal-oriented wrapper around
   Qtopia's telephony APIs.  While the telephony subsystem provides the ability
@@ -128,8 +137,6 @@ public:
   \row \o \c {/Telephony/Status/ModemStatus} \o Set to the string value of the current State enumeration value.
   \row \o \c {/Telephony/Status/SimToolkitAvailable} \o Set to true if SIM toolkit support is available, otherwise false.
   \endtable
-
-  The CellModemManager class provides the \c {CellModem} task.
  */
 
 /*!
@@ -183,6 +190,8 @@ public:
 
 // define CellModemManager
 /*!
+  \internal
+
   Construct a new CellModemManager with the appropriate \a parent.  Only one
   instance of CellModemManager may be constructed.
  */
@@ -1058,9 +1067,8 @@ void CellModemManager::doStateChanged(State newState)
     qLog(QtopiaServer) << "CellModemManager: State changed from"
                        << stateToString(state()) << "to"
                        << stateToString(newState);
-    qLog(Performance) << "QtopiaServer : " << "CellModemManager: State changed from"
-                      << stateToString(state()) << "to" << stateToString(newState)
-                      << " : " << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "CellModemManager: State changed from"
+                      << stateToString(state()).toLatin1() << " to " << stateToString(newState).toLatin1();
 
     // We assert on an impossible state transition
     Q_ASSERT(state() != Initializing ||

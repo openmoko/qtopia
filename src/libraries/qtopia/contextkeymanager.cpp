@@ -39,10 +39,6 @@
 #include "qsoftmenubar.h"
 #include "qtopialog.h"
 
-#ifdef QTOPIA_PHONE
-extern bool mousePreferred; // can't call Qtopia::mousePreferred in libqtopia2 from libqtopia
-#endif
-
 class ContextKeyManagerQSpinBoxLineEditAccessor : public QSpinBox
 {
 public:
@@ -67,7 +63,7 @@ ContextKeyManager::ContextKeyManager()
         // Setup non-standard class context labels.
         QSoftMenuBar::StandardLabel lbl = QSoftMenuBar::NoLabel;
 #ifdef QTOPIA_PHONE
-        if( !mousePreferred )
+        if( !Qtopia::mousePreferred() )
             lbl = QSoftMenuBar::EndEdit;
 #endif
 
@@ -92,7 +88,7 @@ ContextKeyManager::ContextKeyManager()
         setClassStandardLabel("QMenu", Qt::Key_Back, QSoftMenuBar::NoLabel, QSoftMenuBar::AnyFocus);
 
 #ifdef QTOPIA_PHONE
-        if( !mousePreferred ) {
+        if( !Qtopia::mousePreferred() ) {
             setClassStandardLabel("QTimeEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
             setClassStandardLabel("QLineEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
             setClassStandardLabel("QTextEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
@@ -133,7 +129,7 @@ void ContextKeyManager::updateLabelsForFocused()
 
     bool modal = true;
 #ifdef QTOPIA_PHONE
-    if( !mousePreferred )
+    if( !Qtopia::mousePreferred() )
         modal = w->hasEditFocus();
 #endif
 
@@ -150,7 +146,7 @@ void ContextKeyManager::updateLabelsForFocused()
     bool overrideBack = false;
     bool overrideSelect = false;
 #ifdef QTOPIA_PHONE
-    if( !mousePreferred ) {
+    if( !Qtopia::mousePreferred() ) {
         if (modal) {
             QLineEdit *l = qobject_cast<QLineEdit*>(w);
             if (!l && w->inherits("QSpinBox"))
@@ -222,7 +218,7 @@ void ContextKeyManager::updateLabelsForFocused()
             switch (buttons[i]) {
                 case Qt::Key_Select:
 #ifdef QTOPIA_PHONE
-                    if (!mousePreferred && overrideSelect)
+                    if (!Qtopia::mousePreferred() && overrideSelect)
                         setStandard(w, Qt::Key_Select, selectLabel);
                     else
 #endif
@@ -235,7 +231,7 @@ void ContextKeyManager::updateLabelsForFocused()
                     break;
                 case Qt::Key_Back:
 #ifdef QTOPIA_PHONE
-                    if (!mousePreferred && overrideBack)
+                    if (!Qtopia::mousePreferred() && overrideBack)
                         setStandard(w, Qt::Key_Back, backLabel);
                     else
 #endif

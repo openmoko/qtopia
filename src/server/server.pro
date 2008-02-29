@@ -281,7 +281,8 @@ PHONE_HEADERS=\
     phone/qsoftmenubarprovider.h \
     phone/secondarythemeddisplay.h \
     phone/receivewindow.h \
-    phone/homescreenwidgets.h
+    phone/homescreenwidgets.h \
+    phone/phonepowermanager.h
 
 TELEPHONY_HEADERS=\
     phone/externalaccess.h \
@@ -529,9 +530,9 @@ phone {
 
 qtopiatest {
     depends(libraries/qtopiatest/qtesttools/target)
-    depends(libraries/qtopiatest/qsystemtestslave)
     depends(libraries/qtopiatest/qtopiasystemtestslave)
     depends(libraries/qtopiatest/qtopiaservertestslave)
+    depends(libraries/qtopiatest/qtestslave)
 }
 
 !isEmpty(DEVICE_CONFIG_PATH) {

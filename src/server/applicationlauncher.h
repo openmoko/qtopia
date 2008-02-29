@@ -115,6 +115,24 @@ private:
 };
 QTOPIA_TASK_INTERFACE(ApplicationLauncher);
 
+class QtopiaServerApplicationLauncher : public ApplicationTypeLauncher,
+                                        public ApplicationIpcRouter::RouteDestination
+{
+Q_OBJECT
+public:
+    QtopiaServerApplicationLauncher();
+
+    // ApplicationTypeLauncher
+    virtual bool canLaunch(const QString &app);
+    virtual void launch(const QString &app);
+    virtual void kill(const QString &app);
+    virtual ApplicationState applicationState(const QString &app);
+
+    // QCopRouter::RouteDestination
+    virtual void routeMessage(const QString &, const QString &,
+                              const QByteArray &);
+};
+
 class ExeApplicationLauncherPrivate;
 class ExeApplicationLauncher : public ApplicationTypeLauncher,
                                public ApplicationIpcRouter::RouteDestination

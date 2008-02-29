@@ -27,7 +27,24 @@
 #include <qtopiaapplication.h>
 #include <qtranslatablesettings.h>
 
+/*!
+    \class QIMPenProfile
+    \brief The QIMPenProfile class describes a group of character sets that
+    form a profile.
 
+    To improve the quality of character matching it is best to have a
+    number of separate character sets that implement a selection of the
+    total characters supported, for example it is common to have
+    upper case, lower case, and numerals in separate sets and change
+    mode to input characters in the different sets.
+
+    \internal
+*/
+
+/*!
+    Constructs a QIMPenProfile that loads the profile configuration
+    from file named \a fn.
+*/
 QIMPenProfile::QIMPenProfile( const QString &fn )
     : filename( fn )
 {
@@ -35,6 +52,9 @@ QIMPenProfile::QIMPenProfile( const QString &fn )
     load();
 }
 
+/*!
+    Destroys a QIMPenProfile.
+*/
 QIMPenProfile::~QIMPenProfile()
 {
     while ( sets.count() ) delete sets.takeLast();
@@ -89,6 +109,13 @@ void QIMPenProfile::load()
     }
 }
 
+/*!
+    Saves any changes to the profile and character sets it contains.
+
+    Note that any changes to the character sets are stored separately
+    to the system character sets.  This allows the user to revert
+    back to a system character using the handwriting settings application.
+*/
 void QIMPenProfile::save() const
 {
     QSettings usrConfig("Trolltech",userConfig());
@@ -112,6 +139,23 @@ void QIMPenProfile::setStyle( Style s )
     }
 }
 
+/*!
+    \fn int QIMPenProfile::multiStrokeTimeout() const
+
+    Returns the time between two strokes that determines whether a new character
+    has been started, or another stroke of a multi-stroke character has
+    be started.
+
+    \sa setMultiStrokeTimeout()
+*/
+
+/*!
+    Sets the time between two strokes that determines whether a new character
+    has been started, or another stroke of a multi-stroke character has 
+    be started.
+
+    \sa multiStrokeTimeout()
+*/
 void QIMPenProfile::setMultiStrokeTimeout( int t )
 {
     if ( t != msTimeout ) {
@@ -119,6 +163,23 @@ void QIMPenProfile::setMultiStrokeTimeout( int t )
     }
 }
 
+/*!
+    \fn int QIMPenProfile::ignoreStrokeTimeout() const
+
+    Returns the minimum time the stylus must be pressed for the input
+    to be considered a stroke.
+
+    \sa setIgnoreStrokeTimeout()
+*/
+
+/*!
+    Sets the minimum time the stylus must be pressed for the input
+    to be considered a stroke.  This is typically used to determine
+    whether input is a stroke, or a click-through in a full-screen
+    input method.
+
+    \sa ignoreStrokeTimeout()
+*/
 void QIMPenProfile::setIgnoreStrokeTimeout( int t )
 {
     if ( t != isTimeout ) {
@@ -126,11 +187,23 @@ void QIMPenProfile::setIgnoreStrokeTimeout( int t )
     }
 }
 
+/*!
+    Returns a unique identifier for this profile.
+*/
 const QString QIMPenProfile::identifier() const
 {
     QFileInfo fi(filename);
     return fi.baseName();
 }
+
+/*!
+    \fn bool QIMPenProfile::matchWords() const
+
+    Returns true if words should be matched against the dictionary.
+    This considerably improves the accuracy of input by comparing
+    the possible matching characters with possible words in the
+    dictionary.
+*/
 
 QString QIMPenProfile::userConfig() const
 {

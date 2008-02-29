@@ -119,7 +119,7 @@ private:
 };
 
 class QPimSource;
-class QPimSqlIO {
+class QTOPIA_AUTOTEST_EXPORT QPimSqlIO {
 public:
     QPimSqlIO(const QUuid &scope, const char *table, const char *catTable,
             const char *customTable, const char *updateText, const char *insertText);

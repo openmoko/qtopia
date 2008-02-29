@@ -32,6 +32,29 @@
 #include <qtopiaapplication.h>
 #include <qtranslatablesettings.h>
 
+
+/*!
+  \class AccountPage
+  \brief The AccountPage class provides the user interface for the network account configuration.
+  \mainclass
+  \internal
+
+  The AccountPage widget is exclusively used by the Qtopia network plug-ins. It 
+  allows the user to edit the general account details such as:
+
+  \list
+    \o user name
+    \o password
+    \o APN
+    \o dialup number
+    \o Autostart behavoir
+  \endlist
+
+  Note that not all of these details are always enabled. The type of the network plug-in 
+  determines which subwidgets are relevant for a particular network interface type.
+
+  This is not a public class.
+  */
 AccountPage::AccountPage(
         QtopiaNetwork::Type type, const QtopiaNetworkProperties& cfg,
         QWidget* parent, Qt::WFlags flags )

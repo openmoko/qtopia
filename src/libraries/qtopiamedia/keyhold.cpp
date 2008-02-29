@@ -19,10 +19,19 @@
 **
 ****************************************************************************/
 
-#include "keyhold.h"
+#include "keyhold_p.h"
 
 #include <QtGui>
 
+/*!
+    \class KeyHold
+    \internal
+*/
+
+/*!
+    \fn KeyHold::KeyHold( int key, int keyHold, int threshold, QObject* target, QObject* parent )
+    \internal
+*/
 KeyHold::KeyHold( int key, int keyHold, int threshold, QObject* target, QObject* parent )
     : QObject( parent ), m_key( key ), m_keyHold( keyHold ), m_threshold( threshold ), m_target( target )
 {
@@ -35,6 +44,10 @@ KeyHold::KeyHold( int key, int keyHold, int threshold, QObject* target, QObject*
 
 // ### Installing ignores auto repeat
 
+/*!
+    \fn KeyHold::eventFilter( QObject* o, QEvent* e )
+    \internal
+*/
 bool KeyHold::eventFilter( QObject*, QEvent* e )
 {
 static bool enabled = true;
@@ -87,6 +100,10 @@ static bool enabled = true;
     return false;
 }
 
+/*!
+    \fn KeyHold::generateKeyHoldPress()
+    \internal
+*/
 void KeyHold::generateKeyHoldPress()
 {
     QKeyEvent event = QKeyEvent( QEvent::KeyPress, m_keyHold, Qt::NoModifier );

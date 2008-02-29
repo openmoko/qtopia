@@ -44,8 +44,117 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
-#include "inotify-syscalls.h"
-#include "inotify.h"
+
+#if defined(QT_NO_INOTIFY)
+#include <linux/types.h>
+
+#if defined(__i386__)
+# define __NR_inotify_init      291
+# define __NR_inotify_add_watch 292
+# define __NR_inotify_rm_watch  293
+#elif defined(__x86_64__)
+# define __NR_inotify_init      253
+# define __NR_inotify_add_watch 254
+# define __NR_inotify_rm_watch  255
+#elif defined(__powerpc__) || defined(__powerpc64__)
+# define __NR_inotify_init      275
+# define __NR_inotify_add_watch 276
+# define __NR_inotify_rm_watch  277
+#elif defined (__ia64__)
+# define __NR_inotify_init      1277
+# define __NR_inotify_add_watch 1278
+# define __NR_inotify_rm_watch  1279
+#elif defined (__s390__) || defined (__s390x__)
+# define __NR_inotify_init      284
+# define __NR_inotify_add_watch 285
+# define __NR_inotify_rm_watch  286
+#elif defined (__alpha__)
+# define __NR_inotify_init      444
+# define __NR_inotify_add_watch 445
+# define __NR_inotify_rm_watch  446
+#elif defined (__sparc__) || defined (__sparc64__)
+# define __NR_inotify_init      151
+# define __NR_inotify_add_watch 152
+# define __NR_inotify_rm_watch  156
+#elif defined (__arm__)
+# define __NR_inotify_init      316
+# define __NR_inotify_add_watch 317
+# define __NR_inotify_rm_watch  318
+#elif defined (__SH4__)
+# define __NR_inotify_init      290
+# define __NR_inotify_add_watch 291
+# define __NR_inotify_rm_watch  292
+#elif defined (__SH5__)
+# define __NR_inotify_init      318
+# define __NR_inotify_add_watch 319
+# define __NR_inotify_rm_watch  320
+#elif defined (__mips__)
+# define __NR_inotify_init      284
+# define __NR_inotify_add_watch 285
+# define __NR_inotify_rm_watch  286
+#elif defined (__hppa__)
+# define __NR_inotify_init      269
+# define __NR_inotify_add_watch 270
+# define __NR_inotify_rm_watch  271
+#else
+# error "This architecture is not supported. Please talk to qt-bugs@trolltech.com"
+#endif
+
+#ifdef QT_LSB
+// ### the LSB doesn't standardize syscall, need to wait until glib2.4 is standardized
+static inline int syscall(...) { return -1; }
+#endif
+
+static inline int inotify_init()
+{
+    return syscall(__NR_inotify_init);
+}
+
+static inline int inotify_add_watch(int fd, const char *name, __u32 mask)
+{
+    return syscall(__NR_inotify_add_watch, fd, name, mask);
+}
+
+static inline int inotify_rm_watch(int fd, __u32 wd)
+{
+    return syscall(__NR_inotify_rm_watch, fd, wd);
+}
+
+// the following struct and values are documented in linux/inotify.h
+extern "C" {
+
+struct inotify_event {
+        __s32           wd;
+        __u32           mask;
+        __u32           cookie;
+        __u32           len;
+        char            name[0];
+};
+
+#define IN_ACCESS               0x00000001
+#define IN_MODIFY               0x00000002
+#define IN_ATTRIB               0x00000004
+#define IN_CLOSE_WRITE          0x00000008
+#define IN_CLOSE_NOWRITE        0x00000010
+#define IN_OPEN                 0x00000020
+#define IN_MOVED_FROM           0x00000040
+#define IN_MOVED_TO             0x00000080
+#define IN_CREATE               0x00000100
+#define IN_DELETE               0x00000200
+#define IN_DELETE_SELF          0x00000400
+#define IN_MOVE_SELF            0x00000800
+#define IN_UNMOUNT              0x00002000
+#define IN_Q_OVERFLOW           0x00004000
+
+#define IN_CLOSE                (IN_CLOSE_WRITE | IN_CLOSE_NOWRITE)
+#define IN_MOVE                 (IN_MOVED_FROM | IN_MOVED_TO)
+}
+
+// --------- inotify.h end ----------
+
+#else /* QT_NO_INOTIFY */
+#include <sys/inotify.h>
+#endif
 
 #define INOTIFY_BUFSIZE 16384
 #define POLLMONITOR_PERIOD 5
@@ -395,6 +504,7 @@ void QFileMonitorPrivate::fileChanged()
 
 /*!
   \class QFileMonitor
+  \mainclass
   \brief The QFileMonitor class allows applications to asynchronously monitor files for changes.
 
   Using QFileMonitor, clients will be notified through the fileChanged() signal
@@ -439,6 +549,8 @@ void QFileMonitorPrivate::fileChanged()
   To avoid race conditions when using QFileMonitor to trigger re-reading of file
   contents, you should always construct QFileMonitor and \i {only then} read the
   initial file contents.
+
+  \ingroup io
  */
 
 /*!
@@ -463,7 +575,7 @@ void QFileMonitorPrivate::fileChanged()
   */
 
 /*!
-  Construct an invalid file monitor with the specified \a parent.
+  Constructs an invalid file monitor with the specified \a parent.
   */
 QFileMonitor::QFileMonitor(QObject *parent)
 : QObject(parent), d(new QFileMonitorPrivate(QString(),
@@ -472,7 +584,7 @@ QFileMonitor::QFileMonitor(QObject *parent)
 }
 
 /*!
-  Construct a file monitor for the file \a fileName using the specified file
+  Constructs a file monitor for the file \a fileName using the specified file
   monitoring \a strategy and \a parent.
  */
 QFileMonitor::QFileMonitor(const QString &fileName, Strategy strategy,

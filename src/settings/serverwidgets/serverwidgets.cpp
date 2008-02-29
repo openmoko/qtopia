@@ -54,8 +54,8 @@ ServerWidgetSettings::ServerWidgetSettings( QWidget* parent, Qt::WFlags fl )
     label->setWordWrap(true);
     layout->addWidget(label);
 
-    label->setText("<i>Select the Qtopia server configuration.</i>");
-    for(int ii = 0; ii < sizeof(configurations) / sizeof(configurations[0]); ++ii) {
+    label->setText(tr("<i>Select the Qtopia server configuration.</i>"));
+    for(uint ii = 0; ii < sizeof(configurations) / sizeof(configurations[0]); ++ii) {
         QPushButton *pb = new QPushButton(configurations[ii].description, this);
         pb->setProperty("configReference", ii);
         layout->addWidget(pb);

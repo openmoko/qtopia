@@ -427,7 +427,7 @@ void Qtopia::writeHWClock()
 
     Messages for the alarm server are sent on the \c{QPE/AlarmServer}
     QCop channel.  The alarm server is started automatically by the
-    Qtopia server application by calling \c{Qtopia_initAlarmServer()}.
+    Qtopia server application.
 
     \sa Qtopia::addAlarm(), Qtopia::deleteAlarm()
 */

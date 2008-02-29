@@ -33,7 +33,6 @@
 
 #ifndef QT_NO_QWS_QPE_WM_STYLE
 
-class QPEManager;
 class QTimer;
 #include <qwidget.h>
 
@@ -54,11 +53,6 @@ public:
 protected:
     void help(QWidget *);
     virtual int getTitleHeight(const QWidget *);
-    virtual const char **menuPixmap();
-    virtual const char **closePixmap();
-    virtual const char **minimizePixmap();
-    virtual const char **maximizePixmap();
-    virtual const char **normalizePixmap();
 
 private:
     void windowData( const QWidget *w, QWindowDecorationInterface::WindowData &wd ) const;
@@ -71,48 +65,8 @@ protected:
     QImage imageHelp;
     QString helpFile;
     bool helpexists;
-    QPEManager *qpeManager;
     QRect desktopRect;
 };
-
-#ifdef QTOPIA4_TODO
-
-#define QTOPIA_DEFINED_QPEDECORATION
-
-class QTOPIA_EXPORT QPEManager : public QObject
-{
-    Q_OBJECT
-    friend class QtopiaDecoration;
-public:
-    explicit QPEManager( QtopiaDecoration *d, QObject *parent=0 );
-
-    void updateActive();
-    const QWidget *activeWidget() const { return (const QWidget *)active; }
-    const QWidget *whatsThisWidget() const { return (const QWidget *)whatsThis; }
-
-protected:
-    int pointInQpeRegion( QWidget *w, const QPoint &p );
-    virtual bool eventFilter( QObject *, QEvent * );
-    void drawButton( QWidget *w, QtopiaDecoration::QPERegion r, int state );
-    void drawTitle( QWidget *w );
-
-protected slots:
-    void whatsThisTimeout();
-
-protected:
-    QtopiaDecoration *decoration;
-    QPointer<QWidget> active;
-    int helpState;
-    QTime pressTime;
-    QTimer *wtTimer;
-    bool inWhatsThis;
-    QPointer<QWidget> whatsThis;
-};
-
-
-#define QTOPIA_DEFINED_QPEMANAGER
-
-#endif
 
 #endif // QT_NO_QWS_QPE_WM_STYLE
 #endif // Q_WS_QWS

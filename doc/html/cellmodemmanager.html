@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>CellModemManager Class Reference</title>
+  <title>CellModemManager Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">CellModemManager Class Reference</h1>
 <p>The CellModemManager class simplifies the initialization and monitoring of a cellular phone modem. <a href="#details">More...</a></p>
-<pre>#include &lt;CellModemManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;CellModemManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="cellmodemmanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -23,7 +25,6 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="cellmodemmanager.html#CellModemManager">CellModemManager</a></b> ( QObject * <i>parent</i> = 0 )</li>
 <li><div class="fn"/>virtual <b><a href="cellmodemmanager.html#dtor.CellModemManager">~CellModemManager</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#callForwardingEnabled">callForwardingEnabled</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="cellmodemmanager.html#cellLocation">cellLocation</a></b> () const</li>
@@ -89,23 +90,28 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The CellModemManager class simplifies the initialization and monitoring of a cellular phone modem.</p>
+<p>The CellModeManager provides a Qtopia Server Task. Qtopia Server Tasks are documented in full in the <a href="qtopiaserverapplication.html">QtopiaServerApplication</a> class documentation.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td>Task Name</td><td>CellModem</td></tr>
+<tr valign="top" class="even"><td>Interfaces</td><td>CellModemManager</td></tr>
+<tr valign="top" class="odd"><td>Services</td><td>Suspend</td></tr>
+</table></p>
 <p>The CellModemManager class provides a simplified goal-oriented wrapper around Qtopia's telephony APIs. While the telephony subsystem provides the ability to query and control every aspect of a cellular modem, the CellModemManager class focuses only the task of initializing the telephony subsystem and monitoring common attributes such as the current operator or cell location.</p>
 <p>To reduce the complexity of developing a system using CellModemManager, the class rigidly enforces a state transition model of startup and shutdown. Refer to the <a href="cellmodemmanager.html#State-enum">CellModemManager::State</a> enumeration for this model and an exact description of each state. By guarenteeing the transition flow, validating users of the API is greatly reduced.</p>
 <p>In addition to the C++ methods provided, the CellModemManager class also sets the following value space keys:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Key</th><th>Description</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>/Telephony/Status/RegistrationState</tt></td><td>Set to the current registration state of the network. Possible values are &quot;None&quot;, &quot;Home&quot;, &quot;Searching&quot;, &quot;Denied&quot;, &quot;Unknown&quot; or &quot;Roaming&quot; and correspond to the values of the QTelephony::RegistrationState enumeration.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>/Telephony/Status/NetworkRegistered</tt></td><td>Set to true if the network is registered (in the home or roaming states), otherwise false.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>/Telephony/Status/Roaming</tt></td><td>Set to true if the network is in the roaming statem otherwise false.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>/Telephony/Status/CellLocation</tt></td><td>Set to the current cell location. This is equivalent to the value returned by the <a href="cellmodemmanager.html#cellLocation">cellLocation</a>() method.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>/Telephony/Status/OperatorName</tt></td><td>Set to the current network operator name. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperator">networkOperator</a>() method.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>/Telephony/Status/OperatorCountry</tt></td><td>Set to the current network operator's country name, if available. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperatorCountry">networkOperatorCountry</a>() method.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>/Telephony/Status/CallDivert</tt></td><td>True if voice calls will be unconditionally diverted, false otherwise.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>/Telephony/Status/PlaneModeAvailable</tt></td><td>True if the modem supports &quot;plane mode&quot;. Possible values are &quot;Yes&quot;, &quot;No&quot; or &quot;Unknown&quot;. The &quot;Unknown&quot; value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>/Telephony/Status/ModemStatus</tt></td><td>Set to the string value of the current State enumeration value.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>/Telephony/Status/SimToolkitAvailable</tt></td><td>Set to true if SIM toolkit support is available, otherwise false.</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Key</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/RegistrationState</tt></td><td>Set to the current registration state of the network. Possible values are &quot;None&quot;, &quot;Home&quot;, &quot;Searching&quot;, &quot;Denied&quot;, &quot;Unknown&quot; or &quot;Roaming&quot; and correspond to the values of the QTelephony::RegistrationState enumeration.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/NetworkRegistered</tt></td><td>Set to true if the network is registered (in the home or roaming states), otherwise false.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/Roaming</tt></td><td>Set to true if the network is in the roaming statem otherwise false.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/CellLocation</tt></td><td>Set to the current cell location. This is equivalent to the value returned by the <a href="cellmodemmanager.html#cellLocation">cellLocation</a>() method.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/OperatorName</tt></td><td>Set to the current network operator name. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperator">networkOperator</a>() method.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/OperatorCountry</tt></td><td>Set to the current network operator's country name, if available. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperatorCountry">networkOperatorCountry</a>() method.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/CallDivert</tt></td><td>True if voice calls will be unconditionally diverted, false otherwise.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/PlaneModeAvailable</tt></td><td>True if the modem supports &quot;plane mode&quot;. Possible values are &quot;Yes&quot;, &quot;No&quot; or &quot;Unknown&quot;. The &quot;Unknown&quot; value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/ModemStatus</tt></td><td>Set to the string value of the current State enumeration value.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkitAvailable</tt></td><td>Set to true if SIM toolkit support is available, otherwise false.</td></tr>
 </table></p>
-<p>The CellModemManager class provides the <tt>CellModem</tt> task.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="State-enum"></a>enum CellModemManager::State</h3>
@@ -128,8 +134,6 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="CellModemManager"></a>CellModemManager::CellModemManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Construct a new <a href="cellmodemmanager.html">CellModemManager</a> with the appropriate <i>parent</i>. Only one instance of <a href="cellmodemmanager.html">CellModemManager</a> may be constructed.</p>
 <h3 class="fn"><a name="dtor.CellModemManager"></a>CellModemManager::~CellModemManager ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroy the <a href="cellmodemmanager.html">CellModemManager</a> instance.</p>
 <h3 class="fn"><a name="blockProfiles"></a>void CellModemManager::blockProfiles ( bool <i>block</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -200,8 +204,8 @@
 <p>Returns <i>state</i> as a string.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

@@ -144,7 +144,7 @@ void QtopiaSqlPrivate::disksChanged ()
     f.content = QFileSystemFilter::Set;
     foreach ( const QFileSystem *fs, smi.fileSystems(&f, false) ) {
         // Have I seen this database already?
-        if ( fs->isConnected() && QtopiaSql::databaseIdForPath(fs->path()) == 0 ) {
+        if ( fs->isConnected() && QtopiaSql::databaseIdForPath(fs->path()) == 0 && fs->contentDatabase()) {
             // qLog(Sql) << "fs->path() =" << fs->path() << "fs->isRemovable() =" << fs->isRemovable() << "fs->isWritable() =" << fs->isWritable();
             if ( !fs->isRemovable() && fs->isWritable() ) {
                 // Simple case, just attach normally
@@ -156,7 +156,7 @@ void QtopiaSqlPrivate::disksChanged ()
                 bool useTemp = !fs->isWritable();
                 // If we're removable, test that the file can be opened.
                 // Read-only SD cards still show as writeable.
-                if ( fs->isRemovable() && dbExists ) {
+                if ( fs->isRemovable() ) {
                     // try and write the database.
                     QString tmpfilename=fs->path()+QLatin1String("/.qtopia_write_test");
                     if(QFile::exists(tmpfilename))
@@ -266,6 +266,50 @@ void QtopiaSqlPrivate::installSorting( QSqlDatabase &db)
 #endif
 }
 
+/*!
+  \class QtopiaSql
+  \mainclass
+  \brief The QtopiaSql class provides a collection of methods for setting up and managing database connections.
+
+  Qtopia has a database architecture which uses a number of different databases, including
+  a seperate database for each removable storage media.  Additionally the database
+  schema required for a particular version of Qtopia may differ from that currently on the
+  device due to Qtopia being upgraded.
+
+  Use these routines to manage connections to these databases.  The QtopiaDatabaseId type
+  identifies a particular database of the collectin.
+
+  The systemDatabase() method is used to fetch a QSqlDatabase object pointing to the Qtopia
+  main system database.  Call attachDB() to connect a database for a particular path, typically
+  associated with a new storage media mount-point.  These will be operated on with the
+  system database as a unit.
+
+  Lists of the current databases can be obtained with databaseIds() and databases().  Given
+  a database id obtain the path for the associated media mount point with databasePathForId()
+  and obtain the QSqlDatabase itself with database().
+
+  The ensureTableExists() methods call through to the Database migration utility to ensure
+  the table schema referred to is loaded.
+
+  The attachDB() methods use the underlying database implementation specific method for
+  creating queries across seperate databases.  In SQLITE this method is the ATTACH statement,
+  but an equivalent method is used for other implementations.
+*/
+    static QSqlDatabase &database(const QtopiaDatabaseId& id);
+    static const QList<QSqlDatabase> databases();
+    static bool isDatabase(const QString &path);
+    static QString databasePathForId(const QtopiaDatabaseId& id);
+
+    static QString escapeString(const QString &input);
+    static QSqlDatabase applicationSpecificDatabase(const QString &appname);
+    static bool ensureTableExists(const QString &table, QSqlDatabase &db );
+    static bool ensureTableExists(const QStringList &, QSqlDatabase& );
+
+    static void logQuery(const QSqlQuery &q);
+
+/*!
+  Opens the main system database, if it is not already open.
+*/
 void QtopiaSql::openDatabase()
 {
     initPrivate();
@@ -277,11 +321,24 @@ void QtopiaSql::openDatabase()
     }
 }
 
+/*!
+  Closes the main system database, if it is not already closed.
+*/
 void QtopiaSql::closeDatabase()
 {
     delete QtopiaSqlPrivate::defaultConn;
     QtopiaSqlPrivate::defaultConn = 0;
 }
+
+/*!
+  \fn QtopiaSql::stringCompare( const QString &l, const QString &r )
+
+  Perform a locale aware string compare of the two argument QStrings \a l and \a r
+  using the database implementations native collating functions.
+
+  If the database does not provide one, or if one is provided but not integrated,
+  then returns the same result as QString::localeAwareCompare()
+*/
 
 #ifdef Q_USE_SQLITE
 #ifdef USE_LOCALE_AWARE
@@ -397,6 +454,11 @@ void QtopiaSql::init(QSqlDatabase &db, bool force)
     }
 }
 
+/*!
+  Initializes the state of the QtopiaSql system with the \a type of database, eg "sqlite".
+
+  The meaning of the \a name and \a user parameters are as defined in QSqlDatabase.
+*/
 void QtopiaSql::loadConfig(const QString &type, const QString &name, const QString &user)
 {
     initPrivate();
@@ -443,6 +505,11 @@ void QtopiaSql::initPrivate()
         d = new QtopiaSqlPrivate;
 }
 
+/*!
+  Execute the given QString \a query on the database \a db.  If \a inTransaction is true,
+  then perform the query inside an SQL transaction, for atomicity, if the database
+  backend supports this.
+*/
 QSqlError QtopiaSql::exec(const QString &query, QSqlDatabase& db, bool inTransaction)
 {
     QSqlError result = QSqlError();
@@ -490,6 +557,11 @@ QSqlError QtopiaSql::exec(const QString &query, QSqlDatabase& db, bool inTransac
     return result;
 }
 
+/*!
+  Execute the given QSqlQuery \a query on the database \a db.  If \a inTransaction is true,
+  then perform the query inside an SQL transaction, for atomicity, if the database
+  backend supports this.
+*/
 QSqlError QtopiaSql::exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction)
 {
     QSqlError result = QSqlError();
@@ -538,7 +610,7 @@ QSqlError QtopiaSql::exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction
 
 /*!
   Returns a reference to the qtopia database object (used for
-  settings storage, doc manager, etc).  There is a separate set of database objects
+  settings storage, doc manager, etc) for the given QtopiaDatabaseId \a id.  There is a separate set of database objects
   created per thread.
   */
 QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
@@ -592,6 +664,10 @@ QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
     return (*dbs)[id];
 }
 
+/*!
+  Returns a version of the QString \a input with all single quote characters
+  replaced with two consecutive quote characters.
+  */
 QString QtopiaSql::escapeString(const QString &input)
 {
     // add more changes as needed.
@@ -601,6 +677,12 @@ QString QtopiaSql::escapeString(const QString &input)
     return result;
 }
 
+/*!
+  Attach the database for the media located at the mount-point \a path.
+  The path given by \a dbPath is the database to use in the attach.
+
+  \sa exec()
+*/
 void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
 {
     qLog(Sql) << "Attaching database for path" << path << "with the db located at" << dbPath;
@@ -682,11 +764,29 @@ void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
         qLog(Sql) << "tried to attach an already attached database:" << dbPath;
 }
 
+/*!
+  Attach the database for the media located at the mount-point \a path.  The
+  database to use is located on that media.
+
+  After this call database entries for the attached database will be used in
+  future queries executed.
+
+  \sa exec()
+*/
 void QtopiaSql::attachDB(const QString& path)
 {
     QtopiaSql::attachDB(path, d->databaseFile(path));
 }
 
+/*!
+  Undo the effect of the attachDB() method, for the database associated with
+  mount-point \a path.
+
+  After this call database queries executed will not attempt to reference this
+  database.
+
+  \sa attachDB(), exec()
+*/
 void QtopiaSql::detachDB(const QString& path)
 {
     qLog(Sql) << "Detaching database at" << path;
@@ -724,6 +824,9 @@ void QtopiaSql::detachDB(const QString& path)
         qLog(Sql) << "tried to detach an invalid database path mapping:" << path;
 }
 
+/*!
+  Returns a list QSqlDatabase objects comprising all attached databases.
+*/
 const QList<QSqlDatabase> QtopiaSql::databases()
 {
     openDatabase();
@@ -734,6 +837,12 @@ const QList<QSqlDatabase> QtopiaSql::databases()
     return QtopiaSqlPrivate::dbs.localData()->values();
 }
 
+/*!
+  Return the QtopiaDatabaseId identifier for the database associated with the
+  given \a path.
+
+  Internally causes the database system to be opened, if not already open.
+*/
 QtopiaDatabaseId QtopiaSql::databaseIdForPath(const QString& path)
 {
     openDatabase();
@@ -748,6 +857,12 @@ QtopiaDatabaseId QtopiaSql::databaseIdForPath(const QString& path)
     return 0;
 }
 
+/*!
+  Return the QtopiaDatabaseId identifier for the database located at the
+  given \a dbPath.
+
+  Internally causes the database system to be opened, if not already open.
+*/
 QtopiaDatabaseId QtopiaSql::databaseIdForDatabasePath(const QString& dbPath)
 {
     openDatabase();
@@ -757,6 +872,12 @@ QtopiaDatabaseId QtopiaSql::databaseIdForDatabasePath(const QString& dbPath)
         return qHash(QDir::cleanPath(dbPath));
 }
 
+/*!
+  Return a list of the QtopiaDatabaseId entries for all the attached
+  databases.
+
+  Internally causes the database system to be opened, if not already open.
+*/
 const QList<QtopiaDatabaseId> QtopiaSql::databaseIds()
 {
     openDatabase();
@@ -764,11 +885,24 @@ const QList<QtopiaDatabaseId> QtopiaSql::databaseIds()
     return QtopiaSqlPrivate::masterAttachedConns.keys().toSet().toList();
 }
 
+/*!
+  Return the QSqlDatabase instance of the main system database.
+*/
 QSqlDatabase &QtopiaSql::systemDatabase()
 {
     return database(0);
 }
 
+/*!
+  Return true if the file located at the given \a path is a Qtopia database file,
+  for example the datastore used by the SQLITE engine; return false otherwise.
+
+  This may be used to test if the file should be shown to the end-user.
+  \code
+    if ( !QtopiaSql::isDatabase( fileFound ))
+        listForDisplay.append( fileFound );
+  \endcode
+*/
 bool QtopiaSql::isDatabase(const QString &path)
 {
     openDatabase();
@@ -783,6 +917,10 @@ bool QtopiaSql::isDatabase(const QString &path)
     return false;
 }
 
+/*!
+  Return the full path to the mount-point related to the database
+  for the given QtopiaDatabaseId \a id
+*/
 QString QtopiaSql::databasePathForId(const QtopiaDatabaseId& id)
 {
     openDatabase();
@@ -793,6 +931,10 @@ QString QtopiaSql::databasePathForId(const QtopiaDatabaseId& id)
     return result;
 }
 
+/*!
+  Send a string for the given QSqlQuery \a q to the qtopia logging
+  system.
+*/
 void QtopiaSql::logQuery(const QSqlQuery &q)
 {
     if (qLogEnabled(Sql))
@@ -803,6 +945,10 @@ void QtopiaSql::logQuery(const QSqlQuery &q)
     }
 }
 
+/*!
+  Return a QSqlDatabase object for the database specific to the application
+  given by \a appname
+*/
 QSqlDatabase QtopiaSql::applicationSpecificDatabase(const QString &appname)
 {
     QSqlDatabase db;
@@ -825,6 +971,14 @@ QSqlDatabase QtopiaSql::applicationSpecificDatabase(const QString &appname)
     return db;
 }
 
+/*!
+  Ensure that the given table \a tableName exists in the database \a db
+
+  Internally this invokes the "DBMigrationEngine" service to run any migrations
+  or schema updates required.
+
+  Return true if the operation was successful; otherwise returns false
+*/
 bool QtopiaSql::ensureTableExists(const QString &tableName, QSqlDatabase &db )
 {
 #ifndef QTOPIA_CONTENT_INSTALLER
@@ -882,6 +1036,12 @@ bool QtopiaSql::ensureTableExists(const QString &tableName, QSqlDatabase &db )
 #endif
 }
 
+/*!
+  Ensure that all tables in the list of \a tableNames exists in the database \a db.
+
+  Internally this invokes the "DBMigrationEngine" service to run any migrations
+  or schema updates required.
+*/
 bool QtopiaSql::ensureTableExists(const QStringList &tableNames, QSqlDatabase&db )
 {
 

@@ -21,54 +21,64 @@
 
 /*!
   \class QImageDocumentSelector
-  \brief The QImageDocumentSelector widget allows the selection of images from
+  \ingroup documentselection
+  \mainclass
+  \brief The QImageDocumentSelector widget allows the selection an image from
   a list of image documents available on the device.
 
   The QImageDocumentSelector widget builds a list of documents by
   locating all images in the device document directories.
   Alternatively, the list can be built with images which match a custom content filter.
 
-  The following functionality is provided:
+  Some of the commonly used functionality is:
+  \table
+  \header
+    \o Function/slot 
+    \o Usage
+  \row
+    \o setFilter()
+    \o filter the list of image documents using a QContentFilter.
+  \row
+    \o filter()
+    \o retrieve the current QContentFilter.
+  \row
+    \o documents()
+    \o Returns image documents listed.
+  \row 
+    \o documentSelected()
+    \o notifies which document was chosen.
+  \endtable 
+ 
+  In addition documents may be viewed in two modes:
   \list
-  \o setFilter() : filter the list of image documents
-  \o filter() :  retrieve the current content filter
-  \o documents() : retrieve the list of image documents
-  \o count() : retrieve the number of image documents in the list
-  \o selectedDocument() : retrieve a selected document
-  \endlist
-
-  In addition \c QImageDocumentSelector provides control of the presentation of image documents for selection.
-  If a single image selection is required, consider using the \l QImageDocumentSelectorDialog convience class.
-
-  Documents may be presented in two modes:
-  \list
-  \o \c QImageDocumentSelector::Single - presents a thumbnail of the current image
-  contained within the dimensions of the \c QImageDocumentSelector widget.
-  \o \c QImageDocumentSelector::Thumbnail - presents thumbnails of the images
+  \o QImageDocumentSelector::Single - presents a thumbnail of the current image
+  contained within the dimensions of the QImageDocumentSelector widget.
+  \o  QImageDocumentSelector::Thumbnail - presents thumbnails of the images
   in an icon-type scroll view allowing multiple image thumbnails to be
   viewed concurrently.
 
   The size of thumbnails is manipulated using:
     \list
     \o setThumbnailSize() - sets the size of the thumbnail
-    \o thumbnailSize() - retrieves the size of the current thumbnail select key.
+    \o thumbnailSize() - retrieves the size of the current thumbnail.
     \endlist
   \endlist
 
-  Images are displayed one at a time and are selected via the stylus or select key and
-  arrow keys are used to navigate through the list of image documents.
+  Images are highlighted one at a time and a articular image can be chosen vi
+  the stylus or select key and arrow keys are used to navigate through the list 
+  of image documents.
 
-  When an image is selected the following occurs:
+  When an image is chosen the following occurs:
   \list
-  \o QImageDocumentSelector emits a documentSelected() signal
-  \o a QContent for the selected document is passed with the signal.
+    \o The image document selector emits a documentSelected() signal
+    \o a QContent for the chosen document is passed with the signal.
   \endlist
 
-  Whenever the list of documents is changed as a result of a change of a
-  category filter or a file system change QImageDocumentSelector will emit a
+  Whenever the list of documents is changed as a result of a filter change 
+  or a file system change, QImageDocumentSelector will emit a
   documentsChanged() signal.
 
-  For example, the following code allows the user to select from all image documents
+  The following code allows the user to choose from all image documents
   available on the device using the thumbnail view mode with a custom thumbnail
   size:
 
@@ -82,11 +92,10 @@
 
   QImageDocumentSelector is often the first widget seen in a \l {Qtopia - Main Document Widget}{document-oriented application }. When used
   with \l QStackedWidget, an application
-  allows selection of a document using the selector before revealing
+  allows choosing of a document using the selector before revealing
   the document viewer or editor.
 
-  \ingroup documentselection
-  \sa QImageDocumentSelectorDialog, QDocumentSelector
+  \sa QImageDocumentSelectorDialog, QDocumentSelector, QDocumentSelectorDialog
 */
 
 #include "qimagedocumentselector_p.h"
@@ -104,7 +113,7 @@
 #include <QDesktopWidget>
 
 /*!
-  Construct an QImageDocumentSelector with parent \a parent.
+  Construct an image document selector widget with the given \a parent.
 */
 QImageDocumentSelector::QImageDocumentSelector( QWidget* parent )
     : QWidget( parent )
@@ -141,17 +150,17 @@ QImageDocumentSelector::~QImageDocumentSelector()
 /*!
   \enum QImageDocumentSelector::ViewMode
 
-  This enum describes presentation modes.
+  This enum describes the types of viewing modes.
   \value Single Images are displayed one at a time.
   \value Thumbnail Multiple images are displayed in an icon type scroll view.
 */
 
 /*!
-  Sets the display mode to \a mode.
+  Sets the viewing \a mode 
 
   The default mode is QImageDocumentSelector::Thumbnail.
 
-  See \l QImageDocumentSelector::ViewMode for a listing of supported modes.
+  See QImageDocumentSelector::ViewMode for a listing of supported view modes.
 
   \sa viewMode()
 */
@@ -161,9 +170,9 @@ void QImageDocumentSelector::setViewMode( ViewMode mode )
 }
 
 /*!
-  Returns the current display mode.
+  Returns the current view mode.
 
-  See \l QImageDocumentSelector::ViewMode for a listing of supported modes.
+  See QImageDocumentSelector::ViewMode for a listing of supported view modes.
 
   \sa setViewMode()
 */
@@ -173,7 +182,7 @@ QImageDocumentSelector::ViewMode QImageDocumentSelector::viewMode() const
 }
 
 /*!
-  Sets the maximum size of a thumbnail to \a size.
+  Sets the maximum \a size of a thumbnail.
 
   The default size is QSize( 65, 65 ).
 
@@ -197,6 +206,8 @@ QSize QImageDocumentSelector::thumbnailSize() const
 /*!
   Returns a \l QContent for the currently selected image, or an invalid \l QContent
   if there is no current selection.
+
+  \sa documents()
 */
 QContent QImageDocumentSelector::currentDocument() const
 {
@@ -204,7 +215,9 @@ QContent QImageDocumentSelector::currentDocument() const
 }
 
 /*!
-  Returns the list of documents available for selection.
+  Returns the content set of image documents listed by the selector
+
+  \sa currentDocument()
 */
 const QContentSet &QImageDocumentSelector::documents() const
 {
@@ -213,6 +226,10 @@ const QContentSet &QImageDocumentSelector::documents() const
 
 /*!
   Returns the current documents filter.
+
+  The filter defines the subset of image documents on the device the user can select from.
+    
+  \sa setFilter(), QContentSet::filter()
 */
 QContentFilter QImageDocumentSelector::filter() const
 {
@@ -220,7 +237,9 @@ QContentFilter QImageDocumentSelector::filter() const
 }
 
 /*!
-    Sets the \a filter which determines what documents from the backing store are displayed.
+    Sets the \a filter which defines the subset of image documents on the device the user can select from.
+
+    \sa filter(), QContentSet::filter() 
  */
 void QImageDocumentSelector::setFilter( const QContentFilter &filter )
 {
@@ -228,7 +247,9 @@ void QImageDocumentSelector::setFilter( const QContentFilter &filter )
 }
 
 /*!
-    Returns the attributes the content is ordered by.
+  Returns the current document sort mode.
+
+  \sa setSortMode()
  */
 QDocumentSelector::SortMode QImageDocumentSelector::sortMode() const
 {
@@ -236,7 +257,11 @@ QDocumentSelector::SortMode QImageDocumentSelector::sortMode() const
 }
 
 /*!
-    Sets the attributes content is ordered by to \a sortMode.
+  Sets the document \a sortMode 
+
+  The default mode is QDocumentSelector::Alphabetical.
+
+  \sa sortMode()
  */
 void QImageDocumentSelector::setSortMode( QDocumentSelector::SortMode sortMode )
 {
@@ -263,13 +288,16 @@ void QImageDocumentSelector::setFocus()
 
 
 /*!
-    Sets the \a categories selected by default in the document selector's category filter dialog.
+    Sets the \a categories checked by default in the document selector's category filter dialog.
 
-    If a default category does not appear in the category filter dialog then the content of the document selector will
-    not be filtered on that category.  If a default category is added to the list after the category selector has been
-    initialized it will not be automatically selected.
+    If a supplied category does not match those available in the category filter dialog, the document
+    selector will not filter with that category. Upon invocation this function will set the default checked
+    categories within the category filter dialog, and filter according to the supplied \a categories.
+    \bold {Note:} Once the dialog has been shown once, this function no longer has any effect.
 
-    \sa defaultCategories()
+    Filtering according to \a categories is applied after the filter defined by filter()
+    
+    \sa defaultCategories(), filter(), setFilter()
  */
 void QImageDocumentSelector::setDefaultCategories( const QStringList &categories )
 {
@@ -277,7 +305,7 @@ void QImageDocumentSelector::setDefaultCategories( const QStringList &categories
 }
 
 /*!
-    Returns the categories selected by default in the document selector's category filter dialog.
+    Returns the categories checked by default in the document selector's category filter dialog.
 
     \sa setDefaultCategories()
  */
@@ -287,11 +315,19 @@ QStringList QImageDocumentSelector::defaultCategories() const
 }
 
 /*!
-    Sets the intended usage of the selected document.  If the document does not have the \a permission the document selector
-    will attempt to activate before the selection succeeds.  If the document cannot be activated with that permission, it
-    will not be selectable.
+    Sets the \a permission a document should give in order to be choosable.
+    The permissions effectively specify the intended usage for that document.
 
-    If the permission is QDrmRights::InvalidPermission the default permission for the content is used.
+    If a document does not have provide the given \a permission, the document
+    selector will try to activate and thus acquire permissions for the
+    document.  If the document cannot be activated with that \a permission, it
+    will not be choosable from the list and visual indication of this is given.
+
+    If the \a permission is QDrmRights::InvalidPermission the default
+    permissions for the document is used.
+
+    \sa selectPermission(), setMandatoryPermissions(), mandatoryPermissions()
+
  */
 void QImageDocumentSelector::setSelectPermission( QDrmRights::Permission permission )
 {
@@ -299,7 +335,11 @@ void QImageDocumentSelector::setSelectPermission( QDrmRights::Permission permiss
 }
 
 /*!
-    Returns the intended usage of the selected document.
+    Returns the permissions a document should give in order to be choosable.
+
+    The permissions effectively describe the document's intended usage.
+
+    \sa setSelectPermission(), mandatoryPermissions(), setMandatoryPermissions()
  */
 QDrmRights::Permission QImageDocumentSelector::selectPermission() const
 {
@@ -307,12 +347,17 @@ QDrmRights::Permission QImageDocumentSelector::selectPermission() const
 }
 
 /*!
-    Sets the \a permissions a document must have in order to be selectable in the document selector.
+    Sets the \a permissions a document must have in order to be choosable from the document
+    selector.
 
-    Unlike the select permission if a document is missing a mandatory permission it is simply unselectable and can not
-    be activated.
+    Unlike select permissions, if a document is missing a mandatory permission it will not be activated,
+    and the document cannot be chosen.
 
-    \sa setSelectPermission()
+    Because the \a permissions are mandatory, passing QDrmRights::InvalidPermission as a parameter
+    does not exhibit the same behavior as in setSelectPermission().
+
+    \sa mandatoryPermissions(), setSelectPermission(), selectPermission()
+
  */
 void QImageDocumentSelector::setMandatoryPermissions( QDrmRights::Permissions permissions )
 {
@@ -320,8 +365,10 @@ void QImageDocumentSelector::setMandatoryPermissions( QDrmRights::Permissions pe
 }
 
 /*!
-    Returns the permissions a document must have in order to be selectable in the document selector.
- */
+    Returns the permissions a document must have in order to be choosable by the document selector.
+
+    \sa setMandatoryPermissions(), setSelectPermission(), selectPermission()
+*/
 QDrmRights::Permissions QImageDocumentSelector::mandatoryPermissions() const
 {
     return d->mandatoryPermissions();
@@ -329,7 +376,7 @@ QDrmRights::Permissions QImageDocumentSelector::mandatoryPermissions() const
 
 /*! \fn void QImageDocumentSelector::documentSelected( const QContent& image );
 
-  This signal is emitted when the user selects an image. A \l QContent for the
+  This signal is emitted when the user chooses an image. A \l QContent for the
   image document is given in \a image.
 */
 
@@ -344,14 +391,17 @@ QDrmRights::Permissions QImageDocumentSelector::mandatoryPermissions() const
   in \a pos.
 */
 
-/*! \fn void QImageDocumentSelector::documentsChanged();
+/*! 
+  \fn void QImageDocumentSelector::documentsChanged();
 
-   This signal is emitted when the list of documents is changes as a result of a
-   change to the category filter or a file system change.
+  This signal is emitted when the list of documents changes as
+  a result of a filter change or a file system change.
 */
 
 /*!
   \class QImageDocumentSelectorDialog
+  \ingroup documentselection
+  \mainclass
   \brief The QImageDocumentSelectorDialog class allows the user to select an image
   from a list of image documents available on the device.
 
@@ -380,14 +430,13 @@ QDrmRights::Permissions QImageDocumentSelector::mandatoryPermissions() const
     }
   \endcode
 
-  \ingroup documentselection
-  \sa QImageDocumentSelector
+  \sa QImageDocumentSelector, QDocumentSelector, QDocumentSelectorDialog
 */
 
 /*!
-  Construct an QImageDocumentSelectorDialog with parent \a parent.
+  Construct an image document selector the given \a parent.
 
-  The dialog lists all documents with the \i image mime type.
+  The dialog lists all documents with the image mime type.
   The dialog is modal by default.
 */
 QImageDocumentSelectorDialog::QImageDocumentSelectorDialog( QWidget* parent )
@@ -435,7 +484,7 @@ QImageDocumentSelectorDialog::~QImageDocumentSelectorDialog()
 }
 
 /*!
-  Sets the maximum size of a thumbnail to \a size.
+  Sets the maximum \a size of a thumbnail.
 
   The default size is QSize( 65, 65 ).
 
@@ -459,6 +508,8 @@ QSize QImageDocumentSelectorDialog::thumbnailSize() const
 /*!
   Returns a \l QContent for the currently selected image, or an invalid \l QContent
   if there is no current selection.
+
+  \sa documents()
 */
 QContent QImageDocumentSelectorDialog::selectedDocument() const
 {
@@ -466,7 +517,9 @@ QContent QImageDocumentSelectorDialog::selectedDocument() const
 }
 
 /*!
-  Returns the list of documents available for selection.
+  Returns the content set of image documents listed by the selector.
+
+  \sa selectedDocument()
 */
 const QContentSet &QImageDocumentSelectorDialog::documents() const
 {
@@ -475,6 +528,10 @@ const QContentSet &QImageDocumentSelectorDialog::documents() const
 
 /*!
   Returns the current documents filter.
+
+  The filter defines the subset of image documents on the device the user can select from.
+  \sa setFilter(), QContentSet::filter()
+ 
  */
 QContentFilter QImageDocumentSelectorDialog::filter() const
 {
@@ -482,7 +539,9 @@ QContentFilter QImageDocumentSelectorDialog::filter() const
 }
 
 /*!
-    Sets the \a filter which determines what documents from the backing store are displayed.
+  Sets the \a filter which defines the subset of image documents on the device the user can select from.
+    
+  \sa filter(), QContentSet::filter()
  */
 void QImageDocumentSelectorDialog::setFilter( const QContentFilter &filter )
 {
@@ -490,7 +549,7 @@ void QImageDocumentSelectorDialog::setFilter( const QContentFilter &filter )
 }
 
 /*!
-    Returns the attributes the content is ordered by.
+    Returns current document sort mode. 
 */
 QDocumentSelector::SortMode QImageDocumentSelectorDialog::sortMode() const
 {
@@ -498,7 +557,11 @@ QDocumentSelector::SortMode QImageDocumentSelectorDialog::sortMode() const
 }
 
 /*!
-    Sets the attributes content is ordered by to \a sortMode.
+  Sets the document \a sortMode.
+
+  The default mode is QDocumentSelector::Alphabetical.
+
+  \sa sortMode()
 */
 void QImageDocumentSelectorDialog::setSortMode( QDocumentSelector::SortMode sortMode )
 {
@@ -549,7 +612,7 @@ void QImageDocumentSelectorDialog::setContextBar()
     {
     case QImageDocumentSelector::Single:
         if( hasImages ) {
-            QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+            QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Ok );
         } else {
             QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::NoLabel );
         }
@@ -573,65 +636,85 @@ void QImageDocumentSelectorDialog::setViewSingle()
 #endif
 
 /*!
-    Sets the \a categories selected by default in the document selector's category filter dialog.
+    Sets the \a categories checked by default in the document selector's category filter dialog.
 
-    If a default category does not appear in the category filter dialog then the content of the document selector will
-    not be filtered on that category.  If a default category is added to the list after the category selector has been
-    initialized it will not be automatically selected.
+    If a supplied category does not match those available in the category filter dialog, the document
+    selector will not filter with that category. Upon invocation this function will set the default checked
+    categories within the category filter dialog, and filter according to the supplied \a categories.
+    \bold {Note:} Once the dialog has been shown once, this function no longer has any effect.
 
-    \sa defaultCategories()
- */
+    Filtering according to \a categories is applied after the filter defined by filter()
+
+    \sa defaultCategories(), filter(), setFilter()
+*/
 void QImageDocumentSelectorDialog::setDefaultCategories( const QStringList &categories )
 {
     selector->setDefaultCategories( categories );
 }
 
 /*!
-    Returns the categories selected by default in the document selector's category filter dialog.
+    Returns the categories checked by default in the document selector's category filter dialog.
 
     \sa setDefaultCategories()
- */
+*/
 QStringList QImageDocumentSelectorDialog::defaultCategories() const
 {
     return selector->defaultCategories();
 }
 
 /*!
-    Sets the intended usage of the selected document.  If the document does not have the \a permission the document selector
-    will attempt to activate before the selection succeeds.  If the document cannot be activated with that permission, it
-    will not be selectable.
+    Sets the \a permission a document should give in order to be choosable.
+    The permissions effectively specify the intended usage for that document.
 
-    If the permission is QDrmRights::InvalidPermission the default permission for the content is used.
- */
+    If a document does not have provide the given \a permission, the document
+    selector will try to activate and thus acquire permissions for the
+    document.  If the document cannot be activated with that \a permission, it
+    will not be choosable from the list and visual indication of this is given.
+
+    If the \a permission is QDrmRights::InvalidPermission the default
+    permissions for the document is used.
+
+    \sa selectPermission(), setMandatoryPermissions(), mandatoryPermissions()
+*/
 void QImageDocumentSelectorDialog::setSelectPermission( QDrmRights::Permission permission )
 {
     selector->setSelectPermission( permission );
 }
 
 /*!
-    Returns the intended usage of the selected document.
- */
+    Returns the permissions a document should give in order to be choosable.
+
+    The permissions effectively describe the document's intended usage.
+
+    \sa setSelectPermission(), mandatoryPermissions(), setMandatoryPermissions()
+*/
 QDrmRights::Permission QImageDocumentSelectorDialog::selectPermission() const
 {
     return selector->selectPermission();
 }
 
 /*!
-    Sets the \a permissions a document must have in order to be selectable in the document selector.
+    Sets the \a permissions a document must have in order to be choosable from the document
+    selector.
 
-    Unlike the select permission if a document is missing a mandatory permission it is simply unselectable and can not
-    be activated.
+    Unlike select permissions, if a document is missing a mandatory permission it will not be activated,
+    and the document cannot be chosen.
 
-    \sa setSelectPermission()
- */
+    Because the \a permissions are mandatory, passing QDrmRights::InvalidPermission as a parameter
+    does not exhibit the same behavior as in setSelectPermission().
+
+    \sa mandatoryPermissions(), setSelectPermission(), selectPermission()
+*/
 void QImageDocumentSelectorDialog::setMandatoryPermissions( QDrmRights::Permissions permissions )
 {
     selector->setMandatoryPermissions( permissions );
 }
 
 /*!
-    Returns the permissions a document must have in order to be selectable in the document selector.
- */
+    Returns the permissions a document must have in order to be choosable by the document selector.
+
+    \sa setMandatoryPermissions(), setSelectPermission(), selectPermission()
+*/
 QDrmRights::Permissions QImageDocumentSelectorDialog::mandatoryPermissions() const
 {
     return selector->mandatoryPermissions();

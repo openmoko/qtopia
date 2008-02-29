@@ -50,17 +50,25 @@ Q_DECLARE_METATYPE(QList<uint>)
 
 /*!
     \class QBluetoothSdpQueryResult
+    \mainclass
     \brief The QBluetoothSdpQueryResult class encapsulates a result of an SDAP query.
 
-The QBluetoothSdpQueryResult class encapsulates a result of an SDAP query, which is returned by the QBluetoothSdpQuery object.
-The query consists of a list of \c QBluetoothSdpRecord objects.
+    This object is returned by the QBluetoothSdpQuery object in
+    the QBluetoothSdpQuery::searchComplete() signal.  It represents
+    the result of the service discovery query of a remote device.  If the
+    query failed, then the object is invalid.  Otherwise, it contains
+    a list of QBluetoothSdpRecord objects that matched the parameters.
+    The result could be valid and empty, in the case that no records were
+    found with the required search attributes.
 
     \ingroup qtopiabluetooth
     \sa QBluetoothSdpQuery, QBluetoothSdpRecord
  */
 
 /*!
-    Constructs an empty QBluetoothSdpQueryResult object.
+    Constructs a valid, empty QBluetoothSdpQueryResult object.
+
+    \sa isValid()
 */
 QBluetoothSdpQueryResult::QBluetoothSdpQueryResult()
 {
@@ -100,6 +108,8 @@ void QBluetoothSdpQueryResult::addService(const QBluetoothSdpRecord &service)
 
 /*!
     Returns whether the search result is valid (no error occurred during the search).
+
+    \sa error()
 */
 bool QBluetoothSdpQueryResult::isValid() const
 {
@@ -108,6 +118,8 @@ bool QBluetoothSdpQueryResult::isValid() const
 
 /*!
     Returns the error string, if any.
+
+    \sa isValid(), setError()
 */
 QString QBluetoothSdpQueryResult::error() const
 {
@@ -115,8 +127,10 @@ QString QBluetoothSdpQueryResult::error() const
 }
 
 /*!
-    Flags that an error occurred during an SDAP query and sets the error string to
-    \a error.
+    Flags that an error occurred during an SDAP query and sets the error
+    string to \a error.
+
+    \sa error()
 */
 void QBluetoothSdpQueryResult::setError(const QString &error)
 {
@@ -342,12 +356,14 @@ bool QBluetoothSdpQuery_Private::searchServices(const QBluetoothAddress &remote,
 
 /*!
     \class QBluetoothSdpQuery
+    \mainclass
     \brief The QBluetoothSdpQuery class encapsulates operations performed by the SDAP profile.
 
-    The QBluetoothSdpQuery class provides a way to use the facilities of the Bluetooth Service
-    Discovery Application Profile.  QBluetoothSdpQuery allows the client to browse all services
-    or search for a specific service on a remote device.  QBluetoothSdpQuery also allows the same
-    functionality to be performed for a local device.  The results are reported in the
+    The QBluetoothSdpQuery class provides a way to use the facilities of
+    the Bluetooth Service Discovery Application Profile.
+    QBluetoothSdpQuery allows the client to browse all services
+    or search for a specific service on a remote device.
+    The results of the query are reported in the
     \c QBluetoothSdpQueryResult object.
 
     \ingroup qtopiabluetooth
@@ -393,7 +409,8 @@ void QBluetoothSdpQuery::cancelSearch()
     The \a local parameter specifies the local Bluetooth adapter to use for the query.
 
     The method returns true if the request could be started successfully, and false
-    otherwise.  The searchComplete() signal will be sent once the search is finished.
+    otherwise.  The searchComplete() signal will be sent once the search is finished. You can attempt to cancel SDP queries by using the
+    cancelSearch() method.
 
     \sa searchComplete()
  */
@@ -411,7 +428,8 @@ bool QBluetoothSdpQuery::searchServices(const QBluetoothAddress &remote,
 
     The method returns true if the request could be started
     successfully, and false otherwise. The searchComplete() signal will
-    be sent once the search is finished.
+    be sent once the search is finished.  You can attempt to cancel SDP
+    queries by using the cancelSearch() method.
 
     \sa searchComplete()
  */
@@ -443,6 +461,8 @@ bool QBluetoothSdpQuery::searchServices(const QBluetoothAddress &remote,
     \endcode
 
     The searchComplete() signal will be sent once the search is finished.
+    You can attempt to cancel SDP queries by using the cancelSearch()
+    method.
 
     \sa searchComplete()
  */
@@ -457,7 +477,7 @@ bool QBluetoothSdpQuery::browseServices(const QBluetoothAddress &remote, const Q
     This signal is emitted when an SDAP result has completed.  The result of the scan
     is reported by the \a result parameter.
 
-    \sa QBluetoothSdpQueryResult
+    \sa QBluetoothSdpQueryResult, searchCancelled()
  */
 
 /*!
@@ -465,7 +485,7 @@ bool QBluetoothSdpQuery::browseServices(const QBluetoothAddress &remote, const Q
 
     This signal is emitted whenever an SDAP search has been successfully cancelled.
 
-    \sa cancelSearch()
+    \sa cancelSearch(), searchComplete()
 */
 
 #include "qbluetoothsdpquery.moc"

@@ -90,6 +90,7 @@ private:
 
 /*!
     \class QMediaContentPlayer
+    \mainclass
     \brief The QMediaContentPlayer class is used to immediately, without
             further intervention, play media.
 
@@ -101,6 +102,7 @@ private:
     QMediaContentPlayer will currently not work for media that requires
     interaction with the host application, such as video.
 
+    \code
     Example;
     To Play a notification sound on an event.
     {
@@ -108,8 +110,8 @@ private:
 
         QMediaContentPlayer(media);
     }
+    \endcode
 
-    \ingroup content
     \ingroup multimedia
 */
 
@@ -122,7 +124,7 @@ private:
     The \a domain is the audio domain in which this media content should exist.
 */
 
-QMediaContentPlayer::QMediaContentPlayer(QString const& url, QString const& domain)
+QMediaContentPlayer::QMediaContentPlayer(QUrl const& url, QString const& domain)
 {
     new QMediaContentPlayerPrivate(new QMediaContent(url, domain));
 }

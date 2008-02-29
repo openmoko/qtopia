@@ -1,18 +1,22 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Network Services</title>
+  <title>Network Services</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Network Services<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Network Services<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#how-it-works">How it Works</a></li>
-<ul><li><a href="#distribution-specific-configuration">Distribution specific configuration</a></li>
+<ul><li><a href="#network-configuration-file-format">Network configuration file format</a></li>
+<li><a href="#distribution-specific-configuration">Distribution specific configuration</a></li>
 <li><a href="#the-dialup-plug-in">The Dialup Plug-in</a></li>
 <ul><li><a href="#general-configuration">General configuration</a></li>
 <li><a href="#gprs">GPRS</a></li>
@@ -26,9 +30,9 @@
 <ul><li><a href="#general-configuration">General configuration</a></li>
 <li><a href="#w-lan-network-script">(W)LAN network script</a></li>
 </ul>
-<li><a href="#the-bluetooth-plug-in">The Bluetooth Plug-in</a></li>
+<li><a href="#the-bluetooth-dial-up-networking-dun-plug-in">The Bluetooth Dial-up Networking (DUN) Plug-in</a></li>
 <ul><li><a href="#general-configuration">General configuration</a></li>
-<li><a href="#bluetooth-network-script">Bluetooth network script</a></li>
+<li><a href="#bluetooth-dun-network-script">Bluetooth DUN network script</a></li>
 </ul>
 <li><a href="#the-proxies-page">The Proxies page</a></li>
 </ul>
@@ -52,26 +56,31 @@
 <p>Qtopia Network Services are defined by files that allow the configuration of Linux system networking services. Once the Network Service is defined the user customizes and starts the Network Service they require via using the <tt>Internet</tt> Settings application.</p>
 <a name="how-it-works"></a>
 <h2>How it Works</h2>
+<a name="network-configuration-file-format"></a>
+<h3>Network configuration file format</h3>
 <p>Qtopia's network support can be configured via Network configuration files in <tt>$HOME/Applications/Network/config</tt>. The structure and type of these configuration files determines the type of the network.</p>
 <p>The following keys are generic to all network types:</p>
 <ul>
 <li>[Info] The Info group provides a short summary of the network service.<ul>
 <li><tt>Name</tt> - the name presented to the user (translatable).</li>
 <li><tt>Type</tt> - the parameter determines which plugin should be loaded in order to read this configuration. The following types are currently known:<ul>
-<li>lan,pcmcialan -&gt; the lan plugin (<tt>$QPEDIR/src/plugins/network/lan</tt> )</li>
-<li>dialup -&gt; the dial-up plugin (<tt>$QPEDIR/src/plugins/network/dialing</tt>)</li>
-<li>bluetooth -&gt; the bluetooth plugin ( <tt>$QPEDIR/src/plugins/network/bluetooth</tt> )</li>
+<li>lan -&gt; LAN device (handled by (W)LAN plug-in <tt>$QPEDIR/src/plugins/network/lan</tt> )</li>
+<li>wlan -&gt; wireless LAN device (handled by (W)LAN plug-in <tt>$QPEDIR/src/plugins/network/lan</tt> )</li>
+<li>pcmcialan -&gt; PCMCIA LAN card is being used (handled by (W)LAN plug-in <tt>$QPEDIR/src/plugins/network/lan</tt> )</li>
+<li>pcmciawlan -&gt; wireless PCMCIA LAN card is being used (handled by (W)LAN plug-in <tt>$QPEDIR/src/plugins/network/lan</tt> )</li>
+<li>dialup -&gt; the dial-up plug-in (<tt>$QPEDIR/src/plugins/network/dialing</tt>)</li>
+<li>bluetooth -&gt; the Bluetooth DUN plug-in ( <tt>$QPEDIR/src/plugins/network/bluetooth</tt> )</li>
 </ul>
 </li>
 <li><tt>Help</tt> - long description of the service (translatable and user visible).</li>
-<li><tt>Visibility</tt> - set to &quot;hidden&quot; if this interface should be hidden from the user view (e.g. server connections)</li>
+<li><tt>Visibility</tt> - set to &quot;hidden&quot; if this interface should be hidden from the user view (e.g&#x2e; server connections)</li>
 </ul>
 </li>
 <li>[Properties] The Properties group specifies parameters which are common to most plug-ins.<ul>
-<li><tt>DeviceType</tt> - the network interface type (values = ppp, eth, wlan etc.) This property cannot be changed by the user.</li>
+<li><tt>DeviceName</tt> - this allows the explicit assignment of network interfaces to configurations. Using e.g&#x2e;, eth0 as value for this field implies that <tt>eth0</tt> is not to be used by other ethernet configurations and the current configuration will not be associated with any other interfaces. Leaving this value empty implies that the configuration should choose the next best interface that matches this type. By default this value is empty. This value is ignored by all network types which rely on dynamic creation of network device names such as the various dial-up and bluetooth interfaces.</li>
 <li><tt>DHCP</tt> - the interface is configured via DHCP (values = [y]/n)</li>
 <li><tt>IPADDR</tt> - the IP address to be used by the service (IPv4 or IPv6)</li>
-<li><tt>DNS_1</tt> - primary DNS server (IPv4 or IPv6 supported)</li>
+<li><tt>DNS_1</tt> - primary DNS server (IPv4 or IPv6)</li>
 <li><tt>DNS_2</tt> - secondary DNS server (IPv4 or IPv6)</li>
 <li><tt>BROADCAST</tt> - broadcast address (IPv4 or IPv6)</li>
 <li><tt>GATEWAY</tt> - gateway address (IPv4 or IPv6)</li>
@@ -86,7 +95,7 @@
 <ol type="1">
 <li><tt>Dialup</tt> - allows the creation and configuration of network interfaces which require pppd</li>
 <li><tt>(W)LAN</tt> - allows the creation and configuration of Ethernet and WLAN interfaces</li>
-<li><tt>Bluetooth</tt> - allows the creation and configuration of ppp connections to devices which support Bluetooth Dialup Networking.</li>
+<li><tt>Bluetooth</tt> DUN - allows the creation and configuration of ppp connections to devices which support Bluetooth Dialup Networking.</li>
 </ol>
 <a name="distribution-specific-configuration"></a>
 <h3>Distribution specific configuration</h3>
@@ -100,7 +109,7 @@
 <ul>
 <li>recognizes/configures the following types of modems for dialup/GPRS:<ul>
 <li>internal modems in mobil phones (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::PhoneModem</a>)</li>
-<li>any arbitrary serial device attached to a device, e.g. /dev/ttySx (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::NamedModem</a>)</li>
+<li>any arbitrary serial device attached to a device, e.g&#x2e; /dev/ttySx (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::NamedModem</a>)</li>
 <li>PCMCIA modem cards (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::PCMCIA</a>)</li>
 </ul>
 </li>
@@ -116,7 +125,7 @@
 <li><tt>Phone</tt> - the phone number for dial-up connections (non-GPRS only)</li>
 <li><tt>Type</tt> - an internal configuration uses the internal modem as serial device. If the device is external, SerialDevice must be specified (values = [internal]/external)</li>
 <li><tt>SerialDevice</tt> - optional, the device, for example, <tt>/dev/ttyS2</tt></li>
-<li><tt>Speed</tt> - the modem speed ( e.g. value = 115200 )</li>
+<li><tt>Speed</tt> - the modem speed ( e.g&#x2e; value = 115200 )</li>
 <li><tt>ATDial</tt> - dial string prefix ( values = [ATDT]/ATDP/user-defined )</li>
 <li><tt>ConnectDelay</tt> - wait for &lt;number&gt; seconds after the connect script finishes for a valid PPP packet from the peer</li>
 <li><tt>Crtscts</tt> - sets the serial port to use hardware flow control (values = [y]/n)</li>
@@ -147,21 +156,21 @@
 </ul>
 <a name="gprs-startup-procedure"></a>
 <h5>GPRS startup procedure</h5>
-<p>An outline of the mechanism to establish a GPRS connection is provided in the following section. It is assumed that the application <tt>Setting-&gt;Internet</tt> has been used to create a valid GPRS configuration. The following code walkthrough applies to connections which are established via the internal phone modem only. Any other type of serial connection (e.g. via PCMCIA modem cards) does not use the Qtopia phone library and hence uses a slightly different approach.</p>
+<p>An outline of the mechanism to establish a GPRS connection is provided in the following section. It is assumed that the application <tt>Setting-&gt;Internet</tt> has been used to create a valid GPRS configuration. The following code walkthrough applies to connections which are established via the internal phone modem only. Any other type of serial connection (e.g&#x2e; via PCMCIA modem cards) does not use the Qtopia phone library and hence uses a slightly different approach.</p>
 <ul>
 <li>The Qtopia Network Server is a server task and is started during the startup phase of the Qtopia server. File location: <tt>$QPEDIR/src/server/networkserver.cpp</tt></li>
 <li>The network server initiates all network devices for which it can find a valid configuration ( see <tt>NetworkServer::updateNetwork()</tt> ). File location: $QPEDIR/src/server/networkserver.cpp</li>
-<li>Each network interface is started via<pre>&nbsp;   QtopiaNetwork::startInterface( ifaceHandle, param )</pre>
+<li>Each network interface is started via<pre>    QtopiaNetwork::startInterface( ifaceHandle, param )</pre>
 <p>which sends a QCop message on the QPE/Network channel. The param parameter is optional and can be used to pass additional startup parameter to the network plug-in. Note that not all network plug-ins support additional parameter and will simply ignore them.</p>
 </li>
-<li><tt>NetworkServer</tt> will receive this QCop msg and calls:<pre>&nbsp;       QtopiaNetworkServer::activateInterface( appName, ifaceHandle, options )</pre>
+<li><tt>NetworkServer</tt> will receive this QCop msg and calls:<pre>        QtopiaNetworkServer::activateInterface( appName, ifaceHandle, options )</pre>
 <p>The appName represents the name of the application that requested the start of the interface. This information is used for network session management.</p>
 </li>
-<li>Loads plug-in, tests the interface's availability and starts the interface:<pre>&nbsp;       QtopiaNetworkInterface* plugin = QtopiaNetwork::loadPlugin( ifaceHandle );
+<li>Loads plug-in, tests the interface's availability and starts the interface:<pre>        QtopiaNetworkInterface* plugin = QtopiaNetwork::loadPlugin( ifaceHandle );
         plugin-&gt;status()
         plugin-&gt;start( param );</pre>
 </li>
-<li><tt>DialupImpl::start(...)</tt> prepares the pppd command line options. If the serial network device is the internal GSM modem, Qtopia checks that the phone modem has a valid GSM network registration and starts the connection by calling:<pre>&nbsp;       QDialOptions pppd;
+<li><tt>DialupImpl::start(...)</tt> prepares the pppd command line options. If the serial network device is the internal GSM modem, Qtopia checks that the phone modem has a valid GSM network registration and starts the connection by calling:<pre>        QDialOptions pppd;
         pppd.setIpModule( true );
         pppd.setIpProgramName( &quot;/sbin/sbin/pppd&quot; );
 
@@ -173,10 +182,10 @@
         QPhoneCall dataCall = callManager-&gt;create(&quot;IP&quot;);
         dataCall.dial( pppd );</pre>
 <p>If the serial network device is an external device, the Dialup plug-in will directly start pppd directly by calling</p>
-<pre>&nbsp;       QProcess::execute(Qtopia::qtopiaDir()+&quot;bin/ppp-network&quot;, pppdArgs)</pre>
+<pre>        QProcess::execute(Qtopia::qtopiaDir()+&quot;bin/ppp-network&quot;, pppdArgs)</pre>
 <p>File location: $QPEDIR/src/plugins/network/dialing/dialup.cpp</p>
 </li>
-<li><tt>phoneServer</tt> calls<pre>&nbsp;       pppdManager-&gt;start( dataCall )</pre>
+<li><tt>phoneServer</tt> calls<pre>        pppdManager-&gt;start( dataCall )</pre>
 <p>File location: <tt>$QPEDIR/src/libraries/qtopiaphone/qpppdmanager.cpp</tt>.</p>
 </li>
 </ul>
@@ -184,7 +193,7 @@
 <a name="gprs-at-dial-string"></a>
 <h5>GPRS AT dial string</h5>
 <p>By default the Dialup plug-in uses the following minimal dial string for GPRS connections:</p>
-<pre>&nbsp;       dialstring = &quot;AT+CGDCONT=1,\&quot;IP\&quot;,\&quot;&quot; + &lt;provider APN&gt; + &quot;\&quot;&quot; + &quot; OK &quot;
+<pre>        dialstring = &quot;AT+CGDCONT=1,\&quot;IP\&quot;,\&quot;&quot; + &lt;provider APN&gt; + &quot;\&quot;&quot; + &quot; OK &quot;
                &quot;AT+CGATT=1 OK &quot;
                &quot;OK ATD*99***1#&quot;;</pre>
 <p>This string is not necessarily suitable for all modems. If a GPRS data connection cannot be started this string has to be adjusted to the requirements of the particular modem. It may be necessary to contact the modem manufacturer to determine the dial string that should be used. The dialstring can be customized in <tt>$QPEDIR/src/plugins/network/dialing/dialstring.cpp</tt>.</p>
@@ -194,7 +203,7 @@
 <ul>
 <li><tt>start &lt;pppd cmd args&gt;</tt><p>Starts pppd using the given cmd line arguments. This call requires installed peers files (see <tt>install</tt> option) and is called by Qtopia whenever the user whishes to initiate the pppd connection.</p>
 </li>
-<li><tt>stop &lt;PPP-IFACE&gt;</tt><p>Stops the pppd process that is responsible for the given interface (e.g. ppp0)</p>
+<li><tt>stop &lt;PPP-IFACE&gt;</tt><p>Stops the pppd process that is responsible for the given interface (e.g&#x2e; ppp0)</p>
 </li>
 <li><tt>install</tt><p>In general this option is called when the user makes some adjustments to the interface configuration. By using this option Qtopia ensures that the underlying system configuration reflects these adjustments.</p>
 <ul>
@@ -221,7 +230,7 @@
 <p>The LAN plug-in:</p>
 <ul>
 <li>recognizes/configures the following types of Ethernet and WLAN adapter:<ul>
-<li>builtin Ethernet or WLAN devices, e.g. PCI cards (default behavior if not specified otherwise)</li>
+<li>builtin Ethernet or WLAN devices, e.g&#x2e; PCI cards (default behavior if not specified otherwise)</li>
 <li>PCMCIA network cards (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::PCMCIA</a>)</li>
 </ul>
 </li>
@@ -246,7 +255,7 @@
 <li><tt>WirelessKey_4</tt></li>
 <li><tt>AccessPoint</tt> - name of the wireless access point</li>
 <li><tt>CHANNEL</tt> - the channel number zero uses auto detection (values = 1..14/[0])</li>
-<li><tt>BitRate</tt> - the bit rate zero uses auto detection (values = 1...54/[0])</li>
+<li><tt>BitRate</tt> - the bit rate zero uses auto detection (values = 1..&#x2e;54/[0])</li>
 <li><tt>Nickname</tt> - wlan nickname</li>
 <li><tt>WPAEnterprise</tt> - values = [TLS]|TTLS|PEAP</li>
 <li><tt>Identity</tt> - Identity for WPA-EAP encryption ( when using TTLS or PEAP )</li>
@@ -319,11 +328,11 @@
 <li><tt>route &lt;IFACE&gt; -gw &lt;GATEWAY IP&gt;</tt><p>IFACE becomes the default gateway for packages. Any existing default route will be implicitly removed.</p>
 </li>
 </ul>
-<a name="the-bluetooth-plug-in"></a>
-<h3>The Bluetooth Plug-in</h3>
+<a name="the-bluetooth-dial-up-networking-dun-plug-in"></a>
+<h3>The Bluetooth Dial-up Networking (DUN) Plug-in</h3>
 <a name="general-configuration"></a>
 <h4>General configuration</h4>
-<p>The Blueooth plug-in:</p>
+<p>The Blueooth DUN plug-in:</p>
 <ul>
 <li>handles ppp interfaces established via blueooth connections</li>
 <li>configures PPPD peer files in <tt>/etc/ppp/peers/</tt></li>
@@ -332,18 +341,22 @@
 </ul>
 <p>Note that this plug-in only provides the client side of Bluetooth dial-up network. Qtopia's Bluetooth dial-up networking server is provides by a separate server task.</p>
 <ul>
+<li>[Bluetooth]<ul>
+<li><tt>Profile</tt> - must be set to &quot;DUN&quot;</li>
+</ul>
+</li>
 <li>[Serial]<ul>
-<li><tt>DialString</tt> - the main dial string (e.g. *99***1#). Qtopia automatically prepends AT to this string.</li>
-<li><tt>ExtraDialString</tt> - additional AT commands which need to be executed prior to the main dial string (e.g. +CGDCONT=1,&quot;ip&quot;,&quot;&lt;APN&gt;&quot;). Qtopia automatically prepends AT to this string.</li>
+<li><tt>DialString</tt> - the main dial string (e.g&#x2e; *99***1#). Qtopia automatically prepends AT to this string.</li>
+<li><tt>ExtraDialString</tt> - additional AT commands which need to be executed prior to the main dial string (e.g&#x2e; +CGDCONT=1,&quot;ip&quot;,&quot;&lt;APN&gt;&quot;). Qtopia automatically prepends AT to this string.</li>
 <li><tt>PeerID</tt> - the peer name (generated by Qtopia)</li>
-<li><tt>Speed</tt> - the modem speed ( e.g. value = 115200 )</li>
+<li><tt>Speed</tt> - the modem speed ( e.g&#x2e; value = 115200 )</li>
 <li><tt>Timeout</tt> - the disconnect/idle timeout (in seconds) after which pppd automatically disconnects the connection ( values = [none]/&lt;number&gt; )</li>
 </ul>
 </li>
 </ul>
-<a name="bluetooth-network-script"></a>
-<h4>Bluetooth network script</h4>
-<p>The Bluetooth network script is called <tt>btdun-network</tt> and is almost identical to the <a href="#ppp-network-script">dialup network script</a>.</p>
+<a name="bluetooth-dun-network-script"></a>
+<h4>Bluetooth DUN network script</h4>
+<p>The Bluetooth DUN network script is called <tt>btdun-network</tt> and is almost identical to the <a href="#ppp-network-script">dialup network script</a>.</p>
 <a name="the-proxies-page"></a>
 <h3>The Proxies page</h3>
 <p>The Dialup and LAN plug-ins share a proxies page. The settings for this page are defined in the configuration as:</p>
@@ -416,14 +429,14 @@
 <a name="session-management"></a>
 <h2>Session management</h2>
 <p>The Qtopia network server provides a session manager. This is used to ensure that a network interface is shutdown when there is no need for it. If an application starts a network interface the interface will remain active for the life time of the application. This means that network interfaces are stopped if an application crashes or quits. If two applications were to request the same interface the interface will stay active until the last application closes.</p>
-<p>To cater for more flexibility the network server can extend the session life time beyond the life time of applications. By default every interface which has been started manually will remain active until it is turned off by the user or the interface times out (e.g. timeout on pppd sessions).</p>
+<p>To cater for more flexibility the network server can extend the session life time beyond the life time of applications. By default every interface which has been started manually will remain active until it is turned off by the user or the interface times out (e.g&#x2e; timeout on pppd sessions).</p>
 <a name="troubleshooting"></a>
 <h2>Troubleshooting</h2>
 <a name="example-connect-disconnect-scripts"></a>
 <h3>Example connect,disconnect scripts</h3>
 <p>The dial-up process uses chat files. These chat files may need some customization in order to work flawless with particular modems. The chat files are stored in <tt>$HOME/Applications/Network/chat</tt>. Each interface has a connect and a disconnect chat file. The following two chat files represent rather generic chat files for a GPRS connection.</p>
 <ul>
-<li>Connect chat (<tt>$HOME/Applications/Network/chat/connect-&lt;peerID&gt;</tt>)<pre>&nbsp;     ABORT &quot;NO CARRIER&quot;
+<li>Connect chat (<tt>$HOME/Applications/Network/chat/connect-&lt;peerID&gt;</tt>)<pre>      ABORT &quot;NO CARRIER&quot;
       ABORT &quot;NO DIALTONE&quot;
       ABORT BUSY
       # Change the word internet to the name of your providers APN
@@ -431,10 +444,10 @@
       OK &quot;AT+CGATT=1&quot;
       OK &quot;ATDT*99***1#&quot;</pre>
 </li>
-<li>Disconnect Chat (<tt>$HOME/Applications/Network/chat/disconnect-&lt;peerID&gt;</tt>)<pre>&nbsp;     \d+++\d\c OK
+<li>Disconnect Chat (<tt>$HOME/Applications/Network/chat/disconnect-&lt;peerID&gt;</tt>)<pre>      \d+++\d\c OK
       ATH0 OK</pre>
 </li>
-<li>If there are difficulties establishing the GPRS connection it may be helpful to use an approach which would temporarily circumvent Qtopia's network code. The following script could be used to debug the connection process manually.<pre>&nbsp;    #!/bin/sh
+<li>If there are difficulties establishing the GPRS connection it may be helpful to use an approach which would temporarily circumvent Qtopia's network code. The following script could be used to debug the connection process manually.<pre>     #!/bin/sh
      #
      # Start a pppd session via GPRS
      #
@@ -503,11 +516,11 @@
 <li>check the contents of <tt>$HOME/Applications/Network/modules/DialUpGPRS*.conf</tt></li>
 <li>check the contents of <tt>/etc/ppp/peers/*GPRS*</tt></li>
 <li>check that <tt>GPRSDialString()</tt> in <tt>$QPEDIR/src/plugins/networking/dialing/dialstring.cpp</tt> suits your modem. For example you may need to use either<ol type="1">
-<li>AT+CGDCONT=1,&quot;IP&quot; ...</li>
-<li>AT+CGDCONT=1,&quot;PPP&quot; ...</li>
+<li>AT+CGDCONT=1,&quot;IP&quot; ..&#x2e;</li>
+<li>AT+CGDCONT=1,&quot;PPP&quot; ..&#x2e;</li>
 </ol>
 </li>
-<li>update the /etc/ppp/options file to enable debugging and record ALL traffic. eg add<pre>&nbsp;   debug
+<li>update the /etc/ppp/options file to enable debugging and record ALL traffic. eg add<pre>    debug
     record /tmp/ppp-all-text.log</pre>
 </li>
 <li>modify the connect-chat, disconnect-chat and startpppd.sh to suit your modem and internet provider : at least<ul>
@@ -521,7 +534,7 @@
 <ol type="1">
 <li>Ensure that Qtopia and pppd are not running</li>
 <li>Start pppd via running startpppd.sh</li>
-<li>Ping an non-local address : eg<pre>&nbsp;   ping 216.239.39.99</pre>
+<li>Ping an non-local address : eg<pre>    ping 216.239.39.99</pre>
 </li>
 <li>Confirm that pppd attempts to start the link and review the content of /tmp/ppp-all-text.log</li>
 <li>If needed send the recorded traffic as setup in step 2 in a tar.gz to support</li>
@@ -530,7 +543,7 @@
 <h3>Network testing</h3>
 <p>The following can help to isolate any GPRS issues.</p>
 <p>Run the following commands to ping local and non-local resources:</p>
-<pre>&nbsp;        ping &lt;some IP address on your local network&gt;
+<pre>         ping &lt;some IP address on your local network&gt;
 
          ping 66.102.7.99
 
@@ -538,9 +551,9 @@
 
          ping www.google.com</pre>
 <p>It might be necessary to specify the network interface that the ping command should use. If you have more than one network interface and suspect routing issues use:</p>
-<pre>&nbsp;        ping -I &lt;iface-name&gt; &lt;host&gt;</pre>
+<pre>         ping -I &lt;iface-name&gt; &lt;host&gt;</pre>
 <p>If one or less of the above tests fail then provide the output of the following commands :</p>
-<pre>&nbsp;        /sbin/ifconfig -a
+<pre>         /sbin/ifconfig -a
 
          /sbin/ifstatus eth0
 
@@ -562,8 +575,8 @@
 </ol>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

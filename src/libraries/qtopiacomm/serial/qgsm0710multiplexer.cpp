@@ -26,12 +26,18 @@
 
 /*!
     \class QGsm0710Multiplexer
-    \brief The QGsm0710Multiplexer class provides a multiplexing implementation based on GSM 07.10
+    \mainclass
+    \brief The QGsm0710Multiplexer class provides a multiplexing implementation based on 3GPP TS 07.10/27.010
     \ingroup telephony::serial
 
-    The QGsm0710Multiplexer class provides a multiplexing implementation
-    based on GSM 07.10.  This is the default multiplexer that is tried
-    if a plug-in override is not available.
+    This is the default multiplexer implementation that is tried if a multiplexer
+    plug-in override is not available.
+
+    By default, this class uses the 3GPP TS 07.10/27.010 basic multiplexing mode,
+    with a frame size of 31 bytes.  The mode and/or frame size can be modified
+    by writing a multiplexer plug-in.  See the \l{Tutorial: Writing a Multiplexer Plug-in}
+    for more information on how to write a multiplexer plug-in that modifies the
+    3GPP TS 07.10/27.010 parameters.
 
     \sa QSerialIODeviceMultiplexer, QMultiPortMultiplexer, QSerialIODeviceMultiplexerPlugin
 */
@@ -561,7 +567,7 @@ QSerialIODevice *QGsm0710Multiplexer::channel( const QString& name )
 /*!
     Construct a \c{AT+CMUX} command with the specified parameters and
     send it to \a device.  Returns true if the command succeeded, or
-    false if the command failed.  This is typically called by plugins
+    false if the command failed.  This is typically called by plug-ins
     that use GSM 07.10 with a different frame size or operating mode.
 
     The size of frames is \a frameSize.  If \a advanced is true, then use
@@ -599,17 +605,17 @@ bool QGsm0710Multiplexer::cmuxChat( QSerialIODevice *device,
 }
 
 /*!
-    Get the GSM 07.10 channel number associated with the channel \a name.
+    Returns the GSM 07.10 channel number associated with the channel \a name.
     Returns -1 if the channel name is not recognized.  The default channel
     assignment is as follows:
 
     \table
-    \header \i Name \i Number
-    \row \i \c{primary} \i 1
-    \row \i \c{secondary} \i 2
-    \row \i \c{data} \i 3
-    \row \i \c{datasetup} \i 3
-    \row \i \c{aux*} \i 4
+    \header \o Name \o Number
+    \row \o \c{primary} \o 1
+    \row \o \c{secondary} \o 2
+    \row \o \c{data} \o 3
+    \row \o \c{datasetup} \o 3
+    \row \o \c{aux*} \o 4
     \endtable
 
     This assignment causes data call setup commands to be sent on the data
@@ -618,6 +624,8 @@ bool QGsm0710Multiplexer::cmuxChat( QSerialIODevice *device,
 
     The current implementation is limited to channel numbers between 1 and 63.
     Numbers outside this range should not be returned.
+
+    \sa channel()
 */
 int QGsm0710Multiplexer::channelNumber( const QString& name ) const
 {
@@ -941,13 +949,26 @@ void QGsm0710Multiplexer::close( int channel )
 
 /*!
     \class QGsm0710MultiplexerServer
-    \brief The QGsm0710MultiplexerServer class provides a server-side multiplexing implementation based on GSM 07.10
+    \mainclass
+    \brief The QGsm0710MultiplexerServer class provides a server-side multiplexing implementation based on 3GPP TS 07.10/27.010
     \ingroup telephony::serial
 
-    The QGsm0710MultiplexerServer class provides a server-side multiplexing
-    implementation based on GSM 07.10.
+    This class is used by incoming AT connection managers such as the \l{Modem Emulator}
+    to emulate 3GPP TS 07.10/27.010 multiplexing for the remote device that is connecting.
 
-    \sa QGsm0710Multiplexer
+    When the remote device opens a channel, the opened() signal is emitted, providing a
+    QSerialIODevice that can be used by the AT connection manager to communicate
+    with the remote device on that channel.
+
+    When the remote device closes a channel, the closed() signal is emitted to allow
+    the AT connection manager to clean up the QSerialIODevice for the channel and
+    any other associated channel-specific context information.
+
+    When the remote device terminates the 3GPP TS 07.10/27.010 session, closed() signals
+    for all open channels will be emitted, and then the terminated() signal will be
+    emitted.
+
+    \sa QGsm0710Multiplexer, {Modem Emulator}
 */
 
 /*!
@@ -984,6 +1005,8 @@ QGsm0710MultiplexerServer::~QGsm0710MultiplexerServer()
     Signal that is emitted when the client opens a new GSM 07.10
     \a channel.  The \a device object allows access to the raw
     data and modem control signals on the channel.
+
+    \sa closed()
 */
 
 /*!
@@ -991,6 +1014,8 @@ QGsm0710MultiplexerServer::~QGsm0710MultiplexerServer()
 
     Signal that is emitted when the client closes a GSM 07.10 \a channel.
     After this signal is emitted, \a device will no longer be valid.
+
+    \sa opened()
 */
 
 /*!

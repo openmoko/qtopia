@@ -23,13 +23,21 @@
 
 /*!
     \class QtopiaPrinterInterface
-    \brief The QtopiaPrinterInterface class privides interface to various printers.
+    \mainclass
+    \brief The QtopiaPrinterInterface class provides the minimum interface to various printers.
     \ingroup multimedia
+
+    The embedded systems usually have restricted printing capability.
+    The QtopiaPrinterInterface class declares the minimum set of functions
+    that has to be implemented by printer plug-ins to provide printing
+    capabilities within Qtopia.
+
+    \sa QtopiaPrinterPlugin
  */
 
 
 /*!
-    Destorys the printer object.
+    Destroys the printer object.
  */
 QtopiaPrinterInterface::~QtopiaPrinterInterface()
 {
@@ -38,7 +46,7 @@ QtopiaPrinterInterface::~QtopiaPrinterInterface()
 /*!
     \fn void QtopiaPrinterInterface::print( QMap<QString, QVariant> options )
 
-    Sends a print data to a printer. Values in \a options are used to configure the printer.
+    Sends printer \a options data to a printer that can be used to configure the printer.
     Values are consist of a QString form of QPrintEngine::PrintEnginePropertyKey and its value.
 */
 
@@ -54,7 +62,7 @@ QtopiaPrinterInterface::~QtopiaPrinterInterface()
 
 /*!
     \fn bool QtopiaPrinterInterface::abort()
-    Attempts to stop the printing. Sends true if printing is successfully interrupted.
+    Attempts to stop the printing. Returns true if printing is successfully interrupted; otherwise returns false.
 */
 
 /*!
@@ -70,17 +78,72 @@ QtopiaPrinterInterface::~QtopiaPrinterInterface()
 
 /*!
     \class QtopiaPrinterPlugin
-    \brief The QtopiaPrinterPlugin class provides an abstract base for QtopiaPrinterInterface plugins.
+    \mainclass
+    \brief The QtopiaPrinterPlugin class provides an abstract base for QtopiaPrinterInterface plug-ins.
 
-    Create a new printing mechanism by subclassing this base class and reimplementing the pure virtual functions.
+    \section1 Creating a New Plug-in
+
+    To create a new printer plug-in, create a new project directory, for example, \c newprinter,
+    under \c $QPEDIR/src/plugins/qtopiapringing/.
+
+    Create a new printing mechanism by sub-classing QtopiaPrinterPlugin
+    and reimplementing the pure virtual functions. The new plug-in must be exported.
+    For example:
+
+    \code
+        class QTOPIA_PLUGIN_EXPORT NewPrinterPlugin : public QtopiaPrinterPlugin
+        {
+            Q_OBJECT
+        public:
+            NewPrinterPlugin( QObject *parent = 0 );
+            ~NewPrinterPlugin();
+
+            virtual void print( QMap<QString, QVariant> options );
+            ...
+        };
+    \endcode
+
+    \section1 Loading the Plug-in
+
+    Use QPluginManager to load plug-ins from an application.
+    For example:
+
+    \code
+        QPluginManager *manager = new QPluginManager( "qtopiaprinting" );
+
+        QObject *instance;
+        QtopiaPrinterInterface *iface;
+
+        instance = manager->instance( "newprinter" );
+        iface = qobject_cast<QtopiaPrinterPlugin *>(instance);
+
+        if ( iface ) {
+            if ( iface->isAvailable() )
+                iface->printFile( fileName );
+        }
+    \endcode
+
+    Alternatively, PrintService can be used.
+
+    \code
+        QtopiaServiceRequest service( "Print", "print(QString)" );
+        service << fileName;
+        service.send();
+    \endcode
+
+    There is a Qtopia Print Server that handles this request.
+    The Print Server will present the user with a list of available plug-ins to choose from.
+    It also loads the selected plug-in and dispatches the print job.
 
     \ingroup multimedia
-    \sa QtopiaPrinterInterface
+    \ingroup plugins
+
+    \sa QtopiaPrinterInterface, QPluginManager, PrintService
 
 */
 
 /*!
-    Constructs a printer plugin with the given \a parent.
+    Constructs a printer plug-in with the given \a parent.
  */
 QtopiaPrinterPlugin::QtopiaPrinterPlugin( QObject *parent )
     :QObject( parent )
@@ -88,7 +151,7 @@ QtopiaPrinterPlugin::QtopiaPrinterPlugin( QObject *parent )
 }
 
 /*!
-    Destroys the printer plugin.
+    Destroys the printer plug-in.
  */
 QtopiaPrinterPlugin::~QtopiaPrinterPlugin()
 {

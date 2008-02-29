@@ -34,6 +34,11 @@
 #define ERROR_THRESHOLD     200000
 #define LOOKAHEAD_ERROR     2500
 
+/*!
+    QIMPenMatch interacts with QIMPenChar lists and the Qtopia dictionaries to turn lists of guesses about letters into lists of guesses about words.
+
+    \sa QDawg, QIMPenChar
+*/
 QIMPenMatch::QIMPenMatch( QObject *parent, const char *name )
     : QObject( parent ), errorThreshold(ERROR_THRESHOLD), badMatches(0), mCanvasHeight(0)
 {
@@ -56,6 +61,9 @@ QIMPenMatch::QIMPenMatch( QObject *parent, const char *name )
     doWordMatching = true;
 }
 
+/*!
+    Destroy QIMPenMatch and clean up.
+*/
 QIMPenMatch::~QIMPenMatch()
 {
     while ( strokes.count() ) delete strokes.takeLast();
@@ -63,16 +71,24 @@ QIMPenMatch::~QIMPenMatch()
     while ( wordMatches.count() ) delete wordMatches.takeLast();
 }
 
+/*!
+    Sets the current QIMPenCharSet to \a cs.  This is the the set of characters and stroke signatures
+*/
 void QIMPenMatch::setCharSet( QIMPenCharSet *cs )
 {
     charSet = cs;
 }
 
+/*!
+    Begins the multi-stroke timer.
+    \sa endMulti()
+*/
 void QIMPenMatch::beginStroke()
 {
     multiTimer->stop();
 }
 
+// 
 void QIMPenMatch::strokeEntered( QIMPenStroke *st )
 {
     mCanvasHeight = 0; // reset
@@ -213,6 +229,11 @@ void QIMPenMatch::updateLastCanvasHeight(const QIMPenCharMatchList &ml)
     }
 }
 
+/*!
+    Updates the word with the latest QIMPenCharMatchList (i.e. list of character guesses).  
+    
+    If the first guess for the new character is punctuation, whitespace, or any of Qt::Key_Enter, Qt::Key_Return, or Qt::Key_Escape then the current word in progress will be reset.
+*/
 void QIMPenMatch::updateWordMatch( QIMPenCharMatchList &ml )
 {
     if ( !ml.count() || !doWordMatching )
@@ -254,6 +275,11 @@ void QIMPenMatch::updateWordMatch( QIMPenCharMatchList &ml )
     emit matchedWords( wordMatches );
 }
 
+/*!
+    \internal
+    Searches the fixedDawg for words that match the current list of character guesses
+    \sa QIMPenCharMatchList
+*/
 void QIMPenMatch::matchWords()
 {
     if ( wordEntered.length() > 0 ) {
@@ -270,6 +296,7 @@ void QIMPenMatch::matchWords()
         if ( maxGuess < 3 )
             maxGuess = 3;
         QString str;
+        // scanDict outputs to wordMatches
         scanDict( Qtopia::fixedDawg().root(), 0, str, 0 );
     }
     // TODO assume wordMatches.count is large (on average), otherwise
@@ -277,6 +304,15 @@ void QIMPenMatch::matchWords()
     qStableSort( wordMatches.begin(), wordMatches.end() );
 }
 
+/*!
+    \internal
+
+    This function is used to recursively scan QDawgs for matches to the current QIMPenCharMatchList (i.e. the current list of lists of letter-guesses).  It finds words at least as long as wordChars, and stores the words and associated errors it finds in wordMatches.
+
+    This function is an implementation detail, and not part of the Qtopia API.
+
+    \sa QDawg
+*/
 void QIMPenMatch::scanDict( const QDawg::Node* n, int ipos, const QString& str, int error )
 {
     if ( !n )
@@ -285,12 +321,13 @@ void QIMPenMatch::scanDict( const QDawg::Node* n, int ipos, const QString& str, 
         return;
 
     while (n) {
-        if ( goodMatches > 20 )
+        if ( goodMatches > 20 ) // Magic number - never return more than 20 matches.
             break;
         if ( ipos < (int)wordChars.count() ) {
             int i;
             QChar testCh = QChar(n->letter());
             QIMPenCharMatchList::Iterator it;
+            // Magic number - scan up to the first 8 character guesses at ipos.
             for ( i = 0, it = wordChars.at(ipos)->begin();
                   it != wordChars.at(ipos)->end() && i < 8; ++it, i++ ) {
                 QChar ch( (*it).penChar->repCharacter() );
@@ -299,6 +336,8 @@ void QIMPenMatch::scanDict( const QDawg::Node* n, int ipos, const QString& str, 
                     if ( testCh.category() == QChar::Letter_Uppercase )
                         ch = testCh;
                     QString newstr( str + ch );
+                    // Could potentially accept -2, -3 and -4 here as well and 
+                    // check for common suffixes - s, ed, es, ing etc.
                     if ( n->isWord() && ipos == (int)wordChars.count() - 1 ) {
                         wordMatches.append( new MatchWord( newstr, newerr ) );
                         goodMatches++;
@@ -306,6 +345,8 @@ void QIMPenMatch::scanDict( const QDawg::Node* n, int ipos, const QString& str, 
                     scanDict( n->jump(), ipos+1, newstr, newerr );
                 }
             }
+        // TEMP: Should this be, like, 2, and not 200? 
+        // Would 1 be sufficient? Is this "Find me one potential longer word"?
         } else if ( badMatches < 200 && ipos < maxGuess ) {
             int d = ipos - wordChars.count();
             int newerr = error + ERROR_THRESHOLD + LOOKAHEAD_ERROR*d;
@@ -320,6 +361,9 @@ void QIMPenMatch::scanDict( const QDawg::Node* n, int ipos, const QString& str, 
     }
 }
 
+/*!
+    Deletes the last set of letter guesses (QIMPenCharMatchList) from the word currently being constructed.
+*/
 void QIMPenMatch::backspace()
 {
     if (!wordChars.isEmpty()) {
@@ -334,6 +378,41 @@ void QIMPenMatch::backspace()
     }
 }
 
+/*!
+    \fn void QIMPenMatch::setMultiStrokeTimeout( int t )
+*/
+
+/*!
+    \fn int QIMPenMatch::multiStrokeTimeout( ) const
+*/
+
+/*!
+    \fn const QString &QIMPenMatch::word() const
+*/
+
+/*!
+    \fn void QIMPenMatch::setWordMatchingEnabled( bool e )
+    \sa isWordMatchingEnabled()
+*/
+
+/*!
+    \fn bool QIMPenMatch::isWordMatchingEnabled() const
+    Returns true if word matching (dictionary lookup) is currently enabled, otherwise returns false.
+    \sa setWordMatchingEnabled()
+*/
+
+/*!
+    \fn int QIMPenMatch::lastCanvasHeight() const 
+    Returns the last height calculated for the canvas.  This value represents the height of the space that the last character was drawn on, calculated using the length of the stroke and the height of the character matched.
+
+    If there has been no attept to match strokes, or the last such attempt failed, this value will be 0.
+    \sa strokeEntered(), updateLastCanvasHeight()
+*/
+
+/*!
+    This ends a multi-stroke, clearing internal data to make ready for a fresh stroke for a new letter.
+    This function is called by a timer if a new stroke is not begun within a fixed time from the previous stroke being matched.
+*/
 void QIMPenMatch::endMulti()
 {
     int i = strokes.count();
@@ -343,6 +422,10 @@ void QIMPenMatch::endMulti()
     multiCharSet = 0;
 }
 
+/*!
+    This clears the internal data pertaining to words and emits the \l matchedWords signal with an empty \l MatchWordList.  \bold{Note:} This does not affect strokes, which will reset independantly.
+    \sa endMulti(), backspace()
+*/
 void QIMPenMatch::resetState()
 {
     if ( !wordEntered.isEmpty() ) {

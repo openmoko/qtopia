@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QPhoneNumber Class Reference</title>
+  <title>QPhoneNumber Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPhoneNumber Class Reference</h1>
-<p>The QPhoneNumber class provides utilities of interest to phone applications that manipulate numeric telephony numbers. <a href="#details">More...</a></p>
-<pre>#include &lt;QPhoneNumber&gt;</pre><ul>
+<p>The QPhoneNumber class provides utility functions to manipulate telephone numbers. <a href="#details">More...</a></p>
+<pre>    #include &lt;QPhoneNumber&gt;</pre><ul>
 <li><a href="qphonenumber-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="static-public-members"></a>
@@ -26,25 +28,37 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QPhoneNumber class provides utilities of interest to phone applications that manipulate numeric telephony numbers.</p>
-<p>The QPhoneNumber class provides utilities that may be of interest to applications that manipulate numeric telephone numbers.</p>
+<p>The QPhoneNumber class provides utility functions to manipulate telephone numbers.</p>
+<p>The functions provided by this class are largely intended to assist with the dialing (and &quot;quick dialing&quot;) experience, and include:</p>
+<ul>
+<li>stripping a number of any non-telephony characters</li>
+<li>returning the &quot;local&quot; component (non area/country code) of a telephone number</li>
+<li>checking to see how closely two telephone numbers match</li>
+<li>testing whether a phone number starts with a supplied prefix</li>
+<li>converting an alphabetic telephone number into the equivalent numeric number</li>
+</ul>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="localNumber"></a><a href="qstring.html">QString</a> QPhoneNumber::localNumber ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the local component of the phone <i>number</i>. In the case of countries with variable area codes may only return the end of the local number.</p>
+<p>Returns the local component of the phone <i>number</i>. In the case of countries with variable length area codes this may only return the end of the local number.</p>
 <h3 class="fn"><a name="matchNumbers"></a>int QPhoneNumber::matchNumbers ( const <a href="qstring.html">QString</a> &amp; <i>num1</i>, const <a href="qstring.html">QString</a> &amp; <i>num2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Compare two phone numbers, <i>num1</i> and <i>num2</i>, to determine the degree to which they match. Returns zero for no match, or increasing positive values for the &quot;quality&quot; of the match between the values.</p>
+<p>Both numbers should be in numeric (not alphanumeric) form.</p>
+<p>See also <a href="qphonenumber.html#resolveLetters">resolveLetters</a>().</p>
 <h3 class="fn"><a name="matchPrefix"></a>bool QPhoneNumber::matchPrefix ( const <a href="qstring.html">QString</a> &amp; <i>num</i>, const <a href="qstring.html">QString</a> &amp; <i>prefix</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Determine if a number, <i>num</i>, appears to start with a given <i>prefix</i>. This is useful for fuzzy matching in quick dialers.</p>
+<p>Returns whether the given number <i>num</i> appears to start with the given <i>prefix</i>. The <i>prefix</i> will be tested against <i>num</i> with and without area code or international prefixes.</p>
+<p>Both numbers should be in numeric (not alphanumeric) form.</p>
+<p>See also <a href="qphonenumber.html#resolveLetters">resolveLetters</a>().</p>
 <h3 class="fn"><a name="resolveLetters"></a><a href="qstring.html">QString</a> QPhoneNumber::resolveLetters ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Convert a letter-ized phone <i>number</i> into a regular phone number. e.g. <tt>1-800-HEY-PHIL</tt> becomes <tt>1-800-439-7445</tt>.</p>
-<p>Note: this is the only function in the API that can take a letter-ized phone number as an argument. All other functions assume that the number has already been resolved.</p>
+<p>Convert an alphanumeric phone <i>number</i> into a regular phone number. e.g&#x2e; <tt>1-800-HEY-PHIL</tt> becomes <tt>1-800-439-7445</tt>.</p>
+<p>Certain letters are not converted into numbers, because they can be used to control the way a number is dialed. These letters are lower case <tt>p</tt>, <tt>w</tt> and <tt>x</tt>, which insert pauses or waits when dialing a number. Upper case letters are always converted into the corresponding numbers.</p>
+<p>Note: this is the only function in the API that can take an alphanumeric phone number as an argument. All other functions assume that the number has already been resolved.</p>
 <h3 class="fn"><a name="stripNumber"></a><a href="qstring.html">QString</a> QPhoneNumber::stripNumber ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Strip a <i>number</i> down to remove non-digit and non-dialing characters.</p>
+<p>Strip the given <i>number</i> down to remove non-digit and non-dialing characters.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

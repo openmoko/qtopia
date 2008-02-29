@@ -66,6 +66,7 @@
 QSXE_APP_KEY
 
 #include "qtopiaserverapplication.h"
+#include "pressholdgate.h"
 
 #include <QDesktopWidget>
 #include <QLibraryInfo>
@@ -305,7 +306,7 @@ private:
 };
 #endif
 
-class BootCharger : public ThemedView {
+class BootCharger : public ThemedView, public QWSServer::KeyboardFilter {
     Q_OBJECT
 public:
     BootCharger() :
@@ -332,19 +333,19 @@ public:
         }
 
         connect(&vsoCharging, SIGNAL(contentsChanged()), SLOT(chargingStateChanged()));
-        grabKeyboard();
+
+        ph = new PressHoldGate(this);
+        connect(ph, SIGNAL(activate(int,bool)), this, SLOT(doActivate(int,bool)));
+        QWSServer::addKeyboardFilter(this);
     }
 
-    ~BootCharger()
+    virtual bool filter(int, int keycode, int modifiers, bool press, bool autoRepeat)
     {
-        releaseKeyboard();
-    }
+        // Test if the hangup key is being held
+        if (keycode == Qt::Key_Hangup && !autoRepeat && !modifiers)
+            ph->filterKey(Qt::Key_Hangup, press, false, true);
 
-    void keyPressEvent(QKeyEvent *e)
-    {
-        if (e->key() == Qt::Key_Hangup) {
-            emit finished();
-        }
+        return true;
     }
 
     bool charging()
@@ -355,16 +356,44 @@ public:
 signals:
     void finished();
 
-public slots:
+private slots:
+    void doActivate(int keycode, bool held)
+    {
+        if (keycode == Qt::Key_Hangup && held) {
+            ThemeItem *item = findItem("battery", ThemedView::Item);
+            if (item)
+                item->setActive(false);
+
+            item = findItem("loading", ThemedView::Item);
+            if (item)
+                item->setActive(true);
+
+            repaint();
+
+            emit finished();
+        }
+    }
+
     void chargingStateChanged()
     {
         if (!vsoCharging.value().toBool()) {
+            ThemeItem *item = findItem("battery", ThemedView::Item);
+            if (item)
+                item->setActive(false);
+
+            item = findItem("poweroff", ThemedView::Item);
+            if (item)
+                item->setActive(true);
+
+            repaint();
+
             QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);
         }
     }
 
 private:
     QValueSpaceItem vsoCharging;
+    PressHoldGate *ph;
 };
 
 void Qtopia_initAlarmServer(); // from qalarmserver.cpp
@@ -381,13 +410,14 @@ int initApplication( int argc, char ** argv )
     if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "prestartup"))
         qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
+    QPerformanceLog("QtopiaServer") << "Adjusting time zone";
+    QTime t = QTime::currentTime();
     refreshTimeZoneConfig();
-    qLog(Performance) << "QtopiaServer : " << "Refresh time zone information : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog::adjustTimezone(t);
+    QPerformanceLog("QtopiaServer") << "Time zone adjusted";
 
     initKeyboard();
-    qLog(Performance) << "QtopiaServer : " << "Keyboard initialisation : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Keyboard initialisation";
 
     const QByteArray warmBootFile = "/tmp/warm-boot";
     if ( !QFile::exists( warmBootFile ) &&
@@ -413,8 +443,7 @@ int initApplication( int argc, char ** argv )
 #if defined(QTOPIA_ANIMATED_SPLASH)
     SplashScreen *splash = new SplashScreen;
     splash->splash(QString(":image/splash"));
-    qLog(Performance) << "QtopiaServer : " << "Splash screen creation : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Splash screen creation";
 #endif
 
     if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "startup"))
@@ -441,28 +470,23 @@ int initApplication( int argc, char ** argv )
     if(interface)
         interface->show();
 #endif
-    qLog(Performance) << "QtopiaServer : " << "Display the server : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Display the server";
 
     Qtopia_initAlarmServer();
-    qLog(Performance) << "QtopiaServer : " << "AlarmServer startup : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "AlarmServer startup";
 
-    qLog(Performance) << "QtopiaServer : " << "Entering event loop : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Entering event loop";
 
 //    int rv =  a.exec();
     //Can't do this either, exec is static int rv =  qApp->exec();
     int rv = static_cast<QtopiaApplication *>(qApp)->exec();
 
     qLog(QtopiaServer) << "exiting...";
-    qLog(Performance) << "QtopiaServer : " << "Event loop exited : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Event loop exited";
 
     delete interface;
 
-    qLog(Performance) << "QtopiaServer : " << "Leaving initApplication : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Leaving initApplication";
     return rv;
 }
 
@@ -505,8 +529,7 @@ int main( int argc, char ** argv )
     executableName = executableName.right(executableName.length() - executableName.lastIndexOf('/') - 1);
 
     if ( executableName != "qpe" ) {
-        qLog(Performance) << executableName.toLatin1().constData() << " : " << "Starting single-exec main : "
-            << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+        QPerformanceLog(executableName.toLatin1().constData()) << "Starting single-exec main";
         QPEMainMap *qpeMainMap();
         if ( qpeMainMap()->contains(executableName) ) {
             // This is a non-quicklaunch app
@@ -523,8 +546,7 @@ int main( int argc, char ** argv )
 {
     check_prefix();
 #endif // SINGLE_EXEC
-    qLog(Performance) << "QtopiaServer : " << "Starting qpe main : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Starting qpe main";
 
     signal( SIGCHLD, SIG_IGN );
 
@@ -553,8 +575,7 @@ int main( int argc, char ** argv )
     Qtopia::sleep( 1 );
     killpg( getpid(), SIGKILL );
 
-    qLog(Performance) << "QtopiaServer : " << "Exiting qpe main : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("QtopiaServer") << "Exiting qpe main";
     return retVal;
 }
 #else // WIN32

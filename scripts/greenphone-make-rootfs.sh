@@ -119,7 +119,7 @@ clean_package()
         rm -rf $FBV
         rm -f $STAMPDIR/$FBV.buildstamp
         ;;
-      samba)
+    samba)
         rm -rf $SAMBA
         rm -rf host/$SAMBA
         rm -f $STAMPDIR/$SAMBA.buildstamp
@@ -376,9 +376,6 @@ build_package()
         LD_LIBRARY_PATH="$LD_LIBRARY_PATH_SAVED"
         unset LD_LIBRARY_PATH_SAVED
         cd ..
- #       if [ -z $USE_TOOLCHAIN ]; then
- #cp -a
-#				fi
         touch $STAMPDIR/$CROSSTOOL.buildstamp
         ;;
     busybox-secure)
@@ -429,7 +426,7 @@ build_package()
         tar -xjf $DOWNLOAD_DIR/$LIBUNGIF.tar.bz2 || die "libungif extract"
 
         cd $ROOTFS_BUILD_PATH/$LIBUNGIF
-        ./configure --prefix=/usr --host=$CROSS_PREFIX ||
+        ./configure --prefix=/usr --host=$CROSS_PREFIX >$LOGFILE 2>&1 ||
             die "libungif configure"
         make >$LOGFILE 2>&1 || die "libungif build"
         cd ..
@@ -438,6 +435,8 @@ build_package()
         ;;
     ilib)
         source_changed $ROOTFS_SOURCE_PATH/ilib $STAMPDIR/$ILIB.buildstamp || return 0
+
+        rm -rf $ROOTFS_BUILD_PATH/$ILIB
 
         tar -xzf $DOWNLOAD_DIR/$ILIB-min.tar.gz || die "ilib extract"
 
@@ -523,7 +522,8 @@ build_package()
         tar -xzf $DOWNLOAD_DIR/$SAMBA.tar.gz || die "samba extract"
 
         cd $ROOTFS_BUILD_PATH/$SAMBA/source
-        CC=$CROSS_PREFIX-gcc ./configure --host=$CROSS_PREFIX || die "samba configure"
+        CC=$CROSS_PREFIX-gcc ./configure --host=$CROSS_PREFIX --disable-cups >$LOGFILE 2>&1 ||
+            die "samba configure"
         echo '#define HAVE_GETTIMEOFDAY_TZ 1' >> include/config.h
         echo '#define uint32 unsigned int' >> include/config.h
         echo '#define int32 int' >> include/config.h
@@ -537,7 +537,7 @@ build_package()
         tar -xzf $DOWNLOAD_DIR/$SAMBA.tar.gz -C host || die "samba/make_unicodemap host extract"
 
         cd host/$SAMBA/source
-        ./configure || die "samba/make_unicodemap configure"
+        ./configure >$LOGFILE 2>&1 || die "samba/make_unicodemap configure"
         make bin/make_unicodemap >$LOGFILE 2>&1 || die "samba/make_unicodemap build"
         cd ../../..
 
@@ -678,7 +678,7 @@ build"
         tar -xzf $DOWNLOAD_DIR/$EXPAT.tar.gz || die "expat extract"
 
         cd $ROOTFS_BUILD_PATH/$EXPAT
-        ./configure --host=$CROSS_PREFIX --prefix=/usr || die "expat configure"
+        ./configure --host=$CROSS_PREFIX --prefix=/usr >$LOGFILE 2>&1 || die "expat configure"
         make >$LOGFILE 2>&1 || die "expat build"
         cd ..
 
@@ -847,7 +847,7 @@ build"
             die "initrd busybox configure"
         make oldconfig >$LOGFILE 2>&1 || die "initrd busybox configure"
         make >$LOGFILE 2>&1 || die "initrd busybox build"
-        cd ../..
+        cd ../../
 
         # linuxrc for initrd
         cd initrd
@@ -860,13 +860,13 @@ build"
         dd if=/dev/zero of=$ROOTFS_BUILD_PATH/$INITRD_FILENAME bs=1024 seek=1024 count=0
         /sbin/mkfs.ext2 -F $ROOTFS_BUILD_PATH/$INITRD_FILENAME
         MNTPNT=`mktemp -d initrd.XXXXXX`
-        sudo mount -o loop $ROOTFS_BUILD_PATH/$INITRD_FILENAME $MNTPNT
+        sudo mount -o loop $ROOTFS_BUILD_PATH/$INITRD_FILENAME $MNTPNT || die "sudo failed at line $LINENO"
         
-        sudo mkdir -p $MNTPNT/dev
-        sudo mknod $MNTPNT/dev/console c 5 1
-        sudo cp -a linuxrc $MNTPNT/
-        sudo cp -a $ROOTFS_SOURCE_PATH/initrd/tffs.o $MNTPNT/
-        sudo umount $MNTPNT
+        sudo mkdir -p $MNTPNT/dev || die "sudo failed at line $LINENO"
+        sudo mknod $MNTPNT/dev/console c 5 1 || die "sudo failed at line $LINENO"
+        sudo cp -a linuxrc $MNTPNT/ || die "sudo failed at line $LINENO"
+        sudo cp -a $ROOTFS_SOURCE_PATH/initrd/tffs.o $MNTPNT/ || die "sudo failed at line $LINENO"
+        sudo umount $MNTPNT || die "sudo failed at line $LINENO"
         rmdir $MNTPNT
         cd ..
 
@@ -907,13 +907,13 @@ build"
 
         cd $ROOTFS_BUILD_PATH/$GPH_LINUX
 
-        if [ $OPTION_DEVEL -eq 0 ]; then
-            # Only apply patches if not in DEVEL mode
-            chmod -R u+w .
-            for i in $ROOTFS_SOURCE_PATH/linux/*.patch; do
-                patch -l -p 1 < $i || die "linux patch"
-            done
-        fi
+#        if [ $OPTION_DEVEL -eq 0 ]; then
+#            # Only apply patches if not in DEVEL mode
+#            chmod -R u+w .
+#            for i in $ROOTFS_SOURCE_PATH/linux/*.patch; do
+#                patch -l -p 1 < $i || die "linux patch"
+#            done
+#        fi
 
         if [ -e $ROOTFS_BUILD_PATH/$INITRD_FILENAME ]; then
             chmod u+w init/initrd.bin
@@ -935,8 +935,8 @@ build"
         fi
 
         if [ -x ../progress ]; then
-            # echo -n "   building deps"
-            # make dep 2>&1 | ../progress $LOGFILE || die "linux build dep"
+            echo -n "   building deps"
+            make dep 2>&1 | ../progress $LOGFILE || die "linux build dep"
             echo -n "   building image"
             make zImage 2>&1 | ../progress $LOGFILE || die "linux build" 
             echo -n "   building modules"
@@ -953,6 +953,10 @@ build"
         ;;
 
     lids)
+if [ ! -z $CONFIG_LIDS ]; then
+        # only build lids if kernel has lids support
+        [ -r $ROOTFS_BUILD_PATH/$GPH_LINUX/kernel/lids.c ] || return 0
+
         source_changed "$ROOTFS_SOURCE_PATH/lids" $STAMPDIR/$LIDS.buildstamp ||
         source_changed "$ROOTFS_BUILD_PATH/$GPH_LINUX" $STAMPDIR/$LIDS.buildstamp || return 0
 
@@ -993,6 +997,7 @@ build"
         cd ../..
 
         touch $STAMPDIR/$LIDS.buildstamp
+fi
         ;;
     basefiles)
         ;;
@@ -1008,20 +1013,28 @@ install_package()
 
     case $1 in
     toolchain)
-    	if [ "$OWNTOOLCHAIN" = "1" ]; then
-	     	return 0
-	 	fi
 
+    	if [ "$OWNTOOLCHAIN" = "1" ]; then
+        TOOLCHAIN_ROOT=$TOOLCHAIN_PATH/$CROSS_PREFIX
+			else
         TOOLCHAIN_ROOT=$RESULT_TOP/gcc-4.1.1-glibc-2.3.6/$CROSS_PREFIX/$CROSS_PREFIX
+
+			fi
         LIB_LINKS=`find $TOOLCHAIN_ROOT/lib -type l -printf "%P\n"`
         LIBS=`echo $LIB_LINKS | tr ' ' '\n' | xargs -iXFILEX ls -l $TOOLCHAIN_ROOT/lib/XFILEX | awk '{print $NF}'`
         strip_install unneeded $TOOLCHAIN_ROOT/lib $ROOTFS_IMAGE_DIR/lib $LIBS $LIB_LINKS
         strip_install unneeded $TOOLCHAIN_ROOT/lib $ROOTFS_IMAGE_DIR/lib libSegFault.so libmemusage.so libpcprofile.so
 
+    	if [ "$OWNTOOLCHAIN" = "1" ]; then
+#        install all $TOOLCHAIN_ROOT/../bin $ROOTFS_IMAGE_DIR/usr/bin gdbserver 
+        install $TOOLCHAIN_ROOT/$CROSS_PREFIX/sbin/ldd $ROOTFS_IMAGE_DIR/sbin 
+        install $TOOLCHAIN_ROOT/$CROSS_PREFIX/sbin/ldconfig $ROOTFS_IMAGE_DIR/sbin 
+#        install $ROOTFS_BUILD_PATH/$CROSSTOOL/build/$CROSS_PREFIX/gcc-4.1.1-glibc-2.3.6/build-glibc/elf $ROOTFS_IMAGE_DIR/sbin ldd
+			else
         strip_install all $TOOLCHAIN_ROOT/../bin $ROOTFS_IMAGE_DIR/usr/bin gdbserver 
         strip_install all $ROOTFS_BUILD_PATH/$CROSSTOOL/build/$CROSS_PREFIX/gcc-4.1.1-glibc-2.3.6/build-glibc/elf $ROOTFS_IMAGE_DIR/sbin ldconfig
         install $ROOTFS_BUILD_PATH/$CROSSTOOL/build/$CROSS_PREFIX/gcc-4.1.1-glibc-2.3.6/build-glibc/elf $ROOTFS_IMAGE_DIR/sbin ldd
-
+			fi
         install $TOOLCHAIN_ROOT/etc $ROOTFS_IMAGE_DIR/etc rpc
         ;;
     busybox-secure)
@@ -1063,6 +1076,7 @@ install_package()
         strip_install all chat $ROOTFS_IMAGE_DIR/usr/sbin chat
         strip_install all pppd $ROOTFS_IMAGE_DIR/usr/sbin pppd
         install etc.ppp $USERFS_IMAGE_DIR/etc/ppp chap-secrets options pap-secrets
+        mkdir -p $USERFS_IMAGE_DIR/etc/ppp/peers
         ln -sf /mnt/user/etc/ppp $ROOTFS_IMAGE_DIR/etc/ppp
         cd ..
         ;;
@@ -1196,6 +1210,9 @@ install_package()
         cd ..
         ;;
     lids)
+if [ ! -z $CONFIG_LIDS ]; then
+        [ -r $LIDS.buildstamp ] || return 0
+
         cd $ROOTFS_BUILD_PATH/$LIDS/lidstools-0.5.6/src
 
         make DESTDIR=`pwd`/.install install >$LOGFILE 2>&1
@@ -1216,7 +1233,7 @@ install_package()
 
         # Generate lids password
         LIDS_PASSWORD=greenphone
-        echo -n -e "$LIDS_PASSWORD\n$LIDS_PASSWORD\n" | sudo chroot `pwd`/.install /sbin/lidsconf -P >/dev/null 2>&1
+        echo -n -e "$LIDS_PASSWORD\n$LIDS_PASSWORD\n" | sudo chroot `pwd`/.install /sbin/lidsconf -P >/dev/null 2>&1 || die "sudo failed at line $LINENO"
         mkdir -p $ROOTFS_IMAGE_DIR/etc/lids
         mkdir -p $USERFS_IMAGE_DIR/etc/lids
         echo "$LIDS_PASSWORD" > $ROOTFS_IMAGE_DIR/etc/lids/lids.secret
@@ -1233,6 +1250,7 @@ install_package()
         touch $ROOTFS_IMAGE_DIR/etc/lids/lids{,.boot,.postboot,.shutdown}.conf
 
         cd ../../..
+fi
         ;;
     basefiles)
         install_basefiles || die "Basefiles install"
@@ -1260,36 +1278,36 @@ install_basefiles()
     mkdir -p $ROOTFS_IMAGE_DIR/dev
     cd $ROOTFS_IMAGE_DIR/dev
 
-    sudo mknod initctl p
+    sudo mknod initctl p || die "sudo failed at line $LINENO"
 
-    sudo mknod mem     c 1 1
-    sudo mknod kmem    c 1 2
-    sudo mknod null    c 1 3
-    sudo mknod zero    c 1 5
-    sudo mknod random  c 1 8
-    sudo mknod urandom c 1 9
+    sudo mknod mem     c 1 1 || die "sudo failed at line $LINENO"
+    sudo mknod kmem    c 1 2 || die "sudo failed at line $LINENO"
+    sudo mknod null    c 1 3 || die "sudo failed at line $LINENO"
+    sudo mknod zero    c 1 5 || die "sudo failed at line $LINENO"
+    sudo mknod random  c 1 8 || die "sudo failed at line $LINENO"
+    sudo mknod urandom c 1 9 || die "sudo failed at line $LINENO"
 
-    sudo mknod ttyS0 c 4 64
-    sudo mknod ttyS1 c 4 65
-    sudo mknod ttyS2 c 4 66
+    sudo mknod ttyS0 c 4 64 || die "sudo failed at line $LINENO"
+    sudo mknod ttyS1 c 4 65 || die "sudo failed at line $LINENO"
+    sudo mknod ttyS2 c 4 66 || die "sudo failed at line $LINENO"
 
-    sudo mknod tty     c 5 0
-    sudo mknod console c 5 1
+    sudo mknod tty     c 5 0 || die "sudo failed at line $LINENO"
+    sudo mknod console c 5 1 || die "sudo failed at line $LINENO"
 
-    sudo mknod fb0 c 29 0
-    sudo ln -s fb0 fb
+    sudo mknod fb0 c 29 0 || die "sudo failed at line $LINENO"
+    sudo ln -s fb0 fb || die "sudo failed at line $LINENO"
 
-    sudo mknod tffsa  b 100  0
-    sudo mknod tffsa1 b 100  1
-    sudo mknod tffsa2 b 100  2
-    sudo mknod tffsb  b 100 32
-    sudo mknod tffsc  b 100 64
-    sudo mknod tffsd  b 100 96
-    sudo ln -s tffsa1 root
+    sudo mknod tffsa  b 100  0 || die "sudo failed at line $LINENO"
+    sudo mknod tffsa1 b 100  1 || die "sudo failed at line $LINENO"
+    sudo mknod tffsa2 b 100  2 || die "sudo failed at line $LINENO"
+    sudo mknod tffsb  b 100 32 || die "sudo failed at line $LINENO"
+    sudo mknod tffsc  b 100 64 || die "sudo failed at line $LINENO"
+    sudo mknod tffsd  b 100 96 || die "sudo failed at line $LINENO"
+    sudo ln -s tffsa1 root || die "sudo failed at line $LINENO"
 
-    sudo mknod mmca  b 241 0
-    sudo mknod mmca1 b 241 1
-    sudo mknod mmca2 b 241 2
+    sudo mknod mmca  b 241 0 || die "sudo failed at line $LINENO"
+    sudo mknod mmca1 b 241 1 || die "sudo failed at line $LINENO"
+    sudo mknod mmca2 b 241 2 || die "sudo failed at line $LINENO"
 
 
     # Create full /dev
@@ -1297,149 +1315,149 @@ install_basefiles()
 
     mkdir -p pts
 
-    sudo mknod initctl p
+    sudo mknod initctl p || die "sudo failed at line $LINENO"
 
-    sudo mknod mem c 1 1
-    sudo mknod kmem c 1 2
-    sudo mknod null c 1 3
-    sudo mknod zero c 1 5
-    sudo mknod random c 1 8
-    sudo mknod urandom c 1 9
+    sudo mknod mem c 1 1 || die "sudo failed at line $LINENO"
+    sudo mknod kmem c 1 2 || die "sudo failed at line $LINENO"
+    sudo mknod null c 1 3 || die "sudo failed at line $LINENO"
+    sudo mknod zero c 1 5 || die "sudo failed at line $LINENO"
+    sudo mknod random c 1 8 || die "sudo failed at line $LINENO"
+    sudo mknod urandom c 1 9 || die "sudo failed at line $LINENO"
 
-    sudo mknod ptyp0 c 2 0
+    sudo mknod ptyp0 c 2 0 || die "sudo failed at line $LINENO"
 
-    sudo mknod ttyp0 c 3 0
+    sudo mknod ttyp0 c 3 0 || die "sudo failed at line $LINENO"
 
-    sudo mknod tty0 c 4 0
-    sudo mknod tty1 c 4 1
-    sudo mknod tty2 c 4 2
-    sudo mknod tty3 c 4 3
-    sudo mknod tty4 c 4 4
-    sudo mknod tty5 c 4 5
-    sudo mknod tty6 c 4 6
-    sudo mknod tty7 c 4 7
-    sudo mknod tty8 c 4 8
+    sudo mknod tty0 c 4 0 || die "sudo failed at line $LINENO"
+    sudo mknod tty1 c 4 1 || die "sudo failed at line $LINENO"
+    sudo mknod tty2 c 4 2 || die "sudo failed at line $LINENO"
+    sudo mknod tty3 c 4 3 || die "sudo failed at line $LINENO"
+    sudo mknod tty4 c 4 4 || die "sudo failed at line $LINENO"
+    sudo mknod tty5 c 4 5 || die "sudo failed at line $LINENO"
+    sudo mknod tty6 c 4 6 || die "sudo failed at line $LINENO"
+    sudo mknod tty7 c 4 7 || die "sudo failed at line $LINENO"
+    sudo mknod tty8 c 4 8 || die "sudo failed at line $LINENO"
 
-    sudo mknod ttyS0 c 4 64
-    sudo mknod ttyS1 c 4 65
-    sudo mknod ttyS2 c 4 66
+    sudo mknod ttyS0 c 4 64 || die "sudo failed at line $LINENO"
+    sudo mknod ttyS1 c 4 65 || die "sudo failed at line $LINENO"
+    sudo mknod ttyS2 c 4 66 || die "sudo failed at line $LINENO"
 
-    sudo mknod tty c 5 0
-    sudo mknod console c 5 1
-    sudo mknod ptmx c 5 2
+    sudo mknod tty c 5 0 || die "sudo failed at line $LINENO"
+    sudo mknod console c 5 1 || die "sudo failed at line $LINENO"
+    sudo mknod ptmx c 5 2 || die "sudo failed at line $LINENO"
 
-    sudo mknod ts c 10 17
-    sudo mknod imm c 10 63
-    sudo mknod dpmc c 10 90
-    sudo mknod ipmc c 10 90
-    sudo mknod watchdog c 10 130
+    sudo mknod ts c 10 17 || die "sudo failed at line $LINENO"
+    sudo mknod imm c 10 63 || die "sudo failed at line $LINENO"
+    sudo mknod dpmc c 10 90 || die "sudo failed at line $LINENO"
+    sudo mknod ipmc c 10 90 || die "sudo failed at line $LINENO"
+    sudo mknod watchdog c 10 130 || die "sudo failed at line $LINENO"
 
-    sudo mknod mixer0 c 14 0
-    sudo mknod sequencer c 14 1
-    sudo mknod midi00 c 14 2
-    sudo mknod dsp0 c 14 3
-    sudo mknod audio0 c 14 4
-    sudo mknod dspW0 c 14 5
-    sudo mknod sndstat c 14 6
-    sudo mknod dmfm0 c 14 7
-    sudo mknod mixer1 c 14 16
-    sudo mknod midi01 c 14 18
-    sudo mknod dsp1 c 14 19
-    sudo mknod audio1 c 14 20
-    sudo mknod dspW1 c 14 21
-    sudo mknod mixer2 c 14 32
-    sudo mknod midi02 c 14 34
-    sudo mknod dsp2 c 14 35
-    sudo mknod audio2 c 14 36
-    sudo mknod dspW2 c 14 37
-    sudo mknod mixer3 c 14 48
-    sudo mknod midi03 c 14 50
-    sudo mknod dsp3 c 14 51
-    sudo mknod audio3 c 14 52
-    sudo mknod dspW3 c 14 53
-    sudo ln -s audio0 audio
-    sudo ln -s mixer0 audioctl
-    sudo ln -s dmfm0 dmfm
-    sudo ln -s dsp0 dsp
-    sudo ln -s dspW0 dspW
-    sudo ln -s dsp0 dspdefault
-    sudo ln -s midi00 midi
-    sudo ln -s mixer0 mixer
+    sudo mknod mixer0 c 14 0 || die "sudo failed at line $LINENO"
+    sudo mknod sequencer c 14 1 || die "sudo failed at line $LINENO"
+    sudo mknod midi00 c 14 2 || die "sudo failed at line $LINENO"
+    sudo mknod dsp0 c 14 3 || die "sudo failed at line $LINENO"
+    sudo mknod audio0 c 14 4 || die "sudo failed at line $LINENO"
+    sudo mknod dspW0 c 14 5 || die "sudo failed at line $LINENO"
+    sudo mknod sndstat c 14 6 || die "sudo failed at line $LINENO"
+    sudo mknod dmfm0 c 14 7 || die "sudo failed at line $LINENO"
+    sudo mknod mixer1 c 14 16 || die "sudo failed at line $LINENO"
+    sudo mknod midi01 c 14 18 || die "sudo failed at line $LINENO"
+    sudo mknod dsp1 c 14 19 || die "sudo failed at line $LINENO"
+    sudo mknod audio1 c 14 20 || die "sudo failed at line $LINENO"
+    sudo mknod dspW1 c 14 21 || die "sudo failed at line $LINENO"
+    sudo mknod mixer2 c 14 32 || die "sudo failed at line $LINENO"
+    sudo mknod midi02 c 14 34 || die "sudo failed at line $LINENO"
+    sudo mknod dsp2 c 14 35 || die "sudo failed at line $LINENO"
+    sudo mknod audio2 c 14 36 || die "sudo failed at line $LINENO"
+    sudo mknod dspW2 c 14 37 || die "sudo failed at line $LINENO"
+    sudo mknod mixer3 c 14 48 || die "sudo failed at line $LINENO"
+    sudo mknod midi03 c 14 50 || die "sudo failed at line $LINENO"
+    sudo mknod dsp3 c 14 51 || die "sudo failed at line $LINENO"
+    sudo mknod audio3 c 14 52 || die "sudo failed at line $LINENO"
+    sudo mknod dspW3 c 14 53 || die "sudo failed at line $LINENO"
+    sudo ln -s audio0 audio || die "sudo failed at line $LINENO"
+    sudo ln -s mixer0 audioctl || die "sudo failed at line $LINENO"
+    sudo ln -s dmfm0 dmfm || die "sudo failed at line $LINENO"
+    sudo ln -s dsp0 dsp || die "sudo failed at line $LINENO"
+    sudo ln -s dspW0 dspW || die "sudo failed at line $LINENO"
+    sudo ln -s dsp0 dspdefault || die "sudo failed at line $LINENO"
+    sudo ln -s midi00 midi || die "sudo failed at line $LINENO"
+    sudo ln -s mixer0 mixer || die "sudo failed at line $LINENO"
 
-    sudo mknod fb0 c 29 0
-    sudo mknod fb1 c 29 32
-    sudo mknod fb2 c 29 64
-    sudo mknod fb3 c 29 96
-    sudo mknod fb4 c 29 128
-    sudo mknod fb5 c 29 160
-    sudo mknod fb6 c 29 192
-    sudo mknod fb7 c 29 224
-    sudo ln -s fb0 fb
+    sudo mknod fb0 c 29 0 || die "sudo failed at line $LINENO"
+    sudo mknod fb1 c 29 32 || die "sudo failed at line $LINENO"
+    sudo mknod fb2 c 29 64 || die "sudo failed at line $LINENO"
+    sudo mknod fb3 c 29 96 || die "sudo failed at line $LINENO"
+    sudo mknod fb4 c 29 128 || die "sudo failed at line $LINENO"
+    sudo mknod fb5 c 29 160 || die "sudo failed at line $LINENO"
+    sudo mknod fb6 c 29 192 || die "sudo failed at line $LINENO"
+    sudo mknod fb7 c 29 224 || die "sudo failed at line $LINENO"
+    sudo ln -s fb0 fb || die "sudo failed at line $LINENO"
 
-    sudo mknod ttyP0 c 57 0
-    sudo mknod ttyP1 c 57 1
-    sudo mknod ttyP2 c 57 2
-    sudo mknod ttyP3 c 57 3
+    sudo mknod ttyP0 c 57 0 || die "sudo failed at line $LINENO"
+    sudo mknod ttyP1 c 57 1 || die "sudo failed at line $LINENO"
+    sudo mknod ttyP2 c 57 2 || die "sudo failed at line $LINENO"
+    sudo mknod ttyP3 c 57 3 || die "sudo failed at line $LINENO"
 
-    sudo mknod ixs_oscr c 59 0
+    sudo mknod ixs_oscr c 59 0 || die "sudo failed at line $LINENO"
 
-    sudo mknod video0 c 81 0
-    sudo ln -s video0 video
+    sudo mknod video0 c 81 0 || die "sudo failed at line $LINENO"
+    sudo ln -s video0 video || die "sudo failed at line $LINENO"
 
-    sudo mknod ppp c 108 0
+    sudo mknod ppp c 108 0 || die "sudo failed at line $LINENO"
 
-    sudo mknod ttyUSB0 c 188 0
+    sudo mknod ttyUSB0 c 188 0 || die "sudo failed at line $LINENO"
 
     for i in {0..31}; do
-        sudo mknod rfcomm$i c 216 $i
+        sudo mknod rfcomm$i c 216 $i || die "sudo failed at line $LINENO"
     done
 
-    sudo mknod omega_bt c 250 0
-    sudo mknod omega_vibrator c 57 0
-    sudo mknod omega_detect c 102 0
-    sudo mknod omega_alarm c 120 0
-    sudo mknod omega_rtcalarm c 121 0
-    sudo mknod omega_kpbl c 127 0
-    sudo mknod omega_bcm2121 c 200 0
-    sudo mknod IPMC_FORCE_SLEEP c 201 0
-    sudo mknod omega_chgled c 251 0
-    sudo mknod sdcard_pm c 252 0
-    sudo mknod camera c 253 0
-    sudo mknod lcdctrl c 254 0
-    sudo mknod omega_lcdctrl c 254 0
+    sudo mknod omega_bt c 250 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_vibrator c 57 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_detect c 102 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_alarm c 120 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_rtcalarm c 121 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_kpbl c 127 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_bcm2121 c 200 0 || die "sudo failed at line $LINENO"
+    sudo mknod IPMC_FORCE_SLEEP c 201 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_chgled c 251 0 || die "sudo failed at line $LINENO"
+    sudo mknod sdcard_pm c 252 0 || die "sudo failed at line $LINENO"
+    sudo mknod camera c 253 0 || die "sudo failed at line $LINENO"
+    sudo mknod lcdctrl c 254 0 || die "sudo failed at line $LINENO"
+    sudo mknod omega_lcdctrl c 254 0 || die "sudo failed at line $LINENO"
 
-    sudo mknod loop0 b 7 0
-    sudo mknod loop1 b 7 1
-    sudo mknod loop2 b 7 2
-    sudo mknod loop3 b 7 3
-    sudo mknod loop4 b 7 4
-    sudo mknod loop5 b 7 5
-    sudo mknod loop6 b 7 6
-    sudo mknod loop7 b 7 7
+    sudo mknod loop0 b 7 0 || die "sudo failed at line $LINENO"
+    sudo mknod loop1 b 7 1 || die "sudo failed at line $LINENO"
+    sudo mknod loop2 b 7 2 || die "sudo failed at line $LINENO"
+    sudo mknod loop3 b 7 3 || die "sudo failed at line $LINENO"
+    sudo mknod loop4 b 7 4 || die "sudo failed at line $LINENO"
+    sudo mknod loop5 b 7 5 || die "sudo failed at line $LINENO"
+    sudo mknod loop6 b 7 6 || die "sudo failed at line $LINENO"
+    sudo mknod loop7 b 7 7 || die "sudo failed at line $LINENO"
 
-    sudo mknod docparatable b 58 1
+    sudo mknod docparatable b 58 1 || die "sudo failed at line $LINENO"
     
-    sudo mknod flh0 b 60 0
-    sudo mknod flh1 b 60 1
-    sudo mknod flh2 b 60 2
-    sudo mknod flh3 b 60 3
+    sudo mknod flh0 b 60 0 || die "sudo failed at line $LINENO"
+    sudo mknod flh1 b 60 1 || die "sudo failed at line $LINENO"
+    sudo mknod flh2 b 60 2 || die "sudo failed at line $LINENO"
+    sudo mknod flh3 b 60 3 || die "sudo failed at line $LINENO"
     
-    sudo mknod mmca  b 241 0
-    sudo mknod mmca1 b 241 1
-    sudo mknod mmca2 b 241 2
+    sudo mknod mmca  b 241 0 || die "sudo failed at line $LINENO"
+    sudo mknod mmca1 b 241 1 || die "sudo failed at line $LINENO"
+    sudo mknod mmca2 b 241 2 || die "sudo failed at line $LINENO"
 
-    sudo mknod ram0 b 1 0
-    sudo mknod ram1 b 1 1
-    sudo mknod ram2 b 1 2
-    sudo mknod ram3 b 1 3
+    sudo mknod ram0 b 1 0 || die "sudo failed at line $LINENO"
+    sudo mknod ram1 b 1 1 || die "sudo failed at line $LINENO"
+    sudo mknod ram2 b 1 2 || die "sudo failed at line $LINENO"
+    sudo mknod ram3 b 1 3 || die "sudo failed at line $LINENO"
 
-    sudo mknod tffsa  b 100 0
-    sudo mknod tffsa1 b 100 1
-    sudo mknod tffsa2 b 100 2
-    sudo mknod tffsb  b 100 32
-    sudo mknod tffsc  b 100 64
-    sudo mknod tffsd  b 100 96
-    sudo ln -s tffsa1 root
+    sudo mknod tffsa  b 100 0 || die "sudo failed at line $LINENO"
+    sudo mknod tffsa1 b 100 1 || die "sudo failed at line $LINENO"
+    sudo mknod tffsa2 b 100 2 || die "sudo failed at line $LINENO"
+    sudo mknod tffsb  b 100 32 || die "sudo failed at line $LINENO"
+    sudo mknod tffsc  b 100 64 || die "sudo failed at line $LINENO"
+    sudo mknod tffsd  b 100 96 || die "sudo failed at line $LINENO"
+    sudo ln -s tffsa1 root || die "sudo failed at line $LINENO"
 
     # Install oui.txt required for Bluetooth
     cd $ROOTFS_IMAGE_DIR
@@ -1451,19 +1469,19 @@ install_basefiles()
     files=`find $ROOTFS_SOURCE_PATH/basefiles -mindepth 1 -maxdepth 1 2>/dev/null`
     for i in $files; do
         if [ `basename $i` != "mnt" ]; then
-            sudo cp -a $i $ROOTFS_IMAGE_DIR
+            sudo cp -a $i $ROOTFS_IMAGE_DIR || die "sudo failed at line $LINENO"
         fi
     done
     ln -s . $ROOTFS_IMAGE_DIR/lib/modules/2.4.19-rmk7-pxa2-greenphone
 
     files=`find $ROOTFS_SOURCE_PATH/basefiles/mnt -mindepth 1 -maxdepth 1 -name user -prune -o -print 2>/dev/null`
     for i in $files; do
-        sudo cp -a $i $ROOTFS_IMAGE_DIR/mnt
+        sudo cp -a $i $ROOTFS_IMAGE_DIR/mnt || die "sudo failed at line $LINENO"
     done
 
     files=`find $ROOTFS_SOURCE_PATH/basefiles/mnt/user -mindepth 1 -maxdepth 1 2>/dev/null`
     for i in $files; do
-        sudo cp -a $i $USERFS_IMAGE_DIR
+        sudo cp -a $i $USERFS_IMAGE_DIR || die "sudo failed at line $LINENO"
     done
 
 
@@ -1478,11 +1496,11 @@ install_basefiles()
     for i in $files; do
         if [ ! -L $ROOTFS_IMAGE_DIR/etc/`basename $i` ] &&
            [ ! -e $ROOTFS_IMAGE_DIR/etc/`basename $i` ]; then
-            sudo ln -s /mnt/user/etc/`basename $i` $ROOTFS_IMAGE_DIR/etc
+            sudo ln -s /mnt/user/etc/`basename $i` $ROOTFS_IMAGE_DIR/etc || die "sudo failed at line $LINENO"
         fi
     done
-    sudo ln -s /proc/mounts $ROOTFS_IMAGE_DIR/etc/mtab
-    sudo ln -s /mnt/user/etc/resolv.conf $ROOTFS_IMAGE_DIR/etc
+    sudo ln -s /proc/mounts $ROOTFS_IMAGE_DIR/etc/mtab || die "sudo failed at line $LINENO"
+    sudo ln -s /mnt/user/etc/resolv.conf $ROOTFS_IMAGE_DIR/etc || die "sudo failed at line $LINENO"
 
     cd ..
 }
@@ -1490,20 +1508,20 @@ install_basefiles()
 create_default_tgzs()
 {
     echo "Creating default tarballs"
-    sudo chown -R root.root $USERFS_IMAGE_DIR/* || die "chown $USERFS_IMAGE_DIR"
+    sudo chown -R root.root $USERFS_IMAGE_DIR/* || die "chown $USERFS_IMAGE_DIR" || die "sudo failed at line $LINENO"
 
     cd $USERFS_IMAGE_DIR || die "cd $USERFS_IMAGE_DIR"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/user_default.tgz etc fs.ver
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/user_tools.tgz tools
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/user_default.tgz etc fs.ver || die "sudo failed at line $LINENO"
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/user_tools.tgz tools || die "sudo failed at line $LINENO"
 
     cd $DEVFS_IMAGE_DIR || die "cd $DEVFS_IMAGE_DIR"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/dev.tgz *
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/dev.tgz * || die "sudo failed at line $LINENO"
 
     cd $ROOTFS_IMAGE_DIR/var || die "cd $ROOTFS_IMAGE_DIR/var"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/var.tgz *
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/var.tgz * || die "sudo failed at line $LINENO"
 
     cd $ROOTFS_IMAGE_DIR/mnt/disk2/home || die "cd $ROOTFS_IMAGE_DIR/mnt/disk2/home"
-    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/home_default.tgz .
+    sudo tar --owner=0 --group=0 -czf $ROOTFS_IMAGE_DIR/home_default.tgz . || die "sudo failed at line $LINENO"
 
     cd $ROOTFS_BUILD_PATH
 }
@@ -1518,19 +1536,19 @@ make_rootfs_image()
     rm -f $ROOTFS_FILENAME
     dd if=/dev/zero of=$ROOTFS_FILENAME bs=1 count=0 seek=44040192 2>/dev/null
     /sbin/mkfs.ext2 -F $ROOTFS_FILENAME >/dev/null 2>&1
-    sudo mount -t ext2 -o loop $ROOTFS_FILENAME $MNTPNT
+    sudo mount -t ext2 -o loop $ROOTFS_FILENAME $MNTPNT || die "sudo failed at line $LINENO"
 
-    sudo mkdir -p $MNTPNT/var
+    sudo mkdir -p $MNTPNT/var || die "sudo failed at line $LINENO"
 
     files=`find $ROOTFS_IMAGE_DIR -mindepth 1 -maxdepth 1 2>/dev/null`
     for i in $files; do
         if [ `basename $i` != "var" ]; then
-            sudo cp -a $i $MNTPNT
-            sudo chown -R root.root $MNTPNT/`basename $i`
+            sudo cp -a $i $MNTPNT || die "sudo failed at line $LINENO"
+            sudo chown -R root.root $MNTPNT/`basename $i` || die "sudo failed at line $LINENO"
         fi
     done
 
-    sudo umount $MNTPNT
+    sudo umount $MNTPNT || die "sudo failed at line $LINENO"
     rmdir $MNTPNT
 }
 
@@ -1574,6 +1592,7 @@ OPTION_CONFIG_LINUX=0
 OWNTOOLCHAIN=0
 DOWNLOAD_DIR=$PWD
 STAMPDIR=$PWD
+BUILDDIR=
 
 TOOLCHAIN_PATH="/opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux"
 CROSS_PREFIX="arm-linux"
@@ -1589,13 +1608,16 @@ ALL_PACKAGES="toolchain busybox-secure busybox"
 ALL_PACKAGES="$ALL_PACKAGES libungif ilib fbv"
 ALL_PACKAGES="$ALL_PACKAGES dosfstools"
 ALL_PACKAGES="$ALL_PACKAGES ppp sxetools armioctl tat getkeycode"
-ALL_PACKAGES="$ALL_PACKAGES dropbear samba"
+ALL_PACKAGES="$ALL_PACKAGES dropbear"
+ALL_PACKAGES="$ALL_PACKAGES samba"
 ALL_PACKAGES="$ALL_PACKAGES strace prelink"
 ALL_PACKAGES="$ALL_PACKAGES expat dbus"
 ALL_PACKAGES="$ALL_PACKAGES bluez-libs bluez-utils bluez-hcidump bluez-firmware"
 ALL_PACKAGES="$ALL_PACKAGES wireless-tools wpa_supplicant"
 ALL_PACKAGES="$ALL_PACKAGES initrd linux"
+if [ ! -z $CONFIG_LIDS ]; then
 ALL_PACKAGES="$ALL_PACKAGES lids"
+fi
 ALL_PACKAGES="$ALL_PACKAGES basefiles"
 PACKAGES=$ALL_PACKAGES
 
@@ -1686,6 +1708,10 @@ while [ $# -ne 0 ]; do
 						TOOLCHAIN_PATH="$2"
 						shift 1
 						;;
+        --build-dir)
+             BUILDDIR="$2"
+             shift 1
+             ;; 
         --verbose)
 						VERBOSITY=1
 						;;  
@@ -1736,7 +1762,7 @@ if [ $QTOPIA_SOURCE_PATH = $PWD ]; then
     mkdir -p $ROOTFS_BUILD_PATH
     cd $ROOTFS_BUILD_PATH
 else
-    ROOTFS_BUILD_PATH=$PWD/rootfs
+    ROOTFS_BUILD_PATH=$PWD/$BUILDDIR
     mkdir -p $ROOTFS_BUILD_PATH
 fi
 
@@ -1796,9 +1822,9 @@ if [ $OPTION_CLEAN -eq 1 ]; then
         clean_package $package
     done
 
-    sudo rm -rf $ROOTFS_IMAGE_DIR
-    sudo rm -rf $USERFS_IMAGE_DIR
-    sudo rm -rf $DEVFS_IMAGE_DIR
+    sudo rm -rf $ROOTFS_IMAGE_DIR || die "sudo failed at line $LINENO"
+    sudo rm -rf $USERFS_IMAGE_DIR || die "sudo failed at line $LINENO"
+    sudo rm -rf $DEVFS_IMAGE_DIR || die "sudo failed at line $LINENO"
     [ -d host ] && rmdir --ignore-fail-on-non-empty host
 
     rm -f $ROOTFS_FILENAME
@@ -1809,7 +1835,7 @@ if [ $OPTION_BUILD -eq 1 ]; then
     done
 fi
 if [ $OPTION_INSTALL -eq 1 ]; then
-    sudo rm -rf $ROOTFS_IMAGE_DIR $USERFS_IMAGE_DIR $DEVFS_IMAGE_DIR
+    sudo rm -rf $ROOTFS_IMAGE_DIR $USERFS_IMAGE_DIR $DEVFS_IMAGE_DIR || die "sudo failed at line $LINENO"
     mkdir -p $ROOTFS_IMAGE_DIR $USERFS_IMAGE_DIR $DEVFS_IMAGE_DIR
     rm -rf $ROOTFS_BUILD_PATH/junk
 

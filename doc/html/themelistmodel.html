@@ -1,24 +1,26 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>ThemeListModel Class Reference</title>
+  <title>ThemeListModel Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ThemeListModel Class Reference</h1>
-<p>The ThemeListModel class provides a list model that is used for list functionality in Qtopia themeing. <a href="#details">More...</a></p>
-<pre>#include &lt;ThemeListModel&gt;</pre><p>Inherits <a href="qabstractlistmodel.html">QAbstractListModel</a>.</p>
+<p>The ThemeListModel class provides a list model that is used for list functionality in Qtopia theming. <a href="#details">More...</a></p>
+<pre>    #include &lt;ThemeListModel&gt;</pre><p>Inherits <a href="qabstractlistmodel.html">QAbstractListModel</a>.</p>
 <ul>
 <li><a href="themelistmodel-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="themelistmodel.html#ThemeListModel">ThemeListModel</a></b> ( QObject * <i>parent</i>, ThemeListItem * <i>li</i>, ThemedView * <i>view</i> )</li>
+<li><div class="fn"/><b><a href="themelistmodel.html#ThemeListModel">ThemeListModel</a></b> ( QObject * <i>parent</i>, ThemeListItem * <i>listItem</i>, ThemedView * <i>view</i> )</li>
 <li><div class="fn"/>virtual <b><a href="themelistmodel.html#dtor.ThemeListModel">~ThemeListModel</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="themelistmodel.html#addEntry">addEntry</a></b> ( ThemeListModelEntry * <i>item</i> )</li>
 <li><div class="fn"/>void <b><a href="themelistmodel.html#clear">clear</a></b> ()</li>
@@ -59,8 +61,8 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The ThemeListModel class provides a list model that is used for list functionality in Qtopia themeing.</p>
-<p>List functionality in themeing is implemented using Qt's model-view architecture and theme templates.</p>
+<p>The ThemeListModel class provides a list model that is used for list functionality in Qtopia theming.</p>
+<p>List functionality in theming is implemented using Qt's model-view architecture and theme templates.</p>
 <p>To use a ThemeListModel you pass in the associated <a href="themelistitem.html">ThemeListItem</a> and <a href="themedview.html">ThemedView</a> objects during construction, and then populate it with <a href="themelistmodelentry.html">ThemeListModelEntry</a> items using the <a href="themelistmodel.html#addEntry">addEntry</a>() and <a href="themelistmodel.html#removeEntry">removeEntry</a>() functions. The ThemeListModel installs itself as the model for the <a href="themelistitem.html">ThemeListItem</a>'s <a href="qlistview.html">QListView</a> object during construction. From that point on communication between the <a href="qlistview.html">QListView</a> and the ThemeListModel occurs through Qt's model-view architecture.</p>
 <p>Theme templates are used to describe the visual look of items in the ThemeListModel. As a list's items are added dynamically at runtime, they cannot be specified in the themed view XML. However, using theme templates, the visual appearance of a list item is defined instead, which is used to draw items as appropriate. Instances of these theme templates can be created at anytime using <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>().</p>
 <p>An internal implementation of <a href="qitemdelegate.html">QItemDelegate</a> called ThemeListDelegate exists to handle communication between the <a href="qlistview.html">QListView</a> of a <a href="themelistitem.html">ThemeListItem</a>, and associated ThemeListModel/<a href="themelistmodelentry.html">ThemeListModelEntry</a> objects. It works completely under the hood, and so this information is given only to help the developer understand how the system works.</p>
@@ -73,21 +75,21 @@
 <li>The template instance for the <a href="themelistmodelentry.html">ThemeListModelEntry</a> object is painted to the <a href="qlistview.html">QListView</a> at the index.</li>
 </ul>
 <p>See the <a href="themetemplateitem.html">ThemeTemplateItem</a> and <a href="themelistmodelentry.html">ThemeListModelEntry</a> documentation for more information.</p>
-<p>The valuespace is used to communicate data from the system to items in the themed list. Normally a valuespace path can be assigned in the themed view XML to items using the vspath attribute of ThemeItem. However, as template definitions representing a theme list items' visual appearance are not actual instances, their vspath is dynamically determined and set at runtime when they are created using <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>(). <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>() takes a uid which is actually set to the vspath of the returned ThemeTemplateInstance. For template instances created by <a href="themelistmodelentry.html#templateInstance">ThemeListModelEntry::templateInstance</a>() the uid passed is the return value of <a href="themelistmodelentry.html#uid">ThemeListModelEntry::uid</a>(). This acts as a unique association between a theme template instance and the <a href="themelistmodelentry.html">ThemeListModelEntry</a>, as well as a unique valuespace path for both to communicate under. A call to <a href="themelistmodelentry.html#setValue">ThemeListModelEntry::setValue</a>() set keys under this unique vspath. For example, given the following themed view XML definition:</p>
-<pre>&nbsp;   &lt;list vspath=&quot;/UserInterface/MyList/&quot;&gt;
+<p>The valuespace is used to communicate data from the system to items in the themed list. Normally a valuespace path can be assigned in the themed view XML to items using the vspath attribute of <a href="themeitem.html">ThemeItem</a>. However, as template definitions representing a theme list items' visual appearance are not actual instances, their vspath is dynamically determined and set at runtime when they are created using <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>(). <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>() takes a uid which is actually set to the vspath of the returned ThemeTemplateInstance. For template instances created by <a href="themelistmodelentry.html#templateInstance">ThemeListModelEntry::templateInstance</a>() the uid passed is the return value of <a href="themelistmodelentry.html#uid">ThemeListModelEntry::uid</a>(). This acts as a unique association between a theme template instance and the <a href="themelistmodelentry.html">ThemeListModelEntry</a>, as well as a unique valuespace path for both to communicate under. A call to <a href="themelistmodelentry.html#setValue">ThemeListModelEntry::setValue</a>() set keys under this unique vspath. For example, given the following themed view XML definition:</p>
+<pre>    &lt;list vspath=&quot;/UserInterface/MyList/&quot;&gt;
         &lt;template name=&quot;myListItem&quot;&gt;
             &lt;text name=&quot;titleMessage&quot;&gt;@TitleMessage&lt;/text&gt;
         &lt;/template&gt;
     &lt;/list&gt;</pre>
 <p>you could set the text of the element 'titleMessage' with the following:</p>
-<pre>&nbsp;   ThemeListModelEntry* myEntry; // assuming that myEntry-&gt;type() returns &quot;myListItem&quot;
+<pre>    ThemeListModelEntry* myEntry; <span class="comment">// assuming that myEntry-&gt;type() returns &quot;myListItem&quot;</span>
     ..
-    myEntry-&gt;setValue(&quot;TitleMessage&quot;, &quot;Hello, World&quot;); // expands to /UserInterface/MyList/&lt;myEntry-&gt;uid()&gt;/TitleMessage</pre>
+    myEntry-&gt;setValue(&quot;TitleMessage&quot;, &quot;Hello, World&quot;); <span class="comment">// expands to /UserInterface/MyList/&lt;myEntry-&gt;uid()&gt;/TitleMessage</span></pre>
 <p>See also <a href="themed-view-elements.html">Themed View Elements</a>, <a href="themetemplateitem.html">ThemeTemplateItem</a>, <a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a>, and <a href="themelistmodelentry.html">ThemeListModelEntry</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="ThemeListModel"></a>ThemeListModel::ThemeListModel ( <a href="qobject.html">QObject</a> * <i>parent</i>, <a href="themelistitem.html">ThemeListItem</a> * <i>li</i>, <a href="themedview.html">ThemedView</a> * <i>view</i> )</h3>
-<p>Constructs a <a href="themelistmodel.html">ThemeListModel</a>. <i>parent</i> is passed to <a href="qabstractlistmodel.html">QAbstractListModel</a>, <i>li</i> is the <a href="themelistitem.html">ThemeListItem</a> associated with this model and <i>view</i> is the <a href="themedview.html">ThemedView</a> associated with this model. The model is installed on the <a href="themelistitem.html">ThemeListItem</a> <i>li</i> using the <a href="themelistitem.html#setModel">ThemeListItem::setModel</a>() function.</p>
+<h3 class="fn"><a name="ThemeListModel"></a>ThemeListModel::ThemeListModel ( <a href="qobject.html">QObject</a> * <i>parent</i>, <a href="themelistitem.html">ThemeListItem</a> * <i>listItem</i>, <a href="themedview.html">ThemedView</a> * <i>view</i> )</h3>
+<p>Constructs a <a href="themelistmodel.html">ThemeListModel</a>. <i>parent</i> is passed to <a href="qabstractlistmodel.html">QAbstractListModel</a>, <i>listItem</i> is the <a href="themelistitem.html">ThemeListItem</a> associated with this model and <i>view</i> is the <a href="themedview.html">ThemedView</a> associated with this model. The model is installed on the <a href="themelistitem.html">ThemeListItem</a> <i>listItem</i> using the <a href="themelistitem.html#setModel">ThemeListItem::setModel</a>() function.</p>
 <h3 class="fn"><a name="dtor.ThemeListModel"></a>ThemeListModel::~ThemeListModel ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the model. All items in the model are deleted.</p>
 <h3 class="fn"><a name="addEntry"></a>void ThemeListModel::addEntry ( <a href="themelistmodelentry.html">ThemeListModelEntry</a> * <i>item</i> )</h3>
@@ -110,8 +112,8 @@
 <p>Triggers an update in the view for all items in the model.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

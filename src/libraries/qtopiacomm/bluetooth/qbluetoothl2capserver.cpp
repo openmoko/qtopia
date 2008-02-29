@@ -50,10 +50,45 @@ public:
 
 /*!
     \class QBluetoothL2CapServer
+    \mainclass
     \brief The QBluetoothL2CapServer class represents an L2CAP server socket.
 
     This class makes it possible to accept incoming L2CAP connections.
     You can specify the address and the L2CAP PSM to listen on.
+
+    Call listen() to make the server listen for new connections.  The
+    newConnection() signal will be emmited each time a client connects
+    to the server.  The MTU to use should be specified during the listen()
+    call.
+
+    Security options controlling the authentication and encryption of the
+    Bluetooth link on the socket can be specified at any time by calling
+    setSecurityOptions().  Currently this will only affect all future
+    connections, not connections which are active or pending.
+
+    Call nextPendingConnection() to accept the pending client connection.
+
+    When listening for connections, server address and PSM are available
+    by calling serverAddress() and serverPsm().
+
+    Calling close() will make the QBluetoothL2CapServer stop listening
+    for connections and delete all pending connections.
+
+    \code
+        // Create a new L2CapServer on PSM 25
+        QBluetoothL2CapServer *server = new QBluetoothL2CapServer;
+        server->listen(QBluetoothAddress::any, 25);
+
+        // wait for newConnection() signal
+
+        QBluetoothL2CapSocket *sock =
+            qobject_cast<QBluetoothL2CapSocket *>( sock->nextPendingConnection() );
+
+        server->close();
+    \endcode
+
+    \ingroup qtopiabluetooth
+    \sa QBluetoothL2CapSocket
  */
 
 /*!
@@ -68,8 +103,8 @@ QBluetoothL2CapServer::QBluetoothL2CapServer(QObject *parent)
 }
 
 /*!
-    Destructor.
- */
+    Destroys the server.
+*/
 QBluetoothL2CapServer::~QBluetoothL2CapServer()
 {
     if (m_data)
@@ -80,7 +115,13 @@ QBluetoothL2CapServer::~QBluetoothL2CapServer()
     Tells the server to listen for incoming connections on address \a local
     and PSM \a psm.  The \a mtu parameter holds the MTU to use for the server.
 
-    Returns true if the server successfully started listening; otherwise returns false.
+    PSM stands for Port and Service Multiplexer.  The PSM value can be
+    any \bold{odd} value the range of 1-32765.  For more information
+    please see Bluetooth Specification Version 2.0 + EDR [vol 4]
+    page 45.
+
+    Returns true if the server successfully started listening;
+    otherwise returns false.
     If the server was already listening, returns false.
 
     \sa isListening()
@@ -95,7 +136,6 @@ bool QBluetoothL2CapServer::listen(const QBluetoothAddress &local, int psm, int 
 
     if (fd < 0) {
         setError(QBluetoothAbstractServer::ResourceError);
-        qDebug() << "Couldn't create socket";
         return false;
     }
 
@@ -114,7 +154,6 @@ bool QBluetoothL2CapServer::listen(const QBluetoothAddress &local, int psm, int 
     socklen_t optlen = sizeof(opts);
 
     if (::getsockopt(fd, SOL_L2CAP, L2CAP_OPTIONS, &opts, &optlen) == -1) {
-        qDebug() << "getsockopt error";
         perror("getsockopt failed");
         setError(QBluetoothAbstractServer::ListenError);
         ::close(fd);
@@ -124,7 +163,6 @@ bool QBluetoothL2CapServer::listen(const QBluetoothAddress &local, int psm, int 
     opts.imtu = mtu;
 
     if (setsockopt(fd, SOL_L2CAP, L2CAP_OPTIONS, &opts, sizeof(opts)) == -1) {
-        qDebug() << "setsockopt error";
         perror("setsockopt failed");
         setError(QBluetoothAbstractServer::ListenError);
         ::close(fd);
@@ -167,6 +205,8 @@ void QBluetoothL2CapServer::close()
 /*!
     Returns the L2CAP PSM the server is currently listening on.  If the server
     is not listening, returns -1.
+
+    \sa serverAddress()
  */
 int QBluetoothL2CapServer::serverPsm() const
 {
@@ -176,6 +216,8 @@ int QBluetoothL2CapServer::serverPsm() const
 /*!
     Returns the address the server is currently listening on.  If the server
     is not listening, returns QBluetoothAddress::invalid.
+
+    \sa serverPsm()
  */
 QBluetoothAddress QBluetoothL2CapServer::serverAddress() const
 {
@@ -219,8 +261,8 @@ QBluetooth::SecurityOptions QBluetoothL2CapServer::securityOptions() const
 }
 
 /*!
-    Sets the security options of the socket to be \a options.  Note that under the current
-    Linux implementation only new connections will be affected by the change in security
+    Returns true if able to set the security options of the socket to be \a options; otherwise returns false.
+    Note that under the current Linux implementation only new connections will be affected by the change in security
     options.  Existing and pending connections will not be affected.
 
     \sa securityOptions()
@@ -245,8 +287,8 @@ QBluetoothAbstractSocket * QBluetoothL2CapServer::createSocket()
 
 /*!
     Returns the MTU that should be used for this server.  By default the MTU
-    is set to be 672 bytes.  If the socket is not listening, or an error occurred,
-    returns -1.
+    is set to be 672 bytes.  If the socket is not listening, or an
+    error occurred, returns -1.
 */
 int QBluetoothL2CapServer::mtu() const
 {

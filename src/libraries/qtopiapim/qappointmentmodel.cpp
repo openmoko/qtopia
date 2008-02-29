@@ -106,7 +106,7 @@ void QAppointmentModel::initMaps()
 }
 
 /*!
-  Returns a translated string describing the appointment model sort \a field.
+  Returns a translated string describing the appointment model \a field.
 
   \sa fieldIcon(), fieldIdentifier(), identifierField()
 */
@@ -120,7 +120,7 @@ QString QAppointmentModel::fieldLabel(Field field)
 }
 
 /*!
-  Returns a icon representing the appointment model sort \a field.
+  Returns a icon representing the appointment model \a field.
 
   Returns a null icon if no icon is available.
 
@@ -137,7 +137,7 @@ QIcon QAppointmentModel::fieldIcon(Field field)
 }
 
 /*!
-  Returns a non-translated string describing the appointment model sort \a field.
+  Returns a non-translated string describing the appointment model \a field.
 
   \sa fieldLabel(), fieldIcon(), identifierField()
 */
@@ -151,7 +151,7 @@ QString QAppointmentModel::fieldIdentifier(Field field)
 }
 
 /*!
-  Returns the appointment model sort field for the non-translated string \a identifier
+  Returns the appointment model field for the non-translated field \a identifier
 
   \sa fieldLabel(), fieldIcon(), fieldIdentifier()
 */
@@ -166,24 +166,31 @@ QAppointmentModel::Field QAppointmentModel::identifierField(const QString &ident
 
 /*!
   \class QAppointmentModel
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QAppointmentModel class provides access to the Calendar data.
 
-  The QAppointmentModel is used to access the Calendar data.  It is a descendant of QAbstractItemModel,
-  so it is suitable for use with the Qt View classes such as QListView and QTableView, as well as
-  any custom developer Views.
+  User appointments are represented in the appointment model as a table, with each row corresponding to a
+  particular appointment and each column as on of the fields of the appointment.  Complete QAppointment objects can
+  be retrieved using the appointment() function which takes either a row, index, or unique identifier.
 
-  QAppointmentModel provides functions for sorting and some filtering of items.
-  For filters or sorting that is not provided by QAppointmentModel it is recommended that
-  QSortFilterProxyModel is used to wrap QAppointmentModel.
+  The appointment model is a descendant of QAbstractItemModel, so it is suitable for use with
+  the Qt View classes such as QListView and QTableView, as well as any custom views.
 
-  QAppointmentModel will refresh when changes are made in other instances of QAppointmentModel or
-  from other applications.
+  The appointment model provides functions for sorting and some filtering of items.
+  For filters or sorting that is not provided by the appointment model it is recommended that
+  QSortFilterProxyModel is used to wrap the appointment model.
+
+  A QAppointmentModel instance will also reflect changes made in other instances of QAppointmentModel,
+  both within this application and from other applications.  This will result in
+  the modelReset() signal being emitted.
+
+  \sa QAppointment, QSortFilterProxyModel
 */
 
 /*!
-  Constructs a QAppointmentModel with parent \a parent.
+  Constructs an appointment model with the given \a parent.
 */
 QAppointmentModel::QAppointmentModel(QObject *parent)
     : QPimModel(parent)
@@ -204,7 +211,7 @@ QAppointmentModel::QAppointmentModel(QObject *parent)
 }
 
 /*!
-  Destructs the QAppointmentModel.
+  Destroys the appointment model.
 */
 QAppointmentModel::~QAppointmentModel()
 {
@@ -217,21 +224,37 @@ QAppointmentModel::~QAppointmentModel()
   Enumerates the columns when in table mode and columns used for sorting.
   This is a subset of data retrievable from a QAppointment.
 
-  \omitvalue Invalid
-  \omitvalue Description
-  \omitvalue Location
-  \omitvalue Start
-  \omitvalue End
-  \omitvalue AllDay
-  \omitvalue TimeZone
-  \omitvalue Notes
-  \omitvalue Alarm
-  \omitvalue RepeatRule
-  \omitvalue RepeatFrequency
-  \omitvalue RepeatEndDate
-  \omitvalue RepeatWeekFlags
-  \omitvalue Identifier
-  \omitvalue Categories
+  \value Invalid
+    An invalid field
+  \value Description
+    The description of the appointment
+  \value Location
+    The location of the appointment
+  \value Start
+    The start time of the appointment
+  \value End
+    The end time of the appointment
+  \value AllDay
+    Whether the appointment is an all day event
+  \value TimeZone
+    The time zone of the appointment
+  \value Notes
+    The notes of the appointment
+  \value Alarm
+    The type of alarm of the appointment
+  \value RepeatRule
+    The repeat rule of the appointment
+  \value RepeatFrequency
+    The repeat frequency of the appointment
+  \value RepeatEndDate
+    The date a repeating appointment repeats until.  If null the appointment
+    repeats forever
+  \value RepeatWeekFlags
+    The flags specifying what days of the week the appointment repeats on
+  \value Identifier
+    The identifier of the appointment
+  \value Categories
+    The list of categories the appointment belongs to
 */
 
 /*!
@@ -244,15 +267,7 @@ QAppointmentModel::~QAppointmentModel()
 */
 
 /*!
-  \overload
-
-  Returns an object that contains a serialized description of the specified \a indexes.
-  The format used to describe the items corresponding to the \a indexes is obtained from
-  the mimeTypes() function.
-
-  If the list of indexes is empty, 0 is returned rather than a serialized empty list.
-
-  Currently returns 0 but may be implemented at a future date.
+  \reimp
 */
 QMimeData * QAppointmentModel::mimeData(const QModelIndexList &indexes) const
 {
@@ -262,11 +277,7 @@ QMimeData * QAppointmentModel::mimeData(const QModelIndexList &indexes) const
 }
 
 /*!
-  \overload
-
-  Returns a list of MIME types that can be used to describe a list of model indexes.
-
-  Currently returns an empty list but may be implemented at a future date.
+  \reimp
 */
 QStringList QAppointmentModel::mimeTypes() const
 {
@@ -314,9 +325,7 @@ QVariant QAppointmentModel::data(const QModelIndex &index, int role) const
 }
 
 /*!
-  \overload
-
-  Returns the number of columns for the given \a parent.
+  \reimp
 */
 int QAppointmentModel::columnCount(const QModelIndex &parent) const
 {
@@ -326,8 +335,13 @@ int QAppointmentModel::columnCount(const QModelIndex &parent) const
 
 /*!
   \overload
-  Sets the \a role data for the item at \a index to \a value. Returns true if successful,
-  otherwise returns false.
+  Sets the \a role data for the item at \a index to \a value. Returns true if successful.
+
+  The appointment model only accepts data for the \c EditRole.  The column of the specified
+  index specifies the \c QAppointmentModel::Field to set and the row of the index
+  specifies which appointment to modify.
+
+  \sa setAppointmentField()
 */
 bool QAppointmentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -358,9 +372,7 @@ bool QAppointmentModel::setData(const QModelIndex &index, const QVariant &value,
 }
 
 /*!
-  \overload
-  For every Qt::ItemDataRole in \a roles, sets the role data for the item at \a index to the
-  associated value in \a roles. Returns true if successful, otherwise returns false.
+  \reimp
 */
 bool QAppointmentModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &roles)
 {
@@ -370,10 +382,7 @@ bool QAppointmentModel::setItemData(const QModelIndex &index, const QMap<int,QVa
 }
 
 /*!
-  \overload
-
-  Returns a map with values for all predefined roles in the model for the item at the
-  given \a index.
+  \reimp
 */
 QMap<int,QVariant> QAppointmentModel::itemData(const QModelIndex &index) const
 {
@@ -391,10 +400,7 @@ QMap<int,QVariant> QAppointmentModel::itemData(const QModelIndex &index) const
 }
 
 /*!
-  \overload
-
-  Returns the data for the given \a role and \a section in the header with the
-  specified \a orientation.
+  \reimp
 */
 QVariant QAppointmentModel::headerData(int section, Qt::Orientation orientation,
         int role) const
@@ -421,7 +427,7 @@ QAppointment QAppointmentModel::appointment(const QModelIndex &index) const
 }
 
 /*!
-  Returns the appointment for the \a row specified.
+  Returns the appointment for given \a row.
 */
 QAppointment QAppointmentModel::appointment(int row) const
 {
@@ -433,24 +439,25 @@ QAppointment QAppointmentModel::appointment(int row) const
 }
 
 /*!
-  Returns the appointment with the identifier \a id.  The appointment does
+  Returns the appointment in the model with the given \a identifier.  The appointment does
   not have to be in the current filter mode for it to be returned.
 */
-QAppointment QAppointmentModel::appointment(const QUniqueId & id) const
+QAppointment QAppointmentModel::appointment(const QUniqueId & identifier) const
 {
-    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(access(id));
+    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(access(identifier));
     if (model)
-        return model->appointment(id);
+        return model->appointment(identifier);
     return QAppointment();
 }
 
 /*!
-  Returns the value from \a appointment that would be returned for
-  sort key \a k as it would from a row in the QAppointmentModel.
+  Returns the value for the specified \a field of the given \a appointment.
+
+  \sa data()
 */
-QVariant QAppointmentModel::appointmentField(const QAppointment &appointment, QAppointmentModel::Field k)
+QVariant QAppointmentModel::appointmentField(const QAppointment &appointment, QAppointmentModel::Field field)
 {
-    switch(k) {
+    switch(field) {
         default:
         case QAppointmentModel::Invalid:
             break;
@@ -487,104 +494,106 @@ QVariant QAppointmentModel::appointmentField(const QAppointment &appointment, QA
 }
 
 /*!
-  Sets the value in \a appointment that would be set for sort key \a k as it would
-  if modified for a appointment in the QAppointmentModel to \a v.
+  Sets the value for the specified \a field of the given \a appointment to \a value.
 
-  Returns true if the appointment was modified.  Otherwise returns false.
+  Returns true if the appointment was modified.
+
+  \sa setData()
 */
-bool QAppointmentModel::setAppointmentField(QAppointment &appointment, QAppointmentModel::Field k,  const QVariant &v)
+bool QAppointmentModel::setAppointmentField(QAppointment &appointment, QAppointmentModel::Field field,  const QVariant &value)
 {
-    switch(k) {
+    switch(field) {
         default:
         case QAppointmentModel::Invalid:
         case QAppointmentModel::Identifier: // not a settable field
             return false;
         case QAppointmentModel::Categories:
-            if (v.canConvert(QVariant::StringList)) {
-                appointment.setCategories(v.toStringList());
+            if (value.canConvert(QVariant::StringList)) {
+                appointment.setCategories(value.toStringList());
                 return true;
             }
             return false;
         case QAppointmentModel::Notes:
-            if (v.canConvert(QVariant::String)) {
-                appointment.setNotes(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                appointment.setNotes(value.toString());
                 return true;
             }
             return false;
         case QAppointmentModel::Description:
-            if (v.canConvert(QVariant::String)) {
-                appointment.setDescription(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                appointment.setDescription(value.toString());
                 return true;
             }
             return false;
         case QAppointmentModel::Location:
-            if (v.canConvert(QVariant::String)) {
-                appointment.setLocation(v.toString());
+            if (value.canConvert(QVariant::String)) {
+                appointment.setLocation(value.toString());
                 return true;
             }
             return false;
         case QAppointmentModel::Start:
-            if (v.canConvert(QVariant::DateTime)) {
-                appointment.setStart(v.toDateTime());
+            if (value.canConvert(QVariant::DateTime)) {
+                appointment.setStart(value.toDateTime());
                 return true;
             }
             return false;
         case QAppointmentModel::End:
-            if (v.canConvert(QVariant::DateTime)) {
-                appointment.setEnd(v.toDateTime());
+            if (value.canConvert(QVariant::DateTime)) {
+                appointment.setEnd(value.toDateTime());
                 return true;
             }
             return false;
         case QAppointmentModel::AllDay:
-            if (v.canConvert(QVariant::Bool)) {
-                appointment.setAllDay(v.toBool());
+            if (value.canConvert(QVariant::Bool)) {
+                appointment.setAllDay(value.toBool());
                 return true;
             }
             return false;
         case QAppointmentModel::TimeZone:
-            if (v.canConvert(QVariant::String)) {
-                appointment.setTimeZone(QTimeZone(v.toString().toAscii()));
+            if (value.canConvert(QVariant::String)) {
+                appointment.setTimeZone(QTimeZone(value.toString().toAscii()));
                 return true;
             }
             return false;
         case QAppointmentModel::Alarm:
-            if (v.canConvert(QVariant::Int)) {
-                appointment.setAlarm(appointment.alarmDelay(), (QAppointment::AlarmFlags)v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                appointment.setAlarm(appointment.alarmDelay(), (QAppointment::AlarmFlags)value.toInt());
                 return true;
             }
             return false;
         case QAppointmentModel::RepeatRule:
-            if (v.canConvert(QVariant::Int)) {
-                appointment.setRepeatRule((QAppointment::RepeatRule)v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                appointment.setRepeatRule((QAppointment::RepeatRule)value.toInt());
                 return true;
             }
             return false;
         case QAppointmentModel::RepeatFrequency:
-            if (v.canConvert(QVariant::Int)) {
-                appointment.setFrequency(v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                appointment.setFrequency(value.toInt());
                 return true;
             }
             return false;
         case QAppointmentModel::RepeatEndDate:
-            if (v.canConvert(QVariant::Date)) {
-                appointment.setRepeatUntil(v.toDate());
+            if (value.canConvert(QVariant::Date)) {
+                appointment.setRepeatUntil(value.toDate());
                 return true;
             }
             return false;
         case QAppointmentModel::RepeatWeekFlags:
-            if (v.canConvert(QVariant::Int)) {
-                appointment.setWeekFlags((QAppointment::WeekFlags)v.toInt());
+            if (value.canConvert(QVariant::Int)) {
+                appointment.setWeekFlags((QAppointment::WeekFlags)value.toInt());
                 return true;
             }
             return false;
     }
     return false;
 }
-/*!
-  Updates the appointment \a appointment so long as a there is a appointment in the
-  QAppointmentModel with the same uid as \a appointment.
 
-  Returns true if the appointment was successfully updated.  Otherwise return false.
+/*!
+  Updates the appointment in the model with the same identifier as the specified \a appointment to
+  equal the specified appointment.
+
+  Returns true if a appointment was successfully updated.
 */
 bool QAppointmentModel::updateAppointment(const QAppointment& appointment)
 {
@@ -597,10 +606,9 @@ bool QAppointmentModel::updateAppointment(const QAppointment& appointment)
 }
 
 /*!
-  Removes the appointment \a appointment so long as there is a appointment in the QAppointmentModel with
-  the same uid as \a appointment.
+  Removes the appointment from the model with the same identifier as the specified \a appointment.
 
-  Returns true if the appointment was successfully removed.  Otherwise return false.
+  Returns true if a appointment was successfully removed.
 */
 bool QAppointmentModel::removeAppointment(const QAppointment& appointment)
 {
@@ -608,14 +616,14 @@ bool QAppointmentModel::removeAppointment(const QAppointment& appointment)
 }
 
 /*!
-  Removes the appointment that has the uid \a id from the QAppointmentModel;
+  Removes the appointment from the model with the specified \a identifier.
 
-  Returns true if the appointment was successfully removed.  Otherwise return false.
+  Returns true if a appointment was successfully removed.
 */
-bool QAppointmentModel::removeAppointment(const QUniqueId& id)
+bool QAppointmentModel::removeAppointment(const QUniqueId& identifier)
 {
-    QAppointmentContext *c= qobject_cast<QAppointmentContext *>(context(id));
-    if (c && c->removeAppointment(id)) {
+    QAppointmentContext *c= qobject_cast<QAppointmentContext *>(context(identifier));
+    if (c && c->removeAppointment(identifier)) {
         refresh();
         return true;
     }
@@ -623,10 +631,13 @@ bool QAppointmentModel::removeAppointment(const QUniqueId& id)
 }
 
 /*!
-  Adds the appointment \a appointment to the QAppointmentModel under the storage source \a source.
-  If source is empty will add the appointment to the default storage source.
+  Adds the \a appointment to the model under the specified storage \a source.
+  If source is null the function will add the appointment to the default storage source.
 
-  Returns true if the appointment was successfully added.  Otherwise return false.
+  Returns a valid identifier for the appointment if the appointment was
+  successfully added.  Otherwise returns a null identifier.
+
+  Note the current identifier of the specified appointment is ignored.
 */
 QUniqueId QAppointmentModel::addAppointment(const QAppointment& appointment, const QPimSource &source)
 {
@@ -641,9 +652,10 @@ QUniqueId QAppointmentModel::addAppointment(const QAppointment& appointment, con
 }
 
 /*!
-  Removes the occurrence \a occurrence from a series of repeating appointments, by creating an exception.
+  Updates the appointment in the model with the same identifier as the specified \a occurrence
+  to have an exception on the date of the occurrence.
 
-  Returns true if the exception was successfully added. Otherwise returns false.
+  Returns true if the exception was successfully added.
 */
 
 bool QAppointmentModel::removeOccurrence(const QOccurrence& occurrence)
@@ -654,9 +666,10 @@ bool QAppointmentModel::removeOccurrence(const QOccurrence& occurrence)
 /*!
   \overload
 
-  Removes the occurrence of appointment \a appointment, that occurs on the date \a date, by creating an exception.
+  Updates the appointment in the model with the same identifier as the specified \a appointment
+  to have an exception on the specified \a date.
 
-  Returns true if the exception was successfully added. Otherwise returns false.
+  Returns true if the exception was successfully added.
 */
 
 bool QAppointmentModel::removeOccurrence(const QAppointment& appointment, const QDate &date)
@@ -666,16 +679,16 @@ bool QAppointmentModel::removeOccurrence(const QAppointment& appointment, const 
 
 /*!
   \overload
+  Updates the appointment in the model with the specified \a identifier to have an
+  exception on the specified \a date.
 
-  Mark the repeating appointment identified by \a id in the this context so as not
-  to occur on \a date.  Returns true if the appointment was successfully updated,
-  otherwise returns false.
+  Returns true if the appointment was successfully updated.
 */
 
-bool QAppointmentModel::removeOccurrence(const QUniqueId &id, const QDate &date)
+bool QAppointmentModel::removeOccurrence(const QUniqueId &identifier, const QDate &date)
 {
-    QAppointmentContext *c = qobject_cast<QAppointmentContext *>(context(id));
-    if (c && c->removeOccurrence(id, date)) {
+    QAppointmentContext *c = qobject_cast<QAppointmentContext *>(context(identifier));
+    if (c && c->removeOccurrence(identifier, date)) {
         refresh();
         return true;
     }
@@ -683,11 +696,13 @@ bool QAppointmentModel::removeOccurrence(const QUniqueId &id, const QDate &date)
 }
 
 /*!
-  Replaces an occurrence of the appointment \a appointment on the date \a date with \a occurrence.
-  If \a date is null, the start date of the supplied \a occurrence will be used to create the
-  exception.
+  Updates the appointment in the model with the same identifier as the specified \a appointment to
+  have an exception on the specified \a date.  The \a occurrence will be added as a child occurrence
+  of the modified appointment.  If the specified date is null, the start date of the occurrence will be used
+  to create the exception.
 
-  Returns the uid of the replacement appointment.
+  Returns a valid identifier for the occurrence if the exception was successfully added. Otherwise
+  returns a null identifier.
 */
 
 QUniqueId QAppointmentModel::replaceOccurrence(const QAppointment& appointment, const QOccurrence& occurrence, const QDate& date)
@@ -702,12 +717,12 @@ QUniqueId QAppointmentModel::replaceOccurrence(const QAppointment& appointment, 
 }
 
 /*!
-  Remove all occurrences of the appointment \a appointment with occurrences of the appointment \a replacement that
-  occur on or after the date \a date.  If \a date is null, the start date of the \a replacement will be used as
-  the transition date.  The original \a appointment will have its repeatUntil date set to the day before the
-  transition date.
+  Updates the appointment in the model with the same identifier as the specified \a appointment to no longer repeat on or
+  after the specified \a date.  If the specified date is null, the start date of the \a replacement
+  will be used.  The \a replacement appointment will be added to the model.
 
-  Returns the uid of the replacement appointment.
+  Returns a valid identifier for the replacement appointment if the model was successfully modified. Otherwise
+  returns a null identifier.
 */
 
 QUniqueId QAppointmentModel::replaceRemaining(const QAppointment& appointment, const QAppointment& replacement, const QDate& date)
@@ -722,21 +737,21 @@ QUniqueId QAppointmentModel::replaceRemaining(const QAppointment& appointment, c
 }
 
 /*!
-  Removes the appointments specified by the list of uids \a ids.
+  Removes the records in the model specified by the list of \a identifiers.
 
-  Returns true if appointments are successfully removed.  Otherwise returns  false.
+  Returns true if appointments were successfully removed.  Otherwise returns false.
 */
-bool QAppointmentModel::removeList(const QList<QUniqueId> &ids)
+bool QAppointmentModel::removeList(const QList<QUniqueId> &identifiers)
 {
     // TODO needs better mixing code.
     // e.g. build list for each model loaded,
     // then remove list at a time, instead of appointment at a time.
     QUniqueId id;
-    foreach(id, ids) {
+    foreach(id, identifiers) {
         if (!exists(id))
             return false;
     }
-    foreach(id, ids) {
+    foreach(id, identifiers) {
         removeAppointment(id);
     }
     return true;
@@ -745,16 +760,18 @@ bool QAppointmentModel::removeList(const QList<QUniqueId> &ids)
 /*!
   \overload
 
-  Adds the PIM record encoded in \a bytes to the QAppointmentModel under the storage source \a source.
-  The format of the record in \a bytes is given by \a format.  An empty \a format string will
+  Adds the PIM record encoded in \a bytes to the model under the specified storage \a source.
+  The format of the record in \a bytes is given by the \a format string.  An empty format string will
   cause the record to be read using the data stream operators for the PIM data type of the model.
-  If \a source is empty will add the record to the default storage source.
+  If the specified source is null the function will add the record to the default storage source.
 
-  Returns valid id if the record was successfully added.  Otherwise returns an invalid id.
+  Returns a valid identifier for the record if the record was
+  successfully added.  Otherwise returns a null identifier.
 
   Can only add PIM data that is represented by the model.  This means that only appointment data
-  can be added using a QAppointmentModel.  Valid formats are "vCalendar" or an empty string.
+  can be added using a appointment model.  Valid formats are "vCalendar" or an empty string.
 
+  \sa addAppointment()
 */
 QUniqueId QAppointmentModel::addRecord(const QByteArray &bytes, const QPimSource &source, const QString &format)
 {
@@ -773,14 +790,15 @@ QUniqueId QAppointmentModel::addRecord(const QByteArray &bytes, const QPimSource
 
 /*!
   \overload
-
-  Updates the record enoded in \a bytes so long as there is a record in the QAppointmentModel with
-  the same uid as the record.  The format of the record in \a bytes is given by \a format.
+  Updates the corresponding record in the model to equal the record encoded in \a bytes.
+  The format of the record in \a bytes is given by the \a format string.
   An empty \a format string will cause the record to be read using the data stream operators
-  for the PIM data type of the model. If \a id is not null will set the record uid to \a id
+  for the PIM data type of the model. If \a id is not null will set the record identifier to \a id
   before attempting to update the record.
 
-  Returns true if the record was successfully updated.  Otherwise returns false.
+  Returns true if the record was successfully updated.
+
+  \sa updateAppointment()
 */
 bool QAppointmentModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, const QString &format)
 {
@@ -800,24 +818,30 @@ bool QAppointmentModel::updateRecord(const QUniqueId &id, const QByteArray &byte
 }
 
 /*!
-  \fn bool QAppointmentModel::removeRecord(const QUniqueId &id)
+  \fn bool QAppointmentModel::removeRecord(const QUniqueId &identifier)
   \overload
 
-  Removes the record that has the uid \a id from the QAppointmentModel.
+  Removes the record from the model with the specified \a identifier.
 
-  Returns true if the record was successfully removed.  Otherwise returns false.
+  Returns true if the record was successfully removed.
+
+  \sa removeAppointment()
 */
 
 /*!
   \overload
 
-    Returns the record with the identifier \a id encoded in the format specified by \a format.
-    An empty \a format string will cause the record to be written using the data stream
-    operators for the PIM data type of the model.
+  Returns the record in the model with the specified \a identifier encoded in the format specified by the \a format string.
+  An empty format string will cause the record to be written using the data stream
+  operators for the PIM data type of the model.
+
+  Valid formats are "vCalendar" or an empty string.
+
+  \sa appointment()
 */
-QByteArray QAppointmentModel::record(const QUniqueId &id, const QString &format) const
+QByteArray QAppointmentModel::record(const QUniqueId &identifier, const QString &format) const
 {
-    QAppointment a = appointment(id);
+    QAppointment a = appointment(identifier);
     if (a.uid().isNull())
         return QByteArray();
 
@@ -857,28 +881,26 @@ QAppointmentModel::DurationType QAppointmentModel::durationType() const
 }
 
 /*!
-  Set the model to only include appointments that end or have occurrences that end on or
-  after \a rangeStart and that start before \a rangeEnd.
-
-  Will include all events if \a rangeStart and \a rangeEnd are null.  Likewise will
-  include all events that may occur or after \a rangeStart if \a rangeEnd is null and all
-  events that may occur on or before \a rangeEnd if \a rangeStart is null.
+  Sets the occurrence model to contain only occurrences
+  that end on or after the specified range \a start time and start before
+  the specified range \a end time.
+  Both start and end time specified should be in local time.
 */
-void QAppointmentModel::setRange(const QDateTime &rangeStart, const QDateTime &rangeEnd)
+void QAppointmentModel::setRange(const QDateTime &start, const QDateTime &end)
 {
-    if (d->rStart == rangeStart && d->rEnd == rangeEnd)
+    if (d->rStart == start && d->rEnd == end)
         return;
-    d->rStart = rangeStart;
-    d->rEnd = rangeEnd;
+    d->rStart = start;
+    d->rEnd = end;
 
     foreach(QRecordIO *model, accessModels()) {
         QAppointmentIO *appointmentModel = qobject_cast<QAppointmentIO *>(model);
-        appointmentModel->setRangeFilter(rangeStart, rangeEnd);
+        appointmentModel->setRangeFilter(start, end);
     }
 }
 
 /*!
-  Returns the start of the range filter for the model if one is currently applied.
+  Returns the start of the range filter for the model.  A null date time will be returned if there is no restriction on the range start.
 
   \sa setRange()
 */
@@ -888,7 +910,7 @@ QDateTime QAppointmentModel::rangeStart() const
 }
 
 /*!
-  Returns the end of the range filter for the model if one is currently applied.
+  Returns the end of the range filter for the model  A null date time will be returned if there is no restriction on the range end.
 
   \sa setRange()
  */
@@ -925,18 +947,18 @@ public:
 
 /*!
   \class QOccurrenceModel
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QOccurrenceModel class provides access to the Calendar data.
 
-  The QOccurrenceModel is used to access the Calendar data.  It is a descendant of QAbstractItemModel
-  so is suitable for use with the Qt View classes such as QListView and QTableView, as well as
-  any custom developer Views.
+  It is a descendant of QAbstractItemModel so is suitable for use with the Qt View classes
+  such as QListView and QTableView, as well as any custom developer Views.
 
   It differs from the QAppointmentModel in that it will show each occurrence of appointments as a
   separate item in the model.  Since some appointments have infinite occurrences a date
   range must be specified to limit the total set of occurrences included in the model.  Another important difference
-  is that the values for the QAppointmentModel::Start and QAppointmentModel::End columns are converted
+  is that the values for the QAppointmentModel::Start and QAppointmentModel::End fields are converted
   to the current time zone of the device.
 */
 
@@ -960,13 +982,15 @@ public:
 /*!
   \fn QAppointment QOccurrenceModel::appointment(int row) const
 
-  Returns the appointment for the \a row specified.
+  Returns the appointment for the given \a row.
 */
 
 /*!
-  Constructs a QOccurrenceModel that contains appointments that occur in the
-  range of \a start to \a end.  The model will have the parent \a parent.
-  Both \a start and \a end should be in the local time zone.
+  Constructs an occurrence model with the given \a parent that 
+  contains only occurrences that end on or after the specified
+  range \a start time and start before the specified range \a end time.
+  Both start and end time specified should be in local time.
+
 */
 QOccurrenceModel::QOccurrenceModel(const QDateTime &start, const QDateTime &end, QObject *parent)
     : QAbstractItemModel(parent)
@@ -976,9 +1000,10 @@ QOccurrenceModel::QOccurrenceModel(const QDateTime &start, const QDateTime &end,
 }
 
 /*!
-  Constructs a QOccurrenceModel that contains appointments that
-  occur at or after \a start (in the local time zone) for a total
-  of \a count occurrences.  The model will have the parent \a parent.
+  Constructs an occurrence model with the given \a parent that contains
+  only the first \a count occurrences that end
+  on or after the specified range \a start time.
+  The start time specified should be in local time.
 */
 QOccurrenceModel::QOccurrenceModel(const QDateTime &start, int count, QObject *parent)
     : QAbstractItemModel(parent)
@@ -996,7 +1021,7 @@ void QOccurrenceModel::init(QAppointmentModel *appointmentModel)
 }
 
 /*!
-  Destroys a QOccurrenceModel.
+  Destroys the occurrence model.
 */
 QOccurrenceModel::~QOccurrenceModel()
 {
@@ -1019,9 +1044,7 @@ int QOccurrenceModel::rowCount(const QModelIndex &parent) const
 }
 
 /*!
-  \overload
-
-  Returns the number of columns for the given \a parent.
+  \reimp
 */
 int QOccurrenceModel::columnCount(const QModelIndex &parent) const
 {
@@ -1030,15 +1053,7 @@ int QOccurrenceModel::columnCount(const QModelIndex &parent) const
 }
 
 /*!
-  \overload
-
-  Returns an object that contains a serialized description of the specified \a indexes.
-  The format used to describe the items corresponding to the \a indexes is obtained from
-  the mimeTypes() function.
-
-  If the list of indexes is empty, 0 is returned rather than a serialized empty list.
-
-  Currently returns 0 but may be implemented at a future date.
+  \reimp
 */
 QMimeData *QOccurrenceModel::mimeData(const QModelIndexList &indexes) const
 {
@@ -1047,11 +1062,7 @@ QMimeData *QOccurrenceModel::mimeData(const QModelIndexList &indexes) const
 }
 
 /*!
-  \overload
-
-  Returns a list of MIME types that can be used to describe a list of model indexes.
-
-  Currently returns an empty list but may be implemented at a future date.
+  \reimp
 */
 QStringList QOccurrenceModel::mimeTypes() const
 {
@@ -1067,6 +1078,11 @@ QVariant QOccurrenceModel::appointmentData(int row, int column) const
   \overload
 
   Returns the data stored under the given \a role for the item referred to by the \a index.
+
+  The row of the index specifies which appointment to access and the column of the index is treated as
+  a \c QAppointmentModel::Field.
+
+  \sa QAppointmentModel::appointmentField()
 */
 QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
 {
@@ -1131,7 +1147,7 @@ QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
 
 /*!
   \overload
-  Returns false since QOccurrenceModel does not allow editing.  \a index, \a value and \a role
+  Returns false since occurrence model does not allow editing.  \a index, \a value and \a role
   are ignored.
 */
 bool QOccurrenceModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -1144,7 +1160,7 @@ bool QOccurrenceModel::setData(const QModelIndex &index, const QVariant &value, 
 
 /*!
   \overload
-  Returns false since QOccurrenceModel does not allow editing.  \a index and \a values
+  Returns false since occurrence model does not allow editing.  \a index and \a values
   are ignored
 */
 bool QOccurrenceModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &values)
@@ -1177,7 +1193,6 @@ QMap<int,QVariant> QOccurrenceModel::itemData(const QModelIndex &index) const
 
 /*!
   Returns true if the current filter mode of the model contains \a index.
-  Otherwise returns false.
 */
 bool QOccurrenceModel::contains(const QModelIndex &index) const
 {
@@ -1186,38 +1201,36 @@ bool QOccurrenceModel::contains(const QModelIndex &index) const
 
 /*!
   Returns true if the current filter mode of the model contains an occurrence
-  for the appointment with uid \a id.
-  Otherwise returns false.
+  for the appointment with the specified \a identifier.
 */
-bool QOccurrenceModel::contains(const QUniqueId &id) const
+bool QOccurrenceModel::contains(const QUniqueId &identifier) const
 {
     for (int i = 0; i < od->cache.size(); ++i) {
-        if (od->cache.at(i).id == id)
+        if (od->cache.at(i).id == identifier)
             return true;
     }
     return false;
 }
 
 /*!
-  If the model contains an occurrence representing an appointment with uid \a id returns
-  the index of the first occurrence.
-  Otherwise returns a null QModelIndex
+  Returns the index of the first occurrence in the model that represents an appointment with the specified \a identifier.
+  If no occurrences are found returns a null index.
 
   \sa contains()
 */
-QModelIndex QOccurrenceModel::index(const QUniqueId &id) const
+QModelIndex QOccurrenceModel::index(const QUniqueId &identifier) const
 {
     for (int i = 0; i < od->cache.size(); ++i) {
-        if (od->cache.at(i).id == id)
+        if (od->cache.at(i).id == identifier)
             return createIndex(i, 0);
     }
     return QModelIndex();
 }
 
 /*!
-  Return the id for the appointment represented by the occurrence
+  Return the identifier for the appointment represented by the occurrence
   at the row specified by \a index.  If index is null or out of the range of
-  the model will return a null id.
+  the model will return a null identifier.
 */
 QUniqueId QOccurrenceModel::id(const QModelIndex &index) const
 {
@@ -1225,15 +1238,15 @@ QUniqueId QOccurrenceModel::id(const QModelIndex &index) const
 }
 
 /*!
-  If the model contains an occurrence \a o returns the index of that occurrence.
-  Otherwise returns a null QModelIndex
+  If the model contains the \a occurrence returns the index of that occurrence.
+  Otherwise returns a null index.
 */
-QModelIndex QOccurrenceModel::index(const QOccurrence &o) const
+QModelIndex QOccurrenceModel::index(const QOccurrence &occurrence) const
 {
     if (od->cache.count() < 1)
         return QModelIndex();
     for (int i = 0; i < od->cache.size(); ++i) {
-        if (od->cache.at(i).id == o.uid() && od->cache.at(i).date == o.date())
+        if (od->cache.at(i).id == occurrence.uid() && od->cache.at(i).date == occurrence.date())
             return createIndex(i, 0);
     }
     return QModelIndex();
@@ -1258,31 +1271,29 @@ QOccurrence QOccurrenceModel::occurrence(int row) const
 }
 
 /*!
-   Returns the occurrence that occurs on the \a date specified for the appointment with
-   uid \a id.  If the appointment does not exists or does not occur on the \a date,
+   Returns the occurrence of the appointment with the specified \a identifier which occurs on
+   the specified \a date.  If the appointment does not exists or does not occur on the date,
    returns a null occurrence.
 */
-QOccurrence QOccurrenceModel::occurrence(const QUniqueId &id, const QDate &date) const
+QOccurrence QOccurrenceModel::occurrence(const QUniqueId &identifier, const QDate &date) const
 {
-    QOccurrence o(date, appointment(id));
+    QOccurrence o(date, appointment(identifier));
     if (index(o).isValid())
         return o;
     return QOccurrence();
 }
 
 /*!
-  Returns the appointment with the identifier \a id.  The appointment does
+  Returns the appointment with the specified \a identifier.  The appointment does
   not have to be in the current filter mode for it to be returned.
 */
-QAppointment QOccurrenceModel::appointment(const QUniqueId &id) const
+QAppointment QOccurrenceModel::appointment(const QUniqueId &identifier) const
 {
-    return od->appointmentModel->appointment(id);
+    return od->appointmentModel->appointment(identifier);
 }
 
 /*!
-  \overload
-  Returns the index of the item in the model specified by the given \a row, \a column
-  and \a parent index.
+  \reimp
 */
 QModelIndex QOccurrenceModel::index(int row,int column,const QModelIndex &parent) const
 {
@@ -1293,8 +1304,7 @@ QModelIndex QOccurrenceModel::index(int row,int column,const QModelIndex &parent
 }
 
 /*!
-  \overload
-    Returns the parent of the model item with the given \a index.
+  \reimp
 */
 QModelIndex QOccurrenceModel::parent(const QModelIndex &index) const
 {
@@ -1322,8 +1332,9 @@ QAppointmentModel::DurationType QOccurrenceModel::durationType() const
 // get the appointment and edit that.
 
 /*!
-  Sets the model to only contain the first \a count occurrences that occur at or after the
-  \a start (in the local time zone) of the specified range.
+  Sets the model to contain only the first \a count occurrences that end
+  on or after the specified range \a start time.
+  The start time specified should be in local time.
 */
 void QOccurrenceModel::setRange(const QDateTime &start, int count)
 {
@@ -1363,7 +1374,7 @@ QDateTime QOccurrenceModel::rangeStart() const
   Returns the end of the range specified that occurrences must start before to be included
   in the model, in the local time zone.
 
-  If the range was specified by a start and a count, this will return a null QDateTime.
+  If the range was specified by a start and a count, this will return a null date time.
 */
 QDateTime QOccurrenceModel::rangeEnd() const
 {
@@ -1371,15 +1382,15 @@ QDateTime QOccurrenceModel::rangeEnd() const
 }
 
 /*!
-  Set the model to only contain occurrences accepted by the QCategoryFilter \a f.
+  Set the model to only contain occurrences accepted by the specified \a filter.
 */
-void QOccurrenceModel::setCategoryFilter(const QCategoryFilter &f)
+void QOccurrenceModel::setCategoryFilter(const QCategoryFilter &filter)
 {
-    od->appointmentModel->setCategoryFilter(f);
+    od->appointmentModel->setCategoryFilter(filter);
 }
 
 /*!
-  Returns the QCategoryFilter that occurrences are tested against for the current filter mode.
+  Returns the category filter that occurrences are tested against for the current filter mode.
 */
 QCategoryFilter QOccurrenceModel::categoryFilter() const
 {
@@ -1396,7 +1407,7 @@ QSet<QPimSource> QOccurrenceModel::visibleSources() const
 }
 
 /*!
-  Sets the QAppointmentModel to show only appointments contained in the storage sources specified
+  Sets the model to show only appointments contained in the storage sources specified
   by \a list.
 
   Also refreshes the model.
@@ -1415,17 +1426,15 @@ QSet<QPimSource> QOccurrenceModel::availableSources() const
 }
 
 /*!
-  Returns true if the appointment uid \a id is stored in the storage source \a source.
-  Otherwise returns false.
+  Returns true if the appointment with the specified \a identifier is stored in the specified storage \a source.
 */
-bool QOccurrenceModel::sourceExists(const QPimSource &source, const QUniqueId &id) const
+bool QOccurrenceModel::sourceExists(const QPimSource &source, const QUniqueId &identifier) const
 {
-    return od->appointmentModel->sourceExists(source, id);
+    return od->appointmentModel->sourceExists(source, identifier);
 }
 
 /*!
   Returns true if the occurrence for \a index can be updated or removed.
-  Otherwise returns false.
 */
 bool QOccurrenceModel::editable(const QModelIndex &index) const
 {
@@ -1433,12 +1442,11 @@ bool QOccurrenceModel::editable(const QModelIndex &index) const
 }
 
 /*!
-  Returns true if the appointment for \a id can be updated or removed.
-  Otherwise returns false.
+  Returns true if the appointment with the specified \a identifier can be updated or removed.
 */
-bool QOccurrenceModel::editable(const QUniqueId &id) const
+bool QOccurrenceModel::editable(const QUniqueId &identifier) const
 {
-    return od->appointmentModel->editable(id);
+    return od->appointmentModel->editable(identifier);
 }
 
 /*!

@@ -41,6 +41,7 @@
 
 /*!
   \class IValueSpaceLayer
+  \internal
   \ingroup ipc
   \brief The IValueSpaceLayer class provides support for adding new logical data
   layers to the Qtopia Value Space.
@@ -93,17 +94,19 @@
  */
 
 /*!
-  \fn void IValueSpaceLayer::startup(Type type)
+  \fn bool IValueSpaceLayer::startup(Type type)
 
   Called by the Value Space system to initialize each layer.  The \a type
   parameter will be set accordingly, and layer implementors can use this to
   implement a client/server architecture if desired.
+  Returns true upon success; otherwise returns false.
  */
 
 /*!
   \fn bool IValueSpaceLayer::restart()
 
   Called by the Value Space system to restart each layer.
+  Returns true upon success; otherwise returns false.
  */
 
 /*!
@@ -258,6 +261,7 @@ Q_GLOBAL_STATIC(QValueSpaceManager, valueSpaceManager);
 /*!
   \namespace QValueSpace
   \ingroup ipc
+  \internal
 
   \brief The QValueSpace namespace provides methods that are useful to Value
   Space layer implementors.
@@ -276,6 +280,7 @@ Q_GLOBAL_STATIC(QValueSpaceManager, valueSpaceManager);
   */
 /*!
   \class QValueSpace::AutoInstall
+  \mainclass
   \internal
   */
 /*!
@@ -607,7 +612,11 @@ struct QValueSpaceItemPrivateWrite : public QValueSpaceItemPrivate
     QList<Op> ops;
 };
 
-/*!
+/*
+  XXX - the ValueSpace INI layer is currently unused and untested.  Additionally
+  the layer addition API is internal.  As such, a much simpler explanation of
+  the value space can be given in the QValueSpace class overview.
+
   \group ValueSpace
   \title Qtopia Value Space
   \brief The Qtopia Value Space allows inter-process publication of hierarchical
@@ -906,15 +915,67 @@ struct QValueSpaceItemPrivateWrite : public QValueSpaceItemPrivate
 
 /*!
   \class QValueSpaceItem
+  \mainclass
   \brief The QValueSpaceItem class allows access to Value Space items.
-
   \ingroup ipc
 
-  For an overview of the Qtopia Value Space, please see the \l ValueSpace 
-  documentation.
+  The Value Space is an inter-application hierarchy of readable, writable and
+  subscribable data.  The QValueSpaceItem class allows applications to read
+  and subscribe to this data. 
 
-  Note: The QValueSpaceItem class may only be used from an application's
-  main thread.
+  Conceptually, the Value Space is a hierarchical tree of which each item can 
+  optionally contain a QVariant value and sub-items.  A serialized version of a 
+  simple example might look like this.
+
+  \code
+  /Device/Buttons = 3
+  /Device/Buttons/1/Name = Context
+  /Device/Buttons/1/Usable = true
+  /Device/Buttons/2/Name = Select
+  /Device/Buttons/2/Usable = false
+  /Device/Buttons/3/Name = Back
+  /Device/Buttons/3/Usable = true
+  \endcode
+
+  Any application in Qtopia can read values from the Value Space, or be notified
+  asynchronously when they change using the QValueSpaceItem class.  
+
+  Items in the Value Space can be thought of as representing "objects" adhering
+  to a well known schema.  This is a conceptual differentiation, not a physical
+  one, as internally the Value Space is treated as one large tree.  In the 
+  sample above, the \c {/Device/Buttons} schema can be defined as containing a
+  value representing the number of mappable buttons on a device, and a sub-item
+  for each.  Likewise, the sub-item object schema contains two attributes - 
+  \c {Name} and \c {Usable}.  
+  
+  Applications may use the QValueSpaceObject class to create a schema object 
+  within the Value Space.  Objects remain in the Value Space as long as the
+  QValueSpaceObject instance exists - that is, they are not persistant.  If
+  the object is destroyed, or the application containing it exits (or crashes)
+  the items are removed.
+
+  Change notification is modelled in a similar way.  Applications subscribe to
+  notifications at a particular object (ie. item) in the tree.  If anything in
+  that object (ie. under that item) changes, the application is notified.  This
+  allows, for example, subscription to just the \c {/Device/Buttons} item to
+  receive notification when anything "button" related changes.
+
+  For example, 
+
+  \code
+  QValueSpaceItem buttons("/Device/Buttons");
+  qWarning() << "There are" << buttons.value().toUInt() << "buttons";
+  QObject::connect(&buttons, SIGNAL(contentsChanged()),
+                   this, SLOT(buttonInfoChanged()));
+  \endcode
+
+  will invoke the \c {buttonInfoChanged()} slot whenever any item under
+  \c {/Device/Buttons} changes.  This includes the value of \c {/Device/Buttons}
+  itself, a change of a sub-object such as \c {/Device/Buttons/2/Name} or the
+  creation (or removal) of a new sub-object, such as \c {/Device/Buttons/4}.
+
+  \i {Note:} The QValueSpaceItem class is not thread safe and may only be used from 
+  an application's main thread.
  */
 
 #define QVALUESPACEITEM_D(d) QValueSpaceItemPrivateData *md = (QValueSpaceItemPrivate::Data == d->type)?static_cast<QValueSpaceItemPrivateData *>(d):static_cast<QValueSpaceItemPrivateWrite *>(d)->data;
@@ -1105,7 +1166,7 @@ QValueSpaceItem::~QValueSpaceItem()
 }
 
 /*!
-  Returns the item name that this QValueSpaceItem refers to.
+  Returns the item name of this QValueSpaceItem.
   */
 QString QValueSpaceItem::itemName() const
 {
@@ -1118,6 +1179,11 @@ QString QValueSpaceItem::itemName() const
 /*!
   Request that the item be removed.  The provider of the item determines whether
   the request is honored or ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+  
+  \sa QValueSpaceObject::itemRemove()
  */
 void QValueSpaceItem::remove()
 {
@@ -1130,6 +1196,11 @@ void QValueSpaceItem::remove()
 
   Request that the \a subPath of item be removed.  The provider of the sub path
   determines whether the request is honored or ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+  
+  \sa QValueSpaceObject::itemRemove()
  */
 void QValueSpaceItem::remove(const QByteArray &subPath)
 {
@@ -1150,6 +1221,11 @@ void QValueSpaceItem::remove(const QByteArray &subPath)
 
   Request that the \a subPath of item be removed.  The provider of the sub path
   determines whether the request is honored or ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+  
+  \sa QValueSpaceObject::itemRemove()
  */
 void QValueSpaceItem::remove(const char *subPath)
 {
@@ -1162,6 +1238,11 @@ void QValueSpaceItem::remove(const char *subPath)
 
   Request that the \a subPath of item be removed.  The provider of the sub path
   determines whether the request is honored or ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+  
+  \sa QValueSpaceObject::itemRemove()
  */
 void QValueSpaceItem::remove(const QString &subPath)
 {
@@ -1172,6 +1253,11 @@ void QValueSpaceItem::remove(const QString &subPath)
 /*!
   Request that the value of this item be changed to \a value.  The provider of
   the item determines whether the request is honored or ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+
+  \sa QValueSpaceObject::itemSetValue()
   */
 void QValueSpaceItem::setValue(const QVariant &value)
 {
@@ -1185,6 +1271,11 @@ void QValueSpaceItem::setValue(const QVariant &value)
   Request that the value of the \a subPath of this item be changed to \a value.
   The provider of the sub path determines whether the request is honored or
   ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+
+  \sa QValueSpaceObject::itemSetValue()
   */
 void QValueSpaceItem::setValue(const QByteArray &subPath,
                                const QVariant &value)
@@ -1208,6 +1299,11 @@ void QValueSpaceItem::setValue(const QByteArray &subPath,
   Request that the value of the \a subPath of this item be changed to \a value.
   The provider of the sub path determines whether the request is honored or
   ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+
+  \sa QValueSpaceObject::itemSetValue()
   */
 void QValueSpaceItem::setValue(const char * subPath,
                                const QVariant &value)
@@ -1222,6 +1318,11 @@ void QValueSpaceItem::setValue(const char * subPath,
   Request that the value of the \a subPath of this item be changed to \a value.
   The provider of the sub path determines whether the request is honored or
   ignored.
+
+  \i {Note:} This call asynchronously \i asks the current provider of the object to 
+  change the value.  To explicitly make a change use QValueSpaceObject.
+
+  \sa QValueSpaceObject::itemSetValue()
   */
 void QValueSpaceItem::setValue(const QString & subPath,
                                const QVariant &value)
@@ -1230,15 +1331,21 @@ void QValueSpaceItem::setValue(const QString & subPath,
     setValue(subPath.toUtf8(), value);
 }
 
-/*!
-  Commit all changes made by calls to setValue() or remove().  Returns true if
-  all changes were accepted, and false if changes were not.
+/*
+   XXX
+
+  Returns true if all changes were accepted, and false if changes were not.
 
   Changes made in this way are passed to the provider of the items in question.
   These providers may choose to honor the request, ignore the request or do
   something entirely different.  Clients should expect to see results (if any)
   asynchronously some time in the future.  Even if this call returns true, the
   providers themselves may not actually update the items.
+   */
+
+/*!
+  Commit all changes made by calls to setValue() or remove().  The return value
+  is reserved for future use.
  */
 bool QValueSpaceItem::sync()
 {

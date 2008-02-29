@@ -1,8 +1,8 @@
 <page name="title" base="themes/portal" rect="0,0,0x15.45%" transparent="yes">
   <image rect="0,0,0x0" src="titlebg_0" stretch="88,89" scale="vertical" transparent="yes"/>
   <rect name="reserved" rect="0,0,0x0" color="None" brush="None" transparent="yes" />
-  <level name="signal" rect="3.4%,14.7%,7.39%x38.24%" src="signal" scale="yes" count="5" onclick="color=Highlight" interactive="yes" min="0" max="100" active="expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength">
-            expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength
+  <level name="signal" rect="3.4%,14.7%,7.39%x38.24%" src="signal" scale="yes" count="5" onclick="color=Highlight" interactive="yes" min="0" max="100" active="expr:@/Hardware/Accessories/QSignalSource/DefaultSignal/Values/SignalStrength">
+            expr:@/Hardware/Accessories/QSignalSource/DefaultSignal/Values/SignalStrength
 	</level>
         <exclusive>
           <level name="battery" rect="-12.5%,11.76%,6.81%x41.18%" src="battery" scale="yes" onclick="color=Highlight" count="5" interactive="yes" min="0" max="100" delay="1000" loop="0" play="expr:@/Accessories/Battery/Charging == true">

@@ -39,14 +39,15 @@ static const char* const QHEADSETACCESSORY_CONTYPE     = "connectionType";
 
 /*!
     \class QHeadsetAccessory
+    \mainclass
+
     \brief The QHeadsetAccessory class provides access to a headset accessory on the device.
 
-    The QHeadsetAccessory class provides access to a headset accessory
-    on the device. Headset device implementations should inherit from
-    QHeadsetAccessoryProvider.
+    QHeadsetAccessory can be used to control the microphone and speaker volume
+    on the headset using setMicrophoneVolume() and setSpeakerVolume().
 
-    The QHeadsetAccessory can be used to control the microphone and speaker
-    volume on the headset using setMicrophoneVolume() and setSpeakerVolume().
+    Headset device implementations should inherit from
+    QHeadsetAccessoryProvider.
 
     \sa QHeadsetAccessoryProvider, QHardwareInterface
 
@@ -65,27 +66,27 @@ static const char* const QHEADSETACCESSORY_CONTYPE     = "connectionType";
 /*!
     \fn void QHeadsetAccessory::microphoneVolumeModified();
 
-    Signal that is modified when the microphone volume is modified.
+    Signal that is emitted when the microphone volume is modified.
 */
 
 /*!
     \fn void QHeadsetAccessory::speakerVolumeModified();
 
-    Signal that is modified when the speaker volume is modified.
+    Signal that is emitted when the speaker volume is modified.
 */
 
 /*!
-    Construct a new headset acessory object for \a id and attach
+    Construct a new headset accessory object for provider \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the default
-    accessory that supports the headset interface.  If there is more
+    accessory provider that supports the headset interface.  If there is more
     than one service that supports the headset interface, the caller
-    should enumerate them with QHardwareManager::supports()
+    should enumerate them with QHardwareManager::providers()
     and create separate QHeadsetAccessory objects for each.
 
-    \sa QHardwareManager::supports()
+    \sa QHardwareManager::providers()
 */
 QHeadsetAccessory::QHeadsetAccessory(
     const QString& id,
@@ -97,14 +98,14 @@ QHeadsetAccessory::QHeadsetAccessory(
 }
 
 /*!
-    Destroys this headset accessory
+    Destroys the headset accessory.
 */
 QHeadsetAccessory::~QHeadsetAccessory()
 {
 }
 
 /*!
-    Returns the number of channels the headset supports
+    Returns the number of channels the headset supports.
 */
 int QHeadsetAccessory::channels() const
 {
@@ -112,7 +113,7 @@ int QHeadsetAccessory::channels() const
 }
 
 /*!
-    Determines if the headset has a microphone.
+    Returns true if the headset has a microphone; otherwise returns false.
 */
 bool QHeadsetAccessory::microphonePresent() const
 {
@@ -128,7 +129,7 @@ int QHeadsetAccessory::microphoneVolume() const
 }
 
 /*!
-    Determines if the headset has a speaker.
+    Returns true if the headset has a speaker; otherwise returns false.
 */
 bool QHeadsetAccessory::speakerPresent() const
 {
@@ -144,7 +145,8 @@ int QHeadsetAccessory::speakerVolume() const
 }
 
 /*!
-    Returns the connection type.
+    Returns the type of connection used to connect the headset accessory
+    to the handset.
 */
 QHeadsetAccessory::ConnectionType QHeadsetAccessory::connectionType() const
 {
@@ -177,10 +179,9 @@ void QHeadsetAccessory::setSpeakerVolume( const int volume )
 
 /*!
     \class QHeadsetAccessoryProvider
-    \brief The QHeadsetAccessoryProvider class provides an interface for making a headset device visible to the accessory system.
+    \mainclass
 
-    The QHeadsetAccessoryProvider class provides an interface for making a
-    headset device visible to the accessory system.
+    \brief The QHeadsetAccessoryProvider class provides an interface for making a headset device visible to the accessory system.
 
     Headset implementations inherit from this class and set their
     attributes using the set methods.  They then override setMicrophoneVolume()
@@ -191,7 +192,7 @@ void QHeadsetAccessory::setSpeakerVolume( const int volume )
 */
 
 /*!
-    Create a headset device called \a id and attach it to \a parent.
+    Create a headset device provider called \a id and attaches it to \a parent.
 */
 QHeadsetAccessoryProvider::QHeadsetAccessoryProvider
         ( const QString& id, QObject *parent )
@@ -200,7 +201,7 @@ QHeadsetAccessoryProvider::QHeadsetAccessoryProvider
 }
 
 /*!
-    Destroys this headset accessory provider.
+    Destroys the headset accessory provider.
 */
 QHeadsetAccessoryProvider::~QHeadsetAccessoryProvider()
 {
@@ -243,8 +244,8 @@ void QHeadsetAccessoryProvider::setConnectionType( const ConnectionType connecti
 }
 
 /*!
-    Set the microphone \a volume precent. The default implementation updates
-    the volume value as seen by microphoneVolume() on the client.
+    Sets the microphone volume to \a volume percent. The default implementation
+    updates the volume value as seen by microphoneVolume() on the client.
     Headset implementations should override this function to provide
     device-specific functionality and then call this implementation
     to update the client's view of the volume value.
@@ -256,8 +257,8 @@ void QHeadsetAccessoryProvider::setMicrophoneVolume( const int volume )
 }
 
 /*!
-    Set the speaker \a volume percent. The default implementation updates
-    the volume value as seen by speakerVolume() on the client.
+    Sets the speaker volume to \a volume percent. The default implementation
+    updates the volume value as seen by speakerVolume() on the client.
     Headset implementations should override this function to provide
     device-specific functionality and then call this implementation
     to update the client's view of the volume value.

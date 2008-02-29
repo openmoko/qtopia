@@ -33,11 +33,15 @@
 #include <QSet>
 
 
-// default security for a service
+// The default security for a service.
 static int DEFAULT_SERVICE_SECURITY =
         int(QBluetooth::Authenticated | QBluetooth::Encrypted);
 
+// The path at which Bluetooth service settings are stored in the value space.
 static const QString VALUE_SPACE_PATH = "Communications/Bluetooth/Services";
+
+// The name of the QSettings file in which Bluetooth service settings are
+// stored persistently.
 static const QString SERVICE_SETTINGS = "BluetoothServices";
 
 
@@ -73,7 +77,7 @@ BluetoothServiceSettings::~BluetoothServiceSettings()
     delete m_settingsValueSpace;
 }
 
-/*!
+/*
     Returns the saved settings for service \a name. If there are no saved
     settings, returns the default settings.
  */
@@ -123,9 +127,8 @@ QVariant BluetoothServiceSettings::value(const QString &name, const QString &key
 
 
 /*
-    \internal
-    \class Messenger
-    Passes messages (over IPC) between a BluetoothServiceManager and a QBluetoothAbstractService.
+    This class passes messages over IPC between the BluetoothServiceManager and
+    a QBluetoothAbstractService.
  */
 class ServiceMessenger : public QtopiaIpcAdaptor
 {
@@ -174,11 +177,9 @@ void ServiceMessenger::serviceStopped(const QString &name)
 
 
 /*
-    \internal
-    \class ServiceUserMessenger
-    Passes messages (over IPC) between a BluetoothServiceManager and those
-    who want to receive messages about services, or send messages to change
-    service settings (e.g. QBluetoothServiceController).
+    This class passes messages over IPC between the BluetoothServiceManager
+    and those who want to receive messages about services, or send messages
+    to change service settings (e.g. QBluetoothServiceController).
  */
 class ServiceUserMessenger : public QtopiaIpcAdaptor
 {
@@ -232,7 +233,57 @@ void ServiceUserMessenger::setServiceSecurity(const QString &name,
 
 //===============================================================
 
+/*!
+    \class BluetoothServiceManager
+    \brief The BluetoothServiceManager class controls Qtopia's Bluetooth services.
 
+    The Bluetooth Service Manager communicates over IPC with Qtopia's
+    Bluetooth services in order to control and track their states and
+    attributes. It also communicates with other parties, such as
+    Qtopia's Bluetooth settings application, who are interested in
+    controlling and tracking Qtopia's Bluetooth services.
+
+    The presence of the Bluetooth Service Manager provides several benefits:
+    \list
+    \o It automatically starts a Bluetooth service when it is created if it
+    was still running at the end of the last Qtopia session (or whenever it
+    was last terminated).
+    \o It records generic Bluetooth service settings across Qtopia sessions.
+    When a service is created, if it has previously registered with the 
+    Bluetooth Service Manager, the manager will set the service to use the
+    the security options that were previously assigned to the service.
+    \o External parties can control and access Qtopia Bluetooth services
+    through QBluetoothServiceController.
+    \endlist
+
+    Without the presence of the Bluetooth Service Manager, components such as
+    the QBluetoothServiceController class and Qtopia's Bluetooth settings
+    application will not function properly, as they rely on communication with
+    the Bluetooth Service Manager in order to access and control Bluetooth
+    services.
+
+    You can create custom Bluetooth services that will be automatically
+    integrated into the Qtopia Bluetooth framework, and which will be
+    accessible by the Bluetooth Service Manager, by subclassing
+    QBluetoothAbstractService. This is how Qtopia's built-in Bluetooth
+    services, such as BtHandsfreeService and BtHeadsetServices, are
+    implemented.
+
+    The manager stores persistent service settings in \c BluetoothServices.conf.
+    A default configuration file is provided at
+    \c etc/default/Trolltech/BluetoothServices.conf. This can be modified to
+    provide default settings for services.
+
+    See the \l {bluetooth-servicemanager.html} {Bluetooth Service Management Framework}
+    page for more details on the Bluetooth Service Manager's communication
+    architecture.
+
+    \ingroup QtopiaServer::Task::Bluetooth
+*/
+
+/*!
+    Constructs a BluetoothServiceManager with the given \a parent.
+*/
 BluetoothServiceManager::BluetoothServiceManager(QObject *parent)
     : QObject(parent),
       m_settings(new BluetoothServiceSettings),
@@ -241,15 +292,21 @@ BluetoothServiceManager::BluetoothServiceManager(QObject *parent)
 {
 }
 
+/*!
+    Destructor.
+*/
 BluetoothServiceManager::~BluetoothServiceManager()
 {
     delete m_settings;
 }
 
 /*!
-    Called when a service first registers itself. If the service is set to
-    autostart (in the config settings), the manager will immediately send a
-    start() message to the service.
+    \internal
+    Called when a service first registers itself with \a name and
+    \a displayName.
+
+    If the service is set to autostart (in the config settings), the manager
+    will immediately send a start() message to the service.
  */
 void BluetoothServiceManager::registerService(const QString &name, const QString &displayName)
 {
@@ -270,7 +327,8 @@ void BluetoothServiceManager::registerService(const QString &name, const QString
 }
 
 /*!
-    Start the service \a name.
+    \internal
+    Starts the service \a name.
  */
 void BluetoothServiceManager::startService(const QString &name)
 {
@@ -288,7 +346,9 @@ void BluetoothServiceManager::startService(const QString &name)
 }
 
 /*!
-    Called when service \a name emits its started() signal with \a error and \a desc.
+    \internal
+    Called when service \a name emits its started() signal with \a error
+    and \a desc.
  */
 void BluetoothServiceManager::serviceStarted(const QString &name, bool error, const QString &desc)
 {
@@ -310,7 +370,8 @@ void BluetoothServiceManager::serviceStarted(const QString &name, bool error, co
 }
 
 /*!
-    Stop the service \a name.
+    \internal
+    Stops the service \a name.
  */
 void BluetoothServiceManager::stopService(const QString &name)
 {
@@ -327,6 +388,7 @@ void BluetoothServiceManager::stopService(const QString &name)
 }
 
 /*!
+    \internal
     Called when service \a name emits its stopped() signal.
  */
 void BluetoothServiceManager::serviceStopped(const QString &name)
@@ -341,7 +403,8 @@ void BluetoothServiceManager::serviceStopped(const QString &name)
 }
 
 /*!
-    Sets security \a options for the service \a name.
+    \internal
+    Sets the security options for the service \a name to \a options.
  */
 void BluetoothServiceManager::setServiceSecurity(const QString &name, QBluetooth::SecurityOptions options)
 {

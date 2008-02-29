@@ -17,12 +17,6 @@ umount /mnt/sd 2>/dev/null
 
 . /etc/profile
 
-# The following variables define where user_tools.tgz is installed to.
-QTOPIA_TOOLS=/mnt/user/tools
-
-# start usb networking
-nohup $QTOPIA_TOOLS/usbnet.sh up > /dev/null 2>&1 &
-
 if [ -e /tmp/boot-fail ]; then
     splash -now "Boot failed" "Networking is up"
     exit 0

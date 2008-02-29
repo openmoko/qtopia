@@ -45,6 +45,7 @@ public:
     QSettings *m_btsettings;
     QValueSpaceObject *m_localDeviceValues;
     QBluetoothLocalDevice::State m_prevState;
+    bool m_stateBeforePlaneModeOn;
 };
 
 BtPowerServicePrivate::BtPowerServicePrivate(const QByteArray &devId)
@@ -68,7 +69,8 @@ BtPowerServicePrivate::~BtPowerServicePrivate()
 
 /*!
     \class BtPowerService
-    \ingroup QtopiaServer
+    \ingroup QtopiaServer::Task::Bluetooth
+    \internal
     \brief The BtPowerService class provides the Qtopia Bluetooth Power service.
 
     The \i BtPower service enables applications to notify the server
@@ -78,10 +80,15 @@ BtPowerServicePrivate::~BtPowerServicePrivate()
     The \i BtPower service is typically supplied by the Qtopia server,
     but the system integrator might change the application that
     implements this service.
+
+    \sa QCommDeviceController, QCommDeviceSession
  */
 
 /*!
-    \internal
+    Creates a new BtPowerService with the \a serverPath specifying
+    the path to use for the underlying UNIX socket.  The \a devId
+    specifies the device this BtPowerService is managing.  The QObject
+    parent is given by \a parent.
  */
 BtPowerService::BtPowerService(const QByteArray &serverPath,
                                const QByteArray &devId, QObject *parent)
@@ -100,16 +107,24 @@ BtPowerService::BtPowerService(const QByteArray &serverPath,
             this, SLOT(planeModeChanged(bool)));
 
     m_data->m_localDeviceValues->setAttribute("Enabled", QVariant(isUp()));
+
+    if (m_data->m_device->discoverable())
+        m_data->m_prevState = QBluetoothLocalDevice::Discoverable;
+    else if (m_data->m_device->connectable())
+        m_data->m_prevState = QBluetoothLocalDevice::Connectable;
+    else
+        m_data->m_prevState = QBluetoothLocalDevice::Off;
+
     // ensure the service is down if plane mode is on
+    m_data->m_stateBeforePlaneModeOn = QBluetoothLocalDevice::State(-1);
     if (m_data->m_phoneProfileMgr->planeMode()) {
+        m_data->m_stateBeforePlaneModeOn = m_data->m_prevState;
         bringDown();
     }
-
-    m_data->m_prevState = QBluetoothLocalDevice::State(-1);
 }
 
 /*!
-    \internal
+    Destructor.
  */
 BtPowerService::~BtPowerService()
 {
@@ -118,7 +133,7 @@ BtPowerService::~BtPowerService()
 }
 
 /*!
-    Brings up the device.
+    \reimp
 */
 void BtPowerService::bringUp()
 {
@@ -139,7 +154,7 @@ void BtPowerService::bringUp()
 }
 
 /*!
-    Brings down the device.
+    \reimp
 */
 void BtPowerService::bringDown()
 {
@@ -152,7 +167,7 @@ void BtPowerService::bringDown()
 }
 
 /*!
-    Returns whether the device is up.
+    \reimp
 */
 bool BtPowerService::isUp() const
 {
@@ -211,9 +226,12 @@ void BtPowerService::planeModeChanged(bool enabled)
 {
     // switch the device off if plane mode is switched on, and vice-versa
     if (enabled) {
+        m_data->m_stateBeforePlaneModeOn = m_data->m_prevState;
         bringDown();
     } else {
-        bringUp();
+        // don't bring up device if it was off before phone went to plane mode
+        if (m_data->m_stateBeforePlaneModeOn != QBluetoothLocalDevice::Off)
+            bringUp();
     }
 }
 
@@ -249,9 +267,17 @@ bool BtPowerService::shouldBringDown(QUnixSocket *) const
 
 /*!
   \class BtPowerServiceTask
-  \ingroup QtopiaServer::Task
+  \ingroup QtopiaServer::Task::Bluetooth
   \brief The BtPowerServiceTask class provides the BtPowerService.
- */
+
+  The \i BtPower service enables applications to notify the server
+  of Bluetooth device useage, such that the server can intelligently
+  manage the bluetooth device for maximum power efficiency.
+
+  The \i BtPower service is typically supplied by the Qtopia server,
+  but the system integrator might change the application that
+  implements this service.
+*/
 
 /*!
     \internal

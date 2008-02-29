@@ -34,16 +34,36 @@
 
 /*!
     \class QHardwareInterface
-    \brief The QHardwareInterface class is a base-class for accessory classes.
+    \mainclass
+    \brief The QHardwareInterface class is the base class of all accessory classes.
 
-    QHardwareInterface is part of the accessory system which
-    provides information about the available physical accessories.
-    QHardwareInterface is used as a base-class for hardware accessory classes.
+    QHardwareInterface and the accessory classes are part of the
+    \l {Qtopia Accessory System}, which provides information and on the
+    availability of physical accessories and an API for controlling those
+    accessories.  The accessory API is split into two sets of classes:
+    accessory provider classes and accessory client classes.  Both sets are
+    subclasses of QHardwareInterface.
+    
+    The accessory provider classes implement device-specific code for
+    controlling the hardware feature and manage the state that is reported to
+    the rest of Qtopia through the accessory client API.  Provider classes are
+    created by passing QAbstractIpcInterface::Server as the mode parameter when
+    constructing QHardwareInterface derived classes.
 
-    Default accessories are defined in
-    \c {<Qtopia Runtime Prefix>/etc/default/Trolltech/HardwareAccessories.conf}.
-    The file contains a list of interface names and the ID of the default
-    accessory, for example:
+    The accessory client classes provide an API for querying the state of and
+    controlling accessories.  Client classes communicate with provider classes
+    through an Inter Process Communication (IPC) mechanism.  Multiple client
+    instances can connect to a single accessory provider.  Client classes are
+    created by passing QAbstractIpcInterface::Client as the mode parameter when
+    constructing QHardwareInterface derived classes.
+
+    The accessory system supports multiple accessory providers of the same
+    interface type.  For example, a device could have a primary and secondary
+    battery.  Each battery would be exposed as a separate instance of a
+    QBatteryAccessoryProvider derived class.  Default accessories are defined
+    in \c {<Qtopia Runtime Prefix>/etc/default/Trolltech/HardwareAccessories.conf}.
+    This file contains a list of interface names and the identity of the
+    default accessory, for example:
 
     \code
     [Defaults]
@@ -56,8 +76,8 @@
 */
 
 /*!
-    Creates a QHardwareInterface object with identity \a name which
-    belongs to a \a id and operates in \a mode. The object is attached to
+    Constructs a new QHardwareInterface object with interface type \a name,
+    identity \a id and operates in \a mode.  The object is attached to
     \a parent.
 
     If \a id is empty the default accessory for \a name will be
@@ -83,7 +103,7 @@ QHardwareInterface::QHardwareInterface( const QString& name,
 }
 
 /*!
-    \internal
+    Destroys the hardware interface object.
 */
 QHardwareInterface::~QHardwareInterface()
 {

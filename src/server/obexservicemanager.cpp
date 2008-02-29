@@ -212,7 +212,8 @@ private slots:
     void sessionFailed();
 
 private:
-    void startBeamingFile(const QString &filename, const QString &mimetype, bool autodelete);
+    void startBeamingFile(const QString &filename, const QString &mimetype, const QString &displayName,
+                          bool autodelete);
     void startBeamingVObj(const QByteArray &data, const QString &mimetype);
 
     bool m_busy;
@@ -223,6 +224,7 @@ private:
     bool m_autodelete;
     QString m_filename;
     QString m_mimetype;
+    QString m_prettyFile;
     QCommDeviceSession *m_session;
     QByteArray m_deviceName;
 
@@ -330,7 +332,7 @@ void InfraredBeamingService::sessionOpen()
 
     client->connect();
     if (m_file) {
-        client->send(m_file, m_filename, m_mimetype);
+        client->send(m_file, m_prettyFile, m_mimetype);
     }
     else {
         client->send(m_vobj, m_filename, m_mimetype);
@@ -350,9 +352,11 @@ void InfraredBeamingService::startBeamingVObj(const QByteArray &data, const QStr
     m_mimetype = mimetype;
     if (m_mimetype == "text/x-vcard") {
         m_filename = "MyBusinessCard.vcf";
+        m_prettyFile = m_filename;
     }
     else if (m_mimetype == "text/x-vcalendar") {
         m_filename = "vcal.vcs";
+        m_prettyFile = m_filename;
     }
     m_vobj = data;
     m_type = VObject;
@@ -405,6 +409,7 @@ void InfraredBeamingService::doneBeamingVObj(bool error)
  */
 void InfraredBeamingService::startBeamingFile(const QString &filename,
                                               const QString &mimetype,
+                                              const QString &displayName,
                                               bool autodelete)
 {
     m_file = new QFile(filename);
@@ -420,6 +425,7 @@ void InfraredBeamingService::startBeamingFile(const QString &filename,
     m_type = File;
     m_filename = filename;
     m_mimetype = mimetype;
+    m_prettyFile = displayName;
     m_autodelete = autodelete;
 
     m_busy = true;
@@ -455,6 +461,8 @@ void InfraredBeamingService::doneBeamingFile(bool error)
 /*!
     Asks the service to beam the currently set personal business card to a remote
     device.  If no business card is set, the user will be notified appropriately.
+
+    \sa beamBusinessCard()
 */
 void InfraredBeamingService::beamPersonalBusinessCard()
 {
@@ -479,6 +487,8 @@ void InfraredBeamingService::beamPersonalBusinessCard()
 
 /*!
     Asks the service to beam the business card represented by \a contact.
+
+    \sa beamPersonalBusinessCard()
 */
 void InfraredBeamingService::beamBusinessCard(const QContact &contact)
 {
@@ -495,6 +505,8 @@ void InfraredBeamingService::beamBusinessCard(const QContact &contact)
 /*!
     Asks the service to beam the business card represented by \a request.  The
     request object should contain raw serialized QContact data.
+
+    \sa beamPersonalBusinessCard()
 */
 void InfraredBeamingService::beamBusinessCard(const QDSActionRequest &request)
 {
@@ -537,7 +549,12 @@ void InfraredBeamingService::beamFile(const QString &filename,
     if (m_busy)
         return;
 
-    startBeamingFile(filename, mimetype, autodelete);
+    QString display = filename;
+    int pos = filename.lastIndexOf("/");
+    if ( pos != -1 )
+        display = filename.mid( pos + 1 );
+
+    startBeamingFile(filename, mimetype, display, autodelete);
 }
 
 /*!
@@ -553,7 +570,7 @@ void InfraredBeamingService::beamFile(const QContentId &id)
     QContent content(id);
     QMimeType mime(content);
 
-    startBeamingFile(content.file(), mime.id(), false);
+    startBeamingFile(content.file(), mime.id(), content.name(), false);
 }
 #endif
 
@@ -567,6 +584,7 @@ struct BluetoothPushRequest
     QBluetoothAddress m_addr;
     QString m_mimetype;
     QString m_filename;
+    QString m_prettyFile;
     bool m_autodelete;
 };
 
@@ -722,7 +740,7 @@ void BluetoothPushingService::sdapQueryComplete(const QBluetoothSdpQueryResult &
     qLog(Bluetooth) << "Service searching complete";
 
     bool success = false;
-    int channel;
+    int channel = -1;
 
     foreach ( QBluetoothSdpRecord service, result.services() ) {
         if ( service.isInstance( QBluetooth::ObjectPushProfile ) ) {
@@ -774,7 +792,7 @@ void BluetoothPushingService::sdapQueryComplete(const QBluetoothSdpQueryResult &
 
     client->connect();
     if (m_device) {
-        client->send(m_device, m_req.m_filename, m_req.m_mimetype);
+        client->send(m_device, m_req.m_prettyFile, m_req.m_mimetype);
     }
     else {
         client->send(m_req.m_vobj, m_req.m_filename, m_req.m_mimetype);
@@ -790,9 +808,11 @@ void BluetoothPushingService::startPushingVObj(const QBluetoothAddress &addr,
 {
     if (mimetype == "text/x-vcard") {
         m_req.m_filename = "MyBusinessCard.vcf";
+        m_req.m_prettyFile = m_req.m_filename;
     }
     else {
         m_req.m_filename = "vcal.vcs";
+        m_req.m_prettyFile = m_req.m_filename;
     }
 
     QBluetoothLocalDevice localDev;
@@ -905,6 +925,8 @@ bool BluetoothPushingService::getPersonalVCard(QByteArray &arr)
 /*!
     Asks the service to send the currently set personal business card to a remote
     device.  If no business card is set, the user will be notified appropriately.
+
+    \sa pushBusinessCard()
  */
 void BluetoothPushingService::pushPersonalBusinessCard()
 {
@@ -933,6 +955,8 @@ void BluetoothPushingService::pushPersonalBusinessCard()
 
     The user will not be prompted to select a remote device to send to, instead
     the a device with address given by \a addr will be used.
+
+    \sa pushPersonalBusinessCard()
  */
 void BluetoothPushingService::pushPersonalBusinessCard(const QBluetoothAddress &addr)
 {
@@ -961,6 +985,8 @@ void BluetoothPushingService::pushPersonalBusinessCard(const QBluetoothAddress &
 
 /*!
     Asks the service to send the business card represented by \a contact.
+
+    \sa pushPersonalBusinessCard()
  */
 void BluetoothPushingService::pushBusinessCard(const QContact &contact)
 {
@@ -986,6 +1012,8 @@ void BluetoothPushingService::pushBusinessCard(const QContact &contact)
 /*!
     Asks the service to send the business card represented by \a request.  The
     request object should contain raw serialized QContact data.
+
+    \sa pushPersonalBusinessCard()
  */
 void BluetoothPushingService::pushBusinessCard(const QDSActionRequest &request)
 {
@@ -1011,6 +1039,8 @@ void BluetoothPushingService::pushBusinessCard(const QDSActionRequest &request)
 /*!
     Asks the service to beam a vCalendar object represented by \a request.  The
     request object should contain raw serialized QTask or QAppointment data.
+
+    \sa pushBusinessCard()
  */
 void BluetoothPushingService::pushCalendar(const QDSActionRequest &request)
 {
@@ -1050,6 +1080,11 @@ void BluetoothPushingService::pushFile(const QString &filename,
     m_req.m_mimetype = mimetype;
     m_req.m_autodelete = autodelete;
 
+    m_req.m_prettyFile = filename;
+    int pos = filename.lastIndexOf( "/" );
+    if ( pos != -1 )
+        m_req.m_prettyFile = filename.mid( pos + 1 );
+
     m_busy = true;
     startSession();
 }
@@ -1072,6 +1107,7 @@ void BluetoothPushingService::pushFile(const QContentId &id)
     m_req.m_filename = content.file();
     m_req.m_mimetype = mime.id();
     m_req.m_autodelete = false;
+    m_req.m_prettyFile = content.name();
 
     m_busy = true;
     startSession();
@@ -1098,6 +1134,7 @@ void BluetoothPushingService::pushFile(const QBluetoothAddress &addr, const QCon
     m_req.m_filename = content.file();
     m_req.m_mimetype = mime.id();
     m_req.m_autodelete = false;
+    m_req.m_prettyFile = content.name();
 
     m_busy = true;
     startSession();
@@ -1274,8 +1311,10 @@ void ObexPushServiceProvider::setSecurityOptions(QBluetooth::SecurityOptions opt
     \ingroup QtopiaServer
     \brief The ObexServiceManager class is responsible for managing OBEX related services over Bluetooth and Infrared.
 
-    ObexServiceManager provides a common infrastructure for OBEX related services, such as
-    the OPUSH Bluetooth profile and IrXfer Infrared profile.
+    ObexServiceManager provides and manages the Bluetooth OBEX Push
+    service and the Infrared IrXfer server.  It also provides a common
+    infrastructure for these services, including user notification of
+    files transferred and received.
   */
 
 /*!
@@ -1322,7 +1361,7 @@ ObexServiceManager::ObexServiceManager(QObject *parent) : QObject(parent)
 }
 
 /*!
-    \internal
+    Destructor.
 */
 ObexServiceManager::~ObexServiceManager()
 {

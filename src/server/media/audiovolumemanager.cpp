@@ -19,7 +19,6 @@
 **
 ****************************************************************************/
 
-#include <qdebug.h>
 #include <qtopiaipcenvelope.h>
 
 #include "audiovolumemanager.h"
@@ -83,43 +82,25 @@ void AudioVolumeManager::setMuted(bool mute)
     }
 }
 
-void AudioVolumeManager::registerHandler
-(
- QString const& domain,
- QString const& channel
-)
+void AudioVolumeManager::registerHandler(QString const& domain, QString const& channel)
 {
-    qDebug() << "AudioVolumeManager::registerHandler" << domain << channel;
     m_vsps[domain] = channel;
 }
 
-void AudioVolumeManager::unregisterHandler
-(
- QString const& domain,
- QString const& channel
-)
+void AudioVolumeManager::unregisterHandler(QString const& domain, QString const& channel)
 {
     VolumeServiceProviders::iterator it = m_vsps.find(domain);
-    if (it != m_vsps.end())
-    {
-        if ((*it).compare(channel) == 0)
-        {
-            m_vsps.erase(it);
-        }
-    }
+    if (it != m_vsps.end() && (*it).compare(channel) == 0)
+        m_vsps.erase(it);
 }
 
 void AudioVolumeManager::setActiveDomain(QString const& activeDomain)
 {
-    qDebug() << "AudioVolumeManager::setActiveDomain" << activeDomain;
-
     m_domains.push_front(activeDomain);
 }
 
 void AudioVolumeManager::resetActiveDomain(QString const& oldDomain)
 {
-    qDebug() << "AudioVolumeManager::resetActiveDomain" << oldDomain;
-
     m_domains.removeAll(oldDomain);
 }
 
@@ -136,8 +117,6 @@ QString AudioVolumeManager::findProvider() const
         if (it != m_vsps.end())
             provider = *it;
     }
-
-//    qDebug() << "AudioVolumeManager::findProvider() returning" << provider;
 
     return provider;
 }

@@ -52,7 +52,7 @@ class QtopiaIpcAdaptor;
 //
 // ============================================================================
 
-class QDSActionPrivate : public QObject
+class QTOPIA_AUTOTEST_EXPORT QDSActionPrivate : public QObject
 {
     Q_OBJECT
 

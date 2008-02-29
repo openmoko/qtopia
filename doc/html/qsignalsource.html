@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QSignalSource Class Reference</title>
+  <title>QSignalSource Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QSignalSource Class Reference</h1>
-<p>The QSignalSource class provides access to information about signal sources on the device. <a href="#details">More...</a></p>
-<pre>#include &lt;QSignalSource&gt;</pre><p>Inherits <a href="qhardwareinterface.html">QHardwareInterface</a>.</p>
+<p>The QSignalSource class provides access to information about signal sources on devices. <a href="#details">More...</a></p>
+<pre>    #include &lt;QSignalSource&gt;</pre><p>Inherits <a href="qhardwareinterface.html">QHardwareInterface</a>.</p>
 <p>Inherited by <a href="qsignalsourceprovider.html">QSignalSourceProvider</a>.</p>
 <ul>
 <li><a href="qsignalsource-members.html">List of all members, including inherited members</a></li>
@@ -58,22 +60,22 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QSignalSource class provides access to information about signal sources on the device.</p>
-<p>Signal sources are components that provide radio signal details to Qtopia. A signal source could be an internal modem monitoring the GSM/3G network signal or a wireless LAN interface on VoIP devices. The QSignalSource API allows applications to query the status of such signals.</p>
+<p>The QSignalSource class provides access to information about signal sources on devices.</p>
+<p>Signal sources are accessories that provide radio signal details to Qtopia. A signal source could be an internal modem monitoring the GSM/3G network signal or a wireless LAN interface on VoIP devices as indicated by <a href="qsignalsource.html#type">type</a>(). QSignalSource allows applications to query the availability through <a href="qsignalsource.html#availability">availability</a>(), the signal level through <a href="qsignalsource.html#signalStrength">signalStrength</a>() and emits signals <a href="qsignalsource.html#availabilityChanged">availabilityChanged</a>() and <a href="qsignalsource.html#signalStrengthChanged">signalStrengthChanged</a>() when those values change.</p>
 <p>In addition to the above hardware related signal sources Qtopia provides a virtual default signal source. This default source is selected from the list of available QSignalSource providers. The selection may be configured in the <tt>Trolltech/SignalStatus</tt> configuration file. The following keys apply:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>key</th><th>Decription</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>SignalSources/DefaultSignalSource</td><td>Name (ID) of the QSignalSource to use as the default signal source.</td></tr>
+<thead><tr valign="top" class="qt-style"><th>key</th><th>Decription</th></tr></thead>
+<tr valign="top" class="odd"><td>SignalSources/DefaultSignalSource</td><td>Name (ID) of the QSignalSource to use as the default signal source.</td></tr>
 </table></p>
-<p>If the default signal source is not configured the modem signal source is preferred over a WLAN signal source. If there are several signal sources of the same type the first signal source that is created will be used. If the default signal source is configured, but the specified provider does not exist, then QSignalSource becomes invalid.</p>
-<p>If the default signal source is not suitable a specific QSignalSource can be selected as shown in the following example:</p>
-<pre>&nbsp;   QString requestedType = &quot;wlan&quot;;
-    QSignalSource* src = 0;
-    QValueSpaceItem item(&quot;/Hardware/Accessories/SignalSources/&quot;);
-    QStringList signalSources = item.subPaths();
+<p>If the default signal source is not explicitly configured via the configuration file above the modem signal source is preferred over a WLAN signal source. If there are several signal sources of the same type the first signal source that is created will be used. If the default signal source is configured, but the specified provider does not exist, then QSignalSource becomes invalid. The default signal is provided by the <a href="defaultsignal.html">DefaultSignal</a> server task.</p>
+<p>A specific QSignalSource can be selected as shown in the following example:</p>
+<pre>    QString requestedType = &quot;wlan&quot;;
+    QHardwareManager man( &quot;QSignalSource&quot; );
+    QStringList providers = man.providers();
 
-    //find a WLAN signal source
-    foreach( QString signalSourceId, signalSources )
+    QSignalSource* src = 0;
+<span class="comment">    //find a WLAN signal source</span>
+    foreach( QString signalSourceId, providers )
     {
         src = new QSignalSource( signalSourceId, this );
         if ( src-&gt;type() == requestedType ) {
@@ -85,15 +87,15 @@
     }
 
     if ( !src ) {
-        //could not find signal source for wlan
-        //fall back to virtual default signal source
+        <span class="comment">//could not find signal source for WLAN</span>
+        <span class="comment">//fall back to virtual default signal source</span>
         src = new QSignalSource( &quot;DefaultSignal&quot;, this );
         if ( src-&gt;availability() == QSignalSource::Invalid ) {
-            //no signal source available at all
+            <span class="comment">//no signal source available at all</span>
         }
     }</pre>
 <p>New signal sources can be added to Qtopia via the <a href="qsignalsourceprovider.html">QSignalSourceProvider</a> class.</p>
-<p>See also <a href="qsignalsourceprovider.html">QSignalSourceProvider</a>.</p>
+<p>See also <a href="qsignalsourceprovider.html">QSignalSourceProvider</a>, <a href="qhardwaremanager.html">QHardwareManager</a>, and <a href="defaultsignal.html">DefaultSignal</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Availability-enum"></a>enum QSignalSource::Availability</h3>
@@ -101,30 +103,30 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QSignalSource::Available</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The signal source is available.</td></tr>
-<tr><td valign="top"><tt>QSignalSource::NotAvailable</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The Signal source is not available. If the signal source is of type wlan the signal strength is temporarily not available while the wlan interface is not connected.</td></tr>
+<tr><td valign="top"><tt>QSignalSource::NotAvailable</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The Signal source is not available. If the signal source is of type <tt>&quot;wlan&quot;</tt> the signal strength is temporarily not available while the WLAN interface is not connected.</td></tr>
 <tr><td valign="top"><tt>QSignalSource::Invalid</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The signal source is not valid. This is distinct from the not available case. A reason for this state could be that <a href="qsignalsource.html">QSignalSource</a> was initialised with an invalid/not existing ID or in the case of the default signal source there simply is no signal source available that the default signal source could map to.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QSignalSource"></a>QSignalSource::QSignalSource ( const <a href="qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a new signal source object for <i>id</i> with the specified <i>parent</i>.</p>
+<p>Constructs a new signal source for provider <i>id</i> with the specified <i>parent</i>.</p>
 <p>If <i>id</i> is not passed, this class will use the default signal source.</p>
 <h3 class="fn"><a name="dtor.QSignalSource"></a>QSignalSource::~QSignalSource ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destroys the <a href="qsignalsource.html">QSignalSource</a> instance.</p>
+<p>Destroys the <a href="qsignalsource.html">QSignalSource</a>.</p>
 <h3 class="fn"><a name="availability"></a><a href="qsignalsource.html#Availability-enum">Availability</a> QSignalSource::availability () const</h3>
 <p>Returns the signal source availability.</p>
 <h3 class="fn"><a name="availabilityChanged"></a>void QSignalSource::availabilityChanged ( <a href="qsignalsource.html#Availability-enum">QSignalSource::Availability</a> <i>availability</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted whenever the availability of the signal source changes. The new value is passed along via <i>availability</i>.</p>
+<p>This signal is emitted whenever the availability of the signal source changes; <i>availability</i> is the new value.</p>
 <h3 class="fn"><a name="signalStrength"></a>int QSignalSource::signalStrength () const</h3>
-<p>Returns the signal source strength in percentage, or -1 if the strength is unavailable or invalid.</p>
+<p>Returns the signal source strength as a percentage of the maximum strength, or -1 if the strength is unavailable or invalid.</p>
 <h3 class="fn"><a name="signalStrengthChanged"></a>void QSignalSource::signalStrengthChanged ( int <i>signalStrength</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted whenever the strength of the signal changes. <i>signalStrength</i> is the new value.</p>
+<p>This signal is emitted whenever the strength of the signal changes; <i>signalStrength</i> is the new value.</p>
 <h3 class="fn"><a name="type"></a><a href="qstring.html">QString</a> QSignalSource::type () const</h3>
-<p>Returns the type of the signal source, e.g. wlan, modem, or an empty string this signal source is invalid.</p>
+<p>Returns the type of the signal source, e.g&#x2e; <tt>&quot;wlan&quot;</tt>, <tt>&quot;modem&quot;</tt>, or an empty string if this signal source is invalid.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

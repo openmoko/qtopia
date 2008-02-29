@@ -46,21 +46,23 @@
 
 /*!
     \class QObexPushClient
+    \mainclass
     \brief The QObexPushClient class encapsulates an OBEX PUSH client.
 
     The QObexPushClient class can be used to send files to an OBEX Push
     server.  The file sent can either be a business card (vCard), calendar (vCal),
     or any other file type.  This class can also be used to request a business card,
-    or a business card exchange.
+    or perform a business card exchange.
 
-    Here is an example of sending a file over Bluetooth:
+    Here is an example of using QObexPushClient to send a file over a
+    Bluetooth connection:
 
     \code
-        QBluetoothObexSocket *sock =
+        QBluetoothObexSocket *socket =
             new QBluetoothObexSocket("00:00:00:00:00:01", 1); // Fake address, rfcomm channel 1
 
-        if (sock->connect()) {
-            QObexPushClient *sender = new QObexPushClient(sock);
+        if (socket->connect()) {
+            QObexPushClient *sender = new QObexPushClient(socket);
             sender->connect();
             QByteArray data = getSomeData();
             sender->send(data, "MyData.txt");
@@ -102,7 +104,7 @@
     \enum QObexPushClient::State
     Defines the possible states for a push client.
 
-    \value Ready The client is ready to send requests to an OBEX service. This is the default state.
+    \value Ready The client is ready to send commands to an OBEX service. This is the default state.
     \value Connecting The client is connecting to the server.
     \value Disconnecting The client is disconnecting from the server.
     \value Streaming A file transfer operation is in progress.
@@ -115,7 +117,7 @@
 
     \value NoError No error has occurred.
     \value LinkError A connection link has been interrupted. If this error occurs, the client state will change to QObexPushClient::Closed and the client cannot be used for any more operations.
-    \value TransportConnectionError Error while connecting the underlying socket transport.
+    \value TransportConnectionError The underlying socket transport is not connected.
     \value RequestFailed The client's request was refused by the remote service, or an error occured while sending the request.
     \value Aborted The command was aborted by a call to abort().
     \value UnknownError An error other than those specified above occurred.
@@ -183,7 +185,6 @@ public:
 
     QObexPushClient *m_parent;
     QQueue<QObexCommand *> m_q;
-    QObexSocket *m_socket;
     obex_t *m_self;
 
 private:
@@ -194,10 +195,24 @@ private:
     qint64 m_bytes;
 };
 
-QObexPushClientPrivate::QObexPushClientPrivate(QObexSocket *socket, QObexPushClient *parent) :
-        QObject(parent), m_self(NULL)
+QObexPushClientPrivate::QObexPushClientPrivate(QObexSocket *socket, QObexPushClient *parent)
+    : QObject(parent),
+      m_self(0)
 {
-    m_socket = socket;
+    if (socket && socket->isConnected()) {
+        m_self = static_cast<obex_t *>(socket->handle());
+        if (m_self) {
+            OBEX_SetUserCallBack(m_self, qobex_sender_callback, 0);
+            OBEX_SetUserData( m_self, this );
+
+            QSocketNotifier *sn = new QSocketNotifier(socket->socketDescriptor(),
+                    QSocketNotifier::Read, this);
+            QObject::connect(sn, SIGNAL(activated(int)), this, SLOT(processInput()));
+            QObject::connect(this, SIGNAL(enableSocketNotifier(bool)),
+                            sn, SLOT(setEnabled(bool)));
+        }
+    }
+
     m_buf = 0;
 
     resetState();
@@ -454,11 +469,7 @@ static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, int /*mode
 
 void QObexPushClientPrivate::processInput()
 {
-    // Check for a bizarre case
-    //Q_ASSERT(m_state != QObexPushClient::Ready);
-    Q_ASSERT(m_self);
-
-    OBEX_HandleInput( m_self, 0 );
+    OBEX_HandleInput(m_self, 0);
 }
 
 void QObexPushClientPrivate::updateState(QObexPushClient::State state)
@@ -544,24 +555,9 @@ void QObexPushClientPrivate::doPending()
     }
 
     if (!m_self) {
-        // connect transport socket
-        if (!m_socket->isConnected() && !m_socket->connect()) {
-            commandFinished(QObexPushClient::TransportConnectionError);
-            return;
-        }
-
-        m_self = static_cast<obex_t *>(m_socket->handle());
-        OBEX_SetUserCallBack(m_self, qobex_sender_callback, 0);
-        OBEX_SetUserData( m_self, this );
-
-        QSocketNotifier *sn = new QSocketNotifier( OBEX_GetFD( m_self ),
-                QSocketNotifier::Read,
-                this );
-        QObject::connect(sn, SIGNAL(activated(int)), this, SLOT(processInput()));
-        QObject::connect(this, SIGNAL(enableSocketNotifier(bool)),
-                         sn, SLOT(setEnabled(bool)));
+        commandFinished(QObexPushClient::TransportConnectionError);
+        return;
     }
-
 
     switch (cmd->m_cmd) {
         case QObexCommand::CONNECT:
@@ -719,11 +715,17 @@ int QObexPushClientPrivate::addCommand(QObexCommand *cmd)
     return cmd->m_id;
 }
 
+//================================================================
+
 /*!
-    Constructs a new OBEX Push Client.  The OBEX socket to use
-    is given by \a socket.  The socket should generally be connected, however
-    if it is not, the QObexSocket::connect() method of the socket will be executed first.
-    The \a parent parameter specifies the \c QObject parent.
+    Constructs an OBEX Push client.  The \a socket parameter specifies the
+    OBEX socket to use for the transport connection. The \a parent specifies
+    the parent object.
+
+    The socket must be connected; that is, you have either called 
+    QObexSocket::connect() on the socket, or the socket has been obtained from 
+    \c QObexServer::nextPendingConnection(). Otherwise, commands will finish
+    with TransportConnectionError.
 */
 QObexPushClient::QObexPushClient(QObexSocket *socket, QObject *parent) : QObject(parent)
 {
@@ -742,7 +744,7 @@ QObexPushClient::QObexPushClient(QObexSocket *socket, QObject *parent) : QObject
 }
 
 /*!
-    Deconstructs an OBEX Push Client.
+    Destroys the client.
 */
 QObexPushClient::~QObexPushClient()
 {
@@ -751,12 +753,12 @@ QObexPushClient::~QObexPushClient()
 }
 
 /*!
-    Requests the client to connect to the server.  The \c QObexSocket will
-    be used to establish the connection if the socket is not yet connected.
-    After this, the OBEX \bold{CONNECT} command will be sent.  This method returns
-    immediately after queuing the command to be performed.  One can track
-    the progress of the command by using the commandFinished and
-    commandStarted.
+    Connects to the OBEX server. 
+
+    This function returns immediately. It will be executed asynchronously, and
+    the unique identifier that is returned from this function can be used to
+    track the the status of the command through the currentId() function and
+    the commandStarted() and commandFinished() signals.
 
     \sa disconnect()
 */
@@ -766,12 +768,12 @@ int QObexPushClient::connect()
 }
 
 /*!
-    Queues a disconnect request.  The OBEX \bold{DISCONNECT} comand will be sent,
-    after which the socket will be closed.  This method returns immediately after
-    queuing the command to be performed.  One can track the progress of the command
-    by using the commandFinished and commandStarted signals.
+    Disconnects from the OBEX server.
 
-    Returns the id of the command.
+    This function returns immediately. It will be executed asynchronously, and
+    the unique identifier that is returned from this function can be used to
+    track the the status of the command through the currentId() function and
+    the commandStarted() and commandFinished() signals.
 
     \sa connect()
 */
@@ -781,12 +783,15 @@ int QObexPushClient::disconnect()
 }
 
 /*!
-    Initiates a new send request.  The sender will connect to the server and perform a push
-    operation with the contents of \a device.  The \a filename is used for display purposes.
-    If the \a mimetype is not provided (empty) then the mimetype will be guessed based on
-    the file extension.
+    Sends the contents of \a device to the OBEX server, using \a filename and
+    \a mimetype to describe the contents to the server. If the \a mimetype
+    is an empty string, then the client will assume a mimetype based on the
+    file extension in \a filename.
 
-    This method returns a unique command id.
+    This function returns immediately. It will be executed asynchronously, and
+    the unique identifier that is returned from this function can be used to
+    track the the status of the command through the currentId() function and
+    the commandStarted() and commandFinished() signals.
  */
 int QObexPushClient::send(QIODevice *device, const QString &filename,
                           const QString &mimetype)
@@ -795,9 +800,10 @@ int QObexPushClient::send(QIODevice *device, const QString &filename,
 }
 
 /*!
-    This is a convenience method.  It functions essentially like the above method.
-    The \a array contains the contents to be pushed to the server, while \a filename
-    and \a mimetype function as in the above method.
+    \overload
+
+    This convenience function sends the contents of \a array to the OBEX
+    server, using \a filename and \a mimetype to describe the contents.
 */
 int QObexPushClient::send(const QByteArray &array, const QString &filename,
                           const QString &mimetype)
@@ -806,8 +812,7 @@ int QObexPushClient::send(const QByteArray &array, const QString &filename,
 }
 
 /*!
-    Performs a push operation on a business card to the server.  The contents of the
-    business card are given by \a vcard.
+    Sends the business card stored in \a vcard to the OBEX server.
 */
 int QObexPushClient::sendBusinessCard(QIODevice *vcard)
 {
@@ -815,8 +820,8 @@ int QObexPushClient::sendBusinessCard(QIODevice *vcard)
 }
 
 /*!
-    Requests a business card from the server.  The received contents will be put in
-    \a vcard.
+    Requests a business card from the OBEX server. The received contents will
+    be stored in \a vcard.
  */
 int QObexPushClient::requestBusinessCard(QIODevice *vcard)
 {
@@ -824,13 +829,17 @@ int QObexPushClient::requestBusinessCard(QIODevice *vcard)
 }
 
 /*!
-    Performs a business card exchange operation, by first pushing own business card
-    given by \a mine, and requesting a business card from the remote device.  The
-    results will be placed in \a theirs.  The \bold PUT command id is returned in
-    \a putId.  The \bold GET command id is returned in \a getId.
+    Performs a business card exchange operation by sending this client's 
+    business card, given by \a mine, and then requesting a business card from
+    the remote device, which will be stored in \a theirs.
 
-    Note that this method is equivalent to first calling the \c sendBusinessCard method
-    and then calling the \c requestBusinessCard method.
+    The \a putId will be set to the unique identifier for the \c Put command 
+    that is executed when the client's business card is sent. The \a getId will 
+    be set to the unique identifier for \c Get command that is executed when 
+    the client requests the business card from the server.
+
+    Note that this method is equivalent to calling the sendBusinessCard()
+    method and then calling the requestBusinessCard() method.
 */
 void QObexPushClient::exchangeBusinessCard(QIODevice *mine, QIODevice *theirs,
                                            int *putId, int *getId)
@@ -887,6 +896,8 @@ QObexPushClient::State QObexPushClient::state() const
 /*!
     Returns the identifier of the command that is being executed, or 0 if
     there is no command being executed.
+
+    \sa hasPendingCommands()
  */
 int QObexPushClient::currentId() const
 {
@@ -914,7 +925,7 @@ bool QObexPushClient::hasPendingCommands() const
     does not affect the command that is being executed. If you want to stop
     this command as well, use abort().
 
-    \sa hasPendingCommands(), currentId()
+    \sa hasPendingCommands(), currentId(), abort()
  */
 void QObexPushClient::clearPendingCommands()
 {
@@ -924,42 +935,45 @@ void QObexPushClient::clearPendingCommands()
 /*!
     \fn void QObexPushClient::commandFinished(int id, bool error);
 
-    This signal is emitted whenever a queued command has been performed.  The
-    \a id parameter holds the id of the command finished.  The \a error parameter
-    holds whether an error occurred.
+    This signal is emitted when the client has finished processing the command
+    identified by \a id. The \a error value is \c true if an error occurred
+    during the processing of the command; otherwise \a error is \c false.
 
-    \sa commandStarted()
+    \sa commandStarted(), currentId()
 */
 
 /*!
     \fn void QObexPushClient::commandStarted(int id);
 
-    This signal is emitted whenever a queued command has been started.  The
-    \a id parameter holds the id of the command.
+    This signal is emitted when the client has started processing the command
+    identified by \a id.
 
-    \sa commandFinished()
+    \sa commandFinished(), currentId()
 */
 
 /*!
     \fn void QObexPushClient::done(bool error);
 
-    This signal is emitted whenever all pending requests have been completed.
-    The \a error parameter reports whether an error occurred during processing.
+    This signal is emitted when all pending commands have finished; it is
+    emitted after the commandFinished() signal for the last request. The
+    \a error value is \c true if an error occurred during the processing
+    of the command; otherwise \a error is \c false.
  */
 
 /*!
     \fn void QObexPushClient::progress(qint64 completed, qint64 total);
 
-    This signal is emitted reports the progress of the file send operation.
-    The \a completed parameter reports how many bytes were sent, and \a total
-    parameter reports the total number of bytes to send.
+    This signal is emitted during file transfer operations to
+    indicate the progress of the transfer. The \a completed value is the
+    number of bytes that have been sent or received so far, and \a total
+    is the total number of bytes to be sent or received.
  */
 
 /*!
     \fn void QObexPushClient::stateChanged(QObexPushClient::State state)
 
-    This signal is emitted whenever a sender object changes state.  The \a state
-    parameter holds the current state.
+    This signal is emitted when the state of the client changes. The \a state
+    is the new state of the client.
  */
 
 #include "qobexpushclient.moc"

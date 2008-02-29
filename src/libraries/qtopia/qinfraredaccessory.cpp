@@ -34,6 +34,7 @@ static const char* const QINFRAREDACCESSORY_MODE = "mode";
 
 /*!
     \class QInfraredAccessory
+    \mainclass
     \brief The QInfraredAccessory class provides access to an infrared accessory on the device.
 
     The QInfraredAccessory class provides access to an infrared accessory
@@ -54,17 +55,17 @@ static const char* const QINFRAREDACCESSORY_MODE = "mode";
 */
 
 /*!
-    Construct a new infrared acessory object for \a id and attach
+    Construct a new infrared acessory object for provider \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the default
-    accessory that supports the infrared interface.  If there is more
+    accessory provider that supports the infrared interface.  If there is more
     than one service that supports the infrared interface, the caller
-    should enumerate them with QHardwareManager::supports()
+    should enumerate them with QHardwareManager::providers()
     and create separate QInfraredAccessory objects for each.
 
-    \sa QHardwareManager::supports()
+    \sa QHardwareManager::providers()
 */
 QInfraredAccessory::QInfraredAccessory(
     const QString& id,
@@ -99,6 +100,7 @@ QInfraredAccessory::Mode QInfraredAccessory::mode() const
 
 /*!
     \class QInfraredAccessoryProvider
+    \mainclass
     \brief The QInfraredAccessoryProvider class provides an interface for infrared devices to integrate into Qtopia.
 
     The QInfraredAccessoryProvider class provides an interface for
@@ -107,11 +109,11 @@ QInfraredAccessory::Mode QInfraredAccessory::mode() const
     is supported.
 
     \sa QInfraredAccessory
-  \ingroup hardware
+    \ingroup hardware
 */
 
 /*!
-    Create a infrared device called \a id and attach it to \a parent.
+    Create a infrared device provider called \a id and attaches it to \a parent.
 */
 QInfraredAccessoryProvider::QInfraredAccessoryProvider(
     const QString& id,

@@ -24,6 +24,32 @@
 #include <qtopia/comm/qbluetoothaddress.h>
 #include <qtopialog.h>
 
+/*!
+    \class QBluetoothHeadsetAudioGatewayServer
+    \ingroup QtopiaServer::Task::Bluetooth
+    \brief The QBluetoothHeadsetAudioGatewayServer class implements the Bluetooth headset service Audio Gateway interface.
+
+    The QBluetoothHandsfreeAudioGatewayServer class implements Bluetooth
+    Headset Audio Gateway profile..
+
+    QBluetoothHeadsetAudioGatewayServer implements the
+    QBluetoothAudioGateway interface.  Client applications
+    should use the QBluetoothAudioGateway class instead of
+    this class to access the Bluetooth Audio Gateway functionality.
+
+    Please note, this class only acts as a forwarding agent
+    to the QBluetoothHeadsetService class, which handles all
+    implementation details.
+
+    \sa QBluetoothAudioGateway, QBluetoothHeadsetService
+*/
+
+/*!
+    Create a new Bluetooth Headset server for \a parent.  The name
+    of the service is set to \a service.  The audio device to use
+    is given by \a audioDev.
+*/
+
 QBluetoothHeadsetAudioGatewayServer::QBluetoothHeadsetAudioGatewayServer(
         QBluetoothHeadsetCommInterface *parent,
         const QString &audioDev,
@@ -53,38 +79,59 @@ QBluetoothHeadsetAudioGatewayServer::QBluetoothHeadsetAudioGatewayServer(
     setValue("MicrophoneVolume", 0, Delayed);
 }
 
+/*!
+    Destructor.
+*/
 QBluetoothHeadsetAudioGatewayServer::~QBluetoothHeadsetAudioGatewayServer()
 {
 
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHeadsetAudioGatewayServer::connect(const QBluetoothAddress &addr,
         int rfcomm_channel)
 {
     m_parent->connect(addr, rfcomm_channel);
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHeadsetAudioGatewayServer::disconnect()
 {
     qLog(Bluetooth) << "Headset AG got a disconnect request";
     m_parent->disconnect();
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHeadsetAudioGatewayServer::setSpeakerVolume(int volume)
 {
     m_parent->setSpeakerVolume(volume);
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHeadsetAudioGatewayServer::setMicrophoneVolume(int volume)
 {
     m_parent->setMicrophoneVolume(volume);
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHeadsetAudioGatewayServer::releaseAudio()
 {
     m_parent->releaseAudio();
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothHeadsetAudioGatewayServer::connectAudio()
 {
     m_parent->connectAudio();

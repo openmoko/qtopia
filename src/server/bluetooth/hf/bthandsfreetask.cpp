@@ -24,16 +24,31 @@
 #include "qbluetoothhfservice_p.h"
 #include <qtopialog.h>
 
-BtHandsfreeService::BtHandsfreeService( QObject* parent )
+/*!
+    \class BtHandsfreeServiceTask
+    \ingroup QtopiaServer::Task::Bluetooth
+    \brief The BtHandsfreeServiceTask class provides an implementation of the Bluetooth Handsfree Service.
+
+    The BtHeadsetService task manages the lifetime of a
+    QBluetoothHeadsetService object.
+ */
+
+/*!
+    Create a BtHandsfreeService task with \a parent.
+*/
+BtHandsfreeServiceTask::BtHandsfreeServiceTask( QObject* parent )
     : QObject( parent )
 {
     qLog(Bluetooth) << "Initializing Handsfree Service";
     m_hfService = new QBluetoothHandsfreeService( "BluetoothHandsfree", tr("Handsfree Audio Gateway"), this );
 }
 
-BtHandsfreeService::~BtHandsfreeService()
+/*!
+    Destructor.
+*/
+BtHandsfreeServiceTask::~BtHandsfreeServiceTask()
 {
     delete m_hfService;
 }
 
-QTOPIA_TASK( BtHandsfreeService, BtHandsfreeService );
+QTOPIA_TASK( BtHandsfreeServiceTask, BtHandsfreeServiceTask );

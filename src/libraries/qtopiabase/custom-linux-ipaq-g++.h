@@ -24,9 +24,3 @@
 #define QPE_ARCHITECTURE "Compaq/iPAQ"
 #define QPE_DEFAULT_TODAY_MODE "Daily"
 
-#define QPE_OVERRIDE_KEYMAP
-struct KeyOverride;
-extern const KeyOverride* qtopia_override_keys();
-
-
-//#define QPE_OVERRIDE_KEYHANDLER

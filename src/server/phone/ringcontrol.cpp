@@ -94,6 +94,15 @@ public:
          messages.
   \ingroup QtopiaServer::Task
 
+  The RingControl provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o RingControl
+  \row \o Interfaces \o RingControl
+  \row \o Services \o None
+  \endtable
+
   The RingControl class plays ring tones and enables vibration on incoming calls
   and messages.  The specifics of the tones and vibrations generated are
   controlled by the active QPhoneProfile.
@@ -103,8 +112,6 @@ public:
   takes priority and the message ring is discarded.  Likewise, if a message ring
   is in progress when an incoming call is received, the message ring is stopped
   and the phone ring commenced.
-
-  The RingControl class provides the \c {RingControl} task.
 */
 
 /*!
@@ -196,6 +203,8 @@ int volmap[6] = {
 };
 
 /*!
+  \internal
+
   Create a new RingControl instance with the specified \a parent.
  */
 RingControl::RingControl(QObject *parent)
@@ -227,6 +236,7 @@ RingControl::RingControl(QObject *parent)
 }
 
 /*!
+  \internal 
   Destroy the RingControl.
  */
 RingControl::~RingControl()

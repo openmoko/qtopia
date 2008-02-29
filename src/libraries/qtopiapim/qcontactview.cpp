@@ -41,26 +41,82 @@
 
 /*!
   \class QContactDelegate
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QContactDelegate class provides item drawing for QContactModel items.
+  \brief The QContactDelegate class provides drawing of QContactModel items (\l {QContact}{QContacts}).
 
-  The QContactDelegate class provides drawing of QContactModel items to aid in consistent
-  look and feel with other applications dealing with QContactItems.
+  By using QContactDelegate, applications dealing with QContacts can achieve a consistent
+  look and feel.
 
-  It gets from the model data for additional roles defined in QContactModel::QContactModelRole.
+  QContacts are drawn with four major sections per item.  There are icons on
+  the left and right sides of the rendered item, and top and bottom lines of text.
+  The data drawn is fetched from the model (which is assumed to be a QContactModel),
+  using some additional Qt::ItemDataRole values defined in QContactModel.  The
+  following image illustrates a list of \l{QContact}{QContacts} being displayed
+  in a QContactListView using a QContactDelegate:
 
-  QContactModel::PortraitRole is expected to be a pixmap that will be drawn to the left
-  of the item centered to the height of the item.  QContactModel::StatusIconRole if provided
-  is expected to be a pixmap that will be drawn to the right of the item centered to the height
-  of the item. Qt::DisplayRole is expected to be plain formatted text and will be drawn
-  at the top of the model start at the right of where the portrait role is, and ending to the
-  left of the status icon if present, otherwise the right of the item.  If Room is available,
-  text provided by QContactModel::SubLabelRole will be drawn as plain text below the label text.
+  \image qcontactview.png "List of QContacts"
+
+  QContactModel::QContactModelRole defines the additional roles used to draw the items:
+
+  \table 80 %
+   \header
+    \o Role
+    \o Data Type
+    \o Description
+   \row
+    \o QContactModel::PortraitRole
+    \o QPixmap
+    \o Drawn vertically centered on the leading side (left for LTR languages) of the item.
+   \row
+    \o Qt::DisplayRole
+    \o QString
+    \o Plain unformatted text drawn at the top of the item, between any icons.
+   \row
+    \o QContactModel::StatusIconRole
+    \o QPixmap
+    \o Optional. Drawn vertically centered on the trailing side (right for LTR languages) of the item.
+   \row
+    \o QContactModel::SubLabelRole
+    \o QString
+    \o Drawn as plain text below the label text, if space is available.
+  \endtable
+
+  The first four contacts shown in the picture above have the following data in the QContactModel:
+  \table 80 %
+   \header
+    \o PortraitRole
+    \o DisplayRole
+    \o StatusIconRole
+    \o SubLabelRole
+   \row
+    \o Pixmap of a person
+    \o Adam Zucker
+    \o <empty pixmap>
+    \o 12345
+   \row
+    \o Pixmap of a SIM card
+    \o Adam Zucker/h
+    \o <empty pixmap>
+    \o 12345
+   \row
+    \o Pixmap of a SIM card
+    \o Adam Zucker/m
+    \o <empty pixmap>
+    \o 24685
+   \row
+    \o Pixmap of a person
+    \o Bradley Young
+    \o Pixmap of a briefcase
+    \o 48759
+  \endtable
+
+  \sa QContact, QContactListView, QContactModel, QPimDelegate
 */
 
 /*!
-  Contstructs a QContactModelDelegate with parent \a parent.
+  Constructs a QContactDelegate with the given \a parent.
 */
 QContactDelegate::QContactDelegate( QObject * parent )
     : QPimDelegate(parent)
@@ -68,7 +124,8 @@ QContactDelegate::QContactDelegate( QObject * parent )
 }
 
 /*!
-  Returns a list consisting of a single string, with the QContactModel::SubLabelRole for the
+  \reimp
+  Returns a list consisting of a single string, that of the QContactModel::SubLabelRole for the
   supplied \a index.  Ignores \a option.
 */
 QList<StringPair> QContactDelegate::subTexts(const QStyleOptionViewItem &option, const QModelIndex& index) const
@@ -82,8 +139,8 @@ QList<StringPair> QContactDelegate::subTexts(const QStyleOptionViewItem &option,
 }
 
 /*!
-  Returns the count of subsidiary lines for a contact, which is set to one (the QContactModel::SubLabelRole
-  text).
+  \reimp
+  Returns 1 (the QContactModel::SubLabelRole text).
 
   Ignores \a index and \a option.
  */
@@ -97,6 +154,7 @@ int QContactDelegate::subTextsCountHint(const QStyleOptionViewItem& option, cons
 }
 
 /*!
+  \reimp
   Draws the portrait picture (QContactModel::PortraitRole) for the contact
   specified by \a index on the leading side of the item, and the pixmap
   specified by QContactModel::StatusIconRole on the trailing side of the
@@ -151,6 +209,7 @@ void QContactDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOption
 }
 
 /*!
+  \reimp
   Always returns QPimDelegate::Independent, ignoring \a option and \a index.
 */
 QPimDelegate::SubTextAlignment QContactDelegate::subTextAlignment(const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -161,6 +220,7 @@ QPimDelegate::SubTextAlignment QContactDelegate::subTextAlignment(const QStyleOp
 }
 
 /*!
+  \reimp
   Always returns QPimDelegate::SelectedOnly, ignoring \a option and \a index.
  */
 QPimDelegate::BackgroundStyle QContactDelegate::backgroundStyle(const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -171,7 +231,8 @@ QPimDelegate::BackgroundStyle QContactDelegate::backgroundStyle(const QStyleOpti
 }
 
 /*!
-  Calculates the size hint for the delegate, given the \a option and \a index parameters.
+  \reimp
+  Returns the size hint for the delegate, given the \a option and \a index parameters.
   The \a textSize size hint is expanded to accommodate the portrait icon width and height.
 */
 QSize QContactDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& textSize) const
@@ -185,25 +246,38 @@ QSize QContactDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, 
 }
 
 /*!
-  Destroys a QContactModelDelegate.
+  Destroys a QContactDelegate.
 */
 QContactDelegate::~QContactDelegate() {}
 
 /*!
   \class QContactListView
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QContactListView class provides a list view widget with some convenience functions
-  for use with QContactModel.
+  \brief The QContactListView class provides a list view widget for use with QContactModel.
 
-  The QContactListView is a QListView with some additional functions to aid in using a list view
-  of a QContactModel.
+  The convenience functions provided by QContactListView include functions for interpreting
+  the view's model, delegate and current item as the corresponding QContactModel, QContactDelegate and
+  QContact objects.  In addition, QContactListView enforces using a QContactModel (or a derivative)
+  as the model.
+
+  Upon construction, QContactListView automatically sets itself to use a QContactDelegate for drawing,
+  sets \c Batch layout mode (\l setLayoutMode()), and sets the resize mode to \c Adjust
+  (\l setResizeMode()).
+
+  The following image displays a QContactListView, using the
+  default QContactDelegate to render QContacts from a QContactModel.
+
+  \image qcontactview.png "List of QContacts"
+
+  \sa QContact, QContactModel, QContactDelegate
 */
 
 /*!
     \fn QContact QContactListView::currentContact() const
 
-    Return the QContact for the currently selected index.
+    Returns the QContact for the currently selected index.
 */
 
 /*!
@@ -215,11 +289,19 @@ QContactDelegate::~QContactDelegate() {}
 /*!
   \fn QContactDelegate *QContactListView::contactDelegate() const
 
-  Returns the QContactDelegate Set for the view.
+  Returns the QContactDelegate set for the view.  During
+  construction, QContactListView  will automatically create
+  a QContactDelegate to use as the delegate, but this can be
+  overridden with a different delegate derived from
+  QContactDelegate if necessary.
 */
 
 /*!
-  Contructs a QContactListView with parent \a parent.
+  Constructs a QContactListView with the given \a parent.
+
+  This also sets the layout mode to \c Batched for performance,
+  the resize mode to \c Adjust, and creates a \l QContactDelegate
+  to use as the delegate.
 */
 QContactListView::QContactListView(QWidget *parent)
     : QListView(parent)
@@ -231,7 +313,7 @@ QContactListView::QContactListView(QWidget *parent)
 }
 
 /*!
-  Destorys the QContactListView.
+  Destroys the QContactListView.
 */
 QContactListView::~QContactListView()
 {
@@ -243,6 +325,8 @@ QContactListView::~QContactListView()
   Sets the model for the view to \a model.
 
   Will only accept the model if it inherits or is a QContactModel.
+  If the \a model does not inherit a QContactModel, the existing
+  model will be retained.
 */
 void QContactListView::setModel( QAbstractItemModel *model )
 {
@@ -257,7 +341,7 @@ void QContactListView::setModel( QAbstractItemModel *model )
 /*!
   Returns the list of complete contacts selected from the view.  If a large number of contacts
   might be selected this function can be expensive, and selectedContactIds() should be used
-  instead
+  instead.
 
   \sa selectedContactIds()
 */
@@ -272,7 +356,7 @@ QList<QContact> QContactListView::selectedContacts() const
 }
 
 /*!
-  Returns the list of ids for contacts selected from the view.
+  Returns the list of ids for contacts selected in the view.
 
   \sa selectedContacts()
 */
@@ -323,16 +407,26 @@ public:
 
 /*!
   \class QContactSelector
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QContactSelector class provides a way of selecting a contact from a QContactModel.
+  \brief The QContactSelector class provides a way of selecting a single contact from a QContactModel.
 
-  The QContactSelector dialog allows selecting an existing or new contact.
+  In addition, the user can optionally be allowed to indicate they want to create a new contact,
+  if none of the existing contacts are suitable.
+
+  The following image displays a QContactSelector with the option to
+  create a new QContact highlighted.
+
+  \image qcontactselector.png "QContactSelector with the option to create a new contact highlighted"
 */
 
 /*!
-  Constructs a QContactSelector with parent \a parent.  If \a allowNew is true will also provide
-  the abilityt to select that a new contact should be created.
+  Constructs a QContactSelector with the given \a parent.
+
+  If \a allowNew is true, the selector provides
+  the user an option to create a new QContact (see newContactSelected()).
+
 */
 QContactSelector::QContactSelector(bool allowNew, QWidget *parent)
     : QDialog(parent)
@@ -370,20 +464,22 @@ QContactSelector::QContactSelector(bool allowNew, QWidget *parent)
 
 /*!
   \internal
-  Accepts the dialog and indicates a that a new contact should be created.
+  Accepts the dialog and indicates that a new contact should be created.
 */
 void QContactSelector::setNewSelected()
 {
     d->mNewContactSelected = true;
+    d->mContactSelected = false;
     accept();
 }
 
 /*!
   \internal
-  Accepts the dialog and indicates a that a contact at \a idx in the model was selected.
+  Accepts the dialog and indicates that a contact at \a idx in the model was selected.
 */
 void QContactSelector::setSelected(const QModelIndex& idx)
 {
+    d->mNewContactSelected = false;
     if (idx.isValid())
     {
         d->view->setCurrentIndex(idx);
@@ -393,16 +489,19 @@ void QContactSelector::setSelected(const QModelIndex& idx)
 }
 
 /*!
-  Sets the model of representing contacts that should be selected from to \a m.
+  Sets the model providing the choice of contacts to \a model.
 */
-void QContactSelector::setModel(QContactModel *m)
+void QContactSelector::setModel(QContactModel *model)
 {
-    d->view->setModel(m);
+    d->view->setModel(model);
 }
 
 /*!
-  Returns true if the dialog was accepted with a new contact selected.
+  Returns true if the dialog was accepted via the option to
+  create a new contact.
   Otherwise returns false.
+
+  \sa contactSelected()
 */
 bool QContactSelector::newContactSelected() const
 {
@@ -414,6 +513,8 @@ bool QContactSelector::newContactSelected() const
 /*!
   Returns true if the dialog was accepted with an existing contact selected.
   Otherwise returns false.
+
+  \sa newContactSelected()
 */
 bool QContactSelector::contactSelected() const
 {
@@ -422,6 +523,8 @@ bool QContactSelector::contactSelected() const
 
 /*!
   Returns the contact that was selected.  If no contact was selected returns a null contact.
+
+  \sa contactSelected(), newContactSelected()
 */
 QContact QContactSelector::selectedContact() const
 {
@@ -453,26 +556,51 @@ public:
 
 /*!
   \class QPhoneTypeSelector
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QPhoneTypeSelector class a way of selecting a single phone number from or for
-  a QContact.
+  \brief The QPhoneTypeSelector class provides a way of selecting a single type of phone number.
 
-  QPhoneTypeSelector provides a way of selecting a single phone number from or for
-  a QContact.
+  The phone number types correspond to those defined in \l QContact::PhoneType.
+
+  It can be used in one of two ways - either to allow the selection of one of a
+  QContact's existing phone numbers, or to allow the user to pick the type of a
+  new phone number (for example, to save a phone number as a 'work mobile' number).
+
+  \table 80 %
+  \row
+  \o \inlineimage qphonetypeselector-existing.png "Picking an existing phone number"
+  \o Picking an existing number from a QContact
+  \row
+  \o \inlineimage qphonetypeselector-new.png "Picking a new phone number type"
+  \o Choosing a phone number type for a new phone number.  Note that the existing
+     phone numbers for the QContact are displayed.
+  \endtable
+
+  \sa QContact
 */
 
 /*!
   \fn void QPhoneTypeSelector::selected(QContact::PhoneType type)
 
-    This signal is emitted when the user selectes a phone number \a type.
+    This signal is emitted when the user selects a phone number \a type.
 */
 
 /*!
-  Contructs a QPhoneTypeSelector dialog with parent \a parent.
-  The QPhoneTypeSelector will show phone numbers
-  if \a number is empty will only show numbers for which there already exists and entry for
-  the \a contact provided.  Otherwise will provide a selection of all possible phone numbers.
+  Constructs a QPhoneTypeSelector dialog with parent \a parent.
+
+  The dialog will show phone numbers and phone number types from the given \a contact.
+
+  The dialog can be used in two ways:
+  \list
+  \o To choose an existing phone number from a contact, pass an empty string as the \a number argument.
+  \o To choose a phone number type for a new phone number, pass the phone number as a string as the \a number argument.
+  \endlist
+
+  In the second case, the dialog will show any existing phone numbers for the \a contact in addition to
+  the available phone number types.
+
+  \sa updateContact()
 */
 QPhoneTypeSelector::QPhoneTypeSelector( const QContact &contact, const QString &number,
         QWidget *parent )
@@ -503,7 +631,7 @@ QPhoneTypeSelector::QPhoneTypeSelector( const QContact &contact, const QString &
 }
 
 /*!
-  if \a number is empty returns the translation of "(empty)".  Otherwise returns \a number
+  If \a number is empty returns the translation of "(empty)".  Otherwise returns \a number.
 
   \internal
  */
@@ -515,7 +643,8 @@ QString QPhoneTypeSelector::verboseIfEmpty( const QString &number )
 }
 
 /*!
-  Returns the QContact::PhoneType that matches the phone number selected.
+  Returns the QContact::PhoneType that is selected in the dialog.
+  If no phone number type is selected, this will return \c OtherPhone.
 */
 QContact::PhoneType QPhoneTypeSelector::selected() const
 {
@@ -526,7 +655,8 @@ QContact::PhoneType QPhoneTypeSelector::selected() const
 }
 
 /*!
-  Returns the value set for the phone number selected.
+  Returns the contact's phone number that corresponds to the phone number type
+  selected in the dialog.
 */
 QString QPhoneTypeSelector::selectedNumber() const
 {
@@ -593,16 +723,7 @@ void QPhoneTypeSelector::init()
 }
 
 /*!
-  \overload
-
-  This event handler can be reimplemented in a subclass to receive widget
-  resize events which are passed in the \a event parameter. When resizeEvent()
-  is called, the widget already has its new geometry. The old size is
-  accessible through QResizeEvent::oldSize().
-
-  The widget will be erased and receive a paint event immediately after
-  processing the resize event. No drawing need be (or should be) done inside
-  this handler.
+  \reimp
 */
 void QPhoneTypeSelector::resizeEvent(QResizeEvent *event)
 {
@@ -612,14 +733,16 @@ void QPhoneTypeSelector::resizeEvent(QResizeEvent *event)
 }
 
 /*!
-  Updates the \a contact so that the phone number selected is set to \a number.
+  Updates \a contact to have the given \a number for the dialog's selected phone number type.
+
+  \sa selected()
 */
 void QPhoneTypeSelector::updateContact(QContact &contact, const QString &number) const {
     contact.setPhoneNumber(selected(), number);
 }
 
 /*!
-  \overload
+  \reimp
 */
 void QPhoneTypeSelector::accept()
 {

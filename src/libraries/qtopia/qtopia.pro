@@ -33,7 +33,6 @@ QTOPIA_HEADERS+=\
     custom.h\
     qtopiaglobal.h\
     inputmethodinterface.h\
-    qtaskbarappletplugin.h\
     todayplugininterface.h\
     qapplicationplugin.h\
     version.h\
@@ -107,7 +106,8 @@ QTOPIA_HEADERS+=\
     qkeypadlightaccessory.h\
     qtopiasendvia.h\
     qanalogclock.h\
-    qsignalsource.h
+    qsignalsource.h\
+    qperformancelog.h
 
 QTOPIA_PRIVATE_HEADERS+=\
     qimagedocumentselector_p.h\
@@ -157,7 +157,6 @@ QTOPIA_SOURCES+=\
     qcategoryselector.cpp\
     qwindowdecorationinterface.cpp\
     mediarecorderplugininterface.cpp\
-    qtaskbarappletplugin.cpp\
     qapplicationplugin.cpp\
     qdawg.cpp\
     inputmethodinterface.cpp\
@@ -237,7 +236,8 @@ QTOPIA_SOURCES+=\
     qtopiasendvia.cpp\
     qanalogclock.cpp\
     qdateparser.cpp\
-    qsignalsource.cpp
+    qsignalsource.cpp\
+    qperformancelog.cpp
 
 phone:QTOPIA_SOURCES+=\
     themedview.cpp\
@@ -486,20 +486,4 @@ pkg.domain=base
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)
-run_qdoc()
 
-# TODO have this lib include libqtopia1 rather than requiring the projects to do it themselves
-#
-# equals(QTOPIA_TARGET,4.1) {
-#     depend(libraries/qtopia1)
-#     dep(DEPENDS-=libraries/qtopia)
-# }
-#
-# equals(QTOPIA_TARGET,4.0)|equals(MULTI_LIB_QTOPIA,1) {
-#     idep(LIBS+=-l$$TARGET)
-# }
-#
-# then in libraries/qtopia1 have something like this
-#
-# depend(libraries/qtopia)
-# dep(MULTI_LIB_QTOPIA=1)

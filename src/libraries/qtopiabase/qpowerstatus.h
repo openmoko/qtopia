@@ -34,6 +34,7 @@ public:
         bbs = NotPresent;
         percentRemain = -1;
         secsRemain = -1;
+        percentAccurate = false;
     }
     QPowerStatus(const QPowerStatus &other)
         : ac(other.ac), bs(other.bs), bbs(other.bbs),
@@ -95,8 +96,8 @@ private:
     int timerId;
 };
 
-QTOPIABASE_EXPORT void qpe_setBacklight(int bright);
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps();
+QTOPIABASE_EXPORT void qpe_setBrightness(int bright);
 
 #endif
 

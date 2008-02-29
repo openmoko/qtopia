@@ -24,11 +24,9 @@
 
 /*!
     \class QRetryAtChat
-    \brief The QRetryAtChat class provides a mechanism to retry an AT command until it succeeds
+    \mainclass
+    \brief The QRetryAtChat class provides a mechanism to retry an AT command until it succeeds.
     \ingroup telephony::serial
-
-    The QRetryAtChat command provides a mechanism to retry an AT command
-    repeatedly until it succeeds.
 
     The done() signal will be emitted when the command succeeds or when
     the number of retries has been exhausted.

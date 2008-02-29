@@ -7,8 +7,8 @@ CONFIG+=qtopia_main
 CONFIG+=no_quicklaunch
 # Do not build this app into a singleexec binary
 CONFIG+=no_singleexec
-# This project does not use tr() so disable i18n support
-#CONFIG+=no_tr
+# Disable i18n support
+CONFIG+=no_tr
 
 # These are the source files that get built to create the application
 FORMS=examplebase.ui

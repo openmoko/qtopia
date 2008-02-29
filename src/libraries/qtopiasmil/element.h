@@ -22,6 +22,9 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
 
+// WARNING: These classes are not part of the Qtopia API.
+// They are subject to change at any time.
+
 #include <qmap.h>
 #include <qstring.h>
 #include <qstringlist.h>

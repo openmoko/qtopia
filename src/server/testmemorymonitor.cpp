@@ -28,7 +28,19 @@
   \ingroup QtopiaServer::Task
   \brief The TestMemoryMonitor class provides an instrumented implementation of MemoryMonitor for testing.
 
-  The TestMemoryMonitor class exposes the following value space items.
+  The TestMemoryMonitorTask provides a Qtopia Server Task.  Qtopia Server 
+  Tasks are documented in full in the QtopiaServerApplication class 
+  documentation.
+
+  \table
+  \row \o Task Name \o TestMemoryMonitory
+  \row \o Interfaces \o MemoryMonitor
+  \row \o Services \o None
+  \endtable
+
+  The TestMemoryMonitor allows low memory conditions on the device to be 
+  simulated.  The TestMemoryMonitor class exposes the following value space 
+  items.
 
   \table
   \header \o Item \o Permissions \o Description

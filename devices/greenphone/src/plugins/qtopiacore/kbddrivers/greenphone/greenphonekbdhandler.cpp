@@ -30,7 +30,7 @@
 #include "qwindowsystem_qws.h"
 #include "qapplication.h"
 #include "qnamespace.h"
-
+//#include "qperformancelog.h"
 #include <qtopialog.h>
 
 #include <string.h>
@@ -159,8 +159,7 @@ void GreenphoneKbdHandler::readKbdData()
         isPressed       = (driverKeyCode & 0x80) == 0;
 
         qLog(Input) << "keypressed: code=" << driverKeyCode << " (" << (isPressed ? "Down" : "Up") << ")";
-        qLog(Performance) << "keypressed: code=" << driverKeyCode << " (" << (isPressed ? "Down" : "Up") << ")"
-                          << " : " << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+        //QPerformanceLog("keypressed") << "code=" << driverKeyCode << " (" << (isPressed ? "Down" : "Up") << ")";
 
         switch (driverKeyCode & 0x7f)
         {

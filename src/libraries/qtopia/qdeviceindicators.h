@@ -23,9 +23,10 @@
 #define _QDEVICEINDICATORS_H_
 
 #include <QObject>
+#include <qtopiaglobal.h>
 
 class QDeviceIndicatorsPrivate;
-class QDeviceIndicators : public QObject
+class QTOPIA_EXPORT QDeviceIndicators : public QObject
 {
 Q_OBJECT
 public:

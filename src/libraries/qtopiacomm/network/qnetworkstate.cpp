@@ -96,9 +96,26 @@ private:
 
 /*!
   \class QNetworkState
-  \brief
-  The QNetworkState class provides information about the connectivity state of the Qtopia device.
+  \mainclass
+  \brief The QNetworkState class provides very generic information about the connectivity state of the Qtopia device.
 
+  In addition to QtopiaNetwork::online() which returns the current connectivity state
+  QNetworkState provides the connected() and disconnected() signals which are emitted 
+  when the connectivity changes. If more specific information about a particular 
+  device is required QNetworkDevice should be used.
+
+  interfacesOnline() returns the list of interfaces which are online. An network interface 
+  is identified via its device handle which is the configuration file that specifies the 
+  device parameter. If it is required to enumerate all or a particular type of network devices
+  (regardless of their state) availableNetworkDevices() can be used. 
+  The reverse operation is provided by deviceType().
+
+  QNetworkState also provides gateway/routing information. The gateway() function returns the
+  devHandle belonging to the network device that currently provides the default route. 
+  The defaultGatewayChanged() signal is emitted when the default route changes. The default 
+  WAP configuration is returned via defaultWapAccount().
+
+  \sa QtopiaNetwork, QNetworkDevice
   \ingroup io
 */
 
@@ -124,7 +141,8 @@ QNetworkState::~QNetworkState()
 
 /*!
   Returns the handle to the network interface that is currently used as default gateway for
-  network packages. If the network is offline the function returns an empty string.
+  network packages. If QtopiaNetwork::online() returns \c{FALSE} this function returns 
+  an empty string.
 */
 QString QNetworkState::gateway() const
 {
@@ -132,8 +150,8 @@ QString QNetworkState::gateway() const
 }
 
 /*!
-  This function returns the list of all interface  which are online at the time
-  of the function call. The returned list contains the interfaces handles.
+  This function returns the list of all interface which are online at the time
+  of the function call. The returned list contains the device handles for these interfaces.
 */
 QList<QString> QNetworkState::interfacesOnline() const
 {
@@ -141,8 +159,8 @@ QList<QString> QNetworkState::interfacesOnline() const
 }
 
 /*!
-  Returns the list of known network devices of type \a type.
-  If \a type is \c{Any} it returns all known devices. A device is considered
+  Returns the list of known network devices of \a type.
+  If \a type is \c{QtopiaNetwork::Any} it returns all known devices. A device is considered
   to be known if a configuration file exists for it. The returned Qtopia network interface handles
   are equivalent to the full qualified path to the configuration file.
 
@@ -178,7 +196,7 @@ QString QNetworkState::defaultWapAccount() const
 /*!
   \fn void QNetworkState::connected()
 
-  This signal is send when Qtopia changes from offline to online.
+  This signal is emitted when Qtopia changes from offline to online.
   If the connectivity state of a particular device is required \l QNetworkDevice::state()
   should be used.
 
@@ -188,7 +206,7 @@ QString QNetworkState::defaultWapAccount() const
 /*!
   \fn void QNetworkState::disconnected()
 
-  This signal is send when Qtopia changes from online to offline.
+  This signal is emitted when Qtopia changes from online to offline.
   If the connectivity state of a particular device is required \l QNetworkDevice::state()
   should be used.
 

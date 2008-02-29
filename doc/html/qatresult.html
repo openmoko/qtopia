@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QAtResult Class Reference</title>
+  <title>QAtResult Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAtResult Class Reference</h1>
-<p>The QAtResult class provides access to the results of an AT modem command <a href="#details">More...</a></p>
-<pre>#include &lt;QAtResult&gt;</pre><ul>
+<p>The QAtResult class provides access to the results of AT modem commands and unsolicited notifications <a href="#details">More...</a></p>
+<pre>    #include &lt;QAtResult&gt;</pre><ul>
 <li><a href="qatresult-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-types"></a>
@@ -42,8 +44,9 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QAtResult class provides access to the results of an AT modem command</p>
-<p>The QAtResult class provides access to the results of an AT modem command that was executed via the <a href="qatchat.html">QAtChat</a> class.</p>
+<p>The QAtResult class provides access to the results of AT modem commands and unsolicited notifications</p>
+<p>AT commands that are sent to a modem with <a href="qatchat.html#chat">QAtChat::chat</a>() result in a QAtResult object being made available to describe the result of the command when it completes.</p>
+<p>The <a href="qatresult.html#resultCode">resultCode</a>() method can be used to determine the exact cause of an AT modem command failure. The <a href="qatresult.html#content">content</a>() method can be used to access the response content that was returned from the command. For complex response contents, the <a href="qatresultparser.html">QAtResultParser</a> class can be used to decode the response.</p>
 <p>See also <a href="qatchat.html">QAtChat</a> and <a href="qatresultparser.html">QAtResultParser</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -103,9 +106,9 @@
 <tr><td valign="top"><tt>QAtResult::PLMNNotAllowed</tt></td><td align="center" valign="top"><tt>111</tt></td><td valign="top">GSM 27.07 code 111: PLMN not allowed</td></tr>
 <tr><td valign="top"><tt>QAtResult::LocationAreaNotAllowed</tt></td><td align="center" valign="top"><tt>112</tt></td><td valign="top">GSM 27.07 code 112: Location area not allowed</td></tr>
 <tr><td valign="top"><tt>QAtResult::RoamingNotAllowed</tt></td><td align="center" valign="top"><tt>113</tt></td><td valign="top">GSM 27.07 code 113: Roaming not allowed in this location area</td></tr>
-<tr><td valign="top"><tt>QAtResult::ServiceOptionNotSupported</tt></td><td align="center" valign="top"><tt>132</tt></td><td valign="top">GSM 27.07 code 132: serivce option not supported</td></tr>
+<tr><td valign="top"><tt>QAtResult::ServiceOptionNotSupported</tt></td><td align="center" valign="top"><tt>132</tt></td><td valign="top">GSM 27.07 code 132: service option not supported</td></tr>
 <tr><td valign="top"><tt>QAtResult::ServiceOptionNotSubscribed</tt></td><td align="center" valign="top"><tt>133</tt></td><td valign="top">GSM 27.07 code 133: service option not subscribed</td></tr>
-<tr><td valign="top"><tt>QAtResult::ServiceOptionOutOfOrder</tt></td><td align="center" valign="top"><tt>134</tt></td><td valign="top">GSM 27.07 code 134: serivce option temporarily out of order</td></tr>
+<tr><td valign="top"><tt>QAtResult::ServiceOptionOutOfOrder</tt></td><td align="center" valign="top"><tt>134</tt></td><td valign="top">GSM 27.07 code 134: service option temporarily out of order</td></tr>
 <tr><td valign="top"><tt>QAtResult::UnspecifiedGPRSError</tt></td><td align="center" valign="top"><tt>148</tt></td><td valign="top">GSM 27.07 code 148: unspecified GPRS error</td></tr>
 <tr><td valign="top"><tt>QAtResult::PDPAuthenticationFailure</tt></td><td align="center" valign="top"><tt>149</tt></td><td valign="top">GSM 27.07 code 149: PDP authentication failure</td></tr>
 <tr><td valign="top"><tt>QAtResult::InvalidMobileClass</tt></td><td align="center" valign="top"><tt>150</tt></td><td valign="top">GSM 27.07 code 150: invalid mobile class</td></tr>
@@ -142,7 +145,7 @@
 <tr><td valign="top"><tt>QAtResult::SMSCAddressUnknown</tt></td><td align="center" valign="top"><tt>330</tt></td><td valign="top">GSM 27.05 code 330: SMSC address unknown</td></tr>
 <tr><td valign="top"><tt>QAtResult::SMSNoNetworkService</tt></td><td align="center" valign="top"><tt>331</tt></td><td valign="top">GSM 27.05 code 331: no network service</td></tr>
 <tr><td valign="top"><tt>QAtResult::SMSNetworkTimeout</tt></td><td align="center" valign="top"><tt>332</tt></td><td valign="top">GSM 27.05 code 332: network timeout</td></tr>
-<tr><td valign="top"><tt>QAtResult::NoCNMAAckExpected</tt></td><td align="center" valign="top"><tt>340</tt></td><td valign="top">GSM 27.05 code 340: no +CNMA acknowledgement expected</td></tr>
+<tr><td valign="top"><tt>QAtResult::NoCNMAAckExpected</tt></td><td align="center" valign="top"><tt>340</tt></td><td valign="top">GSM 27.05 code 340: no +CNMA acknowledgment expected</td></tr>
 <tr><td valign="top"><tt>QAtResult::UnknownError</tt></td><td align="center" valign="top"><tt>500</tt></td><td valign="top">GSM 27.05 code 500: unknown error</td></tr>
 </table></p>
 <hr />
@@ -155,42 +158,45 @@
 <p>Destruct this <a href="qatresult.html">QAtResult</a> object.</p>
 <h3 class="fn"><a name="append"></a>void QAtResult::append ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Append <i>value</i> to the current content, after a line terminator.</p>
+<p>See also <a href="qatresult.html#content">content</a>() and <a href="qatresult.html#setContent">setContent</a>().</p>
 <h3 class="fn"><a name="content"></a><a href="qstring.html">QString</a> QAtResult::content () const</h3>
-<p>Get the content that was returned with an AT command's result.</p>
-<p>See also <a href="qatresult.html#setContent">setContent</a>().</p>
+<p>Returns the content that was returned with an AT command's result.</p>
+<p>See also <a href="qatresult.html#setContent">setContent</a>() and <a href="qatresult.html#append">append</a>().</p>
 <h3 class="fn"><a name="ok"></a>bool QAtResult::ok () const</h3>
-<p>Determine if this result indicates a successful command. Success is indicated when <a href="qatresult.html#resultCode">resultCode</a>() returns either <a href="qatresult.html#ResultCode-enum">QAtResult::OK</a> or <a href="qatresult.html#ResultCode-enum">QAtResult::Connect</a>. All other result codes indicate failure.</p>
+<p>Returns true if this result indicates a successful command; false otherwise. Success is indicated when <a href="qatresult.html#resultCode">resultCode</a>() returns either <a href="qatresult.html#ResultCode-enum">QAtResult::OK</a> or <a href="qatresult.html#ResultCode-enum">QAtResult::Connect</a>. All other result codes indicate failure.</p>
+<p>See also <a href="qatresult.html#resultCode">resultCode</a>().</p>
 <h3 class="fn"><a name="result"></a><a href="qstring.html">QString</a> QAtResult::result () const</h3>
-<p>Get the result line that terminated the command's response. This is usually a string such as <tt>OK</tt>, <tt>ERROR</tt>, <tt>+CME ERROR: N</tt>, and so on.</p>
+<p>Returns the result line that terminated the command's response. This is usually a string such as <tt>OK</tt>, <tt>ERROR</tt>, <tt>+CME ERROR: N</tt>, and so on.</p>
 <p>The <a href="qatresult.html#resultCode">resultCode</a>() function is a better way to determine why a command failed, but sometimes it is necessary to parse the text result line. For example, for <tt>CONNECT baudrate</tt>, the caller may be interested in the baud rate.</p>
 <p>See also <a href="qatresult.html#setResult">setResult</a>(), <a href="qatresult.html#resultCode">resultCode</a>(), and <a href="qatresult.html#ok">ok</a>().</p>
 <h3 class="fn"><a name="resultCode"></a><a href="qatresult.html#ResultCode-enum">QAtResult::ResultCode</a> QAtResult::resultCode () const</h3>
-<p>Get the numeric result code associated with <a href="qatresult.html#result">result</a>().</p>
-<p>Extended error codes are only possible if the appropriate modem error mode has been enabled (e.g. with the <tt>AT+CMEE=1</tt> command). Otherwise most errors will simply be reported as <a href="qatresult.html#ResultCode-enum">QAtResult::Error</a>.</p>
-<p>See also <a href="qatresult.html#setResultCode">setResultCode</a>().</p>
+<p>Returns the numeric result code associated with <a href="qatresult.html#result">result</a>().</p>
+<p>Extended error codes are only possible if the appropriate modem error mode has been enabled (e.g&#x2e; with the <tt>AT+CMEE=1</tt> command). Otherwise most errors will simply be reported as <a href="qatresult.html#ResultCode-enum">QAtResult::Error</a>.</p>
+<p>See also <a href="qatresult.html#setResultCode">setResultCode</a>(), <a href="qatresult.html#result">result</a>(), and <a href="qatresult.html#ok">ok</a>().</p>
 <h3 class="fn"><a name="setContent"></a>void QAtResult::setContent ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
-<p>Set the content that was returned with an AT command's result to <i>value</i>.</p>
-<p>See also <a href="qatresult.html#content">content</a>().</p>
+<p>Sets the content that was returned with an AT command's result to <i>value</i>.</p>
+<p>See also <a href="qatresult.html#content">content</a>() and <a href="qatresult.html#append">append</a>().</p>
 <h3 class="fn"><a name="setResult"></a>void QAtResult::setResult ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
-<p>Set the result line that terminated the command's response to <i>value</i>. This will also update <a href="qatresult.html#resultCode">resultCode</a>() to reflect the appropriate code.</p>
-<p>See also <a href="qatresult.html#result">result</a>().</p>
+<p>Sets the result line that terminated the command's response to <i>value</i>. This will also update <a href="qatresult.html#resultCode">resultCode</a>() to reflect the appropriate code.</p>
+<p>See also <a href="qatresult.html#result">result</a>() and <a href="qatresult.html#resultCode">resultCode</a>().</p>
 <h3 class="fn"><a name="setResultCode"></a>void QAtResult::setResultCode ( <a href="qatresult.html#ResultCode-enum">QAtResult::ResultCode</a> <i>value</i> )</h3>
-<p>Set the numeric result code to <i>value</i>, and update <a href="qatresult.html#result">result</a>() to reflect the value.</p>
-<p>See also <a href="qatresult.html#resultCode">resultCode</a>().</p>
+<p>Sets the numeric result code to <i>value</i>, and update <a href="qatresult.html#result">result</a>() to reflect the value.</p>
+<p>See also <a href="qatresult.html#resultCode">resultCode</a>() and <a href="qatresult.html#result">result</a>().</p>
 <h3 class="fn"><a name="setUserData"></a>void QAtResult::setUserData ( <a href="qatresult-userdata.html">QAtResult::UserData</a> * <i>value</i> )</h3>
-<p>Set the user data associated with this result object to <i>value</i>.</p>
+<p>Sets the user data associated with this result object to <i>value</i>.</p>
 <p>See also <a href="qatresult.html#userData">userData</a>().</p>
 <h3 class="fn"><a name="userData"></a><a href="qatresult-userdata.html">QAtResult::UserData</a> * QAtResult::userData () const</h3>
-<p>Get the user data associated with this result object.</p>
+<p>Returns the user data associated with this result object.</p>
 <p>See also <a href="qatresult.html#setUserData">setUserData</a>().</p>
 <h3 class="fn"><a name="verboseResult"></a><a href="qstring.html">QString</a> QAtResult::verboseResult () const</h3>
-<p>Return a more verbose version of <a href="qatresult.html#result">result</a>(), suitable for debug output. Many modems report extended errors by number (e.g. <tt>+CME ERROR: 4</tt>), which can be difficult to use when diagnosing problems. This function returns a string that is more suitable for diagnostic output than <a href="qatresult.html#result">result</a>(). If <a href="qatresult.html#result">result</a>() is already verbose, it will be returned as-is.</p>
+<p>Returns a more verbose version of <a href="qatresult.html#result">result</a>(), suitable for debug output. Many modems report extended errors by number (e.g&#x2e; <tt>+CME ERROR: 4</tt>), which can be difficult to use when diagnosing problems. This function returns a string that is more suitable for diagnostic output than <a href="qatresult.html#result">result</a>(). If <a href="qatresult.html#result">result</a>() is already verbose, it will be returned as-is.</p>
+<p>See also <a href="qatresult.html#result">result</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QAtResult &amp; QAtResult::operator= ( const QAtResult &amp; <i>other</i> )</h3>
 <p>Assign the contents of <i>other</i> to this object.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

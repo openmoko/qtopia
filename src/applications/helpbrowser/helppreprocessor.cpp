@@ -47,6 +47,9 @@ HelpPreProcessor::HelpPreProcessor( const QString &file, int maxrecurs )
 #if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
     replace["TELEPHONY"]="1";
 #endif
+#if defined(QTOPIA_INFRARED)
+    replace["INFRARED"]="1";
+#endif
 
 #ifdef QTOPIA_PHONE
     replace["PHONESTYLE"]="1";

@@ -111,25 +111,46 @@ void QBluetoothAbstractServerPrivate::incomingConnection()
 
 /*!
     \class QBluetoothAbstractServer
+    \mainclass
     \brief The QBluetoothAbstractServer class represents an abstract Bluetooth server socket.
 
-    This class makes it possible to accept incoming Bluetooth connections.
+    This class is a common base class for all Bluetooth server
+    socket implementations and makes it possible to accept incoming
+    Bluetooth connections.  The users should not use this class
+    directly, instead they should use concrete implementations.
 
-    Call the subclass listen() implementation to have the server listen
-    for incoming connections.  The newConnection() signal is emitted each time
-    a client connects to the server.
+    The subclasses will implement a \c{listen()} implementation in order
+    to create a listening socket for each particular Bluetooth socket
+    type.  In particular, QBluetoothL2CapServer, QBluetoothRfcommServer,
+    and QBluetoothScoServer will create L2CAP, RFCOMM and SCO sockets
+    respectively.
 
-    Call nextPendingConnection() to accept the pending connection
-    as a connected QBluetoothAbstractSocket.  The actual socket type depends on the
-    type of the server.  E.g. the QBluetoothRfcommServer class will return
-    QBluetoothRfcommSocket sockets.  The function returns a pointer to a
-    QBluetoothAbstractSocket in QBluetoothAbstractSocket::ConnectedState that you can
-    use for communicating with the client.
+    Services that provide RFCOMM based profiles should use the
+    QBluetoothRfcommServer class.  L2CAP based services should use
+    the QBluetoothL2CapServer class.  Headset and Handsfree profile
+    implementations will require the use of QBluetoothScoServer
+    class.
 
-    If an error occurs, error() returns the type of error that has occurred.
+    The typical use of this class is to call the \c{listen()} implementation
+    in the subclass, and then hook onto the newConnection() signal to
+    get an indication of an incoming connection. The newConnection()
+    signal is emitted each time a client has connected to the server.
+    Call nextPendingConnection() to accept the pending
+    connection as a connected QBluetoothAbstractSocket.  The actual socket
+    type depends on the type of the server.  E.g. the
+    QBluetoothRfcommServer socket will return QBluetoothRfcommSocket type
+    sockets.
 
-    Calling close() makes the QBluetoothAbstractServer stop listening for incoming
+    If an error occurs, error() returns the type of error that has
+    occurred.
+
+    Calling close() makes the QBluetoothAbstractServer stop
+    listening for incoming connections and deletes all pending
     connections.
+
+    \sa QBluetoothAbstractSocket
+
+    \ingroup qtopiabluetooth
  */
 
 /*!
@@ -137,10 +158,10 @@ void QBluetoothAbstractServerPrivate::incomingConnection()
     \brief The error that has occurred on the server.
 
     \value NoError No error.
-    \value ResourceError The system has run out of sockets.
-    \value BindError The socket could not be bound to the address provided.
-    \value ListenError The socket could not be listened on.
     \value UnknownError An unknown error has occurred.
+    \value ResourceError The system has run out of sockets.
+    \value ListenError The socket could not be listened on.
+    \value BindError The socket could not be bound to the address provided.
  */
 
 /*!
@@ -154,7 +175,7 @@ QBluetoothAbstractServer::QBluetoothAbstractServer(QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the server.
  */
 QBluetoothAbstractServer::~QBluetoothAbstractServer()
 {
@@ -167,17 +188,23 @@ QBluetoothAbstractServer::~QBluetoothAbstractServer()
 /*! \fn void QBluetoothAbstractServer::newConnection()
 
     This signal is emitted every time a new connection is available.
+    Call nextPendingConnection() in order to accept the connection.
 
     \sa hasPendingConnections(), nextPendingConnection()
  */
 
 /*!
+    \internal
+
     Subclasses of this class should call this function and hand off the
     server socket that will be used for accepting connections.  The
     \a socket parameter contains the socket file descriptor, the
     \a addr parameter contains the sockaddr structure of the address
     to bind and listen on and the \a len parameter contains the length of
     the \a addr structure.
+
+    Returns true on successful completion of the request;
+    otherwise returns false.
 
     \sa isListening()
  */
@@ -222,6 +249,8 @@ bool QBluetoothAbstractServer::initiateListen(int socket, sockaddr *addr, int le
 /*!
     Returns true if the server is currently listening for remote connections,
     and false otherwise.
+
+    \sa close(), socketDescriptor()
  */
 bool QBluetoothAbstractServer::isListening() const
 {
@@ -230,7 +259,9 @@ bool QBluetoothAbstractServer::isListening() const
 
 /*!
     Closes the server. The server will no longer listen for incoming
-    connections.
+    connections and all pending connections will be closed.
+
+    \sa isListening(), socketDescriptor()
  */
 void QBluetoothAbstractServer::close()
 {
@@ -250,6 +281,8 @@ void QBluetoothAbstractServer::close()
 
 /*!
     Returns the last error that has occurred.
+
+    \sa errorString()
  */
 QBluetoothAbstractServer::ServerError QBluetoothAbstractServer::error() const
 {
@@ -258,6 +291,8 @@ QBluetoothAbstractServer::ServerError QBluetoothAbstractServer::error() const
 
 /*!
     Returns a human-readable description of the last device error that occurred.
+
+    \sa error()
 */
 QString QBluetoothAbstractServer::errorString() const
 {
@@ -266,7 +301,7 @@ QString QBluetoothAbstractServer::errorString() const
 
 /*!
     Returns the maximum number of pending accepted connections. The
-    default is 7.
+    default is 1.
 
     \sa setMaxPendingConnections(), hasPendingConnections()
  */
@@ -281,6 +316,8 @@ int QBluetoothAbstractServer::maxPendingConnections() const
     numConnections incoming connections before
     nextPendingConnection() is called. By default, the limit is 1
     pending connection.
+
+    \sa maxPendingConnections(), hasPendingConnections()
  */
 void QBluetoothAbstractServer::setMaxPendingConnections(int numConnections)
 {
@@ -288,7 +325,7 @@ void QBluetoothAbstractServer::setMaxPendingConnections(int numConnections)
 }
 
 /*!
-    Returns true if the server has a pending connection; otherwise
+    Returns true if the server has a pending connection(s); otherwise
     returns false.
 
     \sa nextPendingConnection(), setMaxPendingConnections()
@@ -299,16 +336,34 @@ bool QBluetoothAbstractServer::hasPendingConnections() const
 }
 
 /*!
-    Returns the next pending connection as a connected QBluetoothRfcommSocket
-    object.
+    Returns the next pending connection as a connected
+    QBluetoothAbstractSocket object.  The function returns a
+    pointer to a QBluetoothAbstractSocket in
+    QBluetoothAbstractSocket::ConnectedState that you can
+    use for communicating with the client.
+
+    The type of the socket returned will be based on the server
+    socket type used.  You will need to use qobject_cast to convert
+    the result into the concrete socket type required.
+
+    \code
+        QBluetoothAbstractSocket *sock = server->nextPendingConnection();
+        if (sock) {
+            QBluetoothRfcommSocket *rfcomm =
+                qobject_cast<QBluetoothRfcommSocket *>(sock);
+            if (rfcomm) {
+                // use RFCOMM socket
+            }
+        }
+    \endcode
 
     The socket is created as a child of the server, which means that
     it is automatically deleted when the QBluetoothAbstractServer object is
     destroyed. It is still a good idea to delete the object
     explicitly when you are done with it, to avoid wasting memory.
 
-    0 is returned if this function is called when there are no pending
-    connections.
+    A NULL pointer is returned if this function is called when
+    there are no pending connections.
 
     \sa hasPendingConnections()
  */
@@ -329,7 +384,7 @@ QBluetoothAbstractSocket *QBluetoothAbstractServer::nextPendingConnection()
     available; otherwise returns false. If the operation timed out
     and \a timedOut is not 0, *\a timedOut will be set to true.
 
-    This is a blocking function call. Its use is disadvised in a
+    This is a blocking function call. Its use is not advised in a
     single-threaded GUI application, since the whole application will
     stop responding until the function returns.
     waitForNewConnection() is mostly useful when there is no event
@@ -385,7 +440,9 @@ bool QBluetoothAbstractServer::waitForNewConnection(int msecs, bool *timedOut)
 }
 
 /*!
-    Sets the last error that has occurred to \a serverError.
+    \internal
+    Sets the last error that has occurred to \a serverError.  Only
+    subclasses should use this function.
 */
 void QBluetoothAbstractServer::setError(QBluetoothAbstractServer::ServerError serverError)
 {
@@ -418,6 +475,8 @@ void QBluetoothAbstractServer::setError(QBluetoothAbstractServer::ServerError se
 /*!
     Returns the socket descriptor the server is currently listening on.  If the
     server is not listening, then -1 is returned.
+
+    \sa isListening()
 */
 int QBluetoothAbstractServer::socketDescriptor() const
 {
@@ -425,6 +484,8 @@ int QBluetoothAbstractServer::socketDescriptor() const
 }
 
 /*!
+    \internal
+
     \fn QBluetoothAbstractSocket * QBluetoothAbstractServer::createSocket();
 
     Clients of this class should override this function to provide sockets specific

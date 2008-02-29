@@ -550,7 +550,80 @@ void CallAudioHandler::headsetDisconnected()
 
 //===========================================================================
 
+/*!
+  \class CallScreen
+  \brief The CallScreen class provides a phone call screen.
+  \ingroup QtopiaServer::PhoneUI
+
+  This class is part of the Qtopia server.
+  */
+    
+
+/*!
+  \fn void CallScreen::acceptIncoming()
+  \internal
+  */
+
+/*!
+  \fn int CallScreen::activeCallCount() const
+  \internal
+  */
+
+/*!
+  \fn int CallScreen::heldCallCount() const
+  \internal
+  */
+
+
+/*!
+    \fn bool CallScreen::incomingCall() const
+    \internal
+    */
+
+/*!
+    \fn bool CallScreen::inMultiCall() const
+    \internal
+    */
+
+/*! 
+  \fn void CallScreen::increaseCallVolume()
+  \internal
+  */
+    
+/*!
+  \fn void CallScreen::decreaseCallVolume()
+  \internal
+  */
+
+/*!
+  \fn void CallScreen::muteRing()
+  \internal
+  */
+
+/*!
+  \fn void CallScreen::listEmpty()
+  \internal
+  */
+
+/*!
+    \fn void CallScreen::testKeys(const QString&, bool&)
+    \internal
+    */
+
+/*!
+  \fn void CallScreen::filterKeys(const QString&, bool&)
+  \internal
+  */
+
+/*!
+  \fn void CallScreen::filterSelect(const QString&, bool&)
+  \internal
+  */
+
 /* define CallScreen */
+/*!
+  \internal
+  */
 CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     : PhoneThemedView(parent, fl), control(ctrl), digits(0), listView(0), actionGsm(0),
     activeCount(0), holdCount(0) , keypadVisible(false), mLayout( 0 ),
@@ -632,6 +705,9 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
                      SLOT(requestFailed(QPhoneCall,QPhoneCall::Request)));
 }
 
+/*!
+  \internal
+  */
 bool CallScreen::dialNumbers(const QString & numbers)
 {
     // do not send dtmf tones while dialing for now.
@@ -646,6 +722,9 @@ bool CallScreen::dialNumbers(const QString & numbers)
     return false;
 }
 
+/*!
+  \internal
+  */
 void CallScreen::themeLoaded( const QString & )
 {
     ThemeWidgetItem *item = 0;
@@ -699,6 +778,9 @@ void CallScreen::themeLoaded( const QString & )
     stateChanged();
 }
 
+/*!
+  \internal
+  */
 void CallScreen::manualLayout()
 {
     ThemeRectItem *keypaditem = (ThemeRectItem *)findItem( "keypad-box", ThemedView::Rect );
@@ -711,6 +793,9 @@ void CallScreen::manualLayout()
     update();
 }
 
+/*!
+  \internal
+  */
 QString CallScreen::ringTone()
 {
     CallItemModel* m = qobject_cast<CallItemModel *>(listView->model());
@@ -723,6 +808,9 @@ QString CallScreen::ringTone()
     return QString();
 }
 
+/*!
+  \internal
+  */
 void CallScreen::clearDtmfDigits(bool clearOneChar)
 {
     if(dtmfDigits.isEmpty())
@@ -749,6 +837,9 @@ void CallScreen::clearDtmfDigits(bool clearOneChar)
     setGsmMenuItem();
 }
 
+/*!
+  \internal
+  */
 void CallScreen::setGsmMenuItem()
 {
     if (!actionGsm) {
@@ -774,14 +865,36 @@ void CallScreen::setGsmMenuItem()
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::actionGsmSelected()
 {
     bool filtered = false;
     emit filterSelect(dtmfDigits, filtered);
-    // clear digits wheather filtered or not 
+    // if the digits are not filtered place a call
+    if ( !filtered ) {
+        // check if contact exists
+        QContactModel *m = ServerContactModel::instance();
+        QContact cnt = m->matchPhoneNumber(dtmfDigits);
+
+        if ( cnt == QContact() ) { // no contact
+            QtopiaServiceRequest service( "Dialer", "dial(QString,QString)" );
+            service << QString() << dtmfDigits;
+            service.send();
+        } else {
+            QtopiaServiceRequest service( "Dialer", "dial(QString,QUniqueId)" );
+            service << dtmfDigits << cnt.uid();
+            service.send();
+        }
+    }
+    // clear digits wheather filtered or not
     clearDtmfDigits();
 }
 
+/*!
+  \internal
+  */
 void CallScreen::updateLabels()
 {
     // update context label according to the current call count.
@@ -793,6 +906,9 @@ void CallScreen::updateLabels()
         QSoftMenuBar::setLabel(listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
 } 
 
+/*!
+  \internal
+  */
 void CallScreen::appendDtmfDigits(const QString &dtmf)
 {
     dtmfDigits.append(dtmf);
@@ -826,6 +942,9 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::stateChanged()
 {
     if( !listView || !digits )
@@ -1000,14 +1119,18 @@ void CallScreen::stateChanged()
     update();
 }
 
+/*!
+  \internal
+  */
 void CallScreen::requestFailed(const QPhoneCall &,QPhoneCall::Request r)
 {
     QString title, text;
+    title = tr("Failure");
     if(r == QPhoneCall::HoldFailed) {
-        title = tr("Hold");
         text = tr("Hold attempt failed");
+    } else if(r == QPhoneCall::ActivateFailed) {
+        text = tr("Failure");
     } else {
-        title = tr("Join/Transfer");
         text = tr("Join/transfer attempt failed");
     }
 
@@ -1017,6 +1140,9 @@ void CallScreen::requestFailed(const QPhoneCall &,QPhoneCall::Request r)
     delete box;
 }
 
+/*!
+  \internal
+  */
 CallItemEntry *CallScreen::findCall(const QPhoneCall &call, CallItemModel *m)
 {
     CallItemEntry *item = 0;
@@ -1029,6 +1155,9 @@ CallItemEntry *CallScreen::findCall(const QPhoneCall &call, CallItemModel *m)
     return 0;
 }
 
+/*!
+  \internal
+  */
 void CallScreen::updateAll()
 {
     if( !listView || !digits )
@@ -1075,6 +1204,9 @@ void CallScreen::updateAll()
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::splitCall()
 {
     setWindowTitle(tr("Split Call","split 2 phone lines after having joined them"));
@@ -1088,6 +1220,9 @@ void CallScreen::splitCall()
     actionTransfer->setVisible(false);
 }
 
+/*!
+  \internal
+  */
 void CallScreen::callSelected(const QModelIndex& index)
 {
     CallItemModel* m = qobject_cast<CallItemModel *>(listView->model());
@@ -1103,6 +1238,9 @@ void CallScreen::callSelected(const QModelIndex& index)
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::callClicked(const QModelIndex& index)
 {
     CallItemModel* m = qobject_cast<CallItemModel *>(listView->model());
@@ -1135,6 +1273,9 @@ void CallScreen::callClicked(const QModelIndex& index)
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::themeItemClicked(ThemeItem *item)
 {
     if(!item)
@@ -1200,6 +1341,9 @@ void CallScreen::themeItemClicked(ThemeItem *item)
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::keyPressEvent(QKeyEvent *k)
 {
     if (k->key() == Qt::Key_Flip) {
@@ -1233,6 +1377,9 @@ void CallScreen::keyPressEvent(QKeyEvent *k)
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::showEvent( QShowEvent *e )
 {
     if ( !updateTimer ) {
@@ -1244,6 +1391,9 @@ void CallScreen::showEvent( QShowEvent *e )
     manualLayout();
 }
 
+/*!
+  \internal
+  */
 void CallScreen::keyReleaseEvent(QKeyEvent *k)
 {
     if (k->key() == Qt::Key_Flip && control->hasIncomingCall()) {
@@ -1254,6 +1404,9 @@ void CallScreen::keyReleaseEvent(QKeyEvent *k)
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::closeEvent(QCloseEvent *e)
 {
     if (listView && listView->selectionMode() == QAbstractItemView::SingleSelection) {
@@ -1268,12 +1421,18 @@ void CallScreen::closeEvent(QCloseEvent *e)
     }
 }
 
+/*!
+  \internal
+  */
 void CallScreen::hideEvent( QHideEvent * )
 {
     if ( updateTimer )
         updateTimer->stop();
 }
 
+/*!
+  \internal
+  */
 bool CallScreen::eventFilter(QObject *o, QEvent *e)
 {
     if (o == listView) {
@@ -1344,6 +1503,9 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
     return false;
 }
 
+/*!
+  \internal
+  */
 void CallScreen::setSelectMode(bool s)
 {
     if (s) {
@@ -1366,6 +1528,9 @@ void CallScreen::setSelectMode(bool s)
 }
 
 /* Reimplemented from ThemedView */
+/*!
+  \internal
+  */
 QWidget *CallScreen::newWidget(ThemeWidgetItem* input, const QString& name)
 {
     if( name == "callscreen" )  {

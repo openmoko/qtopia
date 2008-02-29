@@ -35,14 +35,15 @@ QBluetoothSdpUuid QBluetoothSdpUuid::L2cap(L2CAP);
 
 /*!
     \class QBluetoothSdpUuid
-    \brief The QBluetoothSdpUuid class represents a unique identifier used by the SDP protocol.
+    \mainclass
+    \brief The QBluetoothSdpUuid class encapsulates Unique Identifiers defined and used by the Bluetooth Service Discovery Protocol.
 
-The QBluetoothSdpUuid class encapsulates Unique Identifiers defined and used by the SDP protocol.
-There are three UUID sizes: 16 bit, 32 bit and 128 bit.  The 16 bit and 32 bit
-UUIDs can be upward converted to a 128 bit UUID.
+    There are three UUID sizes: 16 bit, 32 bit and 128 bit.  The 16
+    bit and 32 bit UUIDs can be upward converted to a 128 bit UUID.
 
-All values to this class should be given in host byte order.  They will be converted
-to the appropriate byte ordering automatically.
+    All values to this class should be given in host byte order.
+    They will be converted to the appropriate byte
+    ordering automatically.
 
     \ingroup qtopiabluetooth
  */
@@ -57,7 +58,9 @@ to the appropriate byte ordering automatically.
  */
 
 /*!
-    Constructs a new UUID with the value 0 and type \c UUID16.
+    Constructs a new invalid UUID.
+
+    \sa isValid()
  */
 QBluetoothSdpUuid::QBluetoothSdpUuid()
 {
@@ -68,6 +71,9 @@ QBluetoothSdpUuid::QBluetoothSdpUuid()
 
 /*!
     Constructs a new 16 bit UUID with the value given by \a data.
+    The type of the UUID will be \c UUID16
+
+    \sa isValid()
 */
 QBluetoothSdpUuid::QBluetoothSdpUuid(quint16 data)
 {
@@ -78,6 +84,9 @@ QBluetoothSdpUuid::QBluetoothSdpUuid(quint16 data)
 
 /*!
     Constructs a new 32 bit UUID with the value given by \a data.
+    The type of the UUID will be \c UUID32
+
+    \sa isValid()
 */
 QBluetoothSdpUuid::QBluetoothSdpUuid(quint32 data)
 {
@@ -88,6 +97,9 @@ QBluetoothSdpUuid::QBluetoothSdpUuid(quint32 data)
 
 /*!
     Constructs a new 128 bit UUID with the value given by \a data.
+    The type of the UUID will be \c UUID128
+
+    \sa isValid()
 */
 QBluetoothSdpUuid::QBluetoothSdpUuid(quint128 data)
 {
@@ -99,7 +111,9 @@ QBluetoothSdpUuid::QBluetoothSdpUuid(quint128 data)
 /*!
     Constructs a new UUID from a string representation \a str.  The UUID type will be
     inferred from the size and format of the string.  If the string is not in a valid
-    format, a default-constructed UUID is created.
+    format, an invalid UUID is created.
+
+    \sa isValid()
 */
 QBluetoothSdpUuid::QBluetoothSdpUuid(const QString &str)
 {
@@ -255,6 +269,8 @@ static QBluetoothSdpUuid convert_32_to_128(quint32 in)
 /*!
     Converts a 16 or 32 bit UUID to a 128 bit UUID and returns the result.
     If the UUID is already a 128 bit UUID, a copy of the current object is returned.
+
+    \sa type()
 */
 QBluetoothSdpUuid QBluetoothSdpUuid::toUuid128() const
 {
@@ -378,6 +394,8 @@ bool QBluetoothSdpUuid::isValid() const
 
 /*!
     Returns the type of the UUID.
+
+    \sa uuid()
 */
 QBluetoothSdpUuid::Type QBluetoothSdpUuid::type() const
 {
@@ -387,6 +405,8 @@ QBluetoothSdpUuid::Type QBluetoothSdpUuid::type() const
 /*!
     This is a convenience method for creating 16 bit UUIDs.  The \a id parameter
     specifies the 16 bit id to create.
+
+    \sa create32Bit(), create128Bit()
 */
 QBluetoothSdpUuid QBluetoothSdpUuid::create16Bit(quint16 id)
 {
@@ -396,6 +416,8 @@ QBluetoothSdpUuid QBluetoothSdpUuid::create16Bit(quint16 id)
 /*!
     This is a convenience method for creating 32 bit UUIDs. The \a id parameter
     specifies the 32 bit id to create.
+
+    \sa create16Bit(), create128Bit()
  */
 QBluetoothSdpUuid QBluetoothSdpUuid::create32Bit(quint32 id)
 {
@@ -405,6 +427,8 @@ QBluetoothSdpUuid QBluetoothSdpUuid::create32Bit(quint32 id)
 /*!
     This is a convenience method for creating 128 bit UUIDs. The \a id parameter
     specifies the 128 bit id to create.
+
+    \sa create16Bit(), create32Bit()
  */
 QBluetoothSdpUuid QBluetoothSdpUuid::create128Bit(quint128 id)
 {

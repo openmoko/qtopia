@@ -27,16 +27,23 @@
   \ingroup QtopiaServer::Task
   \brief The ShutdownSplashScreen class displays a static splash screen while the system is restarting.
 
+  The ShutdownSplashScreen provides a Qtopia Server Task.  Qtopia Server Tasks 
+  are documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o ShutdownSplashScreen
+  \row \o Interfaces \o SystemShutdownHandler
+  \row \o Services \o None
+  \endtable
+
   The ShutdownSplashScreen class displays a full screen image,
   while the system is restarting.  It uses the
   SystemShutdownHandler hook to ensure that it is run during restart.  For best
   results, the \c {ShutdownSplashScreen} task should be given highest priority
   for the SystemShutdownHandler to ensure that it appears as soon as possible.
 
-  Note that the shutdown splash screen only appears on system restart and NOT
+  \i {Note:} The shutdown splash screen only appears on system restart and NOT
   on system shutdown.
-
-  The ShutdownSplashScreen class provides the \c {ShutdownSplashScreen} task.
  */
 
 /*! \internal */

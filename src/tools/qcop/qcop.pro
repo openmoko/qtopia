@@ -7,6 +7,9 @@ SOURCES		= main.cpp qcopimpl.cpp
 
 enable_singleexec {
     INCLUDEPATH+=$$QPEDIR/include/qtopia
+    qtopiatest {
+        depends(libraries/qtopiatest/qtestslave)
+    }
 }
 
 pkg.desc=Interprocess communication client for Qtopia.

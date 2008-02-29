@@ -90,9 +90,9 @@ MediaRecorder::MediaRecorder(QWidget *parent, Qt::WFlags f):
 
     // Make sure that the "Recordings" category is registered.
     QCategoryManager catman("Documents");
-    catman.addCategory(recordingsCategory, recordingsCategory, QString(), false, true);
-    if(!catman.isSystem(recordingsCategory))
-        catman.setSystem(recordingsCategory);
+    // For new code a more unique id should be used instead of using the untranslated text
+    // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
+    catman.ensureSystemCategory(recordingsCategory, recordingsCategory);
 
     // Create stack widget
     stack = new QStackedWidget(this);

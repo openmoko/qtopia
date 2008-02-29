@@ -6,11 +6,16 @@ case $1 in
         rmmod net_fd
         rmmod g_file_storage
         rmmod serial_fd
+        # notify Qtopia that an ethernet device may have disappeared 
+        qcop send "QPE/NetworkState" "updateNetwork()" &
         ;;
     ether)
         grep usbdcore /proc/modules || insmod usbdcore
         insmod net_fd.o if_name=eth
         insmod bvd_bi
+
+        # notify Qtopia that a new ethernet device may have appeared 
+        qcop send "QPE/NetworkState" "updateNetwork()" &
         ;;
     serial)
         grep usbdcore /proc/modules || insmod usbdcore

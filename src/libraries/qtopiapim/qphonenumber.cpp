@@ -23,16 +23,25 @@
 
 /*!
     \class QPhoneNumber
+    \mainclass
     \module qpepim
     \ingroup pim
-    \brief The QPhoneNumber class provides utilities of interest to phone applications that manipulate numeric telephony numbers.
+    \brief The QPhoneNumber class provides utility functions to manipulate telephone numbers.
 
-    The QPhoneNumber class provides utilities that may be of interest to
-    applications that manipulate numeric telephone numbers.
+    The functions provided by this class are largely intended to assist with
+    the dialing (and "quick dialing") experience, and include:
+    \list
+    \o stripping a number of any non-telephony characters
+    \o returning the "local" component (non area/country code) of a telephone number
+    \o checking to see how closely two telephone numbers match
+    \o testing whether a phone number starts with a supplied prefix
+    \o converting an alphabetic telephone number into the equivalent numeric number
+    \endlist
+
 */
 
 /*!
-    Strip a \a number down to remove non-digit and non-dialing characters.
+    Strip the given \a number down to remove non-digit and non-dialing characters.
 */
 
 QString QPhoneNumber::stripNumber( const QString& number )
@@ -81,7 +90,9 @@ typedef struct
 
 // This list was derived from a combination of the codes in the
 // back of the Telstra White Pages, and the local area code prefixes
-// at "http://kropla.com/dialcode.htm".
+// at "http://kropla.com/dialcode.htm". As a list of facts, they are
+// not copyrightable.
+
 
 static IDDRule const rules[] = {
     {"Afghanistan",              93,    2,  0,   0,   1},
@@ -469,8 +480,8 @@ static void splitNumber( const QString& _number,
 
 /*!
   Returns the local component of the phone \a number.  In the
-  case of countries with variable area codes may only return
-  the end of the local number.
+  case of countries with variable length area codes this may
+  only return the end of the local number.
 */
 QString QPhoneNumber::localNumber( const QString &number)
 {
@@ -489,6 +500,10 @@ QString QPhoneNumber::localNumber( const QString &number)
     Compare two phone numbers, \a num1 and \a num2, to determine the degree
     to which they match.  Returns zero for no match, or increasing positive
     values for the "quality" of the match between the values.
+
+    Both numbers should be in numeric (not alphanumeric) form.
+
+    \sa resolveLetters()
 */
 
 int QPhoneNumber::matchNumbers( const QString& num1, const QString& num2 )
@@ -568,8 +583,13 @@ int QPhoneNumber::matchNumbers( const QString& num1, const QString& num2 )
 }
 
 /*!
-    Determine if a number, \a num, appears to start with a given \a prefix.
-    This is useful for fuzzy matching in quick dialers.
+    Returns whether the given number \a num appears to start with the given \a prefix.
+    The \a prefix will be tested against \a num with and without area code or international
+    prefixes.
+
+    Both numbers should be in numeric (not alphanumeric) form.
+
+    \sa resolveLetters()
 */
 
 bool QPhoneNumber::matchPrefix( const QString& num, const QString& prefix )
@@ -621,11 +641,17 @@ bool QPhoneNumber::matchPrefix( const QString& num, const QString& prefix )
 }
 
 /*!
-    Convert a letter-ized phone \a number into a regular phone number.
+    Convert an alphanumeric phone \a number into a regular phone number.
     e.g. \c{1-800-HEY-PHIL} becomes \c{1-800-439-7445}.
 
-    Note: this is the only function in the API that can take a
-    letter-ized phone number as an argument.  All other functions
+    Certain letters are not converted into numbers, because they
+    can be used to control the way a number is dialed.  These letters
+    are lower case \c p, \c w and \c x, which insert pauses
+    or waits when dialing a number.  Upper case letters are always
+    converted into the corresponding numbers.
+
+    Note: this is the only function in the API that can take an
+    alphanumeric phone number as an argument.  All other functions
     assume that the number has already been resolved.
 */
 

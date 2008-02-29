@@ -25,9 +25,9 @@
 #include "playercontrol.h"
 
 #include <qmediacontent.h>
-#include <requesthandler.h>
-#include <menumodel.h>
-#include <menuview.h>
+#include <private/requesthandler_p.h>
+#include <private/menumodel_p.h>
+#include <private/menuview_p.h>
 
 class TitleBar;
 class PlaylistMenuModel;

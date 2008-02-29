@@ -42,14 +42,32 @@
 
 /*!
     \class QBluetoothObexServer
-    \brief The QBluetoothObexServer class listens for OBEX client connections.
+    \mainclass
+    \brief The QBluetoothObexServer class can be used to listen for new OBEX client connections.
 
-    The QBluetoothObexServer class can be used to listen for
-    new OBEX client connections.  The object binds to an rfcomm
-    channel and listens for any client connections.  Once a client
-    is connected, server reports a new connection, which should
-    then be handled by the individual service implementation,
-    e.g. OBEX Push Service, OBEX FTP Service, etc.
+    The object binds to an RFCOMM channel and listens for any client
+    connections.  Once a client is connected, server reports a new
+    connection, which should then be handled by the individual service
+    implementation, e.g. OBEX Push Service, OBEX FTP Service, etc.
+
+    For instance, to implement a basic PUSH service, use:
+
+    \code
+        MyService::MyService()
+        {
+            QBluetoothObexServer *server =
+                new QBluetoothObexServer(RFCOMM_CHANNEL);
+            QObject::connect(server, SIGNAL(newConnection()),
+                             this, SLOT(connectionNotification()));
+            server->listen();
+        }
+
+        MyService::connectionNotification()
+        {
+            QObexSocket *socket = server->nextPendingConnection();
+            QObexPushService *service = new QObexPushService(socket);
+        }
+    \endcode
 
     \ingroup qtopiabluetooth
  */

@@ -30,9 +30,14 @@
 #include <qtopiaipcmarshal.h>
 
 class QString;
-
+#ifndef Q_QDOC
 namespace QBluetooth
 {
+#else
+class QBluetooth
+{
+public:
+#endif
     enum DeviceMajor {
         Miscellaneous = 0,
         Computer = 1,
@@ -95,14 +100,14 @@ namespace QBluetooth
 Q_DECLARE_OPERATORS_FOR_FLAGS(QBluetooth::ServiceClasses)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QBluetooth::SecurityOptions)
 
-struct quint128 {
+struct QTOPIACOMM_EXPORT quint128 {
     quint128();
     quint128(const quint8 indata[16]);
 
     quint8 data[16];
 };
 
-struct qint128 {
+struct QTOPIACOMM_EXPORT qint128 {
     qint128();
     qint128(const quint8 indata[]);
 

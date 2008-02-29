@@ -28,7 +28,7 @@
 class QBluetoothSdpRecord;
 class QIODevice;
 
-class QTOPIACOMM_EXPORT QSdpXmlGenerator
+class QSdpXmlGenerator
 {
 public:
     static void generate(const QBluetoothSdpRecord &record, QIODevice *device);

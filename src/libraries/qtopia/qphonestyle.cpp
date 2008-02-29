@@ -33,9 +33,11 @@
 #include <QDebug>
 #include <QScrollArea>
 #include <QLineEdit>
+#include <QDateTimeEdit>
 #include <QAbstractItemView>
 #include <QScrollBar>
 #include <QComboBox>
+#include <QSpinBox>
 #include <QPaintEvent>
 #include <QDesktopWidget>
 #include <QWSManager>
@@ -54,6 +56,7 @@ static const int phoneArrowHMargin     =  6; // arrow horizontal margin
 static const int phoneCheckMarkHMargin =  2; // horiz. margins of check mark
 static const int phoneRightBorder      =  8; // right border on windows
 static const int phoneCheckMarkWidth   = 12; // checkmarks width on windows
+static int scrollbarSize = 0; // width of the scrollbar
 
 static bool isSingleFocusWidget(QWidget *focus)
 {
@@ -383,11 +386,39 @@ void drawShadePanel(QPainter *p, int x, int y, int w, int h,
     p->setPen(oldPen);                        // restore pen
 }
 
+/*!
+    \class QPhoneStyle
+    \mainclass
+    \brief The QPhoneStyle class provides a phone look and feel.
+
+    \ingroup appearance
+
+    This style is Qtopia's default GUI style for Qtopia Phone Edition.
+
+    \image qphonestyle.png
+    \sa QWindowsStyle, QWindowsXPStyle, QMacStyle, QPlastiqueStyle, QCDEStyle, QMotifStyle
+*/
+
+/*!
+    Constructs a QPhoneStyle object.
+*/
 QPhoneStyle::QPhoneStyle() : QtopiaStyle()
 {
+    if(!scrollbarSize) {
+        int w = QApplication::desktop()->screen()->width();
+        if(w > 240)
+            scrollbarSize = qRound(16.0 * QApplication::desktop()->screen()->logicalDpiX() /100.0);
+        else if(w > 180)
+            scrollbarSize = 12;
+        else 
+            scrollbarSize = 8;
+    }
     d = new QPhoneStylePrivate(this);
 }
 
+/*!
+    Destroys the QPhoneStyle object.
+*/
 QPhoneStyle::~QPhoneStyle()
 {
     delete d;
@@ -396,10 +427,23 @@ QPhoneStyle::~QPhoneStyle()
 #include <sys/types.h>
 #include <unistd.h>
 
+/*!
+    \reimp
+*/
 void QPhoneStyle::polish(QPalette &pal)
 {
 #ifdef QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
     if (d->bgExport->isAvailable()) {
+        //"unset" palette of running widgets (prepare for repolish)
+        foreach (QWidget *w, QApplication::topLevelWidgets()) {
+            foreach (QObject *o, w->children()) {
+                if (QWidget *sw = qobject_cast<QWidget*>(o))
+                    if (sw->palette() == d->bgPal)
+                        sw->setPalette(QPalette());
+            }
+        }
+        
+        //set palette
         d->origPal = pal;
         d->bgPal = pal;
         QColor col = pal.color(QPalette::Window);
@@ -443,6 +487,9 @@ void QPhoneStyle::polish(QPalette &pal)
 #endif
 }
 
+/*!
+    \reimp
+*/
 void QPhoneStyle::polish(QWidget *widget)
 {
     QTextEdit *te = qobject_cast<QTextEdit*>(widget);
@@ -505,6 +552,9 @@ void QPhoneStyle::polish(QWidget *widget)
 #endif
 }
 
+/*!
+    \reimp
+*/
 void QPhoneStyle::unpolish(QWidget *widget)
 {
 #ifdef QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
@@ -520,11 +570,17 @@ void QPhoneStyle::unpolish(QWidget *widget)
 #endif
 }
 
+/*!
+    \reimp
+*/
 void QPhoneStyle::unpolish(QApplication *app)
 {
     app->setPalette(d->origPal);
 }
 
+/*!
+    \reimp
+*/
 int QPhoneStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
                             const QWidget *widget) const
 {
@@ -532,15 +588,7 @@ int QPhoneStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
 
     switch (metric) {
     case PM_ScrollBarExtent:
-        //XXX use DPI
-        if (Qtopia::mousePreferred()) {
-            ret = 15;
-        } else {
-            QDesktopWidget *desktop = QApplication::desktop();
-            ret = desktop->screenGeometry(widget
-                    ? desktop->screenNumber(widget)
-                    : desktop->primaryScreen()).width() >= 240 ? 12 : 8;
-        }
+        ret = scrollbarSize;
         break;
 
     case PM_TabBarTabHSpace:
@@ -554,6 +602,9 @@ int QPhoneStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
     return ret;
 }
 
+/*!
+    \reimp
+*/
 QSize QPhoneStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
                                 const QSize &csz, const QWidget *widget ) const
 {
@@ -602,6 +653,9 @@ QSize QPhoneStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
     return sz;
 }
 
+/*!
+    \reimp
+*/
 QRect QPhoneStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex *opt,
                                 SubControl sc, const QWidget *w) const
 {
@@ -762,7 +816,9 @@ QRect QPhoneStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex *
     return ret;
 }
 
-
+/*!
+    \reimp
+*/
 void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
                                   QPainter *p, const QWidget *widget) const
 {
@@ -861,6 +917,10 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
                 int m = 4;
                 if (const QComboBox *cb = qobject_cast<const QComboBox *>(widget->parentWidget()))
                     m = 1;
+                else if (const QDateTimeEdit *dte = qobject_cast<const QDateTimeEdit *>(widget->parentWidget()))
+                    m = dte->calendarPopup() ? 1 : 3;
+                else if (const QSpinBox *sb = qobject_cast<const QSpinBox *>(widget->parentWidget()))
+                    m = 3;
                 r.adjust(m,m,-m,-m);
                 p->fillRect(r, panel->palette.brush(QPalette::Highlight));
 
@@ -1007,6 +1067,9 @@ static void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbut
     style->drawPrimitive(pe, &arrowOpt, painter, widget);
 }
 
+/*!
+    \reimp
+*/
 void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPainter *p,
                                 const QWidget *widget) const
 {
@@ -1459,6 +1522,9 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
     }
 }
 
+/*!
+    \reimp
+*/
 void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComplex *opt,
                                       QPainter *p, const QWidget *widget) const
 {
@@ -1675,11 +1741,77 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
             drawControl(CE_ToolButtonLabel, &label, p, widget);
         }
         break;
+    case CC_GroupBox:
+        if (const QStyleOptionGroupBox *groupBox = qstyleoption_cast<const QStyleOptionGroupBox *>(opt)) {
+            // Draw frame
+            QRect textRect = subControlRect(CC_GroupBox, opt, SC_GroupBoxLabel, widget);
+            QRect checkBoxRect = subControlRect(CC_GroupBox, opt, SC_GroupBoxCheckBox, widget);
+            if (groupBox->subControls & QStyle::SC_GroupBoxFrame) {
+                QStyleOptionFrameV2 frame;
+                frame.QStyleOption::operator=(*groupBox);
+                frame.features = groupBox->features;
+                frame.lineWidth = groupBox->lineWidth;
+                frame.midLineWidth = groupBox->midLineWidth;
+                frame.rect = subControlRect(CC_GroupBox, opt, SC_GroupBoxFrame, widget);
+                p->save();
+                QRegion region(groupBox->rect);
+                if (!groupBox->text.isEmpty()) {
+                    bool ltr = groupBox->direction == Qt::LeftToRight;
+                    QRect finalRect;
+                    if (groupBox->subControls & QStyle::SC_GroupBoxCheckBox) {
+                        finalRect = checkBoxRect.united(textRect);
+                        finalRect.adjust(ltr ? -4 : 0, 0, ltr ? 0 : 4, 0);
+                    } else {
+                        finalRect = textRect;
+                    }
+                    region -= finalRect;
+                }
+                p->setClipRegion(region);
+                drawPrimitive(PE_FrameGroupBox, &frame, p, widget);
+                p->restore();
+            }
+
+            // Draw title
+            if ((groupBox->subControls & QStyle::SC_GroupBoxLabel) && !groupBox->text.isEmpty()) {
+                QColor textColor = groupBox->textColor;
+                if (textColor.isValid())
+                    p->setPen(textColor);
+                int alignment = int(groupBox->textAlignment);
+                if (!styleHint(QStyle::SH_UnderlineShortcut, opt, widget))
+                    alignment |= Qt::TextHideMnemonic;
+
+                if (groupBox->state & State_HasFocus) {
+                    QStyleOptionFocusRect fropt;
+                    fropt.QStyleOption::operator=(*groupBox);
+                    fropt.rect = textRect;
+                    p->fillRect(fropt.rect.x(), fropt.rect.y(), fropt.rect.width(), fropt.rect.height(),
+                        groupBox->palette.brush(QPalette::Highlight));
+                    drawPrimitive(PE_FrameFocusRect, &fropt, p, widget);
+                }
+                
+                drawItemText(p, textRect,  Qt::TextShowMnemonic | Qt::AlignHCenter | alignment,
+                             groupBox->palette, groupBox->state & State_Enabled, groupBox->text,
+                             groupBox->state & State_HasFocus ? QPalette::HighlightedText
+                             : textColor.isValid() ? QPalette::NoRole : QPalette::WindowText);
+            }
+
+            // Draw checkbox
+            if (groupBox->subControls & SC_GroupBoxCheckBox) {
+                QStyleOptionButton box;
+                box.QStyleOption::operator=(*groupBox);
+                box.rect = checkBoxRect;
+                drawPrimitive(PE_IndicatorCheckBox, &box, p, widget);
+            }
+        }
+        break;
     default:
         QWindowsStyle::drawComplexControl(cc, opt, p, widget);
     }
 }
 
+/*!
+    \reimp
+*/
 bool QPhoneStyle::event(QEvent *e)
 {
     if (e->type() == QEvent::EnterEditFocus || e->type() == QEvent::LeaveEditFocus) {

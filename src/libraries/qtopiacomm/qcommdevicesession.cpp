@@ -185,6 +185,7 @@ void QCommDeviceSession_Private::readyRead()
 
 /*!
     \class QCommDeviceSession
+    \mainclass
     \brief The QCommDeviceSession class provides facilities to initiate a device session.
 
     The QCommDeviceSession class provides facilities to initiate a new session on a hardware
@@ -193,8 +194,8 @@ void QCommDeviceSession_Private::readyRead()
 
     Sessions are thus used by applications to give a hint to the device manager that the
     device is currently in use.  E.g. a client that is trying to send a vCard over bluetooth
-    to a remote device would wrap all bluetooth related operations by using the
-    QCommDeviceSession object.
+    to a remote device would wrap all Bluetooth related operations by using the
+    QCommDeviceSession object with a given Bluetooth device.
 
     \sa QCommDeviceController
 
@@ -215,6 +216,8 @@ void QCommDeviceSession_Private::readyRead()
     Infrared devices and hciX for Bluetooth devices.
 
     The \a parent parameter is passed to the QObject constructor.
+
+    \sa deviceId()
 */
 QCommDeviceSession::QCommDeviceSession(const QByteArray &deviceId, QObject *parent)
     : QObject(parent)
@@ -234,10 +237,11 @@ QCommDeviceSession::~QCommDeviceSession()
 }
 
 /*!
-    Attempts to initiate a session.  Once the session is established, the sessionOpen()
-    signal will be sent.  Otherwise sessionFailed() signal will be sent.
+    Attempts to initiate a session.  Once the session is established,
+    the sessionOpen() signal will be sent.  Otherwise sessionFailed()
+    signal will be sent.
 
-    \sa sessionOpen(), sessionFailed()
+    \sa sessionOpen(), sessionFailed(), endSession()
 */
 void QCommDeviceSession::startSession()
 {
@@ -246,6 +250,8 @@ void QCommDeviceSession::startSession()
 
 /*!
     Closes the current session.
+
+    \sa startSession(), sessionClosed()
 */
 void QCommDeviceSession::endSession()
 {
@@ -278,18 +284,24 @@ QCommDeviceSession * QCommDeviceSession::session(const QByteArray &deviceId,
 
     This signal is emitted whenever a session has been opened successfully and it is
     safe to use the device.
+
+    \sa startSession()
 */
 
 /*!
     \fn void QCommDeviceSession::sessionFailed();
 
     This signal is emitted when there was a problem opening the device session.
+
+    \sa startSession()
 */
 
 /*!
     \fn void QCommDeviceSession::sessionClosed()
 
     This signal is emitted whenever the session has been terminated (perhaps forcefully)
+
+    \sa endSession()
 */
 
 #include "qcommdevicesession.moc"

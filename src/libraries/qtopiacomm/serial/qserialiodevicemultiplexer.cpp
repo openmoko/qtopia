@@ -33,27 +33,25 @@
 
 /*!
     \class QSerialIODeviceMultiplexer
-    \brief The QSerialIODeviceMultiplexer class provides a base class for serial device multiplexing
+    \mainclass
+    \brief The QSerialIODeviceMultiplexer class provides a base class for serial device multiplexing on AT-based modems.
     \ingroup io
     \ingroup telephony::serial
-
-    The QSerialIODeviceMultiplexer class provides a base class for serial
-    device multiplexers on AT-based modems (e.g. GSM 07.10 multiplexing).
 
     A multiplexer manages one or more channels, identified by their
     names.  The standard names are:
 
-    \list
-    \o \c{primary} Primary AT command channel.
-    \o \c{secondary} Secondary AT command channel for slow AT commands.
+    \table
+    \row \o \c{primary} \o Primary AT command channel.
+    \row \o \c{secondary} \o Secondary AT command channel for slow AT commands.
                      Should return the same as \c{primary} if there
                      is no explicit secondary channel on the modem.
-    \o \c{data} Data channel for GPRS and similar data sessions.
+    \row \o \c{data} \o Data channel for GPRS and similar data sessions.
                 Should return null if there is no explicit data channel
                 on the modem.
-    \o \c{datasetup} Channel for data call setup commands.  Should return
+    \row \o \c{datasetup} \o Channel for data call setup commands.  Should return
                      null if \c{data} is null.
-    \endlist
+    \endtable
 
     Sometimes these channels may overlap.  For example, \c{datasetup}
     may be the same as \c{data} if data call setup should be sent on the
@@ -64,15 +62,33 @@
     The \c{primary} and \c{secondary} channels must always be supported,
     even if they are the same.
 
-    Auxillary channels can be created and released dynamcially.  The
+    Auxiliary channels can be created and released dynamically.  The
     channel name should begin with \c{aux}.  The rest of the name gives
-    an indication as to the type of auxillary data: \c{auxdata}, \c{auxvideo},
+    an indication as to the type of auxiliary data: \c{auxdata}, \c{auxvideo},
     etc.  The multiplexer may return a pre-defined channel (e.g. \c{data})
     if the number of channels on the multiplexer is limited.  The
-    isOpen() method can be used to determine if the channel is already
-    in use, or is free for auxillary traffic.
+    QSerialIODevice::isOpen() method can be used to determine if the channel
+    is already in use, or is free for auxiliary traffic.
 
-    \sa QGsm0710Multiplexer, QNullSerialIODeviceMultiplexer
+    Several standard multiplexer implementations are provided with Qtopia:
+
+    \table
+        \row \o QGsm0710Multiplexer \o Implementation of 3GPP TS 07.10/27.010 multiplexing.
+        \row \o QMultiPortMultiplexer \o Implementation of multiplexing over several
+                serial ports, where each port corresponds to a single channel.
+        \row \o QNullSerialIODeviceMultiplexer \o Null multiplexer with a single
+                channel wrapped around a serial port, for modems that do not support
+                proper multiplexing.
+    \endtable
+
+    New multiplexer implementations can be added using a multiplexer plug-in.
+    See the \l{Tutorial: Writing a Multiplexer Plug-in} for more information
+    on how to write a multiplexer plug-in.
+
+    \sa QGsm0710Multiplexer
+    \sa QMultiPortMultiplexer
+    \sa QNullSerialIODeviceMultiplexer
+    \sa QSerialIODeviceMultiplexerPlugin
 */
 
 /*!
@@ -95,10 +111,11 @@ QSerialIODeviceMultiplexer::~QSerialIODeviceMultiplexer()
 /*!
     \fn QSerialIODevice *QSerialIODeviceMultiplexer::channel( const QString& name )
 
-    Get the serial device corresponding the channel \a name.  If the
+    Returns the serial device corresponding the channel \a name.  If the
     indicated channel does not exist, it should be created if possible.
     Some multiplexers may not be able to create all types of channels,
-    and will return null for unsupported channels.
+    and will return null for unsupported channels.  All multiplexers
+    must support at least \c primary and \c secondary.
 */
 
 // Read a line of text from a serial device.
@@ -129,11 +146,14 @@ static QString readLine( QSerialIODevice *device )
 }
 
 /*!
-    Send \a cmd to the specified serial \a device and wait for the
+    Sends \a cmd to the specified serial \a device and wait for the
     response.  Returns true if the command responds with \c{OK},
     or false if the command responds with an error or it times out.
-    This is typically used by multiplexing plugins to turn on multiplexing
+
+    This function is typically used by multiplexing plug-ins to turn on multiplexing
     prior to creating a subclass of QSerialIODeviceMultiplexer.
+
+    \sa chatWithResponse()
 */
 bool QSerialIODeviceMultiplexer::chat
             ( QSerialIODevice *device, const QString& cmd )
@@ -169,12 +189,14 @@ bool QSerialIODeviceMultiplexer::chat
 }
 
 /*!
-    Send \a cmd to the specified serial \a device and wait for the
+    Sends \a cmd to the specified serial \a device and wait for the
     response.  Returns a null string if the command fails or times
     out, or the contents of the command's response if \c{OK}.
 
     This function can be used to issue commands such as \c{AT+CGMI} where
     the caller is interested in the text of the response.
+
+    \sa chat()
 */
 QString QSerialIODeviceMultiplexer::chatWithResponse
             ( QSerialIODevice *device, const QString& cmd )
@@ -316,14 +338,12 @@ QSerialIODeviceMultiplexer *QSerialIODeviceMultiplexer::create
 
 /*!
     \class QNullSerialIODeviceMultiplexer
+    \mainclass
     \brief The QNullSerialIODeviceMultiplexer class provides a null implementation of multiplexing
     \ingroup io
     \ingroup telephony::serial
 
-    The QNullSerialIODeviceMultiplexer class provides a null implementation
-    on modems that do not support multiplexing.
-
-    This multiplexer provides a primary command channel and a data channel.
+    The null multiplexer provides a primary command channel and a data channel.
     Whenever the data channel is open, the primary command channel cannot be
     used for AT command traffic.  Thus, regular phone operations will be
     suspended while a data call is in progress.

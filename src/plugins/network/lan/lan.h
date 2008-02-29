@@ -67,6 +67,7 @@ private slots:
 
 private:
     void installDNS(bool);
+    bool isAvailableDevice( const QString& ) const;
     void updateTrigger( QtopiaNetworkInterface::Error code = QtopiaNetworkInterface::NoError, const QString& desc = QString() );
 
     QtopiaNetworkConfiguration *configIface;

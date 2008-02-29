@@ -22,6 +22,9 @@
 #include <qtopia/smil/element.h>
 #include <qtopia/smil/module.h>
 
+// WARNING: These classes are not part of the Qtopia API.
+// They are subject to change at any time.
+
 class SmilPrefetch : public SmilElement
 {
 public:

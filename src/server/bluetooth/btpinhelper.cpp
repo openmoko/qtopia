@@ -37,13 +37,20 @@
 #include <qtopialog.h>
 
 /*!
-  \class BTPinHelper
-  \ingroup QtopiaServer
-  \brief The BTPinHelper class provides a default passkey agent for performing Bluetooth passkey authentications.
+    \class BTPinHelper
+    \ingroup QtopiaServer::Task::Bluetooth
+    \brief The BTPinHelper class provides a default passkey agent for performing Bluetooth passkey authentications.
+
+    The BTPinHelper class implements a Qtopia global passkey agent.  The
+    internal implementation uses the QPasswordDialog to ask the user for
+    the passkey.
+
+    \sa QBluetoothPasskeyAgent
  */
 
 /*!
-    \internal
+    Constructs a new BTPinHelper class.  The QObject parent is given
+    by \a parent.
  */
 BTPinHelper::BTPinHelper(QObject *parent)
     : QBluetoothPasskeyAgent("DefaultPasskeyAgent", parent),
@@ -54,7 +61,7 @@ BTPinHelper::BTPinHelper(QObject *parent)
 }
 
 /*!
-    \internal
+    Destructor.
  */
 BTPinHelper::~BTPinHelper()
 {
@@ -62,7 +69,7 @@ BTPinHelper::~BTPinHelper()
 }
 
 /*!
-    \internal
+    \reimp
  */
 void BTPinHelper::requestPasskey(QBluetoothPasskeyRequest &req)
 {
@@ -94,7 +101,7 @@ void BTPinHelper::requestPasskey(QBluetoothPasskeyRequest &req)
 }
 
 /*!
-    \internal
+    \reimp
  */
 void BTPinHelper::cancelRequest(const QString & /*localDevice*/, const QBluetoothAddress & /*remoteAddr*/)
 {
@@ -103,7 +110,7 @@ void BTPinHelper::cancelRequest(const QString & /*localDevice*/, const QBluetoot
 }
 
 /*!
-    \internal
+    \reimp
  */
 void BTPinHelper::release()
 {

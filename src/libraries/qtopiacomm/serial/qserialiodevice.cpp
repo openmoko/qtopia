@@ -49,15 +49,17 @@
 
 /*!
     \class QSerialIODevice
+    \mainclass
     \brief The QSerialIODevice class is the base for all serial devices.
     \ingroup io
     \ingroup telephony::serial
 
     The abstract QSerialIODevice class extends QIODevice with functionality
     that is specific to serial devices.  Subclasses implement specific kinds
-    of serial devices.  QSerialPort implements a physical hardware serial port.
+    of serial devices.  In particular, QSerialPort implements a physical hardware
+    serial port.
 
-    \sa QSerialPort
+    \sa QIODevice, QSerialPort
 */
 
 /*!
@@ -80,7 +82,7 @@ QSerialIODevice::~QSerialIODevice()
 }
 
 /*!
-    Determine if this device is sequential in nature.  Serial devices are
+    Returns if this device is sequential in nature; false otherwise.  Serial devices are
     always sequential.
 */
 bool QSerialIODevice::isSequential() const
@@ -89,7 +91,7 @@ bool QSerialIODevice::isSequential() const
 }
 
 /*!
-    Get the serial device's baud rate.  The default implementation
+    Returns the serial device's baud rate.  The default implementation
     returns 115200.  Subclasses are expected to override this value.
 */
 int QSerialIODevice::rate() const
@@ -100,29 +102,37 @@ int QSerialIODevice::rate() const
 /*!
     \fn bool QSerialIODevice::dtr() const
 
-    Get the current state of the DTR modem status line.
+    Returns true if the current state of the DTR modem status line is active; otherwise returns false.
+
+    \sa setDtr()
 */
 
 /*!
     \fn void QSerialIODevice::setDtr( bool value )
 
-    Set the state of the DTR modem status line to \a value.
+    Sets the state of the DTR modem status line to \a value.
+
+    \sa dtr()
 */
 
 /*!
     \fn bool QSerialIODevice::dsr() const
 
-    Get the current state of the DSR modem status line.
+    Returns true if the current state of the DSR modem status line is active; otherwise returns false.
+
+    \sa dsrChanged()
 */
 
 /*!
     \fn bool QSerialIODevice::carrier() const
 
-    Get the current state of the DCD (carrier) modem status line.
+    Returns true if the current state of the DCD (carrier) modem status line is active; otherwise returns false.
+
+    \sa setCarrier(), carrierChanged()
 */
 
 /*!
-    Set the DCD (carrier) modem status line to \a value.  This is used by
+    Sets the DCD (carrier) modem status line to \a value.  This is used by
     programs that accept incoming serial connections to indicate to the
     peer machine that the carrier has dropped.
 
@@ -134,6 +144,8 @@ int QSerialIODevice::rate() const
     This function will return false if it uses setDtr() to transmit the
     carrier change, or true if it can use a real carrier signal
     (QGsm0710MultiplexerServer supports real carrier signals).
+
+    \sa carrier()
 */
 bool QSerialIODevice::setCarrier( bool value )
 {
@@ -144,27 +156,32 @@ bool QSerialIODevice::setCarrier( bool value )
 /*!
     \fn bool QSerialIODevice::rts() const
 
-    Get the current state of the RTS modem status line.
+    Returns true if the current state of the RTS modem status line is active; otherwise returns false.
+
+    \sa setRts()
 */
 
 /*!
     \fn void QSerialIODevice::setRts( bool value )
 
-    Set the state of the RTS modem status line to \a value.
+    Sets the state of the RTS modem status line to \a value.
+
+    \sa rts()
 */
 
 /*!
     \fn bool QSerialIODevice::cts() const
 
-    Get the current state of the CTS modem status line.
+    Returns true if current state of the CTS modem status line is active; otherwise returns false.
+
+    \sa ctsChanged()
 */
 
 /*!
     \fn void QSerialIODevice::discard()
 
-    Discard pending buffered data without transmitting it.  The companion
-    function QIODevice::flush() waits for the buffers to empty.  This function
-    will do nothing if the underlying implementation cannot discard buffers.
+    Discard pending buffered data without transmitting it.  This function
+    will do nothing if the underlying serial device implementation cannot discard buffers.
 */
 
 /*!
@@ -181,7 +198,7 @@ bool QSerialIODevice::waitForReady() const
 }
 
 /*!
-    Determine if this serial device can validity transfer data.
+    Returns true if this serial device can validly transfer data; false otherwise.
     If this function returns false, there is no point writing
     data to this device, or attempting to read data from it,
     because it will never give a useful result.
@@ -200,6 +217,8 @@ bool QSerialIODevice::isValid() const
 
     Signal that is emitted when the state of the DSR modem
     status line changes to \a value.
+
+    \sa dsr()
 */
 
 /*!
@@ -207,6 +226,8 @@ bool QSerialIODevice::isValid() const
 
     Signal that is emitted when the state of the DCD (carrier) modem
     status line changes to \a value.
+
+    \sa carrier()
 */
 
 /*!
@@ -214,6 +235,8 @@ bool QSerialIODevice::isValid() const
 
     Signal that is emitted when the state of the CTS modem
     status line changes to \a value.
+
+    \sa cts()
 */
 
 /*!
@@ -318,9 +341,11 @@ QProcess *QSerialIODevice::run( const QStringList& arguments,
 }
 
 /*!
-    Get the modem AT command chat object for this serial device.
+    Returns the modem AT command chat object for this serial device.
     This is an alternative to accessing the raw binary data via
     read() and write().
+
+    \sa QAtChat
 */
 QAtChat *QSerialIODevice::atchat()
 {
@@ -332,6 +357,12 @@ QAtChat *QSerialIODevice::atchat()
 /*!
     Abort an \c{ATD} dial command.  The default implementation transmits a
     single CR character.
+
+    If a modem needs to change the way abortDial() works, a multiplexer plug-in
+    should be written which overrides the abortDial() function on
+    the channels that need different abort logic.
+
+    \sa QSerialIODeviceMultiplexerPlugin
 */
 void QSerialIODevice::abortDial()
 {
@@ -490,12 +521,12 @@ void QPseudoTtyProcess::deviceReady()
 
 /*!
     \class QNullSerialIODevice
+    \mainclass
     \brief The QNullSerialIODevice class provides a null implementation of serial device functionality
     \ingroup io
 
-    The QNullSerialIODevice class provides a null implementation of
-    serial device functionality.  All bytes written to the device
-    are quietly ignored, and no data will ever arrive on the device.
+    All bytes written to a QNullSerialIODevice instance are quietly ignored,
+    and no data will ever arrive on the device.
 
     This class can be used when a regular serial device could not
     be opened with QSerialPort::create(), but the application still
@@ -539,7 +570,7 @@ void QNullSerialIODevice::close()
 }
 
 /*!
-    Get the number of bytes that are available on this
+    Returns the number of bytes that are available on this
     null serial device (always 0).
 */
 qint64 QNullSerialIODevice::bytesAvailable() const

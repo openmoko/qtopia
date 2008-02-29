@@ -22,14 +22,14 @@
 #ifndef __QTOPIA_MEDIALIBRARY_MEDIACODECINFO_H
 #define __QTOPIA_MEDIALIBRARY_MEDIACODECINFO_H
 
-#include <qstring.h>
+#include <QString>
 
 #include <qtopiaipcmarshal.h>
 
+class QMediaCodecInfoPrivate;
+
 class QTOPIAMEDIA_EXPORT QMediaCodecInfo
 {
-    struct QMediaCodecInfoPrivate;
-
 public:
     QMediaCodecInfo();
     QMediaCodecInfo(QMediaCodecInfo const& codec);

@@ -42,7 +42,7 @@ public:
     bool contains(const QString&) const;
     int countWords() const;
 
-    class Node {
+    class QTOPIABASE_EXPORT Node {
         friend class QDawgPrivate;
         uint let:16;
         uint a : 14 ; //not used

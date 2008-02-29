@@ -94,7 +94,7 @@ private:
 
 /*!
   \internal
-  Cache all the path lookup in a singleton so it only has to be done once
+  Cache all the path look-up in a singleton so it only has to be done once
   per process.  Previous implementations also did this, but lets make it
   thread-safe while we're on the job.
 */
@@ -200,39 +200,92 @@ QString QtopiaPathHelper::packagePath() const
 
 
 /*!
-  \class Qtopia
+  \namespace Qtopia
+  \mainclass
   \brief The Qtopia namespace contains miscellaneous functionality.
 
   \section1 Word list related
 
   A list of words relevant to the current locale is maintained by the
-  system. The list is held in a \l {QDawg}{DAWG}
-  (implemented by the QDawg class). This list is used, for example, by
-  the pickboard input method.
+  system. The list is held in a QDawg.
+  This list is used, for example, by
+  some input methods.
 
   The global QDawg is returned by fixedDawg(); this cannot be updated.
-  An updatable copy of the global QDawg is returned by addedDawg().
+
+  The addedDawg() contains words that have been added by addWords(); this dawg
+  is also referred to as dawg("local").
+
+  The dawg("deleted") contains words that are in the fixedDawg() but which
+  the user has explicitly deleted, using removeWords().
+
+  The dawg("preferred") contains words that are in either fixedDawg() or
+  dawg("local") and which the user has explicitly marked as preferred
+  to other words, for example, for the purpose of some input methods.
+
   Applications may have their own word lists stored in \l{QDawg}s
   which are returned by dawg(). Use addWords() to add words to the
-  updateable copy of the global QDawg or to named application
-  \l{QDawg}s.
+  modifiable copy of the global QDawg or to named application
+  \l{QDawg}s. Applications should consider the namespace of the
+  word lists, prefixing with the application name where appropriate.
+
+  \section1 Path related
+
+  These methods return the authoritative values of run-time paths used
+  by various components of Qtopia.
+
+  In general do not use these methods.  Instead use the QContent
+  API, or the \l {Qtopia Resource System}.  Qtopia is designed so that
+  searching or scanning the file-system should not be necessary.
+
+  When it is necessary to determine locations on the file-system,
+  use homePath() to find the location for user settings, documentDir()
+  for user documents, and helpPaths() to locate all help files.
+
+  Use installPaths() to find all possible install paths, for example to
+  locate a binary resource.  Use qtopiaDir() for the default location for
+  resources, and packagePath() as the location for third-party resources.
+
+  \quotefromfile appviewer/appviewer.cpp
+  \skipto installPaths
+  \printuntil return info
+
+  The \l installPaths() method gives the complete list of paths known to
+  the Qtopia run-time system.  The \l qtopiaDir() and \l packagePath()
+  directories are stored as the first and last components of this list.
+
+  In fact the paths are determined by compile time configuration options.
+
+  See the documentation on building Qtopia for the -prefix and other
+  relevant options:
+  \list
+      \o \l {Building and Compiling}
+      \o \l {Guide to Configuring and Building Qtopia}
+  \endlist
+
+  \ingroup misc
 */
 
 /*!
    \fn QStringList Qtopia::installPaths()
- 
-   Returns the list of base directories into which Qtopia packages
-   may have been installed.
 
-   The first element in the list is the directory into which
-   Qtopia packages that are always available are installed.
-   The other elements may be on removable media, etc.
+   Returns the list of base directories containing Qtopia software
+   and resources.
 
-   Some directories in the list, or their subdirectories,
+   Some directories in the list, or their sub-directories,
    may not be writable.
 
-   The first element is equals to [qt_prefix] and additional values
-   are set by the colon-seperated environment variable QTOPIA_PATH.
+   Internally the first element is equal to [qt_prefix] and additional values
+   are set by the colon-separated environment variable QTOPIA_PATH.
+
+   Qtopia's algorithm for locating resources searches the paths in order
+   so that for example downloaded binaries or resources cannot overwrite
+   system resources.
+
+   Note that qtopiaDir(), the default location for resources and binaries
+   is first on this list, and packagePath() is last.
+
+   \sa qtopiaDir(), packagePath()
 */
 
 QStringList Qtopia::installPaths()
@@ -242,13 +295,19 @@ QStringList Qtopia::installPaths()
 
 /*!
    \fn QString Qtopia::packagePath()
- 
-   Returns the base directory in which downloaded 3rd party packages
-   will be searched for.
 
-   This is the last item in the installPaths() list.
+   Returns the base directory in which downloaded 3rd party packages,
+   including their binaries and resources, are located.
 
-   This is determined by the [Packages] group in the Storage.conf file.
+   This is returned as the last item in the installPaths() list.
+
+   The value of packagePath() is determined by the [Packages] group
+   in the Storage.conf file.
+
+   The directory must be writable, and is used by the Software Installer
+   for installation of downloaded software.
+
+   \sa installPaths()
 */
 QString Qtopia::packagePath()
 {
@@ -261,11 +320,20 @@ QString Qtopia::packagePath()
 
 /*!
    \fn QString Qtopia::qtopiaDir()
- 
-   Returns the base directory into which Qtopia system packages
-   are installed.
 
-   This is the first item in the installPaths() list.
+   Returns the base directory in which Qtopia system binaries
+   and resources are located.
+
+   This is the default location for all Qtopia configuration and other
+   data.
+
+   This directory may not be writable.
+
+   This is the first item in the installPaths() list, and as such
+   is the first location searched by the Qtopia resource system, and
+   the algorithm for locating binaries for execution.
+
+   \sa installPaths()
  */
 QString Qtopia::qtopiaDir()
 {
@@ -282,7 +350,7 @@ QString Qtopia::qtopiaDir()
 /*!
   \fn QString Qtopia::documentDir()
  
-  Returns the user's current Document directory. There is a trailing "/".
+  Returns the user's current Document directory, with a trailing "/" included.
 */
 QString Qtopia::documentDir()
 {
@@ -294,6 +362,8 @@ QString Qtopia::documentDir()
  
   Returns the name of the directory to be used as the current
   users home directory.
+
+  /sa QDir::homePath()
 */
 QString Qtopia::homePath()
 {
@@ -311,8 +381,6 @@ QString Qtopia::homePath()
 /*!
   \fn QString Qtopia::defaultButtonsFile()
  
-  This function will change in the final Qtopia 4 release.
-
   \internal
 
   Return the name of the defaultbuttons.conf file.
@@ -355,13 +423,22 @@ QStringList Qtopia::helpPaths()
 }
 
 /*!
-    \fn bool Qtopia::confirmDelete( QWidget *parent, const QString & caption, const QString & object )
- 
-    Shows a dialog with \a caption to confirm deletion of \a object with user.
+    Shows a dialog with a \a caption to confirm deletion of the described
+    \a object with the user.  This is a convenience function that makes
+    confirming deletions easier. For example:
+
+    \code
+    if (Qtopia::confirmDelete(this, tr("Delete Contact"), contact->name()))
+        delete contact;
+    \endcode
 
     If \a parent is 0, the dialog becomes an application-global modal dialog
     box. If \a parent is a widget, the dialog becomes modal relative to
     \a parent.
+
+    Returns true if the user agrees to deleting \a object; otherwise returns false.
+
+    \sa QMessageBox::warning()
 */
 bool Qtopia::confirmDelete( QWidget *parent, const QString & caption, const QString & object )
 {
@@ -387,10 +464,16 @@ void Qtopia::actionConfirmation(const QPixmap &pixmap, const QString &text)
 }
 
 /*!
-    \fn void Qtopia::soundAlarm()
- 
     Sounds the audible system alarm. This is used for applications such
     as Calendar when it needs to inform the user of an event.
+
+    This call is equivalent to:
+    \code
+        QtopiaServiceRequest e( "Alert", "soundAlert()" );
+        e.send();
+    \endcode
+
+    \sa AlertService
 */
 void Qtopia::soundAlarm()
 {
@@ -400,9 +483,13 @@ void Qtopia::soundAlarm()
 
 /*!
   \fn void Qtopia::statusMessage(const QString& message)
+  \obsolete
  
   Displays a status \a message to the user. This usually appears
-  in the taskbar for a short amount of time, then disappears.
+  in the task bar for a short amount of time, then disappears.
+
+  This method is related to the PDA Edition which no longer exists. Using it will
+  not cause a failure but nothing will happen when it is called.
 */
 void Qtopia::statusMessage(const QString& message)
 {
@@ -419,13 +506,15 @@ void Qtopia::statusMessage(const QString& message)
 
 /*!
   \fn QStringList Qtopia::languageList()
- 
-  Returns the list of language identifiers for the languages the user
-  has selected as meaningful to them.
 
-  The first string in the list is the users primary
-  language. All information presented to the user should be in the
-  language earliest in the list.
+  Returns the list of language identifiers for the currently selected language.
+  The first string in the list is the identifier for user's primary choice of language.
+  The second string in the list, if any, is more generic language, providing fall-back policy.
+
+  For example, "en_US", "en" is returned when American English is used.
+  If there is no translation in "en_US", more generic translation "en" will be used.
+
+  \sa Internationalization
 */
 QStringList Qtopia::languageList()
 {
@@ -510,14 +599,11 @@ static QList<QTranslator*>* qLocalTranslations(const QString& key)
 }
 
 /*!
-\fn QString Qtopia::translate(const QString& key, const QString& c, const QString& str)
- 
 Translate \a str in the context \a c, using only the translation files defined by \a key.
 The \a key may be either a single name, such as "QtopiaSettings", or it may be a
 'wildcard', such as "Categories-*". The \a key thus defines the set of translation files
 in which to search for a translation.
 */
-
 QString Qtopia::translate(const QString& key, const QString& c, const QString& str)
 {
     static QMutex translationMutex;
@@ -585,7 +671,11 @@ QString Qtopia::dehyphenate(const QString& s)
 /*!
   \fn void Qtopia::sleep( unsigned long secs )
  
-  System independent sleep. Suspend process for \a secs seconds.
+  Suspends the current process for \a secs seconds.
+
+  Note that this function should be avoided where possible as it will freeze the user interface.
+  Use of QTimer and QObject::startTimer() allow for delayed processing without freezing the user
+  interface at the cost of being unable to trigger accurately.
 
   \sa QThread::sleep()
  */
@@ -601,7 +691,11 @@ void Qtopia::sleep( unsigned long secs )
 /*!
   \fn void Qtopia::msleep( unsigned long msecs )
  
-  System independent sleep. Suspend process for \a msecs milliseconds.
+  Suspends the current process for \a msecs milliseconds.
+
+  Note that this function should be avoided where possible as it will freeze the user interface.
+  Use of QTimer and QObject::startTimer() allow for delayed processing without freezing the user
+  interface at the cost of being unable to trigger accurately.
 
   \sa QThread::msleep()
  */
@@ -617,7 +711,11 @@ void Qtopia::msleep( unsigned long msecs )
 /*!
   \fn void Qtopia::usleep( unsigned long usecs )
  
-  System independent sleep. Suspend process for \a usecs microseconds.
+  Suspends the current process for \a usecs microseconds.
+
+  Note that this function should be avoided where possible as it will freeze the user interface.
+  Use of QTimer and QObject::startTimer() allow for delayed processing without freezing the user
+  interface at the cost of being unable to trigger accurately.
 
   \sa QThread::usleep()
  */
@@ -637,7 +735,7 @@ void Qtopia::usleep( unsigned long usecs )
 /*!
   \fn QString Qtopia::version()
  
-  Returns the Qtopia version string. This is of the form:
+  Returns the Qtopia version string, specified by \i QPE_VERSION. This is of the form:
   \i{major} .\i{minor} .\i{patchlevel}  (eg. "1.2.3"),
   possibly followed by a space and special information
   (eg. "1.2.3 beta4").
@@ -648,9 +746,22 @@ QString Qtopia::version()
 }
 
 /*!
+  \fn QString Qtopia::compatibleVersions()
+
+  Returns the versions of Qtopia, which this
+  particular version of Qtopia is binary compatible 
+  with.  (e.g. "4.2.2" or "4.2.2-4.2.3") 
+  
+*/
+QString Qtopia::compatibleVersions()
+{
+    return COMPATIBLE_VERSIONS;
+}
+
+/*!
   \fn QString Qtopia::architecture()
  
-  Returns the device architecture string. This is a sequence
+  Returns the device architecture string specified by \i QPE_ARCHITECTURE. This is a sequence
   of identifiers separated by "/", from most general to most
   specific (eg. "IBM/PC").
 */
@@ -698,9 +809,9 @@ QString Qtopia::ownerName()
 
 #ifdef Q_OS_WIN32
 /*!
-  Truncate file to size specified
+  Returns true if file \a f is able to be truncated to \a size
   \a f must be an open file
-  \a size must be a positive value
+  \a size must be a positive value; otherwise returns false.
  */
 bool Qtopia::truncateFile(QFile &f, int size)
 {
@@ -717,9 +828,9 @@ bool Qtopia::truncateFile(QFile &f, int size)
 }
 #else   // Q_OS_WIN32
 /*!
-  Truncate file to size specified
+  Returns true if file \a f is able to be truncated to \a size
   \a f must be an open file
-  \a size must be a positive value
+  \a size must be a positive value; otherwise returns false.
  */
 bool Qtopia::truncateFile(QFile &f, int size){
     if (!f.isOpen())
@@ -765,10 +876,8 @@ QString Qtopia::tempDir()
 }
 
 /*!
-  \fn QString Qtopia::tempName(const QString &fname)
- 
-  Returns a filename suitable for use as a temporary file using \a fname
-  as a base. Currently returns the filename with "_new" inserted prior to
+  Returns a file name suitable for use as a temporary file using \a fname
+  as a base. Currently returns the file name with "_new" inserted prior to
   the extension.
 
   No attempt is made to check that the file does not already exist.
@@ -785,9 +894,14 @@ QString Qtopia::tempName(const QString &fname)
 
 /*!
   \fn QString Qtopia::applicationFileName(const QString& appname, const QString& filename)
+
+  Returns the application data path for the application specific data
+  file \a filename and the application executable named \a appname.
+
+  Application specific data is stored in a separate directory per
+  application.
  
-  Returns the full path for the application called \a appname, with the
-  given \a filename. The associated directory will be created if if does not exist yet.
+  The application specific directory will be created if if does not exist.
   It is a requirement that the user has write permissions for \l Qtopia::homePath().
   
   If \a filename contains "/", it is the caller's responsibility to
@@ -819,19 +933,26 @@ QString Qtopia::applicationFileName(const QString& appname, const QString& filen
 /*!
   \fn bool Qtopia::isDocumentFileName(const QString& file)
  
-  Returns true if \a file is the filename of a document.
+  Returns true if \a file is the file name of a document ie, it resides under the locations
+    described in storage.conf marked with both Documents=true and possibly with an extra
+    document path for the location.
 */
 bool Qtopia::isDocumentFileName(const QString& file)
 {
     if ( file.right(1) == "/" )
         return false;
-    QStorageMetaInfo storage;
-    QFileSystemFilter fsf;
-    fsf.documents = QFileSystemFilter::Set;
-    foreach ( QFileSystem *fs, storage.fileSystems(&fsf) ) {
-        if ( file.indexOf(fs->path()+"/") == 0 )
+    const QFileSystem *fs=QStorageMetaInfo::instance()->fileSystemOf(file, true);
+    if(fs != NULL && fs->documents() == true)
+    {
+        if(fs->documentsPath() != fs->path())
+        {
+            if(file.startsWith(fs->documentsPath()))
+                return true;
+        }
+        else
             return true;
     }
+
     return false;
 }
 
@@ -848,15 +969,38 @@ bool Qtopia::isDocumentFileName(const QString& file)
                   access locked file. Reserved for future use.
 */
 
-#ifndef Q_OS_WIN32
+/*!
+  \fn bool Qtopia::lockFile(QFile &f, int flags)
+  Lock a file. Any locks created should be released before
+  the program exits. Returns true if successful.
+
+  \a f must be an open file.
+  \a flags any combination of LockShare, LockWrite, LockBlock.
+  \sa Qtopia::unlockFile(), Qtopia::isFileLocked()
+*/
 
 /*!
-  Lock region of file. Any locks created should be released before
-  the program exits. Returns true if sucessfull.
+  \fn bool Qtopia::unlockFile(QFile &f)
+  Unlock a file. Returns true if successful.
 
-  \a f must be an open file
-  \a flags any combination of LockShare, LockWrite, LockBlock
-*/
+  \a f must be an open file previously locked.
+
+  \sa Qtopia::lockFile(), Qtopia::isFileLocked()
+ */
+
+/*!
+  \fn bool Qtopia::isFileLocked(QFile &f, int flags)
+  Tests locking a file. Any locks created should be released before
+  the program exits. Returns true if locking would be successful.
+
+  \a f must be an open file.
+
+  \a flags any combination of LockShare, LockWrite.
+  \sa Qtopia::unlockFile(), Qtopia::lockFile()
+ */
+
+#ifndef Q_OS_WIN32
+
 bool Qtopia::lockFile(QFile &f, int flags)
 {
     struct flock fileLock;
@@ -866,13 +1010,13 @@ bool Qtopia::lockFile(QFile &f, int flags)
 
     fileLock.l_whence = SEEK_SET;
     fileLock.l_start = 0;
-    int lockCommand, lockMode;
+    int lockCommand;
 
     fileLock.l_len = f.size();
 
 
     if (flags == -1){
-        lockMode =  F_RDLCK;
+        fileLock.l_type =  F_RDLCK;
         if (f.openMode() == QIODevice::ReadOnly)
             fileLock.l_type = F_RDLCK;
         else
@@ -895,11 +1039,6 @@ bool Qtopia::lockFile(QFile &f, int flags)
         return false;
 }
 
-
-/*!
-  Unlock a region of file
-  \a f must be an open file previously locked
- */
 bool Qtopia::unlockFile(QFile &f)
 {
     struct flock fileLock;
@@ -921,12 +1060,7 @@ bool Qtopia::unlockFile(QFile &f)
 
 }
 
-/*!
-  Could a request to lock file with given flags succeed
-  \a f must be an opened file
-  \a flags the desired lock type required
- */
-bool Qtopia::isFileLocked(QFile &f, int /* flags */)
+bool Qtopia::isFileLocked(QFile &f, int flags)
 {
     struct flock fileLock;
 
@@ -938,50 +1072,42 @@ bool Qtopia::isFileLocked(QFile &f, int /* flags */)
 
     fileLock.l_len = f.size();
 
-    if (f.openMode() == QIODevice::ReadOnly)
-        fileLock.l_type = F_RDLCK;
-    else
-        fileLock.l_type = F_WRLCK;
+    if (flags == -1){
+        fileLock.l_type =  F_RDLCK;
+        if (f.openMode() == QIODevice::ReadOnly)
+            fileLock.l_type = F_RDLCK;
+        else
+            fileLock.l_type = F_WRLCK;
+    }else{
+        if (flags & LockWrite)
+            fileLock.l_type = F_WRLCK;
+        else
+            fileLock.l_type = F_RDLCK;
+    }
 
     fileLock.l_pid = 0;
 
-    if (::fcntl(f.handle(), F_SETLK, &fileLock) != -1)
+    if (::fcntl(f.handle(), F_GETLK, &fileLock) != -1)
         return false;
 
-    return fileLock.l_pid != 0;
+    return fileLock.l_type == F_UNLCK;
 }
 
 
 #else
 
-/*!
-  Lock region of file. Any locks created should be released before
-  the program exits. Returns true if sucessfull.
-
-  \a f must be an open file
-  \a flags any combination of LockShare, LockWrite, LockBlock
-*/
 bool Qtopia::lockFile(QFile &f, int /*flags*/)
 {
     // If the file has been opened then a lock has been achieved
     return f.isOpen();
 }
 
-/*!
-  Unlock a region of file
-  \a f must be an open file previously locked
- */
 bool Qtopia::unlockFile(QFile & /*f*/)
 {
     // No need to do anything as we do not open file using sharing
     return true;
 }
 
-/*!
-  Could a request to lock file with given flags succeed
-  \a f must be an opened file
-  \a flags the desired lock type required
- */
 bool Qtopia::isFileLocked(QFile &f, int /*flags*/)
 {
     // if the file is open then we must have achieved a file lock
@@ -991,10 +1117,10 @@ bool Qtopia::isFileLocked(QFile &f, int /*flags*/)
 #endif
 
 /*!
-  Returns true if the application can expect the user to
+  Returns true if keypad navigation is disabled and the application can expect the user to
   be able to easily produce \l {QMouseEvent}{mouse events}.
 
-  Returns false if the user \i cannot produce mouse events,
+  Returns false if keypad navigation is enabled and the user \i cannot produce mouse events,
   or chooses not to (eg. does not plug in a mouse).
 
   Applications may use this to tune interactions.
@@ -1002,6 +1128,8 @@ bool Qtopia::isFileLocked(QFile &f, int /*flags*/)
   Note that you should only call this function after an instance of
   QtopiaApplication has been created. This function will return an undefined
   value if called prior to this.
+
+  \sa QApplication::keypadNavigationEnabled()
 */
 bool Qtopia::mousePreferred()
 {
@@ -1017,7 +1145,13 @@ bool Qtopia::mousePreferred()
   may be either fixed function buttons, such as Key_Menu, or user
   mappable buttons, such as Key_F1.
 
-  \sa QSoftMenuBar, QDeviceButtonManager
+  \code
+        if ( Qtopia::hasKey( Qt::Key_Flip ) ) {
+            ... // add flip key funcions
+        }
+  \endcode
+
+  \sa Qt::Key, QSoftMenuBar, QDeviceButtonManager
  */
 bool Qtopia::hasKey(int key)
 {
@@ -1042,13 +1176,14 @@ bool Qtopia::hasKey(int key)
 }
 
 /*!
-  Executes the application identfied by \a app, passing \a
+  \obsolete
+  Executes the application identified by \a app, passing \a
   document if it isn't null.
 
-  Note that a better approach might be to send a QCop message to the
-  application's QPE/Application/\i{appname} channel.
+  Please use the QContent system instead.
+
+  \sa QContent::execute()
 */
-#ifdef Q_WS_QWS
 void Qtopia::execute( const QString &app, const QString& document )
 {
     if ( document.isNull() ) {
@@ -1061,11 +1196,10 @@ void Qtopia::execute( const QString &app, const QString& document )
         e.send();
     }
 }
-#endif
 
 /*!
   Returns the string \a s with the characters '\', '"', and '$' quoted
-  by a preceeding '\', and enclosed by double-quotes (").
+  by a preceding '\', and enclosed by double-quotes (").
 
   \sa stringQuote()
 */
@@ -1086,7 +1220,7 @@ QString Qtopia::shellQuote(const QString& s)
 
 /*!
   Returns the string \a s with the characters '\' and '"' quoted by a
-  preceeding '\'.
+  preceding '\'.
 
   \sa shellQuote()
 */
@@ -1319,7 +1453,7 @@ const QDawg& Qtopia::fixedDawg()
   Returns the changeable QDawg that contains general
   words for the current locale.
 
-  \sa fixedDawg()
+  \sa fixedDawg(), addWords(), removeWords()
 */
 const QDawg& Qtopia::addedDawg()
 {
@@ -1373,9 +1507,9 @@ const QDawg& Qtopia::dawg(const QString& name, const QString& language)
 }
 
 /*!
-  Adds \a wordlist to the addedDawg(). Words that are already there
-  are not added. Words that are in the 'deleted' dictionary are
-  removed from there.
+  Adds \a wordlist to the addedDawg(). Words that are already in the "local"
+  list are not added. Words that are in the "deleted" list are
+  removed from that list.
 
   Note that the addition of words persists between program executions
   (they are saved in the dictionary files), so you should confirm the
@@ -1459,7 +1593,12 @@ void Qtopia::removeWords(const QString& dictname, const QStringList& wordlist)
 }
 
 /*!
-  Reloads new words from a dawg dictionary called \a dictname.
+  Reloads the QDawg named called \a dictname. This must be called if
+  the underlying dawg files are changed, otherwise previous versions will be used.
+
+  Not normally used.
+
+  \sa dawg()
 */
 void Qtopia::qtopiaReloadWords(const QString& dictname)
 {

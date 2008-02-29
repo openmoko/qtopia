@@ -41,7 +41,6 @@ public:
 
 public slots:
     Q_SCRIPTABLE void appMessage(const QString &msg, const QByteArray &data);
-    Q_SCRIPTABLE void foobar();
 
 signals:
     void received(const QString &msg, const QByteArray &data);

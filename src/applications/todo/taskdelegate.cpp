@@ -70,32 +70,32 @@ QList<StringPair> TaskDelegate::subTexts(const QStyleOptionViewItem& option, con
     if (s == QTask::Completed || progress == 100) {
         QDate finishedDate = index.model()->data(index.sibling(index.row(), QTaskModel::CompletedDate),Qt::DisplayRole).toDate();
         // finishedDate should be valid since it is 100% complete..
-        subTexts.append(qMakePair(tr("Completed: "), formatDate(finishedDate)));
+        subTexts.append(qMakePair(tr("Completed:")+QLatin1String(" "), formatDate(finishedDate)));
 
     } else {
         QDate dueDate = index.model()->data(index.sibling(index.row(), QTaskModel::DueDate),Qt::DisplayRole).toDate();
         if (dueDate.isValid()) {
             if (progress > 0)
-                subTexts.append(qMakePair(tr("Due: "), tr("%1 (%2\%)", "Sep 5, 2007 (30%)")
+                subTexts.append(qMakePair(tr("Due:")+QLatin1String(" "), tr("%1 (%2\%)", "%1=date 2=30%")
                         .arg(formatDate( dueDate )).arg(progress)));
             else
-                subTexts.append(qMakePair(tr("Due: "), formatDate( dueDate )));
+                subTexts.append(qMakePair(tr("Due:")+QLatin1String(" "), formatDate( dueDate )));
         }
         else if (progress > 0 && progress < 100)
-            subTexts.append(qMakePair(tr("Progress: "), tr("%1\%", "50%").arg(progress)));
+            subTexts.append(qMakePair(tr("Progress:") +QLatin1String(" "), tr("%1\%", "50%").arg(progress)));
         else if (s != QTask::NotStarted) {
             QDate startDate = index.model()->data(index.sibling(index.row(), QTaskModel::StartedDate),Qt::DisplayRole).toDate();
             if (startDate.isValid())
-                subTexts.append(qMakePair(tr("Started: "), formatDate(startDate)));
+                subTexts.append(qMakePair(tr("Started:")+QLatin1String(" "), formatDate(startDate)));
             // for perc == 0 && s != NotStarted and startDate to be invalid, it means s == Waiting or Deferred
         }
     }
     if (s == QTask::NotStarted)
-        subTexts.append(qMakePair(tr("Status: "), tr("Not started")));
+        subTexts.append(qMakePair(tr("Status:")+QLatin1String(" "), tr("Not started")));
     if (s == QTask::Waiting)
-        subTexts.append(qMakePair(tr("Status: "), tr("Waiting")));
+        subTexts.append(qMakePair(tr("Status:")+QLatin1String(" "), tr("Waiting")));
     if (s == QTask::Deferred)
-        subTexts.append(qMakePair(tr("Status: "), tr("Deferred")));
+        subTexts.append(qMakePair(tr("Status:")+QLatin1String(" "), tr("Deferred")));
 
     return subTexts;
 }

@@ -48,6 +48,7 @@
 
 /*!
   \class QStorageDeviceSelector
+  \mainclass
   \brief The QStorageDeviceSelector class displays a list of available storage
          locations.
 

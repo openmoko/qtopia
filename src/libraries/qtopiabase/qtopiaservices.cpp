@@ -49,35 +49,55 @@ static QStringList serviceList_p(const QString& d, const QString n)
 
 /*!
   \class QtopiaService
+  \mainclass
 
-  \brief The QtopiaService class allows applications to provide services for use
-  by other applications.
+  \brief The QtopiaService class allows applications to query the services provided by other applications.
 
     \ingroup ipc
 
-  A QtopiaService is a named collection of features that an application
+  A Qtopia service is a named collection of features that an application
   may choose to provide. For example, web browsers providing
-  the feature of displaying a web page given a URL.
+  the feature of displaying a web page given a URL will implement the \c WebAccess
+  service; telephony programs providing phone call dialing support will implement
+  the \c Dialer server; etc.
+
+  See also \l{Services} for more information on implementing and configuring services.
 
   \sa {Services}, QtopiaServiceRequest
 */
 
 /*!
   \class QtopiaServiceRequest
+  \mainclass
 
-  \brief The QtopiaServiceRequest class allows applications to request services from
-  other applications.
+  \brief The QtopiaServiceRequest class allows applications to request services from other applications.
 
     \ingroup ipc
 
-  A \c QtopiaServiceRequest encapsulates a \c QtopiaService and the message to be sent to
-  that service. It is similar to a \c QtopiaIpcEnvelope, but uses service names
-  rather than direct application names.
+  A QtopiaServiceRequest encapsulates a Qtopia service name and the message to be sent to
+  that service. It is similar to QtopiaIpcEnvelope, but uses service names
+  rather than direct channel names.  The following example sends the \c{editTime()}
+  request to the \c Time service:
 
-  Since \c QtopiaServiceRequest inherits \c QDataStream, data may be written to the
-  request prior to sending it with \c send().
+  \code
+  QtopiaServiceRequest req("Time", "editTime()");
+  req.send();
+  \endcode
 
-  \sa {Services}, QtopiaService
+  Parameter data may be written to the request prior to sending it with send().
+  The following example requests that the \c WebAccess service open a specific URL:
+
+  \code
+  QtopiaServiceRequest req("WebAccess", "openURL(QString)");
+  req << "http://www.trolltech.com/";
+  req.send();
+  \endcode
+
+  Applications that implement services can use QtopiaAbstractService to process
+  incoming service messages.  See also {Services} for more information on
+  implementing and configuring services.
+
+  \sa {Services}, QtopiaService, QtopiaAbstractService
 */
 
 
@@ -90,7 +110,7 @@ QStringList QtopiaService::list()
 }
 
 /*!
-  Returns the name of the \c QSettings file defining the bindings which the
+  Returns the name of the QSettings file defining the bindings which the
   user has selected for the \a service.
 */
 QString QtopiaService::binding(const QString& service)
@@ -103,12 +123,14 @@ QString QtopiaService::binding(const QString& service)
 
 
 /*!
-  Returns the name of the \c QSettings file defining the facilities available from
+  Returns the name of the QSettings file defining the facilities available from
   the applications providing the \a service, or
   a null string if there is no such service.
 
   Applications providing the service may have additional configuration
-  defined in the \c appConfig() file.
+  defined in the appConfig() file.
+
+  \sa appConfig()
 */
 QString QtopiaService::config(const QString& service)
 {
@@ -117,19 +139,20 @@ QString QtopiaService::config(const QString& service)
 
 
 /*!
-  Returns the \c QSettings file defining the facilities available from
+  Returns the QSettings file defining the facilities available from
   the applications providing the \a service, or
   a null string if there is no such service.
 
-  The \c QSettings can be used to extract more detailed application-specific
+  The QSettings can be used to extract more detailed application-specific
   information about the application providing the service.
 
   Note: The application always provides at least the services defined
-  in the \c config() file - the information in the \c appConfig()
-  is application-specific.
+  in the config() file - the information in the appConfig() is application-specific.
 
   If \a appname is provided, a specific binding to that application may
   be used rather than the global binding.
+
+  \sa config()
 */
 QString QtopiaService::appConfig(const QString& service, const QString& appname)
 {
@@ -143,6 +166,8 @@ QString QtopiaService::appConfig(const QString& service, const QString& appname)
 /*!
   Returns all applications that offer the \a service, or
   a null string if there is no such service offered.
+
+  \sa app()
 */
 QStringList QtopiaService::apps(const QString& service)
 {
@@ -162,6 +187,8 @@ QStringList QtopiaService::apps(const QString& service)
 
   If \a appname is provided, a specific binding to that application may
   be used rather than the global binding.
+
+  \sa apps()
 */
 QString QtopiaService::app(const QString& service, const QString& appname)
 {
@@ -193,6 +220,8 @@ QString QtopiaService::app(const QString& service, const QString& appname)
 /*!
   Returns the QCop channels for applications that offer
   \a service.
+
+  \sa channel()
 */
 QStringList QtopiaService::channels(const QString& service)
 {
@@ -204,11 +233,13 @@ QStringList QtopiaService::channels(const QString& service)
 }
 
 /*!
-  Returns the \c QCop channel for the given \a service, or
+  Returns the QCop channel for the given \a service, or
   a null string if there is no such service.
 
   If \a appname is provided, a specific binding to that application may
   be used rather than the global binding.
+
+  \sa channels()
 */
 QString QtopiaService::channel(const QString& service, const QString& appname)
 {
@@ -220,7 +251,7 @@ QString QtopiaService::channel(const QString& service, const QString& appname)
 
 /*!
   Construct a null service request.
-  \c setService() and\c  setMessage() must be called before \c send(), but the
+  setService() and setMessage() must be called before send(), but the
   service may be written prior to the calls.
  */
 QtopiaServiceRequest::QtopiaServiceRequest()
@@ -229,7 +260,7 @@ QtopiaServiceRequest::QtopiaServiceRequest()
 
 /*!
   Construct a service request that will send \a message to
-  a \a service when \c send() is called. The service may be written
+  a \a service when send() is called. The service may be written
   prior to the calls.
 */
 QtopiaServiceRequest::QtopiaServiceRequest(const QString& service, const QString& message)
@@ -266,15 +297,17 @@ QtopiaServiceRequest& QtopiaServiceRequest::operator=(const QtopiaServiceRequest
 }
 
 /*!
-  Destructs the service request. Unlike \c QtopiaIpcEnvelope, the
-  request is NOT automatically sent.
+  Destructs the service request. Unlike QtopiaIpcEnvelope, the
+  request is not automatically sent.
 */
 QtopiaServiceRequest::~QtopiaServiceRequest()
 {
 }
 
 /*!
-  Returns true if either the service or message is not set.
+  Returns true if either the service() or message() is not set.
+
+  \sa service(), message()
  */
 bool QtopiaServiceRequest::isNull() const
 {
@@ -282,7 +315,8 @@ bool QtopiaServiceRequest::isNull() const
 }
 
 /*!
-  Sends the request. Returns false if the request was null.
+  Sends the request. Returns false if there was no application that could
+  service the request.
 */
 bool QtopiaServiceRequest::send() const
 {
@@ -365,6 +399,8 @@ bool QtopiaServiceRequest::send() const
 
 /*!
   Sets the \a service to which the request will be sent.
+
+  \sa service()
  */
 void QtopiaServiceRequest::setService(const QString& service)
 {
@@ -381,6 +417,8 @@ void QtopiaServiceRequest::setService(const QString& service)
 
 /*!
     Sets the \a message to be sent to the service.
+
+    \sa message()
 */
 void QtopiaServiceRequest::setMessage(const QString& message)
 {
@@ -398,25 +436,25 @@ void QtopiaServiceRequest::setMessage(const QString& message)
 /*!
     \fn const QList<QVariant> &QtopiaServiceRequest::arguments() const
 
-    Get the complete list of arguments for this service request.
+    Returns the complete list of arguments for this service request.
 */
 
 /*!
     \fn void QtopiaServiceRequest::setArguments(const QList<QVariant> &arguments)
 
-    Set the complete list of \a arguments for this service request.
+    Sets the complete list of \a arguments for this service request.
 */
 
 /*!
     \fn QtopiaServiceRequest &QtopiaServiceRequest::operator<< (const T &var)
 
-    Add \a var to the list of arguments for this service request.
+    Adds \a var to the list of arguments for this service request.
 */
 
 /*!
     \fn QtopiaServiceRequest &QtopiaServiceRequest::operator<< (const char *var)
 
-    Add \a var to the list of arguments for this service request.
+    Adds \a var to the list of arguments for this service request.
 */
 
 /*!

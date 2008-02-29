@@ -92,6 +92,7 @@ bool lessThan(const QVariant &left, const QVariant &right) {
 
 /*!
   \class QBiasedRecordIOMerge
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QBiasedRecordIOMerge class provides a way of merging records from multiple
@@ -512,6 +513,7 @@ bool QBiasedRecordIOMerge::compare(const QVariant &left, const QVariant &right)
 
 /*!
   \class QRecordIO
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QRecordIO class provides an interface that will allow merging

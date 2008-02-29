@@ -36,7 +36,7 @@ class QTOPIACOMM_EXPORT QBluetoothObexSocket : public QObexSocket
 public:
     QBluetoothObexSocket(QObject *parent = 0);
     QBluetoothObexSocket(const QBluetoothAddress &remote,
-                         quint8 rfcomm_channel,
+                         quint8 rfcommChannel,
                          const QBluetoothAddress &local = QBluetoothAddress::any,
                          QObject *parent = 0);
     virtual ~QBluetoothObexSocket();

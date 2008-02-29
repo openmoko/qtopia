@@ -35,6 +35,7 @@ public:
     virtual void close();
 
     void setHandle(void *handle) { m_handle = handle; }
+    virtual int socketDescriptor() const;
     void * handle() { return m_handle; }
 
     bool isConnected() const;

@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QContentFilterDialog Class Reference</title>
+  <title>QContentFilterDialog Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContentFilterDialog Class Reference</h1>
 <p>The QContentFilterDialog widget provides a dialog box for selecting content filters. <a href="#details">More...</a></p>
-<pre>#include &lt;QContentFilterDialog&gt;</pre><p>Inherits <a href="qdialog.html">QDialog</a>.</p>
+<pre>    #include &lt;QContentFilterDialog&gt;</pre><p>Inherits <a href="qdialog.html">QDialog</a>.</p>
 <ul>
 <li><a href="qcontentfilterdialog-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -21,7 +23,7 @@
 <li><div class="fn"/><b><a href="qcontentfilterdialog.html#QContentFilterDialog">QContentFilterDialog</a></b> ( QWidget * <i>parent</i> = 0 )</li>
 <li><div class="fn"/><b><a href="qcontentfilterdialog.html#QContentFilterDialog-2">QContentFilterDialog</a></b> ( const QContentFilterModel::Template &amp; <i>modelTemplate</i>, QWidget * <i>parent</i> = 0 )</li>
 <li><div class="fn"/><b><a href="qcontentfilterdialog.html#QContentFilterDialog-3">QContentFilterDialog</a></b> ( QContent::Property <i>property</i>, QContentFilterModel::TemplateOptions <i>options</i> = QContentFilterModel::SelectAll, const QStringList &amp; <i>checked</i> = QStringList(), QWidget * <i>parent</i> = 0 )</li>
-<li><div class="fn"/><b><a href="qcontentfilterdialog.html#QContentFilterDialog-4">QContentFilterDialog</a></b> ( QContentFilter::FilterType <i>type</i>, const QString &amp; <i>subType</i> = QString(), QContentFilterModel::TemplateOptions <i>options</i> = QContentFilterModel::SelectAll, const QStringList &amp; <i>checked</i> = QStringList(), QWidget * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qcontentfilterdialog.html#QContentFilterDialog-4">QContentFilterDialog</a></b> ( QContentFilter::FilterType <i>type</i>, const QString &amp; <i>scope</i> = QString(), QContentFilterModel::TemplateOptions <i>options</i> = QContentFilterModel::SelectAll, const QStringList &amp; <i>checked</i> = QStringList(), QWidget * <i>parent</i> = 0 )</li>
 <li><div class="fn"/>QContentFilter <b><a href="qcontentfilterdialog.html#checkedFilter">checkedFilter</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qcontentfilterdialog.html#checkedLabel">checkedLabel</a></b> () const</li>
 <li><div class="fn"/>QContentFilter <b><a href="qcontentfilterdialog.html#filter">filter</a></b> ()</li>
@@ -30,7 +32,7 @@
 <li><div class="fn"/>void <b><a href="qcontentfilterdialog.html#setFilter">setFilter</a></b> ( const QContentFilter &amp; <i>filter</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontentfilterdialog.html#setModelTemplate">setModelTemplate</a></b> ( const QContentFilterModel::Template &amp; <i>modelTemplate</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontentfilterdialog.html#setModelTemplate-2">setModelTemplate</a></b> ( QContent::Property <i>property</i>, QContentFilterModel::TemplateOptions <i>options</i> = QContentFilterModel::SelectAll, const QStringList &amp; <i>checked</i> = QStringList() )</li>
-<li><div class="fn"/>void <b><a href="qcontentfilterdialog.html#setModelTemplate-3">setModelTemplate</a></b> ( QContentFilter::FilterType <i>type</i>, const QString &amp; <i>subType</i> = QString(), QContentFilterModel::TemplateOptions <i>options</i> = QContentFilterModel::SelectAll, const QStringList &amp; <i>checked</i> = QStringList() )</li>
+<li><div class="fn"/>void <b><a href="qcontentfilterdialog.html#setModelTemplate-3">setModelTemplate</a></b> ( QContentFilter::FilterType <i>type</i>, const QString &amp; <i>scope</i> = QString(), QContentFilterModel::TemplateOptions <i>options</i> = QContentFilterModel::SelectAll, const QStringList &amp; <i>checked</i> = QStringList() )</li>
 </ul>
 <ul>
 <li><div class="fn"/>9 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
@@ -68,7 +70,7 @@
 <p>QContentFilterDialog is based on <a href="qcontentfiltermodel.html">QContentFilterModel</a> and its contents are defined using a <a href="qcontentfiltermodel-template.html">QContentFilterModel::Template</a>.</p>
 <p>A content filter dialog may be either single or multiple selection depending on its set model template. The filter selected in a single selection scenario may be retrieved using the <a href="qcontentfilterdialog.html#selectedFilter">selectedFilter</a>() method, and the <a href="qcontentfilterdialog.html#checkedFilter">checkedFilter</a>() method will return the checked filters in a multiple selection scenario. A brief summary of the checked filter's labels may also be retrieved using the <a href="qcontentfilterdialog.html#checkedLabel">checkedLabel</a>() method.</p>
 <p>Using a content filter dialog to select an or'ed combination of mime type filters:</p>
-<pre>&nbsp;   QContentFilter selectMimeTypes()
+<pre>    QContentFilter selectMimeTypes()
     {
         QContentFilterDialog dialog(
             QContentFilter::MimeType, QString(), QContentFilterModel::CheckList | QContentFilterModel::SelectAll );
@@ -80,7 +82,7 @@
         return dialog.checkedFilters();
     }</pre>
 <p>Using a content filter dialog to select a an album filter from a list grouped by artist.</p>
-<pre>&nbsp;   QContentFilter selectAlbum()
+<pre>    QContentFilter selectAlbum()
     {
         QContentFilterModel::Template albums( QContent::Album );
         QContentFilterModel::Template artists( album, QContent::Artist );
@@ -98,19 +100,19 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QContentFilterDialog"></a>QContentFilterDialog::QContentFilterDialog ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a filter dialog with the parent <i>parent</i>.</p>
+<p>Constructs a content filter dialog with the parent <i>parent</i>.</p>
 <h3 class="fn"><a name="QContentFilterDialog-2"></a>QContentFilterDialog::QContentFilterDialog ( const <a href="qcontentfiltermodel-template.html">QContentFilterModel::Template</a> &amp; <i>modelTemplate</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a filter dialog with the parent <i>parent</i> and the initial template <i>modelTemplate</i>.</p>
+<p>Constructs a content filter selector dialog with the parent <i>parent</i> and the initial template <i>modelTemplate</i>.</p>
 <h3 class="fn"><a name="QContentFilterDialog-3"></a>QContentFilterDialog::QContentFilterDialog ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::TemplateOptions</a> <i>options</i> = QContentFilterModel::SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a filter dialog with the parent <i>parent</i> and an initial template which lists the possible values of <i>property</i> according to the given <i>options</i>.</p>
+<p>Constructs a content filter dialog parented to <i>parent</i> that lists the possible values of <i>property</i> according to the filter model template options <i>options</i>.</p>
 <p>The properties listed in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="QContentFilterDialog-4"></a>QContentFilterDialog::QContentFilterDialog ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>subType</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::TemplateOptions</a> <i>options</i> = QContentFilterModel::SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a filter dialog with the parent <i>parent</i> and an intial template which lists filters of type <i>type</i> with the specialistion <i>subType</i> according to the given <i>options</i>.</p>
+<h3 class="fn"><a name="QContentFilterDialog-4"></a>QContentFilterDialog::QContentFilterDialog ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::TemplateOptions</a> <i>options</i> = QContentFilterModel::SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a content filter dialog parented to <i>parent</i> that lists filters which are of type <i>type</i> and within the given <i>scope</i> according to the filter model template options <i>options</i>.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
 <h3 class="fn"><a name="checkedFilter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentFilterDialog::checkedFilter () const</h3>
 <p>Returns a filter combining all filters checked by the user.</p>
 <h3 class="fn"><a name="checkedLabel"></a><a href="qstring.html">QString</a> QContentFilterDialog::checkedLabel () const</h3>
-<p>Returns a short summary describing the checked filters, if a single filter is checked the display text for that label is returned concatenated with a list of it's parent filter's display text. If multiple filters are checked then the text 'Multi' is returned concatentated to a list of parents common to all checked filters.</p>
+<p>Returns a short summary describing the checked filters, if a single filter is checked the display text for that label is returned concatenated with a list of it's parent filter's display text. If multiple filters are checked then the text 'Multi' is returned concatenated to a list of parents common to all checked filters.</p>
 <h3 class="fn"><a name="filter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentFilterDialog::filter ()</h3>
 <p>Returns the base filter.</p>
 <p>See also <a href="qcontentfilterdialog.html#setFilter">setFilter</a>().</p>
@@ -127,16 +129,16 @@
 <p>See also <a href="qcontentfilterdialog.html#modelTemplate">modelTemplate</a>().</p>
 <h3 class="fn"><a name="setModelTemplate-2"></a>void QContentFilterDialog::setModelTemplate ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::TemplateOptions</a> <i>options</i> = QContentFilterModel::SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Sets the model tempalte to a list of possible values of <i>property</i> according to the given <i>options</i>.</p>
+<p>Sets the model template to a list of possible values of <i>property</i> according to the given <i>options</i>.</p>
 <p>The properties listed in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="setModelTemplate-3"></a>void QContentFilterDialog::setModelTemplate ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>subType</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::TemplateOptions</a> <i>options</i> = QContentFilterModel::SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="setModelTemplate-3"></a>void QContentFilterDialog::setModelTemplate ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::TemplateOptions</a> <i>options</i> = QContentFilterModel::SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Set the model template to a list of filters of type <i>type</i> with the specialisation <i>subType</i> according to the given <i>options</i>.</p>
+<p>Set the model template to a list of filters of type <i>type</i> with the specialization <i>scope</i> according to the given <i>options</i>.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

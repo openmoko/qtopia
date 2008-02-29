@@ -33,7 +33,7 @@ class QTOPIA_EXPORT QColorSelector : public QWidget
 {
     Q_OBJECT
 public:
-    explicit QColorSelector( QWidget *parent=0, Qt::WFlags f=0 );
+    explicit QColorSelector( QWidget *parent=0, Qt::WindowFlags f=0 );
     ~QColorSelector();
 
     QColor color() const;
@@ -66,8 +66,8 @@ class QTOPIA_EXPORT QColorSelectorDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit QColorSelectorDialog( const QColor &c, QWidget *parent=0, Qt::WFlags f = 0 );
-    QColorSelectorDialog( QWidget *parent=0, Qt::WFlags f = 0 );
+    explicit QColorSelectorDialog( const QColor &c, QWidget *parent=0, Qt::WindowFlags f = 0 );
+    QColorSelectorDialog( QWidget *parent=0, Qt::WindowFlags f = 0 );
 
     QColor color() const;
 
@@ -82,7 +82,7 @@ public slots:
 signals:
     void selected( const QColor &c );
 
-protected slots:
+private slots:
     void colorSelected( const QColor &c );
 
 private:

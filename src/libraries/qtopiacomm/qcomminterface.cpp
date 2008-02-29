@@ -23,11 +23,8 @@
 
 /*!
     \class QCommInterface
+    \mainclass
     \brief The QCommInterface class provides facilities for implementing client and server communications objects
-
-    The QCommInterface class provides facilities for implementing client and
-    server communications objects.  It inherits from QAbstractIpcInterface
-    to get the majority of the client/server interface code.
 
     Configuration values for the interface are placed under
     \c{/Communications/interfaceName/service} in the value space,
@@ -52,6 +49,8 @@
     then the object is constructed in client mode and \a service may
     be empty to indicate the default service that implements this
     type of interface.
+
+    \sa service()
 */
 QCommInterface::QCommInterface
         ( const QString& interfaceName, const QString& service,

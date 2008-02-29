@@ -56,6 +56,7 @@ int QPdaStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
 
 /*!
   \class QPEStyle
+  \mainclass
   \brief The QPEStyle class implements the default Qtopia widget style.
 
   \ingroup appearance

@@ -9,16 +9,7 @@ desktop.files=textviewer.desktop
 desktop.path=/apps/Applications
 desktop.trtarget=textviewer-nct
 desktop.hint=nct desktop
-
-pics.files=pics/*
-pics.path=/pics/textviewer
-pics.hint=pics
-
-help.source=help
-help.files=textviewer.html
-help.hint=help
-
-INSTALLS+=desktop pics help
+INSTALLS+=desktop
 
 pkg.name=textviewer
 pkg.desc=An Example Program to View Text Files

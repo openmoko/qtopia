@@ -25,12 +25,16 @@
 
 /*!
     \class QMultiPortMultiplexer
+    \mainclass
     \brief The QMultiPortMultiplexer class provides multiplexing across several serial ports
     \ingroup telephony::serial
 
-    The QMultiPortMultiplexer class provides multiplexing across several
-    serial ports.  Use this instead of QGsm0710Multiplexer if the kernel
-    has builtin support for multiplexing.
+    Use this class instead of QGsm0710Multiplexer if the operating system kernel
+    has built-in support for multiplexing.
+
+    Instances of QMultiPortMultiplexer are created by multiplexer plug-ins.
+    See the \l{Tutorial: Writing a Multiplexer Plug-in} for more information
+    on how to write a multiplexer plug-in that uses QMultiPortMultiplexer.
 
     \sa QSerialIODeviceMultiplexer, QGsm0710Multiplexer, QSerialIODeviceMultiplexerPlugin
 */

@@ -45,8 +45,6 @@ const QString PhoneLauncherView::SELECTED_BACKGROUND_FILE_DEFAULT(":image/phone/
 
   \brief The PhoneLauncherView class is a view onto a scene, which is a grid of objects.
 
-  \mainclass
-
   PhoneLauncherView creates and maintains the scene itself; it is capable of creating and
   adding the grid objects which will populate the scene's grid. Each grid object represents
   a folder or application, i.e. something that can be 'opened'.

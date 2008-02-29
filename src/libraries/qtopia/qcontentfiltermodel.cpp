@@ -35,7 +35,7 @@
 
     Provides optional features to be used when generating lists.
 
-    \value NoTemplateOptions Don't display any additional list items or checkboxes.
+    \value NoTemplateOptions Don't display any additional list items or check boxes.
     \value ForceAll Always display a select all option at the start of a list.
     \value SelectAll Display a select all option at the start of a list if there is more than one other item in the list.
     \value CheckList The list is a checklist.
@@ -64,7 +64,7 @@ public:
     QContentFilterModel::Template target;
     QString title;
     QContentFilter::FilterType filterType;
-    QString filterSubType;
+    QString filterScope;
     QContentFilter filter;
     QStringList checkedList;
     bool checkedLabel;
@@ -88,7 +88,16 @@ public:
 
 /*!
     \class QContentFilterModel::Template
-    \brief The Template class defines a template for constructing a QContentFilterModel.
+    \mainclass
+    \brief The Template class enables the construction of complex QContentFilterModels with fixed entries and multiple lists.
+
+    A basic content filter model consists of just a flat list of content filters of a common type. A content filter model
+    template adds options to extend these lists to include fixed labels, and multiple lists based on different criteria.
+
+    Templates also allows list items to link to child templates to create hierachial filter models where the contents
+    of each child list is filtered by the parent filter item.
+
+    \sa QContentFilterModel
 
   \ingroup content
 */
@@ -102,19 +111,19 @@ QContentFilterModel::Template::Template()
 }
 
 /*!
-    Constructs a new Template for a list of filters with the FilterType \a type and specialization \a subType.
+    Constructs a new Template for a list of filters with the FilterType \a type and specialization \a scope.
 
     By default no template \a options will be set.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
 */
-QContentFilterModel::Template::Template( QContentFilter::FilterType type, const QString &subType, TemplateOptions options, const QStringList &checked )
+QContentFilterModel::Template::Template( QContentFilter::FilterType type, const QString &scope, TemplateOptions options, const QStringList &checked )
 {
     d = new QContentFilterModelTemplatePrivate;
 
     d->options = options;
 
-    addList( type, subType, checked );
+    addList( type, scope, checked );
 }
 
 /*!
@@ -134,7 +143,7 @@ QContentFilterModel::Template::Template( QContent::Property property, TemplateOp
 }
 
 /*!
-    Constructs a new Template for a list of filters with the FilterType \a type and specialization \a subType.
+    Constructs a new Template for a list of filters with the FilterType \a type and specialization \a scope.
 
     Each filter in the list will parent a sub list defined by the Template \a target.
 
@@ -142,13 +151,13 @@ QContentFilterModel::Template::Template( QContent::Property property, TemplateOp
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
 */
-QContentFilterModel::Template::Template( const Template &target, QContentFilter::FilterType type, const QString &subType, TemplateOptions options, const QStringList &checked )
+QContentFilterModel::Template::Template( const Template &target, QContentFilter::FilterType type, const QString &scope, TemplateOptions options, const QStringList &checked )
 {
     d = new QContentFilterModelTemplatePrivate;
 
     d->options = options;
 
-    addList( target, type, subType, checked );
+    addList( target, type, scope, checked );
 }
 
 /*!
@@ -282,51 +291,51 @@ void QContentFilterModel::Template::addLabel( const Template &target, const QStr
 }
 
 /*!
-    Adds a list of filters with the FilterType \a type and specialization \a subType to the template.
+    Adds a list of filters of type \a type within the given \a scope to the template.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
 */
-void QContentFilterModel::Template::addList( QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
+void QContentFilterModel::Template::addList( QContentFilter::FilterType type, const QString &scope, const QStringList &checked )
 {
     TemplateItem item;
 
     item.filterType    = type;
-    item.filterSubType = subType;
+    item.filterScope = scope;
     item.checkedList   = checked;
 
     d->items.append( item );
 }
 
 /*!
-    Adds a list of filters with the FilterType \a type and specialization \a subType to the template.
+    Adds a list of filters of type \a type within the given \a scope to the template.
 
     Each filter in the list will parent a sub list defined by the Template \a target.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
  */
-void QContentFilterModel::Template::addList( const Template &target, QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
+void QContentFilterModel::Template::addList( const Template &target, QContentFilter::FilterType type, const QString &scope, const QStringList &checked )
 {
     TemplateItem item;
 
     item.target        = target;
     item.filterType    = type;
-    item.filterSubType = subType;
+    item.filterScope = scope;
     item.checkedList   = checked;
 
     d->items.append( item );
 }
 
 /*!
-    Adds a list of filters filtered by \a filter with the FilterType \a type and specialization \a subType to the template.
+    Adds a list of filters of type \a type within the given \a scope and filtered by \a filter to the template.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
  */
-void QContentFilterModel::Template::addList( const QContentFilter &filter, QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
+void QContentFilterModel::Template::addList( const QContentFilter &filter, QContentFilter::FilterType type, const QString &scope, const QStringList &checked )
 {
     TemplateItem item;
 
     item.filterType    = type;
-    item.filterSubType = subType;
+    item.filterScope = scope;
     item.filter        = filter;
     item.checkedList   = checked;
 
@@ -334,19 +343,19 @@ void QContentFilterModel::Template::addList( const QContentFilter &filter, QCont
 }
 
 /*!
-    Adds a list of filters filtered by \a filter with the FilterType \a type and specialization \a subType to the template.
+    Adds a list of filters of type \a type within the given \a scope and filtered by \a filter to the template.
 
     Each filter in the list will parent a sub list defined by the Template \a target.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
  */
-void QContentFilterModel::Template::addList( const Template &target, const QContentFilter &filter, QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
+void QContentFilterModel::Template::addList( const Template &target, const QContentFilter &filter, QContentFilter::FilterType type, const QString &scope, const QStringList &checked )
 {
     TemplateItem item;
 
     item.target        = target;
     item.filterType    = type;
-    item.filterSubType = subType;
+    item.filterScope = scope;
     item.filter        = filter;
     item.checkedList   = checked;
 
@@ -598,7 +607,7 @@ private:
 class FilterList : public FilterGroup
 {
 public:
-    FilterList( QContentFilter::FilterType type, const QString &subType, const QContentFilter &parentFilter, const QContentFilterModel::Template &target, const QContentFilter &filter, const QStringList &checked );
+    FilterList( QContentFilter::FilterType type, const QString &scope, const QContentFilter &parentFilter, const QContentFilterModel::Template &target, const QContentFilter &filter, const QStringList &checked );
     virtual ~FilterList();
 
     virtual QString label( int index ) const;
@@ -618,7 +627,7 @@ private:
     void refresh( const ItemConstructor &constructor, const QStringList &filters, QContentFilterModel *model, QContentFilterModelPrivate *parent, int offset );
 
     QContentFilter::FilterType m_type;
-    QString m_subType;
+    QString m_scope;
     QList< FilterListItem * > m_items;
 };
 
@@ -677,19 +686,19 @@ QContentFilter FilterGroup::filter() const
     return m_filter;
 }
 
-FilterList::FilterList( QContentFilter::FilterType type, const QString &subType, const QContentFilter &parentFilter, const QContentFilterModel::Template &target, const QContentFilter &filter, const QStringList &checked )
+FilterList::FilterList( QContentFilter::FilterType type, const QString &scope, const QContentFilter &parentFilter, const QContentFilterModel::Template &target, const QContentFilter &filter, const QStringList &checked )
     : FilterGroup( target, filter )
     , m_type( type )
-    , m_subType( subType )
+    , m_scope( scope )
 {
     if( type == QContentFilter::Unknown )
         return;
 
     QContentFilter f = parentFilter & filter;
 
-    QStringList filters = f.argumentMatches( type, subType );
+    QStringList filters = f.argumentMatches( type, scope );
 
-    if( filters.count() == 0  && !(type == QContentFilter::Category && subType.isEmpty() ) )
+    if( filters.count() == 0  && !(type == QContentFilter::Category && scope.isEmpty() ) )
         return;
 
     switch( type )
@@ -703,7 +712,7 @@ FilterList::FilterList( QContentFilter::FilterType type, const QString &subType,
         init( MimeItemConstructor(), filters, checked );
         break;
     case QContentFilter::Category: {
-        CategoryItemConstructor cic( m_subType );
+        CategoryItemConstructor cic( m_scope );
         init( cic, filters, checked );
         break;
     }
@@ -764,7 +773,7 @@ int FilterList::count() const
 
 void FilterList::init( const ItemConstructor &constructor, const QStringList &filters, const QStringList &checked )
 {
-    if( m_type == QContentFilter::Category && m_subType.isEmpty() ) // First item in global category list is 'Unfiled'
+    if( m_type == QContentFilter::Category && m_scope.isEmpty() ) // First item in global category list is 'Unfiled'
     {
         m_items.append( new FilterListItem( QCategoryManager::unfiledLabel(), QLatin1String( "Unfiled" ) ) );
 
@@ -788,7 +797,7 @@ void FilterList::refresh( QContentFilterModel *model, QContentFilterModelPrivate
 
     QContentFilter f = parent->filter() & FilterGroup::filter();
 
-    QStringList filters = f.argumentMatches( m_type, m_subType );
+    QStringList filters = f.argumentMatches( m_type, m_scope );
 
     switch( m_type )
     {
@@ -801,7 +810,7 @@ void FilterList::refresh( QContentFilterModel *model, QContentFilterModelPrivate
         refresh( MimeItemConstructor(), filters, model, parent, offset );
         break;
     case QContentFilter::Category: {
-        CategoryItemConstructor cic( m_subType );
+        CategoryItemConstructor cic( m_scope );
         refresh( cic, filters, model, parent, offset );
         break;
     }
@@ -815,7 +824,7 @@ void FilterList::refresh( const ItemConstructor &constructor, const QStringList 
     int itemIndex = 0;
     int filterIndex = 0;
 
-    if( m_type == QContentFilter::Category && m_subType.isEmpty() ) // First item in global category list is 'Unfiled'
+    if( m_type == QContentFilter::Category && m_scope.isEmpty() ) // First item in global category list is 'Unfiled'
         itemIndex = 1;
 
     while( itemIndex < m_items.count() || filterIndex < filters.count() )
@@ -1318,7 +1327,7 @@ void QContentFilterModelPrivate::repopulate()
         else
             group = new FilterList(
                     item.filterType,
-                    item.filterSubType,
+                    item.filterScope,
                     m_filter & temp.filter(),
                     item.target,
                     item.filter,
@@ -1531,12 +1540,15 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
 
 /*!
     \class QContentFilterModel
+    \mainclass
     \brief The QContentFilterModel class defines a model for displaying and selecting possible content filters.
 
     A basic content filter model is simply a list of content filters of common type which match content passed
     by a base filter. The type of filter listed in the model is specified using the \l QContentFilter::FilterType
     enumeration with some types requiring an additional sub-type.  A base filter may be applied to a content filter
     model to restrict the displayed filters to those which also pass content passed by the base filter.
+
+    \section1 File path lists
 
     A content filter model constructed with the \l QContentFilter::Location type and no sub-type will list locations
     filters for the root document paths containing content which matches the base filter.  If a directory is passed
@@ -1547,6 +1559,8 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
     the sub-type which contain content matching the base filter.  Listed directories will contain matching content
     in the immediate directory, not a sub-directory.  If no directory is given in the sub-type then no filters will be
     listed.
+
+    \section1 Mime type lists
 
     A list of mime types can be obtained by constructing the content filter model with the \l QContentFilter::MimeType filter
     type.  If a mime major type is given as the the sub-type then only mime-types belonging to that major type will be listed,
@@ -1561,6 +1575,8 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
         QContentFilterModel imageTypes = new QContentFilterModel( QContentFilter::MimeType, "image" );
     \endcode
 
+    \section1 Category lists
+
     Category filter may be listed using the \l QContentFilter::Category filter type where the sub-type specifies the scope
     of the category filters, if no sub-type is given categories belonging to the global scope will be listed.
 
@@ -1572,6 +1588,8 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
     \code
         QContentFilterModel *categories = new QContentFilterModel( QContentFilter::Category, "Documents" );
     \endcode
+
+    \section1 Property lists
 
     Content filter models which list content property values can be constructed using the \l QContentFilter::Synthetic
     filter type with the property group and key in the sub-type, or using the \l QContent::Property enumeration.  The
@@ -1587,11 +1605,15 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
         QContentFilterModel *artists = new QContentFilterModel( QContent::Artist );
     \endcode
 
+    \section1 Templates
+
     Using templates more complex filter models can be created, templates extend on the filter lists by including static labels,
     concatenation of multiple filter lists, and nested lists.
 
+    \section2 Labels
+
     Labels allow items to be explicitly added to a list, they may be used to select a static filter or a nested list.  A label
-    at a minimum consits of a user visible string usually combined with a a filter or a target sub-template and may include an
+    at a minimum consists of a user visible string usually combined with a a filter or a target sub-template and may include an
     icon. Labels are not sorted they appear in the order they are appended to a list.  By default if the filter for a label does
     not match any known content the label will not be displayed, this can be disabled by setting the
     \l QContentFilterModel::ShowEmptyLabels template option.
@@ -1602,6 +1624,8 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
     role.addLabel( tr( "Applications" ), QContentFilter( QContent::Role ) );
     role.addLabel( tr( "Documents" ), QContentFilter( QContent::Document ) );
     \endcode
+
+    \section2 Nested templates
 
     Templates may be nested to construct a tree model of content filters, templates are nested by specifying a target template
     when adding a list or label to another template.  The contents of a nested template will be filtered by the filters of the
@@ -1618,10 +1642,12 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
     model->setModelTemplate( album );
     \endcode
 
+    \section1 Multiple selection
+
     Content filter models may be either single or multiple selection, to make a model multiple selection the
     \l QContentFilterModel::CheckList option should be set in the model template, which will allow list items
     to be checked.  The check list option only applies to list items created from the template it was set in and
-    not in any children, in order for all levels of a tree filter model to be checkable all the templates must
+    not in any children, in order for all levels of a tree filter model to be able to be checked all the templates must
     have the check list option set.  By default the checked filters are combined using the OR operand, setting the
     \l QContentFilterModel::AndCheckedFilters template option will cause the AND operand to be used instead.
 
@@ -1644,7 +1670,7 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
         QContentFilter::MimeType, QString(), QContentFilterModel::SelectAll | QContentFilterModel::CheckList );
     \endcode
 
-    \sa QContentFilterSelector, QContentFilterDialog
+    \sa QContentFilter, QContentFilterSelector, QContentFilterDialog
 
   \ingroup content
 */
@@ -1662,7 +1688,7 @@ QContentFilterModel::QContentFilterModel( QObject *parent )
 }
 
 /*!
-    Creates a new content filter model with the given \a parent which lists filters for the property
+    Creates a new content filter model parented to \a parent which lists filters for the property
     \a property according to the given template \a options.
 
     The properties listed in the \a checked list will be checked by default.
@@ -1679,17 +1705,17 @@ QContentFilterModel::QContentFilterModel( QContent::Property property, TemplateO
 }
 
 /*!
-    Creates a new content filter model with the given \a parent which lists filter of type \a type and specialisation
-    \a subType according to the given template \a options.
+    Creates a new content filter model parented to \a parent which lists filters of type \a type within the given
+    \a scope according to the template \a options.
 
     Any filters with an argument that matches one in the \a checked list will be checked by default.
 */
-QContentFilterModel::QContentFilterModel( QContentFilter::FilterType type, const QString &subType, TemplateOptions options, const QStringList &checked, QObject *parent )
+QContentFilterModel::QContentFilterModel( QContentFilter::FilterType type, const QString &scope, TemplateOptions options, const QStringList &checked, QObject *parent )
     : QAbstractItemModel( parent )
 {
     d = new QContentFilterModelPrivate;
 
-    setModelTemplate( Template( type, subType, options, checked ) );
+    setModelTemplate( Template( type, scope, options, checked ) );
 
     connect( qApp, SIGNAL(contentChanged(const QContentIdList&,QContent::ChangeType)),
              this, SLOT  (contentChanged(const QContentIdList&,QContent::ChangeType)) );
@@ -1724,7 +1750,7 @@ void QContentFilterModel::setBaseFilter( const QContentFilter &filter )
 }
 
 /*!
-    Returns the template which the model is structured around.
+    Returns the template which the model is constructed from.
 */
 QContentFilterModel::Template QContentFilterModel::modelTemplate() const
 {
@@ -1732,7 +1758,7 @@ QContentFilterModel::Template QContentFilterModel::modelTemplate() const
 }
 
 /*!
-    Sets the template the model is structed around to \a modelTemplate.
+    Sets the template the model is constructed from to \a modelTemplate.
 */
 void QContentFilterModel::setModelTemplate( const Template &modelTemplate )
 {

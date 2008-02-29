@@ -59,6 +59,8 @@ IrPowerService_Private::~IrPowerService_Private()
     The \i IrPower service is typically supplied by the Qtopia server,
     but the system integrator might change the application that
     implements this service.
+
+    \sa QCommDeviceController, QCommDeviceSession
  */
 
 /*!
@@ -153,7 +155,9 @@ bool IrPowerService::shouldBringDown(QUnixSocket *) const
 /*!
   \class IrPowerServiceTask
   \ingroup QtopiaServer::Task
-  \brief The IrPowerServiceTask class provides the IrPowerService task.
+  \brief The IrPowerServiceTask class provides the IrPowerService as a server task.
+
+    The IrPowerServiceTask manages the lifetime of an IrPowerService object.
  */
 
 /*!

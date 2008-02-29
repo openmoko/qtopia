@@ -44,11 +44,6 @@
 #  define QT_NO_TABDIALOG
 #endif
 
-// Fonts
-#ifndef QT_NO_FREETYPE
-// #  define QT_NO_FREETYPE
-#endif
-
 // Images
 #ifndef QT_NO_IMAGEFORMAT_PPM
 #  define QT_NO_IMAGEFORMAT_PPM

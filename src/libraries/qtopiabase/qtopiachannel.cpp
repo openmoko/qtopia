@@ -189,6 +189,7 @@ bool QtopiaChannel_Private::dbusSend(const QString &channel,
 
 /*!
     \class QtopiaChannel
+    \mainclass
     \ingroup ipc
 
     \brief The QtopiaChannel class provides communication capabilities
@@ -221,6 +222,8 @@ bool QtopiaChannel_Private::dbusSend(const QString &channel,
     which returns the name of the object's channel, and the received()
     signal which is emitted with the given message and data when a
     QtopiaChannel receives a message from its channel.
+
+    \sa QtopiaAbstractService
 */
 
 /*!
@@ -242,7 +245,7 @@ QtopiaChannel::QtopiaChannel(const QString &channel, QObject *parent) :
 }
 
 /*!
-    Destructor.
+    Destroys this QtopiaChannel instance.
 */
 QtopiaChannel::~QtopiaChannel()
 {
@@ -268,7 +271,9 @@ QString QtopiaChannel::channel() const
 
 /*!
     Returns true if the \a channel is registered.  Note that this function
-    always returns true in the DBus implementation.
+    always returns true in the DBus implementation.  In the QCop implementation,
+    this function requires a round-trip to the QWS server, which may impact
+    system performance.
 */
 bool QtopiaChannel::isRegistered(const QString &channel)
 {
@@ -287,7 +292,10 @@ bool QtopiaChannel::isRegistered(const QString &channel)
 }
 
 /*!
-    Sends an empty message \a msg on \a channel.
+    Sends a message \a msg with no parameters on \a channel.
+    Returns true if able to send the message; otherwise returns false.
+
+    \sa received()
 */
 bool QtopiaChannel::send(const QString &channel, const QString &msg)
 {
@@ -303,8 +311,11 @@ bool QtopiaChannel::send(const QString &channel, const QString &msg)
 }
 
 /*!
-    Sends a message \a msg on channel \a channel.  The data to be
-    sent is given by \a data.
+    Sends a message \a msg on channel \a channel with the parameter
+    data given by \a data.  Returns true if able to send the message;
+    otherwise returns false.
+
+    \sa received()
 */
 bool QtopiaChannel::send(const QString &channel, const QString &msg,
                          const QByteArray &data)
@@ -350,8 +361,8 @@ bool QtopiaChannel::send(const QString &channel, const QString &msg,
 }
 
 /*!
-    Flushes all pending messages destined to channel, causing them
-    to be sent immediately.
+    Flushes all pending messages destined from this channel, causing them to be
+    sent immediately.  Returns true if the flush succeeded; otherwise returns false.
 */
 bool QtopiaChannel::flush()
 {
@@ -432,6 +443,8 @@ void QtopiaChannel_Private::receivedFragment(const QString& msg, const QByteArra
 
     This signal is emitted with the given \a message and \a data whenever the
     channel receives a message on the channel being listened on.
+
+    \sa send()
  */
 
 void QtopiaChannel_Private::cleanup()

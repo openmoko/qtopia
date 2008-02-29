@@ -23,6 +23,9 @@
 #include <qtopia/smil/module.h>
 #include <qpixmap.h>
 
+// WARNING: These classes are not part of the Qtopia API.
+// They are subject to change at any time.
+
 class SmilSystem;
 class AudioPlayer;
 

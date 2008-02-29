@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <limits.h>
 
 typedef struct {
     unsigned int   dummy1;
@@ -44,9 +45,16 @@ typedef struct {
     unsigned int   value;
 } ts_packet;
 
+// sanity check values of the range of possible mouse positions
+#define MOUSE_SAMPLE_MIN    0
+#define MOUSE_SAMPLE_MAX    2000
+
+// probably there will be need to change the value of devicePath
+static const char *devicePath = "/dev/input/event1";
 
 ExampleMouseHandler::ExampleMouseHandler()
-    : m_raw(false), totX(0), totY(0), nX(0), nY(0), mouseIdx(0)
+    : nX(0), nY(0),
+    min_x(INT_MAX), min_y(INT_MAX), mouseFD(0), mouseIdx(0)
 {
     qWarning( "***Loaded Example touchscreen plugin!");
     setObjectName( "Example Mouse Handler" );
@@ -60,11 +68,12 @@ ExampleMouseHandler::~ExampleMouseHandler()
 
 void ExampleMouseHandler::openTs()
 {
-    if ((mouseFD = open("/dev/input/event1", O_RDONLY | O_NDELAY)) < 0) {
-      qWarning("Cannot open /dev/input/event1 (%s)", strerror(errno));
+    if ((mouseFD = open(devicePath, O_RDONLY | O_NDELAY)) < 0) {
+      qWarning("Cannot open %s (%s)", devicePath, strerror(errno));
       return;
-    } else
-      qWarning("Opened /dev/input/event1 as touchscreen input");
+    } else {
+      qWarning("Opened %s as touchscreen input", devicePath);
+    }
 
     m_notify = new QSocketNotifier( mouseFD, QSocketNotifier::Read, this );
     connect( m_notify, SIGNAL(activated(int)), this, SLOT(readMouseData()));
@@ -78,7 +87,6 @@ void ExampleMouseHandler::closeTs()
 
     delete m_notify;
     m_notify = 0;
-    m_raw = false;
 }
 
 void ExampleMouseHandler::suspend()
@@ -112,18 +120,15 @@ void ExampleMouseHandler::readMouseData()
         data = (ts_packet *) mb;
         if(data->code == 0) {
           // x value
-          totX = totX + data->value;
           sx[nX] = data->value;
           nX++;
         } else if(data->code == 1) {
           // y value
-          totY = totY + data->value;
           sy[nY] = data->value;
           nY++;
         }
         if(nX >= TS_SAMPLES && nY >= TS_SAMPLES) {
-          if(nX < nY) ss=nX;
-          else ss=nY;
+          int ss = (nX < nY) ? nX : nY;
 
           for(i=0;i<ss-1;i++) {
             for(j=i+1;j<ss;j++) {
@@ -147,10 +152,14 @@ void ExampleMouseHandler::readMouseData()
           QPoint pos( (sx[index_x1] + sx[index_x2])/2,
                   (sy[index_y1] + sy[index_y2])/2);
 
-          nX=0; nY=0; totX=0; totY=0;
+          nX = 0;
+          nY = 0;
+          min_x = INT_MAX;
+          min_y = INT_MAX;
+
           oldmouse = transform( pos );
-          if(oldmouse.x() < 0 || oldmouse.x() > 2000 ||
-             oldmouse.y() < 0 || oldmouse.y() > 2000) {
+          if (oldmouse.x() < MOUSE_SAMPLE_MIN || oldmouse.x() > MOUSE_SAMPLE_MAX ||
+              oldmouse.y() < MOUSE_SAMPLE_MIN || oldmouse.y() > MOUSE_SAMPLE_MAX) {
             qLog(Input) << "*BAD Mouse sample :x=" << oldmouse.x() << ",y=" << oldmouse.y();
             oldmouse.setX(0);
             oldmouse.setY(0);
@@ -163,7 +172,8 @@ void ExampleMouseHandler::readMouseData()
           // Removed pen from screen
           qLog(Input) << "Mouse Up  :x=" << oldmouse.x() << ",y=" << oldmouse.y();
           emit mouseChanged( oldmouse, 0);
-          nX=0; nY=0; totX=0; totY=0;
+          nX = 0;
+          nY = 0;
         }
         idx += sizeof(ts_packet);
       }

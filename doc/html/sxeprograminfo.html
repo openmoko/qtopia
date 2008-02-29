@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SxeProgramInfo Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SxeProgramInfo Class Reference</h1>
+<p>The SxeProgramInfo class is a data transfer object that models a program on disk. <a href="#details">More...</a></p>
+<pre>    #include &lt;SxeProgramInfo&gt;</pre><ul>
+<li><a href="sxeprograminfo-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="sxeprograminfo.html#SxeProgramInfo">SxeProgramInfo</a></b> ()</li>
+<li><div class="fn"/><b><a href="sxeprograminfo.html#dtor.SxeProgramInfo">~SxeProgramInfo</a></b> ()</li>
+<li><div class="fn"/>QString <b><a href="sxeprograminfo.html#absolutePath">absolutePath</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="sxeprograminfo.html#isValid">isValid</a></b> () const</li>
+</ul>
+<a name="public-variables"></a>
+<h3>Public Variables</h3>
+<ul>
+<li><div class="fn"/>QString <b><a href="sxeprograminfo.html#domain-var">domain</a></b></li>
+<li><div class="fn"/>QString <b><a href="sxeprograminfo.html#fileName-var">fileName</a></b></li>
+<li><div class="fn"/>unsigned char <b><a href="sxeprograminfo.html#id-var">id</a></b></li>
+<li><div class="fn"/>QString <b><a href="sxeprograminfo.html#installRoot-var">installRoot</a></b></li>
+<li><div class="fn"/>char <b><a href="sxeprograminfo.html#key-var">key</a></b>[QSXE_KEY_LEN]</li>
+<li><div class="fn"/>QString <b><a href="sxeprograminfo.html#relPath-var">relPath</a></b></li>
+<li><div class="fn"/>QString <b><a href="sxeprograminfo.html#runRoot-var">runRoot</a></b></li>
+</ul>
+<a name="related-non-members"></a>
+<h3>Related Non-Members</h3>
+<ul>
+<li><div class="fn"/>QDebug <b><a href="sxeprograminfo.html#operator-lt-lt-62">operator&lt;&lt;</a></b> ( QDebug <i>debug</i>, const SxeProgramInfo &amp; <i>progInfo</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The SxeProgramInfo class is a data transfer object that models a program on disk.</p>
+<p>Used for registration of binaries with the SXE system.</p>
+<p>Registration can happen at run-time of the qtopia device or at install-time, when building the qtopia ROM image on a development host.</p>
+<p>For example, consider the following binaries installed onto a device:</p>
+<pre>    /opt/Qtopia.rom/bin/calculator
+    /opt/Qtopia.user/packages/bin/bomber</pre>
+<p>These examples are referenced in the documentation of public variables below. The table below summarizes the difference between &quot;make install&quot; time and run time.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>install root on dev host</th><th>run root on device</th></tr></thead>
+<tr valign="top" class="odd"><td>$HOME/build/qtopia42/image</td><td>/opt/Qtopia.rom</td></tr>
+</table></p>
+<p>The <a href="sxeprograminfo.html#runRoot-var">runRoot</a> must be one of the elements which will be returned by the <a href="qtopia.html#installPaths">Qtopia::installPaths</a>() method at runtime.</p>
+<p>The <a href="sxeprograminfo.html#installRoot-var">installRoot</a> is optional and will be empty in the case of a binary installed at run-time by the package manager.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="SxeProgramInfo"></a>SxeProgramInfo::SxeProgramInfo ()</h3>
+<p>Construct a new <a href="sxeprograminfo.html">SxeProgramInfo</a></p>
+<h3 class="fn"><a name="dtor.SxeProgramInfo"></a>SxeProgramInfo::~SxeProgramInfo ()</h3>
+<p>Destroy this <a href="sxeprograminfo.html">SxeProgramInfo</a> object</p>
+<h3 class="fn"><a name="absolutePath"></a><a href="qstring.html">QString</a> SxeProgramInfo::absolutePath () const</h3>
+<p>Return the <a href="qstring.html">QString</a> of the absolute path to the binary for this <a href="sxeprograminfo.html">SxeProgramInfo</a> object.</p>
+<p>This is simply the concatenation of <a href="sxeprograminfo.html#installRoot-var">installRoot</a>, <a href="sxeprograminfo.html#relPath-var">relPath</a> and <a href="sxeprograminfo.html#fileName-var">fileName</a>. If the <a href="sxeprograminfo.html#installRoot-var">installRoot</a> is null, the <a href="sxeprograminfo.html#runRoot-var">runRoot</a> is used instead.</p>
+<h3 class="fn"><a name="isValid"></a>bool SxeProgramInfo::isValid () const</h3>
+<p>Return true if the <a href="sxeprograminfo.html">SxeProgramInfo</a> object represents a valid binary for SXE registration, and otherwise returns false.</p>
+<p>The binary is valid if all of the components of <a href="sxeprograminfo.html#absolutePath">absolutePath</a>() above are non-empty, and the resulting path is to a file which exists.</p>
+<hr />
+<h2>Member Variable Documentation</h2>
+<h3 class="fn"><a name="domain-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::domain</h3>
+<p>security domains, a list of comma seperated values</p>
+<h3 class="fn"><a name="fileName-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::fileName</h3>
+<p>the binaries file name, eg calculator, bomber</p>
+<h3 class="fn"><a name="id-var"></a>unsigned char SxeProgramInfo::id</h3>
+<p>SXE program identity</p>
+<h3 class="fn"><a name="installRoot-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::installRoot</h3>
+<p>for example <tt>$HOME/build/qtopia/42-phone/image</tt></p>
+<h3 class="fn"><a name="key-var"></a>char SxeProgramInfo::key[QSXE_KEY_LEN]</h3>
+<p>SXE shared secret key</p>
+<h3 class="fn"><a name="relPath-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::relPath</h3>
+<p>for example <tt>bin</tt>, <tt>packages/bin</tt></p>
+<h3 class="fn"><a name="runRoot-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::runRoot</h3>
+<p>for example <tt>/opt/Qtopia.rom</tt>, <tt>/opt/Qtopia.user</tt></p>
+<hr />
+<h2>Related Non-Members</h2>
+<h3 class="fn"><a name="operator-lt-lt-62"></a>QDebug operator&lt;&lt; ( QDebug <i>debug</i>, const SxeProgramInfo &amp; <i>progInfo</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sends the <a href="sxeprograminfo.html">SxeProgramInfo</a> <i>progInfo</i> to the <i>debug</i> stream.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+</tr></table></div></address></body>
+</html>

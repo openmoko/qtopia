@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QBluetoothPasskeyRequest Class Reference</title>
+  <title>QBluetoothPasskeyRequest Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothPasskeyRequest Class Reference</h1>
 <p>The QBluetoothPasskeyRequest class encapsulates a Bluetooth PIN request. <a href="#details">More...</a></p>
-<pre>#include &lt;QBluetoothPasskeyRequest&gt;</pre><ul>
+<pre>    #include &lt;QBluetoothPasskeyRequest&gt;</pre><ul>
 <li><a href="qbluetoothpasskeyrequest-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -44,9 +46,10 @@
 <h3 class="fn"><a name="QBluetoothPasskeyRequest-2"></a>QBluetoothPasskeyRequest::QBluetoothPasskeyRequest ( const QBluetoothPasskeyRequest &amp; <i>other</i> )</h3>
 <p>Copy constructor. Constructs a <a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a> from <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QBluetoothPasskeyRequest"></a>QBluetoothPasskeyRequest::~QBluetoothPasskeyRequest ()</h3>
-<p>Destructor.</p>
+<p>Destroys the passkey request.</p>
 <h3 class="fn"><a name="isRejected"></a>bool QBluetoothPasskeyRequest::isRejected () const</h3>
 <p>Returns true if the request has been rejected.</p>
+<p>See also <a href="qbluetoothpasskeyrequest.html#setRejected">setRejected</a>().</p>
 <h3 class="fn"><a name="localDevice"></a>const <a href="qstring.html">QString</a> &amp; QBluetoothPasskeyRequest::localDevice () const</h3>
 <p>Returns the name of the local device adapter. The string returned is of the form hciX. This can be passed in to the <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> constructor.</p>
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a>.</p>
@@ -57,10 +60,10 @@
 <p>Returns the address of the remote device associated with this request.</p>
 <h3 class="fn"><a name="setPasskey"></a>void QBluetoothPasskeyRequest::setPasskey ( const <a href="qstring.html">QString</a> &amp; <i>passkey</i> )</h3>
 <p>Accepts the pairing request, and sets the passkey to <i>passkey</i>.</p>
-<p>See also <a href="qbluetoothpasskeyrequest.html#passkey">passkey</a>().</p>
+<p>See also <a href="qbluetoothpasskeyrequest.html#setRejected">setRejected</a>() and <a href="qbluetoothpasskeyrequest.html#passkey">passkey</a>().</p>
 <h3 class="fn"><a name="setRejected"></a>void QBluetoothPasskeyRequest::setRejected ()</h3>
 <p>Sets the request to be rejected. This usually means that the user has explicitly rejected the request.</p>
-<p>See also <a href="qbluetoothpasskeyrequest.html#isRejected">isRejected</a>().</p>
+<p>See also <a href="qbluetoothpasskeyrequest.html#isRejected">isRejected</a>() and <a href="qbluetoothpasskeyrequest.html#setPasskey">setPasskey</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QBluetoothPasskeyRequest::operator!= ( const QBluetoothPasskeyRequest &amp; <i>other</i> ) const</h3>
 <p>Comparison operator. Compares the contents of <i>other</i> to the current passkey request. Returns true if the contents are not equal.</p>
 <h3 class="fn"><a name="operator-eq"></a>QBluetoothPasskeyRequest &amp; QBluetoothPasskeyRequest::operator= ( const QBluetoothPasskeyRequest &amp; <i>other</i> )</h3>
@@ -69,8 +72,8 @@
 <p>Comparison operator. Compares the contents of <i>other</i> to the current passkey request. Returns true if the contents are equal.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

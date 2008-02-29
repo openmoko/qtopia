@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QContent Class Reference</title>
+  <title>QContent Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContent Class Reference</h1>
-<p>The QContent class represents a content carrying entity in the Qtopia system. <a href="#details">More...</a></p>
-<pre>#include &lt;QContent&gt;</pre><ul>
+<p>The QContent class represents a content carrying entity in the Qtopia system, where content includes resources which an end-user may view or manage. <a href="#details">More...</a></p>
+<pre>    #include &lt;QContent&gt;</pre><ul>
 <li><a href="qcontent-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-types"></a>
@@ -67,7 +69,7 @@
 <li><div class="fn"/>QString <b><a href="qcontent.html#property">property</a></b> ( const QString &amp; <i>key</i>, const QString &amp; <i>group</i> = QString() ) const</li>
 <li><div class="fn"/>QString <b><a href="qcontent.html#property-2">property</a></b> ( Property <i>key</i> ) const</li>
 <li><div class="fn"/>void <b><a href="qcontent.html#removeFiles">removeFiles</a></b> ()</li>
-<li><div class="fn"/>void <b><a href="qcontent.html#removeLinkFile">removeLinkFile</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qcontent.html#removeLinkFile">removeLinkFile</a></b> ()&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>QDrmRights <b><a href="qcontent.html#rights">rights</a></b> ( QDrmRights::Permission <i>permission</i> ) const</li>
 <li><div class="fn"/>Role <b><a href="qcontent.html#role">role</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qcontent.html#save">save</a></b> ( const QByteArray &amp; <i>data</i> )</li>
@@ -76,7 +78,7 @@
 <li><div class="fn"/>void <b><a href="qcontent.html#setExecutableName">setExecutableName</a></b> ( const QString &amp; <i>exec</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontent.html#setFile">setFile</a></b> ( const QString &amp; <i>filename</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontent.html#setIcon">setIcon</a></b> ( const QString &amp; <i>iconpath</i> )</li>
-<li><div class="fn"/>void <b><a href="qcontent.html#setLinkFile">setLinkFile</a></b> ( const QString &amp; <i>filename</i> )</li>
+<li><div class="fn"/>void <b><a href="qcontent.html#setLinkFile">setLinkFile</a></b> ( const QString &amp; <i>filename</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>bool <b><a href="qcontent.html#setMedia">setMedia</a></b> ( const QString &amp; <i>media</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontent.html#setMimeTypes">setMimeTypes</a></b> ( const QStringList &amp; <i>mimeTypes</i> )</li>
 <li><div class="fn"/>void <b><a href="qcontent.html#setName">setName</a></b> ( const QString &amp; <i>docname</i> )</li>
@@ -93,6 +95,7 @@
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
+<li><div class="fn"/>const QContentId <b><a href="qcontent.html#InvalidId-var">InvalidId</a></b></li>
 <li><div class="fn"/>void <b><a href="qcontent.html#clearErrors">clearErrors</a></b> ()</li>
 <li><div class="fn"/>QContentId <b><a href="qcontent.html#execToContent">execToContent</a></b> ( const QString &amp; <i>bin</i> )</li>
 <li><div class="fn"/>QContentId <b><a href="qcontent.html#install">install</a></b> ( const QFileInfo &amp; <i>fi</i> )</li>
@@ -116,22 +119,28 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QContent class represents a content carrying entity in the Qtopia system.</p>
-<p>Each entity may include:</p>
+<p>The QContent class represents a content carrying entity in the Qtopia system, where content includes resources which an end-user may view or manage.</p>
+<p>By creating content with a <a href="qcontent.html#Role-enum">Role</a> of <tt>Data</tt> using the <a href="qcontent.html#setRole">setRole</a>() method, resources not intended to be directly consumed by the end-user may also be managed.</p>
+<p>An instance of a QContent may, for example, represent any one of the following types of content:</p>
 <ul>
 <li>a stream</li>
 <li>a file</li>
 <li>a temporary file</li>
 <li>a DRM controlled file (possibly encrypted).</li>
+<li>an item in a container, eg an archive or DRM multi-part file</li>
 </ul>
 <p>The QContent class is responsible for providing access to metadata about the content contained in a file or stream.</p>
-<p>A server process calls <tt>install(...)</tt> and <tt>uninstall(...)</tt> to update the records of metadata in the backing store in response to hardware and software events such as:</p>
+<p>As a system-wide invariant, the backing store is authoritative for information about content available on the device. For example content stored in a DRM file or a stream may not have a logical file on the file-system.</p>
+<p>In general applications should use the QContent and <a href="qcontentset.html">QContentSet</a> interface to manage, and search for resources, instead of calling through to the file-system.</p>
+<p>The backing store is typically an SQL database, although it could be some other kind of persistent storage.</p>
+<p>The static methods <a href="qcontent.html#install">install</a>() and <a href="qcontent.html#uninstall">uninstall</a>() are used to update records of metadata in the backing store in response to hardware and software events such as:</p>
 <ul>
 <li>removable storage being removed</li>
 <li>new content arriving via WAP or MMS</li>
 <li>DRM expiry.</li>
 </ul>
-<p>To be notified of these events, create a <a href="qcontentset.html">QContentSet</a> object and connect to its <a href="qcontentset.html#changed">changed</a>(<a href="qcontent.html#QContentId-typedef">QContentId</a>) signal.</p>
+<p>To be notified of these events, create a <a href="qcontentset.html">QContentSet</a> object and connect to its <a href="qcontentset.html#changed">QContentSet::changed</a>() signal.</p>
+<p>See also <a href="qcontentset.html">QContentSet</a> and <a href="qcontentfilter.html">QContentFilter</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ChangeType-enum"></a>enum QContent::ChangeType</h3>
@@ -142,6 +151,7 @@
 <tr><td valign="top"><tt>QContent::Removed</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the <a href="qcontent.html">QContent</a> has been deleted.</td></tr>
 <tr><td valign="top"><tt>QContent::Updated</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">the <a href="qcontent.html">QContent</a> has been modified.</td></tr>
 </table></p>
+<p>See also <a href="qcontentset.html#changed">QContentSet::changed</a>().</p>
 <h3 class="fn"><a name="DrmState-enum"></a>enum QContent::DrmState</h3>
 <p>This enum specifies the DRM State of this <a href="qcontent.html">QContent</a> object.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -178,7 +188,7 @@
 <tr><td valign="top"><tt>QContent::Application</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">an application (possibly Java, possibly DRM controlled)</td></tr>
 </table></p>
 <h3 class="fn"><a name="UsageMode-typedef"></a>typedef QContent::UsageMode</h3>
-<p><b>This typedef is deprecated.</b></p>
+<p>This typedef is deprecated.</p>
 <p><tt>UsageMode</tt> has been deprecated, use <tt>Role</tt> instead.</p>
 <p>See also <a href="qcontent.html#Role-enum">QContent::Role</a>.</p>
 <hr />
@@ -186,15 +196,15 @@
 <h3 class="fn"><a name="QContent"></a>QContent::QContent ()</h3>
 <p>Constructs an empty invalid content object.</p>
 <h3 class="fn"><a name="QContent-2"></a>QContent::QContent ( <a href="qcontent.html#QContentId-typedef">QContentId</a> <i>id</i> )</h3>
-<p>Create a <tt>QContent</tt> object by fetching the metadata from the backing store of the passed <i>id</i>. This uses in-process caching with statics in the inner private class to save on SQL/calls to the backing store. This method will be fast if the object has already been referenced as the <tt>QContent</tt> and <tt>QContentSet</tt> classes are loaded in the current process.</p>
+<p>Create a <tt>QContent</tt> object by fetching the metadata from the backing store specified by <i>id</i>. This method will be fast if the object has already been referenced by <tt>QContent</tt> and <tt>QContentSet</tt> classes loaded in the current process, since internally the results of calls to the backing store are cached.</p>
 <h3 class="fn"><a name="QContent-3"></a>QContent::QContent ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, bool <i>store</i> = true )</h3>
-<p>Create an application or document content link based on the <i>fileName</i>.</p>
+<p>Create a <tt>QContent</tt> based on the content contained in the file represented by <i>fileName</i>.</p>
 <p>Passing <i>store</i> specifies whether this content object is stored into the backing store database, or only used as a local object.</p>
 <h3 class="fn"><a name="QContent-4"></a>QContent::QContent ( const <a href="qfileinfo.html">QFileInfo</a> &amp; <i>fi</i>, bool <i>store</i> = true )</h3>
-<p>Create an application or document content link based on the <a href="qfileinfo.html">QFileInfo</a> <i>fi</i>.</p>
-<p>Passing <i>store</i> specifies whether this content object is stored into the backing store database, or only used as a local object.</p>
+<p>Create a <tt>QContent</tt> based on the content contained in the file represented by <i>fi</i>.</p>
+<p>Passing <i>store</i> specifies whether this content object is stored into the backing store, or only used as a local object.</p>
 <h3 class="fn"><a name="QContent-5"></a>QContent::QContent ( const QContent &amp; <i>other</i> )</h3>
-<p>Create a content link by copying the <i>other</i> content object.</p>
+<p>Create a <tt>QContent</tt> by copying the <i>other</i> content object.</p>
 <h3 class="fn"><a name="dtor.QContent"></a>QContent::~QContent ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the content object.</p>
 <h3 class="fn"><a name="categories"></a><a href="qstringlist.html">QStringList</a> QContent::categories () const</h3>
@@ -221,8 +231,8 @@
 <h3 class="fn"><a name="error"></a>bool QContent::error () const</h3>
 <p>Return true if this <tt>QContent</tt> object is in an error state. Call the <tt>errorString()</tt> method to return a text description of the error.</p>
 <h3 class="fn"><a name="execToContent"></a><a href="qcontent.html#QContentId-typedef">QContentId</a> QContent::execToContent ( const <a href="qstring.html">QString</a> &amp; <i>bin</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Given an application binary name <i>bin</i>, return an id pointing to the <a href="qcontent.html">QContent</a> item for an application for that binary.</p>
-<p>A path name may be supplied for for <i>bin</i> (eg <i>bin</i> may contain &quot;/&quot; characters).</p>
+<p>Given an application binary name <i>bin</i>, return <tt>QContentId</tt> pointing to the <a href="qcontent.html">QContent</a> item representing an application with that binary.</p>
+<p>A path name may be supplied for <i>bin</i> (eg <i>bin</i> may contain &quot;/&quot; characters).</p>
 <p>Note that binary names are unique across qtopia.</p>
 <h3 class="fn"><a name="executableName"></a><a href="qstring.html">QString</a> QContent::executableName () const</h3>
 <p>Returns the executable name property. This is the name of the executable program associated with the <a href="qcontent.html">QContent</a> target.</p>
@@ -261,12 +271,13 @@
 <p>Installs a set of files in a <i>batch</i>, committing to the database only once. This achieves a significant performance boost over multiple calls to install.</p>
 <p>See also <a href="qcontent.html#install">install</a>().</p>
 <h3 class="fn"><a name="isDocument"></a>bool QContent::isDocument () const</h3>
-<p>Convenience function to test if this <a href="qcontent.html">QContent</a> is a Document or an Application.</p>
+<p>Convenience function to test if this <a href="qcontent.html">QContent</a> is a Document or an Application. Returns true if this <a href="qcontent.html">QContent</a> is a Document or an Application; otherwise returns false.</p>
 <p>See also <a href="qcontent.html#usageMode">usageMode</a>().</p>
 <h3 class="fn"><a name="isPreloaded"></a>bool QContent::isPreloaded () const</h3>
-<p>Queries the launcher configuration settings to check if this object is in the systems PreloadApps list.</p>
+<p>Queries the launcher configuration settings and returns true if this object is in the systems PreloadApps list; otherwise returns false.</p>
 <h3 class="fn"><a name="isValid"></a>bool QContent::isValid ( bool <i>force</i> = false ) const</h3>
-<p>Content link is invalid if the backing file is unavailable, either due to removal of media or deletion of the file. If <i>force</i> is true, the content will be revalidated even if this value has been previously cached.</p>
+<p>Content is invalid if the backing file is unavailable, either due to removal of media or deletion of the file. If <i>force</i> is true, the content will be revalidated even if this value has been previously cached. Returns true if content is valid; otherwise returns false.</p>
+<p>Note: this method can be expensive.</p>
 <h3 class="fn"><a name="lastUpdated"></a><a href="qdatetime.html">QDateTime</a> QContent::lastUpdated () const</h3>
 <p>Return the value of the last time underlying file was updated.</p>
 <h3 class="fn"><a name="linkFile"></a><a href="qstring.html">QString</a> QContent::linkFile () const</h3>
@@ -290,7 +301,7 @@
 <p>See also <a href="qcontent.html#setMimeTypes">setMimeTypes</a>().</p>
 <h3 class="fn"><a name="moveTo"></a>bool QContent::moveTo ( const <a href="qstring.html">QString</a> &amp; <i>newPath</i> )</h3>
 <p>Move the contents of the file and the metainfo from this <a href="qcontent.html">QContent</a> to <i>newPath</i>.</p>
-<p>Returns true is successful, otherwise false.</p>
+<p>Returns true if the contents is successfully moved, otherwise false.</p>
 <p>Note: The <a href="qcontent.html#id">id</a>() of the original file will be invalid and should not be used.</p>
 <h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QContent::name () const</h3>
 <p>Return the user-visible name for this content object</p>
@@ -316,6 +327,7 @@
 <h3 class="fn"><a name="removeFiles"></a>void QContent::removeFiles ()</h3>
 <p>Uninstall this object from the database, and remove it from the filesystem.</p>
 <h3 class="fn"><a name="removeLinkFile"></a>void QContent::removeLinkFile ()</h3>
+<p>This function is deprecated.</p>
 <p>Uninstall the .desktop/link file for this object from the database, and remove it from the filesystem.</p>
 <h3 class="fn"><a name="rights"></a><a href="qdrmrights.html">QDrmRights</a> QContent::rights ( <a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a> <i>permission</i> ) const</h3>
 <p>Return a <a href="qdrmrights.html">QDrmRights</a> representation of any rights for this object for the given <i>permission</i>. If the drmStatus() returns Unprotected, then this method returns a <a href="qdrmrights.html">QDrmRights</a> object with valid rights for all permissions. Use drmStatus() != Unprotected to test for unprotected content and <a href="qcontent.html#permissions">permissions</a>() &amp; [permission] to test for a specific permission.</p>
@@ -341,10 +353,11 @@
 <p>Sets the icons associated with this content to <i>iconpath</i>. The property will not be written to the backing store until <a href="qcontent.html#commit">commit</a>() is called.</p>
 <p>See also <a href="qcontent.html#icon">icon</a>() and <a href="qcontent.html#commit">commit</a>().</p>
 <h3 class="fn"><a name="setLinkFile"></a>void QContent::setLinkFile ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )</h3>
+<p>This function is deprecated.</p>
 <p>Set the link/.desktop file that this content references to <i>filename</i>.</p>
 <p>See also <a href="qcontent.html#linkFile">linkFile</a>().</p>
 <h3 class="fn"><a name="setMedia"></a>bool QContent::setMedia ( const <a href="qstring.html">QString</a> &amp; <i>media</i> )</h3>
-<p>Sets the root path of the <i>media</i> the file is stored on. Once a <a href="qcontent.html">QContent</a> has been commited to the database the media cannot be changed.</p>
+<p>Sets the root path of the <i>media</i> the file is stored on. Once a <a href="qcontent.html">QContent</a> has been commited to the database the media cannot be changed. Returns true if successful; otherwise false.</p>
 <p>See also <a href="qcontent.html#media">media</a>().</p>
 <h3 class="fn"><a name="setMimeTypes"></a>void QContent::setMimeTypes ( const <a href="qstringlist.html">QStringList</a> &amp; <i>mimeTypes</i> )</h3>
 <p>Sets the MimeTypes property tp <i>mimeTypes</i>. This is the list of MIME types that the application can view or edit.</p>
@@ -376,13 +389,17 @@
 <p>Uninstalls a set of files in a <i>batch</i>, committing to the database only once. This achieves a significant performance boost over multiple calls to <a href="qcontent.html#uninstall">uninstall</a>().</p>
 <p>See also <a href="qcontent.html#uninstall">uninstall</a>().</p>
 <h3 class="fn"><a name="usageMode"></a><a href="qcontent.html#UsageMode-typedef">UsageMode</a> QContent::usageMode () const</h3>
-<p><b>This function is deprecated.</b></p>
+<p>This function is deprecated.</p>
 <p>Return the document status of the object as per the <tt>UsageMode</tt> enum. This value does not usually change. The status is used to determine what to display to the user. <tt>Data</tt> objects make no sense to display to the user, as they cannot be launched or categorized. These files are only of use to the applications which operate on them.</p>
 <p>See also <a href="qcontent.html#role">role</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QContent &amp; QContent::operator= ( const QContent &amp; <i>other</i> )</h3>
 <p>Assignment operator. Sets data on this to be what is set on <i>other</i>.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QContent::operator== ( const QContent &amp; <i>other</i> ) const</h3>
-<p>Equality operator. Return true if this <tt>Content</tt> object is the same as the <i>other</i>. Is true if both have the same Id number, or if both are empty.</p>
+<p>Equality operator. Return true if this <tt>Content</tt> object is the same as the <i>other</i>; otherwise returns false. Is true if both have the same Id number, or if both are empty.</p>
+<hr />
+<h2>Member Variable Documentation</h2>
+<h3 class="fn"><a name="InvalidId-var"></a>const <a href="qcontent.html#QContentId-typedef">QContentId</a> QContent::InvalidId</h3>
+<p>This variable holds a constant representing an invalid QContent identifier.</p>
 <hr />
 <h2>Related Non-Members</h2>
 <h3 class="fn"><a name="QContentId-typedef"></a>typedef QContentId</h3>
@@ -393,8 +410,8 @@
 <p>A QtopiaDatabaseId is a globally unique identifier for a <a href="qcontent.html">QContent</a> backing store. Synonym for quint32.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

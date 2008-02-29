@@ -52,10 +52,9 @@
 #include <QTimer>
 
 
-/*!
-    \internal
-    \class DevicesTableController
-    Controls a QTableWidget that displays devices and their pairing status.
+/*
+    The DevicesTableController class controls a QTableWidget that displays
+    devices and their pairing status.
  */
 
 const Qt::ItemFlags DevicesTableController::ITEM_FLAGS =
@@ -331,11 +330,10 @@ void DevicesTableController::currentCellChanged( int row, int col, int, int)
 }
 
 
+//=================================================================
 
-/*!
-   \internal
-   \class BluetoothIconBlinker
-   Blinks a little Bluetooth icon.
+/*
+   The BluetoothIconBlinker class just blinks a little Bluetooth icon.
  */
 BluetoothIconBlinker::BluetoothIconBlinker( int blinkInterval, QObject *parent )
     : QObject( parent ),
@@ -387,15 +385,14 @@ void BluetoothIconBlinker::toggleIconImage()
 
 /*!
     \class QBluetoothRemoteDeviceDialogFilter
+    \mainclass
     \brief The QBluetoothRemoteDeviceDialogFilter class provides a filter on the devices that are displayed by a QBluetoothRemoteDeviceDialog.
 
-    The QBluetoothRemoteDeviceDialogFilter class provides a filter on the devices
-    that are displayed by a QBluetoothRemoteDeviceDialog. This allows the
-    programmer to control whether particular devices should be displayed in
-    the dialog.
+    This clss allows the programmer to control whether particular devices
+    should be displayed in a QBluetoothRemoteDeviceDialog.
 
-    For example, to create a remote device dialog that only displays computers
-    and phones:
+    For example, this will create a QBluetoothRemoteDeviceDialog that only 
+    displays computers and phones:
     \code
     QBluetoothRemoteDeviceDialogFilter filter;
     QSet<QBluetooth::DeviceMajor> majors;
@@ -427,7 +424,7 @@ QBluetoothRemoteDeviceDialogFilter::QBluetoothRemoteDeviceDialogFilter()
 }
 
 /*!
-    Destructs a QBluetoothRemoteDeviceDialogFilter.
+    Destroys the dialog filter.
  */
 QBluetoothRemoteDeviceDialogFilter::~QBluetoothRemoteDeviceDialogFilter()
 {
@@ -456,7 +453,9 @@ QBluetoothRemoteDeviceDialogFilter &QBluetoothRemoteDeviceDialogFilter::operator
 }
 
 /*!
-    Returns whether this filter is equal to \a other.
+    Returns whether this filter is equal to \a other. Returns \c true if
+    this filter has the same accepted device majors and service classes
+    as \a other.
  */
 bool QBluetoothRemoteDeviceDialogFilter::operator==(const QBluetoothRemoteDeviceDialogFilter &other)
 {
@@ -510,8 +509,8 @@ QSet<QBluetooth::DeviceMajor> QBluetoothRemoteDeviceDialogFilter::acceptedDevice
     For example, to create a filter that only accepts devices with the
     ObjectTransfer and Telephony service classes:
     \code
-        QBluetoothRemoteDeviceDialogFilter filter;
-        filter.setAcceptedServiceClasses(QBluetooth::ObjectTransfer | QBluetooth::Telephony);
+    QBluetoothRemoteDeviceDialogFilter filter;
+    filter.setAcceptedServiceClasses(QBluetooth::ObjectTransfer | QBluetooth::Telephony);
     \endcode
 
     If the filter should accept devices regardless of their service classes,
@@ -563,11 +562,10 @@ bool QBluetoothRemoteDeviceDialogFilter::filterAcceptsDevice( const QBluetoothRe
 }
 
 
+//===================================================================
 
-/*!
-   \internal
-   \class QBluetoothRemoteDeviceDialogPrivate
-   Private implementation class for QBluetoothRemoteDeviceDialog.
+/*
+    Private implementation class for QBluetoothRemoteDeviceDialog.
  */
 
 const QString QBluetoothRemoteDeviceDialogPrivate::SETTINGS_FAVORITES_KEY = "Favorites";
@@ -1257,6 +1255,7 @@ QBluetoothAddress QBluetoothRemoteDeviceDialogPrivate::selectedDevice() const
 
 /*!
     \class QBluetoothRemoteDeviceDialog
+    \mainclass
     \brief The QBluetoothRemoteDeviceDialog class allows the user to perform a bluetooth device discovery and select a particular device.
 
     When a remote device dialog is first displayed, it shows all paired and
@@ -1265,16 +1264,47 @@ QBluetoothAddress QBluetoothRemoteDeviceDialogPrivate::selectedDevice() const
     paired or favorite devices, a device discovery will be started immediately.
 
     The setFilter() function can be used to ensure that the device dialog
-    only displays certain types of devices.
+    only displays certain types of devices. Also, the setValidationProfiles()
+    function can be used to ensure that the user can only activate a device
+    if offers a particular service profile. For example, here is a dialog that
+    will only display phone devices, and only allows the user to select a
+    device if the device offers a service with the Object Push Profile:
 
-    Custom menu actions can be added to a device dialog through
-    QWidget::addAction(). Any added actions will be enabled when a device is
-    selected, and disabled when no devices are selected. They are also
-    disabled during device discoveries.
+    \code
+    QSet<QBluetooth::DeviceMajor> deviceMajors;
+    deviceMajors.insert(QBluetooth::Phone);
+    QBluetoothRemoteDeviceDialogFilter filter;
+    filter.setAcceptedDeviceMajors(deviceMajors);
 
-    The getRemoteDevice() static method is the easiest way to run a device
+    QSet<QBluetooth::SDPProfile> profiles;
+    profiles.insert(QBluetooth::ObjectPushProfile);
+
+    QBluetoothRemoteDeviceDialog *dialog = new QBluetoothRemoteDeviceDialog;
+    dialog->setFilter(filter);
+    dialog->setValidationProfiles(profiles);
+    if (QtopiaApplication::execDialog(dialog) == QDialog::Accepted) {
+        QBluetoothAddress selectedDevice = dialog->selectedDevice();
+    }
+    \endcode
+
+    This will produce a dialog similar to this:
+
+    \image qbluetoothremotedevicedialog.png "Screenshot of example dialog"
+
+    The static function getRemoteDevice() is the easiest way to run a device
     dialog. It runs a modal device selection dialog, then returns the
-    address of the device that was activated by the user.
+    address of the device that was activated by the user. Using getRemoteDevice(),
+    the last section of the above example code could be rewritten thus:
+
+    \code
+    QBluetoothAddress selectedDevice =
+            QBluetoothRemoteDeviceDialog::getRemoteDevice(0, profiles, filter);
+    \endcode
+
+    QBluetoothRemoteDeviceDialog also allows custom menu actions to be added 
+    through QWidget::addAction(). Any added actions will be enabled when a 
+    device is selected, and disabled when no devices are selected. They are 
+    also disabled during device discoveries.
 
     \ingroup qtopiabluetooth
     \sa QBluetoothRemoteDeviceDialogFilter
@@ -1306,7 +1336,7 @@ QBluetoothRemoteDeviceDialog::QBluetoothRemoteDeviceDialog( bool showPairedAndFa
 }
 
 /*!
-    Destructs a QBluetoothRemoteDeviceDialog object.
+    Destroys the device dialog.
  */
 QBluetoothRemoteDeviceDialog::~QBluetoothRemoteDeviceDialog()
 {
@@ -1354,10 +1384,10 @@ QBluetoothAddress QBluetoothRemoteDeviceDialog::getRemoteDevice(
     device if it has a service with the OBEX Object Push profile:
 
     \code
-        QSet<QBluetooth::SDPProfile> profiles;
-        profiles.insert(QBluetooth::ObjectPushProfile);
-        QBluetoothRemoteDeviceDialog dialog;
-        dialog.setValidationProfiles(profiles);
+    QSet<QBluetooth::SDPProfile> profiles;
+    profiles.insert(QBluetooth::ObjectPushProfile);
+    QBluetoothRemoteDeviceDialog dialog;
+    dialog.setValidationProfiles(profiles);
     \endcode
 
     (If the user chooses a device that does not have the Object Push Profile,
@@ -1409,7 +1439,8 @@ QBluetoothRemoteDeviceDialogFilter QBluetoothRemoteDeviceDialog::filter() const
     are only applied when a device is activated, and not when they are merely
     selected. Therefore, if any validation profiles have been set, the
     programmer should be aware that the device returned by this method may not
-    have been validated against these profiles.
+    have been validated against these profiles, if this function is called
+    before the user has activated a device in the dialog.
 
     \sa setValidationProfiles()
  */
@@ -1443,6 +1474,5 @@ void QBluetoothRemoteDeviceDialog::actionEvent(QActionEvent *event)
             break;
         default:
             break;
-        
     }
 }

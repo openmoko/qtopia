@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Tutorial: Using prelink</title>
+  <title>Tutorial: Using prelink</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Using prelink<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Using prelink<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#process">Process</a></li>
 <li><a href="#example-configuration-file">Example Configuration File</a></li>
@@ -27,13 +30,13 @@
 <li>Install Qtopia files to <tt>/opt/Qtopia</tt>.</li>
 </ol>
 <p>In console of the device run:</p>
-<pre>&nbsp;   prelink -amR</pre>
+<pre>    prelink -amR</pre>
 <p>This will take some time to run so be patient! Once it has completed check that <tt>/etc/prelink.cache</tt> exists and contains information.</p>
 <p>The <tt>prelink</tt> command should be rerun each time files are updated.</p>
 <a name="example-configuration-file"></a>
 <h2>Example Configuration File</h2>
 <p>The following is an example <tt>prelink.conf</tt> file:</p>
-<pre>&nbsp;   # This config file contains a list of directories both with binaries
+<pre>    # This config file contains a list of directories both with binaries
     # and libraries prelink should consider by default.
     # If a directory name is prefixed with `-l ', the directory hierarchy
     # will be walked as long as filesystem boundaries are not crossed.
@@ -46,8 +49,8 @@
     -l /opt/Qtopia/bin</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

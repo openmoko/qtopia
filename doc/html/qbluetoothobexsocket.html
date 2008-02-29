@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QBluetoothObexSocket Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothObexSocket Class Reference</h1>
+<p>The QBluetoothObexSocket class represents a single Bluetooth OBEX connection. <a href="#details">More...</a></p>
+<pre>    #include &lt;QBluetoothObexSocket&gt;</pre><p>Inherits <a href="qobexsocket.html">QObexSocket</a>.</p>
+<ul>
+<li><a href="qbluetoothobexsocket-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qbluetoothobexsocket.html#QBluetoothObexSocket">QBluetoothObexSocket</a></b> ( QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qbluetoothobexsocket.html#QBluetoothObexSocket-2">QBluetoothObexSocket</a></b> ( const QBluetoothAddress &amp; <i>remote</i>, quint8 <i>rfcommChannel</i>, const QBluetoothAddress &amp; <i>local</i> = QBluetoothAddress::any, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/>virtual <b><a href="qbluetoothobexsocket.html#dtor.QBluetoothObexSocket">~QBluetoothObexSocket</a></b> ()</li>
+<li><div class="fn"/>qint16 <b><a href="qbluetoothobexsocket.html#channel">channel</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothobexsocket.html#isAuthenticated">isAuthenticated</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothobexsocket.html#isEncrypted">isEncrypted</a></b> () const</li>
+<li><div class="fn"/>const QBluetoothAddress &amp; <b><a href="qbluetoothobexsocket.html#localAddress">localAddress</a></b> () const</li>
+<li><div class="fn"/>const QBluetoothAddress &amp; <b><a href="qbluetoothobexsocket.html#remoteAddress">remoteAddress</a></b> () const</li>
+<li><div class="fn"/>QBluetooth::SecurityOptions <b><a href="qbluetoothobexsocket.html#securityOptions">securityOptions</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qbluetoothobexsocket.html#setChannel">setChannel</a></b> ( quint8 <i>channel</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothobexsocket.html#setLocalAddress">setLocalAddress</a></b> ( const QBluetoothAddress &amp; <i>address</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothobexsocket.html#setRemoteAddress">setRemoteAddress</a></b> ( const QBluetoothAddress &amp; <i>addr</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>5 public functions inherited from <a href="qobexsocket.html#public-functions">QObexSocket</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QBluetoothObexSocket class represents a single Bluetooth OBEX connection.</p>
+<p>This allows the use of the OBEX protocol over a Bluetooth connection. For example, a QBluetoothObexSocket object could be used to create a <a href="qobexpushclient.html">QObexPushClient</a> object in order to run an OBEX Push client over a Bluetooth transport connection.</p>
+<p>See also <a href="qbluetoothobexserver.html">QBluetoothObexServer</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QBluetoothObexSocket"></a>QBluetoothObexSocket::QBluetoothObexSocket ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new invalid <a href="qbluetoothobexsocket.html">QBluetoothObexSocket</a> with parent object <i>parent</i>.</p>
+<h3 class="fn"><a name="QBluetoothObexSocket-2"></a>QBluetoothObexSocket::QBluetoothObexSocket ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remote</i>, quint8 <i>rfcommChannel</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>local</i> = QBluetoothAddress::any, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new <a href="qbluetoothobexsocket.html">QBluetoothObexSocket</a>. The <i>rfcommChannel</i> parameter specifies the RFCOMM channel to connect to. The <i>remote</i> parameter specifies the address of the remote bluetooth device, and <i>local</i> parameter specifies which local bluetooth adapter is to be used for the connection. The <i>parent</i> specifies the parent object.</p>
+<h3 class="fn"><a name="dtor.QBluetoothObexSocket"></a>QBluetoothObexSocket::~QBluetoothObexSocket ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroys the socket.</p>
+<h3 class="fn"><a name="channel"></a>qint16 QBluetoothObexSocket::channel () const</h3>
+<p>Returns the RFCOMM channel of the socket.</p>
+<p>See also <a href="qbluetoothobexsocket.html#setChannel">setChannel</a>().</p>
+<h3 class="fn"><a name="isAuthenticated"></a>bool QBluetoothObexSocket::isAuthenticated () const</h3>
+<p>Returns true if the socket is authenticated. This method will always return false if the socket is not connected.</p>
+<h3 class="fn"><a name="isEncrypted"></a>bool QBluetoothObexSocket::isEncrypted () const</h3>
+<p>Returns true if the socket is encrypted. This method will always return false if the socket is not connected.</p>
+<h3 class="fn"><a name="localAddress"></a>const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; QBluetoothObexSocket::localAddress () const</h3>
+<p>Returns the address of the local adaptor used for the connection.</p>
+<p>See also <a href="qbluetoothobexsocket.html#setLocalAddress">setLocalAddress</a>().</p>
+<h3 class="fn"><a name="remoteAddress"></a>const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; QBluetoothObexSocket::remoteAddress () const</h3>
+<p>Returns the address of the remote bluetooth device to connect to.</p>
+<p>See also <a href="qbluetoothobexsocket.html#setRemoteAddress">setRemoteAddress</a>().</p>
+<h3 class="fn"><a name="securityOptions"></a><a href="qbluetooth.html#SecurityOption-enum">QBluetooth::SecurityOptions</a> QBluetoothObexSocket::securityOptions () const</h3>
+<p>Returns the security options of the socket. If the socket is not connected, 0 is returned.</p>
+<h3 class="fn"><a name="setChannel"></a>void QBluetoothObexSocket::setChannel ( quint8 <i>channel</i> )</h3>
+<p>Sets the RFCOMM channel of the socket to <i>channel</i>.</p>
+<p>See also <a href="qbluetoothobexsocket.html#channel">channel</a>().</p>
+<h3 class="fn"><a name="setLocalAddress"></a>void QBluetoothObexSocket::setLocalAddress ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>address</i> )</h3>
+<p>Sets the address of the local adaptor to use to <i>address</i>.</p>
+<p>See also <a href="qbluetoothobexsocket.html#localAddress">localAddress</a>().</p>
+<h3 class="fn"><a name="setRemoteAddress"></a>void QBluetoothObexSocket::setRemoteAddress ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
+<p>Sets the address of the remote device to connect to <i>addr</i>.</p>
+<p>See also <a href="qbluetoothobexsocket.html#remoteAddress">remoteAddress</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+</tr></table></div></address></body>
+</html>

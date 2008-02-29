@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Bluetooth Service Management Framework</title>
+  <title>Bluetooth Service Management Framework</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Bluetooth Service Management Framework<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Bluetooth Service Management Framework<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><a name="introduction"></a>
 <h2>Introduction</h2>
 <p>Qtopia's Bluetooth infrastructure includes a framework for creating and managing Bluetooth services inside Qtopia. This framework allows Bluetooth services to be handled consistently within Qtopia. It also provides mechanisms to allow programmers to easily create and register custom Bluetooth services within the framework, and control and configure existing Bluetooth services.</p>
@@ -27,14 +30,14 @@
 <p>The service manager is also responsible for storing and loading persistent service settings in the <tt>BluetoothServices.conf</tt> configuration file. A default configuration file is provided at <tt>etc/default/Trolltech/BluetoothServices.conf</tt>. This can be modified to provide default settings for services.</p>
 <p>Each <b>Qtopia Bluetooth service</b> has a two-way communication link with the Bluetooth Service Manager. A service notifies the manager when significant service events have occured, such as when the service has started or stopped. The manager notifies a service when it should perform a particular operation, such as when the service should be started or stopped.</p>
 <p>All communication between the Bluetooth services and the service manager is handled internally within <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a>. When a custom Bluetooth service is created by subclassing <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a>, all IPC communication aspects will be initialised transparently, and communication with the service manager will appear to the custom class as signals and method invocations. (The IPC aspects are handled through the use of <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>.)</p>
-<p>Finally, the <a href="qbluetoothservicecontroller.html">QBluetoothServiceController</a> class in the Bluetooth library provides <b>service access for external parties</b>. The interface of this class allows interested parties to control a Bluetooth service (e.g. start or stop it) or access information about the service (e.g. its security options or state). For example, Qtopia's Bluetooth settings application uses this class to start and stop any Qtopia Bluetooth service and modify its security settings.</p>
+<p>Finally, the <a href="qbluetoothservicecontroller.html">QBluetoothServiceController</a> class in the Bluetooth library provides <b>service access for external parties</b>. The interface of this class allows interested parties to control a Bluetooth service (e.g&#x2e; start or stop it) or access information about the service (e.g&#x2e; its security options or state). For example, Qtopia's Bluetooth settings application uses this class to start and stop any Qtopia Bluetooth service and modify its security settings.</p>
 <a name="creating-a-custom-bluetooth-service"></a>
 <h3>Creating a custom Bluetooth service</h3>
 <p>To create a custom Qtopia Bluetooth service, simply subclass <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a>. See the <a href="qbluetoothabstractservice.html">class documentation</a> for an example of implementing a custom Bluetooth service.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

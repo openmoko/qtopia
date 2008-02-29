@@ -9,6 +9,8 @@
 TARGET=composeim
 
 qtopia_project(qtopia plugin)
+# Disable i18n support
+CONFIG+=no_tr
 HEADERS      = composeim.h composeimpl.h
 SOURCES      = composeim.cpp composeimpl.cpp
 plugin_type  = inputmethods

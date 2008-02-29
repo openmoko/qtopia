@@ -59,7 +59,7 @@ SimpleErrorReporter::SimpleErrorReporter( ReporterType type, const QString &pkgN
                        .arg( packageName ); 
             break;
         case ( Uninstall ):
-            prefix = QObject::tr("b>Uninstall Failed</b> for %1: ", "%1 = package name" ) 
+            prefix = QObject::tr("<b>Uninstall Failed</b> for %1: ", "%1 = package name" ) 
                         .arg( packageName ); 
             break;
         case ( Other ):
@@ -75,7 +75,7 @@ void SimpleErrorReporter::doReportError( const QString &simpleError, const QStri
     QString userVisibleError = prefix + simpleError;
     QString logError = userVisibleError + "\n" + detailedError;  
     PackageView::displayMessage( userVisibleError );
-    qLog( Package ) << logError;
+    qWarning( qPrintable( logError ) );
 }
 
 /**
@@ -138,9 +138,9 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
 
     // install to directory
     QString packageFile = pkg.packageFile;
-    packageFile.prepend( Qtopia::packagePath() + "tmp/" );
+    packageFile.prepend( Qtopia::tempDir() );
 
-    if( !targz_extract_all( packageFile, job.destinationPath() ) )
+    if( !targz_extract_all( packageFile, job.destinationPath(), false ) )
     {
         if( reporter )
         {
@@ -154,7 +154,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     }
 
     // extract data part
-    if( !targz_extract_all( dataTarGz, job.destinationPath() ) )
+    if( !targz_extract_all( dataTarGz, job.destinationPath(), false ) )
     {
         if( reporter )
         {
@@ -302,7 +302,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
         return false;
     }
        
-    if ( !VersionUtil::checkVersion( infoReader.qtopiaVersion() ) )
+    if ( !VersionUtil::checkVersionLists( Qtopia::compatibleVersions(), infoReader.qtopiaVersion() ) )
     {
         if ( reporter )
         {

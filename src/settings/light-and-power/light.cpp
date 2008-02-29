@@ -147,7 +147,7 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
         d->autoPhoneLock->hide();
 #else
     batteryMode.canSuspend = true;
-    externalMode.canSuspend = true;
+    externalMode.canSuspend = false;
 
     b->screensaver_suspend->setEnabled(true);
     if (!QPowerStatusManager::APMEnabled()) {
@@ -166,7 +166,7 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     batteryMode.intervalSuspend = config.value("Interval", 60).toInt();
     batteryMode.initbright = config.value("Brightness", 255).toInt();
     batteryMode.dim = config.value("Dim", true).toBool();
-    batteryMode.lightoff = config.value("LightOff", true ).toBool();
+    batteryMode.lightoff = config.value("LightOff", false).toBool();
     batteryMode.suspend = config.value("Suspend", true).toBool();
     batteryMode.networkedsuspend = config.value("NetworkedSuspend", true).toBool();
     config.endGroup();
@@ -176,9 +176,9 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     externalMode.intervalLightOff = config.value("Interval_LightOff", 30).toInt();
     externalMode.intervalSuspend = config.value("Interval", 240).toInt();
     externalMode.initbright = config.value("Brightness", 255).toInt();
-    externalMode.dim = config.value("Dim", true).toBool();          //default to leave on
-    externalMode.lightoff = config.value("LightOff", true ).toBool();    //default to leave on
-    externalMode.suspend = config.value("Suspend",true).toBool();
+    externalMode.dim = config.value("Dim", true).toBool();
+    externalMode.lightoff = config.value("LightOff", false).toBool();   //default to leave on
+    externalMode.suspend = config.value("Suspend", true).toBool();
     externalMode.networkedsuspend = config.value("NetworkedSuspend",false).toBool();
     config.endGroup();
 

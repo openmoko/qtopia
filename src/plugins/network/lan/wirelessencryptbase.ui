@@ -1,7 +1,4 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>WirelessEncryptionBase</class>
  <widget class="QWidget" name="WirelessEncryptionBase" >
   <property name="geometry" >
@@ -106,7 +103,11 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="passphrase" />
+    <widget class="QLineEdit" name="passphrase" >
+     <property name="echoMode" >
+      <enum>QLineEdit::PasswordEchoOnEdit</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="multkeys" >
@@ -282,7 +283,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="ident_password" />
+       <widget class="QLineEdit" name="ident_password" >
+        <property name="echoMode" >
+         <enum>QLineEdit::PasswordEchoOnEdit</enum>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="clientCertLabel" >
@@ -328,7 +333,6 @@
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
  <resources/>
  <connections/>
 </ui>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Applications</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Applications<br /><span class="subtitle"></span>
+</h1>
+<p>Qtopia applications can be built in one of four ways.</p>
+<ul>
+<li>quicklaunch</li>
+<li>non-quicklaunch</li>
+<li>singleexec (quicklaunch)</li>
+<li>singleexec (non-quicklaunch)</li>
+</ul>
+<p>To facilitate switching between build modes, two macros are provided. They are to be used as follows:</p>
+<pre>    #include &quot;myheader.h&quot;
+    #include &lt;QtopiaApplication&gt;
+
+    QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,MyMainClass)
+    QTOPIA_MAIN</pre>
+<p>The first argument to QTOPIA_ADD_APPLICATION() must be a literal string that matches the binary name (ie. the value of TARGET from the .pro file). The build system defines <a href="def-qtopia-target-1.html">QTOPIA_TARGET</a> with the value of TARGET and it is recommended to use this macro.</p>
+<p>The second argument to QTOPIA_ADD_APPLICATION() should be the name of your class. If you use the wrong value you will get a compile failure.</p>
+<p>Building for either quicklaunch or singleexec (quicklaunch) requires these macros but the build system cannot easily tell if you have used them and the penalty for a wrong guess could be disastrous. Therefore you must use the <a href="conf-qtopia-main-1.html">qtopia_main</a> CONFIG value if you use these macros or the build system will assume your app is not quicklaunch-compatible. If your app does not handle quicklaunch or singleexec you can use the <a href="conf-no-quicklaunch-1.html">no_quicklaunch</a> or <a href="conf-no-singleexec-1.html">no_singleexec</a> CONFIG values.</p>
+<p>For example, games don't need the speed benefits of quicklauncher (and there's a size penalty for using quicklauncher) but they do work with singleexec so they do <tt>CONFIG+=qtopia_main no_quicklaunch</tt> to indicate this.</p>
+<p>Some applications cannot use the macros (eg. If you need to use a custom application class). This prevents the use of quicklauncher but you can still work with singleexec if you make some changes to your code. You need to use the <a href="conf-singleexec-main-1.html">singleexec_main</a> CONFIG value and have a main.cpp that looks something like this:</p>
+<pre>    #include &quot;myheader.h&quot;
+    #include &lt;QtopiaApplication&gt;
+
+    #ifdef SINGLE_EXEC
+    QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,MyMainClass)
+    #define MAIN_FUNC main_MyMainClass
+    #else
+    #define MAIN_FUNC main
+    #endif
+
+    int MAIN_FUNC( int argc, char **argv )
+    {
+        MyApplication a( argc, argv );
+        MyMainClass w;
+        w.show();
+        return a.exec();
+    }</pre>
+<p>The use of MyMainClass is not strictly required but the value you use must be unique.</p>
+<p>See also <a href="conf-qtopia-main-1.html">qtopia_main</a>, <a href="conf-no-quicklaunch-1.html">no_quicklaunch</a>, <a href="conf-singleexec-main-1.html">singleexec_main</a>, <a href="conf-no-singleexec-1.html">no_singleexec</a>, and <a href="def-qtopia-target-1.html">QTOPIA_TARGET</a>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 Trolltech</td>
+<td align="right">Qtopia Build System Documentation</td>
+</tr></table></div></address></body>
+</html>

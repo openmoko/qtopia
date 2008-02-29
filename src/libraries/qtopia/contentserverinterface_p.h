@@ -29,8 +29,11 @@
 
 /*!
   \internal
+  \obsolete
   \class ContentServerInterface
+  \mainclass
   Pure virtual base class to provide interface for calling server.
+  Alternate notification system has been put in place, and this class will be dissapearing in the near future.
 */
 class QTOPIA_EXPORT ContentServerInterface : public QThread
 {

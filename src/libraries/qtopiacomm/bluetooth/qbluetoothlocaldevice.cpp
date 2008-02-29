@@ -45,11 +45,13 @@
 
 /*!
     \class QBluetoothReply
+    \mainclass
     \brief The QBluetoothReply class is a wrapper object that contains a reply, and an error indicator.
 
     This object represents a return value of a method call.  It contains
     the return value or the error code and is used by the Bluetooth classes
-    to allow returning the error condition as the function's return argument.
+    to allow returning the result value or an error condition as the
+    function's return argument.
 
     \ingroup qtopiabluetooth
 */
@@ -60,12 +62,16 @@
     Constructs a QBluetoothReply object from a valid value of Type \c Type.
     The reply will be valid, and the \a value will represent the returned
     value.
+
+    \sa isError()
  */
 
 /*!
     \fn QBluetoothReply::QBluetoothReply()
 
     Constructs a QBluetoothReply object with an error condition set.
+
+    \sa isError()
  */
 
 /*!
@@ -73,6 +79,8 @@
 
     Returns whether a reply is an error condition.  The class returning the
     error condition should be queried for the actual error that has occurred.
+
+    \sa value()
  */
 
 /*!
@@ -80,6 +88,8 @@
     Returns the reply return value.  If the reply is an error, the return
     value of this function is undefined and may be undistinguishable
     from a valid return value.
+
+    \sa isError()
  */
 
 /*!
@@ -573,16 +583,44 @@ void QBluetoothLocalDevice_Private::remoteNameFailed(const QString &addr)
 
 /*!
     \class QBluetoothLocalDevice
+    \mainclass
     \brief The QBluetoothLocalDevice class represents a local bluetooth device.
 
-    The QBluetoothLocalDevice class encapsulates a local Bluetooth device.
     The class can be used to query for device attributes, such as device address,
     device class, device manufacturer, etc.  Changing of certain attributes is
     also allowed.  This class can also be used to query remote devices which are
     within range and to initiate bluetooth pairing procedures with remote devices.
 
+    This class uses a QBluetoothReply template class in order to return
+    method call results.  The QBluetoothReply class holds an error
+    condition flag and the actual return value.  If the error condition
+    flag is set to true, then the return value is set to the default
+    constructed value.  Thus it is recommended to always check the
+    return value by using the QBluetoothReply::isError method like so:
+
+    \code
+        QBluetoothAddress addr(remoteDevice);
+        QBluetoothLocalDevice local;
+
+        QBluetoothReply<QDateTime> result = local.lastSeen(remoteDevice);
+        if (result.isError()) {
+            // handle error
+            return;
+        }
+
+        QDateTime realTime = result.value();
+    \endcode
+
+    Alternatively, if you know the return value will always succeed, you
+    can do:
+
+    \code
+        QDateTime result = local.lastSeen(remoteDevice);
+    \endcode
+
     \ingroup qtopiabluetooth
-    \sa QBluetoothAddress, QBluetoothRemoteDevice
+    \sa QBluetoothAddress, QBluetoothRemoteDevice, QBluetoothReply
+    \sa QBluetoothLocalDeviceManager
 */
 
 /*!
@@ -590,8 +628,8 @@ void QBluetoothLocalDevice_Private::remoteNameFailed(const QString &addr)
     \brief State of the local adaptor
 
     \value Off The device is turned off.
-    \value Discoverable The device can be connected to and can be discovered by other remote devicess.
     \value Connectable The device can be connected to, but cannot be discovered.
+    \value Discoverable The device can be connected to and can be discovered by other remote devicess.
 
     The device has two scanning types, page scanning and inquiry scanning.
     \list
@@ -617,22 +655,22 @@ void QBluetoothLocalDevice_Private::remoteNameFailed(const QString &addr)
     \enum QBluetoothLocalDevice::Error
     \brief Possible errors that might occur.
 
-    \value NoError No Error
-    \value InvalidArguments Invalid arguments have been provided for the operation
-    \value NotAuthorized The client has no permission to perform the action
-    \value OutOfMemory Out of memory condition occurred
-    \value NoSuchAdaptor Trying to use a device which does not exist
-    \value UnknownAddress No such host has been found
-    \value ConnectionAttemptFailed Connection attempt has failed
-    \value NotConnected No connection exists
-    \value AlreadyExists A record or procedure already exists
-    \value DoesNotExist A record or procedure does not exist
-    \value InProgress A long running operation is in progress
-    \value AuthenticationFailed Authentication has failed
-    \value AuthenticationTimeout Authentication has timed out
-    \value AuthenticationRejected Authentication has been rejected
-    \value AuthenticationCancelled Authentication has been cancelled
-    \value UnknownError Unknown error has occurred
+    \value NoError No error.
+    \value InvalidArguments Invalid arguments have been provided for the operation.
+    \value NotAuthorized The client has no permission to perform the action.
+    \value OutOfMemory Out of memory condition occurred.
+    \value NoSuchAdaptor Trying to use a device which does not exist.
+    \value UnknownAddress No such host has been found.
+    \value ConnectionAttemptFailed Connection attempt has failed.
+    \value NotConnected No connection exists.
+    \value AlreadyExists A record or procedure already exists.
+    \value DoesNotExist A record or procedure does not exist.
+    \value InProgress A long running operation is in progress.
+    \value AuthenticationFailed Authentication has failed.
+    \value AuthenticationTimeout Authentication has timed out.
+    \value AuthenticationRejected Authentication has been rejected.
+    \value AuthenticationCancelled Authentication has been canceled.
+    \value UnknownError Unknown error has occurred.
 */
 
 /*!
@@ -658,6 +696,8 @@ QBluetoothLocalDevice::QBluetoothLocalDevice(QObject *parent)
     Constructs a QBluetoothLocalDevice with \a address paremeter
     representing the bluetooth address of the local device.
     The \a parent parameter specifies the QObject parent.
+
+    \sa deviceName()
 */
 QBluetoothLocalDevice::QBluetoothLocalDevice(const QBluetoothAddress &address, QObject* parent ) :
         QObject( parent )
@@ -669,6 +709,8 @@ QBluetoothLocalDevice::QBluetoothLocalDevice(const QBluetoothAddress &address, Q
     Constructs a QBluetoothLocalDevice with \a devName, which represents a
     system internal device name for the device, typically hci<0-7>.
     The \a parent parameter specifies the QObject parent.
+
+    \sa deviceName()
 */
 QBluetoothLocalDevice::QBluetoothLocalDevice(const QString &devName, QObject* parent ) :
         QObject( parent )
@@ -697,6 +739,9 @@ void QBluetoothLocalDevice::connectNotify(const char *signal)
     }
 }
 
+/*!
+    \internal
+*/
 void QBluetoothLocalDevice::disconnectNotify(const char *signal)
 {
     QByteArray sig(signal);
@@ -717,6 +762,8 @@ bool QBluetoothLocalDevice::isValid() const
 
 /*!
     Returns the last error that has occurred.
+
+    \sa errorString()
 */
 QBluetoothLocalDevice::Error QBluetoothLocalDevice::error() const
 {
@@ -725,6 +772,8 @@ QBluetoothLocalDevice::Error QBluetoothLocalDevice::error() const
 
 /*!
     Returns the human readable form of the last error that has occurred.
+
+    \sa error()
 */
 QString QBluetoothLocalDevice::errorString() const
 {
@@ -733,6 +782,8 @@ QString QBluetoothLocalDevice::errorString() const
 
 /*!
     Returns the Bluetooth address of this device.
+
+    \sa deviceName()
 */
 QBluetoothAddress QBluetoothLocalDevice::address() const
 {
@@ -741,6 +792,8 @@ QBluetoothAddress QBluetoothLocalDevice::address() const
 
 /*!
     Returns the system device name of this device.  This is of the form \bold hciX.
+
+    \sa address()
 */
 QString QBluetoothLocalDevice::deviceName() const
 {
@@ -749,6 +802,8 @@ QString QBluetoothLocalDevice::deviceName() const
 
 /*!
     Returns the manufacturer of the device.
+
+    \sa version(), revision(), company()
  */
 QBluetoothReply<QString> QBluetoothLocalDevice::manufacturer() const
 {
@@ -768,6 +823,8 @@ QBluetoothReply<QString> QBluetoothLocalDevice::manufacturer() const
 /*!
     Returns the Bluetooth protocol version this device supports.
     This can for instance be 1.0, 1.1, 1.2, 2.0...
+
+    \sa manufacturer(), revision(), company()
  */
 QBluetoothReply<QString> QBluetoothLocalDevice::version() const
 {
@@ -786,6 +843,8 @@ QBluetoothReply<QString> QBluetoothLocalDevice::version() const
 
 /*!
     Returns the device revision.  This is generally manufacturer-specific.
+
+    \sa manufacturer(), version(), company()
  */
 QBluetoothReply<QString> QBluetoothLocalDevice::revision() const
 {
@@ -809,6 +868,8 @@ QBluetoothReply<QString> QBluetoothLocalDevice::revision() const
     file in order to read the company information correctly. This file
     can be downloaded from the IEEE site. The HCI daemon expects the file
     to be placed at \c /usr/share/misc/oui.txt.
+
+    \sa manufacturer(), version(), revision()
  */
 QBluetoothReply<QString> QBluetoothLocalDevice::company() const
 {
@@ -846,20 +907,20 @@ QBluetoothReply<QString> QBluetoothLocalDevice::name() const
 }
 
 /*!
-    Sets the human readable name of this device to \a n.
-    Returns whether the call could be queued.  Returns true
-    if the call succeeded, and false otherwise.  In addition,
-    nameChanged signal will be sent once the name has been changed.
+    Sets the human readable name of this device to \a name.
+    Returns true if the call succeeded, and false otherwise.
+    In addition, nameChanged signal will be sent once the name
+    has been changed.
 
     \sa name(), nameChanged()
 */
-bool QBluetoothLocalDevice::setName(const QString &n)
+bool QBluetoothLocalDevice::setName(const QString &name)
 {
     if (!m_data->m_iface || !m_data->m_iface->isValid()) {
         return false;
     }
 
-    QDBusReply<void> reply = m_data->m_iface->call("SetName", n);
+    QDBusReply<void> reply = m_data->m_iface->call("SetName", name);
     if (!reply.isValid()) {
         m_data->handleError(reply.error());
         return false;
@@ -995,7 +1056,9 @@ QBluetoothReply<bool> QBluetoothLocalDevice::connectable() const
     The stateChanged() signal will be sent once the device has changed
     state.  An error() signal will be sent if the state change failed.
 
-    \sa connectable()
+    Use setConnectable() or setDiscoverable() to turn the device back on.
+
+    \sa connectable(), State
  */
 bool QBluetoothLocalDevice::turnOff()
 {
@@ -1011,7 +1074,8 @@ bool QBluetoothLocalDevice::turnOff()
 }
 
 /*!
-    Returns true if the local device is currently enabled
+    Returns true if the local device is currently enabled.  This is the
+    same as calling connectable().
 
     \sa connectable(), setConnectable(), turnOff()
  */
@@ -1080,9 +1144,8 @@ QBluetoothReply<bool> QBluetoothLocalDevice::isConnected(const QBluetoothAddress
     If the client wants to receive information about a device as it is received,
     they should subscribe to the remoteDeviceFound() signal.  Note that the clients
     should be prepared to receive multiple signals with information about
-    the same device, and deal with them accordingly.
-
-    If the clients wish to receive the information wholesale, they should subscribe
+    the same device, and deal with them accordingly. If the clients wish to
+    receive the information wholesale, they should subscribe
     to the remoteDevicesFound() signal.
 
     \sa remoteDevicesFound(), remoteDeviceFound(), cancelDiscovery()
@@ -1103,8 +1166,10 @@ bool QBluetoothLocalDevice::discoverRemoteDevices()
 }
 
 /*!
-    Attempts to cancel the discovery of remote devices.  In case of error,
-    an error signal will be emitted.  In the case of success, a discoveryCancelled()
+    Attempts to cancel the discovery of remote devices started
+    by discoverRemoteDevices(). In case of error or if no
+    discovery process is in progress, an error signal will
+    be emitted.  In the case of success, a discoveryCancelled()
     signal will be emitted.  Note that only the QBluetoothLocalDevice instance
     that initiated the discovery can cancel it, and only that instance will receive
     the discoveryCancelled() signal.  All other instances will receive the
@@ -1112,7 +1177,7 @@ bool QBluetoothLocalDevice::discoverRemoteDevices()
 
     Returns true if the request could be queued, false otherwise.
 
-    \sa discoveryCancelled()
+    \sa discoverRemoteDevices(), discoveryCancelled()
 */
 bool QBluetoothLocalDevice::cancelDiscovery()
 {
@@ -1184,6 +1249,8 @@ QBluetoothReply<QDateTime> QBluetoothLocalDevice::lastUsed(const QBluetoothAddre
     information about the device. The remote device is given
     by \a device.
 
+    Returns true on successful completion of the request; otherwise returns false.
+
     \sa discoverRemoteDevices(), remoteDevicesFound()
 */
 bool QBluetoothLocalDevice::updateRemoteDevice(QBluetoothRemoteDevice &device) const
@@ -1251,6 +1318,7 @@ bool QBluetoothLocalDevice::updateRemoteDevice(QBluetoothRemoteDevice &device) c
     otherwise.
 
     \sa pairedDevices(), pairingCreated(), pairingFailed()
+    \sa QBluetoothPasskeyAgent
 */
 bool QBluetoothLocalDevice::requestPairing(const QBluetoothAddress &addr)
 {
@@ -1537,6 +1605,8 @@ bool QBluetoothLocalDevice::disconnectRemoteDevice(const QBluetoothAddress &addr
 
 /*!
     Lists the addresses of all known devices, ones that have paired, seen or used.
+
+    \sa lastUsed(), lastSeen()
 */
 QBluetoothReply<QList<QBluetoothAddress> >
         QBluetoothLocalDevice::knownDevices() const
@@ -1563,6 +1633,8 @@ QBluetoothReply<QList<QBluetoothAddress> >
 /*!
     Lists the addresses of all known devices, ones that have paired, seen or used after
     the given \a date.
+
+    \sa lastUsed(), lastSeen()
  */
 QBluetoothReply<QList<QBluetoothAddress> >
         QBluetoothLocalDevice::knownDevices(const QDateTime &date) const

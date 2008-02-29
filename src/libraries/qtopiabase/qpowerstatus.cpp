@@ -39,77 +39,109 @@
 
 /*!
   \class QPowerStatus
+  \mainclass
   \brief The QPowerStatus class represents a snapshot of the systems power status
   at a given time.
 
-  An updated status can be obtained by calling \c{QPowerStatusManager::readStatus()}.
+  The QPowerStatus class is a value class.  The latest power information can be
+  obtained by calling QPowerStatusManager::readStatus().
 
-  \ingroup hardware
+  For example,
+
+  \code
+  QPowerStatus status = QPowerStatusManager::readStatus();
+  if(status.acStatus() == QPowerStatus::Offline)
+      qWarning() << "The device is not plugged into AC power!";
+  \endcode
+
+  \i {Note:} Use of the QPowerStatus class is discouraged.  Its API and functionality
+  has been improved in future versions of Qtopia.
+
+  \sa QPowerStatusManager
 */
 
 /*!
   \fn QPowerStatus::QPowerStatus(const QPowerStatus& other)
 
-  Constructs a QPowerstatus object from a deep copy of \a other.
+  Constructs a copy of \a other.
 */
 
 /*!
   \fn QPowerStatus::QPowerStatus()
 
-  Constructs a QPowerStatus object.
+  Constructs a QPowerStatus object with default values.  The default for
+  each value is:
+
+  \table
+  \header \o Value \o Default
+  \row \o QPowerStatus::acStatus() \o QPowerStatus::Offline
+  \row \o QPowerStatus::batteryStatus() \o QPowerStatus::NotPresent
+  \row \o QPowerStatus::backupBatteryStatus() \o QPowerStatus::NotPresent
+  \row \o QPowerStatus::batteryPercentAccurate() \o false
+  \row \o QPowerStatus::batteryPercentRemaining() \o -1
+  \row \o QPowerStatus::batteryTimeRemaining() \o -1
+  \endtable
 */
+
 /*!
     \enum QPowerStatus::ACStatus
 
-    \value Offline the device is running on battery
-    \value Online the device is powered by an external power source
-    \value Backup the device is running on backup power
-    \value Unknown status is unknown
-*/
+    The current state of AC power.  AC power is usually equivalent to an 
+    "unlimited" wall provided source.
 
+    \value Offline The device is running on battery
+    \value Online The device is powered by an external power source
+    \value Backup The device is running on backup power
+    \value Unknown Status is unknown
+*/
 
 /*!
     \enum QPowerStatus::BatteryStatus
 
-    \value High battery is fully charged
-    \value Low the battery level is low
-    \value VeryLow very low battery level
-    \value Critical critical battery level
-    \value Charging the battery is being charged
-    \value NotPresent the status if the battery is unknown
+    The current battery state.
+
+    \value High The battery is fully charged
+    \value Low The battery level is low
+    \value VeryLow The battery level is very low
+    \value Critical The battery level is critical 
+    \value Charging The battery is being charged
+    \value NotPresent The status of the battery is unknown
 */
 
 /*!
   \fn BatteryStatus QPowerStatus::batteryStatus() const
 
-  Returns the battery status of the device.
+  Returns the status of the primary device battery, or QPowerStatus::NotPresent
+  if the device has no primary battery.
 */
 
 /*!
   \fn BatteryStatus QPowerStatus::backupBatteryStatus() const
 
-  Returns the status of the backup battery.
+  Returns the status of the backup device battery, or QPowerStatus::NotPresent
+  if the device has no backup battery.
 */
 
 /*!
   \fn bool QPowerStatus::batteryPercentAccurate() const
 
-  Returns true if the value returned by \c{batteryPercentRemaining()}
-  reflects the true value of remaining battery. If for instance APM is
-  not available the return value of remaining battery does not reflect
-  the true value.
+  Some battery sources cannot accuractely provide capacity information.  This
+  method returns true if the value returned by batteryPercentRemaining() 
+  reflects the true value of remaining battery. 
 */
 
 /*!
   \fn int QPowerStatus::batteryPercentRemaining() const
 
-  Returns the remaining battery life (percentage of charge).
+  Returns the remaining battery life (percentage of charge), or -1 if no 
+  information is available.
 */
 
 /*!
   \fn int QPowerStatus::batteryTimeRemaining() const
 
-  Returns the remaining battery life in seconds.
+  Returns the remaining battery life in seconds, or -1 if no information is 
+  available.
 */
 
 /*!
@@ -127,24 +159,71 @@
 
 /*!
   \class QPowerStatusManager
+  \mainclass
   \brief The QPowerStatusManager class provides easy access to the
   power status of the Qtopia device.
   \ingroup hardware
+
+  QPowerStatusManager allows the current power status to be read on demand.
+
+  \i {Note:} Use of the QPowerStatusManager class is discouraged.  Its functionality
+  has been integrated into the QPowerStatus class in future versions of Qtopia.
+
+  \sa QPowerStatus
 */
 
 /*!
 
   \fn void QPowerStatusManager::getStatus()
 
+  \internal
+
   Implements the platform specific part of the status reader and is called by
-  \c{readStatus()}. This function is defined in custom-{arch}-{platform}-g++.cpp files.
+  \c{readStatus()}. This function should be implemented by system integrators in
+  the custom-{arch}-{platform}-g++.cpp file to support their specific system.
 
   \sa readStatus(), getProcApmStatus()
+*/
+
+/*!
+  \fn int qpe_sysBrightnessSteps()
+
+  \relates QPowerStatus
+
+  Returns the number of graduations supported by the device's LCD
+  backlight/frontlight.
+
+  This function must be implemented in the custom-<platform-spec>.cpp file by
+  the system integrator, see \l {Hardware Configuration} for details.
+
+  \sa qpe_setBrightness()
+*/
+
+/*!
+  \fn int qpe_setBrightness(int bright)
+
+  \relates QPowerStatus
+
+  Sets the brightness of the device's LCD backlight/frontlight to \a bright.
+
+  \a bright represents the LCD backlight/frontlight brightness as an integer
+  between 0 and 255.  A value of 0 means that the LCD display should be turned
+  off.  Values between 1 and 255 are interpreted as varying brightness levels
+  with 1 representing the dimmest level and 255 the brightest.
+
+  This function must be implemented in the custom-<platform-spec>.cpp file by
+  the system integrator, see \l {Hardware Configuration} for details.  It may
+  be necessary for the implementation of this function to convert \a bright to
+  a device specific brightness level, as returned by qpe_sysBrightnessSteps().
+
+  \sa qpe_sysBrightnessSteps()
 */
 
 QPowerStatus *QPowerStatusManager::ps = 0;
 
 /*!
+  \internal
+
   Constructs a QPowerStatusManager object with the specified \a parent.
 */
 QPowerStatusManager::QPowerStatusManager(QObject *parent)
@@ -156,7 +235,7 @@ QPowerStatusManager::QPowerStatusManager(QObject *parent)
 /*!
   Reads and returns the current power status of the device.
 
-  \sa getStatus(), QPowerStatus
+  \sa QPowerStatus
 */
 QPowerStatus QPowerStatusManager::readStatus()
 {
@@ -166,16 +245,11 @@ QPowerStatus QPowerStatusManager::readStatus()
 }
 
 /*!
-  This function implements a standard /proc/apm reader. The results
-  are only valid if \c APMEnabled() returns true.
+  \internal
 
-  \list
-  \o \a ac - AC line status
-  \o \a bs - battery status
-  \o \a bf - battery flag (not used by Qtopia)
-  \o \a pc - remaining battery life (percentage of charge)
-  \o \a sec - remaining battery life (time units)
-  \endlist
+  This function implements a standard /proc/apm reader and can be used in an
+  APM based implementation of QPowerStatusManger::getStatus(). The results are 
+  only valid if \c APMEnabled() returns true.
 */
 bool QPowerStatusManager::getProcApmStatus( int &ac, int &bs, int &bf, int &pc, int &sec )
 {
@@ -256,6 +330,8 @@ bool QPowerStatusManager::getProcApmStatus( int &ac, int &bs, int &bf, int &pc, 
 }
 
 /*!
+  \internal
+
   Returns true if the device has enabled APM support.
 */
 bool QPowerStatusManager::APMEnabled()
@@ -304,6 +380,8 @@ void QPowerStatusManager::timerEvent(QTimerEvent *e)
 
 /*!
   \fn void QPowerStatusManager::powerStatusChanged(const QPowerStatus &newStatus)
+
+  \internal
 
   Emitted whenever the power status of the device changes.  \a newStatus will
   be the new power status.

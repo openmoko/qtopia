@@ -405,6 +405,7 @@ void QtSslSocketPrivate::initializeConnection(QTcpSocket *socket)
 /*!
   \internal
     \class QtSslSocket
+    \mainclass
     \brief The QtSslSocket class provides a TCP socket with SSL
     encryption support.
 
@@ -534,6 +535,7 @@ void QtSslSocketPrivate::initializeConnection(QTcpSocket *socket)
     QHttp::setSocket() to achieve an SSL encrypted HTTP transport. (SSL over
     HTTP uses port 443.)}
 
+    \ingroup io
     \sa QTcpSocket, QTcpServer
 */
 

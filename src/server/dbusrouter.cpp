@@ -131,17 +131,25 @@ void DBusLauncherService::launch(const QString &app)
 }
 
 /*!
-  \class DBusRouter
-  \ingroup QtopiaServer::Task
-  \brief The DBusRouter launches DBus applications and routes Application Messages
+    \class DBusRouter
+    \ingroup QtopiaServer::Task
+    \brief The DBusRouter launches DBus applications and routes Application Messages
+    \internal
 
-  For ease of replacability with QCopRouter, the DBusRouter task installs itself
-  as IpcRouter.
+    \bold {NOTE:} This class is not used.  It should be considered
+    for removal.  The configure option that enables this class
+    has been removed in Qtopia 4.2 series.
+
+    For ease of replacability with QCopRouter, the DBusRouter
+    task installs itself as an IpcRouter.
  */
 
 QTOPIA_TASK(IpcRouter, DBusRouter);
 QTOPIA_TASK_PROVIDES(IpcRouter, ApplicationIpcRouter);
 
+/*!
+    \internal
+*/
 DBusRouter::DBusRouter()
 {
     DBusLauncherService *service = new DBusLauncherService(this);
@@ -149,7 +157,7 @@ DBusRouter::DBusRouter()
 
     QDBusConnection dbc = QDBus::sessionBus();
     if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
     }
 
@@ -164,6 +172,9 @@ DBusRouter::DBusRouter()
     bool succ = dbc.registerObject("/DBusLauncher", service, QDBusConnection::ExportSlots);
 }
 
+/*!
+    \internal
+*/
 DBusRouter::~DBusRouter()
 {
     foreach (DBUSQtopiaApplicationChannel *channel, m_channels) {
@@ -171,6 +182,9 @@ DBusRouter::~DBusRouter()
     }
 }
 
+/*!
+    \internal
+*/
 // Process all messages to QPE/Application/*.
 void DBusRouter::applicationMessage
         ( const QString& msg, const QByteArray& data )
@@ -187,6 +201,9 @@ void DBusRouter::applicationMessage
     routeMessage(channel->appName(), msg, data);
 }
 
+/*!
+    \internal
+*/
 void DBusRouter::routeMessage(const QString &dest,
                               const QString &message,
                               const QByteArray &data)
@@ -203,6 +220,9 @@ void DBusRouter::routeMessage(const QString &dest,
     }
 }
 
+/*!
+    \internal
+*/
 void DBusRouter::addRoute(const QString &app, RouteDestination *dest)
 {
     Q_ASSERT(dest);
@@ -216,6 +236,9 @@ void DBusRouter::addRoute(const QString &app, RouteDestination *dest)
     }
 }
 
+/*!
+    \internal
+*/
 void DBusRouter::remRoute(const QString &app, RouteDestination *dest)
 {
     Q_ASSERT(dest);

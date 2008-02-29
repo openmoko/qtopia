@@ -31,14 +31,15 @@ public:
 
 /*!
     \class QTranslatableSettings
+    \mainclass
     \brief The QTranslatableSettings class provides persistent application
     settings that can be translated.
 
     QTranslatableSettings is functionally equivalent to QSettings except
-    that strings read by QTranslatableSettings are translated.
+    that strings read by QTranslatableSettings can be translated.
 
-    Translatable settings are denoted by square brackets '[]' in the
-    key.  For example:
+    Translatable settings are denoted in the settings file
+    by square brackets '[]' in the key.  For example:
     \code
     [Plugin]
     Name[] = Clock
@@ -48,6 +49,10 @@ public:
     \endcode
     The \i Name key is translatable and the [Translation] group specifies
     the file containing the translations.
+
+    Caution should be used when passing a QTranslatableSettings object to
+    a function that takes a QSettings& argument, since that function will
+    \i not use any translations.
 
     \sa QSettings
 
@@ -96,7 +101,7 @@ QTranslatableSettings::QTranslatableSettings(Scope scope, const QString &organiz
     : QSettings(scope,organization,application,parent) { initTranslation(); }
 
 /*!
-    Constructs a QTranslatableSettings object to acess settings of the
+    Constructs a QTranslatableSettings object to access settings of the
     application called \a application from the organization called
     \a organization with parent \a parent.
 
@@ -125,7 +130,7 @@ QTranslatableSettings::QTranslatableSettings(Format format, Scope scope, const Q
     If \a format is QSettings::NativeFormat, the meaning of \a fileName
     depends on the platform as follows:
     \list
-    \o Unix/X11  - \a fileName is the name of and INI file
+    \o Unix/X11  - \a fileName is the name of an INI file
     \o Mac OS X -  \a fileName is the name of a .plist file
     \o Windows -  \a fileName is a path in the system registry.
     \endlist
@@ -204,8 +209,8 @@ QTranslatableSettings::~QTranslatableSettings()
     If no default value is specified, a default QVariant is
     returned.
 
-    If the key is translatable, that is, it has square brackets [] after it,
-    the translated value will be returned.
+    If the key is translatable, that is, it has square brackets [] after it
+    in the INI settings file, the translated value will be returned.
 
     for example:
 

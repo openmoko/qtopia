@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Build SDK greenphone Qtopia 4
 #
@@ -63,7 +63,7 @@ make_greenphone_sdk()
 
 
   if [ "$CLEAN" = "1" ]; then      
-      if $QPEDIR/configure -device greenphone -platform $QPEDIR/devices/gcc411/mkspecs/linux-g++ -sdk /opt/Qtopia/SDK/$QPEVER/greenphone -image /opt/Qtopia/SDK/$QPEVER/greenphone/image $SKIP $EXTRA_OPTIONS >${OUTPUT} 2>&1; then
+      if $QPEDIR/configure -device greenphone -platform $QPEDIR/devices/gcc411/mkspecs/linux-g++ -sdk /opt/Qtopia/SDK/$QPEVER/greenphone -image /opt/Qtopia/SDK/$QPEVER/greenphone/image -confirm-license $SKIP $EXTRA_OPTIONS >${OUTPUT} 2>&1; then
         echo "DONE"
       else
         echo "$0 FAILED in configure for greenphone SDK"
@@ -244,6 +244,7 @@ update_extras()
 
 make_flash()
 {
+echo "make_flash "
   mkdir -p /opt/Qtopia/extras/images
   EXTRA_FLASH_OPTIONS=
 
@@ -257,11 +258,18 @@ make_flash()
     cd ..
     EXTRA_FLASH_OPTIONS=" --rootfs $QPEDIR/rootfs/greenphone_rootfs.ext2 --kernel $QPEDIR/rootfs/greenphone_kernel"
   else
-    sudo cp -f rootfs/greenphone_rootfs.ext2 /opt/Qtopia/extras/images/greenphone_rootfs.ext2
-    sudo cp -f rootfs/greenphone_kernel /opt/Qtopia/extras/images/greenphone_kernel
+    sudo cp -f $BUILD_PATH/greenphone_rootfs.ext2 /opt/Qtopia/extras/images/greenphone_rootfs.ext2
+    sudo cp -f $BUILD_PATH/greenphone_kernel /opt/Qtopia/extras/images/greenphone_kernel
   fi
 
+if [ -z $QTOPIA_SOURCE_PATH ]; then
   sudo $QPEDIR/scripts/greenphone-make-flash.sh --qtopia-build $QPEDIR/$IMAGE_PATH --flash $EXTRA_FLASH_OPTIONS
+else
+		echo "Make flash now..."
+		sleep 2
+		sudo $QPEDIR/scripts/greenphone-make-flash.sh --qtopia-build $QPEDIR/$IMAGE_PATH --qtopia-source $QTOPIA_SOURCE_PATH --flash $EXTRA_FLASH_OPTIONS
+
+fi
   if [ -s $QPEDIR/qtopia-greenphone-flash ]; then
     sudo cp -f $QPEDIR/qtopia-greenphone-flash /opt/Qtopia/extras/images/qtopia-greenphone-flash-$QPEVER
     echo ""
@@ -294,13 +302,14 @@ SDKIMG=0
 FLASH=0
 EXTRAS=0
 VMWARE=0
-ROOTFS=0
+ROOTFS=1
 QUIET=0
 SXE=0
 DRM=0
 IMAGE_PATH=image
 BUILD_PATH=$PWD/rootfs
 CLEAN=1
+QTOPIA_SOURCE_PATH=
 
 while [ -n "$1" ] ; do
   case $1 in
@@ -356,6 +365,17 @@ while [ -n "$1" ] ; do
   -no-clean | --no-clean)
     CLEAN=0
     ;;
+  --qtopia-source)
+    if [ $# -ge 2 ]; then
+				unset QTOPIA_SOURCE_PATH
+        QTOPIA_SOURCE_PATH="$2"
+          shift 1
+      else
+          echo "$1 requires an argument"
+          usage
+          exit 1
+      fi
+      ;;
   *)
     echo $1: unknown argument
     ;;
@@ -376,11 +396,12 @@ if [ "$HELP" = "yes" ] ; then
   echo " --sdk-x86         Build x86 SDK"
   echo " --sdk-img         Create Qtopia dir from greenphone SDK binaries."
   echo " --flash           Create greenphone_flash file"
-  echo " --extras          Update qt3to4, uic3 etc, for internal use by Trolltech only"
+  echo " --extras          Update qt3to4, uic3 etc"
   echo " --sxe             Builds the specified SDK with SXE"
   echo " --drm             Builds the specified SDK with DRM"
   echo " --image-path      Specify the path where the Qtopia filesystem is."
   echo " --build-path      Specify the path where the rootfs is."
+  echo " --qtopia-source   Specify where the Qtopia sources live."
   echo " --no-clean        Build without first cleaning the build directory"
   echo
   exit
@@ -390,7 +411,7 @@ if [ "`hostname`" = "greenphonesdk" ] ; then
   #We force if detect building inside vmware since don't have access to extras
   EXTRAS=0
   ROOTFS=0
-  echo "Extras option has been disabled as extras files are only available to Trolltech staff"
+  echo "Extras option has been disabled"
 fi
 
 export QPEVER=`version`
@@ -441,7 +462,9 @@ if [ -e /opt/Qtopia/extras/bin/uic3 ] ; then
   fi
 fi
 
+if [ "$SDKGRN" = "1" ] ; then
 if [ ! -e /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb/Greenphone.skin ] ; then
+  mkdir -p /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb 
   cp -dpR $QPEDIR/devices/greenphone/Greenphone.skin /opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb 
 fi
 
@@ -457,3 +480,4 @@ chmod 755 /opt/Qtopia/SDK/scripts/functions
 echo "Built: `date`">/opt/Qtopia/SDK/versioninfo
 echo "By:    `whoami`">>/opt/Qtopia/SDK/versioninfo
 echo "Host:  `hostname`">>/opt/Qtopia/SDK/versioninfo
+fi

@@ -370,9 +370,6 @@ private:
     QSharedDataPointer<QContactData> d;
 };
 
-#define QTOPIAPIM_DEFINE_CONTACT
-#include <qtopia/pim/qtopiapimwinexport.h>
-
 Q_DECLARE_USER_METATYPE(QContact)
 
 #endif

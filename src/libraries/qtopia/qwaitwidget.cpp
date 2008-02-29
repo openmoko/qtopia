@@ -45,16 +45,51 @@ public:
 };
 
 /*!
-   Construct a QWaitWidget to popup over \a parent
-   \code
-   QWaitWidget *wl = new QWaitWidget(this);
-   wl->show();
-   // do time consuming operations
-   delete wl;
-   \endcode
+    \class QWaitWidget
+    \mainclass
+    \brief The QWaitWidget class provides an informative idle screen
+    for a slow operation.
+
+    A wait widget is used to give the user an indication
+    that an operation is going to take some time,
+    and to demonstrate that the application has not frozen.
+    It can also give the user an opportunity to abort the operation
+    when setCancelEnabled() is set to be true.
+
+    For example, construct a QWaitWidget to popup over \a parent.
+    \code
+        QWaitWidget *waitWidget = new QWaitWidget(this);
+        waitWidget->show();
+        // do time consuming operations
+        delete waitWidget;
+    \endcode
+
+    Use setText() and setCancelEnabled() to give more
+    feedback and control to the user. For example,
+    \code
+        QWaitWidget *waitWidget = new QWaitWidget(this);
+        waitWidget->setCancelEnabled( true );
+        waitWidget->setText( "Searching..." );
+        waitWidget->show();
+
+        QDir dir = QDir::current();
+        QFileInfoList list = dir.entryInfoList();
+        int totalSize = 0;
+
+        for ( int i = 0; i < dir.count(); i++ ) {
+            totalSize += list.at( i ).size();
+           waitWidget->setText( QString( "Size: %1 bytes" ).arg( QString::number(totalSize) ) );
+        }
+        waitWidget->hide();
+    \endcode
+    The wait widget, in this example, emits a signal cancelled()
+    when the user presses the Cancel button.
+    \image qwaitwidget.png "A wait widget with text"
 */
 
-
+/*!
+  Constructs an QWaitWidget object with the given \a parent.
+*/
 QWaitWidget::QWaitWidget(QWidget *parent)
     : QDialog( parent )
 {
@@ -99,8 +134,10 @@ QWaitWidget::QWaitWidget(QWidget *parent)
 }
 
 /*!
-    Makes the Cancel button appear on the context menu.
+    Sets whether the Cancel button appears on the context menu to \a enabled.
     When the Cancel button is presed the signal cancelled() is emitted.
+
+    \sa cancelled()
 */
 void QWaitWidget::setCancelEnabled(bool enabled)
 {
@@ -169,15 +206,17 @@ void QWaitWidget::timeExpired()
     hide();
 }
 
-/*
-   Sets the text label to text \a str.
+/*!
+  \fn void QWaitWidget::setText( const QString &label )
+
+   Sets the informative text \a label for this wait widget.
 */
 void QWaitWidget::setText( const QString &str )
 {
     d->textLabel->setText( str );
 }
 
-/*
+/*!
    Blends the image with color \a col.
 */
 void QWaitWidget::setColor( const QColor &col )
@@ -217,12 +256,18 @@ QRgb QWaitWidget::blendRgb( QRgb rgb, int sr, int sg, int sb )
     return qRgba( r, g, b, qAlpha( rgb ) );
 }
 
+/*!
+  \reimp
+*/
 void QWaitWidget::hideEvent( QHideEvent *e )
 {
     reset();
     QDialog::hideEvent( e );
 }
 
+/*!
+  \reimp
+*/
 void QWaitWidget::keyPressEvent( QKeyEvent *e )
 {
     if ( e->key() == Qt::Key_Back && d->cancelEnabled ) {
@@ -241,3 +286,8 @@ void QWaitWidget::reset()
     d->count = 0;
 }
 
+/*!
+  \fn void QWaitWidget::cancelled()
+
+  This signal is emitted whenever the wait widget dialog is cancelled by user.
+*/

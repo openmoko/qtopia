@@ -26,10 +26,14 @@
 
 /*!
     \class QSignalIntercepter
-    \brief The QSignalIntercepter class provides an interface for intercepting signals as metacalls
+    \mainclass
+    \brief The QSignalIntercepter class provides an interface for intercepting signals as meta-calls
 
-    The QSignalIntercepter class provides an interface for intercepting
-    signals as metacalls, without attaching them to an explicit slot.
+    IPC mechanisms need to intercept signals and convert them into protocol
+    messages, but it is generally impractical to create a slot for every
+    signal that needs to be dispatched.  The QSignalIntercepter class allows
+    signals to be intercepted as meta-calls so that IPC dispatching can
+    be implemented in a generic fashion.
 
     The activated() method is called whenever the signal is emitted,
     with the arguments in a typed list.
@@ -58,7 +62,6 @@ public:
 };
 
 /*!
-    \internal
     Create a new signal intercepter which traps \a signal on \a sender.
     The object will be attached to \a parent, if present.
 */
@@ -113,7 +116,6 @@ QSignalIntercepter::QSignalIntercepter
 }
 
 /*!
-    \internal
     Destroy a signal intercepter.
 */
 QSignalIntercepter::~QSignalIntercepter()
@@ -130,8 +132,7 @@ QSignalIntercepter::~QSignalIntercepter()
 }
 
 /*!
-    \internal
-    Get the sender that this signal interceptor is attached to.
+    Returns the sender that this signal interceptor is attached to.
 */
 QObject *QSignalIntercepter::sender() const
 {
@@ -139,8 +140,7 @@ QObject *QSignalIntercepter::sender() const
 }
 
 /*!
-    \internal
-    Get the name of the signal that this signal interceptor is attached to.
+    Returns the name of the signal that this signal interceptor is attached to.
 */
 QByteArray QSignalIntercepter::signal() const
 {
@@ -148,8 +148,9 @@ QByteArray QSignalIntercepter::signal() const
 }
 
 /*!
-    \internal
-    Determine if this signal intercepter is valid.
+    Returns true if this signal intercepter is valid; that is, there was
+    a signal present with the specified parameters when this object
+    was constructed.
 */
 bool QSignalIntercepter::isValid() const
 {
@@ -198,11 +199,10 @@ int QSignalIntercepter::qt_metacall(QMetaObject::Call c, int id, void **a)
 }
 
 /*!
-    \internal
     \fn void QSignalIntercepter::activated( const QList<QVariant>& args )
 
     Called when the signal that is being intercepted is activated.
-    The arguments to the signal are passed in the list \a a.
+    The arguments to the signal are passed in the list \a args.
 */
 
 // Get the QVariant type number for a type name.
@@ -222,12 +222,10 @@ int QSignalIntercepter::typeFromName( const QByteArray& type )
 }
 
 /*!
-    Get the connection types associated with a signal or slot \a member
+    Returns the connection types associated with a signal or slot \a member
     specification.  The array of types is returned from this function,
     and the number of arguments is returned in \a nargs.  Returns null
     if \a member is invalid.  The return value must be freed with qFree().
-
-    \internal
 */
 int *QSignalIntercepter::connectionTypes( const QByteArray& member, int& nargs )
 {

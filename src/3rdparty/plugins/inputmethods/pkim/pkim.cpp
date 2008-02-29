@@ -29,10 +29,10 @@
 
 #include <QDebug>
 
-// These two defines just increase the amount of qLog(Input) output, useful
+// These two defines just increase the amount of log & debug output, useful
 // for debugging purposes, but annoying otherwise
 //#define PKIM_VERBOSE_OUTPUT
-//#define DEBUG_PKIM_FILTER
+//#define DEBUG_PKIM
 
 // FSHANDWRITING_SIMPLE_STROKES turns off "advanced" drawing
 // Note that drawing with the composition modes is faster and prettier,
@@ -47,6 +47,9 @@ static const int GUESS_TIME_OUT=2000;
 class QWSScreenStroke;
 static QWSScreenStroke *qt_screenstroke = 0;
 
+#ifdef DEBUG_PKIM
+QDebug& operator <<(QDebug& d, InputMatcherChar& i){return d << "InputMatcherChar( "<< i.id << i.tapfunc << i.taparg << i.holdfunc << i.holdarg << i.showList << ")";};
+#endif //DEBUG_PKIM
 
 // can also do by not accepting points more than X away, and left-click if stroke length is 1
 bool could_be_left_click;
@@ -129,7 +132,6 @@ QWSScreenStroke::QWSScreenStroke() :
     setAttribute(Qt::WA_NoSystemBackground);
     setWindowOpacity(0.0);
 //    setWindowOpacity(4.0/7.0);
-
     setFixedSize(desktopAvailableRect.size());
     // This covers the screen, but allows space for the context key bar at the
     // the header
@@ -561,8 +563,11 @@ void PkIM::queryResponse ( int property, const QVariant & result )
 */
 void PkIM::setMicroFocus( int x, int y )
 {
-    if(x != microX || y != microY)
-        qLog(Input) << "PkIM::setMicroFocus - changed to ("<<x<<", "<<y<<")";
+    if(x == microX && y == microY) return;
+        
+#ifdef PKIM_VERBOSE_OUTPUT
+    qLog(Input) << "PkIM::setMicroFocus - changed to ("<<x<<", "<<y<<")";
+#endif // PKIM_VERBOSE_OUTPUT
     microX = x;
     microY = y;
     if (active) {
@@ -613,6 +618,10 @@ void PkIM::setHint(const QString& s)
     QStringList args = s.split(" ");
     QString h=args.first();
     
+#ifdef DEBUG_PKIM
+    qDebug() << "PkIM : setHint("""<<s<<""", head is "<<h<<", full args are "<<args;
+#endif
+
     if (!profile) {
         qLog(Input) << "PkIM::setHint("<<h<<") - no profile";
         return;
@@ -632,10 +641,8 @@ void PkIM::setHint(const QString& s)
             emit stateChanged(QtopiaInputMethod::Sleeping);
             qLog(Input) << "PkIM::setHint("<<h<<") Sleeping";
         }
-#ifdef PKIM_VERBOSE_OUTPUT
         else
             qLog(Input) << "PkIM::setHint("<<h<<") - already off, no action taken";
-#endif
         return;
     };
 
@@ -723,11 +730,11 @@ void PkIM::setHint(const QString& s)
             setModePixmap();
             emit stateChanged(QtopiaInputMethod::Ready);
 
-            if (cMode != Lower) {
+            if (cMode != Dict) {
                 qLog(Input) << "PkIM::setHint(" << h << ") - changing to words mode";
                 penMatcher->setCharSet( profile->charSet("Text") ); // no tr
                 setCharSetCalled = true;
-                cMode = Lower;
+                cMode = Dict;
                 active = true;
                 // XXX updateStatusIcon();
             } else
@@ -1249,9 +1256,9 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
     }
 
     if (!active || !profile) {
-#ifdef DEBUG_PKIM_FILTER
+#ifdef DEBUG_PKIM
         //        qLog(Input) << "PkIM::filter() - rejecting mouse"; 
-#endif // DEBUG_PKIM_FILTER
+#endif // DEBUG_PKIM
 
         return false; // not filtering
     }
@@ -1284,9 +1291,9 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
             if (could_be_left_click && (pos-inputStroke->startingPoint()).manhattanLength() > strokeThreshold) {
                 lClickTimer->stop();
                 could_be_left_click = false;
-#ifdef DEBUG_PKIM_FILTER               
+#ifdef DEBUG_PKIM               
                 qLog(Input) << "PkIM::filter() - could_be_left_click = false.  Stroke distance = "<<(pos-inputStroke->startingPoint()).manhattanLength();
-#endif // DEBUG_PKIM_FILTER
+#endif // DEBUG_PKIM
             }
             int dx = qAbs( pos.x() - lastPoint.x() );
             int dy = qAbs( pos.y() - lastPoint.y() );
@@ -1309,9 +1316,9 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
             // mouse press
             lClickTimer->start(profile->ignoreStrokeTimeout()); // make configurable
             could_be_left_click = !lStrokeTimer->isActive();
-#ifdef DEBUG_PKIM_FILTER            
+#ifdef DEBUG_PKIM            
             qLog(Input) << "PkIM::filter() - could_be_left_click=!lStrokeTimer->isActive() is "<<could_be_left_click;
-#endif // DEBUG_PKIM_FILTER
+#endif // DEBUG_PKIM
             lStrokeTimer->stop();
             inputStroke = new QIMPenStroke;
             // should be configurable.  canvas height should be user-drawing height.
@@ -1337,9 +1344,9 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
             lClickTimer->stop();
             fs_fade_stroke();
             if (could_be_left_click) {
-#ifdef DEBUG_PKIM_FILTER                
+#ifdef DEBUG_PKIM                
                 qLog(Input) << "PkIM::filter() - if (could_be_left_click) is true- sending mouse event";
-#endif // DEBUG_PKIM_FILTER
+#endif // DEBUG_PKIM
                 fs_end_stroke(); // not a stroke (it's a click-through), so end
                 // this hides the fullscreen widget so it doesn't get 
                 // the mouse events about to be created
@@ -1380,27 +1387,162 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
     return true;
 }
 
-#ifdef DEBUG_PKIM_FILTER 
-#define REPORT_FILTER_KEY_RESULT_MACRO(x) qLog(Input) << "PkIM::filter(" << unicode << ", " << keycode << ", " << modifiers <<  ", " << (isPress?"true":"false") << ", "  << (autoRepeat?"true":"false") << ") " << x
-#else // DEBUG_PKIM_FILTER 
+#ifdef DEBUG_PKIM 
+#define REPORT_FILTER_KEY_RESULT_MACRO(x) qDebug() << "PkIM::filter(" << unicode << ", " << keycode << ", " << modifiers <<  ", " << (isPress?"true":"false") << ", "  << (autoRepeat?"true":"false") << ") " << x
+#define REPORT_PROCESS_CHAR_RESULT_MACRO(x) qDebug() << "PkIM::processInputMatcherChar(" << unicode << ", " << keycode << ", " <<  ", " << (isPress?"true":"false") <<  ") " << x
+#else // DEBUG_PKIM 
 #define REPORT_FILTER_KEY_RESULT_MACRO(x) 
+#define REPORT_PROCESS_CHAR_RESULT_MACRO(x) 
 #endif // REPORT_FILTER_KEY_RESULT_MACRO(x)
+
+/*!
+    \internal
+    Processes input based on InputMatcherChar
+*/
+
+bool PkIM::processInputMatcherChar(InputMatcher* matcher, int unicode, int keycode, bool isPress)
+{
+        InputMatcherChar item = (matcher->map())[unicode];
+        if (isPress) {
+            //check if there is a hold for it.
+            if (item.holdfunc != noFunction) {
+                tid_hold = startTimer(PRESS_AND_HOLD_TIME);
+                hold_uc = unicode;
+                hold_key = keycode;
+                hold_item = item;
+                REPORT_PROCESS_CHAR_RESULT_MACRO(" - consumed, setting hold for it");
+                return true; // we will hold, need to wait for release
+            }
+            // XXX Add check for single char taparg.
+            // nature of func may need to wait till we have spec that uses it though.
+            // in this case should just modify uni-code and pass through.
+            if (item.tapfunc != noFunction) {
+                REPORT_PROCESS_CHAR_RESULT_MACRO(" - consumed, no action till key release");
+                return true; // we will do it on release.
+            }
+            // no tap set, no hold set.  send, end, and let this key go through.
+            REPORT_PROCESS_CHAR_RESULT_MACRO(" - rejected and terminating word, no tap set or hold set");
+            sendAndEnd();
+            return false;
+        } else {
+            // is release
+            if ( tid_hold ) {
+                killTimer(tid_hold);
+                tid_hold = 0;
+            }
+            // doesn't matter if there was a hold function, we are
+            // not doing it.
+            // check out tap functionalit.
+            // XXX Add check for single char taparg.
+            // this function different depending if tap or hold.
+            if (item.tapfunc == insertText) {
+                if (!matcher->lookup()) {
+                    if ( tid_abcautoend ){
+                        killTimer(tid_abcautoend);
+                        tid_abcautoend = 0;
+                    }
+                    if (unicode == lastUnicode && item.taparg.length() > 1) {
+                        nextWord();
+                    } else {
+                        bool wasShift = shift;
+                        sendAndEnd();
+                        shift = wasShift;
+
+                        appendLookup(item.taparg);
+
+                        if (choices.count() == 1) {
+                            sendAndEnd();
+                        }
+                    }
+                } else {
+                    appendLookup(item.taparg);
+                }
+                if (!charList)
+                    charList = new CharList();
+
+                // SHOULD BE SHARED - only with the newer drawing method
+                if (!matcher->lookup() && choices.count() > 1) {
+                    if (item.showList) {
+                        charList->setChars(choices);
+                        if ( !charList->isVisible() )
+                            charList->setMicroFocus(microX, microY);
+                        charList->setCurrent(choices[choice]);
+#ifdef PKIM_VERBOSE_OUTPUT
+                        qLog(Input) << "CharList being shown at " << microX << ", " << microY;
+#endif // PKIM_VERBOSE_OUTPUT
+                        charList->show();
+                    }
+                    tid_abcautoend = startTimer(ABC_AUTOEND_TIME);
+                }
+                lastUnicode = unicode;
+                REPORT_PROCESS_CHAR_RESULT_MACRO(" - consumed - inserting text");
+                return true;
+            }
+            if (item.tapfunc != noFunction) {
+                REPORT_PROCESS_CHAR_RESULT_MACRO(" - consumed - applying tap function");
+                applyFunction(item.tapfunc);
+                return true;
+            }
+            // no tap set, no tap function, if there is a hold though we might have delayed the press.
+            // if so, compose and send text now.
+            if (item.holdfunc != noFunction) {
+                text += unicode;
+                sendAndEnd();
+                REPORT_PROCESS_CHAR_RESULT_MACRO(" - consumed - applying hold function");
+                return true;
+            }
+        }
+        REPORT_PROCESS_CHAR_RESULT_MACRO(" - rejected. unicode in matcher map, but not processed");
+        return false; // sendAndEnd done on press
+}
+/*!
+    A simple helper function for PkIM.  Remove the last character from the preedit text and word.  If this leaves the preedit text empty, end the preedit session.
+
+    A true return value consumes the key event that triggered this call.
+    \sa filter()
+*/
+bool PkIM::processBackspace()
+{
+    if ( word.length() ) {
+        word.truncate(word.length()-1);
+    }
+    if (text.length())  {
+        revertLookup();
+#ifdef DEBUG_PKIM        
+        qDebug() << "PkIM::processBackspace() - consumed backspace, reverting lookup";
+#endif // DEBUG_PKIM
+        if(!text.length()) sendAndEnd(true);
+
+        return true;
+    }
+    return false;
+}
+
 
 /*!
   \internal
   Filters key events for keypad/dictionary style input.
- */
+
+  This is far too complicated and needs to be refactored.
+
+    Always ignore the Hangup key, and ignore everything ig the IM is off.
+
+    Assuming that this is a new press, send it to \l processInputMatcherChar() to find out what it does, and whether it has a hold function.
+
+    If the key has a hold function, we don't know yet whether it has been held for long enough (\l timerEvent()), so consume autorepeats without doing anything until we know.
+*/
 bool PkIM::filter(int unicode, int keycode, int modifiers, 
         bool isPress, bool autoRepeat)
 {
     if (Qt::Key_Hangup == keycode)
         return false;
-    
+
+    // consume autorepeats for buttons with a hold function.
     if ( waitforrelease ) { 
         if ( isPress || autoRepeat ){
             return true;
         };
-        REPORT_FILTER_KEY_RESULT_MACRO("- consumed, autorepeats, now released");
+        REPORT_FILTER_KEY_RESULT_MACRO(" Consumed, hold released");
         waitforrelease = false;
         return true;
     }
@@ -1448,124 +1590,34 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
     InputMatcher *matcher = matcherSet->currentMode();
     QMap<QChar, InputMatcherChar> set = matcher->map();
 
+#ifdef DEBUG_PKIM 
+    QMap<QChar, InputMatcherChar>::const_iterator i = set.constBegin();
+    if(i == set.constEnd()) {
+        qDebug() << "Pkim : matcher->map() is empty";
+    } else {
+        while (i != set.constEnd()) {
+            qDebug() << i.key() << ": "<< i.value().id << i.value().tapfunc << i.value().taparg << i.value().holdfunc << i.value().holdarg << i.value().showList;
+            ++i;
+        };
+    };
+#endif // DEBUG_PKIM
+
     if (set.contains(unicode)) {
-        InputMatcherChar item = set[unicode];
-        if (isPress) {
-            //check if there is a hold for it.
-            if (item.holdfunc != noFunction) {
-                tid_hold = startTimer(PRESS_AND_HOLD_TIME);
-                hold_uc = unicode;
-                hold_key = keycode;
-                hold_item = item;
-                REPORT_FILTER_KEY_RESULT_MACRO(" - consumed, setting hold for it");
-                return true; // we will hold, need to wait for release
-            }
-            // XXX Add check for single char taparg.
-            // nature of func may need to wait till we have spec that uses it though.
-            // in this case should just modify uni-code and pass through.
-            if (item.tapfunc != noFunction) {
-                REPORT_FILTER_KEY_RESULT_MACRO(" - consumed, no action till key release");
-                return true; // we will do it on release.
-            }
-            // no tap set, no hold set.  send, end, and let this key go through.
-            REPORT_FILTER_KEY_RESULT_MACRO(" - rejected and terminating word, no tap set or hold set");
-            sendAndEnd();
-            return false;
-        } else {
-            // is release
-            if ( tid_hold ) {
-                killTimer(tid_hold);
-                tid_hold = 0;
-            }
-            // doesn't matter if there was a hold function, we are
-            // not doing it.
-            // check out tap functionalit.
-            // XXX Add check for single char taparg.
-            // this function different depending if tap or hold.
-            if (item.tapfunc == insertText) {
-                if (!matcher->lookup()) {
-                    if ( tid_abcautoend ){
-                        killTimer(tid_abcautoend);
-                        tid_abcautoend = 0;
-                    }
-                    if (unicode == lastUnicode && item.taparg.length() > 1) {
-                        nextWord();
-                    } else {
-                        bool wasShift = shift;
-                        sendAndEnd();
-                        shift = wasShift;
-
-                        appendLookup(item.taparg);
-
-                        if (choices.count() == 1) {
-                            sendAndEnd();
-                        }
-                    }
-                } else {
-                    appendLookup(item.taparg);
-                }
-                if (!charList)
-                    charList = new CharList();
-
-                // SHOULD BE SHARED - only with the newer drawing method
-                if (!matcher->lookup() && choices.count() > 1) {
-                    if (item.showList) {
-                        charList->setChars(choices);
-                        if ( !charList->isVisible() )
-                            charList->setMicroFocus(microX, microY);
-                        charList->setCurrent(choices[choice]);
-                        qLog(Input) << "CharList being shown at " << microX << ", " << microY;
-                        charList->show();
-                    }
-                    tid_abcautoend = startTimer(ABC_AUTOEND_TIME);
-                }
-                lastUnicode = unicode;
-                REPORT_FILTER_KEY_RESULT_MACRO(" - consumed - inserting text");
-                return true;
-            }
-            if (item.tapfunc != noFunction) {
-                REPORT_FILTER_KEY_RESULT_MACRO(" - consumed - applying tap function");
-                applyFunction(item.tapfunc);
-                return true;
-            }
-            // no tap set, no tap function, if there is a hold though we might have delayed the press.
-            // if so, compose and send text now.
-            if (item.holdfunc != noFunction) {
-                text += unicode;
-                sendAndEnd();
-                REPORT_FILTER_KEY_RESULT_MACRO(" - consumed - applying hold function");
-                return true;
-            }
-        }
-        REPORT_FILTER_KEY_RESULT_MACRO(" - rejected. unicode in matcher map, but not processed");
-        return false; // sendAndEnd done on press
+        return processInputMatcherChar(matcher, unicode, keycode, isPress);
     } else if ( isPress && ((keycode == Qt::Key_Backspace)
 #ifdef QTOPIA_PHONE
                 || (keycode == Qt::Key_Back)
 #endif
                 )) {
-        qLog(Input) << " PkIM::filter() - ((isPress || !Qtopia::mousePreferred()) && ("<<keycode<<" == "<<Qt::Key_Backspace<<" || "<<Qt::Key_Back<<")";
-
-
-        if ( word.length() ) {
-            word.truncate(word.length()-1);
-        }
-        if (text.length())  {
-            revertLookup();
-            REPORT_FILTER_KEY_RESULT_MACRO(" - consumed backspace, reverting lookup");
-            if(!text.length())
-                sendAndEnd(true);
-
-            return true;
-        };
+        qLog(Input) << " PkIM::filter() - ((isPress || !Qtopia::mousePreferred()) && ("<<"keycode == "<<(keycode==Qt::Key_Backspace?"Qt::Key_Backspace":"Qt::Key_Back")<<")";
+        return processBackspace();
         sendAndEnd(); 
         qLog(Input) << "calling sendAndEnd on empty text";
     } else if (isPress && set.count() > 0) {
         qLog(Input) << "PkIM::filter() - (isPress && set.count() > 0)";
         /* if not in set, (and set not empty), and not any other special key 
-           (Back) then send and end. 
+           (like Back) then send and end. 
            This includes events sent to qvfb from the desktop keyboard. */
-        // Seems to be ending the word because the character isn't recognized, and going on to reject the keystroke.  This doesn't seem like desirable behaviour.
         sendAndEnd();
         word.clear();  // better to lose a potential word than add garbage.
         REPORT_FILTER_KEY_RESULT_MACRO(" - rejected, not recognized. (word ended)");
@@ -1574,6 +1626,8 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
     REPORT_FILTER_KEY_RESULT_MACRO(" - rejected");
     return false;
 }
+
+
 
 // different per phone and mode.
 void PkIM::timerEvent(QTimerEvent* e)

@@ -758,6 +758,8 @@ void dodump(QValueSpaceItem * item)
 {
     QList<QString> children = item->subPaths();
     foreach(QString child, children) {
+        if ( child.isEmpty() )
+            continue;
         QValueSpaceItem subitem(*item, child);
         dodump(&subitem);
     }

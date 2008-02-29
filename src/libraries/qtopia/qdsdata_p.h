@@ -59,7 +59,7 @@ public:
 //
 // ============================================================================
 
-class QDSLockedFile : public QFile
+class QTOPIA_AUTOTEST_EXPORT QDSLockedFile : public QFile
 {
 public:
     QDSLockedFile();

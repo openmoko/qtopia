@@ -24,16 +24,22 @@
 #include "qmediapipe.h"
 
 
+/*!
+    \class QMediaPipe
+    \internal
+*/
 
+// {{{ QMediaPipePrivate
 class QMediaPipePrivate
 {
 public:
     QIODevice*  inputDevice;
     QIODevice*  outputDevice;
 };
+// }}}
 
 
-
+// {{{ QMediaPipe
 QMediaPipe::QMediaPipe
 (
  QIODevice* inputDevice,
@@ -53,7 +59,6 @@ QMediaPipe::QMediaPipe
             this, SIGNAL(bytesWritten(qint64)));
 }
 
-
 QMediaPipe::~QMediaPipe()
 {
     delete d;
@@ -68,5 +73,4 @@ qint64 QMediaPipe::write(const char *data, qint64 len)
 {
     return d->outputDevice->write(data, len);
 }
-
-
+// }}}

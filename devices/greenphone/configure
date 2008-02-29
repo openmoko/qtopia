@@ -20,4 +20,3 @@
 -D SYSINFO_GEEK_MODE
 -extra-qtopiacore-config "-D QT_QWS_SCREEN_COORDINATES"
 -release
--confirm-license

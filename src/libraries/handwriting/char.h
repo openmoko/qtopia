@@ -64,6 +64,8 @@ public:
     void clearFlag( int f ) { flags &= ~f; }
     bool testFlag( int f ) { return flags & f; }
 
+
+
     enum Flags { System=0x01,
         Deleted=0x02,
         CombineRight=0x04,
@@ -99,6 +101,7 @@ protected:
 
 typedef QList<QIMPenChar *> QIMPenCharList;
 typedef QList<QIMPenChar *>::ConstIterator QIMPenCharIterator;
+
 
 QTOPIAHW_EXPORT QDataStream & operator<< (QDataStream & s, const QIMPenChar &ws);
 QTOPIAHW_EXPORT QDataStream & operator>> (QDataStream & s, QIMPenChar &ws);

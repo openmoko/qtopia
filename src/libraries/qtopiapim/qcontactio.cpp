@@ -40,6 +40,7 @@
 
 /*!
   \class QContactIO
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QContactIO class provides an interface for accessing contact data stores such

@@ -71,4 +71,13 @@ private:
     QList< QContentPlugin * > plugins;
 };
 
+// Only exported for binary compability with 4.2.2.
+class QTOPIA_EXPORT QContentFactory
+{
+public:
+    static bool installContent( const QString &fileName, QContent *content );
+    static bool updateContent( QContent *content );
+};
+
+
 #endif

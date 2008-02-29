@@ -334,8 +334,8 @@ void DialerControl::dial( const QString &number, bool sendcallerid, const QStrin
 
         // Call the specified number.
         QPhoneCall call = createCall(callType);
+        phoneValueSpace.setAttribute( "LastDialedCall", QVariant(number) );
         call.dial( dialopts );
-        phoneValueSpace.setAttribute("LastDialedCall", number);
     }
 }
 
@@ -439,10 +439,25 @@ void DialerControl::accept()
             if( hasActiveCalls() && hasCallsOnHold() )
                 callsOnHold().first().hangup();
             //put active calls on hold
-            if( hasActiveCalls() )
-                hold();
-            incoming.accept();
-            incoming.activate();
+            if ( incoming.callType() == "Voice" ) {   // No tr
+                // GSM calls will be put on hold automatically by the accept().
+                // Other call types need to be put on hold explicitly.
+                if( hasActiveCalls() ) {
+                    if ( activeCalls().first().callType() == "Voice" ) {  // No tr
+                        incoming.accept();
+                    } else {
+                        hold();
+                        incoming.accept();
+                    }
+                } else {
+                    incoming.accept();
+                }
+            } else {
+                if( hasActiveCalls() )
+                    hold();
+                incoming.accept();
+                incoming.activate();
+            }
         }
     }
 }
@@ -592,7 +607,7 @@ void DialerControl::callStateChanged( const QPhoneCall& call )
         } else {
             number = tr("Unknown", "Unknown caller");
         }
-        phoneValueSpace.setAttribute("Incoming/Number", QVariant(number));
+        phoneValueSpace.setAttribute("Incoming/Number", QVariant(number.trimmed()));
         phoneValueSpace.setAttribute("Incoming/Name", QVariant(name));
 
         if(!aaTid && mProfiles->activeProfile().autoAnswer())
@@ -711,7 +726,18 @@ int DialerControl::missedCallCount() const
 
 void DialerControl::doActiveCalls()
 {
-    int newActive = activeCalls().count();
+    QStringList activeList;
+    QList<QPhoneCall> allActive = activeCalls();
+    QList<QPhoneCall>::Iterator iter;
+
+    int newActive = allActive.count();
+
+    for ( iter = allActive.begin(); iter != allActive.end(); ++iter ) {
+        activeList << (*iter).number().trimmed();
+    }
+
+    phoneValueSpace.setAttribute("ActiveCallList", activeList);
+
     if(newActive != activeCallCount) {
         activeCallCount = newActive;
         phoneValueSpace.setAttribute("ActiveCalls", activeCallCount);

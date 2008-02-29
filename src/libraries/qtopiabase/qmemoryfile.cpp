@@ -29,6 +29,7 @@
 
 /*
   \class QMemoryFile
+  \mainclass
   \intern
   \brief The QMemoryFile class provides a means to map a file info memory or reference
   to a block or memory by name.

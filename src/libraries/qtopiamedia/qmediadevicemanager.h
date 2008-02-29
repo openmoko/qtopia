@@ -34,6 +34,12 @@
 class QMediaDevice;
 
 
+/*!
+    \class QMediaDeviceManager
+    \internal
+*/
+
+
 class QTOPIAMEDIA_EXPORT QMediaDeviceManager : public QObject
 {
     Q_OBJECT

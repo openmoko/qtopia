@@ -418,6 +418,10 @@ extern DLLEXPORT(VObject*) Parse_MIME_FromFile(FILE *file);
 
 extern DLLEXPORT(const char *) vObjectTypeInfo(VObject *o);
 
+#ifdef Q_QDOC
+class VObjectLegal {};
+#endif
+
 
 #endif /* __VOBJECT_H__ */
 

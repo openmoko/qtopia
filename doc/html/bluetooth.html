@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Bluetooth Support</title>
+  <title>Bluetooth Support</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Bluetooth Support<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Bluetooth Support<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <ul><li><a href="#hardware-requirements">Hardware Requirements</a></li>
 <li><a href="#software-requirements">Software Requirements</a></li>
@@ -36,17 +39,17 @@
 <p>Qtopia does not directly support any hardware, instead it relies on the BlueZ Bluetooth stack. Thus for any hardware to be supported by Qtopia, it must be supported by BlueZ. For more information, please visit the BlueZ website at http://www.bluez.org.</p>
 <a name="software-requirements"></a>
 <h3>Software Requirements</h3>
-<p>Qtopia 4.2.2 requires BlueZ Bluetooth framework Version 3.9. This means both the bluez-libs-3.9 and bluez-utils-3.9 must be installed on your system. For more information about installing BlueZ, please refer to the BlueZ website at http://www.bluez.org.</p>
+<p>Qtopia 4.2&#x2e;2 requires BlueZ Bluetooth framework Version 3.9&#x2e; This means both the bluez-libs-3.9 and bluez-utils-3.9 must be installed on your system. For more information about installing BlueZ, please refer to the BlueZ website at http://www.bluez.org.</p>
 <p>BlueZ uses the DBUS communications protocol to expose a rich and complex API. Qtopia uses this API to manage Bluetooth devices. Thus Qtopia requires DBUS to be configured and running in order to successfully communicate with hcid. Qtopia does not link to the BlueZ libraries, however correct version of the bluez-lib package must be installed as it is used by bluez-utils.</p>
 <p>Qtopia requires the BlueZ hcid daemon to be running. In addition, depending on your BlueZ configuration, the sdpd daemon should be running as well.</p>
 <a name="qtopia-configuration"></a>
 <h3>Qtopia Configuration</h3>
 <p>Qtopia has several configure options which relate to Bluetoth support. These options are documented in the table below:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Option</th><th>Description</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>-bluetooth</td><td>Turns Bluetooth Support on. This option also implies -dbus.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td>-dbus</td><td>Bluetooth support requires DBUS. This turns on DBUS support. By default, configure searches for DBUS installation hierarchy under /usr. Thus the libdbus-1.so will be found in /usr/lib/libdbus-1.so. If a useable version of the DBUS library is not found, the DBUS and Bluetooth support will be disabled. Use -dbuspath option to manually specify where DBUS library resides.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>-dbuspath</td><td><b>This option is optional.</b> If your DBUS installation is not in /usr, this specifies the DBUS installation path.</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>-bluetooth</td><td>Turns Bluetooth Support on. This option also implies -dbus.</td></tr>
+<tr valign="top" class="even"><td>-dbus</td><td>Bluetooth support requires DBUS. This turns on DBUS support. By default, configure searches for DBUS installation hierarchy under /usr. Thus the libdbus-1.so will be found in /usr/lib/libdbus-1.so. If a useable version of the DBUS library is not found, the DBUS and Bluetooth support will be disabled. Use -dbuspath option to manually specify where DBUS library resides.</td></tr>
+<tr valign="top" class="odd"><td>-dbuspath</td><td><b>This option is optional.</b> If your DBUS installation is not in /usr, this specifies the DBUS installation path.</td></tr>
 </table></p>
 <a name="integration"></a>
 <h2>Integration</h2>
@@ -107,8 +110,8 @@
 <p>For more information, see the <a href="bluetooth-servicemanager.html">Bluetooth Service Management Framework</a> page.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

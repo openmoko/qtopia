@@ -49,6 +49,22 @@ class ProxiesPageBaseContainer : public QFrame, public Ui::ProxiesPageBase
     friend class ProxiesPage;
 };
 
+/*!
+  \class ProxiesPage
+  \brief The ProxiesPage class provides the user interface for the network proxy configuration.
+  \mainclass
+  \internal
+
+  The ProxiesPage widget is exclusively used by the Qtopia network plug-ins. It 
+  allows the user to edit the following proxy details:
+
+  \list
+    \o http proxy
+    \o ftp proxy
+  \endlist
+
+  This is not a public class.
+*/
 ProxiesPage::ProxiesPage( const QtopiaNetworkProperties& cfg, QWidget* parent, Qt::WFlags flags ) :
     QWidget(parent, flags)
 {

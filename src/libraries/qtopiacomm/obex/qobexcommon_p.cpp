@@ -58,9 +58,9 @@ void getHeaders( obex_t *self, obex_object_t *object, QObexHeader &header )
         switch ( hi ) {
             case OBEX_HDR_DESCRIPTION:
             {
-                if (hv_size > 0) {
+                if (hv_size > 1) {
                     // strip null terminator if present (it should be there, but check)
-                    if (hv.bs[hv_size] == uint8_t('\0'))
+                    if (hv.bs[hv_size-2] == uint8_t('\0') && hv.bs[hv_size-1] == uint8_t('\0'))
                         desc.setUnicode((const QChar *)hv.bs, hv_size / 2 - 1);
                     else
                         desc.setUnicode((const QChar *)hv.bs, hv_size / 2);
@@ -74,9 +74,9 @@ void getHeaders( obex_t *self, obex_object_t *object, QObexHeader &header )
 
             case OBEX_HDR_NAME:
             {
-                if (hv_size > 0) {
+                if (hv_size > 1) {
                     // strip null terminator if present (it should be there, but check)
-                    if (hv.bs[hv_size] == uint8_t('\0'))
+                    if (hv.bs[hv_size-2] == uint8_t('\0') && hv.bs[hv_size-1] == uint8_t('\0'))
                         name.setUnicode((const QChar*)hv.bs, hv_size / 2 - 1);
                     else
                         name.setUnicode((const QChar*)hv.bs, hv_size / 2);

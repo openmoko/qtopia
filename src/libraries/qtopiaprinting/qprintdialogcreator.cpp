@@ -37,7 +37,7 @@ static void createPrintDialog(QPrintDialog *parent)
 typedef void (*QPrintDialogCreator)(QPrintDialog *parent);
 extern QPrintDialogCreator _qt_print_dialog_creator;
 /*!
-    /internal
+    \internal
     _qt_print_dialog_creator is defined in QPrintDialog
     and called when a QPrintDialog is contructed to ensure
     that graphic representation of QPrintDialog fits to handheld devices.

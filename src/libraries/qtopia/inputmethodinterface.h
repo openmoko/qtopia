@@ -44,15 +44,16 @@ class QIMActionDescriptionPrivate;
 class QTOPIA_EXPORT QIMActionDescription
 {
 public:
+    QIMActionDescription(const QIMActionDescription& original) ;
+    explicit QIMActionDescription(int id=0, QString label = QString(), 
+        QString iconFileName=QString());
+    ~QIMActionDescription();
     int id() const;
     void setId(const int);
     QString label() const;
     void setLabel(const QString&);
     QString iconFileName() const;
     void setIconFileName(const QString&);
-    explicit QIMActionDescription(int id=0, QString label = QString(), 
-        QString iconFileName=QString());
-    QIMActionDescription(const QIMActionDescription& original) ;
 
 template <typename T> 
     void serialize(T &stream) const;
@@ -60,7 +61,6 @@ template <typename T>
 template <typename T>
     void deserialize(T &stream);
 
-    ~QIMActionDescription();
 protected:
     QIMActionDescription(QIMActionDescriptionPrivate &dd);
 private:

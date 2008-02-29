@@ -21,19 +21,23 @@
 
 #include <qabstractipcinterface.h>
 #include <qvaluespace.h>
+#include <QString>
 #include <qtimer.h>
 #include <qmetaobject.h>
 
 /*!
     \class QAbstractIpcInterface
+    \mainclass
     \brief The QAbstractIpcInterface class provides facilities for implementing the client and server sides of IPC communications paths.
     \ingroup ipc
 
-    The QAbstractIpcInterface class provides facilities for implementing the
-    client and server sides of IPC communications paths.  Subclasses that
-    inherit this class implement the client side of the communication.
-    Subclasses of the client implement the server side, overriding the
-    client functionality with server code.
+    This class makes it easier to implement IPC mechanisms using Qtopia.
+    It is used extensively by the Qtopia Telephony, Bluetooth, Hardware Accessory,
+    and Multimedia libraries.
+
+    Subclasses that inherit this class implement the client side of the
+    communication.  Subclasses of the client implement the server side,
+    overriding the client functionality with server code.
 
     As an example, we will show how to implement a client/server "echo"
     interface.  The client side has a \c{send()} slot which sends a
@@ -229,14 +233,18 @@ QAbstractIpcInterface::QAbstractIpcInterface
     d->interfaceName = interfaceName;
     d->realInterfaceName = interfaceName;
     d->valueSpaceLocation = valueSpaceLocation;
+    while ( d->valueSpaceLocation.endsWith("/") )
+        d->valueSpaceLocation.chop(1);
+    if ( !d->valueSpaceLocation.startsWith( "/" ) )
+        d->valueSpaceLocation.prepend( "/" );
 
     // Determine the path to use for settings and published values.
-    d->path = valueSpaceLocation + "/" + interfaceName + "/" + group;
+    d->path = d->valueSpaceLocation + "/" + interfaceName + "/" + group;
 
     // Determine the name of the QCop channels to use for this interface.
-    requestChannel = "QPE" + valueSpaceLocation + "/" + interfaceName +
+    requestChannel = "QPE" + d->valueSpaceLocation + "/" + interfaceName +
                      "/Request/" + group;
-    responseChannel = "QPE" + valueSpaceLocation + "/" + interfaceName +
+    responseChannel = "QPE" + d->valueSpaceLocation + "/" + interfaceName +
                       "/Response/" + group;
 
     // Set up the QtopiaIpcAdaptor logic in server or client mode.
@@ -253,7 +261,7 @@ QAbstractIpcInterface::QAbstractIpcInterface
 
     } else {
         // Client side: look up the channel to connect to.
-        QValueSpaceItem item( valueSpaceLocation + "/" + interfaceName );
+        QValueSpaceItem item( d->valueSpaceLocation + "/" + interfaceName );
         if ( group.isEmpty() ) {
             // Search for the default group implementing this interface.
             QStringList values = item.subPaths();
@@ -294,7 +302,7 @@ QAbstractIpcInterface::QAbstractIpcInterface
         d->send = new QtopiaIpcAdaptor( requestChannel, this );
         d->receive = new QtopiaIpcAdaptor( responseChannel, this );
         if ( valuePath.isEmpty() ) {
-            d->path = valueSpaceLocation + "/" + interfaceName +
+            d->path = d->valueSpaceLocation + "/" + interfaceName +
                       "/" + group;
         } else {
             d->path = valuePath;
@@ -319,7 +327,9 @@ QAbstractIpcInterface::~QAbstractIpcInterface()
 }
 
 /*!
-    Get the name of the group associated with this interface object.
+    Returns the name of the group associated with this interface object.
+
+    \sa interfaceName()
 */
 QString QAbstractIpcInterface::groupName() const
 {
@@ -327,9 +337,11 @@ QString QAbstractIpcInterface::groupName() const
 }
 
 /*!
-    Get the interface name associated with this interface object.
+    Returns the interface name associated with this interface object.
     If this object is known by more than one interface name, the interface
     name passed in the last call to proxyAll() will be returned.
+
+    \sa groupName()
 */
 QString QAbstractIpcInterface::interfaceName() const
 {
@@ -337,11 +349,13 @@ QString QAbstractIpcInterface::interfaceName() const
 }
 
 /*!
-    Get the mode that this interface object is operating in.
+    Returns the mode that this interface object is operating in.
     Returns QAbstractIpcInterface::Client for client mode,
     QAbstractIpcInterface::Server for server mode, and
     QAbstractIpcInterface::Invalid if the client's connection to the
     server could not be established or has been lost.
+
+    \sa available()
 */
 QAbstractIpcInterface::Mode QAbstractIpcInterface::mode() const
 {
@@ -351,13 +365,15 @@ QAbstractIpcInterface::Mode QAbstractIpcInterface::mode() const
 /*!
     \fn bool QAbstractIpcInterface::available() const
 
-    Determine if the server is available for use.  This is normally
+    Returns true if the server is available for use; otherwise returns false.  This is normally
     used by a client just after the constructor is called to determine
     if the constructor could locate a suitable server.
+
+    \sa mode()
 */
 
 /*!
-    Set the priority of this server to \a value.  Ignored on the client.
+    Sets the priority of this server to \a value.  Ignored on the client.
 */
 void QAbstractIpcInterface::setPriority( int value )
 {
@@ -368,10 +384,16 @@ void QAbstractIpcInterface::setPriority( int value )
 }
 
 /*!
-    Proxy \a member so that it will be delivered between the client and server.
+    Proxies \a member so that it will be delivered between the client and server.
     This is typically called from the constructor of the immediate subclass
     of QAbstractIpcInterface for all signals and slots that will cross the
     client/server boundary.
+
+    This method is useful when the subclass has only a few signals and slots
+    that need to be proxied.  Or it contains signals and slots that must not
+    be proxied because they are private to the client or server sides.
+    The related proxyAll() method is simpler to use if the subclass has
+    many signals and slots and they must all be proxied.
 
     \sa proxyAll()
 */
@@ -390,7 +412,7 @@ void QAbstractIpcInterface::proxy( const QByteArray& member )
 }
 
 /*!
-    Set up remote invocation proxies for all signals and public slots
+    Sets up remote invocation proxies for all signals and public slots
     on this object, starting at the class specified by \a meta.
 
     Normally \a meta will be the \c staticMetaObject value for the
@@ -441,7 +463,7 @@ void QAbstractIpcInterface::proxyAll( const QMetaObject& meta )
 }
 
 /*!
-    Set up remote invocation proxies for all signals and public slots
+    Sets up remote invocation proxies for all signals and public slots
     on this object, starting at the class specified by \a meta.
     Also register \a subInterfaceName as a sub-interface name for
     this object's primary interface name.  After this call,
@@ -486,7 +508,7 @@ void QAbstractIpcInterface::proxyAll
 }
 
 /*!
-    Perform a call to the zero-argument slot \a name from the client to
+    Performs a call to the zero-argument slot \a name from the client to
     the server.  Ignored on the server.
 */
 QtopiaIpcSendEnvelope QAbstractIpcInterface::invoke( const QByteArray& name )
@@ -498,7 +520,7 @@ QtopiaIpcSendEnvelope QAbstractIpcInterface::invoke( const QByteArray& name )
 }
 
 /*!
-    Perform a call to the one-argument slot \a name from the client to
+    Performs a call to the one-argument slot \a name from the client to
     the server, with the argument \a arg1.  Ignored on the server.
 */
 void QAbstractIpcInterface::invoke( const QByteArray& name, QVariant arg1 )
@@ -508,7 +530,7 @@ void QAbstractIpcInterface::invoke( const QByteArray& name, QVariant arg1 )
 }
 
 /*!
-    Perform a call to the two-argument slot \a name from the client to
+    Performs a call to the two-argument slot \a name from the client to
     the server, with the arguments \a arg1 and \a arg2.  Ignored on the server.
 */
 void QAbstractIpcInterface::invoke( const QByteArray& name, QVariant arg1, QVariant arg2 )
@@ -518,7 +540,7 @@ void QAbstractIpcInterface::invoke( const QByteArray& name, QVariant arg1, QVari
 }
 
 /*!
-    Perform a call to the three-argument slot \a name from the client to
+    Performs a call to the three-argument slot \a name from the client to
     the server, with the arguments \a arg1, \a arg2, and \a arg3.
     Ignored on the server.
 */
@@ -529,7 +551,7 @@ void QAbstractIpcInterface::invoke( const QByteArray& name, QVariant arg1, QVari
 }
 
 /*!
-    Perform a call to the multi-argument slot \a name from the client to
+    Performs a call to the multi-argument slot \a name from the client to
     the server, with the arguments in the list \a args.  Ignored on the server.
 */
 void QAbstractIpcInterface::invoke( const QByteArray& name, const QList<QVariant>& args )
@@ -548,7 +570,7 @@ void QAbstractIpcInterface::invoke( const QByteArray& name, const QList<QVariant
 */
 
 /*!
-    Set \a name to \a value in the auxillary value space for
+    Sets \a name to \a value in the auxiliary value space for
     this interface object.  This is called by the server to notify
     clients of a change in \a name.  Ignored on the client.
 
@@ -557,7 +579,7 @@ void QAbstractIpcInterface::invoke( const QByteArray& name, const QList<QVariant
     be more efficient if the server needs to set or remove several values
     at once.  The default value for \a sync is \c Immediate.
 
-    \sa value()
+    \sa value(), removeValue()
 */
 void QAbstractIpcInterface::setValue
         ( const QString& name, const QVariant& value,
@@ -571,10 +593,12 @@ void QAbstractIpcInterface::setValue
 }
 
 /*!
-    Get the value associated with \a name in the auxillary value space
+    Returns the value associated with \a name in the auxiliary value space
     for this interface object.  Returns \a def if the name does not exist.
     This can be called on either the client or the server (but usually
     the client).
+
+    \sa setValue(), removeValue()
 */
 QVariant QAbstractIpcInterface::value
             ( const QString& name, const QVariant& def ) const
@@ -584,13 +608,14 @@ QVariant QAbstractIpcInterface::value
 }
 
 /*!
-    Remove the value associated with \a name from the auxillary value space.
+    Removes the value associated with \a name from the auxiliary value space.
 
     If \a sync is \c Delayed, then delay publication of the value to
     clients until the server re-enters the Qt event loop.  This may
     be more efficient if the server needs to set or remove several values
     at once.  The default value for \a sync is \c Immediate.
 
+    \sa value(), setValue()
 */
 void QAbstractIpcInterface::removeValue
         ( const QString& name, QAbstractIpcInterface::SyncType sync)
@@ -603,8 +628,10 @@ void QAbstractIpcInterface::removeValue
 }
 
 /*!
-    Returns a list of all value names in the auxillary value space
+    Returns a list of all value names in the auxiliary value space
     for this interface object contained within \a path.
+
+    \sa value()
 */
 QList<QString> QAbstractIpcInterface::valueNames(
     const QString& path ) const
@@ -616,10 +643,12 @@ QList<QString> QAbstractIpcInterface::valueNames(
 }
 
 /*!
-    Initialize server-side functionality within this interface after
+    Initializes server-side functionality within this interface after
     all interfaces in the group have been created.  This is called by
     QAbstractIpcInterfaceGroup::initialize() after all interface
-    handling objects on \a group have been created.
+    handling objects on \a group have been created.  It will not be
+    called if the interface is not associated with a QAbstractIpcInterfaceGroup
+    instance.
 
     Subclasses typically override this method so that they can connect
     to signals on other interfaces which may not have existed when the
@@ -680,6 +709,8 @@ void QAbstractIpcInterface::connectNotify( const char *signal )
 
     The mode() of the interface object will be \c Invalid when
     this signal is emitted.
+
+    \sa mode()
 */
 
 void QAbstractIpcInterface::remoteDisconnected()

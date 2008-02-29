@@ -50,6 +50,10 @@ static QString token(QString str, QChar c1, QChar c2, int *index)
     return str.mid(start, stop - start);
 }
 
+/*!
+  \internal
+  \class QHttpCookie
+*/
 QHttpCookie::QHttpCookie(const QString &encoded) : secure(false)
 {
     // ; seperatied, name=value, escaping unknown as yet, probably percent encoding though.
@@ -204,6 +208,10 @@ public:
     QList<QHttpCookie> mCookies;
 };
 
+/*!
+  \internal
+  \class QHttpCookieJar
+*/
 QHttpCookieJar::QHttpCookieJar()
 {
     d = new QHttpCookieJarData;
@@ -333,6 +341,7 @@ public:
 /*!
   \internal
   \class QtopiaHttp
+  \mainclass
   \brief The QtopiaHttp class provides a wrapper around QHttp to make fetching redirected urls
   easier
 */

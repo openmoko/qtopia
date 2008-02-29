@@ -49,6 +49,7 @@ QBluetoothRfcommSocketPrivate::QBluetoothRfcommSocketPrivate()
 
 /*!
     \class QBluetoothRfcommSocket
+    \mainclass
     \brief The QBluetoothRfcommSocket class represents an RFCOMM client socket.
 
     The Bluetooth RFCOMM protocol provides emulation of serial ports over the
@@ -57,12 +58,15 @@ QBluetoothRfcommSocketPrivate::QBluetoothRfcommSocketPrivate()
     socket programming.  QBluetoothRfcommSockets are thus stream oriented network
     sockets and share many of the interface aspects of the Qt TCP sockets.
 
-    The channel and address of the connected peer is fetched by calling
+    \bold{NOTE:} If you are connecting to an OBEX based service,
+    you should use the QBluetoothObexSocket class instead.
+
+    The channel and address of the connected peer are fetched by calling
     remoteChannel() and remoteAddress().  localAddress() return
     address of the local socket.
 
     \ingroup qtopiabluetooth
-    \sa QBluetoothRfcommServer
+    \sa QBluetoothRfcommServer, QBluetoothAbstractSocket
 */
 
 /*!
@@ -75,7 +79,7 @@ QBluetoothRfcommSocket::QBluetoothRfcommSocket(QObject *parent)
 }
 
 /*!
-    Destructor.
+    Destroys the socket.
 */
 QBluetoothRfcommSocket::~QBluetoothRfcommSocket()
 {
@@ -84,6 +88,8 @@ QBluetoothRfcommSocket::~QBluetoothRfcommSocket()
 /*!
     Returns the address of the remote device.  If the socket is not currently
     connected, returns QBluetoothAddress::invalid.
+
+    \sa localAddress(), remoteChannel()
  */
 QBluetoothAddress QBluetoothRfcommSocket::remoteAddress() const
 {
@@ -95,6 +101,8 @@ QBluetoothAddress QBluetoothRfcommSocket::remoteAddress() const
 /*!
     Returns the address of the local device.  If the socket is not currently
     connected, returns QBluetoothAddress::invalid.
+
+    \sa remoteAddress(), remoteChannel()
  */
 QBluetoothAddress QBluetoothRfcommSocket::localAddress() const
 {
@@ -106,6 +114,8 @@ QBluetoothAddress QBluetoothRfcommSocket::localAddress() const
 /*!
     Returns the RFCOMM channel of the remote device.  If the socket is not
     currently connected, returns -1.
+
+    \sa remoteAddress(), localAddress()
  */
 int QBluetoothRfcommSocket::remoteChannel() const
 {
@@ -152,6 +162,9 @@ QBluetooth::SecurityOptions QBluetoothRfcommSocket::securityOptions() const
     return 0;
 }
 
+/*!
+    \reimp
+*/
 bool QBluetoothRfcommSocket::readSocketParameters(int socket)
 {
     SOCKET_DATA(QBluetoothRfcommSocket);
@@ -194,13 +207,16 @@ bool QBluetoothRfcommSocket::readSocketParameters(int socket)
 
     Optionally the client can request that the connection be secured
     by specifying the \a options parameter.  \bold NOTE: This feature
-    might not work under some systems.
+    might not work under some systems.  The options will be set
+    but might be ignored by the implementation.
 
     The function returns true if the connection process could be started,
     and false otherwise.
 
     Note that the connection could still fail, the state of the socket
     will be sent in the stateChanged() signal.
+
+    \sa state(), connected(), waitForConnected()
  */
 bool QBluetoothRfcommSocket::connect(const QBluetoothAddress &local,
                                      const QBluetoothAddress &remote,
@@ -247,6 +263,9 @@ bool QBluetoothRfcommSocket::connect(const QBluetoothAddress &local,
     return initiateConnect(sockfd, (struct sockaddr *) &addr, sizeof(addr));
 }
 
+/*!
+    \reimp
+*/
 void QBluetoothRfcommSocket::resetSocketParameters()
 {
     SOCKET_DATA(QBluetoothRfcommSocket);

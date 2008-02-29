@@ -24,16 +24,31 @@
 #include "qbluetoothhsservice_p.h"
 #include <qtopialog.h>
 
-BtHeadsetService::BtHeadsetService( QObject* parent )
+/*!
+    \class BtHeadsetServiceTask
+    \ingroup QtopiaServer::Task::Bluetooth
+    \brief The BtHeadsetServiceTask class provides the Bluetooth Headset Service.
+
+    The BtHeadsetService task manages the lifetime of a
+    QBluetoothHeadsetService object.
+ */
+
+/*!
+    Create a BtHeadsetService task with \a parent.
+*/
+BtHeadsetServiceTask::BtHeadsetServiceTask( QObject* parent )
     : QObject( parent )
 {
     qLog(Bluetooth) << "Initializing Headset Service";
     m_hsService = new QBluetoothHeadsetService( "BluetoothHeadset", tr("Headset Audio Gateway"), this );
 }
 
-BtHeadsetService::~BtHeadsetService()
+/*!
+    Destructor.
+*/
+BtHeadsetServiceTask::~BtHeadsetServiceTask()
 {
     delete m_hsService;
 }
 
-QTOPIA_TASK( BtHeadsetService, BtHeadsetService );
+QTOPIA_TASK( BtHeadsetServiceTask, BtHeadsetServiceTask );

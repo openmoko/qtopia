@@ -23,6 +23,7 @@
 
 /*!
     \class QBluetoothPasskeyRequest
+    \mainclass
     \brief The QBluetoothPasskeyRequest class encapsulates a Bluetooth PIN request.
 
     The QBluetoothPasskeyRequest class encapsulates a passkey request received
@@ -59,7 +60,7 @@ QBluetoothPasskeyRequest::QBluetoothPasskeyRequest(const QBluetoothPasskeyReques
 }
 
 /*!
-    Destructor.
+    Destroys the passkey request.
 */
 QBluetoothPasskeyRequest::~QBluetoothPasskeyRequest()
 {
@@ -126,6 +127,8 @@ const QBluetoothAddress &QBluetoothPasskeyRequest::remoteDevice() const
 /*!
     Sets the request to be rejected.  This usually means that the user
     has explicitly rejected the request.
+
+    \sa isRejected(), setPasskey()
 */
 void QBluetoothPasskeyRequest::setRejected()
 {
@@ -135,6 +138,8 @@ void QBluetoothPasskeyRequest::setRejected()
 
 /*!
     Returns true if the request has been rejected.
+
+    \sa setRejected()
 */
 bool QBluetoothPasskeyRequest::isRejected() const
 {
@@ -143,6 +148,8 @@ bool QBluetoothPasskeyRequest::isRejected() const
 
 /*!
     Accepts the pairing request, and sets the passkey to \a passkey.
+
+    \sa setRejected(), passkey()
 */
 void QBluetoothPasskeyRequest::setPasskey(const QString &passkey)
 {
@@ -152,6 +159,8 @@ void QBluetoothPasskeyRequest::setPasskey(const QString &passkey)
 
 /*!
     Returns the passkey for the request.
+
+    \sa setPasskey()
 */
 const QString &QBluetoothPasskeyRequest::passkey() const
 {

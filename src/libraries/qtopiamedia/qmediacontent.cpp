@@ -67,6 +67,7 @@ public:
 
 /*!
     \class QMediaContent
+    \mainclass
     \brief The QMediaContent class is used to prepare a media resource
     for playing in Qtopia.
 
@@ -85,6 +86,7 @@ public:
     If there is an error preparing the media resource, the mediaError signal will
     be emitted, with a QString detailing the error information.
 
+    \code
     Example:
     {
         QContent        beep = findBeepSound();
@@ -93,7 +95,6 @@ public:
 
         connect(mediaContent, SIGNAL(controlAvailable(QString)),
                 this, SLOT(mediaControlAvailable(QString)));
-
     }
 
     void mediaControlAvailable(QString const& id)
@@ -108,9 +109,9 @@ public:
             m_mediaControl->start();
         }
     }
+    \endcode
 
     \ingroup multimedia
-    \ingroup content
 */
 
 /*!
@@ -125,9 +126,25 @@ public:
 
 QMediaContent::QMediaContent
 (
- QString const& url,
+ QUrl const&    url,
  QString const& domain,
- QObject* parent
+ QObject*       parent
+):
+    QObject(parent),
+    d(new QMediaContentPrivate)
+{
+    d->mediaContent = this;
+    d->domain = domain;
+    d->control = 0;
+
+    MediaServerProxy::instance()->prepareContent(d, d->domain, url.toString());
+}
+
+QMediaContent::QMediaContent
+(
+ QString const&    url,
+ QString const& domain,
+ QObject*       parent
 ):
     QObject(parent),
     d(new QMediaContentPrivate)

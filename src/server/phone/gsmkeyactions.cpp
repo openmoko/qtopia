@@ -201,9 +201,9 @@ void GsmKeyActions::setDialer( QAbstractDialerScreen *dialer )
 }
 
 /*!
-    Determine if \a number is obviously a number that should be
+    Returns true if \a number is obviously a number that should be
     dialed via a GSM network without giving the user the option
-    to choose GSM vs VoIP.
+    to choose GSM vs VoIP; otherwise returns false.
 */
 bool GsmKeyActions::isGsmNumber( const QString& number )
 {
@@ -348,8 +348,8 @@ GsmBarringAction::GsmBarringAction( QObject *parent )
              SLOT(barringStatus(QCallBarring::BarringType,QTelephony::CallClass)) );
     connect( barring, SIGNAL(setBarringStatusResult(QTelephony::Result)),
              this, SLOT(setBarringStatusResult(QTelephony::Result)) );
-    connect( barring, SIGNAL(unlockResult(QTelephony::Result result)),
-             this, SLOT(unlockResult(QTelephony::Result result)) );
+    connect( barring, SIGNAL(unlockResult(QTelephony::Result)),
+             this, SLOT(unlockResult(QTelephony::Result)) );
     connect( barring, SIGNAL(changeBarringPasswordResult(QTelephony::Result)),
              this, SLOT(changeBarringPasswordResult(QTelephony::Result)) );
 }
@@ -511,7 +511,7 @@ GsmChangePinAction::GsmChangePinAction( QObject *parent )
     connect( manager,
              SIGNAL(pinStatus(QString,QPinManager::Status,QPinOptions)),
              this,
-             SIGNAL(pinStatus(QString,QPinManager::Status)) );
+             SLOT(pinStatus(QString,QPinManager::Status)) );
     connect( manager, SIGNAL(changePinResult(QString,bool)),
              this, SLOT(changePinResult(QString,bool)) );
 }

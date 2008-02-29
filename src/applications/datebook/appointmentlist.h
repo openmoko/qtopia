@@ -39,7 +39,7 @@ public:
     void setFolded(bool f = true);
     void setModel(QAbstractItemModel *model);
     void setMaximumFoldedHeight(int height);
-
+    void setMaximumUnfoldedHeight(int height);
     bool isFolded() const;
     bool provideFoldingOption();
 
@@ -54,6 +54,7 @@ public slots:
 private:
     bool folded;
     int maxFoldedHeight;
+    int maxUnfoldedHeight;
     int maxRows;
     QOccurrenceModel *occurrenceModel;
 };

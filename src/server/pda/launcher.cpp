@@ -350,6 +350,10 @@ void LauncherTabWidget::launcherMessage( const QString &msg, const QByteArray &d
 
 //---------------------------------------------------------------------------
 
+/*!
+  \class Launcher
+  \internal
+  */
 Launcher::Launcher()
 : QWidget(0, Qt::FramelessWindowHint), categories(0)
 {

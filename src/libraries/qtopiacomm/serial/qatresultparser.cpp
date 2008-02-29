@@ -25,11 +25,9 @@
 
 /*!
     \class QAtResultParser
-    \brief The QAtResultParser class provides support for parsing the response to AT modem commands
+    \mainclass
+    \brief The QAtResultParser class provides support for parsing the response to AT modem commands and unsolicited notifications.
     \ingroup telephony::serial
-
-    The QAtResultParser provides functions that support parsing the response
-    from AT modem commands and unsolicited notifications.
 
     The following example demonstrates how to parse the response to a
     \c{AT+CPOL} (preferred operator list) query:
@@ -121,7 +119,9 @@ void QAtResultParser::reset()
 
 /*!
     Position this AT modem result parser on the next line that begins
-    with \a prefix.
+    with \a prefix. Returns true on success; otherwise returns false.
+
+    \sa line(), lines(), readNumeric(), readString()
 */
 bool QAtResultParser::next( const QString& prefix )
 {
@@ -155,8 +155,10 @@ bool QAtResultParser::next( const QString& prefix )
 }
 
 /*!
-    Get the full content of the line that next() positioned us on.
+    Returns the full content of the line that next() positioned us on.
     The line's prefix is not included in the return value.
+
+    \sa next(), readNumeric(), readString()
 */
 QString QAtResultParser::line()
 {
@@ -165,6 +167,8 @@ QString QAtResultParser::line()
 
 /*!
     Read a numeric value from the current line.
+
+    \sa readString(), skip()
 */
 uint QAtResultParser::readNumeric()
 {
@@ -193,6 +197,8 @@ static QString nextString( const QString& buf, int& posn )
 
 /*!
     Read a string from the current line.
+
+    \sa readNumeric(), skip()
 */
 QString QAtResultParser::readString()
 {
@@ -208,6 +214,8 @@ QString QAtResultParser::readString()
 
 /*!
     Skip the contents of a comma-separated field in the current line.
+
+    \sa readNumeric(), readString()
 */
 void QAtResultParser::skip()
 {
@@ -240,8 +248,10 @@ QString QAtResultParser::readNextLine()
 }
 
 /*!
-    Get the content of all lines that begin with \a prefix starting
+    Returns the content of all lines that begin with \a prefix starting
     at the current position.
+
+    \sa next()
 */
 QStringList QAtResultParser::lines( const QString& prefix )
 {
@@ -305,13 +315,12 @@ QList<QAtResultParser::Node> QAtResultParser::readList()
 
 /*!
     \class QAtResultParser::Node
-    \brief Provides access to a generic value parsed from an AT command list
+    \mainclass
+    \brief Provides access to a generic value parsed from an AT command list.
 
-    The QAtResultParser::Node class provides access to a generic value
-    that was parsed from an AT command list.  It is returned from
-    the QAtResultParser::readList() class.
+    Instances of this class are returned from the QAtResultParser::readList() function.
 
-    \sa QAtResultParser
+    \sa QAtResultParser::readList()
 */
 
 QAtResultParser::Node::Node( uint number )
@@ -364,7 +373,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn bool QAtResultParser::Node::isNumber() const
 
-    Determine if this node contains a number.
+    Returns true of if this node contains a number; otherwise returns false.
 
     \sa asNumber()
 */
@@ -372,7 +381,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn bool QAtResultParser::Node::isRange() const
 
-    Determine if this node contains a range.
+    Returns true if this node contains a range; otherwise returns false.
 
     \sa asFirst(), asLast()
 */
@@ -380,7 +389,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn bool QAtResultParser::Node::isString() const
 
-    Determine if this node contains a string.
+    Returns true if this node contains a string; otherwise returns false.
 
     \sa asString()
 */
@@ -388,7 +397,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn bool QAtResultParser::Node::isList() const
 
-    Determine if this node contains a list.
+    Returns true if this node contains a list; otherwise returns false.
 
     \sa asList()
 */
@@ -396,7 +405,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn uint QAtResultParser::Node::asNumber() const
 
-    Get the number contained within this node, or zero if not a number.
+    Returns the number contained within this node, or return zero if node not a number.
 
     \sa isNumber()
 */
@@ -404,8 +413,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn uint QAtResultParser::Node::asFirst() const
 
-    Get the first number in a range that is contained within this node,
-    or zero if not a range.
+    Returns the first number in a range that is contained within this node; otherwise returns zero if not a range.
 
     \sa isRange(), asLast()
 */
@@ -413,8 +421,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn uint QAtResultParser::Node::asLast() const
 
-    Get the last number in a range that is contained within this node,
-    or zero if not a range.
+    Returns the last number in a range that is contained within this node; otherwise returns zero if not a range.
 
     \sa isRange(), asFirst()
 */
@@ -422,7 +429,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn QString QAtResultParser::Node::asString() const
 
-    Get the string contained within this node, or null if not a string.
+    Returns the string contained within this node; otherwise returns null if not a string.
 
     \sa isString()
 */
@@ -430,7 +437,7 @@ QAtResultParser::Node::~Node()
 /*!
     \fn QList<QAtResultParser::Node> QAtResultParser::Node::asList() const
 
-    Get the list contained within this node, or an empty list if this
+    Returns the list contained within this node, or returns an empty list if this
     node does not contain a list.
 
     \sa isList()

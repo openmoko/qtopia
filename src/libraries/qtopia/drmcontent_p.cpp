@@ -33,6 +33,7 @@
 /*!
     \internal
     \class DRMThumbnailLoader
+    \mainclass
     A specialisation of the ThumbnailLoader class that can load thumbnails of
     DRM protected images.
  */
@@ -126,6 +127,7 @@ DrmContentPluginManager *DrmContentPluginManager::instance()
 
 /*!
     \class DrmContentPrivate
+    \mainclass
     \internal
 */
 

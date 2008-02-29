@@ -23,17 +23,27 @@
 #define VPN_MANAGER_H
 
 #ifdef QTOPIA_VPN
-#include <QObject>
 
-class QVpnManager;
-class QtopiaVpnManager : public QObject
-{
+#include <qtopiaipcadaptor.h>
+#include <QHash>
+
+class QVPNClient;
+class QVPNFactory;
+
+class QtopiaVpnManager : public QtopiaIpcAdaptor {
+    Q_OBJECT
 public:
-    QtopiaVpnManager(QObject * parent = 0);
+    explicit QtopiaVpnManager( QObject* parent = 0 );
     ~QtopiaVpnManager();
 
+public slots:
+    void connectVPN( uint vpnID );
+    void disconnectVPN( uint vpnID );
+    void deleteVPN( uint vpnID ) ;
+
 private:
-    QVpnManager* manager;
+    QVPNFactory* vpnFactory;
+    QHash<uint,QVPNClient*> idToVPN;
 };
 #endif //QTOPIA_VPN
 

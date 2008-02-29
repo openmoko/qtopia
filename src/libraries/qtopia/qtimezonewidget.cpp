@@ -44,6 +44,7 @@
 
 /*!
   \class QTimeZoneWidget
+  \mainclass
 
   \brief The QTimeZoneWidget widget allows configuration of time zone information.
 

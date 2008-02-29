@@ -31,6 +31,7 @@
 #include <qcategorymanager.h>
 #include <qtopiasql.h>
 #include <qdrmcontentplugin.h>
+#include "qperformancelog.h"
 
 #include <QTimer>
 #include <QDebug>
@@ -161,8 +162,7 @@ ContentServer::ContentServer( QObject *parent )
     : ContentServerInterface( parent )
 {
     qLog(DocAPI) << "content server constructed";
-    qLog(Performance) << "DocAPI : " << "content server constructed : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("DocAPI") << "content server constructed";
     connect(&contentTimer, SIGNAL(timeout()), this, SLOT(processContent()));
     contentTimer.setSingleShot(true);
     scannerVSObject = new QValueSpaceObject("/Documents", this);
@@ -423,8 +423,7 @@ void DirectoryScannerManager::scannerDone()
 
     if(pendingPaths.count() == 0) {
         QMetaObject::invokeMethod(ds, "quit", Qt::QueuedConnection);
-        qLog(Performance) << "DocAPI : " << "finished scanning : "
-                          << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+        QPerformanceLog("DocAPI") << "finished scanning";
     }
     else
         startScanner(ds);

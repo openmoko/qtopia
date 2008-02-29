@@ -54,6 +54,7 @@ signals:
 
 /*!
     \class QMediaVideoControl
+    \mainclass
     \brief The QMediaVideoControl class is an interface to videos playing through
     the Qtopia Media System.
 
@@ -61,14 +62,33 @@ signals:
     that content is available to be played, this inteface can be used to contruct
     a QWidget which will contain the rendering of the video content.
 
-    A QMediaVideoControl is available after the QMediaControl::controlAvailable signal
-    has been emitted with the controls name.
-    When the QMediaControl::controlUnavailable signal is emitted, there is no
-    longer any valid video to be played. The QMediaControl related to the
-    prepared media content is used to start, stop and perform other operations
-    on the video.
+    Use the \l QMediaControlNotifier class to listen for when video content is
+    available.
+
+    \code
+        QMediaControlNotifier *notifier = new QMediaControlNotifier( QMediaVideoControl::name() );
+        connect( notifier, SIGNAL(valid()), this, SLOT(showVideo()) );
+
+        QMediaContent *content = new QMediaContent( "video.3gp" );
+        notifier->setMediaContent( content );
+    \endcode
+
+    If video content is available createVideoWidget() can be used to construct a
+    new video widget for the media content.
+
+    \code
+        QMediaVideoControl control( content->handle() );
+
+        QWidget *video = control.createVideoWidget();
+        videolayout->addWidget( video );
+    \endcode
+
+    Simply delete video widgets when they are no longer needed or when the video
+    control becomes invalid.
 
     \ingroup multimedia
+
+    \sa QMediaContent, QMediaControlNotifier
 */
 
 /*!

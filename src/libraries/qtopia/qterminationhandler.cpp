@@ -27,6 +27,7 @@
 
 /*!
   \class QTerminationHandler
+  \mainclass
   \brief The QTerminationHandler class allows an application to instruct the system on how to handle an abnormal termination.
 
   While the abnormal termination - ie. crash - of an application is

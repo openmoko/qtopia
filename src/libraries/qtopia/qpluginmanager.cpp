@@ -176,10 +176,11 @@ static const char *cfgName()
 
 /*!
   \class QPluginManager
+  \mainclass
   \brief The QPluginManager class simplifies plug-in loading and allows plugins to be
   enabled/disabled.
 
-  QPluginManager simplifies loading plugins.  The most common use is to
+  The most common use is to
   iterate over the list of plugins and load each one as follows:
 
   \code
@@ -197,6 +198,19 @@ static const char *cfgName()
     }
   \endcode
 
+  The list() function returns a list of plugins, using the filenames
+  of the plugins in the plugin directory.  This does not require
+  any plugins to be loaded, so it is very lightweight.
+
+  In order to load a plugin, call the instance() function with the
+  name of the plugin to load.  qobject_cast() may then be used to query
+  for the desired interface.
+
+  If the application loading a plugin crashes during while loading the
+  plugin, the plugin will be disabled.  This prevents a plugin from permanently
+  rendering an application unusable.  Disabled plugins can be queried
+  using disabledList() and reenabled using setEnabled().
+
   \ingroup plugins
 */
 
@@ -210,10 +224,10 @@ public:
 };
 
 /*!
-  Creates a QPluginManager for plugins of type \a type.
+  Creates a QPluginManager for plugins of \a type with the given
+  \a parent.
 
   The plugins must be installed in the [qt_prefix]/plugins/\i{type}  directory.
-  \a parent is the standard QObject parameter.
 */
 
 QPluginManager::QPluginManager(const QString &type, QObject *parent)
@@ -260,6 +274,9 @@ void QPluginManager::init()
 
 /*!
   Returns the list of plugins that are available.
+
+  The plugin list is derived from the filenames of the plugins and
+  does not force any plugins to be loaded.
 */
 const QStringList &QPluginManager::list() const
 {
@@ -275,9 +292,9 @@ const QStringList &QPluginManager::disabledList() const
 }
 
 /*!
-  Query the plug-in for the interface specified by \a name.
+  Load the plug-in specified by \a name.
 
-  Returns the named interface if found, otherwise 0.
+  Returns the plugin interface if found, otherwise 0.
 
   \code
     QObject *instance = pluginManager->instance("name");
@@ -429,7 +446,7 @@ QStringList QPluginManager::languageList() const
 
 /*!
   Enables or disables plug-in \a name depending on the value of \a enabled.
-  A disabled plug-in can still be queried, but it will not be returned by list().
+  A disabled plug-in can still be loaded, but it will not be returned by list().
 */
 void QPluginManager::setEnabled( const QString &name, bool enabled )
 {

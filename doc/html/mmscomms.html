@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>MmsComms Class Reference</title>
+  <title>MmsComms Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">MmsComms Class Reference</h1>
 <p>The MmsComms class is the base class for MMS communications. <a href="#details">More...</a></p>
-<pre>#include &lt;MmsComms&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;MmsComms&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="mmscomms-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -70,7 +72,7 @@
 <h3 class="fn"><a name="deliveryInd"></a>void MmsComms::deliveryInd ( const MMSMessage &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal must be emitted when an m-delivery-ind MMS message <i>msg</i> arrives via WAP PUSH.</p>
 <h3 class="fn"><a name="error"></a>void MmsComms::error ( int <i>code</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal must be emitted when a fatal error occurs during the communication process, e.g. connection refused. The code <i>code</i> should reflect the error seen by the underlying network protocol being used. The error message <i>msg</i> must be a suitable for displaying to the user and refect the meaning of <i>code</i>.</p>
+<p>This signal must be emitted when a fatal error occurs during the communication process, e.g&#x2e; connection refused. The code <i>code</i> should reflect the error seen by the underlying network protocol being used. The error message <i>msg</i> must be a suitable for displaying to the user and refect the meaning of <i>code</i>.</p>
 <h3 class="fn"><a name="isActive"></a>bool MmsComms::isActive () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return true if there are requests pending or in progress, otherwise false.</p>
 <h3 class="fn"><a name="networkConfig"></a><a href="qstring.html">QString</a> MmsComms::networkConfig () const</h3>
@@ -90,7 +92,7 @@
 <p>Connect to the MMSC and POST the specified MMS message <i>msg</i>. If a connection to a WAP gateway is necessary, it should be done also. The MailAccount details can be accessed via the <i>account</i> variable.</p>
 <p>See also <a href="mmscomms.html#sendConf">sendConf</a>().</p>
 <h3 class="fn"><a name="statusChange"></a>void MmsComms::statusChange ( const <a href="qstring.html">QString</a> &amp; <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal can be emitted when the status of a transfer changes, e.g. connected to server, transferring data. The status <i>status</i> could be used to provide user feed back eg: a status bar.</p>
+<p>This signal can be emitted when the status of a transfer changes, e.g&#x2e; connected to server, transferring data. The status <i>status</i> could be used to provide user feed back eg: a status bar.</p>
 <p>See also <a href="mmscomms.html#error">error</a>().</p>
 <h3 class="fn"><a name="transferSize"></a>void MmsComms::transferSize ( int <i>size</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal must be emitted during data transfers so that the user can see how much data has been transferred. <i>size</i> denotes the amount of data transferred in bytes.</p>
@@ -98,8 +100,8 @@
 <p>This signal must be emitted when all pending or current transfers have completed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

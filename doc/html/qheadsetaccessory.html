@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QHeadsetAccessory Class Reference</title>
+  <title>QHeadsetAccessory Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QHeadsetAccessory Class Reference</h1>
 <p>The QHeadsetAccessory class provides access to a headset accessory on the device. <a href="#details">More...</a></p>
-<pre>#include &lt;QHeadsetAccessory&gt;</pre><p>Inherits <a href="qhardwareinterface.html">QHardwareInterface</a>.</p>
+<pre>    #include &lt;QHeadsetAccessory&gt;</pre><p>Inherits <a href="qhardwareinterface.html">QHardwareInterface</a>.</p>
 <p>Inherited by <a href="qheadsetaccessoryprovider.html">QHeadsetAccessoryProvider</a>.</p>
 <ul>
 <li><a href="qheadsetaccessory-members.html">List of all members, including inherited members</a></li>
@@ -70,8 +72,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QHeadsetAccessory class provides access to a headset accessory on the device.</p>
-<p>The QHeadsetAccessory class provides access to a headset accessory on the device. Headset device implementations should inherit from <a href="qheadsetaccessoryprovider.html">QHeadsetAccessoryProvider</a>.</p>
-<p>The QHeadsetAccessory can be used to control the microphone and speaker volume on the headset using <a href="qheadsetaccessory.html#setMicrophoneVolume">setMicrophoneVolume</a>() and <a href="qheadsetaccessory.html#setSpeakerVolume">setSpeakerVolume</a>().</p>
+<p>QHeadsetAccessory can be used to control the microphone and speaker volume on the headset using <a href="qheadsetaccessory.html#setMicrophoneVolume">setMicrophoneVolume</a>() and <a href="qheadsetaccessory.html#setSpeakerVolume">setSpeakerVolume</a>().</p>
+<p>Headset device implementations should inherit from <a href="qheadsetaccessoryprovider.html">QHeadsetAccessoryProvider</a>.</p>
 <p>See also <a href="qheadsetaccessoryprovider.html">QHeadsetAccessoryProvider</a> and <a href="qhardwareinterface.html">QHardwareInterface</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -86,22 +88,22 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QHeadsetAccessory"></a>QHeadsetAccessory::QHeadsetAccessory ( const <a href="qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QAbstractIpcInterface::Mode</a> <i>mode</i> = Client )</h3>
-<p>Construct a new headset acessory object for <i>id</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
-<p>If <i>id</i> is empty, this class will use the default accessory that supports the headset interface. If there is more than one service that supports the headset interface, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QHardwareManager::supports</a>() and create separate <a href="qheadsetaccessory.html">QHeadsetAccessory</a> objects for each.</p>
-<p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QHardwareManager::supports</a>().</p>
+<p>Construct a new headset accessory object for provider <i>id</i> and attaches it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
+<p>If <i>id</i> is empty, this class will use the default accessory provider that supports the headset interface. If there is more than one service that supports the headset interface, the caller should enumerate them with <a href="qhardwaremanager.html#providers">QHardwareManager::providers</a>() and create separate <a href="qheadsetaccessory.html">QHeadsetAccessory</a> objects for each.</p>
+<p>See also <a href="qhardwaremanager.html#providers">QHardwareManager::providers</a>().</p>
 <h3 class="fn"><a name="dtor.QHeadsetAccessory"></a>QHeadsetAccessory::~QHeadsetAccessory ()</h3>
-<p>Destroys this headset accessory</p>
+<p>Destroys the headset accessory.</p>
 <h3 class="fn"><a name="channels"></a>int QHeadsetAccessory::channels () const</h3>
-<p>Returns the number of channels the headset supports</p>
+<p>Returns the number of channels the headset supports.</p>
 <h3 class="fn"><a name="connectionType"></a><a href="qheadsetaccessory.html#ConnectionType-enum">ConnectionType</a> QHeadsetAccessory::connectionType () const</h3>
-<p>Returns the connection type.</p>
+<p>Returns the type of connection used to connect the headset accessory to the handset.</p>
 <h3 class="fn"><a name="microphonePresent"></a>bool QHeadsetAccessory::microphonePresent () const</h3>
-<p>Determines if the headset has a microphone.</p>
+<p>Returns true if the headset has a microphone; otherwise returns false.</p>
 <h3 class="fn"><a name="microphoneVolume"></a>int QHeadsetAccessory::microphoneVolume () const</h3>
 <p>Returns the microphone volume as a percentage, the default value is 0.</p>
 <p>See also <a href="qheadsetaccessory.html#setMicrophoneVolume">setMicrophoneVolume</a>().</p>
 <h3 class="fn"><a name="microphoneVolumeModified"></a>void QHeadsetAccessory::microphoneVolumeModified ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Signal that is modified when the microphone volume is modified.</p>
+<p>Signal that is emitted when the microphone volume is modified.</p>
 <h3 class="fn"><a name="setMicrophoneVolume"></a>void QHeadsetAccessory::setMicrophoneVolume ( const int <i>volume</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the microphone volume to <i>volume</i> percent.</p>
 <p>See also <a href="qheadsetaccessory.html#microphoneVolume">microphoneVolume</a>().</p>
@@ -109,16 +111,16 @@
 <p>Sets the speaker volume to <i>volume</i> percent.</p>
 <p>See also <a href="qheadsetaccessory.html#speakerVolume">speakerVolume</a>().</p>
 <h3 class="fn"><a name="speakerPresent"></a>bool QHeadsetAccessory::speakerPresent () const</h3>
-<p>Determines if the headset has a speaker.</p>
+<p>Returns true if the headset has a speaker; otherwise returns false.</p>
 <h3 class="fn"><a name="speakerVolume"></a>int QHeadsetAccessory::speakerVolume () const</h3>
 <p>Returns the speaker volume as a percentage, the default value is 0.</p>
 <p>See also <a href="qheadsetaccessory.html#setSpeakerVolume">setSpeakerVolume</a>().</p>
 <h3 class="fn"><a name="speakerVolumeModified"></a>void QHeadsetAccessory::speakerVolumeModified ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Signal that is modified when the speaker volume is modified.</p>
+<p>Signal that is emitted when the speaker volume is modified.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

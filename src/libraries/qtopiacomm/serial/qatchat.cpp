@@ -29,17 +29,49 @@
 
 /*!
     \class QAtChat
-    \brief The QAtChat class provides a simple mechanism for sending AT commands to modems
+    \mainclass
+    \brief The QAtChat class provides communication with AT-command-based modems.
     \ingroup telephony::serial
 
-    The QAtChat interface provides a simple mechanism for sending AT
-    commands to modems and retrieving the responses to those commands.
+    QAtChat is used for sending AT commands to modems and retrieving
+    the responses to those commands.
     It can be preferable to manually processing the raw binary data from
     a serial device.
 
-    QAtChat are obtained by calling QSerialIODevice::atchat().
+    QAtChat objects are obtained by calling QSerialIODevice::atchat() on the
+    serial device that you wish to communicate with.  The following example
+    sends the command \c{AT+CGMI} on \c device.  Once the command completes,
+    the result is sent to the \c{cgmi(bool,QAtResult)} slot on the calling object:
 
-    \sa QSerialIODevice
+    \code
+    QAtChat *atchat = device->atchat();
+    atchat->chat("AT+CGMI", this, SLOT(cgmi(bool,QAtResult)));
+    \endcode
+
+    Results from an AT command are reported in two parameters.  The first parameter is
+    a simple boolean parameter that allows the slot to quickly determine if the
+    command succeeded (true) or failed (false).  The second parameter is a QAtResult
+    object that contains detailed information about the command response, or the reason
+    for command failure.  The QAtResultParser class can be used to assist in parsing
+    complex responses to AT commands.
+
+    QAtChat objects can also be used to receive unsolicited notifications from
+    the modem device.  The caller registers a slot with registerNotificationType() which is
+    invoked whenever a particular unsolicited notification prefix is encountered in
+    the device's input stream.  The following example registers for unsolicited
+    \c{+CSSI:} notifications from \c device:
+
+    \code
+    QAtChat *atchat = device->atchat();
+    atchat()->registerNotificationType("+CSSI:", this, SLOT(cssi(const QString&)));
+    \endcode
+
+    When the corresponding slot is invoked for an unsolicited notification,
+    the entire notification, including the prefix, is passed to the slot as a
+    QString parameter.  The QAtResultParser class can be used to assist in parsing
+    complex unsolicited notification strings.
+
+    \sa QSerialIODevice, QAtResult, QAtResultParser
 */
 
 class QAtChatCommandPrivate
@@ -230,8 +262,19 @@ QAtChat::~QAtChat()
 }
 
 /*!
-    Send \a command to the underlying device.  If the command fails,
+    Sends \a command to the underlying device.  If the command fails,
     the caller will not be notified.
+
+    This version of chat() is useful for commands that the caller is reasonably
+    certain will be understood by the modem, or it is not a serious problem if
+    the command is not understood.
+
+    The following example turns on unsolicited \c{+CRING} notifications for \c device:
+
+    \code
+    QAtChat *atchat = device->atchat();
+    atchat->chat("AT+CRC=1");
+    \endcode
 */
 void QAtChat::chat( const QString& command )
 {
@@ -240,15 +283,29 @@ void QAtChat::chat( const QString& command )
 }
 
 /*!
-    Send \a command to the underlying device.  When the command finishes,
-    notify \a slot on \a target.  The slot has the signature
-    \c{done(bool,QAtResult)}.  The boolean parameter indicates if
-    the command succeeded or not, and the QAtResult parameter contains
-    the full result data.
+    Sends \a command to the underlying device.  When the command finishes,
+    notify \a slot on \a target.
 
     The optional \a data parameter can be used to pass extra user data
     that will be made available to the target slot in the QAtResult::userData()
     field.
+
+    The following example sends the command \c{AT+CGMI} on \c device.  Once the command
+    completes, the result is sent to the \c{cgmi(bool,QAtResult)} slot on the current object:
+
+    \code
+    QAtChat *atchat = device->atchat();
+    atchat->chat("AT+CGMI", this, SLOT(cgmi(bool,QAtResult)));
+    \endcode
+
+    Results from an AT command are reported to \a slot in two parameters.  The first
+    parameter is a simple boolean parameter that allows the slot to quickly determine if the
+    command succeeded (true) or failed (false).  The second parameter is a QAtResult
+    object that contains detailed information about the command response, or the reason
+    for command failure.  The QAtResultParser class can be used to assist in parsing
+    complex responses to AT commands.
+
+    \sa QAtResult, QAtResultParser
 */
 void QAtChat::chat( const QString& command, QObject *target, const char *slot,
                     QAtResult::UserData *data )
@@ -260,7 +317,7 @@ void QAtChat::chat( const QString& command, QObject *target, const char *slot,
 }
 
 /*!
-    Send \a command to the underlying device, followed by \a pdu
+    Sends \a command to the underlying device, followed by \a pdu
     on the next line.  When the command finishes, notify \a slot on \a target.
 
     The \a pdu will be transmitted in hexadecimal, followed by a CTRL-Z.
@@ -268,6 +325,9 @@ void QAtChat::chat( const QString& command, QObject *target, const char *slot,
     The optional \a data parameter can be used to pass extra user data
     that will be made available to the target slot in the QAtResult::userData()
     field.
+
+    The chatPDU() command is intended for AT commands such as \c{AT+CMGS}
+    which need additional information in the form of a binary PDU.
 
     \sa chat()
 */
@@ -282,7 +342,7 @@ void QAtChat::chatPDU( const QString& command, const QByteArray& pdu,
 }
 
 /*!
-    Register \a type as an unsolicited notification on this object.
+    Registers \a type as an unsolicited notification on this object.
     Whenever a line is received from the modem that starts with
     \a type, the indicated \a slot on \a target will be called.
     The slot has the signature \c{notification(const QString&)}.
@@ -294,6 +354,20 @@ void QAtChat::chatPDU( const QString& command, const QByteArray& pdu,
     slot should be called, not the unsolicited notification slot.
     An example is \c{+CREG:}, which can appear in response to an
     \c{AT+CREG} command, or as an unsolicited notification.
+
+    The following example registers for unsolicited \c{+CSSI:} notifications from \c device:
+
+    \code
+    QAtChat *atchat = device->atchat();
+    atchat()->registerNotificationType("+CSSI:", this, SLOT(cssi(const QString&)));
+    \endcode
+
+    When the \c{cssi()} slot is invoked for the \c{+CSSI:} unsolicited notification,
+    the entire notification, including the prefix, is passed to the slot as a
+    QString parameter.  The QAtResultParser class can be used to assist in parsing
+    complex unsolicited notification strings.
+
+    \sa QAtResultParser
 */
 void QAtChat::registerNotificationType
         ( const QString& type, QObject *target,
@@ -304,8 +378,17 @@ void QAtChat::registerNotificationType
 }
 
 /*!
-    Abort an \c{ATD} command.  Usually just sends and empty line to
-    the modem, but some modems use need \c{ATH} instead.
+    Aborts an \c{ATD} command.  Usually just sends and empty line to
+    the modem, but some modems need to use \c{ATH} instead.
+
+    This method calls QSerialIODevice::abortDial() to perform the abort,
+    which by default sends an empty line to the modem.
+
+    Modem-specific multiplexer plug-ins can override QSerialIODevice::abortDial()
+    to implement alternative abort strategies.  The send() method may be
+    useful to implement such strategies.
+
+    \sa send()
 */
 void QAtChat::abortDial()
 {
@@ -316,7 +399,7 @@ void QAtChat::abortDial()
 }
 
 /*!
-    Suspend the AT chat process from the underlying device so
+    Suspends the AT chat process from the underlying device so
     that read() and write() can be used to process binary data.
     Call resume() to restart the AT chat process after the binary data.
 
@@ -334,7 +417,7 @@ void QAtChat::suspend()
 }
 
 /*!
-    Resume the AT chat process after a suspension.  Any data that
+    Resumes the AT chat process after a suspension.  Any data that
     is currently in the buffer will be processed for unsolicited
     notifications.
 
@@ -358,7 +441,7 @@ void QAtChat::resume()
 }
 
 /*!
-    Set the characters to use in debug output to \a from, \a to, \a notify,
+    Sets the characters to use in debug output to \a from, \a to, \a notify,
     and \a unknown.  The defaults are \c{F}, \c{T}, \c{N}, and \c{?}.
     The caller may wish to use different sets on separate channels so that
     it is clear from the debug output which channel is being used.
@@ -372,7 +455,7 @@ void QAtChat::setDebugChars( char from, char to, char notify, char unknown )
 }
 
 /*!
-    Get the current link dead detection timeout in milliseconds.
+    Returns the current link dead detection timeout in milliseconds.
     If this object sends a command to the link and it does not
     receive a response within the specified time, it will emit
     the dead() signal.  If the value is -1 (the default), the
@@ -389,7 +472,7 @@ int QAtChat::deadTimeout() const
 }
 
 /*!
-    Set the link dead detection timeout to \a msec milliseconds.
+    Sets the link dead detection timeout to \a msec milliseconds.
     If this object sends a command to the link and it does not
     receive a response within the specified time, it will emit
     the dead() signal.  If \a msec is -1, the link dead detection
@@ -413,7 +496,7 @@ void QAtChat::setDeadTimeout( int msec )
 }
 
 /*!
-    Get the retry on non-echo timeout.  The default is -1.
+    Returns the retry on non-echo timeout.  The default is -1.
 
     \sa setRetryOnNonEcho()
 */
@@ -423,7 +506,7 @@ int QAtChat::retryOnNonEcho() const
 }
 
 /*!
-    Set the retry on non-echo timeout to \a msec.  If \a msec is not -1,
+    Sets the retry on non-echo timeout to \a msec.  If \a msec is not -1,
     then if an AT command is not echoed by the modem within the
     time period, the command will be automatically retried.  This is
     sometimes necessary to restart chat operations after a modem stall.
@@ -436,7 +519,7 @@ void QAtChat::setRetryOnNonEcho( int msec )
 }
 
 /*!
-    Set \c{+CPIN} as a terminator for the \c{AT+CPIN?} command.
+    Sets \c{+CPIN} as a terminator for the \c{AT+CPIN?} command.
     Needed on some modems that do not send \c{OK}.
 */
 void QAtChat::setCPINTerminator()
@@ -445,9 +528,9 @@ void QAtChat::setCPINTerminator()
 }
 
 /*!
-    Request that the next line from the modem be delivered to
+    Requests that the next line from the modem be delivered to
     \a slot on \a target.  This is used to collect up extra
-    lines of data on an unsoliticited response.  The slot
+    lines of data on an unsolicited response.  The slot
     takes a single QString parameter.
 */
 void QAtChat::requestNextLine( QObject *target, const char *slot )
@@ -458,9 +541,13 @@ void QAtChat::requestNextLine( QObject *target, const char *slot )
 }
 
 /*!
-    Send \a command directly to the modem without waiting for a response,
+    Sends \a command directly to the modem without waiting for a response,
     and without waiting for any existing commands to complete.  This is
-    typically used to send \c{ATH} to a modem to abort an \c{ATD} command.
+    typically used by modem-specific multiplexer plug-ins that have
+    overridden QSerialIODevice::abortDial() to send \c{ATH} or some other
+    command that is different from the default abortDial() behavior.
+
+    \sa abortDial()
 */
 void QAtChat::send( const QString& command )
 {
@@ -468,7 +555,7 @@ void QAtChat::send( const QString& command )
 }
 
 /*!
-    Register \a type as a prefix for error strings.  Any line of data
+    Registers \a type as a prefix for error strings.  Any line of data
     from the modem that starts with \a type will be recorded as a
     synonym for \c ERROR.  This is to support modems that have non-standard
     error strings.
@@ -483,7 +570,7 @@ void QAtChat::registerErrorPrefix( const QString& type )
 /*!
     \fn void QAtChat::pduNotification( const QString& type, const QByteArray& pdu )
 
-    Signal that is emitted when a PDU notification such as \c{+CMT},
+    This signal is emitted when a PDU notification such as \c{+CMT},
     \c{+CDS}, or \c{+CBM} arrives.  The \a type parameter contains the
     type and PDU length (e.g. \c{+CBM: 88}), and the \a pdu parameter
     contains the binary data for the PDU.
@@ -492,7 +579,7 @@ void QAtChat::registerErrorPrefix( const QString& type )
 /*!
     \fn void QAtChat::callNotification( const QString& type )
 
-    Signal that is emitted when a call-related notification such as
+    This signal is emitted when a call-related notification such as
     \c{CONNECT}, \c{NO CARRIER}, \c{BUSY}, etc occurs, but which was
     not associated with a corresponding \c{ATD} command.  The \a type
     parameter is the text of the notification.
@@ -501,7 +588,7 @@ void QAtChat::registerErrorPrefix( const QString& type )
 /*!
     \fn void QAtChat::dead()
 
-    Signal that is emitted when the link is detected to be dead.
+    This signal is emitted when the link is detected to be dead.
 
     \sa deadTimeout(), setDeadTimeout()
 */

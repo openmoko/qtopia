@@ -31,6 +31,8 @@ class QString;
 class QPixmap;
 class QWidget;
 
+// THIS CLASS IS OBSOLETED IN Qtopia 4.3
+
 class QTOPIA_EXPORT TodayItemDisplay : public QObject
 {
 public:

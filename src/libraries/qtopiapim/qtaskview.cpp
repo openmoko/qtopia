@@ -39,17 +39,25 @@
 
 /*!
   \class QTaskDelegate
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QTaskDelegate class provides item drawing for QTaskModel items.
+  \brief The QTaskDelegate class provides drawing of QTaskModel items (\l{QTask}{QTasks}).
 
-  The QTaskDelegate class provides drawing of QTaskModel items to aid in consistent
-  look and feel with other applications dealing with QTaskItems. The tasks are presented
-  by placing their description in bold text in a list view.
+  By using QTaskDelegate, applications using QTasks can achieve a consistent
+  look and feel.
+
+  The tasks are presented by rendering their \l {QTask::description()}{description()} in bold
+  text.  Generally, this class will be used with a QTaskListView or other similar list view.
+
+  The following image shows three QTask objects, rendered using a QTaskDelegate and a QTaskListView:
+  \image qtaskview.png "QTaskListView and QTaskDelegate"
+
+  \sa QTask, QTaskListView, QTaskModel
 */
 
 /*!
-  Contstructs a QTaskModelDelegate with parent \a parent.
+  Constructs a QTaskDelegate with parent \a parent.
 */
 QTaskDelegate::QTaskDelegate( QObject * parent )
     : QAbstractItemDelegate(parent)
@@ -57,14 +65,14 @@ QTaskDelegate::QTaskDelegate( QObject * parent )
 }
 
 /*!
-  Destroys a QTaskModelDelegate.
+  Destroys a QTaskDelegate.
 */
 QTaskDelegate::~QTaskDelegate() {}
 
 /*!
   \internal
-  Provides an alternate font based of the \a start font.  Reduces the size of the returned font
-  by at least step point sizes.  Will attempt a total of six point sizes beyond the request
+  Provides an alternate font based off the \a start font.  Reduces the size of the returned font
+  by at least step point sizes.  Will attempt a total of six point size steps beyond the requested
   point size until a valid font size that differs from the starting font size is found.
 */
 QFont QTaskDelegate::differentFont(const QFont& start, int step) const
@@ -86,10 +94,10 @@ QFont QTaskDelegate::differentFont(const QFont& start, int step) const
 }
 
 /*!
+  \internal
   Returns the font to use for painting the main label text of the item.
   Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
-  ignored.  These attributes can be set by the text returned for
-  QAbstractItemModel::data() where role is QTaskModel::LabelRole.
+  ignored.
 
   By default returns the font of the style option \a o.
 */
@@ -99,9 +107,14 @@ QFont QTaskDelegate::mainFont(const QStyleOptionViewItem &o) const
 }
 
 /*!
-  \overload
-
+  \internal
   Paints the element at \a index using \a painter with style options \a option.
+
+  The \c description() of the QTask corresponding to \a index is rendered
+  as bold rich text, using the font from \l mainFont() as the base font.
+
+  If the task is selected, it will be drawn with a highlighted background and
+  a different foreground color.
 */
 void QTaskDelegate::paint(QPainter *painter, const QStyleOptionViewItem & option,
         const QModelIndex & index ) const
@@ -183,6 +196,7 @@ void QTaskDelegate::paint(QPainter *painter, const QStyleOptionViewItem & option
     QAbstractTextDocumentLayout::PaintContext ctx;
     ctx.palette = modpalette;
     ctx.clip = QRect(0, 0, space.width(), space.height());
+    painter->restore();
     painter->save();
     painter->translate(space.x(), space.y());
     painter->setClipRect(0, 0, space.width(), space.height());
@@ -191,9 +205,7 @@ void QTaskDelegate::paint(QPainter *painter, const QStyleOptionViewItem & option
 }
 
 /*!
-   \overload
-
-   Returns the size hint for objects drawn with the delgate with style options \a option for item at \a index.
+   \reimp
 */
 QSize QTaskDelegate::sizeHint(const QStyleOptionViewItem & option,
                               const QModelIndex &index) const
@@ -206,19 +218,32 @@ QSize QTaskDelegate::sizeHint(const QStyleOptionViewItem & option,
 }
 /*!
   \class QTaskListView
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QTaskListView class provides a list view widget with some convenience functions
   for use with QTaskModel.
 
-  The QTaskListView is a QListView with some additional functions to aid in using a list view
-  of a QTaskModel.
+  The convenience functions provided by QTaskListView include functions for interpreting
+  the view's model, delegate and current item as the corresponding QTaskModel, QTaskDelegate and
+  QTask objects.  In addition, QTaskListView enforces using a QTaskModel (or a derivative)
+  as the model.
+
+  Upon construction, QTaskListView automatically sets itself to use a QTaskDelegate for drawing,
+  sets \c Batched layout mode (\l setLayoutMode()), and sets the resize mode to \c Adjust
+  (\l setResizeMode()).
+
+  The following image shows three QTask objects, rendered using a QTaskDelegate and a QTaskListView:
+  \image qtaskview.png "QTaskListView and QTaskDelegate"
+
+  \sa QTask, QTaskDelegate, QTaskModel
 */
 
 /*!
     \fn QTask QTaskListView::currentTask() const
 
-    Return the QTask for the currently selected index.
+    Return the QTask for the currently selected index, or
+    an empty QTask if there is no selected index.
 */
 
 /*!
@@ -230,11 +255,19 @@ QSize QTaskDelegate::sizeHint(const QStyleOptionViewItem & option,
 /*!
   \fn QTaskDelegate *QTaskListView::taskDelegate() const
 
-  Returns the QTaskDelegate Set for the view.
+  Returns the QTaskDelegate set for the view.  During
+  construction, QTaskListView  will automatically create
+  a QTaskDelegate to use as the delegate, but this can be
+  overridden with a different delegate derived from
+  QTaskDelegate if necessary.
 */
 
 /*!
-  Contructs a QTaskListView with parent \a parent.
+  Constructs a QTaskListView with parent \a parent.
+
+  This also sets the layout mode to \c Batched for performance,
+  the resize mode to \c Adjust, and creates a QTaskDelegate
+  to use as the delegate.
 */
 QTaskListView::QTaskListView(QWidget *parent)
     : QListView(parent)
@@ -246,7 +279,7 @@ QTaskListView::QTaskListView(QWidget *parent)
 }
 
 /*!
-  Destorys the QTaskListView.
+  Destroys the QTaskListView.
 */
 QTaskListView::~QTaskListView()
 {
@@ -258,6 +291,8 @@ QTaskListView::~QTaskListView()
   Sets the model for the view to \a model.
 
   Will only accept the model if it inherits or is a QTaskModel.
+  If the \a model does not inherit a QTaskModel, the existing
+  model will be retained.
 */
 void QTaskListView::setModel( QAbstractItemModel *model )
 {
@@ -268,9 +303,9 @@ void QTaskListView::setModel( QAbstractItemModel *model )
 }
 
 /*!
-  Returns the list of complete tasks selected from the view.  If a large number of tasks
-  might be selected this function can be expensive, and selectedTaskIds() should be used
-  instead
+  Returns a list of QTasks selected in the view.  Fetching the complete QTask
+  object can be expensive, so if a large number of tasks might be selected
+  selectedTaskIds() could be used instead.
 
   \sa selectedTaskIds()
 */
@@ -285,9 +320,9 @@ QList<QTask> QTaskListView::selectedTasks() const
 }
 
 /*!
-  Returns the list of ids for tasks selected from the view.
+  Returns the list of ids for QTasks selected from the view.
 
-  \sa selectedTasks()
+  \sa selectedTasks(), QTask::uid()
 */
 QList<QUniqueId> QTaskListView::selectedTaskIds() const
 {
@@ -312,16 +347,21 @@ public:
 
 /*!
   \class QTaskSelector
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QTaskSelector class provides a way of selecting a task from a QTaskModel.
+  \brief The QTaskSelector class provides a way of selecting a single task from a QTaskModel.
 
-  The QTaskSelector dialog allows selecting an existing or new task.
+  In addition, the user can optionally be allowed to indicate they want to create a new task,
+  if none of the existing tasks are suitable.
+
+  The following image shows a QTaskSelector with the option to create a new task highlighted.
+  \image qtaskselector.png "QTaskSelector, with the new task option highlighted"
 */
 
 /*!
   Constructs a QTaskSelector with parent \a parent.  If \a allowNew is true will also provide
-  the abilityt to select that a new task should be created.
+  an option to indicate a new task should be created.
 */
 QTaskSelector::QTaskSelector(bool allowNew, QWidget *parent)
     : QDialog(parent)
@@ -382,16 +422,19 @@ void QTaskSelector::setSelected(const QModelIndex& idx)
 }
 
 /*!
-  Sets the model of representing tasks that should be selected from to \a m.
+  Sets the model providing the choice of tasks to \a model.
 */
-void QTaskSelector::setModel(QTaskModel *m)
+void QTaskSelector::setModel(QTaskModel *model)
 {
-    d->view->setModel(m);
+    d->view->setModel(model);
 }
 
 /*!
-  Returns true if the dialog was accepted with a new task selected.
+  Returns true if the dialog was accepted with the option to
+  create a new task selected.
   Otherwise returns false.
+
+  \sa taskSelected()
 */
 bool QTaskSelector::newTaskSelected() const
 {
@@ -403,6 +446,8 @@ bool QTaskSelector::newTaskSelected() const
 /*!
   Returns true if the dialog was accepted with an existing task selected.
   Otherwise returns false.
+
+  \sa newTaskSelected()
 */
 bool QTaskSelector::taskSelected() const
 {
@@ -411,6 +456,8 @@ bool QTaskSelector::taskSelected() const
 
 /*!
   Returns the task that was selected.  If no task was selected returns a null task.
+
+  \sa taskSelected(), newTaskSelected()
 */
 QTask QTaskSelector::selectedTask() const
 {

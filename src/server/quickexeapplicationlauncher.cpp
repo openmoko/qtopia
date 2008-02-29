@@ -174,7 +174,17 @@ bool QuickExeApplicationLauncherPrivate::createProcess() const
 /*!
   \class QuickExeApplicationLauncher
   \ingroup QtopiaServer::AppLaunch
-  \brief The QuickExeApplicationLauncher class supports launching "quicklaunched" QtopiaApplication applications.
+  \brief The QuickExeApplicationLauncher class supports launching quicklaunched Qtopia applications.
+
+  The QuickExeApplicationLauncher provides a Qtopia Server Task.  Qtopia Server 
+  Tasks are documented in full in the QtopiaServerApplication class 
+  documentation.
+
+  \table
+  \row \o Task Name \o QuickExeApplicationLauncher
+  \row \o Interfaces \o ApplicationTypeLauncher, SystemShutdownHandler
+  \row \o Services \o None
+  \endtable
 
   The QuickExeApplicationLauncher class provides the ApplicationLauncherType
   implementation that works with the \c {quicklauncher} executable to accelerate
@@ -214,16 +224,16 @@ bool QuickExeApplicationLauncherPrivate::createProcess() const
   anticipation of an application launch.
 
   Once a \c {quicklauncher} instance has transformed itself into a running
-  application, the QuickExeApplicationLauncher class starts another.
+  application, the QuickExeApplicationLauncher class starts another.  When the
+  system shuts down, the QuickExeApplicationLauncher will ensure that the 
+  running \c {quicklauncher} instance is stopped.
 
   Both the QuickExeApplicationLauncher and the \c {quicklauncher} itself search
   the paths returned by the Qtopia::installPaths() method for the
   \c {plugins/application/lib<application name>.so} application plugin.
 
-  XXX - \c {quicklauncher} itself does not search correctly.
-
-  The QuickExeApplicationLauncher class provides the
-  \c {QuickExeApplicationLauncher} task.
+  \i {Note:} \c {quicklauncher} itself does not correctly search the install paths 
+  for applications.  This functionality is planned for a future Qtopia version.
  */
 QTOPIA_TASK(QuickExeApplicationLauncher, QuickExeApplicationLauncher);
 QTOPIA_TASK_PROVIDES(QuickExeApplicationLauncher, ApplicationTypeLauncher);

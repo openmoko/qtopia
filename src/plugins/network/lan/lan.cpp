@@ -121,8 +121,11 @@ void LanImpl::initialize()
     }
 
     if ( isAvailable() ) {
-        ifaceStatus = QtopiaNetworkInterface::Down;
         qLog(Network) << "LanImpl: Using network interface: " <<deviceName;
+	if ( isActive() )
+            ifaceStatus = QtopiaNetworkInterface::Up;
+	else	
+            ifaceStatus = QtopiaNetworkInterface::Down;
     } else {
         ifaceStatus = QtopiaNetworkInterface::Unavailable;
         qLog(Network) << "LanImpl: interface not available";
@@ -514,6 +517,49 @@ bool LanImpl::isPCMCIADevice( const QString& dev ) const
     return false;
 }
 
+/*!
+  Returns \c TRUE if \a device is specifically assigned to the current configuration
+  or nobody else holds a lock on it; other \c FALSE. This removes the indeterministic 
+  assignment of Linux network interface to Qtopia network configurations.
+  */
+bool LanImpl::isAvailableDevice(const QString& device) const
+{
+    const QString assignedDevice = configIface->property("Properties/DeviceName" ).toString();
+    if ( !assignedDevice.isEmpty() ) 
+    {
+        if ( assignedDevice == device ) {
+            qLog(Network) << "Testing assigned device only:" << device;
+            return true;
+        }
+    } 
+    else 
+    {
+        QtopiaNetwork::Type staticNetworkTypes[] = {
+             QtopiaNetwork::LAN, QtopiaNetwork::WirelessLAN };
+        for (uint i=0; i< sizeof( staticNetworkTypes )/sizeof(QtopiaNetwork::Type); i++ ) 
+        {
+            QStringList ifaces = 
+                QtopiaNetwork::availableNetworkConfigs( staticNetworkTypes[i] );
+            //exclude the current config
+            ifaces.removeAll( configIface->configFile() );
+            for( int j = 0; j< ifaces.size(); j++ ) {
+                QSettings cfg( ifaces[j], QSettings::IniFormat );
+                QString devName = cfg.value( "Properties/DeviceName", QString() ).toString();
+                if ( devName.isEmpty() ) {
+                    continue;
+                }
+                if ( devName == device ) {
+                    return false; // ifaces[j] holds a lock on \a device
+                }
+            }
+        }
+        //nobody holds a lock on this device
+        qLog(Network) << "Testing potential device" << device << "for" << configIface->configFile();
+        return true;
+    }
+    return false;
+}
+
 bool LanImpl::isAvailable() const
 {
     const QtopiaNetwork::Type t = type();
@@ -528,7 +574,7 @@ bool LanImpl::isAvailable() const
     FILE* f = fopen("/proc/net/dev", "r");
     if ( f ) {
         char line[1024];
-        qLog(Network) << "LanImpl: Searching for (W)LAN network interfaces";
+        qLog(Network) << "LanImpl: Searching for (W)LAN network interfaces for " << configIface->configFile();
         while ( fgets( line, 1024, f ) ) {
             QString buffer(line);
             int index = buffer.indexOf( QChar(':') );
@@ -546,6 +592,13 @@ bool LanImpl::isAvailable() const
                     }
                     flags = ifrq2.ifr_flags;
                     if ( (flags & IFF_BROADCAST) != IFF_BROADCAST ) //we want ethernet
+                        continue;
+                    
+                    //don't grab this device if another (W)LAN config holds exclusive right
+                    //on this device
+                    //isAvailableDevice() is expensive -> only do this when we don't have an initial
+                    //assignment yet
+                    if ( deviceName.isEmpty() && !isAvailableDevice( dev ) )
                         continue;
 
                     bool isPCMCIA = isPCMCIADevice( dev );

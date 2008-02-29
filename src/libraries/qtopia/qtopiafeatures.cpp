@@ -87,6 +87,7 @@ void QtopiaFeaturesPrivate::refreshFeatures()
 
 /*!
   \class QtopiaFeatures
+  \mainclass
   \ingroup QtopiaServer
   \brief The QtopiaFeatures class allows applications to set and query the
          available Qtopia features.

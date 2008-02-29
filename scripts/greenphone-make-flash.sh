@@ -355,6 +355,7 @@ while [ $# -ne 0 ]; do
             ;;
         --qtopia-source)
             if [ $# -ge 2 ]; then
+								unset QTOPIA_SOURCE_PATH
                 QTOPIA_SOURCE_PATH="$2"
                 shift 1
             else
@@ -417,8 +418,8 @@ fi
 # Make sure all input files and directories exist
 [ -d "$QTOPIA_BUILD_PATH" ] || die "$QTOPIA_BUILD_PATH does not exist or is not a directory"
 if [ ! -f "$QTOPIA_BUILD_PATH/qpe.sh" ]; then
- cp -a $QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/startup/qpe.sh $QTOPIA_BUILD_PATH
- cp -a $QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/startup/qpe.env $QTOPIA_BUILD_PATH
+ cp -a $QTOPIA_SOURCE_PATH/devices/greenphone/src/devtools/startup/qpe.sh $QTOPIA_BUILD_PATH
+ cp -a $QTOPIA_SOURCE_PATH/devices/greenphone/src/devtools/startup/qpe.env $QTOPIA_BUILD_PATH
 fi
 if [ ! -f "$QTOPIA_BUILD_PATH/qpe.sh" ]; then
     echo "$QTOPIA_BUILD_PATH does not contain an image - check \"--qtopia-build\" argument"
@@ -480,7 +481,7 @@ fi
 
 if [ $OPTION_QTOPIA_IMAGE -eq 1 ]; then
     QTOPIA_IMAGE_PATH=`mktemp -d $PWD/qtopia.XXXXXX`
-    [ -d $QTOPIA_IMAGE ] || die "Could not create temporary qtopia directory"
+    [ -d $QTOPIA_IMAGE_PATH ] || die "Could not create temporary qtopia directory"
     cp -a $QTOPIA_BUILD_PATH/* $QTOPIA_IMAGE_PATH
 fi
 

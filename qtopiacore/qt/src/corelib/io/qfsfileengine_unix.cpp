@@ -55,52 +55,9 @@ bool QFSFileEngine::remove()
     return unlink(QFile::encodeName(d->file)) == 0;
 }
 
-/*!
-  \internal
-  Implement unix byte copy.  Attempt to copy file to the same file-system
-  as the \a dst, as a temporary file.  If this fails error out.
-
-  Once temporary file has been created, a rename of the temporary file to
-  the \a dst is attempted - since the file is on the same file-system this
-  is an atomic operation and there is no point at which "neither or both"
-  exists.
-*/
-bool QFSFileEngine::copy(const QString &dst)
+bool QFSFileEngine::copy(const QString &)
 {
-    Q_D(QFSFileEngine);
-    char block[1024];
-    bool error = false;
-    qint64 in = 0;
-    if ( open( QIODevice::ReadOnly ))
-    {
-        QByteArray tempfile = dst.toLocal8Bit();
-        tempfile.append( ".temp_XXXXXX" );
-        int fd = ::mkstemp( tempfile.data() );
-        if ( fd != -1 ) {
-            while (( in = read( block, 1024 ))) {
-                if ( in == -1 || in != ::write( fd, block, in )) {
-                    error = true;
-                    break;
-                }
-            }
-            if ( ::close( fd ) == 0 ) {
-                if ( ::rename( tempfile, qPrintable( dst )) == -1 ) {
-                    qWarning( strerror( errno ));
-                    error = true;
-                    ::unlink( tempfile );
-                }
-            } else {
-                qWarning( strerror( errno ));
-                error = true;
-            }
-        }
-    } else {
-        qWarning( strerror( errno ));
-        error = true;
-    }
-    if ( error )
-        qWarning( "Could not copy %s to %s", qPrintable( d->file ), qPrintable( dst ));
-    return true;
+    return false;
 }
 
 bool QFSFileEngine::rename(const QString &newName)

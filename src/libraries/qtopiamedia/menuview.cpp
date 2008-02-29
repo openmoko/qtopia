@@ -19,9 +19,9 @@
 **
 ****************************************************************************/
 
-#include "menuview.h"
+#include "menuview_p.h"
 
-#include <keyhold.h>
+#include <private/keyhold_p.h>
 
 class StyleDelegate : public QStyle
 {
@@ -96,6 +96,15 @@ void MenuViewStyle::drawPrimitive( PrimitiveElement element, const QStyleOption*
 
 static const int KEY_SELECT_HOLD = Qt::Key_unknown + Qt::Key_Select;
 
+/*!
+    \class MenuView
+    \internal
+*/
+
+/*!
+    \fn MenuView::MenuView( QWidget* parent )
+    \internal
+*/
 MenuView::MenuView( QWidget* parent )
     : QListView( parent ), m_eventcache( QEvent::None, QPoint(), Qt::NoButton, Qt::NoButton, Qt::NoModifier )
 {
@@ -121,11 +130,19 @@ MenuView::MenuView( QWidget* parent )
     m_holdtimer->setSingleShot( true );
 }
 
+/*!
+    \fn MenuView::~MenuView()
+    \internal
+*/
 MenuView::~MenuView()
 {
     delete m_style;
 }
 
+/*!
+    \fn void MenuView::emitHeld()
+    \internal
+*/
 void MenuView::emitHeld()
 {
     QModelIndex current = currentIndex();
@@ -134,6 +151,10 @@ void MenuView::emitHeld()
     }
 }
 
+/*!
+    \fn void MenuView::keyPressEvent( QKeyEvent* e )
+    \internal
+*/
 void MenuView::keyPressEvent( QKeyEvent* e )
 {
     switch( e->key() )
@@ -146,6 +167,10 @@ void MenuView::keyPressEvent( QKeyEvent* e )
     }
 }
 
+/*!
+    \fn void MenuView::mousePressEvent( QMouseEvent* e )
+    \internal
+*/
 void MenuView::mousePressEvent( QMouseEvent* e )
 {
     m_eventcache = *e;
@@ -158,6 +183,10 @@ void MenuView::mousePressEvent( QMouseEvent* e )
     m_holdtimer->start();
 }
 
+/*!
+    \fn void MenuView::mouseReleaseEvent( QMouseEvent* e )
+    \internal
+*/
 void MenuView::mouseReleaseEvent( QMouseEvent* e )
 {
     if( m_holdtimer->isActive() ) {
@@ -167,6 +196,10 @@ void MenuView::mouseReleaseEvent( QMouseEvent* e )
     }
 }
 
+/*!
+    \fn void MenuStack::push( MenuModel* model )
+    \internal
+*/
 void MenuStack::push( MenuModel* model )
 {
     m_stack.push( model );
@@ -174,6 +207,10 @@ void MenuStack::push( MenuModel* model )
     m_view->setModel( model );
 }
 
+/*!
+    \fn MenuModel* MenuStack::pop()
+    \internal
+*/
 MenuModel* MenuStack::pop()
 {
     MenuModel* model = m_stack.pop();

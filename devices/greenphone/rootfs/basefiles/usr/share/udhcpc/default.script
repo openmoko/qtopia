@@ -15,13 +15,20 @@ case $1 in
 		;;
 	bound)
 		ifconfig $interface $ip broadcast $broadcast netmask $subnet
+        route delete default 2>/dev/null
 		route add default gw $router
 		update_resolv_conf
 		;;
 	renew)
 		ifconfig $interface $ip broadcast $broadcast netmask $subnet
-		route add default gw $router
-		update_resolv_conf
+
+        # only update the default route if it is over this interface
+        if ! route -n | grep '^0\.0\.0\.0 *[^ ]* *0\.0\.0\.0 *UG.*'$interface'$' >/dev/null; then
+            route delete default 2>/dev/null
+            route add default gw $router
+        fi
+
+        update_resolv_conf
 		;;
 	nak)
 		echo NAK:$message

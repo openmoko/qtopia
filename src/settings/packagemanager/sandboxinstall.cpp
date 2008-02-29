@@ -34,7 +34,6 @@
 #endif
 
 #include <errno.h>
-#include <qdebug.h>
 #include <qtopialog.h>
 
 #include <QDir>
@@ -103,7 +102,7 @@ SandboxInstallJob::SandboxInstallJob( const InstallControl::PackageInfo *pkg, co
         {
             if( reporter )
             {
-                QString simpleError = QObject::tr( "Unable make destination for package" );
+                QString simpleError = QObject::tr( "Unable to create directory" );
                 QString detailedError = QString( "SandboxInstallJob::SandboxInstallJob:- "
                                                "Could not create directory %1").arg( pkg->md5Sum);
                 reporter->reportError( simpleError, detailedError );
@@ -452,7 +451,7 @@ bool SandboxInstallJob::setupSandbox()
 {
     // create links for the icon, binary
     QHash<QString,QSettings*> desktopConf;
-    qDebug() << "Desktop files are" << desktopPaths;
+    qLog(Package) << "Desktop files are" << desktopPaths;
 
     if ( desktopPaths.count() == 0 )
     {

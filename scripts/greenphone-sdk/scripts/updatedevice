@@ -14,6 +14,12 @@ prepare_device()
 extract_image()
 {
     tar -C $TEMPDIR -xzf $QTOPIA_IMAGE
+
+    # check for flash.conf
+    if [ -r $TEMPDIR/flash.conf ]; then
+        echo "USB Flash image detected.  Refer to the Greenphone Quick Start Guide for instructions."
+        exit 1
+    fi
 }
 
 upload_image()
@@ -33,7 +39,7 @@ upload_image()
 
 install_image()
 {
-    ssh root@$PHONEIP "updateqtopia --ignore-firstrun --dont-reboot $MNTPNT"
+    ssh root@$PHONEIP "updateqtopia --no-questions --ignore-firstrun --dont-reboot $MNTPNT"
     ssh root@$PHONEIP "updateqtopiahelper deletetemp $MNTPNT"
     ssh root@$PHONEIP "reboot"
 }

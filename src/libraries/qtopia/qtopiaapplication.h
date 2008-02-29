@@ -31,12 +31,8 @@
 #include <qtopialog.h>
 
 #include "perftest.h"
-
+#include "qperformancelog.h"
 #include <qtopiasxe.h>
-
-#ifdef QTOPIA_TEST
-# include "qtest/qtopiasystemtestslave.h"
-#endif
 
 class QtopiaChannel;
 class QtopiaApplicationData;
@@ -178,10 +174,6 @@ private:
     static void sendInputHintFor(QWidget*,QEvent::Type);
 
     QtopiaApplicationData *d;
-
-#ifdef QTOPIA_TEST
-    QtopiaSystemTestSlave app_slave;
-#endif
 };
 
 #ifdef Q_OS_WIN32
@@ -287,8 +279,7 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
         QSXE_SET_APP_KEY(argv[0]) \
         QString executableName(argv[0]); \
         executableName = executableName.right(executableName.length() - executableName.lastIndexOf('/') - 1); \
-        qLog(Performance) << executableName.toLatin1().constData() << " : " << "Starting main() : " \
-                          << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) ); \
+        QPerformanceLog(executableName.toLatin1().constData())  << "Starting main()"; \
         QtopiaApplication a( argc, argv ); \
         QWidget *mw = 0; \
         if ( qpeAppMap()->contains(executableName) ) \
@@ -303,14 +294,11 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
             } else { \
                 a.showMainWidget(); \
             } \
-            qLog(Performance) << executableName.toLatin1().constData() << " : " << "Entering event loop : " \
-                              << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) ); \
+            QPerformanceLog(executableName.toLatin1().constData()) << "Entering event loop"; \
             rv = a.exec(); \
-            qLog(Performance) << executableName.toLatin1().constData() << " : " << "Exited event loop : " \
-                              << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) ); \
+            QPerformanceLog(executableName.toLatin1().constData()) << "Exited event loop"; \
             delete mw; \
-            qLog(Performance) << executableName.toLatin1().constData() << " : " << "Exiting main : " \
-                              << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) ); \
+            QPerformanceLog(executableName.toLatin1().constData()) << "Exiting main"; \
             return rv; \
         } \
         return -1; \

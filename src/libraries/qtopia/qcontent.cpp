@@ -42,6 +42,10 @@
 
 static const uint ContentCacheSize = 100;
 
+/*!
+    \variable QContent::InvalidId
+    \brief A constant representing an invalid QContent identifier
+*/
 const QContentId QContent::InvalidId = QContentId(0xffffffff, Q_UINT64_C(0xffffffffffffffff));
 
 Q_IMPLEMENT_USER_METATYPE_NO_OPERATORS(QContentId);
@@ -79,22 +83,41 @@ static QReadWriteLock databaseLock;
 
 /*!
   \class QContent
+  \mainclass
   \brief The QContent class represents a content carrying entity in the
-  Qtopia system.
+  Qtopia system, where content includes resources which an end-user may
+  view or manage.
 
-  Each entity may include:
+  By creating content with a \l {Role} of \c Data using the setRole() method,
+  resources not intended to be directly consumed by the end-user may also be
+  managed.
+
+  An instance of a QContent may, for example, represent any one of the following
+  types of content:
   \list
   \o a stream
   \o a file
   \o a temporary file
   \o a DRM controlled file (possibly encrypted).
+  \o an item in a container, eg an archive or DRM multi-part file
   \endlist
+
   The QContent class is responsible for
   providing access to metadata about the content contained in a file
   or stream.
 
-  A server process calls \c install(...) and \c uninstall(...) to update the
-  records of metadata in the backing store in response to hardware and
+  As a system-wide invariant, the backing store is authoritative for information
+  about content available on the device.  For example content stored in a DRM file
+  or a stream may not have a logical file on the file-system.
+
+  In general applications should use the QContent and QContentSet interface to
+  manage, and search for resources, instead of calling through to the file-system.
+
+  The backing store is typically an SQL database, although it could be some other
+  kind of persistent storage.
+
+  The static methods install() and uninstall()
+  are used to update records of metadata in the backing store in response to hardware and
   software events such as:
   \list
   \o removable storage being removed
@@ -103,7 +126,9 @@ static QReadWriteLock databaseLock;
   \endlist
 
   To be notified of these events, create a QContentSet object and connect
-  to its \l{QContentSet::changed()}{changed(QContentId)} signal.
+  to its \l{QContentSet::changed()} signal.
+
+  \sa QContentSet, QContentFilter
 
   \ingroup content
 */
@@ -116,6 +141,8 @@ static QReadWriteLock databaseLock;
     \value Added the QContent has been added.
     \value Removed the QContent has been deleted.
     \value Updated the QContent has been modified.
+
+    \sa QContentSet::changed()
 */
 
 /*!
@@ -168,14 +195,17 @@ QContent::QContent()
 
 /*!
   Create a \c QContent object by fetching the metadata from the backing
-  store of the passed \a id.  This uses in-process caching with statics in the inner private
-  class to save on SQL/calls to the backing store. This method will be fast if the object
-  has already been referenced as the \c QContent and \c QContentSet
-  classes are loaded in the current process.
+  store specified by \a id.  This method will be fast if the object
+  has already been referenced by \c QContent and \c QContentSet
+  classes loaded in the current process, since internally the results
+  of calls to the backing store are cached.
 */
 QContent::QContent( QContentId id )
     : d( 0 )
 {
+    /*
+       This uses in-process caching with statics in the inner private
+       class to save on SQL/calls to the backing store.  */
     if(id==QContent::InvalidId)
     {
         d = new ContentLinkPrivate;
@@ -214,14 +244,10 @@ QContent::QContent( QContentId id )
 }
 
 /*!
-  Create an application or document content link based on the QFileInfo \a fi.
+  Create a \c QContent based on the content contained in the file represented by \a fi.
 
-  Passing \a store specifies whether this content object is stored into the backing store database,
+  Passing \a store specifies whether this content object is stored into the backing store,
   or only used as a local object.
-
-  \omit
-  Give a reference to documentation about document links.
-  \endomit
 */
 QContent::QContent( const QFileInfo &fi, bool store )
     : d( 0 )
@@ -233,14 +259,10 @@ QContent::QContent( const QFileInfo &fi, bool store )
 }
 
 /*!
-  Create an application or document content link based on the \a fileName.
+  Create a \c QContent based on the content contained in the file represented by \a fileName.
 
   Passing \a store specifies whether this content object is stored into the backing store database,
   or only used as a local object.
-
-  \omit
-  Give a reference to documentation about document links.
-  \endomit
 */
 QContent::QContent( const QString &fileName, bool store )
     : d( 0 )
@@ -377,7 +399,7 @@ bool QContent::updateContent()
 }
 
 /*!
-  Create a content link by copying the \a other content object.
+  Create a \c QContent by copying the \a other content object.
 */
 QContent::QContent( const QContent &other )
     : d( 0 )
@@ -405,10 +427,12 @@ QContent::~QContent()
 }
 
 /*!
-  Content link is invalid if the backing file is unavailable, either
+  Content is invalid if the backing file is unavailable, either
   due to removal of media or deletion of the file. If \a force is true,
   the content will be revalidated even if this value has been previously
-  cached.
+  cached. Returns true if content is valid; otherwise returns false.
+
+  Note: this method can be expensive.
 */
 bool QContent::isValid(bool force) const
 {
@@ -637,10 +661,10 @@ void QContent::clearErrors()
 }
 
 /*!
-  Given an application binary name \a bin, return an id pointing to the
-  QContent item for an application for that binary.
+  Given an application binary name \a bin, return \c QContentId pointing to the
+  QContent item representing an application with that binary.
 
-  A path name may be supplied for for \a bin (eg \a bin may contain "/"
+  A path name may be supplied for \a bin (eg \a bin may contain "/"
   characters).
 
   Note that binary names are unique across qtopia.
@@ -920,7 +944,7 @@ QContent &QContent::operator=( const QContent &other )
 
 /*!
   Equality operator.  Return true if this \c Content object is the same as
-  the \a other.  Is true if both have the same Id number, or if both are
+  the \a other; otherwise returns false.  Is true if both have the same Id number, or if both are
   empty.
 */
 bool QContent::operator==( const QContent &other ) const
@@ -933,7 +957,7 @@ bool QContent::operator==( const QContent &other ) const
 }
 
 /*!
-    Queries the launcher configuration settings to check if this object is in the systems PreloadApps list.
+    Queries the launcher configuration settings and returns true if this object is in the systems PreloadApps list; otherwise returns false.
 */
 bool QContent::isPreloaded() const
 {
@@ -1114,6 +1138,7 @@ void QContent::setIcon(const QString& iconpath)
 
 /*!
     Convenience function to test if this QContent is a Document or an Application.
+    Returns true if this QContent is a Document or an Application; otherwise returns false.
 
     \sa usageMode()
 */
@@ -1365,6 +1390,7 @@ void QContent::removeFiles()
 }
 
 /*!
+    \deprecated
     Uninstall the .desktop/link file for this object from the database, and remove it from the filesystem.
  */
 void QContent::removeLinkFile()
@@ -1375,6 +1401,7 @@ void QContent::removeLinkFile()
 }
 
 /*!
+    \deprecated
     Set the link/.desktop file that this content references to \a filename.
  */
 void QContent::setLinkFile( const QString& filename )
@@ -1409,7 +1436,7 @@ QString QContent::media() const
 
 /*!
     Sets the root path of the \a media the file is stored on.  Once a QContent has been commited to the database
-    the media cannot be changed.
+    the media cannot be changed. Returns true if successful; otherwise false.
 */
 bool QContent::setMedia( const QString &media )
 {
@@ -1568,7 +1595,7 @@ bool QContent::copyTo(const QString &newPath)
     Move the contents of the file and the metainfo from this QContent to
     \a newPath.
 
-    Returns true is successful, otherwise false.
+    Returns true if the contents is successfully moved, otherwise false.
 
     Note: The id() of the original file will be invalid and should not be used.
  */
@@ -1751,18 +1778,33 @@ QTOPIA_EXPORT QDebug &operator<<(QDebug &debug, const QContent &content)
     return debug << content.d.data();
 }
 
+/*!
+  Return a uint suitable for use as a hash value.  This allows QContentId
+  to be stored in a QHash
+*/
 uint qHash(const QContentId &id)
 {
-    const uchar *p = reinterpret_cast<const uchar *>(&id);
-    int n = sizeof(id);
+    int n;
     uint h = 0;
-    uint g;
+    uint g = 0;
 
+    const uchar *p = reinterpret_cast<const uchar *>(&id.first);
+    n = sizeof(id.first);
     while (n--) {
         h = (h << 4) + *p++;
         if ((g = (h & 0xf0000000)) != 0)
             h ^= g >> 23;
         h &= ~g;
     }
+
+    const uchar *q = reinterpret_cast<const uchar *>(&id.second);
+    n = sizeof(id.second);
+    while (n--) {
+        h = (h << 4) + *q++;
+        if ((g = (h & 0xf0000000)) != 0)
+            h ^= g >> 23;
+        h &= ~g;
+    }
+
     return h;
 }

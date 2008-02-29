@@ -22,9 +22,10 @@
 #ifndef __QTOPIA_MEDIALIBRARY_QMEDIACONTENT_H
 #define __QTOPIA_MEDIALIBRARY_QMEDIACONTENT_H
 
-#include <qobject.h>
-#include <qstring.h>
-#include <qcontent.h>
+#include <QObject>
+#include <QString>
+#include <QUrl>
+#include <QContent>
 
 #include "qmediahandle.h"
 
@@ -37,6 +38,9 @@ class QTOPIAMEDIA_EXPORT QMediaContent : public QObject
     friend class QMediaContentPrivate;
 
 public:
+    explicit QMediaContent(QUrl const& url,
+                           QString const& domain = QLatin1String("default"),
+                           QObject* parent = 0);
     explicit QMediaContent(QString const& url,
                            QString const& domain = QLatin1String("default"),
                            QObject* parent = 0);

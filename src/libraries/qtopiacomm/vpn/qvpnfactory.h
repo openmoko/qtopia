@@ -30,7 +30,7 @@ class QTOPIACOMM_EXPORT QVPNFactory {
 public:
     QVPNFactory();
 
-    QVPNClient* create( uint vpnID,  QObject* parent = 0 );
+    QVPNClient* instance( uint vpnID,  QObject* parent = 0 );
     QVPNClient* create( QVPNClient::Type type, QObject* parent = 0 );
 
     static QSet<QVPNClient::Type> types();
@@ -42,7 +42,7 @@ protected:
 private:
     bool serverMode;
 
-    friend class QVpnManager;
+    friend class QtopiaVpnManager;
 };
 
 #endif //QVPNFACTORY

@@ -33,6 +33,7 @@
 
 /*!
   \class QPhoneProfile::Setting
+  \mainclass
   \brief The Setting class provides applications with a mechanism to add their own settings to a profile.
 
   Applications may integrate with the Qtopia profiles by adding their own
@@ -48,12 +49,14 @@
   QPhoneProfile::setApplicationSetting() methods and read via the
   QPhoneProfile::applicationSetting() call.
 
+  \sa QPhoneProfile
+
   \ingroup io
  */
 
 // define QPhoneProfile::Setting
 /*!
-  Construct a null application setting object.
+  Constructs a null application setting object.
  */
 QPhoneProfile::Setting::Setting()
 : notify(false)
@@ -61,7 +64,7 @@ QPhoneProfile::Setting::Setting()
 }
 
 /*!
-  Construct an empty application setting object for \a application.
+  Constructs an empty application setting object for \a application.
   */
 QPhoneProfile::Setting::Setting(const QString &application)
 : appName(application), notify(false)
@@ -69,7 +72,7 @@ QPhoneProfile::Setting::Setting(const QString &application)
 }
 
 /*!
-  Construct a copy of \a other.
+  Constructs a copy of \a other.
   */
 QPhoneProfile::Setting::Setting(const Setting &other)
 : appName(other.appName), appTitle(other.appTitle), details(other.details),
@@ -78,7 +81,7 @@ QPhoneProfile::Setting::Setting(const Setting &other)
 }
 
 /*!
-  Assign \a other to this object.
+  Assigns \a other to this setting and returns a reference to this setting.
   */
 QPhoneProfile::Setting &QPhoneProfile::Setting::operator=(const Setting &other)
 {
@@ -90,8 +93,8 @@ QPhoneProfile::Setting &QPhoneProfile::Setting::operator=(const Setting &other)
 }
 
 /*!
-  Returns true if this is a null application setting object.  A null object is
-  one that has an empty applicationName().
+  Returns true if this setting is null; otherwise returns false.
+  A null object is one that has an empty applicationName().
   */
 bool QPhoneProfile::Setting::isNull() const
 {
@@ -108,8 +111,8 @@ QString QPhoneProfile::Setting::applicationName() const
 }
 
 /*!
-  Return a optional visual description for this setting.  Generally this is
-  the visual name of the application.
+  Returns an optional visual description for this setting.
+  Generally this is the visual name of the application.
   */
 QString QPhoneProfile::Setting::description() const
 {
@@ -117,7 +120,7 @@ QString QPhoneProfile::Setting::description() const
 }
 
 /*!
-  Return the settings data.
+  Returns the data portion of this setting.
  */
 QString QPhoneProfile::Setting::data() const
 {
@@ -125,15 +128,42 @@ QString QPhoneProfile::Setting::data() const
 }
 
 /*!
-  Returns true if the application will be notified when the profile changes and
-  false otherwise.
+  Returns true if the application will be notified when the profile changes;
+  otherwise returns false.
 
   Applications will be notified with a \c {Settings::activateSettings(QString)}
-  message when they are to apply settings, with the parameter set to the
-  data() portion of the setting.  If the profile changes to one where the
+  message via \c {QPE/Application/appname} when they are to apply settings.
+  \c {appname} is applicationName() and the parameter is data() portion of the setting.
+
+  If the profile changes to one where the
   application has not added a custom setting from one where the application has
   added a custom setting, a \c {Settings::activateDefault()} message will
   be sent.
+
+  Therefore applications should be listening to the Qtopia
+  application channels to handle these requests.
+  For example, in the application:
+
+  \code
+        SomeApplication::SomeApplication()
+        {
+            connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
+                this, SLOT(receive(const QString&,const QByteArray&)) );
+            ...
+        }
+
+        void SomeApplication::receive( const QString& message, const QByteArray& data )
+        {
+            QDataStream stream( data );
+            if ( message == "Settings::activateSettings(QString)" ) {
+                ... // parse and apply application settings data
+            } else if ( message == "Settings::activateDefault()" ) {
+                applyDefault(); // apply application default settings
+            }
+        }
+  \endcode
+
+  \sa SettingsService, QtopiaApplication::appMessage()
  */
 bool QPhoneProfile::Setting::notifyOnChange() const
 {
@@ -141,7 +171,7 @@ bool QPhoneProfile::Setting::notifyOnChange() const
 }
 
 /*!
-  Set the application \a name.
+  Sets the application \a name for this setting.
   */
 void QPhoneProfile::Setting::setApplicationName(const QString &name)
 {
@@ -149,7 +179,7 @@ void QPhoneProfile::Setting::setApplicationName(const QString &name)
 }
 
 /*!
-  Set the setting \a description.
+  Sets the setting \a description for this setting.
   */
 void QPhoneProfile::Setting::setDescription(const QString &description)
 {
@@ -157,7 +187,7 @@ void QPhoneProfile::Setting::setDescription(const QString &description)
 }
 
 /*!
-  Set the setting \a data.
+  Set the setting \a data for this setting.
  */
 void QPhoneProfile::Setting::setData(const QString &data)
 {
@@ -165,7 +195,7 @@ void QPhoneProfile::Setting::setData(const QString &data)
 }
 
 /*!
-  Set whether the application is notified on changes to the profile or not.
+  Sets whether the application is notified on changes to the profile or not.
   If \a notifyOnChange is true applications are notified, otherwise they are
   not.
   */
@@ -175,7 +205,7 @@ void QPhoneProfile::Setting::setNotifyOnChange(bool notifyOnChange)
 }
 
 /*!
-  Returns true if this and \a other are equivalent.
+  Returns true if setting \a other is equal to this setting; otherwise returns false.
   */
 bool QPhoneProfile::Setting::operator==(const Setting &other) const
 {
@@ -186,7 +216,7 @@ bool QPhoneProfile::Setting::operator==(const Setting &other) const
 }
 
 /*!
-  Returns true if this and \a other are not equivalent.
+  Returns true if setting \a other is not equal to this setting; otherwise returns false.
  */
 bool QPhoneProfile::Setting::operator!=(const Setting &other) const
 {
@@ -248,8 +278,39 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
 
 /*!
   \class QPhoneProfile
+  \mainclass
   \brief The QPhoneProfile class encapsulates a single phone profile
          configuration.
+
+  The QPhoneProfile class holds data on how the phone
+  behaves for incoming calls or messages when it is activated.
+  When a new profile is created it plays system default tones,
+  systemCallTone() and systemMessageTone(),
+  which can be personalized by setCallTone() and setMessageTone().
+
+  \section1 Activation
+
+  A profile can be manually activated through the
+  QPhoneProfileManager::activateProfile() method.
+  Alternatively a profile may be set to auto-activate at certain times,
+  controlled through by QPhoneProfile::schedule(),
+  or when a phone hardware accessory
+  is attached by QPhoneProfile::setAccessory().
+  For example, a profile can be automatically activated
+  when hands-free hardware accessory is enabled.
+
+  \sa QPhoneProfile::Schedule, QHardwareInterface
+
+  \section1 Associated Settings
+
+  A profile can have a number of associated settings
+  that can be retrieved by applicationSetting() and applicationSettings().
+  These settings are passed to applications
+  by SettingsService::activateSettings() to be applied when the profile is activated.
+
+  Applications that wish to add their settings to a profile can use SettingsManagerService.
+
+  \sa QPhoneProfileManager, SettingsManagerService, SettingsService
 
   \ingroup io
  */
@@ -309,7 +370,9 @@ static QContent findSystemRingTone(const QString &name)
   */
 
 /*!
-  Construct a null QPhoneProfile.
+  Constructs a null QPhoneProfile.
+
+  It is recommended to use QPhoneProfileManager::newProfile() to create a new profile.
   */
 QPhoneProfile::QPhoneProfile()
 : d(new QPhoneProfilePrivate)
@@ -317,7 +380,9 @@ QPhoneProfile::QPhoneProfile()
 }
 
 /*!
-  Construct an empty QPhoneProfile with the specified \a id.
+  Constructs an empty QPhoneProfile with the given \a id.
+
+  It is recommended to use QPhoneProfileManager::newProfile() to create a new profile.
  */
 QPhoneProfile::QPhoneProfile(int id)
 : d(new QPhoneProfilePrivate)
@@ -326,7 +391,7 @@ QPhoneProfile::QPhoneProfile(int id)
 }
 
 /*!
-  Construct a copy of \a other.
+  Constructs a copy of \a other.
  */
 QPhoneProfile::QPhoneProfile(const QPhoneProfile &other)
 : d(other.d)
@@ -334,7 +399,7 @@ QPhoneProfile::QPhoneProfile(const QPhoneProfile &other)
 }
 
 /*!
-  Destroy the QPhoneProfile instance.
+  Destroys the QPhoneProfile object.
  */
 QPhoneProfile::~QPhoneProfile()
 {
@@ -343,8 +408,8 @@ QPhoneProfile::~QPhoneProfile()
 /*!
   \fn bool QPhoneProfile::operator==(const QPhoneProfile &other) const
 
-  Returns true if this profile is equal to \a other.  Equality means all
-  the profile fields are equivalent.
+  Returns true if this profile is equal to \a other; otherwise returns false.
+  Equality means all the profile properties are equivalent.
  */
 bool QPhoneProfile::operator==(const QPhoneProfile &o) const
 {
@@ -368,7 +433,7 @@ bool QPhoneProfile::operator==(const QPhoneProfile &o) const
 /*!
   \fn bool QPhoneProfile::operator!=(const QPhoneProfile &other) const
 
-  Returns true if this profile is not equal to \a other.
+  Returns true if this profile is not equal to \a other; otherwise returns false.
   */
 bool QPhoneProfile::operator!=(const QPhoneProfile &o) const
 {
@@ -376,7 +441,7 @@ bool QPhoneProfile::operator!=(const QPhoneProfile &o) const
 }
 
 /*!
-  Assign \a other to this profile.
+  Assigns \a other to this profile and returns a reference to this profile.
   */
 QPhoneProfile &QPhoneProfile::operator=(const QPhoneProfile &other)
 {
@@ -385,8 +450,8 @@ QPhoneProfile &QPhoneProfile::operator=(const QPhoneProfile &other)
 }
 
 /*!
-  Returns true if this profile is null.  A null profile is one with an id
-  of -1.
+  Returns true if this profile is null; otherwise returns false.
+  A null profile is one with an id of -1.
   */
 bool QPhoneProfile::isNull() const
 {
@@ -394,7 +459,7 @@ bool QPhoneProfile::isNull() const
 }
 
 /*!
-  Returns the user visible name of the profile.
+  Returns the user visible name of this profile.
  */
 QString QPhoneProfile::name() const
 {
@@ -402,8 +467,8 @@ QString QPhoneProfile::name() const
 }
 
 /*!
-  Returns true if this is a system profile.  System profiles can typically not
-  be deleted.
+  Returns true if this is a system profile; otherwise returns false.
+  System profiles can typically not be deleted.
  */
 bool QPhoneProfile::isSystemProfile() const
 {
@@ -419,7 +484,7 @@ int QPhoneProfile::volume() const
 }
 
 /*!
-  Returns true if vibration is enabled, false if not.
+  Returns true if vibration is enabled; otherwise returns false.
  */
 bool QPhoneProfile::vibrate() const
 {
@@ -452,7 +517,7 @@ int QPhoneProfile::msgAlertDuration() const
 
 /*!
   Returns true if incoming calls should be automatically answered in this
-  profile, false if not.
+  profile; otherwise returns false.
  */
 bool QPhoneProfile::autoAnswer() const
 {
@@ -498,7 +563,8 @@ QContent QPhoneProfile::systemMessageTone() const
 }
 
 /*!
-  Returns true if plane mode is on in this profile, false otherwise.
+  Returns true if plane mode is on for this profile; otherwise returns false.
+  Phone calls cannot be made in plane mode.
   */
 bool QPhoneProfile::planeMode() const
 {
@@ -506,7 +572,7 @@ bool QPhoneProfile::planeMode() const
 }
 
 /*!
-  Return all application settings for this profile.
+  Returns all application settings for this profile.
   */
 QPhoneProfile::Settings QPhoneProfile::applicationSettings() const
 {
@@ -514,8 +580,8 @@ QPhoneProfile::Settings QPhoneProfile::applicationSettings() const
 }
 
 /*!
-  Return the setting for \a application for this profile, or a null setting
-  if not applicable.
+  Returns the setting for \a application for this profile if applicable;
+  otherwise returns a null setting.
  */
 QPhoneProfile::Setting QPhoneProfile::applicationSetting(const QString &application) const
 {
@@ -523,7 +589,7 @@ QPhoneProfile::Setting QPhoneProfile::applicationSetting(const QString &applicat
 }
 
 /*!
-  Return the icon to use to identify this profile.
+  Returns the file name for the icon to use to identify this profile.
   */
 QString QPhoneProfile::icon() const
 {
@@ -531,7 +597,7 @@ QString QPhoneProfile::icon() const
 }
 
 /*!
-  Return the auto activation schedule for this profile.
+  Returns the auto activation schedule for this profile.
  */
 QPhoneProfile::Schedule QPhoneProfile::schedule() const
 {
@@ -539,7 +605,7 @@ QPhoneProfile::Schedule QPhoneProfile::schedule() const
 }
 
 /*!
-  Return the identifier for this profile.
+  Returns the identifier for this profile.
   */
 int QPhoneProfile::id() const
 {
@@ -547,8 +613,8 @@ int QPhoneProfile::id() const
 }
 
 /*!
-  Return the accessory on which this profile should auto activate, or an empty
-  string if there is no such accessory.
+  Returns the accessory on which this profile should auto activate if applicable;
+  otherwise returns an empty string.
  */
 QString QPhoneProfile::accessory() const
 {
@@ -556,8 +622,8 @@ QString QPhoneProfile::accessory() const
 }
 
 /*!
-  Return the speed dial input on which this profile should activate.
-  If there is no speed dial input for the profile, an empty string is returned.
+  Returns the speed dial input on which this profile should activate if applicable;
+  otherwise returns an empty string.
   */
 QString QPhoneProfile::speedDialInput() const
 {
@@ -565,7 +631,7 @@ QString QPhoneProfile::speedDialInput() const
 }
 
 /*!
-  Set the profile \a id.
+  Sets the profile \a id.
   */
 void QPhoneProfile::setId(int id)
 {
@@ -573,7 +639,7 @@ void QPhoneProfile::setId(int id)
 }
 
 /*!
-  Set the profile name to \a name.
+  Sets the profile \a name.
   */
 void QPhoneProfile::setName(const QString &name)
 {
@@ -581,7 +647,7 @@ void QPhoneProfile::setName(const QString &name)
 }
 
 /*!
-  Set whether this profile is a system profile to \a isSystemProfile.
+  Sets whether this profile is a system profile to \a isSystemProfile.
   */
 void QPhoneProfile::setIsSystemProfile(bool isSystemProfile)
 {
@@ -589,7 +655,7 @@ void QPhoneProfile::setIsSystemProfile(bool isSystemProfile)
 }
 
 /*!
-  Set the profile \a volume.  Valid values are from 0 to 5.
+  Sets the profile \a volume. Valid values are from 0 to 5.
   */
 void QPhoneProfile::setVolume(int volume)
 {
@@ -597,7 +663,7 @@ void QPhoneProfile::setVolume(int volume)
 }
 
 /*!
-  Set the profile vibration to \a vibrate.
+  Sets the profile vibration to \a vibrate.
   */
 void QPhoneProfile::setVibrate(bool vibrate)
 {
@@ -605,7 +671,7 @@ void QPhoneProfile::setVibrate(bool vibrate)
 }
 
 /*!
-  Set the incoming call alert \a type.
+  Sets the incoming call alert \a type.
   */
 void QPhoneProfile::setCallAlert(AlertType type)
 {
@@ -613,7 +679,7 @@ void QPhoneProfile::setCallAlert(AlertType type)
 }
 
 /*!
-  Set the incoming message alert \a type.
+  Sets the incoming message alert \a type.
   */
 void QPhoneProfile::setMsgAlert(AlertType type)
 {
@@ -621,7 +687,7 @@ void QPhoneProfile::setMsgAlert(AlertType type)
 }
 
 /*!
-  Set the duration of \a ms milliseconds to play the message tone.
+  Sets the duration in milliseconds to play the message tone to \a ms.
   */
 void QPhoneProfile::setMsgAlertDuration(int ms)
 {
@@ -629,7 +695,7 @@ void QPhoneProfile::setMsgAlertDuration(int ms)
 }
 
 /*!
-  Enables auto answer if \a autoAnswer is true, otherwise disable it.
+  Sets whether auto answering is enabled for this profile to \a autoAnswer.
   */
 void QPhoneProfile::setAutoAnswer(bool autoAnswer)
 {
@@ -637,7 +703,8 @@ void QPhoneProfile::setAutoAnswer(bool autoAnswer)
 }
 
 /*!
-  Enable plane mode if \a planeMode is true, otherwise disable it.
+  Sets whether plane mode is enabled for this profile to \a planeMode.
+  Phone calls cannot be made in plane mode.
  */
 void QPhoneProfile::setPlaneMode(bool planeMode)
 {
@@ -645,7 +712,7 @@ void QPhoneProfile::setPlaneMode(bool planeMode)
 }
 
 /*!
-  Set the application \a settings.
+  Sets the application \a settings.
  */
 void QPhoneProfile::setApplicationSettings(const Settings &settings)
 {
@@ -653,7 +720,8 @@ void QPhoneProfile::setApplicationSettings(const Settings &settings)
 }
 
 /*!
-  Add or update a single application \a setting.
+  Adds a single application \a setting if it does not exist;
+  otherwise updates the existing setting.
  */
 void QPhoneProfile::setApplicationSetting(const Setting &setting)
 {
@@ -662,7 +730,7 @@ void QPhoneProfile::setApplicationSetting(const Setting &setting)
 }
 
 /*!
-  Set the profile's auto activation \a schedule.
+  Sets the profile's auto activation \a schedule.
  */
 void QPhoneProfile::setSchedule(const Schedule &schedule)
 {
@@ -672,7 +740,7 @@ void QPhoneProfile::setSchedule(const Schedule &schedule)
 /*!
   \fn void QPhoneProfile::setCallTone(const QContent &tone)
 
-  Set the incoming call \a tone.
+  Sets the incoming call \a tone.
   */
 void QPhoneProfile::setCallTone(const QContent &l)
 {
@@ -685,7 +753,7 @@ void QPhoneProfile::setCallTone(const QContent &l)
 /*!
   \fn void QPhoneProfile::setMessageTone(const QContent &tone)
 
-  Set the incoming message \a tone.
+  Sets the incoming message \a tone.
  */
 void QPhoneProfile::setMessageTone(const QContent &l)
 {
@@ -696,7 +764,7 @@ void QPhoneProfile::setMessageTone(const QContent &l)
 }
 
 /*!
-  Set the auto activation \a accessory.
+  Sets the auto activation \a accessory.
  */
 void QPhoneProfile::setAccessory(const QString &accessory)
 {
@@ -704,13 +772,17 @@ void QPhoneProfile::setAccessory(const QString &accessory)
 }
 
 /*!
-  Set the speed dial input \a input.
+  Sets the speed dial \a input.
   */
 void QPhoneProfile::setSpeedDialInput(const QString &input)
 {
     d->mSpeedDialInput = input;
 }
 
+/*!
+  \internal
+  Reads the configuration file and populates the properties for this profile.
+*/
 void QPhoneProfile::read(QTranslatableSettings &c)
 {
     d->mName=c.value(cName).toString();
@@ -763,7 +835,9 @@ void QPhoneProfile::read(QTranslatableSettings &c)
 }
 
 /*!
-  Set the profile \a icon.
+  \fn void QPhoneProfile::setIcon(const QString &fileName)
+
+  Sets the profile's icon to \a fileName.
   */
 void QPhoneProfile::setIcon(const QString &icon)
 {
@@ -772,6 +846,10 @@ void QPhoneProfile::setIcon(const QString &icon)
         d->mIcon = ":image/" + d->mIcon;
 }
 
+/*!
+  \internal
+  Writes the properties of this profile to the configuration file.
+*/
 void QPhoneProfile::write(QSettings &c) const
 {
     // do not write system profile's name.
@@ -822,6 +900,7 @@ void QPhoneProfile::write(QSettings &c) const
 
 /*!
   \class QPhoneProfile::Schedule
+  \mainclass
   \brief The Schedule class provided information on timed auto-activation of a
          profile.
 
@@ -831,11 +910,13 @@ void QPhoneProfile::write(QSettings &c) const
   QPhoneProfile::schedule() method, and set through a
   QPhoneProfile::setSchedule() call.
 
+  \sa QPhoneProfile
+
   \ingroup io
  */
 // define QPhoneProfile::Schedule
 /*!
-  Construct a new, empty schedule.
+  Constructs a new, empty schedule.
   */
 QPhoneProfile::Schedule::Schedule()
 : _active(false), _days(0)
@@ -850,7 +931,7 @@ QPhoneProfile::Schedule::Schedule(const QString &str)
 }
 
 /*!
-  Construct a copy of \a other.
+  Constructs a copy of \a other.
   */
 QPhoneProfile::Schedule::Schedule(const Schedule &other)
 : _active(other._active), _time(other._time), _days(other._days)
@@ -858,7 +939,7 @@ QPhoneProfile::Schedule::Schedule(const Schedule &other)
 }
 
 /*!
-  Assign \a other to this schedule.
+  Assigns \a other to this schedule and returns a reference to this schedule.
   */
 QPhoneProfile::Schedule::Schedule &QPhoneProfile::Schedule::operator=(const Schedule &other)
 {
@@ -871,7 +952,7 @@ QPhoneProfile::Schedule::Schedule &QPhoneProfile::Schedule::operator=(const Sche
 /*!
   \fn bool QPhoneProfile::Schedule::operator==(const Schedule &other) const
 
-  Return true of \a other is equivalent to this schedule.
+  Returns true if this schedule is equal to \a other; otherwise returns false.
   */
 bool QPhoneProfile::Schedule::operator==(const QPhoneProfile::Schedule &other) const
 {
@@ -883,7 +964,7 @@ bool QPhoneProfile::Schedule::operator==(const QPhoneProfile::Schedule &other) c
 /*!
   \fn bool QPhoneProfile::Schedule::operator!=(const Schedule &other) const
 
-  Return true of \a other is not equivalent to this schedule.
+  Returns true if this schedule is not equal to \a other; otherwise returns false.
   */
 bool QPhoneProfile::Schedule::operator!=(const QPhoneProfile::Schedule &other) const
 {
@@ -891,8 +972,8 @@ bool QPhoneProfile::Schedule::operator!=(const QPhoneProfile::Schedule &other) c
 }
 
 /*!
-  Returns true if the schedule is active.  Inactive schedules will be ignored
-  by the auto activation system.
+  Returns true if the schedule is active.
+  Inactive schedules will be ignored by the auto activation system.
  */
 bool QPhoneProfile::Schedule::isActive() const
 {
@@ -900,7 +981,7 @@ bool QPhoneProfile::Schedule::isActive() const
 }
 
 /*!
-  If \a active is true, the schedule is enabled, otherwise it is disabled.
+  Sets whether this schedule is enabled to \a active.
  */
 void QPhoneProfile::Schedule::setActive(bool active)
 {
@@ -908,7 +989,7 @@ void QPhoneProfile::Schedule::setActive(bool active)
 }
 
 /*!
-  Returns the time of day the profile will be activated.
+  Returns the activation time of day for this schedule.
  */
 QTime QPhoneProfile::Schedule::time() const
 {
@@ -916,7 +997,7 @@ QTime QPhoneProfile::Schedule::time() const
 }
 
 /*!
-  Sets the activation time of day to \a time.
+  Sets the activation \a time of day for this schedule.
   */
 void QPhoneProfile::Schedule::setTime(const QTime &time)
 {
@@ -932,7 +1013,7 @@ inline static unsigned char dayToMask(Qt::DayOfWeek day)
 }
 
 /*!
-  Returns true of the profile will be activated on \a day.
+  Returns true the activation is scheduled on \a day for this schedule.
  */
 bool QPhoneProfile::Schedule::scheduledOnDay(Qt::DayOfWeek day) const
 {
@@ -940,7 +1021,7 @@ bool QPhoneProfile::Schedule::scheduledOnDay(Qt::DayOfWeek day) const
 }
 
 /*!
-  Returns the list of days on which the profile will be auto activated.
+  Returns the list of days on which the auto activation is scheduled.
  */
 QList<Qt::DayOfWeek> QPhoneProfile::Schedule::scheduledOnDays() const
 {
@@ -957,7 +1038,7 @@ QList<Qt::DayOfWeek> QPhoneProfile::Schedule::scheduledOnDays() const
 }
 
 /*!
-  Sets the profile to activate on \a day.  If other days are set they will not
+  Schedules the auto activation on \a day. If other days are set they will not
   be affected.
   */
 void QPhoneProfile::Schedule::setScheduledDay(Qt::DayOfWeek day)
@@ -966,7 +1047,7 @@ void QPhoneProfile::Schedule::setScheduledDay(Qt::DayOfWeek day)
 }
 
 /*!
-  Sets the profile not to activate on \a day.
+  Removes the auto activation scheduled on \a day.
  */
 void QPhoneProfile::Schedule::unsetScheduledDay(Qt::DayOfWeek day)
 {
@@ -974,7 +1055,7 @@ void QPhoneProfile::Schedule::unsetScheduledDay(Qt::DayOfWeek day)
 }
 
 /*!
-  Sets the profile to activate on no days.
+  Clears all scheduled days for auto activation for this schedule.
   */
 void QPhoneProfile::Schedule::clearScheduledDays()
 {
@@ -1079,6 +1160,7 @@ public:
 
 /*!
   \class QPhoneProfileManager
+  \mainclass
   \brief The QPhoneProfileManager class allows applications to control phone profiles.
 
   Qtopia's phone profiles are stored in the \c {Trolltech/PhoneProfile}
@@ -1086,17 +1168,16 @@ public:
   defined profiles.  Each profile has a unique integer identifier which is used
   to refer to it by the system.
 
-  A profile can be manually activated through the
-  QPhoneProfileManager::activateProfile() method.  Alternatively a profile may
-  be set to auto-activate at certain times, controlled through by
-  QPhoneProfile::schedule(), or when a phone accessory is attached.
+  To activate a profile manually use the QPhoneProfileManager::activateProfile() method.
+
+  \sa QPhoneProfile
 
   \ingroup io
  */
 
 // define QPhoneProfileManager
 /*!
-  Construct a new QPhoneProfileManager with the specified \a parent.
+  Constructs a new QPhoneProfileManager with the given \a parent.
  */
 QPhoneProfileManager::QPhoneProfileManager(QObject *parent)
 : QObject(parent), d(new QPhoneProfileManagerPrivate)
@@ -1111,13 +1192,17 @@ QPhoneProfileManager::QPhoneProfileManager(QObject *parent)
 }
 
 /*!
-  Destroy the QPhoneProfileManager instance.
+  Destroys the QPhoneProfileManager object.
  */
 QPhoneProfileManager::~QPhoneProfileManager()
 {
     delete d;
 }
 
+/*!
+  \internal
+  Reads the configuration file and create QPhoneProfile objects.
+*/
 void QPhoneProfileManager::loadConfig()
 {
     d->m_profiles.clear();
@@ -1147,8 +1232,8 @@ void QPhoneProfileManager::loadConfig()
 }
 
 /*!
-  Returns a QPhoneProfile instance for the profile with the specified \a id,
-  or a null QPhoneProfile if no such profile exists.
+  Returns a QPhoneProfile for the given \a id if exists;
+  otherwise returns a null QPhoneProfile.
  */
 QPhoneProfile QPhoneProfileManager::profile(int id) const
 {
@@ -1161,7 +1246,7 @@ QPhoneProfile QPhoneProfileManager::profile(int id) const
 }
 
 /*!
-  Return all configured phone profiles.
+  Returns all configured phone profiles.
  */
 QList<QPhoneProfile> QPhoneProfileManager::profiles() const
 {
@@ -1177,7 +1262,7 @@ QList<QPhoneProfile> QPhoneProfileManager::profiles() const
 }
 
 /*!
-  Return a list of ids for all configured profiles.
+  Returns a list of ids for all configured profiles.
  */
 QList<int> QPhoneProfileManager::profileIds() const
 {
@@ -1185,9 +1270,11 @@ QList<int> QPhoneProfileManager::profileIds() const
 }
 
 /*!
-  Return true if plane mode is active, false if not.  Plane mode is active
-  if either planeModeOverride() is true or QPhoneProfile::planeMode() for
-  the active profile is true.
+  Returns true if plane mode is active; otherwise returns false.
+  Plane mode is active if either it is overridden or
+  the plane mode for the active profile is true.
+
+  \sa planeModeOverride(), QPhoneProfile::planeMode()
  */
 bool QPhoneProfileManager::planeMode() const
 {
@@ -1195,9 +1282,11 @@ bool QPhoneProfileManager::planeMode() const
 }
 
 /*!
-  Returns true if plane mode override is on, false otherwise.  The plane mode
-  override allows plane mode to be enabled, even if the active profile does
-  not specify it as such.
+  Returns true if plane mode override is on; otherwise returns false.
+  The plane mode override allows plane mode to be enabled,
+  even if the active profile does not specify it as such.
+
+  \sa QPhoneProfile::planeMode()
  */
 bool QPhoneProfileManager::planeModeOverride() const
 {
@@ -1205,7 +1294,7 @@ bool QPhoneProfileManager::planeModeOverride() const
 }
 
 /*!
-  Set the current plane mode override state to \a mode.
+  Sets the current plane mode override state to \a mode.
  */
 void QPhoneProfileManager::setPlaneModeOverride(bool mode)
 {
@@ -1218,7 +1307,7 @@ void QPhoneProfileManager::setPlaneModeOverride(bool mode)
 }
 
 /*!
-  Returns true if plane mode is available, false if not.
+  Returns true if plane mode is available; otherwise returns false.
  */
 bool QPhoneProfileManager::planeModeAvailable() const
 {
@@ -1226,7 +1315,7 @@ bool QPhoneProfileManager::planeModeAvailable() const
 }
 
 /*!
-  Returns the currently active profile, or a null profile if not profile is
+  Returns the currently active profile, or a null profile if no profile is
   active.
  */
 QPhoneProfile QPhoneProfileManager::activeProfile() const
@@ -1237,7 +1326,8 @@ QPhoneProfile QPhoneProfileManager::activeProfile() const
 /*!
   \overload
 
-  Activate the \a profile.  If \a profile has not been saved, the saved version
+  Returns true if able to activates the \a profile; otherwise returns false.
+  If \a profile has not been saved, the saved version
   with the same QPhoneProfile::id() will be activated.
 
   This call is equivalent to \c {activateProfile(profile.id())}.
@@ -1250,8 +1340,9 @@ bool QPhoneProfileManager::activateProfile(const QPhoneProfile &profile)
 /*!
   \fn bool QPhoneProfileManager::activateProfile(int profile)
 
-  Activate the \a profile id.  If \a profile is -1 or the specified profile
-  does not exist, a null (default values) profile will be activated.
+  Returns true if able to activate the \a profile id; otherwise returns false.
+  If \a profile is -1 or the specified profile does not exist,
+  a null (default values) profile will be activated.
  */
 bool QPhoneProfileManager::activateProfile(int newProf)
 {
@@ -1266,6 +1357,9 @@ bool QPhoneProfileManager::activateProfile(int newProf)
     return (newProfile.id() != -1) || (newProf == -1);
 }
 
+/*!
+  \internal
+*/
 void QPhoneProfileManager::activateProfile(const QPhoneProfile &newProfile,
                                            const QPhoneProfile &oldProfile)
 {
@@ -1289,6 +1383,13 @@ void QPhoneProfileManager::activateProfile(const QPhoneProfile &newProfile,
     d->m_selected = newProfile.id();
 }
 
+/*!
+  \internal
+  Activates associated application settings if any.
+  If the previous profile had associated settings
+  that the current profile does not have
+  default settings for those application is applied.
+*/
 void QPhoneProfileManager::activateSettings(const QPhoneProfile::Settings &current, const QPhoneProfile::Settings &previous)
 {
     // list of all available settings
@@ -1321,7 +1422,7 @@ void QPhoneProfileManager::activateSettings(const QPhoneProfile::Settings &curre
 }
 
 /*!
-  Save the specified \a profile.
+  Saves the specified \a profile.
 
   Saving a profile will overwrite any previously saved information.
  */
@@ -1353,7 +1454,7 @@ void QPhoneProfileManager::saveProfile(const QPhoneProfile &profile)
 }
 
 /*!
-  Remove \a profile.  If \a profile is a null profile, no action will be
+  Removes \a profile. If \a profile is a null profile, no action will be
   taken.
 
   If \a profile is active, the default profile (QPhoneProfile::id() == 1)
@@ -1400,6 +1501,9 @@ QPhoneProfile QPhoneProfileManager::newProfile()
     return QPhoneProfile(++d->m_maxId);
 }
 
+/*!
+  \internal
+*/
 void QPhoneProfileManager::profMessage(const QString &msg,
                                        const QByteArray &)
 {
@@ -1408,7 +1512,7 @@ void QPhoneProfileManager::profMessage(const QString &msg,
 }
 
 /*!
-  Force the re-reading of the profile information.
+  Forces the re-reading of the profile information.
   */
 void QPhoneProfileManager::sync()
 {
@@ -1464,31 +1568,31 @@ void QPhoneProfileManager::sync()
 /*!
   \fn void QPhoneProfileManager::planeModeChanged(bool enabled)
 
-  Emitted whenever the plane mode state changes.  \a enabled will be set to
-  true when plane mode is on, and false otherwise.
+  This signal is emitted whenever the plane mode state changes.
+  When plane mode is on \a enabled is true; otherwise false.
  */
 
 /*!
   \fn void QPhoneProfileManager::activeProfileChanged(const QPhoneProfile &profile)
 
-  Emitted whenever the active \a profile changes or is updated.
+  This signal is emitted whenever the active \a profile changes or is updated.
   */
 
 /*!
   \fn void QPhoneProfileManager::profileUpdated(const QPhoneProfile &profile)
 
-  Emitted whenever \a profile is updated.
+  This signal is emitted whenever \a profile is updated.
  */
 
 /*!
   \fn void QPhoneProfileManager::profileAdded(const QPhoneProfile &profile)
 
-  Emitted when a new \a profile is added.
+  This signal is emitted when a new \a profile is added.
  */
 
 /*!
   \fn void QPhoneProfileManager::profileRemoved(const QPhoneProfile &profile)
 
-  Emitted when \a profile is removed.
+  This signal is emitted when \a profile is removed.
  */
 

@@ -814,39 +814,65 @@ public:
 
 /*!
     \class QDocumentSelector
-    \brief The QDocumentSelector widget allows the user to select documents from
+    \ingroup documentselection
+    \mainclass
+    \brief The QDocumentSelector widget allows the user choose a document from
             a list of documents available on the device.
 
-    The QDocumentSelector widget builds the list of documents by using a supplied content filter.  If no
+    The QDocumentSelector widget builds the list of documents by using a supplied \l QContent filter.  If no
     filter is set a default filter which searches for all documents on the device is used.
 
-    The following functionality is provided:
-    \list
-        \o \c setFilter() : filter the list of documents using a content filter
-        \o \c filter() : retrieve the current content filter
-        \o \c setSortMode() : control the sorting of the list of documents
-        \o \c QDocumentSelector::SortMode : provide a list of supported sort modes
-        \o \c sortMode() : retrieve the current sort mode
-        \o \c currentDocument() : retrieve the current selected document
-        \o \c newCurrent() : indicates whether the new document list item is selected
-        \o \c QDocumentSelector::Option : provides a list of document selector configuration options.
-        \o \c options : retrieve the enabled document selector options.
-        \o \c setOptions() : set the enabled document selector options.
-        \o \c enableOptions() : enable one or more document selector options.
-        \o \c disableOptions() : disable one or more document selector options.
-    \endlist
+    Some of the most commonly used functionality is:
+    \table
+    \header
+        \o Function/Enum
+        \o Usage
+    \row
+        \o setFilter() 
+        \o filter the list of documents using a QContentFilter.
+    \row
+        \o filter()
+        \o retrieve the current QContentFilter.
+    \row
+        \o setSortMode()
+        \o control the sorting of the list of documents.
+    \row
+        \o QDocumentSelector::SortMode
+        \o Provides a list of supported sort modes.
+    \row 
+        \o currentDocument()
+        \o retrieve the currently selected/highlighted document in the list.
+    \row
+        \o QDocumentSelector::Option
+        \o provides a list of document selector configuration options.
+    \row
+        \o  options()
+        \o  retrieve the enabled document selector options.
+    \row
+        \o  setOptions()
+        \o  set the enabled document selector options.
+    \row
+        \o  enableOptions()
+        \o  enable one or more options in addition to those already enabled.    
+    \row    
+        \o  disableOptions()
+        \o  disable one or more document selector options.
+    \endtable 
+        
+    When the QDocumentSelector::NewDocument option is enabled, QDocumentSelector adds a new document item to the selection widget.
+    When the item is chosen by the user, the newSelected() signal is emitted.
 
-    When the \c NewDocument options is enabled QDocumentSelector adds a new document icon to the selection widget.
-    When the icon is selected the newDocument() signal is emitted.
+    When a document is chosen, QDocumentSelector emits a
+    documentSelected() signal and a QContent associated with document is passed with
+    the signal.  
 
-    When a document is selected, QDocumentSelector emits a
-    documentSelected() signal and a QContent for the selected document is passed with
-    the signal and the selected document is retrieved using selectedDocument().
+    The currently selected document can be retrieved using currentDocument().
 
     The following code is an example of how to:
     \list
-        \o select a document from the chronologically ordered list on the device
-        \o create new documents
+        \o  chronologically order a list of documents
+        \o  receive notification when the user chooses to create a document
+        \o  receive notification when the user chooses a document
     \endlist
 
     \code
@@ -859,23 +885,47 @@ public:
              this, SLOT(openDocument(const QContent&)) );
     \endcode
 
+    The document selector also complies with DRM requirements so that the user can only
+    choose documents which give the permissions needed by the application.  There
+    are two sets of permissions:
+    \list
+        \o Select Permissions 
+        \o Mandatory Permissions
+    \endlist
+
+    Both sets of permissions effectively define the intended usage for the document. 
+    For example, the QDrmRights::Print permission  is required to print the document.  
+    When the documents are displayed in the list, the selector will try to acquire
+    the permissions needed to use the document.  If the document does not give a
+    permission in the select permissions set, the selector will activate in doing so try 
+    to acquire the permissions for that document.  If the selector is unsuccessful, the 
+    document is still displayed but visually "grayed" out to indicate the document cannot 
+    be selected.  Mandatory permissions differ from select permissions in that the activation
+    step is not taken, the document must immediately give the mandatory permission in order 
+    to be choosable.
+
+    In the case of a generic document selector where the permissions required by the application
+    depends on the document type, QDrmRights::InvalidPermission can be passed to setSelectPermission(),
+    the selector will then use the default permissions of the document. 
+     
+
+
     QDocumentSelector is often the first widget seen in a \l {Qtopia - Main Document Widget}{document-oriented application }. Used in combination with
     \l {QStackedWidget}, a typical application allows
-    selecton of a document using the selector before revealing the document
-    viewer or editor.
+    choosing of a document using the QDocumentSelector, before revealing the document in a viewer or editor.
 
-    \ingroup documentselection
-    \sa QImageDocumentSelector
+    \sa QDocumentSelectorDialog, QImageDocumentSelector, QImageDocumentSelectorDialog
 */
 /*!
     \enum QDocumentSelector::Option
     Options for configuring a QDocumentSelector.
 
     \value None No special configuration options.
-    \value NewDocument The first item in the content list selects a new document.
-    \value TypeSelector A 'Select Type' menu item is available in the context menu which allows the user to restrict the visible content types.
-    \value NestTypes The type selector widget common mime types together as a single type. Individual types are accessible through a sub menu.
-    \value ContextMenu The selector has a context menu.
+    \value NewDocument The first item in the documents list is the new document item
+    \value TypeSelector A 'Select Type' menu item is available in the context menu which allows the user to restrict the visible document types.
+    \value NestTypes The type selector widget combines common mime types together as a single type. 
+           Individual mime types are accessible through a sub menu.
+    \value ContextMenu The QDocumentSelector has a context menu.
  */
 
 /*!
@@ -891,10 +941,10 @@ public:
 /*!
     \enum QDocumentSelector::Selection
 
-    This enum indicates the result of diplaying a document selector dialog.
+    This enum indicates the result of displaying a document selector dialog.
 
-    \value NewSelected The user selected the new document option.
-    \value DocumentSelected The user selected an existing document.
+    \value NewSelected The user has chosen the new document option.
+    \value DocumentSelected The user has chosen an existing document.
     \value Cancelled The user cancelled the dialog.
 */
 
@@ -905,7 +955,7 @@ public:
  */
 
 /*!
-    Constructs a new content selector widget with the given \a parent.
+    Constructs a new document selector widget with the given \a parent.
  */
 QDocumentSelector::QDocumentSelector( QWidget *parent )
     : QWidget( parent )
@@ -934,9 +984,11 @@ QDocumentSelector::~QDocumentSelector()
 }
 
 /*!
-    Returns the filter which defines the subset of content on the device the user can select from.
+    Returns the current documents filter.
 
-    \sa QContentSet::filter(), setFilter()
+    The filter defines the subset of content on the device the user can select from.
+
+    \sa setFilter(), QContentSet::filter()
  */
 QContentFilter QDocumentSelector::filter() const
 {
@@ -946,7 +998,7 @@ QContentFilter QDocumentSelector::filter() const
 /*!
     Sets the \a filter which defines the subset of content on the device the user can select from.
 
-    \sa filter()
+    \sa filter(), QContentSet::filter()
  */
 void QDocumentSelector::setFilter( const QContentFilter &filter )
 {
@@ -954,7 +1006,7 @@ void QDocumentSelector::setFilter( const QContentFilter &filter )
 }
 
 /*!
-  Sets the document sort mode to \a mode.
+  Sets the document sort \a mode.
 
   The default mode is QDocumentSelector::Alphabetical.
 
@@ -977,6 +1029,8 @@ QDocumentSelector::SortMode QDocumentSelector::sortMode() const
 
 /*!
     Returns the enabled document selector options.
+
+    \sa setOptions(), enableOptions(), disableOptions()
  */
 QDocumentSelector::Options QDocumentSelector::options() const
 {
@@ -984,7 +1038,8 @@ QDocumentSelector::Options QDocumentSelector::options() const
 }
 
 /*!
-    Sets the enabled selector \a options.
+    Sets the enabled set of selector \a options. 
+    \sa enableOptions(), disableOptions(), options()
  */
 void QDocumentSelector::setOptions( Options options )
 {
@@ -992,7 +1047,8 @@ void QDocumentSelector::setOptions( Options options )
 }
 
 /*!
-    Enables the document selector options \a options.
+    Enables the document selector \a options, in addition to those already enabled.
+    \sa disableOptions(), options(), setOptions()
 */
 void QDocumentSelector::enableOptions( Options options )
 {
@@ -1000,7 +1056,8 @@ void QDocumentSelector::enableOptions( Options options )
 }
 
 /*!
-    Disables the document selector options \a options.
+    Disables the given \a options.
+    \sa enableOptions(), options(), setOptions()
  */
 void QDocumentSelector::disableOptions( Options options )
 {
@@ -1008,13 +1065,19 @@ void QDocumentSelector::disableOptions( Options options )
 }
 
 /*!
-    Sets the \a categories selected by default in the document selector's category filter dialog.
+    Sets the \a categories checked by default in the document selector's category filter dialog.
 
-    If a default category does not appear in the category filter dialog then the content of the document selector will
-    not be filtered on that category.  If a default category is added to the list after the category selector has been
-    initialized it will not be automatically selected.
+    This function is only relevant if the QDocumentSelector::ContextMenu option has been set or enabled as the category
+    filter dialog is only available through the context menu.
 
-    \sa defaultCategories()
+    If a supplied category does not match those available in the category filter dialog, the document 
+    selector will not be filtered on that category. Upon invocation this function will set the default checked 
+    categories within the category filter dialog, and filter according to the supplied \a categories.   
+    \bold {Note:} Once the dialog has been shown once, this function no longer has any effect.
+    
+    Filtering according to \a categories is applied after the filter defined by filter().
+
+    \sa defaultCategories(), filter(), setFilter(), Categories
 */
 void QDocumentSelector::setDefaultCategories( const QStringList &categories )
 {
@@ -1022,9 +1085,10 @@ void QDocumentSelector::setDefaultCategories( const QStringList &categories )
 }
 
 /*!
-    Returns the categories selected by default in the document selector's category filter dialog.
-
-    \sa setDefaultCategories()
+    Returns the categories checked by default in the document selector's category filter dialog.
+    
+    This function is only relevant if the QDocumentSelector::ContextMenu option has been set or enabled.
+    \sa setDefaultCategories(), Categories
 */
 QStringList QDocumentSelector::defaultCategories() const
 {
@@ -1032,19 +1096,29 @@ QStringList QDocumentSelector::defaultCategories() const
 }
 
 /*!
-    Sets the intended usage of the selected document.  If the document does not have the \a permission the document selector
-    will attempt to activate before the selection succeeds.  If the document cannot be activated with that permission, it
-    will not be selectable.
+    Sets the \a permission a document should give in order to be choosable.
+    The permissions effectively specify the intended usage for that document.
 
-    If the permission is QDrmRights::InvalidPermission the default permission for the content is used.
-*/
-void QDocumentSelector::setSelectPermission( QDrmRights::Permission permission )
-{
+    If a document does not have provide the given \a permission, the document
+    selector will try to activate and thus acquire permissions for the
+    document.  If the document cannot be activated with that \a permission, it
+    will not be choosable from the list and visual indication of this is given.
+
+    If the \a permission is QDrmRights::InvalidPermission the default
+    permissions for the document is used.  
+    
+    \sa selectPermission(), setMandatoryPermissions(), mandatoryPermissions()
+*/ void QDocumentSelector::setSelectPermission( QDrmRights::Permission
+permission ) {
     d->setSelectPermission( permission );
 }
 
 /*!
-    Returns the intended usage of the selected document.
+    Returns the permissions a document should give in order to be choosable.
+
+    The permissions effectively describe the document's intended usage. 
+
+    \sa setSelectPermission(), mandatoryPermissions(), setMandatoryPermissions()
 */
 QDrmRights::Permission QDocumentSelector::selectPermission() const
 {
@@ -1052,12 +1126,16 @@ QDrmRights::Permission QDocumentSelector::selectPermission() const
 };
 
 /*!
-    Sets the \a permissions a document must have in order to be selectable in the document selector.
+    Sets the \a permissions a document must have in order to be choosable from the document
+    selector. 
 
-    Unlike the select permission if a document is missing a mandatory permission it is simply unselectable and can not
-    be activated.
-
-    \sa setSelectPermission()
+    Unlike select permissions, if a document is missing a mandatory permission it will not be activated,
+    and the document cannot be chosen.
+    
+    Because the \a permissions are mandatory, passing QDrmRights::InvalidPermission as a parameter
+    does not exhibit the same behavior as in setSelectPermission().
+    
+    \sa mandatoryPermissions(), setSelectPermission(), selectPermission()
 */
 void QDocumentSelector::setMandatoryPermissions( QDrmRights::Permissions permissions )
 {
@@ -1065,7 +1143,9 @@ void QDocumentSelector::setMandatoryPermissions( QDrmRights::Permissions permiss
 }
 
 /*!
-    Returns the permissions a document must have in order to be selectable in the document selector.
+    Returns the permissions a document must have in order to be choosable by the document selector. 
+
+    \sa setMandatoryPermissions(), setSelectPermission(), selectPermission()
 */
 QDrmRights::Permissions QDocumentSelector::mandatoryPermissions() const
 {
@@ -1073,15 +1153,21 @@ QDrmRights::Permissions QDocumentSelector::mandatoryPermissions() const
 }
 
 /*!
-    Returns the content currently selected in the view.
+    Returns a QContent for the currently selected document. 
+
+    A null QContent is returned if there is no current selection or 
+    if the new document item is currently selected.
+
+    \sa documents()
  */
-QContent QDocumentSelector::currentDocument() const
-{
+QContent QDocumentSelector::currentDocument() const {
     return d->currentDocument();
 }
 
 /*!
-    Returns true if the new document option is currently selected.
+    Returns true if the new document item is currently selected.
+    
+    \sa setOptions()
  */
 bool QDocumentSelector::newCurrent() const
 {
@@ -1089,7 +1175,9 @@ bool QDocumentSelector::newCurrent() const
 }
 
 /*!
-    Returns the content set being displayed by the selector.
+    Returns the content set of documents listed by the selector.
+    
+    \sa currentDocument() 
 */
 const QContentSet &QDocumentSelector::documents() const
 {
@@ -1099,25 +1187,30 @@ const QContentSet &QDocumentSelector::documents() const
 /*!
     \fn QDocumentSelector::documentSelected( const QContent &content )
 
-    Signals that the user has selected the QContent \a content.
+    Signals that the user has chosen \a content from the document list.
+    \sa newSelected() 
  */
 
 /*!
     \fn QDocumentSelector::newSelected()
 
-    Signals that the user selected the new document option.
+    Signals that the user chosen the new document item.
+    \sa documentSelected()
  */
 
 /*!
     \fn QDocumentSelector::documentsChanged()
 
-    Signals that the documents visible in the selector have changed.
+    This signal is emitted when the list of documents changes as
+    a result of a filter change or a file system change.
 */
 
 /*!
-    Displays a document selector dialog with the parent \a parent and window title \a title, configured with
-    the standard selector options \a filter, \a options and \a sortMode.  Selecting a document will assign the document
-    to \a content if it can be rendered with the given \a permission.
+    Displays a modal QDocumentSelectorDialog with the given \a parent and \a title.  The
+    dialog will be configured with the provided \a filter, \a options, \a sortMode and \a permission.  Choosing a 
+    document will assign that document to \a content if it can be rendered with the given \a permission.
+
+    Returns the user's chosen action.
 */
 QDocumentSelector::Selection QDocumentSelector::select( QWidget *parent, QContent *content, QDrmRights::Permission permission, const QString &title, const QContentFilter &filter, Options options, SortMode sortMode )
 {
@@ -1147,9 +1240,11 @@ QDocumentSelector::Selection QDocumentSelector::select( QWidget *parent, QConten
 }
 
 /*!
-    Displays a document selector dialog with the parent \a parent and window title \a title, configured with
-    the standard selector options \a filter, \a options and \a sortMode.  Selecting a document will assign the
-    document to \a content.
+    Displays a modal QDocumentSelectorDialog with the given \a parent and \a title.  The
+    dialog will be configured with the provided \a filter, \a options and \a sortMode.  Choosing a 
+    document will assign that document to \a content.
+
+    Returns the user's chosen action.
  */
 QDocumentSelector::Selection QDocumentSelector::select( QWidget *parent, QContent *content, const QString &title, const QContentFilter &filter, Options options, SortMode sortMode )
 {
@@ -1195,17 +1290,21 @@ public:
 
 /*!
     \class QDocumentSelectorDialog
-    \brief The QDocumentSelectorDialog widget allows the user to select documents from
+    \ingroup documentselection
+    \mainclass
+    \brief The QDocumentSelectorDialog class provides a user with the ability to select documents from
             a list of documents available on the device.
 
-    A QDocumentSelectorDialog is internally based on a QContentSet
-    The QContent selected in the dialog is retrieved using the \c selectedDocument() method.
+    The QDocumentSelectorDialog is a convenience class which is built around a QDocumentSelector,
+    which provides all the base functionality for choosing a document.
 
-    \ingroup documentselection
+    The document chosen in the dialog is retrieved using the selectedDocument() method.
+
+    \sa QDocumentSelector, QImageDocumentSelector, QImageDocumentSelectorDialog
  */
 
 /*!
-    Constructs a new content selector dialog with the given \a parent.
+    Constructs a new document selector dialog with the given \a parent.
  */
 QDocumentSelectorDialog::QDocumentSelectorDialog( QWidget *parent )
     : QDialog( parent )
@@ -1234,9 +1333,11 @@ QDocumentSelectorDialog::~QDocumentSelectorDialog()
 }
 
 /*!
-    Returns the filter which defines the subset of content on the device the user can select from.
+    Returns the current documents filter.
 
-    \sa QContentSet::filter(), setFilter()
+    The filter defines the subset of content on the device the user can select from.
+
+    \sa setFilter(), QContentSet::filter()
  */
 QContentFilter QDocumentSelectorDialog::filter() const
 {
@@ -1246,7 +1347,7 @@ QContentFilter QDocumentSelectorDialog::filter() const
 /*!
     Sets the \a filter which defines the subset of content on the device the user can select from.
 
-    \sa filter()
+    \sa filter(), QContentSet::filter()
  */
 void QDocumentSelectorDialog::setFilter( const QContentFilter &filter )
 {
@@ -1254,7 +1355,7 @@ void QDocumentSelectorDialog::setFilter( const QContentFilter &filter )
 }
 
 /*!
-  Sets the document sort mode to \a mode.
+  Sets the document sort \a mode.
 
   The default mode is QDocumentSelector::Alphabetical.
 
@@ -1277,6 +1378,8 @@ QDocumentSelector::SortMode QDocumentSelectorDialog::sortMode() const
 
 /*!
     Returns the enabled document selector options.
+
+    \sa setOptions(), enableOptions(), disableOptions()
  */
 QDocumentSelector::Options QDocumentSelectorDialog::options() const
 {
@@ -1284,7 +1387,8 @@ QDocumentSelector::Options QDocumentSelectorDialog::options() const
 }
 
 /*!
-    Sets the enabled selector \a options.
+    Sets the enabled set of selector \a options.
+    \sa enableOptions(), disableOptions(), options()
  */
 void QDocumentSelectorDialog::setOptions( QDocumentSelector::Options options )
 {
@@ -1292,7 +1396,8 @@ void QDocumentSelectorDialog::setOptions( QDocumentSelector::Options options )
 }
 
 /*!
-    Enables the document selector options \a options.
+    Enables the document selector \a options, in addition to those already enabled.
+    \sa disableOptions(), setOptions(), options()
  */
 void QDocumentSelectorDialog::enableOptions( QDocumentSelector::Options options )
 {
@@ -1300,7 +1405,10 @@ void QDocumentSelectorDialog::enableOptions( QDocumentSelector::Options options 
 }
 
 /*!
-    Disables the document selector options \a options.
+    Disables the the given \a options.
+
+    \sa enableOptions(), options(), setOptions()
+
  */
 void QDocumentSelectorDialog::disableOptions( QDocumentSelector::Options options )
 {
@@ -1308,13 +1416,16 @@ void QDocumentSelectorDialog::disableOptions( QDocumentSelector::Options options
 }
 
 /*!
-    Sets the \a categories selected by default in the document selector's category filter dialog.
+    Sets the \a categories checked by default in the document selector's category filter dialog.
 
-    If a default category does not appear in the category filter dialog then the content of the document selector will
-    not be filtered on that category.  If a default category is added to the list after the category selector has been
-    initialized it will not be automatically selected.
+    If a supplied category does not match those available in the category filter dialog, the document 
+    selector will not be filtered on that category.  Upon invocation this function will set the default 
+    checked categories within the category filter dialog and filter according to the supplied \a categories  
+    \bold {Note:} Once the dialog has been shown once, this function no longer has any effect.
 
-    \sa defaultCategories()
+    Filtering according to \a categories is applied after the filter defined by filter().
+
+    \sa defaultCategories(), filter(), setFilter(), Categories
  */
 void QDocumentSelectorDialog::setDefaultCategories( const QStringList &categories )
 {
@@ -1322,9 +1433,9 @@ void QDocumentSelectorDialog::setDefaultCategories( const QStringList &categorie
 }
 
 /*!
-    Returns the categories selected by default in the document selector's category filter dialog.
+    Returns the categories checked by default in the document selector's category filter dialog.
 
-    \sa setDefaultCategories()
+    \sa setDefaultCategories(), Categories
  */
 QStringList QDocumentSelectorDialog::defaultCategories() const
 {
@@ -1332,11 +1443,18 @@ QStringList QDocumentSelectorDialog::defaultCategories() const
 }
 
 /*!
-    Sets the intended usage of the selected document.  If the document does not have the \a permission the document selector
-    will attempt to activate before the selection succeeds.  If the document cannot be activated with that permission, it
-    will not be selectable.
+    Sets the \a permission a document should give in order to be choosable.
+    The permissions effectively specify the intended usage for that document.
 
-    If the permission is QDrmRights::InvalidPermission the default permission for the content is used.
+    If a document does not have provide the given \a permission, the document
+    selector will try to activate and thus acquire permissions for the
+    document.  If the document cannot be activated with that \a permission, it
+    will not be choosable from the list and visual indication of this is given.
+
+    If the \a permission is QDrmRights::InvalidPermission the default
+    permissions for the document is used.
+
+    \sa selectPermission(), setMandatoryPermissions(), mandatoryPermissions() 
  */
 void QDocumentSelectorDialog::setSelectPermission( QDrmRights::Permission permission )
 {
@@ -1344,7 +1462,11 @@ void QDocumentSelectorDialog::setSelectPermission( QDrmRights::Permission permis
 }
 
 /*!
-    Returns the intended usage of the selected document.
+    Returns the permissions a document should give in order to be choosable.
+
+    The permissions effectively describe the document's intended usage.
+
+    \sa setSelectPermission(), setMandatoryPermissions(), mandatoryPermissions()
  */
 QDrmRights::Permission QDocumentSelectorDialog::selectPermission() const
 {
@@ -1352,20 +1474,25 @@ QDrmRights::Permission QDocumentSelectorDialog::selectPermission() const
 };
 
 /*!
-    Sets the \a permissions a document must have in order to be selectable in the document selector.
+    Sets the \a permissions a document must have in order to be choosable from the document selector.
 
-    Unlike the select permission if a document is missing a mandatory permission it is simply unselectable and can not
-    be activated.
+    Unlike select permissions, if a document is missing a mandatory permission it will not be activated,
+    and the document cannot be chosen.
+    
+    Because the \a permissions are mandatory, passing QDrmRights::InvalidPermission as a parameter
+    does not exhibit the same behavior as in setSelectPermission().
 
-    \sa setSelectPermission()
- */
+    \sa mandatoryPermissions(), setSelectPermission(), selectPermission()
+  */
 void QDocumentSelectorDialog::setMandatoryPermissions( QDrmRights::Permissions permissions )
 {
     d->setMandatoryPermissions( permissions );
 }
 
 /*!
-    Returns the permissions a document must have in order to be selectable in the document selector.
+    Returns the permissions a document must have in order to be choosable by the document selector.
+    
+    \sa setMandatoryPermissions(), setSelectPermission(), selectPermission()
  */
 QDrmRights::Permissions QDocumentSelectorDialog::mandatoryPermissions() const
 {
@@ -1373,8 +1500,12 @@ QDrmRights::Permissions QDocumentSelectorDialog::mandatoryPermissions() const
 }
 
 /*!
-    Returns the content item selected.  If the user selected to create a new document this will be a
-    null QContent.
+    Returns a QContent for the currently selected document.
+
+    A null QContent is returned if there is no current selection or
+    if the new document item is currently selected.
+    
+    \sa newSelected(), documents()
  */
 QContent QDocumentSelectorDialog::selectedDocument() const
 {
@@ -1382,7 +1513,9 @@ QContent QDocumentSelectorDialog::selectedDocument() const
 }
 
 /*!
-    Returns true if the user selected the new document option.
+    Returns true if the new document item from the list is selected.
+    
+    \sa selectedDocument()
  */
 bool QDocumentSelectorDialog::newSelected() const
 {
@@ -1390,7 +1523,9 @@ bool QDocumentSelectorDialog::newSelected() const
 }
 
 /*!
-    Returns the content set being displayed by the selector.
+    Returns the content set of documents listed by the selector.
+
+    \sa selectedDocument()
  */
 const QContentSet &QDocumentSelectorDialog::documents() const
 {

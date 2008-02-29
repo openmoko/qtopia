@@ -91,26 +91,47 @@ QString QDocumentPropertiesWidgetPrivate::humanReadable(quint64 size)
 
 /*!
   \class QDocumentPropertiesWidget
-  \brief The QDocumentPropertiesWidget class provides controls for modifying the
-   properties of a \c QContent.
-
-  The \c QDocumentPropertiesWidget allows modification of the name, location,
-  and category of a file associated with a particular \c QContent.  The file can
-  also be deleted, copied and beamed from the \c QDocumentPropertiesWidget.
-
-  Note: The API of this class will change as a result of the new document
-  model design.
-
   \ingroup content
+  \mainclass
+  \brief The QDocumentPropertiesWidget class provides controls for viewing and modifying the
+   properties of a document.
+
+  The QDocumentPropertiesWidget allows modification of the name, location,
+  and category of a document.  
+  
+  In addition, the following operations are available: 
+    \table
+    \header
+        \o Operation
+        \o Slot
+    \row
+        \o Beaming
+        \o beamLnk()
+    \row
+        \o Duplicating or copying
+        \o duplicateLnk()
+    \row
+        \o Deleting
+        \o unlinkLnk()
+    \endtable 
+
+  On the phone edition of Qtopia, the slots would typically be invoked through the context
+  menu. 
+    
+  If phone edition is not used, buttons to facilitate these operations will appear on the 
+  QDocumentPropertiesWidget, however the slots are still available for use if required.
+
   \sa QDocumentPropertiesDialog
 */
 
 /*!
-  Constructs a QDocumentPropertiesWidget with parent \a parent.
-  \a l is a pointer to an existing QContent.
+  Constructs a QDocumentPropertiesWidget with a QContent,\a doc, representing the
+  document, and a \a parent widget.
+
+  Ensure that \a doc refers to a document as opposed to an application.
  */
-QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget* parent )
-    : QWidget( parent ), lnk( l )
+QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &doc, QWidget* parent )
+    : QWidget( parent ), lnk( doc )
 {
     bool isDocument = lnk.isDocument();
     d = new QDocumentPropertiesWidgetPrivate;
@@ -150,7 +171,7 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
         d->locationCombo = new QStorageDeviceSelector( lnk, main );
         QFileSystemFilter *fsf = new QFileSystemFilter;
         fsf->documents = QFileSystemFilter::Set;
-        if( !(l.permissions() & QDrmRights::Distribute) && !QStorageMetaInfo().fileSystemOf( l.file() )->isRemovable() )
+        if( !(doc.permissions() & QDrmRights::Distribute) && !QStorageMetaInfo().fileSystemOf( doc.file() )->isRemovable() )
             fsf->removable = QFileSystemFilter::NotSet;
         d->locationCombo->setFilter( fsf );
         grid->addWidget( d->locationCombo, row, 1 );
@@ -169,6 +190,7 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
         d->categoryEdit = new QCategorySelector("Documents", QCategorySelector::Editor | QCategorySelector::DialogView);
         grid->addWidget( d->categoryEdit, row, 1 );
         d->categoryEdit->selectCategories( lnk.categories() );
+        d->categoryEdit->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Preferred );
         row++;
     }
 
@@ -220,37 +242,37 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
     }
 #endif
 
-    if( l.drmState() == QContent::Protected )
+    if( doc.drmState() == QContent::Protected )
     {
         bool hasLicense = false;
 
-        if( l.permissions() & QDrmRights::Play )
+        if( doc.permissions() & QDrmRights::Play )
         {
-            addRights( l.rights( QDrmRights::Play ), grid, main, &row );
+            addRights( doc.rights( QDrmRights::Play ), grid, main, &row );
             hasLicense = true;
         }
 
-        if( l.permissions() & QDrmRights::Display )
+        if( doc.permissions() & QDrmRights::Display )
         {
-            addRights( l.rights( QDrmRights::Display ), grid, main, &row );
+            addRights( doc.rights( QDrmRights::Display ), grid, main, &row );
             hasLicense = true;
         }
 
-        if( l.permissions() & QDrmRights::Execute )
+        if( doc.permissions() & QDrmRights::Execute )
         {
-            addRights( l.rights( QDrmRights::Execute ), grid, main, &row );
+            addRights( doc.rights( QDrmRights::Execute ), grid, main, &row );
             hasLicense = true;
         }
 
-        if( l.permissions() & QDrmRights::Print )
+        if( doc.permissions() & QDrmRights::Print )
         {
-            addRights( l.rights( QDrmRights::Print ), grid, main, &row );
+            addRights( doc.rights( QDrmRights::Print ), grid, main, &row );
             hasLicense = true;
         }
 
-        if( l.permissions() & QDrmRights::Export )
+        if( doc.permissions() & QDrmRights::Export )
         {
-            addRights( l.rights( QDrmRights::Export ), grid, main, &row );
+            addRights( doc.rights( QDrmRights::Export ), grid, main, &row );
             hasLicense = true;
         }
 
@@ -302,7 +324,7 @@ QDocumentPropertiesWidget::~QDocumentPropertiesWidget()
 }
 
 /*!
-  Applies any changes made on the QDocumentPropertiesWidget.
+  Applies any changes made on the QDocumentPropertiesWidget 
  */
 void QDocumentPropertiesWidget::applyChanges()
 {
@@ -349,7 +371,7 @@ void QDocumentPropertiesWidget::applyChanges()
 
 // QTOPIA_DOCAPI_TODO: does this need to be moved to QContent?
 /*!
-  Performs a copy operation.
+  Create a duplicate of the document in the document system.
  */
 void QDocumentPropertiesWidget::duplicateLnk()
 {
@@ -429,7 +451,7 @@ bool QDocumentPropertiesWidget::moveLnk()
 }
 
 /*!
-  Beams the associated document.
+  Beams the document. 
  */
 void QDocumentPropertiesWidget::beamLnk()
 {
@@ -439,7 +461,7 @@ void QDocumentPropertiesWidget::beamLnk()
 
 // QTOPIA_DOCAPI_TODO: does this need to be moved to QContent?
 /*!
-  Deletes the file associated with this link.
+  Deletes the document.  
  */
 void QDocumentPropertiesWidget::unlinkLnk()
 {
@@ -489,30 +511,32 @@ void QDocumentPropertiesWidget::addRights( const QDrmRights &rights, QGridLayout
 /*!
   \fn void QDocumentPropertiesWidget::done()
 
-  This signal is emitted when a file is deleted, copied or beamed from the
-  \c QDocumentPropertiesWidget.
+  This signal is emitted when a file is deleted, duplicated or beamed from the
+  QDocumentPropertiesWidget.
  */
 
 /*!
   \class QDocumentPropertiesDialog
-  \brief The QDocumentPropertiesDialog class allows the user to examine attributes
-         associated with an \c QContent object.
-
-  The \c QDocumentPropertiesDialog uses a \c QDocumentPropertiesWidget to allow the user to
-  examine and modify attributes associated with a file.
-
-  Note: The API of this class will change as a result of the new document
-  model design.
-
   \ingroup content
+  \mainclass
+  \brief The QDocumentPropertiesDialog class allows the user to examine and 
+         modify properties of a document. 
+
+  The QDocumentPropertiesDialog is a convenience class which is built around 
+  a \l QDocumentPropertiesWidget, which provides controls for modifying properties 
+  associated with a document via it's associated \l QContent.
+  
   \sa QDocumentPropertiesWidget
 */
 
 
 /*!
-  Constructs a \c QDocumentPropertiesDialog with parent \a parent and content \a l.
+  Constructs a QDocumentPropertiesDialog with a QContent, \a doc, representing the 
+  document, and a \a parent widget.   
+
+  Ensure that \a doc refers to a document as opposed to an application. 
  */
-QDocumentPropertiesDialog::QDocumentPropertiesDialog( const QContent &l, QWidget* parent )
+QDocumentPropertiesDialog::QDocumentPropertiesDialog( const QContent &doc, QWidget* parent )
     : QDialog( parent )
 {
     setModal(true);
@@ -525,22 +549,21 @@ QDocumentPropertiesDialog::QDocumentPropertiesDialog( const QContent &l, QWidget
     scrollArea->setWidgetResizable( true );
     scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     vbox->addWidget( scrollArea );
-    d = new QDocumentPropertiesWidget( l, this );
+    d = new QDocumentPropertiesWidget( doc, this );
     scrollArea->setWidget( d );
     scrollArea->setFocusProxy( d );
     connect( d, SIGNAL(done()), this, SLOT(reject()) );
 }
 
 /*!
-  Destroys the dialog.
+  Destroys the dialog. 
  */
 QDocumentPropertiesDialog::~QDocumentPropertiesDialog()
 {
 }
 
 /*!
-  If \a ok is true, any modifications done in the dialog are applied to the
-  associated QContent.
+  \reimp
  */
 void QDocumentPropertiesDialog::done(int ok)
 {

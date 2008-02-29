@@ -27,6 +27,8 @@
 #include <QString>
 #include <qtopiaglobal.h>
 
+class QIrObexSocketPrivate;
+
 class QTOPIACOMM_EXPORT QIrObexSocket : public QObexSocket
 {
     Q_OBJECT
@@ -46,8 +48,8 @@ public:
 
 private:
     Q_DISABLE_COPY(QIrObexSocket)
-    uint m_addr;
-    QString m_service;
+
+    QIrObexSocketPrivate *m_data;
 };
 
 #endif

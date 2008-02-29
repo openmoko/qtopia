@@ -29,6 +29,19 @@
   \class TimeMonitorTask
   \brief The TimeMonitorTask class is required for the TimeMonitor service to be supported.
   \ingroup QtopiaServer::Task
+
+  The TimeMonitorTask provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o TimeMonitor
+  \row \o Interfaces \o None
+  \row \o Services \o TimeMonitor
+  \endtable
+
+  The TimeMonitorTask class calls the TimeMonitor::timeChanged(QString) service
+  method for each application that supports it whenever the system time changes.
+  This allows applications to update themselves appropriately.
  */
 
 /*! \internal */

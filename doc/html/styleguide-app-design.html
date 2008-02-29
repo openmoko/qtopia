@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Qtopia Style Guide: Application Design</title>
+  <title>Qtopia Style Guide: Application Design</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Style Guide: Application Design<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Style Guide: Application Design<br /><span class="subtitle"></span>
+</h1>
 <ul><li><a href="#application-styles">Application Styles</a></li>
 <ul><li><a href="#item-based-applications">Item-based Applications</a></li>
 <ul><li><a href="#list-of-lists">List of Lists</a></li>
@@ -49,7 +52,7 @@
 <p>Highlighting a list and pressing <tt>Select</tt> displays the List of Items. Pressing <tt>Back</tt> or <tt>Done</tt> must close the application.</p>
 <a name="list-of-items"></a>
 <h4>List of Items</h4>
-<p>This is the screen most applications will display when started via the launcher. It lists the items that the application may view and/or edit. It is recommended that the menu contains a <i>View Category...</i> option to display only the items in the selected category.</p>
+<p>This is the screen most applications will display when started via the launcher. It lists the items that the application may view and/or edit. It is recommended that the menu contains a <i>View Category..&#x2e;</i> option to display only the items in the selected category.</p>
 <p>The context menu should contain entries that act on all of the items, and optionally a <i>New</i> entry.</p>
 <p>Highlighting an item and pressing <tt>Select</tt> should display a more detailed view of the highlighted item. Pressing <tt>Back</tt> or <tt>Done</tt> must return to the previous list of items or lists (if present), otherwise close the application.</p>
 <p>When an item in the list is used to group or store information; selecting that list item should present the information about that item.</p>
@@ -69,14 +72,14 @@
 <h4>Navigational Flow</h4>
 <p>In order to maintain a consistent navigational flow, the following rules must be adhered to:</p>
 <ul>
-<li>When moving <i>forward</i> (e.g. by pressing <tt>Select</tt> or selecting <tt>Edit</tt> from the menu), the displayed screen must be in its <i>initial state</i>. For example, in a list of items the top-most item must be highlighted.</li>
-<li>When moving <i>back</i> (e.g. by pressing <tt>Back</tt> or <tt>Done</tt>), the previously viewed screen must be displayed in the same state that it was in when left. For example, if item <i>D</i> was highlighted then viewed, pressing <tt>Back</tt> in the view must return to the list with item <i>D</i> still highlighted.</li>
+<li>When moving <i>forward</i> (e.g&#x2e; by pressing <tt>Select</tt> or selecting <tt>Edit</tt> from the menu), the displayed screen must be in its <i>initial state</i>. For example, in a list of items the top-most item must be highlighted.</li>
+<li>When moving <i>back</i> (e.g&#x2e; by pressing <tt>Back</tt> or <tt>Done</tt>), the previously viewed screen must be displayed in the same state that it was in when left. For example, if item <i>D</i> was highlighted then viewed, pressing <tt>Back</tt> in the view must return to the list with item <i>D</i> still highlighted.</li>
 <li>The <i>left</i> and <i>right</i> buttons are used for moving between tabs in a tabbed dialog although in some cases they may be used to select widgets that are horizontally aligned.</li>
 <li>The <i>up</i> and <i>down</i> buttons are used for moving between fields in a dialog.</li>
 <li>To edit a field you first have to focus it using the <i>up/down</i> buttons then select it by pressing <tt>Select</tt>.</li>
 <li>The <tt>Select</tt> button is also used to move through tabs when the tab has focus.</li>
 </ul>
-<p><b>Note:</b> In case there is no tabbed dialog it is very tempting to give the <i>left</i> and <i>right</i> buttons the same functionality as <i>up</i> and <i>down</i>. We have explicitly chosen NOT to do so in order to keep the user interface as consistent as possible, i.e. maintaining one way of doing things.</p>
+<p><b>Note:</b> In case there is no tabbed dialog it is very tempting to give the <i>left</i> and <i>right</i> buttons the same functionality as <i>up</i> and <i>down</i>. We have explicitly chosen NOT to do so in order to keep the user interface as consistent as possible, i.e&#x2e; maintaining one way of doing things.</p>
 <a name="form-layout"></a>
 <h4>Form Layout</h4>
 <p>An input form provides a simple and familiar way for the user to input data. The basic layout of an input form is a two-columned table:</p>
@@ -91,8 +94,8 @@
 <p>These applications allow a specific task to be performed. They do not operate on items, though they may generate items that are then accessed in other applications. Examples of task based applications are <tt>Clock</tt> and <tt>Calculator</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

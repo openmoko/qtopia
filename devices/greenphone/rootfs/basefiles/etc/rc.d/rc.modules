@@ -14,6 +14,7 @@ case "$1" in
         insmod nls_cp437
         insmod nls_iso8859-1
         insmod nls_utf8
+        insmod docparatable
         ;;
     *)
         splash -p + "Loading modules"
@@ -43,7 +44,6 @@ case "$1" in
         insmod s1d19120
 
         # Misc Hardware
-        insmod docparatable
         insmod hsav_detect
         insmod omega_alarm
         insmod omega_rtcalarm

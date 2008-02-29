@@ -98,6 +98,7 @@ void QDeviceIndicatorsPrivate::update()
 
 /*!
   \class QDeviceIndicators
+  \mainclass
   \brief The QDeviceIndicators class allows applications to query, enable
          and disable indicator lights on a device.
 
@@ -113,7 +114,8 @@ void QDeviceIndicatorsPrivate::update()
   status could be read and set directly through the
   \c {/Hardware/IndicatorLights/Email} item.
 
-    \ingroup hardware
+  \ingroup hardware
+  \sa QDeviceIndicatorsProvider
  */
 
 /*!

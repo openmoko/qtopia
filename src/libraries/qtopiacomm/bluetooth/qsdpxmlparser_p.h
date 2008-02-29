@@ -31,7 +31,7 @@
 
 #include <qtopiaglobal.h>
 
-class QTOPIACOMM_EXPORT QSdpXmlHandler : public QXmlDefaultHandler
+class QSdpXmlHandler : public QXmlDefaultHandler
 {
 public:
     QSdpXmlHandler();
@@ -87,7 +87,7 @@ private:
 
 class QSdpXmlParser_Private;
 
-class QTOPIACOMM_EXPORT QSdpXmlParser
+class QSdpXmlParser
 {
 public:
     enum Error { NoError, ParseError };

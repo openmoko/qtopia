@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Tutorial: Implementing a Device Plug-in</title>
+  <title>Tutorial: Implementing a Device Plug-in</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Implementing a Device Plug-in<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Implementing a Device Plug-in<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#keypad">Keypad</a></li>
 <ul><li><a href="#implementation-steps">Implementation Steps</a></li>
 </ul>
@@ -18,16 +21,16 @@
 </ul>
 </ul>
 <p>This document describes the process required to implement a plug-in for a new device. All directory references are relative to the example provided in the <tt>&lt;qtopia-root-dir&gt;/devices/example</tt> directory.</p>
-<p>Qtopia also provides <a href="buildsystem-user-guide.html#device-configuration-profiles">Device Configuration Profiles</a> to simplify the task of configuring Qtopia for a device and providing the plug-ins required.</p>
+<p>Qtopia also provides <a href="buildsystem/over-device-profiles-1.html">Device Profiles</a> to simplify the task of configuring Qtopia for a device and providing the plug-ins required.</p>
 <p>The following directories are of particular interest:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Directory</th><th>Description</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>mkspecs</tt></td><td>contains the <tt>qmake</tt> configuration file used to build for the device</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>src</tt></td><td>contains the source code for the plug-in drivers for keypad and touchscreen</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Directory</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>mkspecs</tt></td><td>contains the <tt>qmake</tt> configuration file used to build for the device</td></tr>
+<tr valign="top" class="even"><td><tt>src</tt></td><td>contains the source code for the plug-in drivers for keypad and touchscreen</td></tr>
 </table></p>
 <p>This tutorial assumes that debugging using <tt>qLog()</tt> is enabled. To activate debugging:</p>
 <ul>
-<li>edit <tt>image/Qtopia/etc/Trolltech/log.conf</tt> and enable <tt>Input</tt></li>
+<li>edit <tt>&lt;image</tt> directory&gt;/etc/default/Trolltech/Log.conf and enable <tt>Input</tt></li>
 <li>restart Qtopia to implement the change and <tt>qLog()</tt> messages will be displayed.</li>
 </ul>
 <p>This functionality is available in both debug and release builds.</p>
@@ -82,8 +85,8 @@
 <p><b>Note:</b> When creating a plug-in it is not necessary to rebuild all of Qtopia to enable it. Simply rebuild the plug-in and copy the files to the <tt>image/Qtopia</tt> directory and restart Qtopia.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

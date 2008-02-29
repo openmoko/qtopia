@@ -70,7 +70,7 @@ public:
     QString toLocalContextString() const;
     QByteArray toLocalContextByteArray() const;
 
-    static QUniqueId constructApplicationLocalUniqueId();
+    static QUniqueId constructApplicationLocalUniqueId(); // OBSOLETE
 
 protected:
     // automatically reversable via constructors, which can detect format.
@@ -86,7 +86,7 @@ private:
     uint mId;
 
     static QUuid legacyIdContext();
-    static QUuid temporaryIDContext();
+    static QUuid temporaryIdContext();
 
     friend uint qHash(const QUniqueId &uid);
 };
@@ -106,7 +106,10 @@ public:
 
     QUniqueId constructUniqueId(uint);
 
-    static QUniqueId temporaryID(uint);
+    static QUniqueId temporaryID(uint); // OBSOLETE
+
+    static QUniqueId constructTemporaryId(uint);
+    static QUniqueId createTemporaryId();
 
     static uint mappedContext(const QUuid &context);
 private:

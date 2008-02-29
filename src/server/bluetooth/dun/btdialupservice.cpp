@@ -40,7 +40,7 @@ class BtDialupServiceProvider : public QBluetoothAbstractService
 {
     Q_OBJECT
 public:
-    BtDialupServiceProvider( BtDialupService* parent );
+    BtDialupServiceProvider( BtDialupServiceTask* parent );
 
     void start();
     void stop();
@@ -56,7 +56,7 @@ private:
     void cleanActiveConnections();
 
 private:
-    BtDialupService* m_parent;
+    BtDialupServiceTask* m_parent;
     QBluetoothRfcommServer* server;
     quint32 m_sdpRecordHandle;
     QBluetoothLocalDevice* localDev;
@@ -69,7 +69,7 @@ private:
     QCommDeviceSession *m_session;
 };
 
-BtDialupServiceProvider::BtDialupServiceProvider( BtDialupService* parent )
+BtDialupServiceProvider::BtDialupServiceProvider( BtDialupServiceTask* parent )
     : QBluetoothAbstractService( QLatin1String("DialupNetworking"), tr("Dial-up Networking Service"), parent ),
         localDev( 0 )
 {
@@ -218,19 +218,36 @@ void BtDialupServiceProvider::emulatorStateChanged()
     }
 }
 
-//TODO qdoc
-BtDialupService::BtDialupService( QObject* parent )
+/*!
+  \class BtDialupServiceTask
+  \brief The BtDialupServiceTask class provides server side support for the Bluetooth 
+  DUN profile.
+  \ingroup QtopiaServer::Task::Bluetooth
+
+  This task listens for incoming Bluetooth DUN connections, forwards the request to 
+  Qtopia's modem emulator and manages the life time of these connections.
+  
+  The BtDialupServiceTask class provides the \c {BtDialupServiceTask} task.
+
+  */
+
+/*!
+  Constructs the BtDialupServiceTask instance with the given \a parent.
+  */
+BtDialupServiceTask::BtDialupServiceTask( QObject* parent )
     : QObject( parent )
 {
     qLog(Bluetooth) << "Initializing BtDialupService";
     d = new BtDialupServiceProvider( this );
 }
 
-BtDialupService::~BtDialupService()
+/*!
+  Destroys the BtDialupServiceTask instance.
+  */
+BtDialupServiceTask::~BtDialupServiceTask()
 {
 }
 
-QTOPIA_TASK(BtDialupService,BtDialupService);
-QTOPIA_TASK_PROVIDES(BtDialupService,BtDialupService);
+QTOPIA_TASK(BtDialupServiceTask,BtDialupServiceTask);
 #include "btdialupservice.moc"
 

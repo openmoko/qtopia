@@ -27,17 +27,19 @@
 
 /*!
     \class QBluetoothAudioGateway
+    \mainclass
     \brief The QBluetoothAudioGateway class provides an interface to a Bluetooth Audio Gateway.
     \ingroup qtopiabluetooth
 
-    The QBluetoothAudioGateway class provides an interface to control a Bluetooth Audio Gateway.
-    The Bluetooth Audio Gateway usually has an audio device associated with it.  Clients
-    can also control speaker and microphone volume of the device, connect and disconnect
-    remote clients and find status information of the audio gateway.
+    The Bluetooth Audio Gateway usually has an audio device associated with it.  Clients can also control speaker and microphone volume of
+    the device, connect and disconnect remote clients and find status
+    information of the audio gateway.
 
-    The QBluetoothAudioGateway is used to control the Headset and Handsfree profile
-    implementations in Qtopia.  Both use a control RFCOMM channel and a SCO voice
-    data channel.
+    The QBluetoothAudioGateway is used to control the Headset and Handsfree
+    profile implementations in Qtopia.  Both use a control RFCOMM channel
+    and a SCO voice data channel.  This class should be used by client
+    applications that wish to control the state of Handsfree / Headset
+    implementations (e.g. a Bluetooth Audio settings application.)
 
     \sa QCommInterface
  */
@@ -64,7 +66,7 @@ QAbstractIpcInterface::Mode mode) : QCommInterface("QBluetoothAudioGateway", ser
 }
 
 /*!
-    Destructor.
+    Destroys the audio gateway.
 */
 QBluetoothAudioGateway::~QBluetoothAudioGateway()
 {
@@ -73,6 +75,9 @@ QBluetoothAudioGateway::~QBluetoothAudioGateway()
 /*!
     Returns the audio device associated with this gateway.  This is implementation
     dependent.  The default implementation returns an alsa hwid string.
+
+    \bold{NOTE:} This function is not intended to be used.  It might
+    be removed in future versions of Qtopia.
 */
 QByteArray QBluetoothAudioGateway::audioDevice() const
 {
@@ -81,6 +86,11 @@ QByteArray QBluetoothAudioGateway::audioDevice() const
 
 /*!
     Returns the audio frequency currently being used by the device.
+
+    \bold{NOTE:} This function is not intended to be used.  It might
+    be removed in future versions of Qtopia.
+
+    \sa audioDevice()
 */
 int QBluetoothAudioGateway::audioFrequency() const
 {
@@ -114,6 +124,8 @@ int QBluetoothAudioGateway::microphoneVolume() const
     This is true once an SCO connection has been established between the remote
     device (headset) and the audio gateway.  All audio information should now
     be routed over the device associated with this audio gateway.
+
+    \sa isConnected(), remotePeer()
 */
 bool QBluetoothAudioGateway::audioEnabled() const
 {
@@ -124,6 +136,8 @@ bool QBluetoothAudioGateway::audioEnabled() const
     Returns true if a client is connected.  This is true once an RFCOMM
     control connection has been established between the remote device
     and the audio gateway.
+
+    \sa audioEnabled(), remotePeer()
 */
 bool QBluetoothAudioGateway::isConnected() const
 {
@@ -133,6 +147,8 @@ bool QBluetoothAudioGateway::isConnected() const
 /*!
     Returns the address of the connected remote device.  If there is no connection
     an invalid QBluetoothAddress is returned.
+
+    \sa isConnected()
 */
 QBluetoothAddress QBluetoothAudioGateway::remotePeer() const
 {
@@ -206,7 +222,7 @@ void QBluetoothAudioGateway::releaseAudio()
 
 /*!
     Asks the Audio Gateway to establish an SCO data connection with the currently
-    connected peer.  All audio date should now be routed to the associated audio
+    connected peer.  All audio data should now be routed to the associated audio
     device.
 
     \sa releaseAudio()
@@ -223,6 +239,8 @@ void QBluetoothAudioGateway::connectAudio()
     object.  The \a success parameter is true if the connection succeded, and false
     otherwise.  If the connection failed, the \a msg parameter holds the error
     string.
+
+    \sa connect()
 */
 
 /*!
@@ -231,12 +249,16 @@ void QBluetoothAudioGateway::connectAudio()
     This signal is sent whenever a client has connected to the Audio Gateway.
     It is only sent on remote device initiated connections.  The \a addr
     parameter holds the address of the connected remote device.
+
+    \sa connect()
 */
 
 /*!
     \fn void QBluetoothAudioGateway::headsetDisconnected()
 
     This signal is sent whenever a headset has disconnected from the audio gateway.
+
+    \sa disconnect()
 */
 
 /*!
@@ -244,6 +266,8 @@ void QBluetoothAudioGateway::connectAudio()
 
     This signal is sent whenever the microphone volume of the remote device has been
     changed.
+
+    \sa speakerVolume(), setSpeakerVolume()
 */
 
 /*!
@@ -251,11 +275,16 @@ void QBluetoothAudioGateway::connectAudio()
 
     This signal is sent whenever the microphone volume of the remote device has been
     changed.
+
+    \sa microphoneVolume(), setMicrophoneVolume()
  */
 
 /*!
     \fn void QBluetoothAudioGateway::audioStateChanged()
 
     This signal is emitted whenever the state of the audio data stream has changed.
-    E.g. the audio stream (SCO connection) has been disconnected or connected.
+    E.g. the audio stream (SCO connection) has been disconnected or connected.  Use audioEnabled() to find out the state of the
+    audio stream.
+
+    \sa audioEnabled()
  */

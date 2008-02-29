@@ -150,7 +150,8 @@ QStringList LANConfig::types() const
 
 #ifndef NO_WIRELESS_LAN
 #if WIRELESS_EXT > 13
-    if ( property("Properties/DeviceType").toString() == "wlan" )
+    QString type = property("Info/Type").toString();
+    if ( type == "wlan" || type == "pcmciawlan" )
         ui << QObject::tr("WLAN detection");
 #endif
 #endif
@@ -166,10 +167,9 @@ QDialog* LANConfig::configure( QWidget* parent, const QString& type )
 #if WIRELESS_EXT > 13
     else if ( type == QObject::tr("WLAN detection") )
     {
-        if ( property("Properties/DeviceType").toString() == "wlan" )
+        QString type = property("Info/Type").toString();
+        if ( type == "wlan" || type == "pcmciawlan" )
             return new WLANScanUI( this, parent );
-        else
-            return 0;
     }
 #endif
 #endif

@@ -66,8 +66,6 @@ private:
     void setBatteryLevel(int level);
     void setLeds();
 
-    void forceShutdown();
-
     void timerEvent(QTimerEvent *e);
 
 private slots:

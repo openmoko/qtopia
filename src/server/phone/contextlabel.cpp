@@ -37,6 +37,8 @@ extern QWSServer *qwsServer;
   \class ContextLabel
   \ingroup QtopiaServer::PhoneUI
   \brief The ContextLabel class provides a themeable, dockable soft key bar for phones.
+
+  This class is part of the Qtopia server.
  */
 
 /*!

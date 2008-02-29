@@ -166,6 +166,26 @@ void AudioManagerPrivate::serviceRemoved(const QString &service)
     }
 }
 
+/*!
+    \class AudioManager
+    \internal
+    \brief The AudioManager class provides quasi audio-device switching functionality on the desktop.
+
+    This class provides a proof-of-concept functionality of audio-device
+    switching in the presence of Bluetooth headset/handsfree devices on the
+    desktop.  VoIP is the only system that has been made to work with
+    this class, and it will be superceded by the Hardware Audio Layer
+    framework as well as custom ALSA plugins and/or hardware services.
+
+    End-users should not use this class.  On real devices (e.g. the greenphone)
+    this class is not necessary as they provide hardware-enabled audio routing
+    capabilities.  This class is also not generic enough to provide
+    full capabilities required for general use.
+*/
+
+/*!
+    Constructs the object with QObject parent set to \a parent.
+*/
 AudioManager::AudioManager( QObject* parent )
     : QObject( parent )
 {
@@ -174,6 +194,9 @@ AudioManager::AudioManager( QObject* parent )
     m_data = new AudioManagerPrivate(this);
 }
 
+/*!
+    Destructor.
+*/
 AudioManager::~AudioManager()
 {
     if (m_data)

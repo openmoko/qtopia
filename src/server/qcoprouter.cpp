@@ -43,11 +43,19 @@
 /*!
   \class QCopRouter
   \ingroup QtopiaServer
-  \brief The QCopRouter class takes care of routing low-level QCop messages
-         that were sent to QPE/Application/foo or QPE/Service/foo to the actual
-         applications that handle them.
+  \brief The QCopRouter class provides an application ipc router for the QCop transport.
 
-  The QCopRouter class provides the \c {IpcRouter} task.
+  QCopRouter provides a Qtopia Server Task.  Qtopia Server Tasks are
+  documented in full in the QtopiaServerApplication class documentation.
+
+  \table
+  \row \o Task Name \o IpcRouter
+  \row \o Interfaces \o ApplicationIpcRouter
+  \row \o Services \o None
+  \endtable
+
+  The QCopRouter class provides an implementation of the ApplicationIpcRouter
+  for the QCop transport.  
 */
 
 QTOPIA_TASK(IpcRouter, QCopRouter);

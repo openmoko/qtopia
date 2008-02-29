@@ -21,6 +21,20 @@
 
 #include "qapplicationplugin.h"
 
+/*!
+  \class QApplicationFactoryInterface
+  \internal
+  
+  This class is used by quicklauncher.
+*/
+
+/*!
+  \class QApplicationPlugin
+  \internal
+
+  This class is used by quicklauncher.
+*/
+
 QApplicationPlugin::QApplicationPlugin(QObject *parent)
     : QObject( parent )
 {

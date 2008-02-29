@@ -43,12 +43,15 @@
 
 /*!
     \class QIrObexServer
+    \mainclass
     \brief The QIrObexServer class listens for OBEX client connections.
 
-The QIrObexServer class can be used to listen for new OBEX client connections.
-The object binds to an Infrared OBEX service and listens for any client connections.  Once a
-client is connected, server reports a new connection, which should then be handled
-by the individual service implementation, e.g. IR Xfer service, IR OBEX service, etc.
+    The object binds to an Infrared OBEX service and listens for
+    any client connections.  Once a client is connected, server reports
+    a new connection by emitting the newConnection() signal.  The connection
+    should be accepted and handled by the individual service implementations.
+    This could be an IR Xfer service implementation, an IR OBEX service
+    implementation, or a custom service.
 
     \ingroup qtopiair
  */

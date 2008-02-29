@@ -44,6 +44,7 @@
 #include <qexportedbackground.h>
 #include "qtopiaserverapplication.h"
 #include "contentsetlauncherview.h"
+#include "qperformancelog.h"
 
 // define LazyContentStack
 LazyContentStack::LazyContentStack(Flags lcsFlags, QWidget *parent,
@@ -276,6 +277,9 @@ void PhoneBrowserStack::back()
     LazyContentStack::back();
 }
 
+/*!
+  \internal
+  */
 void PhoneBrowserScreen::closeEvent(QCloseEvent *e)
 {
     m_stack->back();
@@ -352,7 +356,9 @@ LauncherView *PhoneBrowserStack::createAppView(const QString &category)
     if ( category == "Applications" )
     {
         QCategoryManager manager("Applications");
-        manager.addCategory( "Packages", "Packages", "qpe/AppsIcon", false, true );
+        // For new code a more unique id should be used instead of using the untranslated text
+        // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
+        manager.ensureSystemCategory( "Packages", "Packages", "qpe/AppsIcon" );
         QContent *content = new QContent();
         content->setType("Folder/Packages");
         content->setName( tr("Installed Apps"));
@@ -481,8 +487,7 @@ void PhoneMainMenu::makeLauncherMenu(QSettings &cfg)
     const int menuc = cfg.value("Columns",3).toInt();
     menuKeyMap = cfg.value("Map","123456789").toString();
 
-    qLog(Performance) << "UI :  " << "Creating PhoneMainMenu : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("UI") << "Creating PhoneMainMenu";
 
     qLog(UI) << "PhoneMainMenu:";
     qLog(UI) << "    " << menur << "x" << menuc;
@@ -567,8 +572,7 @@ void PhoneMainMenu::makeLauncherMenu(QSettings &cfg)
     // just to get help for the main menu
     (void)QSoftMenuBar::menuFor(this);
 
-    qLog(Performance) << "UI :  " << "PhoneMainMenu created : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog("UI") << "PhoneMainMenu created";
 
     cfg.endGroup();
 }
@@ -585,18 +589,10 @@ QContent *PhoneMainMenu::readLauncherMenuItem(const QString &entry)
         QString apps = Qtopia::qtopiaDir()+"apps/";
         // We need the full path to the entry to compare against the items we get from QContentSet
         QString entryPath = apps+entry;
-        // This is the path we're going to search
-        QString folder = apps+QFileInfo(entry).dir().dirName();
-        QContentSet set( QContentFilter(QContentFilter::Directory, folder) );
-        // The documentation says that items() is expensive. It mentions
-        // getting a pointer from a model but didn't contain a link to the
-        // appropriate documentation.
-        foreach ( const QContent &content, set.items() ) {
-            if ( content.linkFile() == entryPath ) {
-                // Yay. We found it!
-                applnk = new QContent( content );
-                break;
-            }
+        applnk = new QContent( entryPath, false );
+        if ( applnk->id() == QContent::InvalidId ) {
+            delete applnk;
+            applnk = 0;
         }
     } else if (entry == "Documents") { // No tr
         applnk = new QContent();
@@ -773,7 +769,22 @@ void RunningAppsLauncherView::applicationStateChanged()
     //resetSelection();
 }
 
-// define PhoneBrowserScreen
+
+/*!
+  \class PhoneBrowserScreen
+  \brief The PhoneBrowserScreen class provides the main launcher grid for Qtopia Phone.
+  \ingroup QtopiaServer::PhoneUI
+
+  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+
+  \sa QAbstractServerInterface, QAbstractBrowserScreen
+
+*/
+
+/*!
+  Constrcuts a new PhoneBrowserScreen instance with the specified \a parent 
+  and widget \a flags
+  */
 PhoneBrowserScreen::PhoneBrowserScreen(QWidget *parent, Qt::WFlags flags)
 : QAbstractBrowserScreen(parent, flags), m_stack(0)
 {
@@ -789,21 +800,33 @@ PhoneBrowserScreen::PhoneBrowserScreen(QWidget *parent, Qt::WFlags flags)
     setFocusProxy(m_stack);
 }
 
+/*!
+  \reimp
+  */
 QString PhoneBrowserScreen::currentView() const
 {
     return m_stack->currentName();
 }
 
+/*!
+  \reimp
+  */
 bool PhoneBrowserScreen::viewAvailable(const QString &) const
 {
     return true;
 }
 
+/*!
+  \reimp
+  */
 void PhoneBrowserScreen::resetToView(const QString &view)
 {
     m_stack->resetToView(view);
 }
 
+/*!
+  \reimp
+  */
 void PhoneBrowserScreen::moveToView(const QString &view)
 {
     m_stack->showView(view);

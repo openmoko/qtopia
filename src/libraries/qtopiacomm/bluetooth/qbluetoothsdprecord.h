@@ -65,14 +65,14 @@ public:
     QString providerName() const;
     void setProviderName(const QString &providerName);
 
-    QUrl docURL() const;
-    void setDocURL(const QUrl &docURL);
+    QUrl docUrl() const;
+    void setDocUrl(const QUrl &docUrl);
 
-    QUrl execURL() const;
-    void setExecURL(const QUrl &execURL);
+    QUrl execUrl() const;
+    void setExecUrl(const QUrl &execUrl);
 
-    QUrl iconURL() const;
-    void setIconURL(const QUrl &iconURL);
+    QUrl iconUrl() const;
+    void setIconUrl(const QUrl &iconUrl);
 
     QBluetoothSdpUuid id() const;
     void setId(const QBluetoothSdpUuid &id);

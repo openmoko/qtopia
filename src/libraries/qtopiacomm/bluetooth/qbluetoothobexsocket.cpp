@@ -38,6 +38,20 @@ public:
 };
 
 /*!
+    \class QBluetoothObexSocket
+    \mainclass
+    \brief The QBluetoothObexSocket class represents a single Bluetooth OBEX connection.
+
+    This allows the use of the OBEX protocol over a Bluetooth connection.
+    For example, a QBluetoothObexSocket object could be used to create
+    a QObexPushClient object in order to run an OBEX Push client over a
+    Bluetooth transport connection.
+
+    \ingroup qtopiabluetooth
+    \sa QBluetoothObexServer
+*/
+
+/*!
     Constructs a new invalid QBluetoothObexSocket with parent object \a parent.
 */
 QBluetoothObexSocket::QBluetoothObexSocket(QObject *parent) : QObexSocket(parent)
@@ -49,30 +63,30 @@ QBluetoothObexSocket::QBluetoothObexSocket(QObject *parent) : QObexSocket(parent
 }
 
 /*!
-    Constructs a new QBluetoothObexSocket.  The \a rfcomm_channel
-    parameter specifies the RFCOMM channel to connect to.  The
-    \a remote parameter specifies the remote address of the
-    bluetooth device, and \a local parameter specifies what
-    local bluetooth adapter to use. The \a parent specifies the parent
-    object.
+    Constructs a new QBluetoothObexSocket.  The \a rfcommChannel parameter
+    specifies the RFCOMM channel to connect to.  The \a remote parameter
+    specifies the address of the remote bluetooth device, and \a local
+    parameter specifies which local bluetooth adapter is to be used for the
+    connection. The \a parent specifies the parent object.
 */
 QBluetoothObexSocket::QBluetoothObexSocket(const QBluetoothAddress &remote,
-                                           quint8 rfcomm_channel,
+                                           quint8 rfcommChannel,
                                            const QBluetoothAddress &local,
                                            QObject *parent) : QObexSocket(parent)
 {
     m_data = new QBluetoothObexSocketPrivate();
-    m_data->m_channel = rfcomm_channel;
+    m_data->m_channel = rfcommChannel;
     m_data->m_remote = remote;
     m_data->m_local = local;
 }
 
 /*!
-    Destructor.
+    Destroys the socket.
 */
 QBluetoothObexSocket::~QBluetoothObexSocket()
 {
-
+    delete m_data;
+    m_data = NULL;
 }
 
 /*!
@@ -84,7 +98,7 @@ qint16 QBluetoothObexSocket::channel() const
 }
 
 /*!
-    Sets the RFCOMM channel of the socket.
+    Sets the RFCOMM channel of the socket to \a channel.
 */
 void QBluetoothObexSocket::setChannel(quint8 channel)
 {
@@ -101,7 +115,7 @@ const QBluetoothAddress &QBluetoothObexSocket::remoteAddress() const
 }
 
 /*!
-    Sets the address of the remote device to connect to.
+    Sets the address of the remote device to connect to \a addr.
 */
 void QBluetoothObexSocket::setRemoteAddress(const QBluetoothAddress &addr)
 {
@@ -109,7 +123,7 @@ void QBluetoothObexSocket::setRemoteAddress(const QBluetoothAddress &addr)
 }
 
 /*!
-    Returns the address of the local adaptor to use.
+    Returns the address of the local adaptor used for the connection.
 */
 const QBluetoothAddress &QBluetoothObexSocket::localAddress() const
 {
@@ -117,7 +131,7 @@ const QBluetoothAddress &QBluetoothObexSocket::localAddress() const
 }
 
 /*!
-    Sets the address of the local adaptor to use.
+    Sets the address of the local adaptor to use to \a address.
 */
 void QBluetoothObexSocket::setLocalAddress(const QBluetoothAddress &address)
 {
@@ -132,8 +146,6 @@ static void qobex_dummy_callback(obex_t *, obex_object_t *, int, int, int, int)
 
 /*!
     \reimp
-
-    Initiates a bluetooth connection.
 */
 bool QBluetoothObexSocket::connect()
 {

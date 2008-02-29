@@ -33,6 +33,18 @@
 #define STRBUFSIZE 1024
 #define MAXINDENT 64
 
+/*!
+    \class QSdpXmlGenerator
+    \internal
+    \brief The QSdpXmlGenerator class converts the QBluetoothSdpRecord to an XML format
+
+    This class is internal.  It converts a QBluetoothSdpRecord to
+    an XML format useable by BlueZ.
+
+    \sa QBluetoothSdpRecord
+*/
+
+
 static void generate_value(const QVariant &val, int indent_level, QIODevice *device)
 {
     char buf[STRBUFSIZE];
@@ -327,6 +339,13 @@ static void generate_attribute(const QVariant &attr, quint16 id, QIODevice *devi
     device->write("\t</attribute>\n");
 }
 
+/*!
+    \internal
+
+    Convert a QBluetoothSdpRecord into an XML format useable by BlueZ hcid
+    daemon.  The \a device parameter specifies the device to use for
+    writing the output.  This could be a QFile or a QBuffer for instance.
+*/
 void QSdpXmlGenerator::generate(const QBluetoothSdpRecord &record, QIODevice *device)
 {
     QList<quint16> attrList = record.attributeIds();

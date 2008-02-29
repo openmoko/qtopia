@@ -35,12 +35,44 @@
 
 /*!
     \class QtopiaIpcAdaptor
+    \mainclass
     \ingroup ipc
     \brief The QtopiaIpcAdaptor class provides an interface to messages on a Qtopia IPC channel
-    which simplifies remote signal and slot invocations
+    which simplifies remote signal and slot invocations.
 
-    The QtopiaIpcAdaptor class provides an interface for sending messages on a
-    Qtopia IPC channel which simplifies remote signal and slot invocations.
+    Using this class, it is very easy to convert a signal emission into an IPC
+    message on a channel, and to convert an IPC message on a channel into a
+    slot invocation.  In the following example, when the signal \c{valueChanged(int)}
+    is emitted from the object \c source, the IPC message \c{changeValue(int)} will
+    be sent on the channel \c{QPE/Foo}:
+
+    \code
+    QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor("QPE/Foo");
+    QtopiaIpcAdaptor::connect
+        (source, SIGNAL(valueChanged(int)), adaptor, MESSAGE(changeValue(int)));
+    \endcode
+
+    Note that we use QtopiaIpcAdaptor::connect() to connect the signal to the
+    IPC message, not QObject::connect().  A common error is to use \c{connect()}
+    without qualifying it with \c{QtopiaIpcAdaptor::} and picking up
+    QObject::connect() by mistake.
+
+    On the server side of an IPC protocol, the \c{changeValue(int)} message can
+    be connected to the slot \c{setValue()} on \c dest:
+
+    \code
+    QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor("QPE/Foo");
+    QtopiaIpcAdaptor::connect
+        (adaptor, MESSAGE(changeValue(int)), dest, SIGNAL(setValue(int)));
+    \endcode
+
+    Now, whenever the client emits the \c{valueChanged(int)} signal, the
+    \c{setValue(int)} slot will be automatically invoked on the server side,
+    with the \c int parameter passed as its argument.
+
+    Only certain parameter types can be passed across an IPC boundary in this fashion.
+    The type must be visible to QVariant as a meta-type.  Many simple built-in
+    types are already visible; for user-defined types, use Q_DECLARE_USER_METATYPE().
 
     \sa QtopiaAbstractService, QtopiaIpcEnvelope
 */
@@ -142,7 +174,9 @@ QtopiaIpcAdaptor::~QtopiaIpcAdaptor()
 }
 
 /*!
-    Connect \a signal on \a sender to \a member on \a receiver.
+    Connects \a signal on \a sender to \a member on \a receiver.  Returns true
+    if the connection was possible; otherwise returns false.
+
     If either \a sender or \a receiver are instances of
     QtopiaIpcAdaptor, this function will arrange for the signal
     to be delivered over a Qtopia IPC channel.  If both \a sender and
@@ -201,7 +235,7 @@ bool QtopiaIpcAdaptor::connect( QObject *sender, const QByteArray& signal,
 }
 
 /*!
-    Publish the signal or slot called \a member on this object on
+    Publishes the signal or slot called \a member on this object on
     the Qtopia IPC channel represented by this QtopiaIpcAdaptor.
 
     If \a member is a slot, then whenever an application sends a
@@ -213,6 +247,8 @@ bool QtopiaIpcAdaptor::connect( QObject *sender, const QByteArray& signal,
     be sent on the channel.
 
     Returns false if \a member does not refer to a valid signal or slot.
+
+    \sa publishAll()
 */
 bool QtopiaIpcAdaptor::publish( const QByteArray& member )
 {
@@ -235,10 +271,12 @@ bool QtopiaIpcAdaptor::publish( const QByteArray& member )
 */
 
 /*!
-    Publish all signals or public slots on this object within subclasses of
+    Publishes all signals or public slots on this object within subclasses of
     QtopiaIpcAdaptor.  This is typically called from a subclass constructor.
     The \a type indicates if all signals, all public slots, or both, should
     be published.  Private and protected slots will never be published.
+
+    \sa publish()
 */
 void QtopiaIpcAdaptor::publishAll( QtopiaIpcAdaptor::PublishType type )
 {
@@ -270,7 +308,7 @@ void QtopiaIpcAdaptor::publishAll( QtopiaIpcAdaptor::PublishType type )
 }
 
 /*!
-    Send a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qtopia IPC channel which will cause the invocation
     of \a member on receiving objects.  The return value can be used
     to add arguments to the message before transmission.
 */
@@ -281,7 +319,7 @@ QtopiaIpcSendEnvelope QtopiaIpcAdaptor::send( const QByteArray& member )
 }
 
 /*!
-    Send a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qtopia IPC channel which will cause the invocation
     of the single-argument \a member on receiving objects, with the
     argument \a arg1.
 */
@@ -293,7 +331,7 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QVariant &arg1 )
 }
 
 /*!
-    Send a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qtopia IPC channel which will cause the invocation
     of the double-argument \a member on receiving objects, with the
     arguments \a arg1 and \a arg2.
 */
@@ -306,7 +344,7 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QVariant &arg1, con
 }
 
 /*!
-    Send a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qtopia IPC channel which will cause the invocation
     of the triple-argument \a member on receiving objects, with the
     arguments \a arg1, \a arg2, and \a arg3.
 */
@@ -321,7 +359,7 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QVariant &arg1,
 }
 
 /*!
-    Send a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qtopia IPC channel which will cause the invocation
     of the multi-argument \a member on receiving objects, with the
     argument list \a args.
 */
@@ -331,8 +369,8 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QList<QVariant>& ar
 }
 
 /*!
-    Determine if the message on the Qtopia IPC channel corresponding to \a signal
-    has been connected to a local slot.
+    Returns true if the message on the Qtopia IPC channel corresponding to \a signal
+    has been connected to a local slot; otherwise returns false.
 */
 bool QtopiaIpcAdaptor::isConnected( const QByteArray& signal )
 {
@@ -340,7 +378,7 @@ bool QtopiaIpcAdaptor::isConnected( const QByteArray& signal )
 }
 
 /*!
-    Convert a signal or slot \a member name into a Qtopia IPC message name.
+    Converts a signal or slot \a member name into a Qtopia IPC message name.
     The default implementation strips the signal or slot prefix number
     from \a member and then normalizes the name to convert types
     such as \c{const QString&} into QString.
@@ -356,7 +394,7 @@ QString QtopiaIpcAdaptor::memberToMessage( const QByteArray& member )
 }
 
 /*!
-    Convert \a channel into a list of names to use for sending messages.
+    Converts \a channel into a list of names to use for sending messages.
     The default implementation returns a list containing just \a channel.
 */
 QStringList QtopiaIpcAdaptor::sendChannels( const QString& channel )
@@ -367,7 +405,7 @@ QStringList QtopiaIpcAdaptor::sendChannels( const QString& channel )
 }
 
 /*!
-    Convert \a channel into a new name to use for receiving messages.
+    Converts \a channel into a new name to use for receiving messages.
     The default implementation returns \a channel.
 */
 QString QtopiaIpcAdaptor::receiveChannel( const QString& channel )
@@ -531,13 +569,13 @@ void QtopiaIpcAdaptor::send( const QStringList& channels,
 
 /*!
     \class QtopiaIpcSendEnvelope
+    \mainclass
     \ingroup ipc
     \brief The QtopiaIpcSendEnvelope class provides a mechanism to send Qtopia IPC messages with an argument number of arguments.
 
-    The QtopiaIpcSendEnvelope class provides a mechanism to send Qtopia IPC messages
-    with an arbitrary number of arguments, in a similar fashion to
-    QtopiaIpcEnvelope.  The QtopiaIpcAdaptor::send() method returns an instance
-    of this class, as demonstrated in the following example:
+    This class operates in a similar fashion to QtopiaIpcEnvelope.
+    The most common way to use this class is to call QtopiaIpcAdaptor::send(),
+    as demonstrated in the following example:
 
     \code
     QtopiaIpcAdaptor *channel = ...;

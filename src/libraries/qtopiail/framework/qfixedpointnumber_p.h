@@ -99,43 +99,4 @@ inline QFixedPointNumber::operator bool () { return value != 0; }
 inline bool QFixedPointNumber::operator ! () { return value == 0; }
 inline bool QFixedPointNumber::operator == ( bool t ) { return (value != 0) == t; }
 
-/*
-QFixedPointNumber operator + (int x, QFixedPointNumber y) {return y + x;}
-QFixedPointNumber operator * (int x, QFixedPointNumber y) {return y * x;}
-*/
-
-#endif
-
-
-#if 0
-
-
-#include <stdio.h>
-#include "QFixedPointNumber.h"
-
-void main(int argc, char **argv)
-{
-  int i;
-  QFixedPointNumber a(argv[1]);
-  QFixedPointNumber b(argv[2]);
-  printf("a = %s\n", a.edit());
-  printf("b = %s\n", b.edit());
-  printf("a+b = %s\n", (a+b).edit());
-  printf("a-b = %s\n", (a-b).edit());
-  printf("a*b = %s\n", (a*b).edit());
-  printf("-a = %s\n", (-a).edit());
-  printf("a[4] = %s\n", a[4].edit());
-  if (b != 0)
-    printf("a/b = %s\n", (a/b).edit());
-  printf("a.whole() = %d\n", a.whole());
-  printf("is a == b? %s\n", a == b ? "yes" : "no");
-  printf("is a != b? %s\n", a != b ? "yes" : "no");
-  printf("is a <  b? %s\n", a <  b ? "yes" : "no");
-  printf("is a <= b? %s\n", a <= b ? "yes" : "no");
-  printf("is a >  b? %s\n", a >  b ? "yes" : "no");
-  printf("is a >= b? %s\n", a >= b ? "yes" : "no");
-}
-
-
-
 #endif

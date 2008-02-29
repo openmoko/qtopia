@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Device Partition Layout</title>
+  <title>Device Partition Layout</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Device Partition Layout<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Device Partition Layout<br /><span class="subtitle"></span>
+</h1>
 <a name="why-partition-internal-devices"></a>
 <h2>Why Partition Internal Devices?</h2>
 <p>Partitioning internal storage devices provides a several benefits, including:</p>
@@ -35,17 +38,17 @@
 <h2>Typical Partition Layout</h2>
 <p>A typical Qtopia device contains the following partitions:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Contents</th><th>Path</th><th>Size</th><th>Mode</th><th>File System</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>System Software</td><td><tt>/</tt></td><td>less than 10Mb</td><td>read-only</td><td>cramfs</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td>UI Software</td><td><tt>/opt/Qtopia</tt></td><td>greater than 20Mb</td><td>read-only</td><td>cramfs</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>User Documents and Settings</td><td><tt>/home</tt></td><td>at least 5Mb</td><td>read-write</td><td>jffs2, ext2, ext3</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td>Temporary Storage</td><td><tt>/var</tt></td><td>500Kb</td><td>read-write</td><td>tmpfs</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>Temporary Storage</td><td><tt>/tmp</tt></td><td>0</td><td>symbolic link to <tt>/var/tmp</tt></td><td>tmpfs</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Contents</th><th>Path</th><th>Size</th><th>Mode</th><th>File System</th></tr></thead>
+<tr valign="top" class="odd"><td>System Software</td><td><tt>/</tt></td><td>less than 10Mb</td><td>read-only</td><td>cramfs</td></tr>
+<tr valign="top" class="even"><td>UI Software</td><td><tt>/opt/Qtopia</tt></td><td>greater than 20Mb</td><td>read-only</td><td>cramfs</td></tr>
+<tr valign="top" class="odd"><td>User Documents and Settings</td><td><tt>/home</tt></td><td>at least 5Mb</td><td>read-write</td><td>jffs2, ext2, ext3</td></tr>
+<tr valign="top" class="even"><td>Temporary Storage</td><td><tt>/var</tt></td><td>500Kb</td><td>read-write</td><td>tmpfs</td></tr>
+<tr valign="top" class="odd"><td>Temporary Storage</td><td><tt>/tmp</tt></td><td>0</td><td>symbolic link to <tt>/var/tmp</tt></td><td>tmpfs</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

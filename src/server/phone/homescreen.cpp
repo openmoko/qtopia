@@ -94,11 +94,17 @@ private:
 
 };
 
+/*!
+  \internal
+  */
 bool HomeScreen::keyLocked() const
 {
     return keyLock->locked();
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::setKeyLocked(bool lock) const
 {
     if(lock)
@@ -208,6 +214,17 @@ void ThemeBackground::rightsExpired( const QDrmContent &content )
 
 //===========================================================================
 
+/*!
+  \class HomeScreen
+  \brief The HomeScreen class provides the home screen for the Qtopia Phone edition.
+  \ingroup QtopiaServer::PhoneUI
+
+  This class is part of the Qtopia server.
+*/ 
+
+/*!
+  \internal
+  */
 HomeScreen::HomeScreen(QWidget *parent, Qt::WFlags f)
     : PhoneThemedView(parent, f), keyLock(0),
 #ifdef QTOPIA_CELL
@@ -318,6 +335,9 @@ HomeScreen::HomeScreen(QWidget *parent, Qt::WFlags f)
     showLockInformation();
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::activateSpeedDial()
 {
     if ( speeddialdown )
@@ -328,10 +348,16 @@ void HomeScreen::activateSpeedDial()
     speeddial.clear();
 }
 
+/*!
+  \internal
+  */
 HomeScreen::~HomeScreen()
 {
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::themeLoaded(const QString& /*theme*/)
 {
     applyBackgroundImage();
@@ -341,6 +367,9 @@ void HomeScreen::themeLoaded(const QString& /*theme*/)
         textItem->setTextFormat(Qt::RichText);
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::applyBackgroundImage()
 {
     ThemePluginItem *ip = (ThemePluginItem *)findItem("bgplugin", Plugin);
@@ -358,12 +387,18 @@ void HomeScreen::applyBackgroundImage()
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void HomeScreen::setMissedCalls(int m)
 {
     actionCalls->setEnabled(m);
     actionCalls->setVisible(m);
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::setNewMessages(int m)
 {
     actionMessages->setEnabled(m);
@@ -371,6 +406,9 @@ void HomeScreen::setNewMessages(int m)
 }
 #endif
 
+/*!
+  \internal
+  */
 void HomeScreen::setContextBarLocked(bool locked)
 {
     if (locked)
@@ -389,12 +427,18 @@ void HomeScreen::setContextBarLocked(bool locked)
     }
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::showProfileSelector()
 {
     QtopiaServiceRequest e( "Profiles", "showProfiles()" );
     e.send();
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::themeItemClicked(ThemeItem *item)
 {
     if( !item->isInteractive() )
@@ -423,6 +467,9 @@ void HomeScreen::themeItemClicked(ThemeItem *item)
     }
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::showLockInformation()
 {
     // We "lock" navigation throughout the phone if either the key or sim lock
@@ -487,7 +534,7 @@ void HomeScreen::showLockInformation()
                     text = tr("Press %1 then * to unlock phone");
                     int lkey = BasicKeyLock::lockKey();
                     if (lkey == Qt::Key_Context1)
-                        text = text.arg("Unlock");
+                        text = text.arg(tr("Unlock"));
                     else
                         text = text.arg(QString(QKeySequence(lkey)));
                     }
@@ -561,18 +608,27 @@ void HomeScreen::showLockInformation()
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void HomeScreen::viewNewMessages()
 {
     QtopiaServiceRequest req("SMS", "viewSms()");
     req.send();
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::viewMissedCalls()
 {
     emit showMissedCalls();
 }
 #endif
 
+/*!
+  \internal
+  */
 void HomeScreen::inputMethodEvent(QInputMethodEvent *e)
 {
     speeddialdown = true;
@@ -597,6 +653,9 @@ void HomeScreen::inputMethodEvent(QInputMethodEvent *e)
         speeddialTimer->start(1000);
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::specialButton(int keycode, bool held)
 {
     const QDeviceButton* button =
@@ -613,6 +672,9 @@ void HomeScreen::specialButton(int keycode, bool held)
     }
 }
 
+/*!
+  \internal
+  */
 bool HomeScreen::eventFilter(QObject *, QEvent *e)
 {
 #ifdef QTOPIA_PHONEUI
@@ -665,7 +727,25 @@ bool HomeScreen::eventFilter(QObject *, QEvent *e)
     }
 }
 
+/*!
+  \fn void HomeScreen::showPhoneBrowser()
+  \internal
+  */
+
+/*!
+  \fn void HomeScreen::speedDial(const QString &)
+  \internal
+  */
+
+/*!
+  \fn void HomeScreen::keyLockedChanged(bool)
+  \internal
+  */
+
 /* Reimplemented from ThemedView */
+/*!
+  \internal
+  */
 QWidget* HomeScreen::newWidget( ThemeWidgetItem* input, const QString& name )
 {
     Q_UNUSED( input )
@@ -680,16 +760,25 @@ QWidget* HomeScreen::newWidget( ThemeWidgetItem* input, const QString& name )
     return 0;
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::focusInEvent(QFocusEvent *)
 {
     // Avoid repaint.
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::focusOutEvent(QFocusEvent *)
 {
     // Avoid repaint.
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::keyPressEvent(QKeyEvent *k)
 {
     // also needs to respond to IM events....
@@ -770,6 +859,9 @@ void HomeScreen::keyPressEvent(QKeyEvent *k)
         PhoneThemedView::keyPressEvent(k);
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::keyReleaseEvent(QKeyEvent *k)
 {
     if ( !k->isAutoRepeat() )
@@ -781,6 +873,9 @@ void HomeScreen::keyReleaseEvent(QKeyEvent *k)
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void HomeScreen::showCallHistory(bool missed, const QString &/*hint*/)
 {
     if (!DialerControl::instance()->hasIncomingCall() &&
@@ -792,6 +887,9 @@ void HomeScreen::showCallHistory(bool missed, const QString &/*hint*/)
     }
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::phoneStateChanged()
 {
     if (DialerControl::instance()->allCalls().count()) {
@@ -817,6 +915,9 @@ void HomeScreen::phoneStateChanged()
 }
 #endif
 
+/*!
+  \internal
+  */
 uint HomeScreen::showInformation(const QString &pix, const QString &text, int priority)
 {
     static uint nextInfoId = 0;
@@ -835,6 +936,9 @@ uint HomeScreen::showInformation(const QString &pix, const QString &text, int pr
     return info.id;
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::clearInformation(uint id)
 {
     QList<InfoData>::Iterator it;
@@ -848,6 +952,9 @@ void HomeScreen::clearInformation(uint id)
     updateInfo();
 }
 
+/*!
+  \internal
+  */
 void HomeScreen::updateInfo()
 {
     bool hideInfo = true;
@@ -871,6 +978,9 @@ void HomeScreen::updateInfo()
 
 #ifdef QTOPIA_CELL
 
+/*!
+  \internal
+  */
 void HomeScreen::cellBroadcast(CellBroadcastControl::Type type,
                                const QString &chan,
                                const QString &text)
@@ -885,12 +995,18 @@ void HomeScreen::cellBroadcast(CellBroadcastControl::Type type,
 #endif // QTOPIA_CELL
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  */
 void HomeScreen::hideCBSMessage()
 {
     clearInformation( infoMsgId );
 }
 #endif
 
+/*!
+  \internal
+  */
 HomeScreen *HomeScreen::getInstancePtr()
 {
     static HomeScreen *homeScreen = 0;

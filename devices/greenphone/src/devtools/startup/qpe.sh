@@ -87,6 +87,10 @@ while [ -e /tmp/restart-qtopia ]; do
         export QTOPIA_PHONE_DUMMY=1
     fi
 
+    # clean up shared memory and semaphores
+    # but not for resources created by syslogd
+    clearipc $(pidof syslogd)
+
     chvol SYSTEM 100
     chvol CALL 60
 

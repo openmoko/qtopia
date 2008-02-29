@@ -4,8 +4,7 @@ CONFIG+=qtopia_main
 
 # library files
 HEADERS = calculator.h engine.h data.h instruction.h display.h \
-            interfaces/stdinputwidgets.h integerdata.h integerinstruction.h \
-            qtopiacalcwinexport.h
+            interfaces/stdinputwidgets.h integerdata.h integerinstruction.h
 SOURCES = calculator.cpp engine.cpp data.cpp instruction.cpp \
             display.cpp interfaces/stdinputwidgets.cpp main.cpp
 

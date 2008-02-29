@@ -21,8 +21,10 @@
 
 #include "qmediacodecinfo.h"
 
-struct QMediaCodecInfo::QMediaCodecInfoPrivate
+// {{{ QMediaCodecInfoPrivate
+class QMediaCodecInfoPrivate
 {
+public:
     QString id;
     QString name;
     QString comment;
@@ -33,7 +35,14 @@ struct QMediaCodecInfo::QMediaCodecInfoPrivate
     bool    supportsVideo;
     bool    supportsAudio;
 };
+// }}}
 
+/*!
+    \class QMediaCodecInfo
+    \internal
+*/
+
+// {{{ QMediaCodecInfo
 QMediaCodecInfo::QMediaCodecInfo():
     d(new QMediaCodecInfoPrivate)
 {
@@ -106,7 +115,11 @@ bool QMediaCodecInfo::supportsAudio() const
     return d->supportsAudio;
 }
 
-    // {{{ Serialization
+// {{{ Serialization
+/*!
+    \fn void QMediaCodecInfo::serialize(S& stream) const
+    \internal
+*/
 template <typename S>
 void QMediaCodecInfo::serialize(S& stream) const
 {
@@ -120,6 +133,10 @@ void QMediaCodecInfo::serialize(S& stream) const
     stream << d->supportsAudio;
 }
 
+/*!
+    \fn void QMediaCodecInfo::deserialize(S& stream)
+    \internal
+*/
 template <typename S>
 void QMediaCodecInfo::deserialize(S& stream)
 {
@@ -132,6 +149,8 @@ void QMediaCodecInfo::deserialize(S& stream)
     stream >> d->supportsVideo;
     stream >> d->supportsAudio;
 }
+// }}}
+
 // }}}
 
 Q_IMPLEMENT_USER_METATYPE(QMediaCodecInfo);

@@ -23,11 +23,13 @@
 
 /*!
     \class QKeypadLightAccessory
+    \mainclass
+
     \brief The QKeypadLightAccessory class provides access to the keypad light on a phone.
 
-    The QKeypadLightAccessory class provides access to the keypad light
-    on a phone.  The usual way to turn on the keypad light within a
-    client application is as follows:
+    QKeypadLightAccessory can be used to turn the keypad light on and off using
+    setOn().  For example the following code can be used to turn on the keypad
+    light from within a client application:
 
     \code
     QKeypadLightAccessory light;
@@ -38,21 +40,22 @@
     QKeypadLightAccessoryProvider.
 
     \sa QKeypadLightAccessoryProvider, QHardwareInterface
-  \ingroup hardware
+
+    \ingroup hardware
 */
 
 /*!
-    Construct a new keypad light acessory object for \a id and attach
+    Construct a new keypad light accessory object for \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the first available
-    accessory that supports the keypad light.  If there is more
-    than one service that supports the keypad light, the caller
-    should enumerate them with QHardwareManager::supports()
+    accessory provider that supports the keypad light interface.  If there is
+    more than one service that supports the keypad light interface, the caller
+    should enumerate them with QHardwareManager::providers()
     and create separate QKeypadLightAccessory objects for each.
 
-    \sa QHardwareManager::supports()
+    \sa QHardwareManager::providers()
 */
 QKeypadLightAccessory::QKeypadLightAccessory
       ( const QString& id, QObject *parent, QAbstractIpcInterface::Mode mode )
@@ -62,14 +65,14 @@ QKeypadLightAccessory::QKeypadLightAccessory
 }
 
 /*!
-    Destroy this keypad light accessory object.
+    Destroys the keypad light accessory object.
 */
 QKeypadLightAccessory::~QKeypadLightAccessory()
 {
 }
 
 /*!
-    Determine if the keypad light is currently on or off.
+    Returns true if the keypad light is currently on; otherwise returns false.
 */
 bool QKeypadLightAccessory::on() const
 {
@@ -77,7 +80,7 @@ bool QKeypadLightAccessory::on() const
 }
 
 /*!
-    Set the keypad light on or off depending upon \a value.
+    Turns the keypad light on if \a value is true; otherwise it is turned off.
 */
 void QKeypadLightAccessory::setOn( const bool value )
 {
@@ -87,24 +90,25 @@ void QKeypadLightAccessory::setOn( const bool value )
 /*!
     \fn void QKeypadLightAccessory::onModified()
 
-    Signal that is emitted when on() is modified.
+    Signal that is emitted when the state of the keypad light changes.
 */
 
 /*!
     \class QKeypadLightAccessoryProvider
+    \mainclass
+
     \brief The QKeypadLightAccessoryProvider class provides an interface for keypad light devices to integrate into Qtopia.
 
-    The QKeypadLightAccessoryProvider class provides an interface for
-    keypad light devices to integrate into Qtopia.  Keypad light devices
-    inherit from this class and override setOn() to implement the required
-    functionality.
+    Keypad light devices inherit from this class and override setOn() to
+    implement the required functionality.
 
     \sa QKeypadLightAccessory
-  \ingroup hardware
+
+    \ingroup hardware
 */
 
 /*!
-    Create a keypad light device called \a id and attach it to \a parent.
+    Create a keypad light device provider called \a id and attaches it to \a parent.
 */
 QKeypadLightAccessoryProvider::QKeypadLightAccessoryProvider
         ( const QString& id, QObject *parent )
@@ -113,14 +117,18 @@ QKeypadLightAccessoryProvider::QKeypadLightAccessoryProvider
 }
 
 /*!
-    Destroy this keypad light provider.
+    Destroys the keypad light provider.
 */
 QKeypadLightAccessoryProvider::~QKeypadLightAccessoryProvider()
 {
 }
 
 /*!
-    \reimp
+    Turns the keypad light on if \a value is true; otherwise it is turned off.
+    The default implementation updates the state of the keypad light as seen by
+    on() on the client.  Keypad light implementations should override this
+    function to provide device-specific functionality and then call this
+    implementation to update the client's view of the state of the keypad light.
 */
 void QKeypadLightAccessoryProvider::setOn( const bool value )
 {

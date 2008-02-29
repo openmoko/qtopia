@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Document Storage</title>
+  <title>Document Storage</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document Storage<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document Storage<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#storage-conf">Storage.conf</a></li>
 <li><a href="#what-do-we-want-to-do">What do we want <tt>Storage.conf</tt> to do?</a></li>
 <ul><li><a href="#parameters">Parameters</a></li>
@@ -23,10 +26,10 @@
 <h2>Storage.conf</h2>
 <p>Qtopia identifies and defines storage locations in the <tt>Storage.conf</tt> configuration file. Devices are mapped to human-readable names and the <tt>Removable</tt> variable defines whether or not a given device is removable.</p>
 <p>For example:</p>
-<pre>&nbsp;   [MountPoint0]
+<pre>    [MountPoint0]
     Name[] = Internal Storage
     Removable = 0</pre>
-<p>The device can be anything that appears in the first column of <tt>/proc/mounts</tt>, for example, <tt>//server/path/to/nfsmount</tt> is a valid device.</p>
+<p>The device can be anything that appears in the first column of <tt>/proc/mounts</tt>, for example, <tt><span class="comment">//server/path/to/nfsmount</span></tt> is a valid device.</p>
 <p><tt>Storage.conf</tt> refers to devices but Qtopia uses path names and <tt>/proc/mounts</tt> is consulted to determine which device a given path is on. There is <i>special case</i> code for <tt>$HOME</tt> and the non-removable storage location should be located at <tt>$HOME</tt>. Removing the <i>special case</i> status of <tt>$HOME</tt> also removes the requirement to have only one non-removable location.</p>
 <a name="what-do-we-want-to-do"></a>
 <h2>What do we want <tt>Storage.conf</tt> to do?</h2>
@@ -34,8 +37,8 @@
 <ol type="1">
 <li>identify the various content locations that exist on the device:<ul>
 <li>HOME</li>
-<li>non-removable devices (e.g. <tt>/dev/hda1</tt>)</li>
-<li>removable devices (e.g. <tt>/dev/cf</tt>)</li>
+<li>non-removable devices (e.g&#x2e; <tt>/dev/hda1</tt>)</li>
+<li>removable devices (e.g&#x2e; <tt>/dev/cf</tt>)</li>
 <li>prefix of the Qtopia image directory.</li>
 </ul>
 </li>
@@ -45,50 +48,50 @@
 <a name="parameters"></a>
 <h3>Parameters</h3>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Parameter</th><th>Purpose</th><th>Value Type</th><th>Example</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>Applications</tt></td><td>indicates if the location hold applications</td><td>boolean</td><td>1</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>ApplicationsDefault</tt></td><td>indicates the content source name to use when searching for Applications</td><td>string</td><td><tt>HOME</tt></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>ApplicationsPath</tt></td><td>indicates the subdirectory under this content source to use when searching for Applications</td><td>string</td><td><tt>/Applications</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>ContentDatabase</tt></td><td>indicates the content source used to stored the content database</td><td>boolean</td><td><tt>1</tt></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>Documents</tt></td><td>indicates if the location hold documents</td><td>boolean</td><td><tt>1</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>DocumentsDefault</tt></td><td>indicates the content source name to use when searching for Documents</td><td>string</td><td><tt>HOME</tt></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>DocumentsPath</tt></td><td>indicates the subdirectory under this content source to use when searching for Documents</td><td>string</td><td><tt>/Documents</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>Options</tt></td><td>indicates the options to use instead of the mount options in <tt>/proc/mounts</tt>.</td><td>string</td><td><tt>rw</tt></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>MountPoints</tt></td><td>a comma separated list of content source names to search for</td><td>string</td><td><tt>MountPoint0</tt>, <tt>MountPont1</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>Name[]</tt></td><td>the translatable name shown to the user</td><td>string</td><td><tt>MyDocuments</tt></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>Path</tt></td><td>indicates device path for this content source</td><td>string</td><td><tt>/dev/mmca1</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>Removable</tt></td><td>indicates if the location is removable</td><td>boolean</td><td><tt>1</tt></td></tr>
+<thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Purpose</th><th>Value Type</th><th>Example</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>Applications</tt></td><td>indicates if the location hold applications</td><td>boolean</td><td>1</td></tr>
+<tr valign="top" class="even"><td><tt>ApplicationsDefault</tt></td><td>indicates the content source name to use when searching for Applications</td><td>string</td><td><tt>HOME</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>ApplicationsPath</tt></td><td>indicates the subdirectory under this content source to use when searching for Applications</td><td>string</td><td><tt>/Applications</tt></td></tr>
+<tr valign="top" class="even"><td><tt>ContentDatabase</tt></td><td>indicates the content source used to stored the content database</td><td>boolean</td><td><tt>1</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>Documents</tt></td><td>indicates if the location hold documents</td><td>boolean</td><td><tt>1</tt></td></tr>
+<tr valign="top" class="even"><td><tt>DocumentsDefault</tt></td><td>indicates the content source name to use when searching for Documents</td><td>string</td><td><tt>HOME</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>DocumentsPath</tt></td><td>indicates the subdirectory under this content source to use when searching for Documents</td><td>string</td><td><tt>/Documents</tt></td></tr>
+<tr valign="top" class="even"><td><tt>Options</tt></td><td>indicates the options to use instead of the mount options in <tt>/proc/mounts</tt>.</td><td>string</td><td><tt>rw</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>MountPoints</tt></td><td>a comma separated list of content source names to search for</td><td>string</td><td><tt>MountPoint0</tt>, <tt>MountPont1</tt></td></tr>
+<tr valign="top" class="even"><td><tt>Name[]</tt></td><td>the translatable name shown to the user</td><td>string</td><td><tt>MyDocuments</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>Path</tt></td><td>indicates device path for this content source</td><td>string</td><td><tt>/dev/mmca1</tt></td></tr>
+<tr valign="top" class="even"><td><tt>Removable</tt></td><td>indicates if the location is removable</td><td>boolean</td><td><tt>1</tt></td></tr>
 </table></p>
 <a name="groups-within-storage-conf"></a>
 <h3>Groups within Storage.conf</h3>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th colspan="2">MountTable</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><b>Purpose</b></td><td>Lists what content sources to search for in <tt>Storage.conf</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><b>Valid Attributes</b></td><td><tt>ApplicationsDefault</tt>, <tt>DocumentsDefault</tt>, <tt>MountPoints</tt></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><b>Notes:</b></td><td></td></tr>
-<tr valign="top" bgcolor="#a2c511"><th colspan="2">HOME</th></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><b>Purpose</b></td><td>Specify the content stored in the <tt>HOME</tt> content source. If your <tt>HOME</tt> is on a partition specified by <tt>Storage.conf</tt> and it does not contain Applications or Documents you might want to hide it by setting <tt>&quot;Path</tt> = HIDE&quot;</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><b>Notes:</b></td><td>Set <tt>&quot;Path</tt> = HIDE&quot; to hide it and your HOME is on a partition that is specified by <tt>Storage.conf</tt> and it does not contain Applications or Documents o Set <tt>&quot;Path</tt> = HOME&quot; to use a value of <tt>Qtopia::homePath()</tt></td></tr>
-<tr valign="top" bgcolor="#a2c511"><th colspan="2">&lt;A content source name list in <tt>MountPoints&gt;</tt> : e.g. <tt>MountPoint0</tt></th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><b>Purpose</b></td><td>Specify the details of a content source declared in the <tt>MountTable</tt>.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>ContentDatabase</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><b>Notes:</b></td><td></td></tr>
-<tr valign="top" bgcolor="#a2c511"><th colspan="2">PREFIX</th></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><b>Purpose</b></td><td>Allow customization of the <tt>prefix</tt> directory.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>ContentDatabase</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><b>Notes:</b></td><td>Commercial customers please contact support before using this group.</td></tr>
+<thead><tr valign="top" class="qt-style"><th colspan="2">MountTable</th></tr></thead>
+<tr valign="top" class="odd"><td><b>Purpose</b></td><td>Lists what content sources to search for in <tt>Storage.conf</tt></td></tr>
+<tr valign="top" class="even"><td><b>Valid Attributes</b></td><td><tt>ApplicationsDefault</tt>, <tt>DocumentsDefault</tt>, <tt>MountPoints</tt></td></tr>
+<tr valign="top" class="odd"><td><b>Notes:</b></td><td></td></tr>
+<thead><tr valign="top" class="qt-style"><th colspan="2">HOME</th></tr></thead>
+<tr valign="top" class="even"><td><b>Purpose</b></td><td>Specify the content stored in the <tt>HOME</tt> content source. If your <tt>HOME</tt> is on a partition specified by <tt>Storage.conf</tt> and it does not contain Applications or Documents you might want to hide it by setting <tt>&quot;Path</tt> = HIDE&quot;</td></tr>
+<tr valign="top" class="odd"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
+<tr valign="top" class="even"><td><b>Notes:</b></td><td>Set <tt>&quot;Path</tt> = HIDE&quot; to hide it and your HOME is on a partition that is specified by <tt>Storage.conf</tt> and it does not contain Applications or Documents o Set <tt>&quot;Path</tt> = HOME&quot; to use a value of <tt>Qtopia::homePath()</tt></td></tr>
+<thead><tr valign="top" class="qt-style"><th colspan="2">&lt;A content source name list in <tt>MountPoints&gt;</tt> : e.g&#x2e; <tt>MountPoint0</tt></th></tr></thead>
+<tr valign="top" class="odd"><td><b>Purpose</b></td><td>Specify the details of a content source declared in the <tt>MountTable</tt>.</td></tr>
+<tr valign="top" class="even"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>ContentDatabase</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
+<tr valign="top" class="odd"><td><b>Notes:</b></td><td></td></tr>
+<thead><tr valign="top" class="qt-style"><th colspan="2">PREFIX</th></tr></thead>
+<tr valign="top" class="even"><td><b>Purpose</b></td><td>Allow customization of the <tt>prefix</tt> directory.</td></tr>
+<tr valign="top" class="odd"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>ContentDatabase</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
+<tr valign="top" class="even"><td><b>Notes:</b></td><td>Commercial customers please contact support before using this group.</td></tr>
 </table></p>
 <p>The <tt>HOME</tt> location defaults to <tt>rw</tt> for its <tt>Options</tt> value. Qtopia assumes a location is writable only if <tt>Options</tt> contains <tt>rw</tt>. A location's <tt>Options</tt> might need to be overwritten if they don't include <tt>rw</tt> but are writable. For example, SMB mounts on a machine have <tt>Options</tt> of 0 or if they are overly complex; <tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> encode the <tt>Options</tt> as part of a <tt>;</tt> delimited string.</p>
 <a name="filtering"></a>
 <h2>Filtering</h2>
 <p>The <tt>StorageInfo::filesytems()</tt> function provide filtering functionality.</p>
 <p>For example, to extend the <i>Documents</i> file systems use the following:</p>
-<pre>&nbsp;   FileSystemFilter fsf;
+<pre>    FileSystemFilter fsf;
     fsf.documents == FileSystemFilter::Set;
     QList&lt;FileSystem*&gt; filesystems = storage-&gt;filesystems( &amp;fsf );</pre>
 <p>The <tt>FileSystemFilter</tt> is then easily extended as follows:</p>
-<pre>&nbsp;   class WriteableFileSystemFilter : public FileSystemFilter
+<pre>    class WriteableFileSystemFilter : public FileSystemFilter
     {
     public:
         WriteableFileSystemFilter()
@@ -129,8 +132,8 @@
 </ul>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

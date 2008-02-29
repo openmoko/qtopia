@@ -82,16 +82,34 @@ public:
 };
 
 
+/*!
+  \class QIconSelector
+  \brief The QIconSelector class provides an icon-based combo box implementation.
 
-//widget like a combobox that allows, but doesn't use text when not popped up
+  QIconSelector operates similarly to a combo box but it has an important difference. It deals with
+  information that is represented as both an icon and as text. The widget itself displays only icons
+  while the pop-up selector displays both icon and text. This makes it suitable for placement in areas
+  where there is limited horizontal space.
+
+  Here is a QIconSelector next to a text field. When down, it takes up very little room.
+  \image qiconselect-down.png "QIconSelector"
+
+  Here is the pop-up selector. Both the icons and text are visible.
+  \image qiconselect-up.png "QIconSelector pop-up selector"
+*/
+
+/*!
+  Constructs a QIconSelector with the given \a parent.
+*/
 QIconSelector::QIconSelector( QWidget *parent )
     : QToolButton( parent )
 {
     init();
 }
 
-
-
+/*!
+  Constructs a QIconSelector with initial icon \a icn and the given \a parent.
+*/
 QIconSelector::QIconSelector( const QIcon &icn, QWidget *parent )
     : QToolButton( parent )
 {
@@ -100,6 +118,9 @@ QIconSelector::QIconSelector( const QIcon &icn, QWidget *parent )
     init();
 }
 
+/*!
+  Destroys a QIconSelector.
+*/
 QIconSelector::~QIconSelector()
 {
     delete d->list;
@@ -107,6 +128,10 @@ QIconSelector::~QIconSelector()
     delete d;
 }
 
+/*!
+  \internal
+  Initialize the QIconSelector.
+*/
 void QIconSelector::init()
 {
     d = new QIconSelectorPrivate();
@@ -122,6 +147,10 @@ void QIconSelector::init()
     }
 
     d->mPopup = new QWidget(0, Qt::Popup | Qt::WindowStaysOnTopHint);
+#ifdef QTOPIA_PHONE
+    QSoftMenuBar::setLabel( d->mPopup, Qt::Key_Select, QSoftMenuBar::Select );
+    QSoftMenuBar::setLabel( d->mPopup, Qt::Key_Back, QSoftMenuBar::Cancel );
+#endif
 
     d->list = new QListWidget(d->mPopup);
     d->list->setMouseTracking(true);
@@ -134,6 +163,9 @@ void QIconSelector::init()
     connect(this, SIGNAL(clicked()), this, SLOT(popup()));
 }
 
+/*!
+  \reimp
+*/
 QSize QIconSelector::sizeHint() const
 {
     const int border = style()->pixelMetric(QStyle::PM_ButtonMargin) * 2;
@@ -148,11 +180,17 @@ QSize QIconSelector::sizeHint() const
     return QSize( w+border, h+border ).expandedTo( QApplication::globalStrut() );
 }
 
+/*!
+  Returns the number of items the QIconSelector contains.
+*/
 uint QIconSelector::count()
 {
     return d->data.count();
 }
 
+/*!
+  Adds an item to the QIconSelector with icon \a icn and text \a text.
+*/
 void QIconSelector::insertItem( const QIcon &icn, const QString &text )
 {
     d->data.insert(d->count, new QIconSelectorData(icn, text));
@@ -161,6 +199,9 @@ void QIconSelector::insertItem( const QIcon &icn, const QString &text )
     ++d->count;
 }
 
+/*!
+  Removes the item at index \a index.
+*/
 void QIconSelector::removeIndex( int index )
 {
     d->data.removeAt( index );
@@ -169,17 +210,31 @@ void QIconSelector::removeIndex( int index )
     setCurrentIndex( d->count ? d->count : -1 );
 }
 
+/*!
+  Removes all items.
+
+  Note that no icon will be visible.
+*/
 void QIconSelector::clear()
 {
     d->data.clear();
     setCurrentIndex( -1 );
 }
 
+/*!
+  Returns the index of the currently selected item.
+  This will be \c -1 if no items are selected.
+*/
 int QIconSelector::currentIndex() const
 {
     return d->current;
 }
 
+/*!
+  Sets the current selected item to the item at index \a index.
+  Set \a index to \c -1 to select no items. Note that no icon will be visible if
+  no items are selected.
+*/
 void QIconSelector::setCurrentIndex( int index )
 {
     if( index >= (int)d->data.count() || index < 0 )
@@ -195,6 +250,12 @@ void QIconSelector::setCurrentIndex( int index )
     }
 }
 
+/*!
+  Sets the displayed icon to \a icn.
+  Note that this does not change the selected item so using this function
+  may confuse the user. It is provided so that a suitable icon can be
+  displayed when nothing is selected.
+*/
 void QIconSelector::setIcon( const QIcon &icn )
 {
     d->icon = icn;
@@ -202,11 +263,17 @@ void QIconSelector::setIcon( const QIcon &icn )
     updateGeometry();
 }
 
+/*!
+  Returns the icon that is being displayed.
+*/
 QIcon QIconSelector::icon() const
 {
     return d->icon;
 }
 
+/*!
+  Opens the pop-up selector.
+*/
 void QIconSelector::popup()
 {
     d->list->clear();
@@ -275,12 +342,11 @@ void QIconSelector::popup()
 
     d->list->update();
     d->list->setFocus();
-
-#ifdef QTOPIA_PHONE
-    QSoftMenuBar::setLabel( d->list, Qt::Key_Select, QSoftMenuBar::Select );
-#endif
 }
 
+/*!
+  Closes the pop-up selector.
+*/
 void QIconSelector::popdown()
 {
     d->list->removeEventFilter(this);
@@ -289,12 +355,18 @@ void QIconSelector::popdown()
     d->mPopup->hide();
 }
 
+/*!
+  Closes the pop-up selector and selects the item at index \a index.
+*/
 void QIconSelector::itemSelected( int index )
 {
     popdown();
     setCurrentIndex( index );
 }
 
+/*!
+  \reimp
+*/
 bool QIconSelector::eventFilter( QObject *obj, QEvent *e ) //mostly copied from qcombobox
 {
     if( !e ) return true;
@@ -370,7 +442,16 @@ bool QIconSelector::eventFilter( QObject *obj, QEvent *e ) //mostly copied from 
     return QWidget::eventFilter( obj, e );
 }
 
+/*!
+  \reimp
+*/
 void QIconSelector::keyPressEvent( QKeyEvent *e )
 {
     QToolButton::keyPressEvent( e );
 }
+
+/*!
+  \fn QIconSelector::activated(int index)
+  This signal is emitted when an item is activated. The item is indicated by \a index.
+*/
+

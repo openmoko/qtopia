@@ -314,9 +314,9 @@ void PackageView::editServers()
     delete edit;
 }
 
-/**
+/*!
     \internal
-    \function targetChoiceChanged( const QString & )
+    \fn void PackageView::targetChoiceChanged( const QString & )
     Emitted when the user choice of installation target changes, eg
     from "Internal Storage" to "CF Card"
 */
@@ -342,7 +342,7 @@ void PackageView::showDetails( const QModelIndex &item )
 
     pd->setWindowTitle( name );
     QString details;
-    if ( op == "Install" )
+    if ( op == AbstractPackageController::tr("Install") )
     {
 #ifndef QT_NO_SXE
         if( model->hasSensitiveDomains( model->data( item, Qt::WhatsThisRole ).toString() ) )
@@ -366,7 +366,7 @@ void PackageView::showDetails( const QModelIndex &item )
                 .arg( model->data( item, Qt::DisplayRole ).toString() );
 #endif
     }
-    else if ( op == "Uninstall" )
+    else 
     {
 #ifndef QT_NO_SXE
         pd->installButton->setVisible( true );
@@ -374,11 +374,11 @@ void PackageView::showDetails( const QModelIndex &item )
 #endif
         if ( enabled )
         {
-            details = tr( "<font color=\"#FF9900\"><b>Uninstalling package</b></font> %1 <b>Go ahead?</b>" )
+            details = tr( "<font color=\"#FF9900\"><b>Uninstall package</b></font> %1 <b>Go ahead?</b>" )
                       .arg( model->data( item, Qt::WhatsThisRole ).toString() );
         } else
         {
-            details = tr( "<font color=\"#FF9900\"><b>Uninstalling/Re-enabling package</b></font> %1" )
+            details = tr( "<font color=\"#FF9900\"><b>Uninstall/Re-enable package</b></font> %1" )
                       .arg( model->data( item, Qt::WhatsThisRole ).toString() );
 
         }

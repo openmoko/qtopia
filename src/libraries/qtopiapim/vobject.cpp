@@ -19,7 +19,16 @@
 **
 ****************************************************************************/
 
-/***************************************************************************
+/*!
+    \class VObjectLegal
+    \brief The VObjectLegal class is a placeholder for licensing information.
+
+    \ingroup qtopia3rdparty
+
+    The License from the file headers is reproduced here for your
+    convenience.
+
+    \quotation
 (C) Copyright 1996 Apple Computer, Inc., AT&T Corp., International
 Business Machines Corporation and Siemens Rolm Communications Inc.
 
@@ -54,8 +63,8 @@ PURPOSE.
 The software is provided with RESTRICTED RIGHTS.  Use, duplication, or
 disclosure by the government are subject to restrictions set forth in
 DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
-
-***************************************************************************/
+\endquotation
+*/
 
 /*
  * src: vobject.c

@@ -33,6 +33,9 @@ class QSpeedDialList;
 class QTOPIA_EXPORT QSpeedDialList : public QListView
 {
     Q_OBJECT
+    Q_PROPERTY(int count READ count)
+    Q_PROPERTY(int currentRow READ currentRow WRITE setCurrentRow)
+    Q_PROPERTY(QString currentInput READ currentInput)
     friend class QSpeedDialDialog;
 
 public:

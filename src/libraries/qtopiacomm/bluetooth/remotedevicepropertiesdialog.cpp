@@ -47,18 +47,23 @@
 /*!
     \internal
     \class RemoteDevicePropertiesDialog
+    \mainclass
 
-    A dialog that shows information about a remote device. Shows a main
-    screen with the main information about a device, and provides other
-    information (services, etc.) that is accessible through the context menu.
+    \brief A RemoteDevicePropertiesDialog displays information about a remote device.
+
+    It shows generic information about a remote device, such as its name,
+    address, vendor, manufacturer, and so on. It also allows the user to
+    change the alias for the remote device, and view the device's services
+    through the context menu of the dialog.
  */
 
-const QString RemoteDevicePropertiesDialog::SERVICE_ERROR_MSG =
-        tr( "<P>Unable to look up services for this device" );
 
 /*!
-    Constructor.
-    Assumes given remote and local devices are valid.
+    Constructs a RemoteDevicePropertiesDialog with the given \a parent and the
+    window flags \a flags. The dialog will use the local device with address
+    \a localAddr to perform SDP queries and alias requests.
+
+    Assumes the given remote and local devices are valid.
  */
 RemoteDevicePropertiesDialog::RemoteDevicePropertiesDialog(
             const QBluetoothAddress &localAddr,
@@ -103,6 +108,9 @@ RemoteDevicePropertiesDialog::RemoteDevicePropertiesDialog(
     setWindowTitle( tr( "Device information" ) );
 }
 
+/*!
+    Destroys the dialog.
+*/
 RemoteDevicePropertiesDialog::~RemoteDevicePropertiesDialog()
 {
 }
@@ -182,7 +190,10 @@ void RemoteDevicePropertiesDialog::initMainInfo()
     setLayout( baseLayout );
 }
 
-
+/*!
+    Sets the dialog to show the properties for the remote device \a remote,
+    and use \a icon when displaying the device properties.
+*/
 void RemoteDevicePropertiesDialog::setRemoteDevice( const QBluetoothRemoteDevice &remote, const QPixmap &icon )
 {
     m_remote = remote;
@@ -266,7 +277,7 @@ void RemoteDevicePropertiesDialog::showServices()
 
     // search by L2CAP to avoid having to do a full slow "records" sdp search
     if ( !m_sdap.searchServices( addr, *m_local, QBluetoothSdpUuid::L2cap ) ) {
-        QMessageBox::warning( this, tr( "Service Error" ), SERVICE_ERROR_MSG );
+        QMessageBox::warning( this, tr( "Service Error" ), tr( "<P>Unable to look up services for this device" ) );
         m_waitWidget->hide();
     } else {
         qLog(Bluetooth) << "Starting service search...";
@@ -283,7 +294,7 @@ void RemoteDevicePropertiesDialog::foundServices( const QBluetoothSdpQueryResult
     if ( !result.isValid() ) {
         qLog( Bluetooth ) << "Error in finding services:" << result.error();
         m_waitWidget->hide();
-        QMessageBox::warning( this, tr( "Service Error" ), SERVICE_ERROR_MSG );
+        QMessageBox::warning( this, tr( "Service Error" ), tr( "<P>Unable to look up services for this device" ) );
         return;
     }
 

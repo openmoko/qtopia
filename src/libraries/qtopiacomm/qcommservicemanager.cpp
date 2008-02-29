@@ -24,10 +24,8 @@
 
 /*!
     \class QCommServiceManager
+    \mainclass
     \brief The QCommServiceManager class provides a method to discover the active communications services and interfaces.
-
-    The QCommServiceManager class provides a method to discover the
-    communications services and interfaces that are active within the system.
 
     Each service has a unique name, such as \c{GSM}, \c{VoIP}, etc.  Within
     each service is a list of interfaces for functionality areas, which have
@@ -73,6 +71,8 @@ QCommServiceManager::~QCommServiceManager()
 
 /*!
     Get the list of all services that are currently active within the system.
+
+    \sa servicesChanged(), serviceAdded(), serviceRemoved()
 */
 QStringList QCommServiceManager::services() const
 {
@@ -84,6 +84,8 @@ QStringList QCommServiceManager::services() const
 
     Signal that is emitted when the list of services changes, if the interfaces
     on a service has changed, or if the priority assignments have changed.
+
+    \sa services()
 */
 
 /*!
@@ -91,6 +93,8 @@ QStringList QCommServiceManager::services() const
 
     Signal that is emitted when \a service is added.  A service is considered
     to have been added when its first interface is constructed.
+
+    \sa services()
 */
 
 /*!
@@ -98,4 +102,6 @@ QStringList QCommServiceManager::services() const
 
     Signal that is emitted when \a service is removed.  A service is
     considered to have been removed when its last interface is deleted.
+
+    \sa services()
 */

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 . /opt/Qtopia/SDK/scripts/functions
 
@@ -29,7 +29,7 @@ gp_net()
 {
   # Bring up network to greenphone
 
-  sudo modprobe usbnet>/dev/null 2>&1
+  sudo modprobe usbnet >/dev/null 2>&1
   if [ "$DEVNODE" = "" ] ; then
     echo "Networking failed. Please unplug and plug the Greenphone back in."
     return 1;
@@ -41,7 +41,7 @@ gp_net()
   # Figure out the IP now that the device is up
   PHONEIP=`phoneip`
 
-  if ! ping -c 1 -i 2 $PHONEIP 1>/dev/null 2>&1 ; then
+  if ! ping -c 1 -i 2 $PHONEIP >/dev/null 2>&1 ; then
     echo "Networking failed. Please unplug and plug the Greenphone back in."
     return 1;
   fi
@@ -49,14 +49,20 @@ gp_net()
   if [ ! -f "$HOME/.ssh/id_dsa.pub" ]; then
     # generate keypair of ssh
     [ "$VERBOSE" = "1" ] && echo "Generating DSA keypair for ssh"
-    ssh-keygen -t dsa -N '' -f $HOME/.ssh/id_dsa 2>&1 >/dev/null
+    ssh-keygen -t dsa -N '' -f $HOME/.ssh/id_dsa >/dev/null 2>&1
   fi
 
   # send public key to Greenphone
-  if netcat -n $PHONEIP 10022 < $HOME/.ssh/id_dsa.pub; then
+  if netcat -n $PHONEIP 10022 < $HOME/.ssh/id_dsa.pub >/dev/null 2>&1; then
      [ "$VERBOSE" = "1" ] && echo "Sent DSA public key to Greenphone"
   else
      [ "$VERBOSE" = "1" ] && echo "Greenphone already has DSA public key."
+     
+     # test if we can connect to Greenphone
+     if ! ssh root@$PHONEIP /bin/true >/dev/null 2>&1; then
+       echo "Authentication failed. Run 'Devtools/Reqacquire Auth Key' on Greenphone."
+       return 1
+     fi
   fi
 
   if [ "$VERBOSE" = "1" ]; then
@@ -242,11 +248,11 @@ gp_run()
     fi
 if [ "$QDEBUG" = "-debug" ] ; then
 
-  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ]; then echo \$file; exit; fi; done); gdbserver hostpc:22222 \$binary 2>&1 | logger -t 'DEBUGGER' &"
+  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia.rom/qpe.env; gdbserver hostpc:22222 \$binary 2>&1 | logger -t 'DEBUGGER' &"
 
 else
   
-  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ]; then echo \$file; exit; fi; done); \$binary 2>&1 | logger -t 'DEBUGGER' &"
+  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia.rom/qpe.env; \$binary 2>&1 | logger -t 'DEBUGGER' &"
  
   fi
 fi

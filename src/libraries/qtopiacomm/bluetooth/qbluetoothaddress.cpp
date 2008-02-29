@@ -27,11 +27,21 @@
 
 /*!
     \class QBluetoothAddress
+    \mainclass
     \brief The QBluetoothAddress class represents a bluetooth address.
 
-The QBluetoothAddress class refers to a single Bluetooth address.
-Each Bluetooth device can have one and only one address.  There are certain
-special addresses defined.  Namely \bold{any}, \bold{local}, \bold{all}.
+    Each Bluetooth device can have one and only one address.  There are certain
+    special addresses defined.  Namely \c{any}, \c{local}, \c{all}.
+
+    The Bluetooth address can be constructed from a string representation.
+    For instance,
+
+    \code
+        QBluetoothAddress addr("00:00:FF:FF:00:00");
+    \endcode
+
+    If the address is a valid Bluetooth address, then isValid()
+    will return true, and false otherwise.
 
     \ingroup qtopiabluetooth
     \sa QBluetoothLocalDevice, QBluetoothRemoteDevice
@@ -101,7 +111,7 @@ QBluetoothAddress &QBluetoothAddress::operator=(const QBluetoothAddress &other)
 }
 
 /*!
-    Compares the current Bluetooth address against a Bluetooth address given by \a other.
+    Returns the result of comparing the current Bluetooth address against a Bluetooth address given by \a other.
 */
 bool QBluetoothAddress::operator==(const QBluetoothAddress &other) const
 {
@@ -109,9 +119,9 @@ bool QBluetoothAddress::operator==(const QBluetoothAddress &other) const
 }
 
 /*!
-    Converts the Bluetooth address into a QString.  The format will be of the form
-    XX:XX:XX:XX:XX:XX where XX is a hexadecimal number.  If the address is invalid, a
-    null string is returned.
+    Converts the Bluetooth address into a QString.  The format will be of
+    the form XX:XX:XX:XX:XX:XX where XX is a hexadecimal number.
+    If the address is invalid, a null string is returned.
 */
 QString QBluetoothAddress::toString() const
 {
@@ -180,6 +190,9 @@ template <typename Stream> void QBluetoothAddress::deserialize(Stream &stream)
     stream >> m_valid;
 }
 
+/*!
+    \internal
+*/
 uint qHash(const QBluetoothAddress &addr)
 {
     return qHash(addr.m_bdaddr);

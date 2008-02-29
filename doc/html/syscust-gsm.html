@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>GSM Modem Integration</title>
+  <title>GSM Modem Integration</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">GSM Modem Integration<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">GSM Modem Integration<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#gsm-modem-integration">GSM Modem Integration</a></li>
 <li><a href="#outline-of-a-modem-vendor-plugin">Outline of a Modem Vendor Plugin</a></li>
 <li><a href="#gsm-modem-porting-sequence">GSM Modem Porting Sequence</a></li>
@@ -27,7 +30,7 @@
 <h2>Outline of a Modem Vendor Plugin</h2>
 <p>There are two sample implementations under <tt>src/plugins/phonevendors/ericsson</tt> and <tt>src/plugins/phonevendors/wavecom</tt>. This section reviews the major components of the wavecom plugin to demonstrate how to write such a plug-in.</p>
 <p>The plug-in inherits from the QModemServicePlugin class, which provides modem detection and service creation functions.</p>
-<pre>&nbsp;   #include &lt;qmodemserviceplugin.h&gt;
+<pre>    #include &lt;qmodemserviceplugin.h&gt;
 
     class WavecomPluginImpl : public QModemServicePlugin
     {
@@ -42,7 +45,7 @@
                                QObject *parent );
     };</pre>
 <p>The plug-in declares two functions, <tt>supports()</tt> and <tt>create()</tt>, which should be implemented as follows:</p>
-<pre>&nbsp;   QTOPIA_EXPORT_PLUGIN( WavecomPluginImpl )
+<pre>    QTOPIA_EXPORT_PLUGIN( WavecomPluginImpl )
 
     WavecomPluginImpl::WavecomPluginImpl() {}
     WavecomPluginImpl::~WavecomPluginImpl() {}
@@ -66,7 +69,7 @@
 <p>The <tt>supports()</tt> function checks the manufacturer string from the <tt>AT+CGMI</tt> command against the expected value. The first plug-in that returns true from <tt>supports()</tt> will used.</p>
 <p>The <tt>create()</tt> function creates a QModemService instance to handle the modem specifics. It is passed the name of the service (usually <tt>modem</tt>), the multiplexing object that is used to communicate with the modem, and the parent <a href="qobject.html">QObject</a> to attach the modem service to.</p>
 <p>The modem service implementation inherits from QModemService and should override <tt>initialize()</tt> to create the vendor-specific functionality handlers:</p>
-<pre>&nbsp;   #include &lt;qmodemservice.h&gt;
+<pre>    #include &lt;qmodemservice.h&gt;
 
     class WavecomModemService : public QModemService
     {
@@ -112,10 +115,10 @@
 <p>The QModemService class creates default implementations based on the 3GPP TS 27.007 and 3GPP TS 27.005 specifications. The modem vendor plug-in overrides those handlers that are different from the standard, and only those that are different. When QModemService::initialize() is called, the missing handlers will be created automatically.</p>
 <p>The handlers mentioned above inherit from the following standard classes:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>WavecomSimInfo</tt></td><td>QModemSimInfo</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>WavecomSimToolkit</tt></td><td>QModemSimToolkit</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>WavecomPhoneBook</tt></td><td>QModemPhoneBook</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>WavecomCallProvider</tt></td><td>QModemCallProvider</td></tr>
+<tr valign="top" class="odd"><td><tt>WavecomSimInfo</tt></td><td>QModemSimInfo</td></tr>
+<tr valign="top" class="even"><td><tt>WavecomSimToolkit</tt></td><td>QModemSimToolkit</td></tr>
+<tr valign="top" class="odd"><td><tt>WavecomPhoneBook</tt></td><td>QModemPhoneBook</td></tr>
+<tr valign="top" class="even"><td><tt>WavecomCallProvider</tt></td><td>QModemCallProvider</td></tr>
 </table></p>
 <p>A complete list of classes for accessing AT-based modems can be found on the <a href="telephony-modem.html">Modem Classes</a> page.</p>
 <a name="gsm-modem-porting-sequence"></a>
@@ -136,14 +139,14 @@
 <h2>Modem Emulator</h2>
 <p>Most modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications. The <a href="#modem-emulator">Modem Emulator</a> assists with supporting such interfaces.</p>
 <p>To enable the modem emulator to use an external serial interface, the <tt>Phone.conf</tt> file should be placed under the <tt>etc/default/Trolltech</tt> directory on the vendor system, with contents such as the following:</p>
-<pre>&nbsp;   [SerialDevices]
+<pre>    [SerialDevices]
     ExternalAccessDevice=/dev/ttyS1:115200</pre>
 <p>where <tt>/dev/ttyS1</tt> should be replaced with the name of the serial device to listen to, and <tt>115200</tt> should be replaced with the desired baud rate.</p>
 <p>If this option is configured, the modem emulator will be launched automatically once the phone server has been initialized. If this option is not configured, then the modem emulator will only be launched when other components in the system request it (for example, Bluetooth hands-free kits).</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

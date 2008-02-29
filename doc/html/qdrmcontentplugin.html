@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QDrmContentPlugin Class Reference</title>
+  <title>QDrmContentPlugin Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDrmContentPlugin Class Reference</h1>
 <p>The QDrmContentPlugin class is the primary interface between DRM agents and the Qtopia document system. <a href="#details">More...</a></p>
-<pre>#include &lt;QDrmContentPlugin&gt;</pre><p>Inherits <a href="qobject.html">QObject</a> and <a href="qabstractfileenginehandler.html">QAbstractFileEngineHandler</a>.</p>
+<pre>    #include &lt;QDrmContentPlugin&gt;</pre><p>Inherits <a href="qobject.html">QObject</a> and <a href="qabstractfileenginehandler.html">QAbstractFileEngineHandler</a>.</p>
 <ul>
 <li><a href="qdrmcontentplugin-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -74,7 +76,7 @@
 <a name="drm-content-recognition-and-installation"></a>
 <h3>DRM Content Recognition and Installation</h3>
 <p>When the document system discovers new content on a device it will attempt to determine if it is DRM protected by calling <a href="qdrmcontentplugin.html#installContent">installContent</a>() for each DRM content plugin installed. If a plugin recognizes the content as DRM protected it should populate the passed <a href="qcontent.html">QContent</a> with meta-data from the files and return true which will mark the content as being DRM protected.</p>
-<p>Once a <a href="qcontent.html">QContent</a> has been identified as being DRM protected the document system will identify the plugin by looking up the file extension in the list returned by <a href="qdrmcontentplugin.html#keys">keys</a>(). If a file passed to <a href="qdrmcontentplugin.html#installContent">installContent</a>() is DRM protected but does not have a correct extension it should be renamed by the plugin when it installed. Likewise if a DRM format has separate transport and storage formats the plugin should convert from the transport format to the storage format when it is installed.</p>
+<p>Once a <a href="qcontent.html">QContent</a> has been identified as being DRM protected the document system will identify the plugin by looking up the file extension in the list returned by <a href="qdrmcontentplugin.html#keys">keys</a>(). If a file passed to <a href="qdrmcontentplugin.html#installContent">installContent</a>() is DRM protected but does not have a correct extension it should be renamed by the plugin when it is installed. Likewise if a DRM format has separate transport and storage formats the plugin should convert from the transport format to the storage format when it is installed.</p>
 <a name="drm-file-access"></a>
 <h3>DRM File Access</h3>
 <p>The document system requires applications to request a license through <a href="qdrmcontent.html">QDrmContent</a> before they can access the plain-text content of a DRM protected file. When a license is requested the document system first checks the current permissions of the file, if permission the license is requested for is not valid the document system will attempt to acquire rights for the file by calling <a href="qdrmcontentplugin.html#activate">activate</a>(). If the file permissions were already valid or the activation was successful the document system will then attempt to acquire an instance of <a href="qdrmcontentlicense.html">QDrmContentLicense</a> by calling <a href="qdrmcontentplugin.html#requestContentLicense">requestContentLicense</a>() which will be used to update the files license constraints. Content licenses can be registered by calling <a href="qdrmcontentplugin.html#registerLicense">registerLicense</a>() and once a license has been registered it can be retrieved using <a href="qdrmcontentplugin.html#license">license</a>(), deleted licenses are automatically unregistered. QDrmContentPlugin inherits from <a href="qabstractfileengine.html">QAbstractFileEngine</a> and its implementation of <a href="qabstractfileenginehandler.html#create">create</a>() constructs a file engine which will allow application to open a DRM protected file in read-only mode if a content license for that file has been registered with the plugin, the file will be opened using a <a href="qiodevice.html">QIODevice</a> created by <a href="qdrmcontentplugin.html#createDecoder">createDecoder</a>() with the permission the license was requested for. When a license is released the document system will call <a href="qdrmcontentplugin.html#reactivate">reactivate</a>() irregardless of the current permissions of the file, if rights have expired or will expire in the near future a plugin may prompt the user to acquire new rights.</p>
@@ -134,7 +136,7 @@
 <p>See also <a href="qdrmcontentplugin.html#license">license</a>() and <a href="qdrmcontentplugin.html#requestContentLicense">requestContentLicense</a>().</p>
 <h3 class="fn"><a name="requestContentLicense"></a><a href="qdrmcontentlicense.html">QDrmContentLicense</a> * QDrmContentPlugin::requestContentLicense ( const <a href="qcontent.html">QContent</a> &amp; <i>content</i>, <a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a> <i>permission</i>, <a href="qdrmcontent.html#LicenseOption-enum">QDrmContent::LicenseOptions</a> <i>options</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Requests a content license for rendering <i>content</i> with the given <i>permission</i>. If the content has valid and current rights a pointer to a new content license is returned otherwise a null pointer is returned. The initial state of the content license is determined by the license <i>options</i>.</p>
-<p>New content licenses are registered with the plugin using <a href="qdrmcontentplugin.html#registerLicense">registerLicense</a>() and are automatically unregistered when destroyed. Once a license has been granted and registered with the plugin access to the unencrypted content of the DRM protected file will become available through the Qt file API for the duration of the license's lifetime.</p>
+<p>Implementing classes should register new content licenses with the plugin using <a href="qdrmcontentplugin.html#registerLicense">registerLicense</a>(), the content licenses are unregistered automatically when destroyed. Once a license has been granted and registered with the plugin access to the unencrypted content of the DRM protected file will become available through the Qt file API for the duration of the license's lifetime.</p>
 <h3 class="fn"><a name="thumbnail"></a><a href="qpixmap.html">QPixmap</a> QDrmContentPlugin::thumbnail ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, const <a href="qsize.html">QSize</a> &amp; <i>size</i>, <a href="qt.html#AspectRatioMode-enum">Qt::AspectRatioMode</a> <i>mode</i> = Qt::KeepAspectRatio )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Creates a preview thumbnail image of the content with the file name <i>fileName</i> scaled to the given <i>size</i>. Aspect ratio is maintained according to <i>mode</i>.</p>
 <h3 class="fn"><a name="types"></a><a href="qstringlist.html">QStringList</a> QDrmContentPlugin::types () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
@@ -146,8 +148,8 @@
 <p>Returns true if the content data was out of date, false otherwise.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

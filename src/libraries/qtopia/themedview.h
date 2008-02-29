@@ -64,17 +64,17 @@ public:
         All = 7 // Default | Pressed | Focus
     };
 
-    ThemeItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeItem();
 
-    virtual void setActive(bool a);
+    virtual void setActive(bool active);
     bool active() const;
     bool transient() const;
 
     QRect rect() const;
     QRect geometry() const;
     QRectF geometryHint()const;
-    virtual void setGeometry(const QRect&);
+    virtual void setGeometry(const QRect &rect);
     bool isVisible() const;
 
     virtual int rtti() const;
@@ -85,8 +85,8 @@ public:
     bool pressed() const;
     bool hasFocus() const;
 
-    virtual void setPressed( bool p );
-    virtual void setFocus( bool p );
+    virtual void setPressed(bool pressed);
+    virtual void setFocus(bool focus);
 
     ThemeItem::State state() const;
     ThemeItem *parentItem() const;
@@ -98,53 +98,60 @@ public:
     QList<ThemeItem*> children() const;
 
 protected:
-    virtual void stateChanged( const ThemeItem::State& st );
-    void removeChild( ThemeItem* item );
-    void addChild( ThemeItem* item );
+    virtual void stateChanged(const ThemeItem::State &state);
+    void removeChild(ThemeItem *item);
+    void addChild(ThemeItem *item);
 
     virtual void clickedEvent();
 
-    bool isStringExpression( const QString& str );
-    QString stripStringExpression( const QString& str );
+    bool isStringExpression(const QString &str);
+    QString stripStringExpression(const QString &str);
 
-    virtual void expressionChanged( QExpressionEvaluator* );
+    virtual void expressionChanged(QExpressionEvaluator *);
     virtual void constructionComplete();
 
-    QExpressionEvaluator* createExpression( const QString& data );
-    QVariant getExpressionResult( QExpressionEvaluator* expr, const QVariant::Type& t );
+    QExpressionEvaluator *createExpression(const QString &data);
+    QVariant getExpressionResult(QExpressionEvaluator *expression, const QVariant::Type &type);
 
-    void setAttribute( const QString &key, const int &val, ThemeItem::State st = ThemeItem::Default );
-    int attribute( const QString &key, ThemeItem::State st = ThemeItem::Default ) const;
-    void setAttribute( const QString &key, const QString &val, ThemeItem::State st = ThemeItem::Default );
-    QString strAttribute( const QString &key, ThemeItem::State st = ThemeItem::Default );
+    void setAttribute(const QString &key, const int &val, ThemeItem::State st = ThemeItem::Default);
+    int attribute(const QString &key, ThemeItem::State st = ThemeItem::Default) const;
+    void setAttribute(const QString &key, const QString &val, ThemeItem::State st = ThemeItem::Default);
+    QString strAttribute(const QString &key, ThemeItem::State st = ThemeItem::Default);
 
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
     virtual void layout();
 
+    /*!
+      \internal
+    */
     enum RMode { Rect, Coords };
+
+    /*!
+      \internal
+    */
     enum Unit { Pixel, Percent, Point };
 
     void update();
     void update(int x, int y, int w, int h);
-    QMap<QString,QString> parseSubAtts( const QString &subatts ) const;
+    QMap<QString,QString> parseSubAtts(const QString &subatts) const;
     int resolveUnit(qreal, int, Unit) const;
-    int parseAlignment(const ThemeAttributes &atts, const QString &name=QString());
+    int parseAlignment(const ThemeAttributes &atts, const QString &name = QString());
 
-    virtual void addCharacters(const QString &ch);
+    virtual void addCharacters(const QString &characters);
 
 
 protected:
-    void setVisible(bool v);
+    void setVisible(bool visible);
     void setDataExpression(bool b);
     bool isDataExpression() const;
 
 private:
-    QRectF parseRect(const ThemeAttributes &atts, RMode &rmode, const QString &name=QString());
+    QRectF parseRect(const ThemeAttributes &atts, RMode &rmode, const QString &name = QString());
     ThemeItem* parentLayout() const;
-    ThemeMessageData parseMessage( const QString& qcop, bool* ok );
-    void paletteChange(const QPalette &);
-    void setVSPath( const QString& );
-    ThemeItemPrivate* d;
+    ThemeMessageData parseMessage(const QString &message, bool *ok);
+    void paletteChange(const QPalette &palette);
+    void setVSPath(const QString &path);
+    ThemeItemPrivate *d;
     friend class ThemedView;
     friend class ThemedViewPrivate;
     friend class ThemeExclusiveItem;
@@ -162,7 +169,7 @@ struct ThemePageItemPrivate;
 class QTOPIA_EXPORT ThemePageItem : public ThemeItem
 {
 public:
-    ThemePageItem(ThemedView *ir, const ThemeAttributes &atts);
+    ThemePageItem(ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemePageItem();
 
     const QString base() const;
@@ -172,25 +179,25 @@ public:
     QSize sizeHint() const;
 
 protected:
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
     virtual void layout();
 
 private:
     void applyMask();
 
 private:
-    ThemePageItemPrivate* d;
+    ThemePageItemPrivate *d;
 };
 
 class QTOPIA_EXPORT ThemeGroupItem : public ThemeItem
 {
 public:
-    ThemeGroupItem( ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts );
+    ThemeGroupItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
 
     int rtti() const;
 
 protected:
-    virtual void setPressed( bool p );
+    virtual void setPressed(bool pressed);
 };
 
 
@@ -198,23 +205,23 @@ struct ThemePluginItemPrivate;
 class QTOPIA_EXPORT ThemePluginItem : public ThemeItem
 {
 public:
-    ThemePluginItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemePluginItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     ~ThemePluginItem();
 
-    void setPlugin(const QString &);
+    void setPlugin(const QString &plugin);
     void setBuiltin(ThemedItemPlugin *);
 
     int rtti() const;
 
 protected:
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
     virtual void layout();
 
 private:
     void releasePlugin();
 
 private:
-    ThemePluginItemPrivate* d;
+    ThemePluginItemPrivate *d;
 };
 
 
@@ -222,14 +229,14 @@ struct ThemeLayoutItemPrivate;
 class QTOPIA_EXPORT ThemeLayoutItem : public ThemeItem
 {
 public:
-    ThemeLayoutItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeLayoutItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeLayoutItem();
 
     int rtti() const;
 
 protected:
     virtual void layout();
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
 
 private:
     ThemeLayoutItemPrivate* d;
@@ -248,25 +255,25 @@ private:
     };
 
 public:
-    ThemeTemplateItem( ThemeItem* p, ThemedView* v, const ThemeAttributes& atts );
+    ThemeTemplateItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeTemplateItem();
 
     virtual int rtti() const;
 
-    ThemeTemplateInstanceItem* createInstance( const QString& uid );
+    ThemeTemplateInstanceItem* createInstance(const QString &uid);
 
 private:
 
-    bool startElement( const QString& qName, const ThemeAttributes& atts );
+    bool startElement(const QString &qName, const ThemeAttributes &atts);
     bool endElement();
-    bool characters( const QString& str );
+    bool characters(const QString &str);
     ThemeTemplateItemPrivate* d;
 };
 
 class QTOPIA_EXPORT ThemeTemplateInstanceItem : public ThemeTemplateItem
 {
 public:
-    ThemeTemplateInstanceItem( ThemeItem* p, ThemedView* v, const ThemeAttributes& atts );
+    ThemeTemplateInstanceItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeTemplateInstanceItem();
     virtual int rtti() const;
 };
@@ -275,7 +282,7 @@ public:
 class QTOPIA_EXPORT ThemeExclusiveItem : public ThemeItem
 {
 public:
-    ThemeExclusiveItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeExclusiveItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
 
     int rtti() const;
 
@@ -288,7 +295,7 @@ struct ThemeGraphicItemPrivate;
 class QTOPIA_EXPORT ThemeGraphicItem : public ThemeItem
 {
 public:
-    ThemeGraphicItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeGraphicItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeGraphicItem();
 
 protected:
@@ -310,60 +317,56 @@ struct ThemeTextItemPrivate;
 class QTOPIA_EXPORT ThemeTextItem : public ThemeGraphicItem
 {
     friend class ThemeFactory;
+
 public:
-    ThemeTextItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeTextItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     ~ThemeTextItem();
 
-    void setText(const QString &t);
+    void setText(const QString &text);
     QString text() const;
     bool shortLabel() const;
     void setTextFormat(Qt::TextFormat format);
     Qt::TextFormat textFormat() const;
-
     int rtti() const;
 
 protected:
     void constructionComplete();
-    void expressionChanged( QExpressionEvaluator* expr );
-    void setupFont( const QFont &deffont, const QString &size, const QString &bold, const QString &col,
-            const QString &outline, ThemeItem::State st = ThemeItem::Default );
-    virtual void paint(QPainter *p, const QRect &r);
-    void addCharacters(const QString &ch);
+    void expressionChanged(QExpressionEvaluator *expression);
+    void setupFont(const QFont &deffont, const QString &size, const QString &bold, const QString &color,
+                   const QString &outline, ThemeItem::State state = ThemeItem::Default);
+    virtual void paint(QPainter *painter, const QRect &rect);
+    void addCharacters(const QString &characters);
 
 private:
     void setupThemeText();
-    void drawOutline(QPainter *p, const QRect &r, int flags, const QString &text);
-    void drawOutline(QPainter *p, const QRect &r, const QPalette &pal, QAbstractTextDocumentLayout *rt);
-    ThemeTextItemPrivate* d;
+    void drawOutline(QPainter *painter, const QRect &rect, int flags, const QString &text);
+    void drawOutline(QPainter *painter, const QRect &rect,
+                     const QPalette &palette, QAbstractTextDocumentLayout *rt);
+    ThemeTextItemPrivate *d;
 };
-
-//class ThemeRectItemPrivate;
 
 class QTOPIA_EXPORT ThemeRectItem : public ThemeGraphicItem
 {
 public:
-    ThemeRectItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeRectItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
 
     int rtti() const;
 
     QColor brushColor( ThemeItem::State st = ThemeItem::Default ) const;
 
 protected:
-    virtual void paint(QPainter *p, const QRect &r);
-
-private:
-    //ThemeRectItemPrivate *d[3];
+    virtual void paint(QPainter *painter, const QRect &rect);
 };
 
 class QTOPIA_EXPORT ThemeLineItem : public ThemeGraphicItem
 {
 public:
-    ThemeLineItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeLineItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
 
     int rtti() const;
 
 protected:
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
 };
 
 /* PIXMAP THEME ITEMS */
@@ -372,7 +375,7 @@ struct Image;
 class QTOPIA_EXPORT ThemePixmapItem : public ThemeGraphicItem
 {
 public:
-    ThemePixmapItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemePixmapItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemePixmapItem();
 
     static void colorizeImage( QImage &img, const QColor& col, int alpha, bool colorroles = true);
@@ -398,7 +401,7 @@ class ThemeAnimationFrameInfo;
 class QTOPIA_EXPORT ThemeAnimationItem : public ThemePixmapItem
 {
 public:
-    ThemeAnimationItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeAnimationItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     ~ThemeAnimationItem();
 
     virtual void setFrame(int);
@@ -410,7 +413,7 @@ public:
     int rtti() const;
 
 protected:
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
     virtual void layout();
     void advance();
     void constructionComplete();
@@ -434,7 +437,7 @@ struct ThemeLevelItemPrivate;
 class QTOPIA_EXPORT ThemeLevelItem : public ThemeAnimationItem
 {
 public:
-    ThemeLevelItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeLevelItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     ~ThemeLevelItem();
 
     void setValue(int v);
@@ -459,7 +462,7 @@ struct ThemeStatusItemPrivate;
 class QTOPIA_EXPORT ThemeStatusItem : public ThemePixmapItem
 {
 public:
-    ThemeStatusItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeStatusItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     ~ThemeStatusItem();
 
     void setOn(bool e);
@@ -470,7 +473,7 @@ public:
 protected:
     virtual void layout();
     void constructionComplete();
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
 
     void expressionChanged( QExpressionEvaluator* expr );
 
@@ -484,17 +487,17 @@ struct ThemeImageItemPrivate;
 class QTOPIA_EXPORT ThemeImageItem : public ThemePixmapItem
 {
 public:
-    ThemeImageItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
+    ThemeImageItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeImageItem();
 
-    void setImage( const QPixmap &p, ThemeItem::State st = ThemeItem::Default );
-    QPixmap image( ThemeItem::State st = ThemeItem::Default ) const;
+    void setImage(const QPixmap &pixmap, ThemeItem::State state = ThemeItem::Default);
+    QPixmap image(ThemeItem::State state = ThemeItem::Default) const;
 
     int rtti() const;
 
 protected:
     virtual void layout();
-    virtual void paint(QPainter *p, const QRect &r);
+    virtual void paint(QPainter *painter, const QRect &rect);
     void paletteChange(const QPalette &);
     void constructionComplete();
     void expressionChanged( QExpressionEvaluator* expr );
@@ -510,7 +513,7 @@ class QTOPIA_EXPORT ThemeWidgetItem : public ThemeGraphicItem
     friend class ThemeListItem;
     friend class ThemeWidgetItemPrivate;
 public:
-    ThemeWidgetItem(ThemeItem *p, ThemedView *v, const ThemeAttributes &atts);
+    ThemeWidgetItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeWidgetItem();
     virtual void setWidget( QWidget* );
     QWidget* widget() const;
@@ -536,32 +539,42 @@ class ThemeListModel;
 class QTOPIA_EXPORT ThemeListItem : public ThemeWidgetItem
 {
 public:
-    ThemeListItem(ThemeItem* p, ThemedView* ir, const ThemeAttributes & atts);
+    ThemeListItem(ThemeItem *parent, ThemedView *view, const ThemeAttributes &atts);
     virtual ~ThemeListItem();
     int rtti() const;
     QListView* listView() const;
-    virtual void setWidget( QWidget* w );
-    void setModel(ThemeListModel* model);
-    ThemeListModel* model() const;
+    virtual void setWidget(QWidget *widget);
+    void setModel(ThemeListModel *model);
+    ThemeListModel *model() const;
 private:
-    ThemeListItemPrivate* d;
+    ThemeListItemPrivate *d;
 };
 
 class QTOPIA_EXPORT ThemedView : public QWidget
 {
     Q_OBJECT
+
 public:
-    explicit ThemedView(QWidget *parent=0, Qt::WFlags f=0);
+    enum Type { Item, Page, Animation, Level, Status, Image, Text, Rect,
+                Line, Plugin, Exclusive, Layout, Group, Widget, List,
+                Template, TemplateInstance };
+
+    explicit ThemedView(QWidget *parent = 0, Qt::WFlags f = 0);
     virtual ~ThemedView();
 
-    bool sourceLoaded() const; // return whether a source has been loaded
+    /* return whether a source has been loaded. */
+    bool sourceLoaded() const;
 
     bool loadSource(const QString &file = QString());
     void setSourceFile(const QString &file);
     QSize sizeHint() const;
 
-    enum Type { Item, Page, Animation, Level, Status, Image, Text, Rect,
-                Line, Plugin, Exclusive, Layout, Group, Widget, List, Template, TemplateInstance };
+    QList<ThemeItem*> findItems(const QString &name, ThemedView::Type type = ThemedView::Item,
+                                ThemeItem::State state = ThemeItem::All) const;
+
+    ThemeItem *findItem(const QString &name, ThemedView::Type type = ThemedView::Item,
+                        ThemeItem::State state = ThemeItem::All) const;
+
     QList<ThemeItem*> findItems(const QString &name, int type, int state = ThemeItem::All) const;
     ThemeItem *findItem(const QString &name, int type, int state = ThemeItem::All) const;
 
@@ -572,18 +585,18 @@ public:
     const QString base() const;
     const QString defaultPics() const;
 
-    ThemeItem *itemAt( const QPoint &pos ) const;
-    virtual QWidget *newWidget(ThemeWidgetItem*, const QString&);
-    void setGeometryAndLayout(const QRect& r);
+    ThemeItem *itemAt(const QPoint &pos) const;
+    virtual QWidget *newWidget(ThemeWidgetItem *, const QString &);
+    void setGeometryAndLayout(const QRect &r);
     void setGeometryAndLayout(int x, int y, int w, int h);
 
-    void paint(QPainter *p, const QRect &clip, ThemeItem *item=0);
+    void paint(QPainter *painter, const QRect &clip, ThemeItem *item = 0);
 
     void dumpState() const;
 signals:
-    void itemPressed( ThemeItem * );
-    void itemReleased( ThemeItem * );
-    void itemClicked( ThemeItem * );
+    void itemPressed(ThemeItem *);
+    void itemReleased(ThemeItem *);
+    void itemClicked(ThemeItem *);
     void visibilityChanged(ThemeItem *, bool);
 
 protected:
@@ -592,20 +605,20 @@ protected:
     void layout(ThemeItem *item=0);
 
 
-    void mousePressEvent( QMouseEvent *e );
-    void mouseReleaseEvent( QMouseEvent *e );
-    void mouseMoveEvent( QMouseEvent *e );
+    void mousePressEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
 
     void paintEvent(QPaintEvent *);
 
     void resizeEvent(QResizeEvent *);
     void showEvent(QShowEvent *);
 
-    void registerExpression( ThemeItem* item, QExpressionEvaluator* expr );
+    void registerExpression(ThemeItem *item, QExpressionEvaluator *expr);
 
 private slots:
     void notifyExpressionChanged();
-    void expressionDestroyed( QObject* obj );
+    void expressionDestroyed(QObject *obj);
 
 private:
     QString rttiToString(int) const;
@@ -614,8 +627,12 @@ private:
     void paintItem(QPainter *p, ThemeItem *item, const QRect &clip);
     void paletteChange(const QPalette &);
     void paletteChange(ThemeItem *item, const QPalette &p);
-    bool isOn( ThemeItem *item ) const;
-    ThemeItem *itemAt( const QPoint &pos, ThemeItem *item ) const;
+    bool isOn(ThemeItem *item) const;
+    ThemeItem *itemAt(const QPoint &pos, ThemeItem *item) const;
+    ThemeItem *findItem(ThemeItem *item, const QString &name,
+                        ThemedView::Type type = ThemedView::Item, ThemeItem::State state = ThemeItem::All) const;
+    void findItems(ThemeItem *item, const QString &name, ThemedView::Type type,
+                   ThemeItem::State state, QList<ThemeItem*> &list) const;
     ThemeItem *findItem(ThemeItem *item, const QString &name, int type, int state = ThemeItem::All) const;
     void findItems(ThemeItem *item, const QString &name, int type, int pressed, QList<ThemeItem*> &list) const;
     void visChanged(ThemeItem *item, bool);
@@ -633,22 +650,26 @@ struct ThemeListModelEntryPrivate;
 class QTOPIA_EXPORT ThemeListModelEntry
 {
 public:
-    explicit ThemeListModelEntry( ThemeListModel* model );
+    explicit ThemeListModelEntry(ThemeListModel *model);
     virtual ~ThemeListModelEntry();
 
-    QString uid(); // uniqueid for this item, used in vs
-    virtual QString type() const = 0; // the type (name attribute) that this entry corresponds to
+    /* unique id for this item, used in valuespace. */
+    QString uid();
 
-    void setValue( const QString& key, const QVariant& value );
-    QVariant value( const QString& key );
+    /* the type (name attribute) that this entry corresponds to */
+    virtual QString type() const = 0;
 
-    ThemeListModel* model() const;
+    void setValue(const QString &key, const QVariant &value);
+    QVariant value(const QString &key);
 
-    ThemeTemplateInstanceItem* templateInstance();
+    ThemeListModel *model() const;
+
+    ThemeTemplateInstanceItem *templateInstance();
+
 private:
     void getTemplateInstance();
     QString valuespacePath();
-    ThemeListModelEntryPrivate* d;
+    ThemeListModelEntryPrivate *d;
 };
 
 //-----------------------------------------------------------
@@ -658,21 +679,21 @@ class QTOPIA_EXPORT ThemeListModel : public QAbstractListModel
 {
 public:
     // operates on a constructed list in the valuespace
-    ThemeListModel( QObject* parent, ThemeListItem* li, ThemedView* view );
+    ThemeListModel(QObject *parent, ThemeListItem *li, ThemedView *view);
     virtual ~ThemeListModel();
 
-    int rowCount(const QModelIndex &parent = QModelIndex() ) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-    ThemeListItem* listItem() const;
-    ThemedView* themedView() const;
+    ThemeListItem *listItem() const;
+    ThemedView *themedView() const;
 
     QVariant data(const QModelIndex &index, int role) const;
-    QModelIndex entryIndex( const ThemeListModelEntry* entry ) const;
+    QModelIndex entryIndex(const ThemeListModelEntry *entry) const;
 
-    ThemeListModelEntry* themeListModelEntry(const QModelIndex &index) const;
+    ThemeListModelEntry *themeListModelEntry(const QModelIndex &index) const;
 
-    void addEntry( ThemeListModelEntry* item );
-    void removeEntry( const QModelIndex &index );
+    void addEntry(ThemeListModelEntry *item);
+    void removeEntry(const QModelIndex &index);
     void clear();
 
     void triggerUpdate();
@@ -681,7 +702,7 @@ protected:
     QList<ThemeListModelEntry*> items() const;
 
 private:
-    ThemeListModelPrivate* d;
+    ThemeListModelPrivate *d;
 };
 
 #endif

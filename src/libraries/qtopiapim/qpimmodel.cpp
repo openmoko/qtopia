@@ -50,59 +50,67 @@ public:
 
 /*!
   \class QPimModel
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QPimModel class provides an abstract interface to the pim model classes.
+  \brief The QPimModel class provides an abstract interface to the PIM model classes.
 
-  The QPimModel class defines a standard interface that is implemented by all of the pim
+  The QPimModel class defines a standard interface that is implemented by all of the PIM
   model classes.
+
+  \sa QAppointmentModel, QContactModel, QTaskModel
 */
 
 /*!
   \fn QUniqueId QPimModel::addRecord(const QByteArray &bytes, const QPimSource &source = QPimSource(), const QString &format = QString())
 
-  Adds the PIM record encoded in \a bytes to the QPimModel under the storage source \a source.
-  The format of the record in \a bytes is given by \a format.  An empty \a format string will
+  Adds the PIM record encoded in \a bytes to the model under the specified storage \a source.
+  The format of the record in \a bytes is given by \a format.  An empty format string will
   cause the record to be read using the data stream operators for the PIM data type of the model.
-  If \a source is empty will add the record to the default storage source.
+  If the specified source is null the function will add the record to the default storage source.
 
-  Returns valid id if the record was successfully added.  Otherwise returns an invalid id.
+  Returns a valid identifier for the record if the record was
+  successfully added.  Otherwise returns a null identifier.
 
-  Can only add PIM data that is represented by the model.  This means that only contact data
-  can be added using a QContactModel, only appointment data added using QAppointmentModel and
-  only task data added using QTaskModel.
+  Can only add PIM data that is represented by the model.
+
+  \sa updateRecord(), removeRecord()
 */
 
 /*!
   \fn bool QPimModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, const QString &format = QString())
 
-  Updates the record enoded in \a bytes so long as there is a record in the QPimModel with
-  the same uid as the record.  The format of the record in \a bytes is given by \a format.
+  Updates the corresponding record in the model to equal the record encoded in \a bytes.
+  The format of the record in \a bytes is given by the \a format string.
   An empty \a format string will cause the record to be read using the data stream operators
-  for the PIM data type of the model. If \a id is not null will set the record uid to \a id
+  for the PIM data type of the model. If \a id is not null will set the record identifier to \a id
   before attempting to update the record.
 
-  Returns true if the record was successfully updated.  Otherwise returns false.
+  Returns true if the record was successfully updated.
+
+  \sa addRecord(), removeRecord()
 */
 
 /*!
-  \fn bool QPimModel::removeRecord(const QUniqueId &id)
+  \fn bool QPimModel::removeRecord(const QUniqueId &identifier)
 
-  Removes the record that has the uid \a id from the QPimModel.
+  Removes the record from the model with the specified \a identifier.
 
-  Returns true if the record was successfully removed.  Otherwise returns false.
+  Returns true if the record was successfully removed.
+  
+  \sa addRecord(), updateRecord()
 */
 
 /*!
-  \fn QByteArray QPimModel::record(const QUniqueId &id, const QString &format = QString()) const
+  \fn QByteArray QPimModel::record(const QUniqueId &identifier, const QString &format = QString()) const
 
-    Returns the record with the identifier \a id encoded in the format specified by \a format.
-    An empty \a format string will cause the record to be written using the data stream
-    operators for the PIM data type of the model.
+  Returns the record in the model with the specified \a identifier encoded in the format specified by the \a format string.
+  An empty format string will cause the record to be written using the data stream
+  operators for the PIM data type of the model.
 */
 
 /*!
-  Contstructs a QPimModel with parent \a parent.
+  Constructs a PIM model with the given \a parent.
 */
 QPimModel::QPimModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -114,13 +122,16 @@ QPimModel::QPimModel(QObject *parent)
 }
 
 /*!
-  Destructs the QPimModel
+  Destroys the PIM model.
 */
 QPimModel::~QPimModel()
 {
+    delete d;
 }
 
 /*!
+  \internal
+
   Adds the record \a accessModel to the QPimModel.  If no access models have
   been added previously the \a accessModel is set to be the default model.
 */
@@ -134,6 +145,8 @@ void QPimModel::addAccess(QRecordIO *accessModel)
 }
 
 /*!
+  \internal
+
   Adds the record \a context to the QPimModel.  If no contexts have
   been added previously the \a context is set to be the default context.
 */
@@ -145,25 +158,28 @@ void QPimModel::addContext(QPimContext *context)
 }
 
 /*!
-  Returns the list of access models added to the pim model
+  \internal
+  Returns the list of access models added to the model
 */
 QList<QRecordIO*> &QPimModel::accessModels() const
 { return d->models; }
 
 /*!
-  Returns the access model that holds data for the record with identifier \a id.
+  \internal
+  Returns the access model that provides data for specified \a identifier.
 */
-QRecordIO *QPimModel::access(const QUniqueId &id) const
+QRecordIO *QPimModel::access(const QUniqueId &identifier) const
 {
     foreach(QRecordIO *model, d->models) {
-        if (model->exists(id))
+        if (model->exists(identifier))
             return model;
     }
     return 0;
 }
 
 /*!
-  Returns the access model that holds data for the row \a row in the QPimModel.
+  \internal
+  Returns the access model that holds for the specified \a row.
 */
 QRecordIO *QPimModel::access(int row) const
 {
@@ -172,7 +188,8 @@ QRecordIO *QPimModel::access(int row) const
 }
 
 /*!
-  Returns the row in the access model that holds data for the row \a row in the QPimModel.
+  \internal
+  Returns the row in the access model that holds data for the specified \a row in the model.
 */
 int QPimModel::accessRow(int row) const
 {
@@ -190,7 +207,7 @@ void QPimModel::voidCache()
 }
 
 /*!
-   Returns the contexts of record data that can be shown by the record model.
+   Returns the contexts of record data that is shown by the record model.
 */
 const QList<QPimContext*> &QPimModel::contexts() const
 {
@@ -198,8 +215,10 @@ const QList<QPimContext*> &QPimModel::contexts() const
 }
 
 /*!
-  Returns the list of sources of record data that are currently shown by the
+  Returns the list of sources of record data that is currently shown by the
   record model.
+
+  \sa setVisibleSources(), availableSources()
 */
 QSet<QPimSource> QPimModel::visibleSources() const
 {
@@ -210,10 +229,12 @@ QSet<QPimSource> QPimModel::visibleSources() const
 }
 
 /*!
-  Sets the QPimModel to show only records contained in the storage sources specified
+  Sets the model to show only records contained in the storage sources specified
   by \a list.
 
   Also refreshes the model.
+
+  \sa visibleSources(), availableSources()
 */
 void QPimModel::setVisibleSources(const QSet<QPimSource> &list)
 {
@@ -227,6 +248,8 @@ void QPimModel::setVisibleSources(const QSet<QPimSource> &list)
 
 /*!
   Returns the set of identifiers for storage sources that can be shown.
+
+  \sa setVisibleSources(), visibleSources()
 */
 QSet<QPimSource> QPimModel::availableSources() const
 {
@@ -237,26 +260,30 @@ QSet<QPimSource> QPimModel::availableSources() const
 }
 
 /*!
-  Returns the source identifier that contains the record with identifier \a id.
+  Returns the source identifier that contains the record with the specified \a identifier.
   If the record does not exist returns a null source.
+
+  \sa availableSources()
 */
-QPimSource QPimModel::source(const QUniqueId &id) const
+QPimSource QPimModel::source(const QUniqueId &identifier) const
 {
     foreach(QPimContext *context, d->contexts) {
-        if (context->exists(id))
-            return context->source(id);
+        if (context->exists(identifier))
+            return context->source(identifier);
     }
     return QPimSource();
 }
 
 /*!
-  Returns the context that contains the record with identifier \a id.
+  Returns the context that contains the record with the specified \a identifier.
   If the record does not exists returns 0.
+
+  \sa contexts()
 */
-QPimContext *QPimModel::context(const QUniqueId &id) const
+QPimContext *QPimModel::context(const QUniqueId &identifier) const
 {
     foreach(QPimContext *context, d->contexts) {
-        if (context->exists(id))
+        if (context->exists(identifier))
             return context;
     }
     return 0;
@@ -265,9 +292,9 @@ QPimContext *QPimModel::context(const QUniqueId &id) const
 /*!
   Prepares the currently visible sources for syncing.  
   All modifications between startSyncTransaction() and commitSyncTransaction()
-  will be marked with the same \a timestamp for modification or creation as appropriate.
+  will be marked with the given \a timestamp for modification or creation as appropriate.
 
-  Returns true if transaction successfully initiated, otherwise returns false.
+  Returns true if transaction successfully initiated.
   
   Does not abort transaction if unsuccessfully initiated.
 
@@ -288,7 +315,7 @@ bool QPimModel::startSyncTransaction(const QDateTime &timestamp)
 /*!
   Aborts the current sync transaction.
 
-  Returns true if transaction successfully aborted, otherwise returns false.
+  Returns true if transaction successfully aborted.
 
   \sa startSyncTransaction(), commitSyncTransaction()
 */
@@ -307,7 +334,7 @@ bool QPimModel::abortSyncTransaction()
 /*!
   Commits the current sync transaction.
 
-  Returns true if transaction successfully committed, otherwise returns false.
+  Returns true if transaction successfully committed.
 
   Does not abort transaction if unsuccessfully committed.
 
@@ -326,8 +353,10 @@ bool QPimModel::commitSyncTransaction()
 }
 
 /*!
-  Returns the list of id's for records removed from the current set of visible sources
+  Returns the list of identifiers for records removed from the current set of visible sources
   on or after the specified \a timestamp.
+
+  \sa added(), modified()
 */
 QList<QUniqueId> QPimModel::removed(const QDateTime &timestamp) const
 {
@@ -339,8 +368,10 @@ QList<QUniqueId> QPimModel::removed(const QDateTime &timestamp) const
 }
 
 /*!
-  Returns the list of id's for records added the current set of visible sources
+  Returns the list of identifiers for records added the current set of visible sources
   on or after the specified \a timestamp.
+
+  \sa removed(), modified()
 */
 QList<QUniqueId> QPimModel::added(const QDateTime &timestamp) const
 {
@@ -352,8 +383,10 @@ QList<QUniqueId> QPimModel::added(const QDateTime &timestamp) const
 }
 
 /*!
-  Returns the list of id's for records modified in the current set of visible sources
+  Returns the list of identifiers for records modified in the current set of visible sources
   on or after the specified \a timestamp.
+
+  \sa added(), removed()
 */
 QList<QUniqueId> QPimModel::modified(const QDateTime &timestamp) const
 {
@@ -373,9 +406,7 @@ int QPimModel::count() const
 }
 
 /*!
-  \overload
-
-    Returns the number of rows under the given \a parent.
+  \reimp
 */
 int QPimModel::rowCount(const QModelIndex &parent) const
 {
@@ -384,8 +415,9 @@ int QPimModel::rowCount(const QModelIndex &parent) const
 }
 
 /*!
-  Returns true if the current filter mode of the model contains \a index.
-  Otherwise returns false.
+  Returns true if the current filter mode of the model contains the given \a index.
+
+  \sa exists()
 */
 bool QPimModel::contains(const QModelIndex &index) const
 {
@@ -393,34 +425,34 @@ bool QPimModel::contains(const QModelIndex &index) const
 }
 
 /*!
-  Returns true if the current filter mode of the model contains the record with the uid \a id.
-  Otherwise returns false.
+  Returns true if the current filter mode of the model contains the record with given \a identifier.
+
+  \sa exists()
 */
-bool QPimModel::contains(const QUniqueId & id) const
+bool QPimModel::contains(const QUniqueId & identifier) const
 {
-    return index(id).isValid();
+    return index(identifier).isValid();
 }
 
 /*!
-  Returns true if a record with the uid \a id is stored in the record model.  Otherwise
+  Returns true if a record with the given \a identifier is stored in the model.  Otherwise
   return false.
 
-  The record with uid \a id does not need to be in the current filter mode.
+  The specified record does not need to be in the current filter mode.
 
   \sa contains()
 */
-bool QPimModel::exists(const QUniqueId &id) const
+bool QPimModel::exists(const QUniqueId &identifier) const
 {
     foreach(const QRecordIO *model, d->models) {
-        if (model->exists(id))
+        if (model->exists(identifier))
             return true;
     }
     return false;
 }
 
 /*!
-  Returns true if the record for \a index can be updated or removed.
-  Otherwise returns false.
+  Returns true if the record for the given \a index can be updated or removed.
 */
 bool QPimModel::editable(const QModelIndex &index) const
 {
@@ -428,48 +460,48 @@ bool QPimModel::editable(const QModelIndex &index) const
 }
 
 /*!
-  Returns true if the record for \a id can be updated or removed.
-  Otherwise returns false.
+  Returns true if the record for the given \a identifier can be updated or removed.
 */
-bool QPimModel::editable(const QUniqueId &id) const
+bool QPimModel::editable(const QUniqueId &identifier) const
 {
     foreach (QPimContext *c, d->contexts) {
-        if (c->exists(id))
-            return c->editable(id);
+        if (c->exists(identifier))
+            return c->editable(identifier);
     }
     return false;
 }
 
 /*!
-  Returns true if the record uid \a id is stored in the storage source \a source.
-  Otherwise returns false.
+  Returns true if the record for the given \a identifier is stored in
+  the specified storage \a source.
+
+  \sa exists(), availableSources()
 */
-bool QPimModel::sourceExists(const QPimSource &source, const QUniqueId &id) const
+bool QPimModel::sourceExists(const QPimSource &source, const QUniqueId &identifier) const
 {
     foreach (QPimContext *c, d->contexts) {
         if (c->sources().contains(source))
-            return c->exists(id, source);
+            return c->exists(identifier, source);
     }
     return false;
 }
 
 /*!
-  If the model contains a record with uid \a id, returns the index of the record.
-  Otherwise returns a null QModelIndex
+  Returns the index of the record for the given \a identifier.  If no
+  record is found returns a null index.
 
   \sa contains(), exists()
 */
-QModelIndex QPimModel::index(const QUniqueId & id) const
+QModelIndex QPimModel::index(const QUniqueId & identifier) const
 {
-    int i = d->mio->index(id);
+    int i = d->mio->index(identifier);
     if (i == -1)
         return QModelIndex();
     return createIndex(i, 0);
 }
 
 /*!
-  \overload
-    Returns the parent of the model item with the given \a index.
+  \reimp
 */
 QModelIndex QPimModel::parent(const QModelIndex &index) const
 {
@@ -479,11 +511,7 @@ QModelIndex QPimModel::parent(const QModelIndex &index) const
 
 
 /*!
-  \overload
-  Returns true if \a parent has any children; otherwise returns false.
-  Use rowCount() on the parent to find out the number of children.
-
-  \sa parent(), index()
+  \reimp
 */
 bool QPimModel::hasChildren(const QModelIndex &parent) const
 {
@@ -493,6 +521,8 @@ bool QPimModel::hasChildren(const QModelIndex &parent) const
 
 /*!
   Ensures the data in Records is in a state suitable for syncing.
+
+  Returns true upon success.
 */
 bool QPimModel::flush() {
     return true;
@@ -500,6 +530,7 @@ bool QPimModel::flush() {
 
 /*!
   Forces a refresh of the Record data.
+  Returns true upon success.
 */
 bool QPimModel::refresh() {
     d->mio->rebuildCache();
@@ -507,8 +538,8 @@ bool QPimModel::refresh() {
 }
 
 /*!
-  Return the id for the record at the row specified by \a index.
-  If index is null or out of the range of the model, will return a null id.
+  Returns the identifier for the record at the specified \a index.
+  If index is null or out of the range of the model, will return a null identifier.
 */
 QUniqueId QPimModel::id(const QModelIndex &index) const
 {
@@ -517,7 +548,7 @@ QUniqueId QPimModel::id(const QModelIndex &index) const
 }
 
 /*!
-  Returns the id for record at the \a row specified.
+  Returns the identifier for record at the specified \a row.
 */
 QUniqueId QPimModel::id(int row) const
 {
@@ -529,9 +560,7 @@ QUniqueId QPimModel::id(int row) const
 }
 
 /*!
-  \overload
-  Returns the index of the item in the model specified by the given \a row, \a column
-  and \a parent index.
+  \reimp
 */
 QModelIndex QPimModel::index(int row, int column, const QModelIndex &parent) const
 {
@@ -542,8 +571,10 @@ QModelIndex QPimModel::index(int row, int column, const QModelIndex &parent) con
 }
 
 /*!
-  If the \a source exists in the model returns the pim context that provides that
-  \a source.  Otherwise returns 0.
+  If the given \a source exists in the model returns the context that provides that
+  source.  Otherwise returns 0.
+
+  \sa contexts(), availableSources()
 */
 QPimContext *QPimModel::context(const QPimSource &source) const
 {
@@ -562,20 +593,25 @@ QPimContext *QPimModel::context(const QPimSource &source) const
 }
 
 /*!
-  Set the model to only contain records accepted by the QCategoryFilter \a f.
+  Sets the model to only contain records accepted by the
+  specified category \a filter.
+
+  \sa categoryFilter()
 */
-void QPimModel::setCategoryFilter(const QCategoryFilter &f)
+void QPimModel::setCategoryFilter(const QCategoryFilter &filter)
 {
-    if (f == categoryFilter())
+    if (filter == categoryFilter())
         return;
 
     foreach(QRecordIO *model, d->models)
-        model->setCategoryFilter(f);
+        model->setCategoryFilter(filter);
     d->mio->rebuildCache();
 }
 
 /*!
-  Returns the QCategoryFilter that records are tested against for the current filter mode.
+  Returns the category filter that records are tested against in the current filter mode.
+
+  \sa setCategoryFilter()
 */
 QCategoryFilter QPimModel::categoryFilter() const
 {

@@ -349,8 +349,7 @@ void NetworkPackageController::listFetchComplete()
         else    
         {
             emit updated();
-            emit packageMessage( tr( "Found %1 packages on server", "%1 = # of packages" )
-                    .arg( pkgList.count() ));
+            emit packageMessage( tr( "Found %n package(s) on server", "%1 = # of packages", pkgList.count()) );
         }
         delete hf;
         hf = 0;
@@ -500,7 +499,7 @@ QIcon InstalledPackageController::getDataIcon( int pkgId ) const
     InstallControl::PackageInfo pi = packageInfo( pkgId );
     
     if ( pi.isEnabled )
-         return QIcon( ":icon/installed" );
+         return QIcon( ":icon/accessories" );
     else
         return QIcon( ":icon/reset" );
 }

@@ -382,27 +382,22 @@ void QtopiaSessionManager::invalidateSession( const QByteArray& ifaceHandle )
 
 /*!
   \class QtopiaNetworkServer
+  \ingroup QtopiaServer::Task
   \brief The QtopiaNetworkServer class manages all network interfaces.
 
+  This server task synchronizes the network access across all Qtopia applications.
   Client applications request network functions via QtopiaNetwork which
-  forwards the requests to this network server. There must only be on single
-  instance of this server.
+  forwards the requests to this network server. The network server creates 
+  and keeps the references to the various QtopiaNetworkInterface instance. All
+  forwarded network requests are directly executed by this server class. 
 
-  The network server handles the following qcop messages:
-
-  Additional messages on the channel QPE/NetworkState:
-  \list
-    \o QPE/NetworkState updateNetwork()
-        This msg invokes an internal update of all internal interfaces.
-        This is required when new network interfaces are installed. It forces the
-        server to notice the new config and instanciates the appropriate network plugin.
-        Only applications which are part of the netconfig domain are able to
-        send this message.
-  \o QPE/NetworkState wapChanged()
-        Sent whenever WAP settings may have changed.
-  \endlist
+  The network server ensures the automated start-up of network interfaces during 
+  Qtopia's start phase, stops all network interfaces when Qtopia shuts down and 
+  manages the network sessions for all network devices.
 
   The QtopiaNetworkServer class provides the \c {QtopiaNetworkServer} task.
+
+  \sa QtopiaNetwork, QtopiaNetworkInterface
 */
 
 /*!
@@ -413,8 +408,7 @@ void QtopiaSessionManager::invalidateSession( const QByteArray& ifaceHandle )
 
 
 /*!
-  Constructs the network server. This class must only be instanciated once.
-  It synchronizes the network access across all Qtopia applications.
+  Constructs the network server.
 */
 QtopiaNetworkServer::QtopiaNetworkServer()
     : QtopiaIpcAdaptor( "QPE/Network" ), tidAutoStart( 0 ), lockdown( false )
@@ -460,9 +454,7 @@ QtopiaNetworkServer::QtopiaNetworkServer()
 }
 
 /*!
-  \internal
-
-  Deconstruct network server.
+  Destroys the QtopaNetworkServer instance.
 */
 QtopiaNetworkServer::~QtopiaNetworkServer()
 {

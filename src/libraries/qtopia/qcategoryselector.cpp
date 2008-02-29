@@ -55,6 +55,28 @@
 
 #include <stdlib.h>
 
+class QCategoryEditorData;
+class QCategoryEditor : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit QCategoryEditor(QWidget *parent);
+    ~QCategoryEditor();
+
+    QString name() const;
+    bool global() const;
+
+    void setName(const QString &name);
+    void setGlobal(bool global);
+
+public slots:
+    void accept();
+
+private:
+    QCategoryEditorData *d;
+};
+
 class QCategoryEditorData
 {
 public:
@@ -65,6 +87,33 @@ public:
     QCheckBox *globalCheck;
 };
 
+/*
+  \class QCategoryEditor
+  \internal
+  \ingroup categories
+  \brief The QCategoryEditor class allows the user to change a user category.
+
+  This class aids in the editing of user categories but it does not have intimate knowledge of
+  the category system. It exposes things the user can edit (name, global) but does not handle things
+  the user cannot edit (scope, icon).
+
+  \code
+    QCategoryEditor editor;
+    editor.setName( categoryName );
+    editor.setGlobal( categoryIsGlobal );
+    if ( editor.exec() ) {
+        categoryName = editor.name();
+        categoryIsGlobal = editor.global();
+        // update QCategoryManager
+    }
+  \endcode
+
+  \sa Categories
+*/
+
+/*
+  Constructs a QCategoryEditor with the given \a parent.
+*/
 QCategoryEditor::QCategoryEditor(QWidget *parent)
 : QDialog(parent)
 {
@@ -82,10 +131,17 @@ QCategoryEditor::QCategoryEditor(QWidget *parent)
     setModal(true);
 }
 
+/*
+  Destroys a QCategoryEditor.
+*/
 QCategoryEditor::~QCategoryEditor()
 {
 }
 
+/*
+  \internal
+  The dialog will be accepted only if the category has some text.
+*/
 void QCategoryEditor::accept()
 {
     if(d->nameField->text().isEmpty())
@@ -94,21 +150,37 @@ void QCategoryEditor::accept()
         QDialog::accept();
 }
 
+/*
+  Returns the name of the category being edited.
+  \sa setName()
+*/
 QString QCategoryEditor::name() const
 {
     return d->nameField->text();
 }
 
+/*
+  Returns true if the category being edited exists in the global scope; false otherwise.
+  \sa setGlobal()
+*/
 bool QCategoryEditor::global() const
 {
     return d->globalCheck->isChecked();
 }
 
+/*
+  Sets the \a name of the category being edited.
+  \sa name()
+*/
 void QCategoryEditor::setName(const QString &name)
 {
     d->nameField->setText(name);
 }
 
+/*
+  Sets the category being edited to the global scope if \a global is true.
+  \sa global()
+*/
 void QCategoryEditor::setGlobal(bool global)
 {
     d->globalCheck->setChecked(global);
@@ -157,12 +229,13 @@ public:
         showUnfiled = includeUnfiled;
         showAll = includeAll;
 
-        connect(m, SIGNAL(categoriesChanged()), this, SLOT(categoryiesChanged()));
+        connect(m, SIGNAL(categoriesChanged()), this, SLOT(categoriesChanged()));
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QString itemText(int pos) const;
     QString itemId(int pos) const;
+    int itemPos(const QString& id) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     bool isAll(int pos);
     bool isUnfiled(int pos);
@@ -179,7 +252,7 @@ public:
     void generateList(bool includeUnfiled, bool includeAll, bool includeEllipse);
 
 public slots:
-    void categoryiesChanged();
+    void categoriesChanged();
 
 private:
     void setCheck(int pos, bool check); // Private because it doesn't check that what
@@ -233,7 +306,7 @@ void CategoryItemList::generateList(bool includeUnfiled, bool includeAll, bool i
     }
 }
 
-void CategoryItemList::categoryiesChanged()
+void CategoryItemList::categoriesChanged()
 {
     generateList(showUnfiled, showAll, showEllipse);
     emit reset();
@@ -266,6 +339,17 @@ int CategoryItemList::unfiledPos()
     for( int i = 0; i < rowCount(); ++i )
     {
         if( isUnfiled( i ) )
+            return i;
+    }
+
+    return -1;
+}
+
+int CategoryItemList::itemPos(const QString& id) const
+{
+    for( int i = 0; i < rowCount(); ++i )
+    {
+        if (list[i].t == CategoryItem::Single && list[i].id == id)
             return i;
     }
 
@@ -306,7 +390,7 @@ bool CategoryItemList::isGlobal(int pos) const
 
 QString CategoryItemList::itemText(int pos) const
 {
-    if ( pos > list.count() || pos < 0 )
+    if ( pos >= list.count() || pos < 0 )
         pos = 0;
     switch(list[pos].t)
     {
@@ -328,7 +412,7 @@ QString CategoryItemList::itemText(int pos) const
 
 QString CategoryItemList::itemId(int pos) const
 {
-    if ( pos > list.count() || pos < 0 )
+    if ( pos >= list.count() || pos < 0 )
         pos = 0;
     if (list[pos].t == CategoryItem::Single)
         return list[pos].id;
@@ -496,11 +580,15 @@ public:
     QAction *editCatAction;
     QAction *deleteCatAction;
 
+    QString idToSelect;
+    int rowToSelect;
+
 public slots:
     void rowChanged(int row);
     void newCategory();
     void editCategory();
     void deleteCategory();
+    void categoriesChanged();
 
 signals:
     void categoriesSelected(const QList<QString> &);
@@ -515,6 +603,7 @@ QCategorySelectData::QCategorySelectData( const QString &s,
     scope = s;
 
     comboPos = -1;
+    rowToSelect = -1;
 
     //
     //  Determine the type of widget used
@@ -631,8 +720,7 @@ QCategorySelectData::QCategorySelectData( const QString &s,
         connect(dialogButton, SIGNAL(clicked()), parent, SLOT(showDialog()));
     }
 
-   // slot was private, and empty.
-   //connect(qApp, SIGNAL(categoriesChanged()), parent, SLOT(categoriesChanged()));
+   connect(qApp, SIGNAL(categoriesChanged()), this, SLOT(categoriesChanged()));
 }
 
 void QCategorySelectData::rowChanged(int row)
@@ -641,6 +729,23 @@ void QCategorySelectData::rowChanged(int row)
 
     editCatAction->setVisible(enableEdit);
     deleteCatAction->setVisible(enableEdit);
+    idToSelect = model->itemId(row);
+    rowToSelect = -1;
+}
+
+void QCategorySelectData::categoriesChanged()
+{
+    if ((!idToSelect.isEmpty() || rowToSelect != -1) && listView) {
+        if (rowToSelect == -1)
+            rowToSelect = model->itemPos(idToSelect);
+        if (rowToSelect == -1)
+            rowToSelect = 0;
+        QModelIndex idx = model->index(rowToSelect, 0);
+        if (idx.isValid())
+            listView->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectCurrent);
+        idToSelect.clear();
+        rowToSelect = -1;
+    }
 }
 
 void QCategorySelectData::newCategory()
@@ -648,9 +753,14 @@ void QCategorySelectData::newCategory()
     QCategoryEditor dlg((QWidget*)parent());
     dlg.setWindowTitle(tr("New Category"));
 
-    if(QtopiaApplication::execDialog(&dlg) == QDialog::Accepted)
-        if(!cats->containsLabel(dlg.name(), dlg.global()))
-            cats->add(dlg.name(), QString(), dlg.global());
+    if(QtopiaApplication::execDialog(&dlg) == QDialog::Accepted) {
+        if(!cats->containsLabel(dlg.name(), dlg.global())) {
+            // Add it and store the id for selecting later
+            idToSelect = cats->add(dlg.name(), QString(), dlg.global());
+            rowToSelect = -1;
+        }
+    }
+    listView->setFocus();
 }
 
 void QCategorySelectData::editCategory()
@@ -674,8 +784,11 @@ void QCategorySelectData::editCategory()
             {
                 cats->setLabel(model->itemId(currentRow), dlg.name());
                 cats->setGlobal(model->itemId(currentRow), dlg.global());
+                idToSelect = model->itemId(currentRow);
+                rowToSelect = -1;
             }
         }
+        listView->setFocus();
     }
 }
 
@@ -690,8 +803,16 @@ void QCategorySelectData::deleteCategory()
             .arg(model->itemText(currentRow)), QMessageBox::Yes, QMessageBox::No)
             == QMessageBox::Yes)
         {
+            // Select the next category, if any
+            // otherwise the first
+            rowToSelect = -1;
+            idToSelect = model->itemId(currentRow + 1);
+            if (idToSelect.isEmpty())
+                rowToSelect = 0; // select the first row 
+
             cats->remove(model->itemId(currentRow));
         }
+        listView->setFocus();
     }
 }
 
@@ -755,41 +876,74 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
 
 /*!
   \class QCategorySelector
-  \brief The QCategorySelector widget allows users to select Categories with a
-  combobox interface.
-
-  QCategorySelector is useful to provide a QComboBox of Categories for
-  filtering (such as in the Contacts table view) or to allow the user
-  to select multiple Categories.
-
-  In filtering mode, the All and Unfiled categories are added.
-
-  In selecting mode, the QCategorySelector may either be a QComboBox and
-  a QToolButton or a QListView with checkable items depending on the
-  screen size.
-
-  QCategorySelector automatically updates if Categories has been
-  changed elsewhere in the environment.
-
-  Signals and slots are provided to notify the application of the users
-  selections.  A QToolButton is also provided so that users can edit the
-  Categories manually.
-
+  \mainclass
   \ingroup categories
+  \brief The QCategorySelector widget allows users to select categories for
+  filtering or for applying to an item.
+
+  QCategorySelector is a widget that shows categories the user can choose from.
+  Its appearance and behavior are determined by flags given to the constructor.
+  Control over the categories that are visible is achieved via the select...() functions.
+
+  QCategorySelector automatically updates when the system's categories are changed. It provides an
+  interface for the user to add/edit/delete user categories.
+
+  QCategorySelector is typically used as a \l QCategorySelector::Filter or \l QCategorySelector::Editor;
+  
+  Here's an example of using it as a filter.
+
+  \code
+    MyWidget::MyWidget()
+    {
+        QCategorySelector *sel = new QCategorySelector( "myappscope", QCategorySelector::Filter );
+        connect( sel, SIGNAL(filterSelected(const QCategoryFilter&)),
+                 this, SLOT(filterCategories(const QCategoryFilter&)) );
+        QSettings settings("mycompany", "myapp");
+        QCategoryFilter f;
+        f.readConfig( settings, "filter" );
+        sel->selectFilter( f );
+    }
+
+    void MyWidget::filterCategories( const QCategoryFilter &filter )
+    {
+        QSettings settings("mycompany", "myapp");
+        filter.writeConfig( settings, "filter" );
+        foreach ( item, itemList )
+            item->setVisible( filter.accepted( item->categories() ) );
+    }
+  \endcode
+
+  Here's an example of using QCategorySelector an editor.
+
+  \code
+    MyWidget::MyWidget( MyRecord *item )
+    {
+        QCategorySelector *sel = new QCategorySelector( "myappscope", QCategorySelector::Editor );
+        sel->selectCategories( item->categories() );
+        connect( sel, SIGNAL(categoriesSelected(const QList<QString>&)),
+                 item, SLOT(setCategories(const QList<QString>&)) );
+    }
+  \endcode
+
+  \sa Categories
 */
 
 /*!
-   \fn void QCategorySelector::categoriesSelected(const QList<QString> &list)
+  \fn void QCategorySelector::categoriesSelected(const QList<QString> &list)
+  This signal is emitted when the selected categories changes. The selected categories are
+  indicated by \a list.
 
-   This signal is emitted when a \a list of categories
-   is selected.
+  Note that this function does not indicate if \c All or \c Unfiled is selected. Use
+  filterSelected() to determine if these items are selected.
 */
 
 /*!
   \fn void QCategorySelector::filterSelected(const QCategoryFilter &filter)
 
-  This signal is emitted when a category \a filter is
-  selected.
+  This signal is emitted when the selected categories changes. The selected categories are
+  indicated by \a filter.
+
+  \sa QCategoryFilter::requiredCategories()
 */
 
 /*!
@@ -803,18 +957,28 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
 /*!
   \enum QCategorySelector::ContentFlag
 
-  \value IncludeAll Include All Categories option.
-  \value IncludeUnfiled Include Unfiled Categories option.
-  \value ListView Force items to appear as a list widget rather than a combo box
-  \value ComboView Force items to appear in a combo box rather than a list widget.
-  \value DialogView Force the selector to appear as a button that displays a dialog containing the list widget.
-  \value Filter Selector is used to create a filter for viewing categoriesed objects.
-  \value Editor Selector is used to edit categories of an object.
+  \value IncludeAll Include the All categories option.
+  \value IncludeUnfiled Include the Unfiled categories option.
+  \value ListView Display as a list view.
+  \value ComboView Display as a combo box. Note that this will encourage exclusive selection of categories.
+  \value DialogView Display as a button that opens a dialog containing a list view.
+  \value Filter Alias for IncludeAll|IncludeUnfiled.
+  \value Editor Alias for IncludeUnfiled.
   \value ViewMask Masks the view selection flags.
+
+  The list view looks like this.
+  \image qcategoryselector-list.png
+
+  The combo box looks like this.
+  \image qcategoryselector-combo-down.png
+  \image qcategoryselector-combo-up.png
+
+  The button looks like this.
+  \image qcategoryselector-button.png
 */
 
 /*!
-  Construct as a categories editor widget with parent \a parent.
+  Constructs a QCategorySelector as an editor widget with the given \a parent.
 */
 QCategorySelector::QCategorySelector( QWidget *parent )
     : QWidget( parent )
@@ -823,8 +987,9 @@ QCategorySelector::QCategorySelector( QWidget *parent )
 }
 
 /*!
-  Constructs as a category widget type defined by flags \a f with parent \a parent and
-  categories scope \a scope.
+  Constructs a QCategorySelector with the given \a parent.
+  Unless it is null, \a scope limits the categories that can be seen.
+  The flags in \a f determine the apperance and behavior of the QCategorySelector.
 */
 QCategorySelector::QCategorySelector( const QString &scope, ContentFlags f, QWidget *parent )
     : QWidget( parent )
@@ -832,6 +997,10 @@ QCategorySelector::QCategorySelector( const QString &scope, ContentFlags f, QWid
     d = new QCategorySelectData(scope, f, this);
 }
 
+/*!
+  \internal
+  The combo box selection has changed.
+*/
 void QCategorySelector::comboSelection(int index)
 {
     if(d->model->isValidIndex(index))
@@ -849,6 +1018,10 @@ void QCategorySelector::comboSelection(int index)
     }
 }
 
+/*!
+  \internal
+  An item on the list view was toggled.
+*/
 void QCategorySelector::listActivated(const QModelIndex &idx)
 {
     if(d->model->isValidIndex(idx.row()))
@@ -860,8 +1033,10 @@ void QCategorySelector::listActivated(const QModelIndex &idx)
 }
 
 /*!
+  \internal
   Sets the frame style for the listview of the category selector
-  to \a style
+  to \a style.
+  Note that this only works if the QCategorySelector is displayed as a list view.
 */
 void QCategorySelector::setListFrameStyle(int style)
 {
@@ -870,14 +1045,14 @@ void QCategorySelector::setListFrameStyle(int style)
 }
 
 /*!
-  Destroys the QCategorySelector.
+  Destroys a QCategorySelector.
 */
 QCategorySelector::~QCategorySelector()
 {
 }
 
 /*!
-  Selects the categories with identifiers in the ',' separated list \a categoryids.
+  Selects the categories with identifiers in the comma-separated list \a categoryids.
 */
 void QCategorySelector::selectCategories(const QString &categoryids)
 {
@@ -939,7 +1114,7 @@ void QCategorySelector::selectCategories(const QStringList &categoryids)
 }
 
 /*!
-  Selects the category filter \a filter.
+  Selects the categories specified by \a filter.
 */
 void QCategorySelector::selectFilter(const QCategoryFilter &filter)
 {
@@ -953,6 +1128,9 @@ void QCategorySelector::selectFilter(const QCategoryFilter &filter)
 
 /*!
   Returns the list of selected categories.
+
+  Note that this function does not indicate if \c All or \c Unfiled is selected. Use
+  selectedFilter() to determine if these items are selected.
 */
 QStringList QCategorySelector::selectedCategories() const
 {
@@ -1008,7 +1186,8 @@ QStringList QCategorySelector::selectedCategories() const
 }
 
 /*!
-  Returns the selector category filter object.
+  Returns the QCategoryFilter that indicates the selected categories.
+  \sa QCategoryFilter::requiredCategories()
 */
 QCategoryFilter QCategorySelector::selectedFilter() const
 {
@@ -1036,8 +1215,7 @@ QSize QCategorySelector::sizeHint () const
 }
 
 /*!
-  Select the category filter allow all categories or select object as belonging to all
-  categories.
+  Selects the All entry (all categories are selected).
 */
 void QCategorySelector::selectAll()
 {
@@ -1058,8 +1236,7 @@ void QCategorySelector::selectAll()
 }
 
 /*!
-  Select the category filter allow only empty categories or select object as belonging to no
-  categories.
+  Selects the Unfiled entry (no categories are selected).
 */
 void QCategorySelector::selectUnfiled()
 {
@@ -1082,7 +1259,7 @@ void QCategorySelector::selectUnfiled()
 
 /*!
   \internal
-  Show dialog that allows editing of item.
+  Shows a dialog that allows editing of the current category.
 */
 void QCategorySelector::showDialog()
 {
@@ -1153,31 +1330,23 @@ QCategoryDialogData::QCategoryDialogData(const QString &s,
 
 /*!
   \class QCategoryDialog
+  \mainclass
+  \ingroup categories
   \brief The QCategoryDialog widget allows users to select Categories with a
   dialog interface.
 
-  QCategoryDialog is useful to provide dialog of categories for
-  filtering (such as in the Contacts table view) or to allow the user
-  to select multiple Categories.
+  QCategoryDialog behaves in the same way as QCategorySelector using a list view.
 
-  In filtering mode, the All and Unfiled categories are added.
-
-  QCategoryDialog automatically updates if Categories has been
-  changed elsewhere in the environment.
-
-  Signals and slots are provided to notify the application of the users
-  selections.
-
-  \ingroup categories
+  \sa Categories
 */
 
 /*!
   \enum QCategoryDialog::ContentFlag
 
-  \value IncludeAll Include All Categories option.
-  \value IncludeUnfiled Include Unfiled Categories option.
-  \value Filter Selector is used to create a filter for viewing categoriesed objects.
-  \value Editor Selector is used to edit categories of an object.
+  \value IncludeAll Include the All categories option.
+  \value IncludeUnfiled Include the Unfiled categories option.
+  \value Filter Alias for IncludeAll|IncludeUnfiled.
+  \value Editor Alias for IncludeUnfiled.
 */
 
 /*!
@@ -1214,6 +1383,7 @@ QCategoryDialog::~QCategoryDialog()
 
 #ifdef QTOPIA_KEYPAD_NAVIGATION
 /*!
+  \internal
   Handles the key event \a e.
 */
 void QCategoryDialog::keyPressEvent(QKeyEvent* e)
@@ -1240,9 +1410,10 @@ QSize QCategoryDialog::sizeHint() const
 }
 
 /*!
-  Display the \a text above the category selection list.  \a text may be used
+  Displays \a text above the category selection list.  \a text may be used
   to clarify the category selection purpose.
- */
+  \sa text()
+*/
 void QCategoryDialog::setText(const QString &text)
 {
     d->label->setText(text);
@@ -1253,7 +1424,7 @@ void QCategoryDialog::setText(const QString &text)
 }
 
 /*!
-  Return the dialog text, as set by a previous call to setText().
+  Returns the dialog text, as set by a previous call to \l setText().
  */
 QString QCategoryDialog::text() const
 {
@@ -1262,6 +1433,9 @@ QString QCategoryDialog::text() const
 
 /*!
   Returns the list of selected categories.
+
+  Note that this function does not indicate if \c All or \c Unfiled is selected. Use
+  selectedFilter() to determine if these items are selected.
 */
 QList<QString> QCategoryDialog::selectedCategories() const
 {
@@ -1269,7 +1443,8 @@ QList<QString> QCategoryDialog::selectedCategories() const
 }
 
 /*!
-  Returns the selector category filter object.
+  Returns the QCategoryFilter that indicates the selected categories.
+  \sa QCategoryFilter::requiredCategories()
 */
 QCategoryFilter QCategoryDialog::selectedFilter() const
 {
@@ -1277,7 +1452,7 @@ QCategoryFilter QCategoryDialog::selectedFilter() const
 }
 
 /*!
-  Selects the categories with identifiers in the ',' separated list \a id.
+  Selects the categories with identifiers in the comma-separated list \a id.
 */
 void QCategoryDialog::selectCategories(const QString &id)
 {
@@ -1293,7 +1468,7 @@ void QCategoryDialog::selectCategories(const QList<QString> &categoryids)
 }
 
 /*!
-  Selects the category filter \a filter.
+  Selects the categories specified by \a filter.
 */
 void QCategoryDialog::selectFilter(const QCategoryFilter &filter)
 {
@@ -1301,8 +1476,7 @@ void QCategoryDialog::selectFilter(const QCategoryFilter &filter)
 }
 
 /*!
-  Select the category filter allow all categories or select object as belonging to all
-  categories.
+  Selects the All entry (all categories are selected).
 */
 void QCategoryDialog::selectAll()
 {
@@ -1310,8 +1484,7 @@ void QCategoryDialog::selectAll()
 }
 
 /*!
-  Select the category filter allow only empty categories or select object as belonging to no
-  categories.
+  Selects the Unfiled entry (no categories are selected).
 */
 void QCategoryDialog::selectUnfiled()
 {

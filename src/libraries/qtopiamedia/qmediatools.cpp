@@ -25,6 +25,7 @@
 
 /*!
     \class QMediaContentContext
+    \mainclass
 
     \brief The QMediaContentContext class allows multiple related player
     objects to be grouped together.
@@ -157,6 +158,7 @@ public:
 
 /*!
     \class QMediaControlNotifier
+    \mainclass
 
     \brief The QMediaControlNotifier class watches a media content object for
     the availability of a given media control.

@@ -38,13 +38,13 @@
 
 /*!
   \class QtopiaIpcEnvelope
+  \mainclass
     \ingroup ipc
-  \brief The QtopiaIpcEnvelope class encapsulates and sends QCop messages
-  over QtopiaChannels.
+  \brief The QtopiaIpcEnvelope class encapsulates and sends QCop messages.
 
   QCop messages allow applications to communicate with each other by
-  sending messages using \c QtopiaIpcEnvelope and receivng messages by connecting
-  to a \c QtopiaChannel.
+  sending messages using QtopiaIpcEnvelope and receiving messages by connecting
+  to a QtopiaChannel.
 
   To send a message, use the following protocol:
   \code
@@ -60,7 +60,7 @@
   \list
   \o \c{channelname} is the channel name within Qtopia, commencing with "QPE/".
   \o \c{messagename} is a function identifier followed by a list of types
-  in parentheses. No whitespace is permitted.
+  in parentheses. No white space is permitted.
   \endlist
 
   Note: Do not try to simplify this further as it may confuse some
@@ -78,6 +78,12 @@
   \endcode
   \endlist
   See also: \l {Qtopia IPC Layer}{Qtopia IPC} and \l {Services}{Services}.
+
+  Consider using QtopiaIpcAdaptor or QtopiaServiceRequest instead of
+  QtopiaIpcEnvelope, as they provide a better interface for sending
+  QCop messages.
+
+  \sa QtopiaChannel, QtopiaIpcAdaptor, QtopiaServiceRequest
 */
 
 /*!

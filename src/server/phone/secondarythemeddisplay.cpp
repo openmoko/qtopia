@@ -121,6 +121,20 @@ SecondaryTitle::SecondaryTitle(QWidget *parent, Qt::WFlags f)
 
 //===========================================================================
 
+/*!
+  \class ThemedSecondaryDisplay
+  \brief The ThemedSecondaryDisplay class implements the secondary display for Qtopia Phone.
+  \ingroup QtopiaServer::PhoneUI
+
+  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
+
+  \sa QAbstractServerInterface, QAbstractSecondaryDisplay
+  */
+
+/*!
+  Constructs a ThemedSecondaryDisplay instance with the specified
+  \a parent and widget flags \a f.
+  */
 ThemedSecondaryDisplay::ThemedSecondaryDisplay(QWidget *parent, Qt::WFlags f)
     : QAbstractSecondaryDisplay(parent, f)
 {

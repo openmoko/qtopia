@@ -30,10 +30,7 @@
 /*!
     \class ExternalAccess
     \brief The ExternalAccess class starts the modem emulator on a serial port to allow external access via a serial cable.
-    \ingroup QtopiaServer
-
-    The ExternalAccess class starts the modem emulator on a serial port
-    to allow external access via a serial cable.
+    \ingroup QtopiaServer::Task
 
     Many modern phones have an external serial interface, which is used to
     connect to a computer for the purposes of data calls, FAX transmissions,
@@ -57,6 +54,8 @@
     option is not configured, then the modem emulator will only be launched
     when other components in the system request it (for example,
     Bluetooth hands-free kits).
+
+    \sa {Modem Emulator}
 */
 
 /*!

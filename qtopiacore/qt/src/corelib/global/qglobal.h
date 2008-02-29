@@ -32,7 +32,7 @@
 */
 #define QT_VERSION 0x040203
 
-#define QT_PACKAGEDATE_STR "2007-04-17"
+#define QT_PACKAGEDATE_STR "2007-05-11"
 
 #if !defined(QT_BUILD_MOC)
 #include <QtCore/qconfig.h>

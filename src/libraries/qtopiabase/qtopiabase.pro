@@ -42,6 +42,7 @@ QTOPIABASE_PRIVATE_HEADERS+=\
 
 QTOPIABASE_SOURCES+=\
     dbusapplicationchannel_p.cpp \
+    qtopiasxe.cpp \
     dbusipccommon_p.cpp \
     qactionconfirm.cpp\
     qabstractipcinterface.cpp \

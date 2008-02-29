@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>StandardDeviceFeatures Namespace Reference</title>
+  <title>StandardDeviceFeatures Namespace Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">StandardDeviceFeatures Namespace Reference</h1>
 <p>The StandardDeviceFeatures namespace contains methods to disable Qtopia's standard device feature handling. <a href="#details">More...</a></p>
-<pre>#include &lt;StandardDeviceFeatures&gt;</pre><ul>
+<pre>    #include &lt;StandardDeviceFeatures&gt;</pre><ul>
 </ul>
 <a name="functions"></a>
 <h3>Functions</h3>
@@ -33,7 +35,7 @@
 <h2>Function Documentation</h2>
 <h3 class="fn"><a name="disableBatteryMonitor"></a>void StandardDeviceFeatures::disableBatteryMonitor ()</h3>
 <p>The battery monitor is responsible for maintaining the battery state in the value space. The values that must be maintained are:</p>
-<p><i>/Accessories/Battery/Charging</i> - true if the battery is being charged. <i>/Accessories/Battery/Charge</i> - the percentage of charge remaining (0-100). <i>/Accessories/Battery/VisualCharge</i> - the percentage to display in the user interface. This may not reflect the true percentage exactly, e.g. a charging state is often indicated by progressively increasing the value.</p>
+<p><i>/Accessories/Battery/Charging</i> - true if the battery is being charged. <i>/Accessories/Battery/Charge</i> - the percentage of charge remaining (0-100). <i>/Accessories/Battery/VisualCharge</i> - the percentage to display in the user interface. This may not reflect the true percentage exactly, e.g&#x2e; a charging state is often indicated by progressively increasing the value.</p>
 <p>Invoking this method will disable the default battery monitoring.</p>
 <h3 class="fn"><a name="disableCameraMonitor"></a>void StandardDeviceFeatures::disableCameraMonitor ()</h3>
 <p>The camera monitor detects when camera are available on the device and advertises them using the <a href="qtopiafeatures.html">QtopiaFeatures</a> API as the &quot;Camera&quot; feature.</p>
@@ -41,15 +43,15 @@
 <h3 class="fn"><a name="disableClamshellMonitor"></a>void StandardDeviceFeatures::disableClamshellMonitor ()</h3>
 <p>The clamshell monitor is responsible monitoring when a clamshell style phone (flip phone) is opened or closed and updating the value space. The value that must be maintained is:</p>
 <p><i>/Hardware/Device/ClamshellOpen</i> - true if the clamshell is in an open state.</p>
-<p>The default clamshell monitoring uses Qt::Key_Flip press events to indicate a closed state and Qt::Key_Flip release events to indicate an open state.</p>
+<p>The default clamshell monitoring uses <a href="qt.html#Key-enum">Qt::Key_Flip</a> press events to indicate a closed state and <a href="qt.html#Key-enum">Qt::Key_Flip</a> release events to indicate an open state.</p>
 <p>Invoking this method will disable the default clamshell monitoring.</p>
 <h3 class="fn"><a name="disableInputFeatures"></a>void StandardDeviceFeatures::disableInputFeatures ()</h3>
 <p>The <a href="qtopiafeatures.html">QtopiaFeatures</a> class allows applications to query certain properties about the Qtopia configuration. Based on the configured input modes, the following features are set automatically:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Feature</th><th>Description</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>Touchscreen</tt></td><td>The primary input for the device is via a touchscreen. That is, <tt>Qtopia::mousePreferred() == true</tt>.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>Calibrate</tt></td><td>The touch screen device requires calibration. This is set if <tt>Touchscreen</tt> is set.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>KeyPad</tt></td><td>The primary input for the device is via a keypad. That is, <tt>Qtopia::mousePreferred() == false</tt>.</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Feature</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>Touchscreen</tt></td><td>The primary input for the device is via a touchscreen. That is, <tt>Qtopia::mousePreferred() == true</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>Calibrate</tt></td><td>The touch screen device requires calibration. This is set if <tt>Touchscreen</tt> is set.</td></tr>
+<tr valign="top" class="odd"><td><tt>KeyPad</tt></td><td>The primary input for the device is via a keypad. That is, <tt>Qtopia::mousePreferred() == false</tt>.</td></tr>
 </table></p>
 <p>.</p>
 <p>The device integrator can override these default features by setting the <tt>Device/Input</tt> value in Qtopia's defaultbuttons configuration file. The value should be a comma separated list of the features to set. If <i>any</i> features are specified in this manner, the automatic features above are not set.</p>
@@ -57,17 +59,17 @@
 <h3 class="fn"><a name="disableUITimeValues"></a>void StandardDeviceFeatures::disableUITimeValues ()</h3>
 <p>The current system date and time is kept updated in the following value space keys:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Key</th><th>Description</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>/UI/DisplayTime/Time</tt></td><td>The current time with minute resolution (eg &quot;22:13&quot;).</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>/UI/DisplayTime/Date</tt></td><td>The current date in expanded form (eg. &quot;31 Aug 06&quot;).</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>/UI/DisplayTime/BriefDate</tt></td><td>The current date in reduced form (eg. &quot;31/08/06&quot;).</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Key</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>/UI/DisplayTime/Time</tt></td><td>The current time with minute resolution (eg &quot;22:13&quot;).</td></tr>
+<tr valign="top" class="even"><td><tt>/UI/DisplayTime/Date</tt></td><td>The current date in expanded form (eg. &quot;31 Aug 06&quot;).</td></tr>
+<tr valign="top" class="odd"><td><tt>/UI/DisplayTime/BriefDate</tt></td><td>The current date in reduced form (eg. &quot;31/08/06&quot;).</td></tr>
 </table></p>
 <p>While it is possible, and correct, for applications to source this information directly through the <a href="qtime.html">QTime</a> and <a href="qdate.html">QDate</a> APIs, these values can be used for displaying the time in title bars or other incidental locations. By doing so, these time or date displays will remain in sync with one another.</p>
 <p>Invoking this method will disable the creation and updating of the listed value space keys.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QNetworkDevice Class Reference</title>
+  <title>QNetworkDevice Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QNetworkDevice Class Reference</h1>
-<p>The QNetworkDevice class provides information about the connectivity state of a particular network device. <a href="#details">More...</a></p>
-<pre>#include &lt;QNetworkDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<p>The QNetworkDevice class provides information about the connectivity state of a network device. <a href="#details">More...</a></p>
+<pre>    #include &lt;QNetworkDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qnetworkdevice-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -52,7 +54,12 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QNetworkDevice class provides information about the connectivity state of a particular network device.</p>
+<p>The QNetworkDevice class provides information about the connectivity state of a network device.</p>
+<p>Network devices are always associated with a configuration file which serves as an identifier/handle for a particular device. The configuration file is device specific and is saved in <tt>$HOME/Applications/Network/config/</tt>. The user can start start/stop/configure network devices via the Internet application. Network related application can start and stop the device via <a href="qtopianetwork.html#startInterface">QtopiaNetwork::startInterface</a>() and <a href="qtopianetwork.html#stopInterface">QtopiaNetwork::stopInterface</a>() respectively. If the Qtopia device has more than one device online at a time the default gateway can be set via <a href="qtopianetwork.html#setDefaultGateway">QtopiaNetwork::setDefaultGateway</a>().</p>
+<p>The following UML class diagram displays the general interaction of Qtopia's network API.</p>
+<p align="center"><img src="images/NetworkAPI.png" /></p><p>Qtopia keeps track of network devices with the help of a session manager. If an application starts a device the session manager records the identity of the application and will close the device if the application doesn't stop the device before it quits. If several applications requested the same device the device is closed when the last remaining application closes the device. Hence every application should call <a href="qtopianetwork.html#startInterface">QtopiaNetwork::startInterface</a>() no matter whether the device is active already as this call creates a new session for this application. Note that a device which has been configured to use an internal timeout (e.g&#x2e; timeouts of dial-up connections) may still stop when the timeout is triggered.</p>
+<p>If any network related application may stop a particular interface which has been started by another application. This may be necessary in use cases such as when the phone receives a notification about a pending MMS. If the dial-up connection is already running but the APN is not the required one for MMS download the mail application may stop the dial-up connection and start another dial-up interface.</p>
+<p>See also <a href="qtopianetwork.html">QtopiaNetwork</a> and <a href="qnetworkstate.html">QNetworkState</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QNetworkDevice"></a>QNetworkDevice::QNetworkDevice ( const <a href="qstring.html">QString</a> &amp; <i>handle</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -67,12 +74,12 @@
 <h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QNetworkDevice::errorString () const</h3>
 <p>Returns a human-readable description of the last error that occurred. This is useful for presenting an error message to the user.</p>
 <h3 class="fn"><a name="handle"></a><a href="qstring.html">QString</a> QNetworkDevice::handle () const</h3>
-<p>Returns the interface handle.</p>
+<p>Returns the interface handle which is the full path of the associated configuration file.</p>
 <h3 class="fn"><a name="interfaceName"></a><a href="qstring.html">QString</a> QNetworkDevice::interfaceName () const</h3>
-<p>Returns the name of the associated *nix network interface, e.g. <tt>eth0</tt> or <tt>ppp2</tt>. The name should not be used to identify the network interface as it can change during the life time of the device. The returned name is empty if the interface hasn't been initialized yet or is not available.</p>
+<p>Returns the name of the associated *nix network interface, e.g&#x2e; <tt>eth0</tt> or <tt>ppp2</tt>. The name should not be used to identify the network interface as it can change during the life time of the device. The returned name is empty if the interface hasn't been initialized yet or is not available.</p>
 <p>See also <a href="qnetworkdevice.html#state">state</a>().</p>
 <h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QNetworkDevice::name () const</h3>
-<p>Returns the human-readable name of the device (e.g. Vodafone GPRS). The name can be set by the user when creating and/or configuring the device.</p>
+<p>Returns the human-readable name of the device (e.g&#x2e; Vodafone GPRS). The name can be set by the user when creating and/or configuring the device.</p>
 <h3 class="fn"><a name="state"></a><a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Status</a> QNetworkDevice::state () const</h3>
 <p>This function returns the connectivity state of this device.</p>
 <h3 class="fn"><a name="stateChanged"></a>void QNetworkDevice::stateChanged ( <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Status</a> <i>newState</i>, bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -80,8 +87,8 @@
 <p>See also <a href="qnetworkdevice.html#errorString">errorString</a>() and <a href="qnetworkdevice.html#state">state</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

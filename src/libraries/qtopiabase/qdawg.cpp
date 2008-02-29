@@ -446,45 +446,82 @@ private:
 
 /*!
   \class QDawg
-  \brief The QDawg class provides an implementation of a Directed Acyclic Word Graph.
+  \mainclass
+  \brief The QDawg class provides storage of words in a Directed Acyclic Word Graph.
 
-  A DAWG provides very fast look-up of words in a word list.
-  The following functionality is provided:
-  \list
-  \o readFile(), read() or createFromWords() creates a word list
-  \o allWords() returns a list of all DAWG words
-  \o countWords() returns the total number of words
-  \o contains()  is used to determine if a particular word is in the
-  DAWG
-  \o root() returns the root \l {Node}{node}.
- \endlist
+  A DAWG provides very fast look-up of words in a word list given incomplete or
+  ambiguous letters in those words.
 
-  A global DAWG is maintained for the current locale. See the
-  \l Qtopia class for details.
+  In Qtopia, global DAWGs are maintained for the current locale. See
+  Qtopia::dawg(). Various Qtopia components use these DAWGs, most notably
+  input methods, such as handwriting recognition that use the word lists
+  to choose among the likely interpretations of the user input.
 
-  The structure of a DAWG is a graph of \l {Node}{Nodes}. There are no cycles in the graph as there are no
-  inifinitely repeating words. Each \l {Node}{Node} is a member of a list of \l {Node}{Nodes} called a child list. Each \l {Node}{Node} in the child list has a \i letter, an \i isWord flag,
-  at most one \i jump arc, and at most one arc to the next child in
-  the list.
+  To create your own a QDawg, construct an empty one with the default constructor,
+  then add all the required words to it by a single call to createFromWords().
 
-  If the \l {Node}{Nodes} is traversed in a DAWG,
-  starting from the root(), and all the letters from
-  the single child are concatenated in each child list visited, then at every \l {Node}{Node} which has the isWord flag set the
-  concatenation will be a word in the list represented by the DAWG.
+  Created QDawgs can be stored with write() and retrieved with
+  read() or readFile().
+
+  The data structure is such that adding words incrementally is not an efficient
+  operation and can only be done by creating a new QDawg, using allWords() to get
+  the existing words.
+
+  The structure of a DAWG is a graph of \l {Node}{Nodes}, each representing a letter
+  (retrieved by QDawg::Node::letter()). Paths through the graph
+  represent partial or whole words. Nodes on paths that are whole words are flagged 
+  as such by QDawg::Node::isWord(). Nodes are connected to a list of other nodes.
+  The alphabetically first such node is retrieved by QDawg::Node::jump() and subsequent
+  nodes are retrieved from the earlier by QDawg::Node::next(), with the last child
+  returning 0 for that (and false for QDawg::Node::isLast()).
+
+  There are no cycles in the graph as there are no inifinitely repeating words.
 
   For example, the DAWG below represents the word list:
   ban, band, can, cane, cans, pan, pane, pans.
 
-  This structuring not only provides O(1) lookup of words in the word list,
-  but also produces a smaller storage file than a plain text file word list.
-
   \image qdawg.png
+
+  In the graph above, the \c root() node has the letter 'b', the \c root()->jump()
+  node has the letter 'a', and the \c root()->next() node has the letter 'c'.
+  Also, the root() node is not a word - \c !Node::isWord(), but \c root()->next()->jump()->jump()
+  is a word (the word "can").
+
+  This structuring not only provides O(1) look-up of words in the word list,
+  but also produces a smaller compressed storage file than a plain text file word list.
+
+  A simple algorithm that traverses the QDawg to see if a word is included would be:
+
+  \code
+    bool isWord(const QDawg::Node *n, const QString& s, int index)
+    {
+        int i=0;
+        if ( index < (int)s.length() ) {
+            while (n) {
+                if ( s[index] == n->letter() ) {
+                    if ( n->isWord() && index == (int)s.length()-1 )
+                        return true;
+                    return isWord(n->jump(),s,index+1);
+                }
+                n = n->next();
+            }
+        }
+        return false;
+    }
+  \endcode
+
+  In addition to simple look-up of a single word, the QDawg can be traversed to
+  find lists of words with certain sets of characters, such as the characters associated
+  with phone keys or handwriting. For example, given a QStringList where each string
+  is a list of letter in decreasing order of likelihood, an efficient algorithm could
+  be written for finding the best word by traversing the QDawg just once.
 
   \ingroup userinput
 */
 
 /*!
-    Constructs a new empty DAWG.
+    Constructs a new empty QDawg. The next step is usually to add all words
+    with createFromWords() or use readFile() to retrieve existing words.
 */
 QDawg::QDawg()
 {
@@ -492,7 +529,7 @@ QDawg::QDawg()
 }
 
 /*!
-    Deletes the DAWG.
+    Destroys the QDawg. If it was attached to a file with readFile(), it is detached.
 */
 QDawg::~QDawg()
 {
@@ -500,8 +537,8 @@ QDawg::~QDawg()
 }
 
 /*!
-  \overload
-  Replaces all the DAWG's words with words read from \a dev.
+    \overload
+    Replaces all the words in the QDawg with words read by QIODevice::readLine() from \a dev.
 */
 bool QDawg::createFromWords(QIODevice* dev)
 {
@@ -522,7 +559,7 @@ bool QDawg::createFromWords(QIODevice* dev)
 }
 
 /*!
-  Replaces all the DAWG's words with the words in the \a list.
+  Replaces all the words in the QDawg with the words in the \a list.
 */
 void QDawg::createFromWords(const QStringList& list)
 {
@@ -542,7 +579,7 @@ void QDawg::createFromWords(const QStringList& list)
 }
 
 /*!
-  Returns a list of all the words in the DAWG.
+  Returns a list of all the words in the QDawg, in alphabetical order.
 */
 QStringList QDawg::allWords() const
 {
@@ -553,8 +590,10 @@ QStringList QDawg::allWords() const
 
 
 /*!
-  Replaces the DAWG with the DAWG in \a filename.
-  The file is memory-mapped.
+  Replaces all the words in the QDawg with the QDawg in \a filename.
+  Note that the file is memory-mapped if possible.
+
+  Returns true if successful. If not successful, the QDawg is left unchanged and false is returned.
 
   \sa write()
 */
@@ -572,8 +611,10 @@ bool QDawg::readFile(const QString& filename)
 }
 
 /*!
-  Replaces the DAWG with the DAWG in \a dev.
-  The file is memory-mapped.
+  Replaces all the words in the QDawg with the QDawg read from \a dev.
+  The file is \i not memory-mapped. Use readFile() wherever possible, for better performance.
+
+  Returns true if successful. If not successful, the QDawg is left unchanged and false is returned.
 
   \sa write()
 */
@@ -589,12 +630,14 @@ bool QDawg::read(QIODevice* dev)
 }
 
 /*!
-  Writes the DAWG to \a dev, in a custom QDAWG format.
+  Writes the QDawg to \a dev, in a custom QDAWG format.
 
-  \warning QDawg memory maps DAWG files.
-  The safe method for writing to DAWG files is to
+  Returns true if successful.
+
+  \warning QDawg memory maps QDAWG files.
+  The safe method for writing to QDAWG files is to
   write the data to a new file and move the new
-  file to the old file name. QDawgs using the old
+  file to the old file name. QDawg objects using the old
   file will continue using that file.
 */
 bool QDawg::write(QIODevice* dev) const
@@ -603,7 +646,7 @@ bool QDawg::write(QIODevice* dev) const
 }
 
 /*!
-  Returns the number of words in the DAWG.
+  Iterates over the whole graph and returns the total number of words found in the QDawg.
 */
 int QDawg::countWords() const
 {
@@ -611,7 +654,12 @@ int QDawg::countWords() const
 }
 
 /*!
-  Returns the root \l {Node}{Node} of the DAWG.
+  Returns the root \l {Node}{Node} of the QDawg, or 0 if the QDawg is empty.
+
+  The root is the starting point for all traversals.
+
+  Note that this root node has a Node::letter(),
+  and subsequent nodes returned by Node::next(), just like any other Node.
 */
 const QDawg::Node* QDawg::root() const
 {
@@ -619,7 +667,7 @@ const QDawg::Node* QDawg::root() const
 }
 
 /*!
-  Returns true if the DAWG contains the word \a s; otherwise returns
+  Returns true if the QDawg contains the word \a s; otherwise returns
   false.
 */
 bool QDawg::contains(const QString& s) const
@@ -630,7 +678,7 @@ bool QDawg::contains(const QString& s) const
 /*!
   \internal
 
-  For debugging: prints out the DAWG contents.
+  For debugging: prints out the QDawg contents.
 */
 void QDawg::dump() const
 {
@@ -639,7 +687,18 @@ void QDawg::dump() const
 
 /*!
   \class QDawg::Node
+  \mainclass
   \brief The Node class of the QDawg class is one node of a QDawg.
+
+  Each Node in a QDawg represents a letter().
+  Paths through the QDawg graph
+  represent partial or whole words. Nodes on paths that are whole words are flagged 
+  as such by isWord(). Nodes are connected to a list of other nodes.
+  The alphabetically first such node is retrieved by jump() and subsequent
+  nodes are retrieved from the earlier by next(), with the last child
+  returning 0 for that (and false for isLast()).
+
+  See the QDawg documentation for usage of this class.
 */
 
 /*!
@@ -650,23 +709,28 @@ void QDawg::dump() const
 /*!
   \fn bool QDawg::Node::isWord() const
 
-  Returns true if this Node is the end of a word; otherwise returns
-  false.
+  Returns true if this Node (including its letter()) is the end of a word;
+  otherwise returns false.
 */
 /*!
   \fn bool QDawg::Node::isLast() const
 
-  Returns true if this Node is the last in the child list; otherwise
-  returns false.
+  Returns true if this Node is the last in the child list;
+  otherwise returns false.
 */
 /*!
   \fn const Node* QDawg::Node::next() const
 
-  Returns the next child Node in the child list or 0 if the current
-  Node isLast().
+  Returns the next "child" Node in the child list or 0 if this Node
+  isLast().
+
+  \sa jump()
 */
 /*!
   \fn const Node* QDawg::Node::jump() const
 
-  Returns the node connected to this Node.
+  Returns the node connected to this Node, which is the first "child"
+  Node.
+
+  \sa next()
 */

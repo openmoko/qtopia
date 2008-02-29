@@ -99,15 +99,19 @@ QPoint QAnalogClockPrivate::rotate( QPoint c, QPoint p, int a )
 
 /*!
     \class QAnalogClock
-    \brief The QAnalogClock widget displays an analog clock face
+    \mainclass
+    \brief The QAnalogClock widget displays an analog clock face.
 
-    The QAnalogClock widget displays an analog clock face. Time is displayed
-    using QAnalogClock::display() and QAnalogClock::setFace() sets the
-    image for the face.
+    The QAnalogClock widget displays an analog clock face.
+
+    The clock is not animated. You must call
+    QAnalogClock::display() to display an appropriate time.
+
+    This class exists to ensure consistent appearance of such a widget in Qtopia.
 */
 
 /*!
-    Create an analog clock face under \a parent.
+    Creates an analog clock face with the given \a parent.
 */
 QAnalogClock::QAnalogClock(QWidget *parent)
 :   QFrame( parent ),
@@ -120,7 +124,7 @@ QAnalogClock::QAnalogClock(QWidget *parent)
 }
 
 /*!
-    Destroys the analog clock face
+    Destroys the analog clock face.
 */
 QAnalogClock::~QAnalogClock()
 {
@@ -128,7 +132,8 @@ QAnalogClock::~QAnalogClock()
 }
 
 /*!
-    Sets the background image for the clock \a face.
+    Sets the background image for the clock \a face. The default image is null.
+    Hourly tick marks and the clock hands are drawn over this image.
 */
 void QAnalogClock::setFace( const QPixmap& face )
 {
@@ -318,12 +323,12 @@ void QAnalogClock::drawHand( QPainter *p, QPoint p1, QPoint p2 )
 }
 
 /*!
-    Display the \a time on the clock.
+    Displays the \a time on the clock.
 */
 void QAnalogClock::display( const QTime& time )
 {
     d->currTime = time;
     if  ( isVisible() )
-        d->isEvent = false;
+        d->isEvent = false; // XXX forced to true before used anyway
     repaint();
 }

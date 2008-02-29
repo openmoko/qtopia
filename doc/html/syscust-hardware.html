@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Hardware Configuration</title>
+  <title>Hardware Configuration</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Hardware Configuration<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Hardware Configuration<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#device-specific-code">Device-specific Code</a></li>
 <li><a href="#removable-media-and-devices">Removable Media and Devices</a></li>
@@ -34,24 +37,25 @@
 <p>During configure, the <tt>-xplatform</tt> option is used to select which <tt>custom-&lt;platform-spec&gt;.h</tt> file will be used when compiling Qtopia.</p>
 <p>The following macros can be defined or undefined in a <tt>custom.h</tt> file to customize Qtopia for the specific hardware. The associated <tt>custom-&lt;platform-spec&gt;.cpp</tt> file will be compiled and linked to provide any custom functions that are required.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Macro Name</th><th>description</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>NO_WIRELESS_LAN</tt></td><td><tt>#define</tt> this to disable wireless LAN. This reduces Qtopia's foot print by a considerable amount.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>QPE_USE_MALLOC_FOR_NEW</tt></td><td>#define this to have memory allocated using <tt>malloc()</tt> instead of the default C++ new implementation (this is faster in some cases).</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>QPE_NEED_CALIBRATION</tt></td><td>#define this if there is a touch screen that requires calibration.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>QPE_ARCHITECTURE</tt></td><td>#define this with a string that contains the manufacturer and model that uniquely identifies the device, for example <i>SHARP/SL5500</i>.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</tt></td><td><tt>#define</tt> this to have the phone homescreen background used as the background for the launcher.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</tt></td><td><tt>#define</tt> this to have the phone homescreen background used as the background for all applications. Requires <tt>QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</tt>.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>QGLOBAL_PIXMAP_CACHE_LIMIT=5242880</tt></td><td><tt>#define</tt> this if the default 1M pixmap cache size is not big enough, screen size of 640x480 or bigger.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>QTOPIA_PHONE_DEVICE</tt></td><td><tt>#define</tt> this to select the modem device, e.g. <tt>/dev/ttyS0</tt> (for details see <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a>)</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>QTOPIA_PHONE_MUX</tt></td><td><tt>enables/disables</tt> multiplexing in Qtopia (for details see <a href="syscust-gsm.html">GSM Modem Integration</a>)</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>QTOPIA_PHONE_VENDOR</tt></td><td><tt>#define</tt> this to select the default multiplexer (for details see <a href="syscust-gsm.html">GSM Modem Integration</a>)</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Macro Name</th><th>description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>NO_WIRELESS_LAN</tt></td><td><tt>#define</tt> this to disable wireless LAN. This reduces Qtopia's foot print by a considerable amount.</td></tr>
+<tr valign="top" class="even"><td><tt>QPE_USE_MALLOC_FOR_NEW</tt></td><td>#define this to have memory allocated using <tt>malloc()</tt> instead of the default C++ new implementation (this is faster in some cases).</td></tr>
+<tr valign="top" class="odd"><td><tt>QPE_NEED_CALIBRATION</tt></td><td>#define this if there is a touch screen that requires calibration.</td></tr>
+<tr valign="top" class="even"><td><tt>QPE_ARCHITECTURE</tt></td><td>#define this with a string that contains the manufacturer and model that uniquely identifies the device, for example <i>SHARP/SL5500</i>.</td></tr>
+<tr valign="top" class="odd"><td><tt>QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</tt></td><td><tt>#define</tt> this to have the phone homescreen background used as the background for the launcher.</td></tr>
+<tr valign="top" class="even"><td><tt>QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</tt></td><td><tt>#define</tt> this to have the phone homescreen background used as the background for all applications. Requires <tt>QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>QGLOBAL_PIXMAP_CACHE_LIMIT=5242880</tt></td><td><tt>#define</tt> this if the default 1M pixmap cache size is not big enough, screen size of 640x480 or bigger.</td></tr>
+<tr valign="top" class="even"><td><tt>QTOPIA_PHONE_DEVICE</tt></td><td><tt>#define</tt> this to select the modem device, e.g&#x2e; <tt>/dev/ttyS0</tt> (for details see <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>QTOPIA_PHONE_MUX</tt></td><td><tt>enables/disables</tt> multiplexing in Qtopia (for details see <a href="syscust-gsm.html">GSM Modem Integration</a>)</td></tr>
+<tr valign="top" class="even"><td><tt>QTOPIA_PHONE_VENDOR</tt></td><td><tt>#define</tt> this to select the default multiplexer (for details see <a href="syscust-gsm.html">GSM Modem Integration</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>QTOPIA_ZONEINFO_PATH</tt></td><td><tt>#define</tt> this to select the path to zoneinfo information (for details see <a href="syscust-time.html">Time on an Embedded Device</a>)</td></tr>
 </table></p>
 <p>In addition to the above macros and defines, the following three functions must be implemented in the <tt>custom-&lt;platform-spec&gt;.cpp</tt> file.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Function Name</th><th>Description</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>int qpe_sysBrightnessSteps();</tt></td><td>This function is called by Qtopia to query the number of graduations the device's LCD backlight/frontlight has.</td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td><tt>void qpe_setBrightness(int);</tt></td><td>This function must be implemented with any device specific code used to set the backlight/frontlight brightness to the specified level.</td></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td><tt>void PowerStatusManager::getStatus();</tt></td><td>This function must be implemented to query the power status. The <tt>PowerStatus</tt> class in <tt>qtopia/power.h</tt> defines the power status abstraction. See the <tt>custom-linux-generic-g++.cpp</tt> file for details of a default implementation.</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Function Name</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>int qpe_sysBrightnessSteps();</tt></td><td>This function is called by Qtopia to query the number of graduations the device's LCD backlight/frontlight has.</td></tr>
+<tr valign="top" class="even"><td><tt>void qpe_setBrightness(int);</tt></td><td>This function must be implemented with any device specific code used to set the backlight/frontlight brightness to the specified level.</td></tr>
+<tr valign="top" class="odd"><td><tt>void PowerStatusManager::getStatus();</tt></td><td>This function must be implemented to query the power status. The <tt>PowerStatus</tt> class in <tt>qtopia/power.h</tt> defines the power status abstraction. See the <tt>custom-linux-generic-g++.cpp</tt> file for details of a default implementation.</td></tr>
 </table></p>
 <p>For reference implementations of the device specific code, the existing <tt>custom-*.*</tt> files found in <tt>src/libraries/qtopia/</tt> may be of assistance.</p>
 <a name="removable-media-and-devices"></a>
@@ -60,18 +64,18 @@
 <p>Integrators notify Qtopia by sending QCop messages. QCop messages may be sent from C++ code using the <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a> class, or from system shell scripts using the <tt>qcop</tt> command line tool.</p>
 <p>The following table describes the events and the QCop messages that should be sent:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" bgcolor="#a2c511"><th>Event</th><th>Message</th></tr>
-<tr valign="top" bgcolor="#f0f0f0"><td>Removable media added or removed</td><td>A <tt>mtabChanged()</tt> message must be sent to the <tt>QPE/Card</tt> channel <i>after</i> the media has been mounted or unmounted.<p>To do this from the command line or a script, the following QCop command would suffice:</p>
-<pre>&nbsp;   qcop send QPE/Card &quot;mtabChanged()&quot;</pre>
+<thead><tr valign="top" class="qt-style"><th>Event</th><th>Message</th></tr></thead>
+<tr valign="top" class="odd"><td>Removable media added or removed</td><td>A <tt>mtabChanged()</tt> message must be sent to the <tt>QPE/Card</tt> channel <i>after</i> the media has been mounted or unmounted.<p>To do this from the command line or a script, the following QCop command would suffice:</p>
+<pre>    qcop send QPE/Card &quot;mtabChanged()&quot;</pre>
 </td></tr>
-<tr valign="top" bgcolor="#e0e0e0"><td>Removable PCMCIA device added or removed</td><td>A <tt>stabChanged()</tt> message must be sent to the <tt>QPE/Card</tt> channel. The <a href="stabmonitor.html">StabMonitor</a> server task provides a default implementation by monitoring certain files on the file system.<p>To do this from the command line or a script, the following QCop command would suffice:</p>
-<pre>&nbsp;   qcop send QPE/Card &quot;stabChanged()&quot;</pre>
+<tr valign="top" class="even"><td>Removable PCMCIA device added or removed</td><td>A <tt>stabChanged()</tt> message must be sent to the <tt>QPE/Card</tt> channel. The <a href="stabmonitor.html">StabMonitor</a> server task provides a default implementation by monitoring certain files on the file system.<p>To do this from the command line or a script, the following QCop command would suffice:</p>
+<pre>    qcop send QPE/Card &quot;stabChanged()&quot;</pre>
 </td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

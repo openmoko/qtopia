@@ -34,7 +34,7 @@ libraries:
     qtopiaaudio
     qtopiabase
     qtopiacomm
-    qtopiacore: corelib, gui, network, sql, svg, xml
+    qtopiacore: corelib, gui, network, qtestlib, sql, svg, xml
     qtopiail
     qtopiamail
     qtopiamedia

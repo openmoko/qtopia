@@ -24,7 +24,12 @@
 #include <QIcon>
 
 /*!
-  Returns a hash value for the source.
+  \fn uint qHash(const QPimSource &s)
+  \ingroup pim
+  \module qpepim
+  \relates QPimSource
+
+  Returns a hash value for the source \a s.
 */
 QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 {
@@ -34,13 +39,16 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 
 /*!
   \class QPimSource
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QPimSource class holds identifying information for a storage source of PIM data.
 
   The QPimSource class include a universal identifier representing the QPimContext
-  that created the source and an identity string representing the source within
+  that created the source, and an identity string representing the source within
   the context it represents.
+
+  \sa QPimContext
 */
 
 /*!
@@ -78,21 +86,25 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 
 /*!
   \class QPimContext
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QPimContext class represents a storage context of PIM data.
 
-  The QPimContext class represents a storage context of PIM data, such as SIM Card
-  contacts or contacts stored on the device in Qtopia's native format.  The
-  class can be used to perform operations that relate to a specific context of
-  PIM data.
+  This includes storage such as SIM Card contacts or data stored on the
+  device in Qtopia's native format.  The class can be used to perform
+  operations that relate to a specific context of PIM data.
 
   QPimContext should not be subclassed directly.  Instead, one of the data type
-  specific contexts should be used.  These are QContactContext, QTaskContext
-  and QAppointmentContext.
+  specific contexts should be used.  These are \l QContactContext,
+  \l QTaskContext and \l QAppointmentContext.
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
+
+  Generally, it is easier to use a QPimModel to access QPimRecords.
+
+  \sa QPimRecord, QPimSource, QPimModel
 */
 
 /*!
@@ -118,19 +130,19 @@ bool QPimContext::editable() const { return false; }
 /*!
   \fn QString QPimContext::description() const
 
-  Returns text describing the PIM context suitable for displaying to the user.
+  Returns text describing the PIM context, suitable for displaying to the user.
 */
 
 /*!
   \fn QString QPimContext::title() const
 
-  Returns the title of the PIM context suitable for displaying to the user.
+  Returns the title of the PIM context, suitable for displaying to the user.
 */
 
 /*!
   \fn QString QPimContext::title(const QPimSource &source) const
 
-  Returns the title of the PIM data \a source suitable for displaying to the user.
+  Returns the title of the PIM data \a source, suitable for displaying to the user.
   By default returns the title for the context.
 */
 
@@ -145,8 +157,8 @@ bool QPimContext::editable() const { return false; }
 /*!
   \fn void QPimContext::setVisibleSources(const QSet<QPimSource> &visible)
 
-  Filters the model that created this context to only show records for the source
-  that is contained in \a visible.  Does not affect data from other contexts.
+  Filters the model that created this context to only show records for the sources
+  that are contained in \a visible.  Does not affect data from other contexts.
 */
 
 /*!
@@ -220,14 +232,14 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
 /*!
   \class QContactContext
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QContactContext class represents a storage context of contact data.
 
-  The QContactContext class represents a storage context of contact data,
-  such as SIM Card contacts or contacts stored on the phone in Qtopia's native
-  format.  The class can be used to perform operations that relate to a
-  specific context of PIM data.
+  This includes storage contexts such as SIM Card contacts or contacts stored
+  on the phone in Qtopia's native format.  The class can be used to perform
+  operations that relate to a specific context of PIM data.
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
@@ -237,12 +249,14 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn bool QContactContext::updateContact(const QContact &contact)
 
   Updates the contact with the same identifier as \a contact if it exists in this context.
+  Returns true upon success; otherwise returns false.
 */
 
 /*!
   \fn bool QContactContext::removeContact(const QUniqueId &id)
 
   Removes the contact with the identifier \a id if it exists in this context.
+  Returns true upon success; otherwise returns false.
 */
 
 /*!
@@ -268,7 +282,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 /*!
   \fn bool QContactContext::importContacts(const QPimSource &source, const QList<QContact> &contacts)
 
-  Imports the \a contacts and merges them with the contacts listed in to the
+  Imports the \a contacts and merges them with the contacts listed in the
   PIM data \a source.  The source must be controlled by this context.
   If successful returns true, otherwise returns false.
 
@@ -304,12 +318,14 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
 /*!
   \class QAppointmentContext
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QAppointmentContext class represents a storage context of appointment data.
 
-  The QAppointmentContext class represents a storage context of appointment data.
-  The class can be used to perform operations that relate to a specific context of PIM data.
+  The class can be used to perform operations that relate to a specific context
+  of PIM data, such as appointments stored on a device in the native Qtopia
+  format, or appointments stored in an on-line calendaring service.
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
@@ -319,12 +335,14 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn bool QAppointmentContext::updateAppointment(const QAppointment &appointment)
 
   Updates the appointment with the same identifier as \a appointment if it exists in this context.
+  Returns true upon success; otherwise returns false.
 */
 
 /*!
   \fn bool QAppointmentContext::removeAppointment(const QUniqueId &id)
 
   Removes the appointment with the identifier \a id if it exists in this context.
+  Returns true upon success; otherwise returns false.
 */
 
 /*!
@@ -377,7 +395,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 /*!
   \fn bool QAppointmentContext::importAppointments(const QPimSource &source, const QList<QAppointment> &appointments)
 
-  Imports the \a appointments and merges them with the appointments listed in to the
+  Imports the \a appointments and merges them with the appointments listed in the
   PIM data \a source.  The source must be controlled by this context.
   If successful returns true, otherwise returns false.
 
@@ -413,12 +431,13 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
 /*!
   \class QTaskContext
+  \mainclass
   \module qpepim
   \ingroup pim
   \brief The QTaskContext class represents a storage context of task data.
 
-  The QTaskContext class represents a storage context of task data.
-  The class can be used to perform operations that relate to a specific context of PIM data.
+  The class can be used to perform operations that relate to a specific context
+  of PIM data, such as tasks stored on a device in the native Qtopia format.
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
@@ -428,12 +447,15 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn bool QTaskContext::updateTask(const QTask &task)
 
   Updates the task with the same identifier as \a task if it exists in this context.
+  Returns true upon success; otherwise returns false.
 */
 
 /*!
   \fn bool QTaskContext::removeTask(const QUniqueId &id)
 
   Removes the task with the identifier \a id if it exists in this context.
+  Returns true upon success; otherwise returns false.
+
 */
 
 /*!
@@ -459,7 +481,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 /*!
   \fn bool QTaskContext::importTasks(const QPimSource &source, const QList<QTask> &tasks)
 
-  Imports the \a tasks and merges them with the tasks listed in to the
+  Imports \a tasks and merges them with the tasks listed in the
   PIM data \a source.  The source must be controlled by this context.
   If successful returns true, otherwise returns false.
 

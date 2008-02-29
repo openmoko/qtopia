@@ -288,7 +288,8 @@ void CallHistoryView::updateMenu()
     }
     else
     {
-        mMenu->addAction(mAddContact);
+        if ( !mCallListItem.number().trimmed().isEmpty() )
+            mMenu->addAction(mAddContact);
     }
     if( mDeleteAction )
         mMenu->addAction(mDeleteAction);
@@ -778,9 +779,20 @@ CallHistoryClearList::~CallHistoryClearList()
 {
 }
 
+/*!
+  \class CallHistory
+  \brief The CallHistory class provides the Qtopia Phone call history widget.
+  \ingroup QtopiaServer::PhoneUI
+
+  This class is part of the Qtopia server.
+  */
 // -------------------------------------------------------------
 // CallHistory
 
+
+/*!
+  \internal
+  */
 CallHistory::CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl )
     : QWidget( parent, fl ), mView( 0 ), mCallList( callList ), mShowMissedCalls( false ),
       mDialedListShown( false ), mReceivedListShown( false ), mMissedListShown( false ), mClearList( 0 ), mDialedFindLE( 0 ), mReceivedFindLE( 0 ), mMissedFindLE( 0 )
@@ -958,6 +970,20 @@ CallHistory::CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl )
         mTabs->setFocusPolicy( Qt::NoFocus );
 }
 
+/*!
+  \fn void CallHistory::requestedDial(const QString&, const QUniqueId&)
+
+  \internal
+  */
+
+/*!
+  \fn void CallHistory::viewedMissedCalls()
+  \internal
+  */
+
+/*!
+  \internal
+  */
 void CallHistory::refreshOnFirstShow(int index)
 {
     QWidget *w = mTabs->widget(index);
@@ -984,6 +1010,9 @@ void CallHistory::refreshOnFirstShow(int index)
     }
 }
 
+/*!
+  \internal
+  */
 void CallHistory::setFilterCur( const QString &f )
 {
     if( Qtopia::mousePreferred() )
@@ -1004,6 +1033,9 @@ void CallHistory::setFilterCur( const QString &f )
     }
 }
 
+/*!
+  \internal
+  */
 void CallHistory::clearList()
 {
     if( !mClearList )
@@ -1028,6 +1060,9 @@ void CallHistory::clearList()
     QtopiaApplication::showDialog( mClearList );
 }
 
+/*!
+  \internal
+  */
 void CallHistory::clearList( CallHistoryClearList::ClearType type )
 {
     QList<CallHistoryList*> changedLists;
@@ -1117,6 +1152,9 @@ void CallHistory::clearList( CallHistoryClearList::ClearType type )
     }
 }
 
+/*!
+  \internal
+  */
 void CallHistory::showEvent( QShowEvent *e )
 {
     QWidget::showEvent( e );
@@ -1129,6 +1167,9 @@ void CallHistory::showEvent( QShowEvent *e )
     }
 }
 
+/*!
+  \internal
+  */
 void CallHistory::closeEvent( QCloseEvent *e )
 {
     QWidget::closeEvent(e);
@@ -1138,6 +1179,9 @@ void CallHistory::closeEvent( QCloseEvent *e )
     QTimer::singleShot( 0, this, SLOT(cleanup()) );
 }
 
+/*!
+  \internal
+  */
 void CallHistory::cleanup()
 {
     if (mView) {
@@ -1146,12 +1190,18 @@ void CallHistory::cleanup()
     }
 }
 
+/*!
+  \internal
+  */
 void CallHistory::pageChanged(int index)
 {
     if( mTabs->widget(index) == mMissedTab )
         emit viewedMissedCalls();
 }
 
+/*!
+  \internal
+  */
 void CallHistory::viewDetails( const QModelIndex& idx )
 {
     if (!idx.isValid())
@@ -1188,6 +1238,9 @@ void CallHistory::viewDetails( const QModelIndex& idx )
     mView->showMaximized();
 }
 
+/*!
+  \internal
+  */
 bool CallHistory::eventFilter( QObject *o, QEvent *e )
 {
     QWidget *tb = (QWidget *)mTabs->tabBar();
@@ -1205,7 +1258,7 @@ bool CallHistory::eventFilter( QObject *o, QEvent *e )
             if (!chList)
                 return false;
             CallHistoryModel* chModel = qobject_cast<CallHistoryModel*>(chList->model());
-            if( !text.isEmpty() && chModel )
+            if( !text.isEmpty() && chModel && chModel->rowCount() )
             {
                 mFilters[o] += text;
                 chModel->setFilter( mFilters[o] );
@@ -1382,6 +1435,9 @@ bool CallHistory::eventFilter( QObject *o, QEvent *e )
     return false;
 }
 
+/*!
+  \internal
+  */
 void CallHistory::reset()
 {
     mShowMissedCalls = false;
@@ -1395,6 +1451,9 @@ void CallHistory::reset()
     }
 }
 
+/*!
+  \internal
+  */
 void CallHistory::setFilter( const QString &f )
 {
     mFilters[mDialedList] = mFilters[mReceivedList] = mFilters[mMissedList] = f;
@@ -1418,6 +1477,9 @@ void CallHistory::setFilter( const QString &f )
     }
 }
 
+/*!
+  \internal
+  */
 void CallHistory::refresh()
 {
     CallHistoryList *list = 0;
@@ -1444,6 +1506,9 @@ void CallHistory::refresh()
        chm->refresh();
 }
 
+/*!
+  \internal
+  */
 void CallHistory::showMissedCalls()
 {
     mShowMissedCalls = true;

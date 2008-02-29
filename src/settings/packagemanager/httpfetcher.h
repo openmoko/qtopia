@@ -25,6 +25,7 @@
 #include <qthread.h>
 
 #include <QHttpResponseHeader>
+#include <QUrl>
 
 #include "packagecontroller.h"
 #include "md5file.h"
@@ -100,7 +101,7 @@ private:
     AbstractPackageController *pkgController;
     bool httpRequestAborted;
     int httpGetId;
-    QString url;
+    QUrl url;
     QString file;
     int fileSize;
     int curProgValue;

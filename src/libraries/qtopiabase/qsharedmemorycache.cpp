@@ -1086,12 +1086,14 @@ void QSharedMemoryManager::removePixmap(const QString &key)
 
 /*!
     \class QGlobalPixmapCache
+    \mainclass
 
     \brief The QGlobalPixmapCache class provides a system-wide cache for pixmaps.
 
-    This class is a tool for optimized drawing of pixmaps which are used
-    regularly across the system, For example, the background image. For an application-wide
-    QPixmap cache use QPixmapCache.
+    This class is a tool for caching of pixmaps which are likely to be
+    used by multiple processes, or are expensive to generate and may
+    benefit from caching between application executions.
+    For an application-wide QPixmap cache use QPixmapCache.
 
     Use insert() to insert pixmaps, find() to find them, and remove()
     to remove them from the global cache.
@@ -1105,20 +1107,20 @@ void QSharedMemoryManager::removePixmap(const QString &key)
 
     When the global cache becomes full, insert() will fail until adequate
     space is made available by removing unneeded pixmaps from the global
-    cache.
+    cache, or by deleting all references to the global pixmap's data.
 
     \sa QPixmapCache, QPixmap
-  \ingroup multimedia
+    \ingroup multimedia
 */
 
 /*!
     Looks for a cached pixmap associated with the \a key in the global cache.
-    If the pixmap is found, the function sets \a pm to that pixmap and
-    returns true; otherwise it leaves \a pm alone and returns false.
+    If the pixmap is found, the function sets \a pixmap to that pixmap and
+    returns true; otherwise it leaves \a pixmap alone and returns false.
 
     Internally the global cache ensures that the pixmap is not removed until
-    the \a pm is destroyed, therefore \a pm is directly associated with the QPixmap
-    in the global cache and should not be reused.
+    the \a pixmap is destroyed, therefore \a pixmap is directly associated
+    with the QPixmap in the global cache and should not be reused.
 
     Example of correct use:
     \code
@@ -1157,13 +1159,13 @@ void QSharedMemoryManager::removePixmap(const QString &key)
         painter->drawPixmap(0, 0, pm);
     \endcode
 */
-bool QGlobalPixmapCache::find( const QString &key, QPixmap &pm)
+bool QGlobalPixmapCache::find( const QString &key, QPixmap &pixmap)
 {
-    return qt_getSMManager()->findPixmap( key, pm );
+    return qt_getSMManager()->findPixmap( key, pixmap );
 }
 
 /*!
-    Inserts a copy of the pixmap \a pm associated with the \a key into
+    Inserts the pixmap \a pixmap associated with the \a key into
     the global cache.
 
     All pixmaps inserted by Qtopia have a key starting with "_$QTOPIA",
@@ -1173,23 +1175,20 @@ bool QGlobalPixmapCache::find( const QString &key, QPixmap &pm)
     global cache; otherwise it returns false.
 
     When the pixmap is no longer required in the global cache, remove()
-    must be called to free space in the global cache.
+    may be called to free space in the global cache.
 
     If two pixmaps are inserted into the global cache using equal keys,
-    then the last pixmap will hide the first pixmap, and the first pixmap will
-    be removed from the global cache.
-
-    \sa remove()
+    then the last pixmap will hide the first pixmap.
 */
-bool QGlobalPixmapCache::insert( const QString &key, const QPixmap &pm)
+bool QGlobalPixmapCache::insert( const QString &key, const QPixmap &pixmap)
 {
-    if ( qt_getSMManager()->insertPixmap( key, pm ) ) {
+    if ( qt_getSMManager()->insertPixmap( key, pixmap ) ) {
         return true;
     } else {
         // Cache might be full of unreferenced pixmaps, so try doing
         // a cleanup first
         while ( qt_getSMManager()->pixmapCache()->cleanUp() );
-        if ( qt_getSMManager()->insertPixmap( key, pm ) ) {
+        if ( qt_getSMManager()->insertPixmap( key, pixmap ) ) {
             return true;
         }
     }
@@ -1201,9 +1200,8 @@ bool QGlobalPixmapCache::insert( const QString &key, const QPixmap &pm)
     Removes the pixmap associated with the \a key from the global cache.
 
     Space in the global cache will not be reclaimed unless remove() is called
-    on pixmaps that are not required.
-
-    \sa insert()
+    on pixmaps that are not required or all pixmaps referencing the global
+    pixmap data are deleted.
 */
 void QGlobalPixmapCache::remove( const QString &key )
 {

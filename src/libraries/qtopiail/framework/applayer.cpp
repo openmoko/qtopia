@@ -3395,20 +3395,19 @@ void ApplicationLayer::doClientWrite(const QByteArray &path,
 
 /*!
   \class QValueSpaceObject
+  \mainclass
   \brief The QValueSpaceObject class allows applications to add entries to the
          Value Space.
   \ingroup ipc
 
-  For an overview of the Qtopia Value Space, please see the \l ValueSpace 
+  For an overview of the Qtopia Value Space, please see the QValueSpaceItem 
   documentation.
 
-  The QValueSpaceObject class provides an application interface to the Value
-  Space's "Application Object" layer.  The "Application Object" layer allows
-  applications to write entries into the Value Space that are automatically
-  removed when the QValueSpaceObject is destroyed, or the application exits
-  either cleanly or abnormally.  The "Application Object" layer supports full
-  change notification, allowing other components or processes to gain access to
-  data as soon as it has changed.
+  The QValueSpaceObject class allows applications to write entries into the 
+  Value Space that are automatically removed when the QValueSpaceObject is 
+  destroyed, or the application exits either cleanly or abnormally.  All 
+  applications in the system will have access to the data set through 
+  QValueSpaceObject and, if desired, can be notified when the data changes.
 
   Although, logically, the Value Space is a simple collection of
   hierarchical paths, these paths can conceptually be visualized as a set of
@@ -3466,8 +3465,10 @@ void ApplicationLayer::doClientWrite(const QByteArray &path,
   generally unnecessary, and should be used sparingly to prevent unnecessary
   load on the system.
 
-  Note: The QValueSpaceObject class may only be used from an application's
-  main thread.
+  \i {Note:} The QValueSpaceObject class is not thread safe and may only be used from
+  an application's main thread.
+
+  \sa QValueSpaceItem
  */
 
 /*!

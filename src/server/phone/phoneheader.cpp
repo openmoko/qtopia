@@ -29,6 +29,8 @@
   \class PhoneHeader
   \ingroup QtopiaServer::PhoneUI
   \brief The PhoneHeader class provides a dockable, themeable phone header.
+
+  This class is part of the Qtopia server.
  */
 
 /*!

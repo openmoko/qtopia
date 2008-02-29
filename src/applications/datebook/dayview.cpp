@@ -316,6 +316,8 @@ void DayView::lastTimed()
     if (timedModel->rowCount()) {
         mAllDayList->selectionModel()->clear();
         mTimedView->setCurrentIndex(timedModel->index(timedModel->rowCount() - 1, 0));
+    } else if (allDayModel->rowCount()){
+        mAllDayList->setCurrentIndex(allDayModel->index(allDayModel->rowCount() - 1, 0));
     }
 }
 
@@ -396,9 +398,11 @@ void DayView::setCurrentOccurrence(const QOccurrence &o)
     if (o.appointment().isAllDay()) {
         allDayModel->completeFetch();
         mAllDayList->setCurrentIndex(allDayModel->index(o));
+        mTimedView->setCurrentIndex(QModelIndex());
     } else {
         timedModel->completeFetch();
         mTimedView->setCurrentIndex(timedModel->index(o));
+        mAllDayList->selectionModel()->clear();
     }
 }
 
@@ -418,8 +422,9 @@ bool DayView::eventFilter(QObject *o, QEvent *e)
 
 void DayView::resizeEvent(QResizeEvent *)
 {
-    //  Allow all day events to take no more than 1/3 of the screen.
+    //  Allow all day events to take no more than 1/3 of the screen, and 2/3 when expanded
     mAllDayList->setMaximumFoldedHeight(height() / 3);
+    mAllDayList->setMaximumUnfoldedHeight(2 * height() / 3);
     layout()->activate();
 }
 
@@ -434,6 +439,9 @@ void DayView::timedSelectionChanged(const QModelIndex &index)
 
         mScrollArea->ensureVisible( 0, r.bottom(), 10, 10 );
         mScrollArea->ensureVisible( 0, r.top(), 10, 10 );
+
+        // And clear this
+        mAllDayList->selectionModel()->clear();
     } else {
         lastSelectedTimedId = QUniqueId();
     }
@@ -450,15 +458,15 @@ void DayView::allDayOccurrenceActivated(const QModelIndex &index)
 void DayView::allDayOccurrenceChanged(const QModelIndex &index)
 {
     if (index.isValid()) {
-        // Make sure this is cleared
-        mTimedView->setCurrentIndex(QModelIndex());
-
         // and make sure this is selected
         mAllDayList->selectionModel()->setCurrentIndex(index, QItemSelectionModel::SelectCurrent);
 
         // And save the id
         lastSelectedAllDayId = allDayModel->id(index);
         lastSelectedTimedId = QUniqueId();
+
+        // Make sure this is cleared (after the above, as index gets invalidated because of this)
+        mTimedView->setCurrentIndex(QModelIndex());
     } else {
         lastSelectedAllDayId = QUniqueId();
     }

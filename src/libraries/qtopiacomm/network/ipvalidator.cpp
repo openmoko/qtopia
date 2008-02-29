@@ -151,7 +151,15 @@ QValidator::State IPValidatorPrivate::validateIP6( QString &key, int& /*pos*/ )
 }
 
 
+/*!
+  \class IPValidator
+  \brief The IPValidator class provides validation for IP addresses.
+  \internal
+  \mainclass
 
+  The IPValidator is used by the Qtopia network plug-ins. It is used for validation of
+  user input for QLineEdit fields. It supports IPv4 and IPv6 addresses.
+  */
 
 IPValidator::IPValidator( QWidget* parent )
     : QValidator( parent ), d( 0 )

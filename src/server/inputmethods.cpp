@@ -75,6 +75,17 @@ public:
     };
 };
 
+
+/*!
+  \class InputMethodSelector
+  \ingroup QtopiaServer::InputMethods
+
+
+  */
+
+/*!
+  Constructs a new InputMethodSelector widget with \a parent.
+  */
 InputMethodSelector::InputMethodSelector(QWidget *parent)
     : QWidget(parent), mCurrent(0), m_IMMenuActionAdded(false), m_menuVS("UI/InputMethod"), defaultIM("")
 {
@@ -120,13 +131,30 @@ InputMethodSelector::InputMethodSelector(QWidget *parent)
     QTranslatableSettings cfg(Qtopia::defaultButtonsFile(), QSettings::IniFormat); // No tr
     cfg.beginGroup("InputMethods");
     defaultIM = cfg.value("DefaultIM").toString(); // No tr
+    qLog(Input) << "Default IM is "<< defaultIM;
 }
 
+/*!
+    Destroys and cleans up this \l InputMethodSelector
+*/
 InputMethodSelector::~InputMethodSelector()
 {
     // doesn't own anything other than children... do nothing.
 }
 
+
+/*!
+    Add \a im to this InputMethodSelector.
+    
+    If this is the first or the default input method, this will 
+    cause it to become the current input method and become active.
+    
+    If this is the second input method added, this will activate
+    the drop-down input-method selection \l QToolButton, making 
+    the input methods available to users via the drop-down input method list.
+    
+    Subsequent input methods added with this function are also added to this list.
+*/
 // before, need to set libName, iface, style.
 void InputMethodSelector::add(QtopiaInputMethod *im)
 {
@@ -134,6 +162,8 @@ void InputMethodSelector::add(QtopiaInputMethod *im)
     list.append(im);
 
     if (mCurrent == 0 || im->name() == defaultIM) {
+        if( im->name() == defaultIM )
+            qLog(Input) << "Found defaultIM "<< defaultIM << ", activating";
         mCurrent = list[list.count()-1];
         emit activated(mCurrent);
 
@@ -143,6 +173,17 @@ void InputMethodSelector::add(QtopiaInputMethod *im)
         mChoice->show();
 }
 
+/*!
+    \fn void InputMethodSelector::activated(QtopiaInputMethod *im)
+    This signal is emitted to notify the \l InputMethods object that \a im should be activated.
+*/
+
+
+/*!
+    Updates the status \l QIcon.  This \l QIcon is displayed according to the theme, and may be hidden, especially if the input methods are not currently activated.
+
+    The status icon is set to the \l QtopiaInputMethod::statusWidget() of the current \l QtopiaInputMethod.  If this is not available, then the \l QtopiaInputMethod::icon() is used, and if this is also not available, then an empty \l QIcon is used.
+*/
 void InputMethodSelector::updateStatusIcon()
 {
     if (mCurrent) {
@@ -163,6 +204,10 @@ void InputMethodSelector::updateStatusIcon()
     }
 }
 
+/*!
+    This function notifies the InputMethodSelector that focus has changed.  It causes the input method menus to be reformulated.
+    \sa updateIMMenuAction
+*/
 void InputMethodSelector::focusChanged(QWidget* old, QWidget* now)
 {
     Q_UNUSED(old);
@@ -171,6 +216,9 @@ void InputMethodSelector::focusChanged(QWidget* old, QWidget* now)
     updateIMMenuAction(m_IMMenuActionAdded);
 }
 
+/*!
+    Shows the list of input methods modally, relative to the choice \l QToolButton, and activates the selected input method, if any.
+*/
 void InputMethodSelector::showList()
 {
     pop->clear();
@@ -201,7 +249,8 @@ void InputMethodSelector::showList()
 }
 
 /*!
-    Set the current input method to \a method and activate it
+    Set the current input method to \a method and activate it.
+    \sa activated()
 */
 void InputMethodSelector::setInputMethod(QtopiaInputMethod *method)
 {
@@ -284,19 +333,24 @@ void InputMethodSelector::activateCurrent( bool on )
                 w->show();
 
                 //Add menu item:
+                emit inputWidgetShown( on );
             };
             // should be emitted if the screen is changing sizes.
-            emit inputWidgetShown( on );
         } else { // on == false
             updateIMMenuAction(false);
             if(w) {
                 mButton->setChecked(false);
                 w->hide();
+                emit inputWidgetShown( on );
             };
         }
     }
 }
 
+/*!
+    \fn void InputMethodSelector::inputWidgetShown(bool shown)
+    This signal is emitted when the visible state of the inputWidget is toggled.  \a shown reflects the new state of the widget, true if the widget is being shown, false if it is being hidden.
+*/
 /*!
     Deactivates and hides the current input method, and then sets no current input method.
 */
@@ -334,6 +388,12 @@ void InputMethodSelector::sort()
 }
 
 /*!
+    \fn uint InputMethodSelector::count() const
+    Returns the number of input methods that have been added to the InputMethodSelector.
+*/
+
+
+/*!
     Returns a pointer to the current input method.
 */
 QtopiaInputMethod *InputMethodSelector::current() const
@@ -342,23 +402,23 @@ QtopiaInputMethod *InputMethodSelector::current() const
 }
 
 /*!
-    Selects the input method named \a s if it exists.
+    Selects the input method named \a name if it exists.
 */
-void InputMethodSelector::setInputMethod(const QString &s)
+void InputMethodSelector::setInputMethod(const QString &name)
 {
     foreach(QtopiaInputMethod *method, list) {
-        if (method->identifier() == s) {
+        if (method->identifier() == name) {
             setInputMethod(method);
             break;
         }
     }
 }
 
-/*
-    A simple helper function for supporting inputmethod menu QActions.
+/*!
+    A helper function for supporting input method menu QActions.
     Removes the current IM's QAction from all menus.
-    If the argument is true, adds the QAction to the current focus widgets
-    Menu
+    If \a addToMenu is true, adds the QAction to the 
+    current focus widgets Menu.
 */
 void InputMethodSelector::updateIMMenuAction(bool addToMenu)
 {
@@ -395,7 +455,7 @@ void InputMethodSelector::updateIMMenuAction(bool addToMenu)
 };
 
 /*!
-    Shows or hides the input method selector pop-up widget, depending on \a on.
+    Shows  the input method selector choice button if \a on is true, otherwise hides it.
 */
 void InputMethodSelector::showChoice( bool on)
 {
@@ -409,15 +469,24 @@ void InputMethodSelector::showChoice( bool on)
 
 
 /*!
-    InputMethods is the core class for the Qtopia servers input method handling.  It is very closely related to the \l InputMethodService and \l InputMethodSelector classes.
+  \class InputMethods
+  \brief The InputMethods class provides an implementation of Qtopia server input method handling.
+  \ingroup QtopiaServer::InputMethods
 
-    InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts the messages from the \l InputMethodService, either taking direct action or passing them on to the  \l InputMethodSelector.
+    InputMethods is the core class for the Qtopia servers input method handling.
+    It is very closely related to the \l InputMethodService and \l InputMethodSelector classes.
+
+    InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts on the messages from the \l InputMethodService, either taking direct action or passing them on to the  \l InputMethodSelector.
+*/
+
+/*!
+    Create a new InputMethods object with \a parent that handles input according to \a t.
 */
 InputMethods::InputMethods( QWidget *parent, IMType t ) :
     QWidget( parent ),
     loader(0), type(t), currentIM(0), lastActiveWindow(0), m_IMVisibleVS("/UI/IMVisible"), m_IMVisible(false)
 {
-    // Start up the input method service via QCop.
+    // Start up the input method service via \l{Qtopia IPC Layer}{IPC}.
     new InputMethodService( this );
 
     //overrideWindowFlags(Qt::Tool);
@@ -446,6 +515,16 @@ InputMethods::InputMethods( QWidget *parent, IMType t ) :
 }
 
 /*!
+    \fn InputMethods::inputToggled(bool on)
+    Connect to this signal to recieve notifications of changes in the state of input methods. \a on describes whether the input methods have just turned on (true), or off (false).
+*/
+
+/*!
+    \fn void InputMethods::visibilityChanged(bool visible)
+    Connect to this signal to receive notification of changes in the visibility of input methods.  This is synonymous with activation, input methods do not need to have an input widget to be visible in this sense. \a visible is true if the input method is becoming visible/activating, false if it becoming invisible/deactivating.
+*/
+
+/*!
     Unloads all input methods.
 */
 InputMethods::~InputMethods()
@@ -454,7 +533,22 @@ InputMethods::~InputMethods()
 }
 
 /*!
-    Deactiviates and hides the current input method.
+    \enum InputMethods::IMType 
+    This enum describes which types of input an input method processes.
+    \value Any    The input method can process both mouse and keypad input
+    \value Mouse    The input method processes mouse or pointer input.
+    \value Keypad   The input method processes keypad input.
+*/
+
+/*!
+    \enum InputMethods::SystemMenuItemId 
+    This enum defines values that input method menu items can return to activate system actions based for these menu items.
+    \value  NextInputMethod This value results in the input method being changed to the next input method in alphabetic order.
+    \value ChangeInputMethod    This value causes the input method selection menu to be shown, and to recieve keyboard focus, facilitating changing input methods with the keyboard.
+*/
+
+/*!
+    Deactivates and hides the current input method.
 */
 void InputMethods::hideInputMethod()
 {
@@ -480,6 +574,9 @@ void InputMethods::showInputMethod(const QString& name)
 
 /*!
     Checks whether the activated menu item belonged to the server, and either responds or passes the information on to the current input method appropriately.
+
+    Server menu items typically have values less than 0, so \a v is generally passed to the current input method if it is greater than or equal to 0.
+    \sa QtopiaInputMethod::menuActionActivated()
 */
 void InputMethods::activateMenuItem(int v)
 {
@@ -504,6 +601,9 @@ void InputMethods::resetStates()
             selector->current()->reset();
 }
 
+/*!
+    returns the geometry of the current input methods input widget, or an empty \l QRect if there is no current input method, or no input widget for the current input method.
+*/
 QRect InputMethods::inputRect() const
 {
     if (selector->current()) {
@@ -514,6 +614,9 @@ QRect InputMethods::inputRect() const
     return QRect();
 }
 
+/*!
+    Clears the current input method, and clears and destroys all previously loaded input methods.  Called from InputMethods destructor.
+*/
 void InputMethods::unloadInputMethods()
 {
     if (currentIM) {
@@ -528,8 +631,18 @@ void InputMethods::unloadInputMethods()
     }
 }
 
+/*!
+    Creates a QPluginManager for input methods to load input method plugins out of the \c{ plugins/inputmethods} directory.
+
+    If InputMethods already has a QPluginManager, this function does nothing.
+*/
 void InputMethods::loadInputMethods()
 {
+    if(loader) {
+        qLog(Input) << "Warning : loadInputMethods() erroneously called twice";
+        return;
+    }
+
     selector->blockSignals(true);
 #ifndef QT_NO_COMPONENT
     hideInputMethod();
@@ -639,9 +752,9 @@ void InputMethods::updateIMVisibility()
         m_IMVisibleVS.setAttribute( "", QVariant(imvisible));
         m_IMVisible = imvisible;
         selector->activateCurrent(imvisible);
+        emit visibilityChanged(imvisible);
     }
     selector->refreshIMMenuAction();
-    emit visibilityChanged();
 
 }
 
@@ -656,6 +769,10 @@ void InputMethods::choose(QtopiaInputMethod* imethod)
     }
 }
 
+/*!
+    Sets the input hint for the current input method for widget \a wid.  \a h is the hint for the input method, according to \l QtopiaApplication::InputMethodHint.  The \a password flag sets password mode, indicating that input should be hidden after being entered, and defaults to false.
+    This values are recorded for when this widget gains focus in the future, and if \a wid refers to the last active widget, the hint is forwared to the current input method immediately.
+*/
 void InputMethods::inputMethodHint( int h, int wid, bool password)
 {
 
@@ -686,6 +803,9 @@ void InputMethods::inputMethodHint( int h, int wid, bool password)
     }
 }
 
+/*!
+    Sets the input hint for widget \a wid, according to the hint \a h.  This information is recorded for this widget should it gain focus, and if \a wid refers to the last active window, the hint is immediately forwarded to the current input method.
+*/
 void InputMethods::inputMethodHint( const QString& h, int wid )
 {
     // Could easily scan this here and act on it to change inputmethods...
@@ -703,6 +823,10 @@ void InputMethods::inputMethodHint( const QString& h, int wid )
         updateHint(wid);
 }
 
+/*!
+    Sets the password hint for \a wid to \a passwordFlag, provided an input hint has previously been set for that widget.  If no hint has been set for that widget previously, this function does nothing.
+    \sa inputMethodHint()
+*/
 void InputMethods::inputMethodPasswordHint(bool passwordFlag, int wid)
 {
     if(!hintMap.contains(wid))
@@ -764,16 +888,28 @@ void InputMethods::updateHint(int wid)
     updateIMVisibility();
 }
 
+/*!
+    Returns true if the current input method is active and visible, otherwise returns false.
+*/
 bool InputMethods::shown() const
 {
     return selector->current() && selector->current()->inputWidget() && selector->current()->inputWidget()->isVisible();
 }
 
+/*!
+    Returns the name of the current input method, or an empty QString if there is no current input method.
+    \sa QtopiaInputMethod::name()
+*/
 QString InputMethods::currentShown() const
 {
     return shown() ? selector->current()->name() : QString();
 }
 
+/*!
+    Returns true if the input method selector is visible, false otherwise.  
+    This indicates the visibility of the widget used to change input methods, not the drop-down menu itself.  In Qtopia, this widget is only visible if at least 2 input methods have been loaded, and the widget with focus accepts text input.
+    \sa InputMethodSelector::isVisible(), InputMethodSelector::count()
+*/
 bool InputMethods::selectorShown() const
 {
     return selector->isVisible();
@@ -783,17 +919,17 @@ bool InputMethods::selectorShown() const
     \service InputMethodService InputMethod
     \brief Provides the Qtopia InputMethod service.
 
-    The \i InputMethod service enables applications to adjust the input
+    The InputMethod service enables applications to adjust the input
     method that is being used on text entry fields.
 
-    The messages in this service are sent as ordinary QCop messages
-    on the \c QPE/InputMethod channel.  The service is provided by
+    The messages in this service are sent as ordinary QtopiaIpc messages
+    on the \c{QPE/InputMethod} channel.  The service is provided by
     the Qtopia server.
 
     Normally applications won't need to send these messages directly,
     as they are handled by methods in the QtopiaApplication class.
 
-    \sa QtopiaApplication
+    \sa QtopiaApplication, QtopiaIpcEnvelope
 */
 
 /*!
@@ -817,9 +953,9 @@ InputMethodService::~InputMethodService()
 /*!
     Set the input method \a hint for \a windowId.  The valid values
     for \a hint are specified in QtopiaApplication::InputMethodHint.
-    This message should not be used if the \c Named hint is requested.
+    This method should not be used if the \c Named hint is requested.
 
-    This slot corresponds to the QCop message
+    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
     \c{inputMethodHint(int,int)} on the \c QPE/InputMethod channel.
 */
 void InputMethodService::inputMethodHint( int hint, int windowId )
@@ -828,10 +964,10 @@ void InputMethodService::inputMethodHint( int hint, int windowId )
 }
 
 /*!
-    Set the input method \a hint for \a windowId.  This message should
+    Set the input method \a hint for \a windowId.  This method should
     be used for \c Named hints.
 
-    This slot corresponds to the QCop message
+    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
     \c{inputMethodHint(QString,int)} on the \c QPE/InputMethod channel.
 */
 void InputMethodService::inputMethodHint( const QString& hint, int windowId )
@@ -854,7 +990,7 @@ void InputMethodService::inputMethodPasswordHint(bool passwordFlag, int windowId
     The current input method may still indicated in the taskbar, but no
     longer takes up screen space, and can no longer be interacted with.
 
-    This slot corresponds to the QCop message
+    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
     \c{hideInputMethod()} on the \c QPE/InputMethod channel.
 
     \sa showInputMethod()
@@ -872,7 +1008,7 @@ void InputMethodService::hideInputMethod()
     of the bottom of the screen, to allow the user to interact (input
     characters) with it.
 
-    This slot corresponds to the QCop message
+    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
     \c{showInputMethod()} on the \c QPE/InputMethod channel.
 
     \sa hideInputMethod()
@@ -891,7 +1027,7 @@ void InputMethodService::activateMenuItem(int v)
 }
 
 /*!
-    Activate the input method selector pop-up.
+    Activate the input method selector choice pop-up (a menu of available input methods), and give it keyboard focus.
 */
 
 void InputMethodService::changeInputMethod()
@@ -900,7 +1036,7 @@ void InputMethodService::changeInputMethod()
 }
 
 /*!
-    Activate the input method selector pop-up.
+    Activate the input method selector choice pop-up (a menu of available input methods), and give it keyboard focus.
 */
 
 void InputMethods::changeInputMethod()
@@ -912,7 +1048,7 @@ void InputMethods::changeInputMethod()
     If actions have been added to the softmenu on behalf of an IM, make
     sure they are up to date.
 
-    see also: \a stateChanged()
+    \sa QtopiaInputMethod::stateChanged()
 */
 void InputMethodSelector::refreshIMMenuAction()
 {
@@ -928,3 +1064,35 @@ void InputMethodService::setInputMethod(const QString &inputMethodName)
     parent->showInputMethod(inputMethodName);
 };
 
+/*!
+    \internal
+    Loads all input method plugins.  If any input method plugins have already been loaded, this function does nothing.
+    As input method plugins are loaded automatically on startup, this will generally only be of any use after calling \l unloadInputMethods, which should never be used on a device.
+    Use 
+    \code 
+        $QPEDIR/src/tools/qcop/qcop send "QPE/InputMethod" "loadInputMethods()" 
+    \endcode
+    \sa unloadinputMethods(), InputMethods::unloadInputMethods()
+*/
+void InputMethodService::loadInputMethods()
+{
+    parent->loadInputMethods();
+};
+
+/*!
+    \internal
+    Unloads all input method plugins.
+    This function is extremely dangerous.  Unloading input methods that are in use can easily cause a segmentation fault.
+    This function is only intended as a convenience while developing input method plugins, and should never be called on a device.
+    You have been warned.
+
+    Use:
+    \code{$QPEDIR/src/tools/qcop/qcop send "QPE/InputMethod" "unloadInputMethods()" \endcode
+
+    \sa loadinputMethods(), InputMethods::loadInputMethods()
+*/
+
+void InputMethodService::unloadInputMethods()
+{
+    parent->unloadInputMethods();
+};

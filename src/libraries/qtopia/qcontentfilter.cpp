@@ -45,55 +45,66 @@ public:
 
 /*!
     \class QContentFilter
+    \mainclass
     \brief The QContentFilter class defines criteria for defining a sub-set of all available content.
 
-    Content sets and document selectors use content filters to define their visible set of content.  A basic filter
-    is composed of a string value and an attribute of QContent specified by the \l FilterType enum, any content with
-    whose specified attribute matches the given value is passed. These basic filters can be combined by using the and (&),
-    or (|) and negation (~) operators to create complex filters which pass any content that matches the logical combination
-    of the base filters.
+    Instances of QContentSet and QDocumentSelector use content filters to define their visible set of content.  A basic filter
+    is composed of a string value and an attribute of QContent specified by the \l FilterType enumeration, so that
+    any content with the specified attribute matching the given value is passed.. These basic filters can be combined
+    by using the and (&), or (|) and negation (~) operators to create complex filters which pass any content that
+    matches the logical combination of the base filters.
+
+    If two filters that are not negated are combined with an operand common to both filters (or one or both have no operand) the filter
+    arguments are simply merged to create a new filter with the common operand.  If however there is no common operand or a filter is negated
+    then the combined filters become sub filters of the new filter which has no arguments of its own.
+
+    \section1 File paths
 
     \l Location and \l Directory filters filter content based on their file path, they differ in that a Directory filter will
     only pass content in the directory given in the argument of the filter whereas the Location filter will also pass content
     in any sub-directory of that directory.  Directory filter arguments may include a wild card.
 
-    Filter for all content in the "/Documents" directory:
+    Filter for all content in the \c /Documents directory:
     \code
         QContentFilter filter( QContentFilter::Directory, "/Documents" );
     \endcode
 
-    Filter for all content in the sub-directories of "/Documents" but not in the directory itself:
+    Filter for all content in the sub-directories of \c /Documents but not in the directory itself:
     \code
         QContentFilter filter( QContentFilter::Directory, "/Documents/*" );
     \endcode
 
-    Filter for all content in the "/Documents" directory or any of it's sub-directories:
+    Filter for all content in the \c /Documents directory or any of it's sub-directories:
     \code
         QContentFilter filter( QContentFilter::Location, "/Documents" );
     \endcode
-    Alternatively this could be acheived by combining two directory filters:
+    Alternatively this could be achieved by combining two directory filters:
     \code
         QContentFilter filter
                 = QContentFilter( QContentFilter::Directory, "/Documents" )
                 | QContentFilter( QContentFilter::Directory, "/Documents/*" );
     \endcode
 
+    \section1 Roles
+
     \l Role filters filter content based on the \l QContent::role() attribute which defines the intended
     usage of the QContent.  A role filter may be constructed using the Role filter type or from the
-    \l QContent::Role enum.  Most application content sets will only be interested in displaying user documents
+    \l QContent::Role enumeration.  Most application content sets will only be interested in displaying user documents
     and so should apply a role filter on \l QContent::Document to all content sets.
 
-    Limiting an existing filter to only include documents with the "Document" role:
+    Limiting an existing filter to only include documents with the \l{QContent::Document}{Document} role:
     \code
         QContentFilter final = existingFilter & QContentFilter( QContentFilter::Role, "Document" );
     \endcode
-    The same filter constructed from a the \l QContent::Role enum:
+    The same filter constructed from the \l QContent::Role enumeration:
     \code
         QContentFilter final = existingFilter & QContentFilter( QContent::Document );
     \endcode
 
-    \l MimeType filters filters content on the \l QContent::type() attribute, they may be constructed using
-    the MimeType filter type or from a QMimeType.  Wildcards may be used on mime type arguments to match the
+    \section1 Mime types
+
+    \l MimeType filters filters content on the \l QContent::type() attribute. They may be constructed using
+    the MimeType filter type or from a QMimeType.  Wild cards may be used on mime type arguments to match the
     major type only.
 
     Filter for all PNG images:
@@ -109,33 +120,41 @@ public:
         QContentFilter image( QContentFilter::MimeType, "image/*" );
     \endcode
 
+    \section1 Categories
+
     \l Category filters filter content based on the categories they've been assigned. The argument for a category
     filter is the ID of the category, alternatively a category filter can be constructed from a QCategoryFilter.
 
-    Filter for content with the Business or Personal categories:
+    Filter for content with the \c Business or \c Personal categories:
     \code
         QContentFilter categories
             = QContentFilter( QContentFilter::Category, "Business" )
             | QContentFilter( QContentFilter::Category, "Personal" );
     \endcode
-    Filter for unfiled content using a QCategoryFilter:
+    Content that has not been assigned any categories implicitly belongs to the \c Unfiled category and can be filtered for
+    using the \c Unfiled category ID string or a QCategoryFilter as below:
     \code
         QContentFilter unfiled( QCategoryFilter( QCategoryFilter::Unfiled ) );
     \endcode
 
-    \l DRM filters filter content based on the QContent::drmState() attribute.  The only valid arguments for a
-    DRM filter are "Protected" and "Unprotected" which filter protected and unprotected content respectively.
+    \section1 DRM
 
-    \l Synthetic filters filter content based on their properties.  The argument for a synthetic filter is composed
-    of the property group and key concatenated with the expected value in the form "[group]/[key]/[value]", if the property
-    does not belong to a group the argument should be of the form "none/[key]/[value]".  If the property belongs to the
-    QContent::Property enum the filter may be constructed from that enum and the expected value.
+    \l{Document System: DRM Integration}{DRM} filters filter content based on the QContent::drmState() attribute.  The only valid
+    arguments for a DRM filter are \l{QContent::Protected}{Protected} and \l{QContent::Unprotected}{Unprotected} which filter 
+    protected and unprotected content respectively.  Alternatively a DRM filter may be constructed from the QContent::DrmState enum.
+
+    \section1 Properties
+
+    \l Synthetic filters filter content based on their \l{QContent::property()}{properties}.  The argument for a synthetic filter is composed
+    of the property group and key concatenated with the expected value in the form \c [group]/[key]/[value], if the property
+    does not belong to a group the argument should be of the form \c none/[key]/[value].  If the property belongs to the
+    QContent::Property enumeration the filter may be constructed from that enumeration and the expected value.
 
     Filter for content with the author Trolltech:
     \code
         QContentFilter author( QContentFilter::Synthetic, "none/Author/Trolltech" );
     \endcode
-    The same filter using the QContent::Property enum:
+    The same filter using the QContent::Property enumeration:
     \code
         QContentFilter author( QContent::Author, "Trolltech" );
     \endcode
@@ -156,14 +175,14 @@ public:
 
     Identifies the QContent property that a filter argument is compared with.
 
-    \value Location storage media, mount etc
-    \value Role The value of QContent::role(). Applications, Documents or Data
-    \value MimeType image/gif etc
-    \value Directory directory name
-    \value Category category string from category subsystem
-    \value DRM drm permissions
-    \value Synthetic Filters on synthetic content properties.  Arguments are of the form "[group]/[key]/[value]".
-    \value QtopiaType QtopiaType has been deprecated, use \c Role instead.
+    \value Location The root path of the storage media or mount the content is stored on.
+    \value Role The value of QContent::role(); Application, Document or Data.
+    \value MimeType The value of QContent::type(); audio/mpeg, image/gif, etc.
+    \value Directory The directory the content is located in.
+    \value Category The ID of a category assigned to the content.
+    \value DRM The \l{QContent::DrmState}{DRM state} of the content.
+    \value Synthetic The value of a content \l{QContent::property()}{property}.  Arguments are of the form \c [group]/[key]/[value].
+    \value QtopiaType \c QtopiaType has been deprecated, use \c Role instead.
     \value Unknown Invalid filter argument.
 */
 
@@ -196,7 +215,7 @@ QContentFilter::QContentFilter( FilterType type, const QString &argument )
 }
 
 /*!
-    Constructs a filter which passes content whose's property \a property matches \a value.
+    Constructs a filter which passes content whose \a property matches \a value.
 */
 QContentFilter::QContentFilter( QContent::Property property, const QString &value )
 {
@@ -309,6 +328,8 @@ QContentFilter &QContentFilter::operator =( const QContentFilter &other )
     Creates a negated copy of a QContentFilter.
 
     The new filter will pass all content not passed by the existing QContentFilter.
+
+    \sa negated()
 */
 QContentFilter QContentFilter::operator ~() const
 {
@@ -327,6 +348,8 @@ QContentFilter QContentFilter::operator ~() const
     and \a other.
 
     Combining an invalid QContentFilter and a valid one will return the valid QContentFilter.
+
+    \sa And, operator&=()
 */
 QContentFilter QContentFilter::operator &( const QContentFilter &other ) const
 {
@@ -362,6 +385,8 @@ QContentFilter QContentFilter::operator &( const QContentFilter &other ) const
     and \a other.
 
     Combining an invalid QContentFilter and a valid one will return the valid QContentFilter.
+
+    \sa Or, operator|=()
  */
 QContentFilter QContentFilter::operator |( const QContentFilter &other ) const
 {
@@ -396,6 +421,8 @@ QContentFilter QContentFilter::operator |( const QContentFilter &other ) const
     Restricts a QContentFilter to the intersection of it and another QContentFilter \a other.
 
     If the QContentFilter is invalid, it will be assigned \a other.
+
+    \sa And, operator&()
 */
 QContentFilter &QContentFilter::operator &=( const QContentFilter &other )
 {
@@ -408,6 +435,8 @@ QContentFilter &QContentFilter::operator &=( const QContentFilter &other )
     Restricts a QContentFilter to the union of it and another QContentFilter \a other.
 
     If the QContentFilter is invalid, it will be assigned \a other.
+
+    \sa Or, operator|()
  */
 QContentFilter &QContentFilter::operator |=( const QContentFilter &other )
 {
@@ -417,7 +446,7 @@ QContentFilter &QContentFilter::operator |=( const QContentFilter &other )
 }
 
 /*!
-    Compares a QContentFilter to \a other.  Returns true if they are equal.
+    Compares a QContentFilter to \a other.  Returns true if they are equal and false otherwise.
 */
 bool QContentFilter::operator ==( const QContentFilter &other ) const
 {
@@ -435,7 +464,7 @@ bool QContentFilter::operator ==( const QContentFilter &other ) const
 }
 
 /*!
-    Compares a QContentFilter to \a other.  Returns true if they are not equal.
+    Compares a QContentFilter to \a other.  Returns true if they are not equal and false otherwise.
  */
 bool QContentFilter::operator !=( const QContentFilter &other ) const
 {
@@ -453,7 +482,9 @@ bool QContentFilter::operator !=( const QContentFilter &other ) const
 }
 
 /*!
-    Returns the operand used to combine the top level of arguments and sub filters.
+    Returns the operand used to combine the filter arguments and sub filters.
+
+    \sa types(), arguments(), subFilters()
 */
 QContentFilter::Operand QContentFilter::operand() const
 {
@@ -462,6 +493,8 @@ QContentFilter::Operand QContentFilter::operand() const
 
 /*!
     Returns true if the filter has been negated.
+
+    \sa operator~()
 */
 bool QContentFilter::negated() const
 {
@@ -469,7 +502,9 @@ bool QContentFilter::negated() const
 }
 
 /*!
-    Returns the types of the top level arguments.
+    Returns a list of filter types common to the arguments the filter is composed of, not including sub filters.
+
+    \sa arguments(), subFilters()
 */
 QList< QContentFilter::FilterType > QContentFilter::types() const
 {
@@ -477,7 +512,9 @@ QList< QContentFilter::FilterType > QContentFilter::types() const
 }
 
 /*!
-    Returns the top level arguments of FilterType \a type.
+    Returns the filter arguments of FilterType \a type, not including sub filters.
+
+    \sa types(), subFilters()
 */
 QStringList QContentFilter::arguments( FilterType type ) const
 {
@@ -485,7 +522,9 @@ QStringList QContentFilter::arguments( FilterType type ) const
 }
 
 /*!
-    Returns the sub filters of the top level filter.
+    Returns any sub filters the the filter is composed of.
+
+    \sa types(), arguments()
 */
 QList< QContentFilter > QContentFilter::subFilters() const
 {
@@ -509,7 +548,7 @@ void QContentFilter::clear()
 }
 
 /*!
-    Tests if a QContent object \a content passes the filter.
+    Returns true if a QContent object \a content passes the filter; otherwise returns false.
 */
 bool QContentFilter::test( const QContent &content ) const
 {
@@ -553,24 +592,28 @@ bool QContentFilter::test( const QContent &content ) const
 }
 
 /*!
-    Returns a list of filter arguments of FilterType \a type matching the partial filter \a subType
-    that can be used to further narrow the matches returned by a QContentFilter.
+    Returns a list of filter arguments of FilterType \a type that can be used to further narrow the matches returned by a QContentFilter.
+
+    The \a scope is used to optionally restrict matches to a sub group of arguments matching the filter. The scope of a
+    MimeType filter is the mime major type, so for example the \c image scope will return arguments like \c image/jpeg,
+    and \c image/png. For Category filters scope simply refers to the category scope, and for Synthetic filters it is
+    the property group and key in the form \c [group]/[key].
 */
-QStringList QContentFilter::argumentMatches( FilterType type, const QString &subType ) const
+QStringList QContentFilter::argumentMatches( FilterType type, const QString &scope ) const
 {
     switch( type )
     {
     case MimeType:
-        return QContent::database()->mimeFilterMatches( *this, subType );
+        return QContent::database()->mimeFilterMatches( *this, scope );
     case Category:
-        return QContent::database()->categoryFilterMatches( *this, subType );
+        return QContent::database()->categoryFilterMatches( *this, scope );
     case Synthetic:
-        return QContent::database()->syntheticFilterMatches( *this, subType.section( '/', 0, 0 ), subType.section( '/', 1, 1 ) );
+        return QContent::database()->syntheticFilterMatches( *this, scope.section( '/', 0, 0 ), scope.section( '/', 1, 1 ) );
     case Directory:
     {
         QStringList paths;
 
-        QDir dir( subType );
+        QDir dir( scope );
 
         foreach( QFileInfo f, dir.entryInfoList( QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name ) )
         {
@@ -586,9 +629,9 @@ QStringList QContentFilter::argumentMatches( FilterType type, const QString &sub
     {
         QStringList paths;
 
-        if( !subType.isEmpty() )
+        if( !scope.isEmpty() )
         {
-            QDir dir( subType );
+            QDir dir( scope );
 
             foreach( QFileInfo f, dir.entryInfoList( QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name ) )
             {
@@ -708,6 +751,11 @@ template <typename Stream> void QContentFilter::deserialize(Stream &stream)
         d = 0;
 }
 
+/*!
+    Writes a description of a content \a filter to a \a debug stream.
+
+    \internal
+*/
 QDebug operator <<( QDebug debug, const QContentFilter &filter )
 {
     if( !filter.isValid() )

@@ -1,17 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QHeadsetAccessoryProvider Class Reference</title>
+  <title>QHeadsetAccessoryProvider Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QHeadsetAccessoryProvider Class Reference</h1>
 <p>The QHeadsetAccessoryProvider class provides an interface for making a headset device visible to the accessory system. <a href="#details">More...</a></p>
-<pre>#include &lt;QHeadsetAccessoryProvider&gt;</pre><p>Inherits <a href="qheadsetaccessory.html">QHeadsetAccessory</a>.</p>
+<pre>    #include &lt;QHeadsetAccessoryProvider&gt;</pre><p>Inherits <a href="qheadsetaccessory.html">QHeadsetAccessory</a>.</p>
 <ul>
 <li><a href="qheadsetaccessoryprovider-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -57,14 +59,13 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QHeadsetAccessoryProvider class provides an interface for making a headset device visible to the accessory system.</p>
-<p>The QHeadsetAccessoryProvider class provides an interface for making a headset device visible to the accessory system.</p>
 <p>Headset implementations inherit from this class and set their attributes using the set methods. They then override <a href="qheadsetaccessoryprovider.html#setMicrophoneVolume">setMicrophoneVolume</a>() and <a href="qheadsetaccessoryprovider.html#setSpeakerVolume">setSpeakerVolume</a>() to update the headset hardware when the volume is modified.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QHeadsetAccessoryProvider"></a>QHeadsetAccessoryProvider::QHeadsetAccessoryProvider ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Create a headset device called <i>id</i> and attach it to <i>parent</i>.</p>
+<p>Create a headset device provider called <i>id</i> and attaches it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QHeadsetAccessoryProvider"></a>QHeadsetAccessoryProvider::~QHeadsetAccessoryProvider ()</h3>
-<p>Destroys this headset accessory provider.</p>
+<p>Destroys the headset accessory provider.</p>
 <h3 class="fn"><a name="setChannels"></a>void QHeadsetAccessoryProvider::setChannels ( const int <i>channels</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Indicate the number of <i>channels</i> this headset accessory supports. This is typically called from the constructor of subclass implementations.</p>
 <h3 class="fn"><a name="setConnectionType"></a>void QHeadsetAccessoryProvider::setConnectionType ( const <a href="qheadsetaccessory.html#ConnectionType-enum">ConnectionType</a> <i>connection</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -72,17 +73,17 @@
 <h3 class="fn"><a name="setMicrophonePresent"></a>void QHeadsetAccessoryProvider::setMicrophonePresent ( const bool <i>present</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Indicate whether this headset accessory has a microphone <i>present</i>. This is typically called from the constructor of subclass implementations.</p>
 <h3 class="fn"><a name="setMicrophoneVolume"></a>void QHeadsetAccessoryProvider::setMicrophoneVolume ( const int <i>volume</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
-<p>Set the microphone <i>volume</i> precent. The default implementation updates the volume value as seen by <a href="qheadsetaccessory.html#microphoneVolume">microphoneVolume</a>() on the client. Headset implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the volume value.</p>
+<p>Sets the microphone volume to <i>volume</i> percent. The default implementation updates the volume value as seen by <a href="qheadsetaccessory.html#microphoneVolume">microphoneVolume</a>() on the client. Headset implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the volume value.</p>
 <p>Reimplemented from <a href="qheadsetaccessory.html#setMicrophoneVolume">QHeadsetAccessory</a>.</p>
 <h3 class="fn"><a name="setSpeakerPresent"></a>void QHeadsetAccessoryProvider::setSpeakerPresent ( const bool <i>present</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Indicate whether this headset accessory has a speaker <i>present</i>. This is typically called from the constructor of subclass implementations.</p>
 <h3 class="fn"><a name="setSpeakerVolume"></a>void QHeadsetAccessoryProvider::setSpeakerVolume ( const int <i>volume</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
-<p>Set the speaker <i>volume</i> percent. The default implementation updates the volume value as seen by <a href="qheadsetaccessory.html#speakerVolume">speakerVolume</a>() on the client. Headset implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the volume value.</p>
+<p>Sets the speaker volume to <i>volume</i> percent. The default implementation updates the volume value as seen by <a href="qheadsetaccessory.html#speakerVolume">speakerVolume</a>() on the client. Headset implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the volume value.</p>
 <p>Reimplemented from <a href="qheadsetaccessory.html#setSpeakerVolume">QHeadsetAccessory</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

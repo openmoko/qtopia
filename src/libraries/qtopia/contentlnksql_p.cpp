@@ -65,7 +65,7 @@ const QHash<QString,QString> &ContentLinkSql::getLocNames()
 {
     if ( locNames.count() == 0 )
     {
-        QSettings cfg("Storage");
+        QSettings cfg("Trolltech", "Storage");
         if ( cfg.status() != QSettings::NoError )
             qWarning( "No valid Storage.conf, using paths instead!" );
 #ifdef Q_OS_LINUX
@@ -528,8 +528,7 @@ int ContentLinkSql::recordCount( const QContentFilter &filter )
     QString queryString = QLatin1String(
             "select count(distinct cid) "
             "from %1 "
-            "group by content.cid "
-            "having %2" );
+            "where %2" );
 
     queryString = buildQuery( queryString, filter, &parameters );
 
@@ -705,8 +704,6 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
                 aNCM_cat_qry.bindValue( QLatin1String("categoryscope"), catScope );
                 aNCM_cat_qry.bindValue( QLatin1String("categoryicon"), catIcon );
                 aNCM_cat_qry.bindValue( QLatin1String("flags"), catFlags );
-
-                qDebug() << "Binding found values";
             }
             else
             {
@@ -820,7 +817,7 @@ QContentIdList ContentLinkSql::matches( const QContentIdList &idList, const QCon
     QList< Parameter > parameters;
     QStringList joins;
 
-    QString where = QLatin1String(" GROUP BY content.cid HAVING ") + buildWhereClause( filter, &parameters, &insertAt, &joins );
+    QString where = QLatin1String(" WHERE ") + buildWhereClause( filter, &parameters, &insertAt, &joins );
     QString order = buildOrderBy( sortOrder, &parameters, &insertAt, &joins );
     QString qry = QLatin1String( "SELECT DISTINCT content.cid FROM " ) + buildFrom( filter, joins );
 
@@ -892,7 +889,7 @@ QString ContentLinkSql::buildWhereClause( const QContentFilter &filter, QList< P
         conjunct = operandConjunct;
     }
 
-    part = buildCategories( filter.arguments( QContentFilter::Category ), operandConjunct, parameters, joins );
+    part = buildCategories( filter.arguments( QContentFilter::Category ), operandConjunct, parameters, insertAt, joins );
     if( !part.isEmpty() )
     {
         qry += conjunct + part;
@@ -983,7 +980,8 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
         {
             location.replace( QLatin1Char('*'), QLatin1Char('%') );
 
-            expression += c + QString( "real.location LIKE %1 OR link.location LIKE %1" )
+            expression += c + QString( "real.location LIKE %1 OR link.location LIKE %2" )
+                    .arg( addParameter( location, parameters ) )
                     .arg( addParameter( location, parameters ) );
 
             c = bracketedConjunct;
@@ -993,14 +991,13 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
             if( location.endsWith( QLatin1Char('/') ) )
                 location.chop( 1 );
 
-            QString likeParam = addParameter( location + QLatin1String( "/%" ), parameters );
-            QString equalParam = addParameter( location, parameters );
-
             expression += c + QString(
-                    "real.location LIKE %1 OR link.location LIKE %1 OR "
-                    "real.location = %2 OR link.location = %2" )
-                    .arg( likeParam  )
-                    .arg( equalParam );
+                    "real.location LIKE %1 OR link.location LIKE %2 OR "
+                    "real.location = %3 OR link.location = %4" )
+                    .arg( addParameter( location + QLatin1String( "/%" ), parameters ) )
+                    .arg( addParameter( location + QLatin1String( "/%" ), parameters )  )
+                    .arg( addParameter( location, parameters ) )
+                    .arg( addParameter( location, parameters ) );
 
             c = bracketedConjunct;
         }
@@ -1014,7 +1011,8 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
         {
             directory.replace( QLatin1Char('*'), QLatin1Char('%') );
 
-            expression += c + QString( "real.location LIKE %1 OR link.location LIKE %1" )
+            expression += c + QString( "real.location LIKE %1 OR link.location LIKE %2" )
+                    .arg( addParameter( directory, parameters ) )
                     .arg( addParameter( directory, parameters ) );
 
             c = bracketedConjunct;
@@ -1024,7 +1022,8 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
             if( directory.endsWith( QLatin1Char('/') ) )
                 directory.chop( 1 );
 
-            expression += c + QString( "real.location = %1 OR link.location = %1" )
+            expression += c + QString( "real.location = %1 OR link.location = %2" )
+                    .arg( addParameter( directory, parameters ) )
                     .arg( addParameter( directory, parameters ) );
 
             c = bracketedConjunct;
@@ -1063,7 +1062,7 @@ QString ContentLinkSql::buildMimeTypes( const QStringList &mimes, const QString 
     return !expression.isEmpty() ? QString( "(%1)" ).arg( expression ) : QString();
 }
 
-QString ContentLinkSql::buildCategories( const QStringList &categories, const QString &conjunct, QList< Parameter > *parameters, QStringList *joins )
+QString ContentLinkSql::buildCategories( const QStringList &categories, const QString &conjunct, QList< Parameter > *parameters, int *insertAt, QStringList *joins )
 {
     QString expression;
     QString c;
@@ -1072,24 +1071,29 @@ QString ContentLinkSql::buildCategories( const QStringList &categories, const QS
     {
         QString table = QString( "cat%1" ).arg( joins->count(), 3, 10, QLatin1Char( '0' ) );
 
-        joins->append( QString( " left join mapCategoryToContent as %1 on %1.cid = content.cid" ).arg( table ) );
-
-        category.replace(QLatin1Char('*'), QLatin1Char('%'));
-        category = QtopiaSql::escapeString(category);
-
-        if (category == QLatin1String("Unfiled"))
-            expression += c + QString( "%1.categoryid is NULL" ).arg( table );
-        else if (category.contains("%"))
+        if( category == QLatin1String( "Unfiled" ) )
         {
-            expression += c + QString( "%1.categoryid like %2" )
+            joins->append( QString( " left join mapCategoryToContent as %1 on %1.cid = content.cid" ).arg( table ) );
+
+            expression += c + QString( "%1.categoryid is NULL" ).arg( table );
+        }
+        else if( category.contains( "*" ) )
+        {
+            category.replace(QLatin1Char('*'), QLatin1Char('%'));
+
+            joins->append( QString( " left join mapCategoryToContent as %1 on %1.cid = content.cid and %1.categoryid like %2" )
                     .arg( table )
-                    .arg( addParameter( category, parameters ) );
+                    .arg( addParameter( category, parameters, insertAt ) ) );
+
+            expression += c + QString( "%1.categoryid is not NULL" ).arg( table );
         }
         else
         {
-            expression += c + QString( "%1.categoryid = %2" )
+            joins->append( QString( " left join mapCategoryToContent as %1 on %1.cid = content.cid and %1.categoryid = %2" )
                     .arg( table )
-                    .arg( addParameter( category, parameters ) );
+                    .arg( addParameter( category, parameters, insertAt ) ) );
+
+            expression += c + QString( "%1.categoryid is not NULL" ).arg( table );
         }
 
         c = conjunct;
@@ -1490,7 +1494,7 @@ QString ContentLinkSql::buildSynthetic( const QStringList &synthetic, const QStr
 
         if( value.isEmpty() )
         {
-            expression += c + QString( "(%1.grp = %2 and %1.name = %3 and %1.value is null)" )
+            expression += c + QString( "(%1.value is null)" )
                     .arg( table );
         }
         else if( value.contains( QLatin1Char('*') ) )
@@ -1498,7 +1502,6 @@ QString ContentLinkSql::buildSynthetic( const QStringList &synthetic, const QStr
             value.replace( QLatin1Char('*'), QLatin1Char('%') );
 
             expression += c + QString( "(%1.value like %2 and %1.value not null)" )
-                    .arg( key.section( "/", 0, 0 ) )
                     .arg( table )
                     .arg( addParameter( value, parameters ) );
         }
@@ -1534,8 +1537,7 @@ QStringList ContentLinkSql::mimeFilterMatches( const QContentFilter &filter, con
             mimeQuery = QLatin1String(
                     "select distinct mimeTypeLookup.mimeType "
                     "from %1 "
-                    "group by content.cid "
-                     "having %2 "
+                    "where %2 "
                     "order by mimeTypeLookup.mimeType COLLATE localeAwareCompare" );
         }
         else
@@ -1543,8 +1545,7 @@ QStringList ContentLinkSql::mimeFilterMatches( const QContentFilter &filter, con
             mimeQuery = QLatin1String(
                     "select distinct mimeTypeLookup.mimeType "
                     "from %1 left join mimeTypeLookup on content.mType = mimeTypeLookup.pKey "
-                    "group by content.cid "
-                    "having %2 "
+                    "where %2 "
                     "order by mimeTypeLookup.mimeType COLLATE localeAwareCompare" );
         }
 
@@ -1599,8 +1600,7 @@ QStringList ContentLinkSql::syntheticFilterGroups( const QContentFilter &filter 
         static const QString groupQuery = QLatin1String(
                 "select distinct contentProps.grp "
                 "from %1 left join contentProps on content.cid = contentProps.cid "
-                "group by content.cid "
-                "having %2 "
+                "where %2 "
                 "order by contentProps.grp" );
 
         queryString = buildQuery( groupQuery, filter, &parameters );
@@ -1654,8 +1654,7 @@ QStringList ContentLinkSql::syntheticFilterKeys( const QContentFilter &filter, c
         QString keyQuery = QLatin1String(
                 "select distinct contentProps.name "
                 "from %2 left join contentProps on content.cid = contentProps.cid and contentProps.grp = :group "
-                "group by content.cid "
-                "having %3 "
+                "where %3 "
                 "order by contentProps.name COLLATE localeAwareCompare" );
 
         parameters.append( Parameter( QLatin1String( "group" ), group ) );
@@ -1713,8 +1712,7 @@ QStringList ContentLinkSql::syntheticFilterMatches( const QContentFilter &filter
         static const QString valueQuery = QLatin1String(
                 "select distinct contentProps.value "
                 "from %1 left join contentProps on content.cid = contentProps.cid and contentProps.grp = :group and contentProps.name = :key "
-                "group by content.cid "
-                "having %2 "
+                "where %2 "
                 "order by contentProps.value COLLATE localeAwareCompare");
 
         parameters.append( Parameter( QLatin1String( "group" ), group ) );
@@ -1783,8 +1781,7 @@ QStringList ContentLinkSql::categoryFilterMatches( const QContentFilter &filter,
             "select distinct category.categoryid "
             "from %2 inner join mapCategoryToContent as category on content.cid = category.cid "
                     "inner join categories on category.categoryid = categories.categoryid and %1 "
-                "group by content.cid "
-                "having %3 "
+             "where %3 "
             "order by categories.categorytext COLLATE localeAwareCompare")
             .arg( scopeClause );
 

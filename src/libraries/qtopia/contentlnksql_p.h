@@ -153,7 +153,7 @@ private:
     QString buildQtopiaTypes( const QStringList &types, const QString &conjunct, QList< Parameter > *parameters );
     QString buildMimeTypes( const QStringList &mimes, const QString &conjunct, QList< Parameter > *parameters );
     QString buildPaths( const QStringList &locations, const QStringList &directories, const QString &conjunct, QList< Parameter > *parameters );
-    QString buildCategories( const QStringList &categories, const QString &conjunct, QList< Parameter > *parameters, QStringList *joins );
+    QString buildCategories( const QStringList &categories, const QString &conjunct, QList< Parameter > *parameters, int *insertAt, QStringList *joins );
     QString buildDrm( const QStringList &drm, const QString &conjunct, QList< Parameter > *parameters );
     QString buildSynthetic( const QStringList &synthetic, const QString &conjunct, QList< Parameter > *parameters, int *insertAt, QStringList *joins );
     QString buildOrderBy( const QStringList &, QList< Parameter > *, int *, QStringList * );

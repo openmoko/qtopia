@@ -27,6 +27,7 @@
 
 /*!
     \class QBluetoothSdpSequence
+    \mainclass
     \brief The QBluetoothSdpSequence class is a convenience wrapper used in QBluetoothSdpRecord.
 
     This class is a convenience class introduced for the purpose
@@ -42,6 +43,7 @@
 
 /*!
     \class QBluetoothSdpAlternative
+    \mainclass
     \brief The QBluetoothSdpAlternative class is a convenience wrapper used in QBluetoothSdpRecord.
 
     This class is a convenience class introduced for the
@@ -57,32 +59,73 @@
 
 /*!
     \class QBluetoothSdpRecord
+    \mainclass
     \brief The QBluetoothSdpRecord class represents a bluetooth SDP record.
 
-    The QBluetoothSdpRecord class encapsulates a Bluetooth SDP service record.
-    The record is composed of Attributes, each attribute has a unique
-    16 bit id.  The attributes can be of the following types:
-    \list
-        \o \bold{quint8} - Represents a SDP UINT8 type.
-        \o \bold{qint8} - Represents a SDP INT8 type.
-        \o \bold{quint16} - Represents a SDP UINT16 type.
-        \o \bold{qint16} - Represents a SDP INT16 type.
-        \o \bold{quint32} - Represents a SDP UINT32 type.
-        \o \bold{qint32} - Represents a SDP INT32 type.
-        \o \bold{quint64} - Represents a SDP UINT64 type.
-        \o \bold{qint64} - Represents a SDP INT64 type.
-        \o \bold{quint128} - Represents a SDP UINT128 type.
-        \o \bold{qint128} - Represents a SDP INT128 type.
-        \o \bold{bool} - Represents a SDP BOOL type.
-        \o \bold{QBluetoothSdpAlternative} - Represents a SDP Alternate type.
-        \o \bold{QBluetoothSdpSequence} - Represents a SDP Sequence type.
-        \o \bold{QBluetoothSdpUuid} - Represents a SDP UUID type.
-        \o \bold{QUrl} - Represents a SDP URL type.
-        \o \bold{QString} - Represents a SDP TEXT type.
-        \o \bold{QByteArray} - Represents a SDP TEXT type that appears to contain binary data.
-    \endlist
+    Each Bluetooth record is composed of zero or more attributes.  Each
+    attribute contains exactly one value.  To group several values, sequences
+    or alternatives are used.  Each attribute has a unique 16 bit identifier
+    associated with it.  The mapping between SDP basic types and the types
+    used by the QBluetoothSdpRecord implementation are given below:
 
-The attributes are stored as QVariants.
+    \table
+        \header
+            \o SDP Type
+            \o Qt Type
+        \row
+            \o UINT8
+            \o quint8
+        \row
+            \o INT8
+            \o qint8
+        \row
+            \o UINT16
+            \o quint16
+        \row
+            \o INT16
+            \o qint16
+        \row
+            \o UINT32
+            \o quint32
+        \row
+            \o INT32
+            \o qint32
+        \row
+            \o UINT64
+            \o quint64
+        \row
+            \o INT64
+            \o qint64
+        \row
+            \o UINT128
+            \o quint128
+        \row
+            \o INT128
+            \o qint128
+        \row
+            \o BOOL
+            \o bool
+        \row
+            \o Alternate
+            \o QBluetoothSdpAlternative
+        \row
+            \o Sequence
+            \o QBluetoothSdpSequence
+        \row
+            \o UUID16, UUID32, UUID128
+            \o QBluetoothSdpUuid
+        \row
+            \o URL
+            \o QUrl
+        \row
+            \o TEXT
+            \o QString
+        \row
+            \o TEXT (binary data)
+            \o QByteArray
+        \endtable
+
+    The attributes are stored as QVariants.
 
     \ingroup qtopiabluetooth
     \sa QVariant, QBluetoothSdpSequence, QBluetoothSdpAlternative
@@ -145,6 +188,8 @@ QBluetoothSdpRecord &QBluetoothSdpRecord::operator=(const QBluetoothSdpRecord &o
 
 /*!
     Returns the service name attribute.
+
+    \sa setServiceName()
 */
 QString QBluetoothSdpRecord::serviceName() const
 {
@@ -153,6 +198,8 @@ QString QBluetoothSdpRecord::serviceName() const
 
 /*!
     Sets the service name attribute to \a serviceName.
+
+    \sa serviceName()
 */
 void QBluetoothSdpRecord::setServiceName(const QString &serviceName)
 {
@@ -161,6 +208,8 @@ void QBluetoothSdpRecord::setServiceName(const QString &serviceName)
 
 /*!
     Returns the service description attribute.
+
+    \sa setServiceDescription()
 */
 QString QBluetoothSdpRecord::serviceDescription() const
 {
@@ -169,6 +218,8 @@ QString QBluetoothSdpRecord::serviceDescription() const
 
 /*!
     Sets the service description attribute to \a serviceDesc.
+
+    \sa serviceDescription()
 */
 void QBluetoothSdpRecord::setServiceDescription(const QString &serviceDesc)
 {
@@ -177,6 +228,8 @@ void QBluetoothSdpRecord::setServiceDescription(const QString &serviceDesc)
 
 /*!
     Returns the provider name attribute.
+
+    \sa setProviderName()
 */
 QString QBluetoothSdpRecord::providerName() const
 {
@@ -185,6 +238,8 @@ QString QBluetoothSdpRecord::providerName() const
 
 /*!
     Sets the provider name attribute to \a providerName
+
+    \sa providerName()
 */
 void QBluetoothSdpRecord::setProviderName(const QString &providerName)
 {
@@ -193,55 +248,69 @@ void QBluetoothSdpRecord::setProviderName(const QString &providerName)
 
 /*!
     Returns the Doc URL attribute.
+
+    \sa setDocUrl()
 */
-QUrl QBluetoothSdpRecord::docURL() const
+QUrl QBluetoothSdpRecord::docUrl() const
 {
     return m_attrs.value(DOC_URL).value<QUrl>();
 }
 
 /*!
-    Sets the Doc URL attribute to \a docURL.
+    Sets the Doc URL attribute to \a docUrl.
+
+    \sa docUrl()
 */
-void QBluetoothSdpRecord::setDocURL(const QUrl &docURL)
+void QBluetoothSdpRecord::setDocUrl(const QUrl &docUrl)
 {
-    m_attrs.insert(DOC_URL, QVariant::fromValue(docURL));
+    m_attrs.insert(DOC_URL, QVariant::fromValue(docUrl));
 }
 
 /*!
     Returns the Exec URL attribute.
+
+    \sa setExecUrl()
  */
-QUrl QBluetoothSdpRecord::execURL() const
+QUrl QBluetoothSdpRecord::execUrl() const
 {
     return m_attrs.value(CLNT_EXEC_URL).value<QUrl>();
 }
 
 /*!
-    Sets the Exec URL attribute to \a execURL.
+    Sets the Exec URL attribute to \a execUrl.
+
+    \sa execUrl()
  */
-void QBluetoothSdpRecord::setExecURL(const QUrl &execURL)
+void QBluetoothSdpRecord::setExecUrl(const QUrl &execUrl)
 {
-    m_attrs.insert(CLNT_EXEC_URL, QVariant::fromValue(execURL));
+    m_attrs.insert(CLNT_EXEC_URL, QVariant::fromValue(execUrl));
 }
 
 /*!
     Returns the Icon URL attribute.
+
+    \sa setIconUrl()
  */
-QUrl QBluetoothSdpRecord::iconURL() const
+QUrl QBluetoothSdpRecord::iconUrl() const
 {
     return m_attrs.value(ICON_URL).value<QUrl>();
 }
 
 /*!
-    Sets the Icon URL attribute to \a iconURL.
+    Sets the Icon URL attribute to \a iconUrl.
+
+    \sa iconUrl()
  */
-void QBluetoothSdpRecord::setIconURL(const QUrl &iconURL)
+void QBluetoothSdpRecord::setIconUrl(const QUrl &iconUrl)
 {
-    m_attrs.insert(ICON_URL, QVariant::fromValue(iconURL));
+    m_attrs.insert(ICON_URL, QVariant::fromValue(iconUrl));
 }
 
 /*!
-   Gets the ServiceID attribute.  Each service on the SDP Server is
-   uniquely identified using this uuid.
+    Returns the ServiceID attribute.  Each service on the SDP Server is
+    uniquely identified using this uuid.
+
+    \sa setId()
 */
 QBluetoothSdpUuid QBluetoothSdpRecord::id() const
 {
@@ -249,8 +318,10 @@ QBluetoothSdpUuid QBluetoothSdpRecord::id() const
 }
 
 /*!
-   Sets the ServiceID attribute to \a id.  The \a id argument should be unique
-   identifier of the service.
+    Sets the ServiceID attribute to \a id.  The \a id argument should be unique
+    identifier of the service.
+
+    \sa id()
 */
 void QBluetoothSdpRecord::setId(const QBluetoothSdpUuid &id)
 {
@@ -259,6 +330,8 @@ void QBluetoothSdpRecord::setId(const QBluetoothSdpUuid &id)
 
 /*!
     Returns the group id attribute.
+
+    \sa setGroup()
 */
 QBluetoothSdpUuid QBluetoothSdpRecord::group() const
 {
@@ -270,6 +343,8 @@ QBluetoothSdpUuid QBluetoothSdpRecord::group() const
    a Group Service Class will require this attribute.  All other services
    can be a part of one or more groups.  This is set through the
    browse group list attribute.
+
+    \sa group()
 */
 void QBluetoothSdpRecord::setGroup(const QBluetoothSdpUuid &group)
 {
@@ -277,7 +352,10 @@ void QBluetoothSdpRecord::setGroup(const QBluetoothSdpUuid &group)
 }
 
 /*!
-    Returns a list of unique identifiers of all browse groups this service is a part of.
+    Returns a list of unique identifiers of all browse groups this service is
+    a part of.
+
+    \sa setBrowseGroups()
 */
 QList<QBluetoothSdpUuid> QBluetoothSdpRecord::browseGroups() const
 {
@@ -302,8 +380,10 @@ QList<QBluetoothSdpUuid> QBluetoothSdpRecord::browseGroups() const
 }
 
 /*!
-    Sets a list of unique identifiers of all browse groups this service is a part of
-    to \a groups.
+    Sets a list of unique identifiers of all browse groups this service is
+    a part of to \a groups.
+
+    \sa browseGroups()
 */
 void QBluetoothSdpRecord::setBrowseGroups(const QList<QBluetoothSdpUuid> &groups)
 {
@@ -319,6 +399,8 @@ void QBluetoothSdpRecord::setBrowseGroups(const QList<QBluetoothSdpUuid> &groups
 
 /*!
     Returns a server specific record handle.
+
+    \sa setRecordHandle()
 */
 quint32 QBluetoothSdpRecord::recordHandle() const
 {
@@ -327,6 +409,8 @@ quint32 QBluetoothSdpRecord::recordHandle() const
 
 /*!
     Sets a server specific record handle to \a handle.
+
+    \sa recordHandle()
 */
 void QBluetoothSdpRecord::setRecordHandle(quint32 handle)
 {
@@ -335,6 +419,8 @@ void QBluetoothSdpRecord::setRecordHandle(quint32 handle)
 
 /*!
    Returns a list of all attribute identifiers this service contains.
+
+    \sa addAttribute(), removeAttribute(), attribute(), clearAttributes()
 */
 QList<quint16> QBluetoothSdpRecord::attributeIds() const
 {
@@ -344,6 +430,8 @@ QList<quint16> QBluetoothSdpRecord::attributeIds() const
 /*!
     Tries to add an attribute \a attr with id \a id to the service.
     Returns false if the attribute already exists.
+
+    \sa attributeIds(), removeAttribute(), attribute(), clearAttributes()
 */
 bool QBluetoothSdpRecord::addAttribute(quint16 id, const QVariant &attr)
 {
@@ -359,6 +447,8 @@ bool QBluetoothSdpRecord::addAttribute(quint16 id, const QVariant &attr)
     Removes the attribute with the specified id \a id from the service record.
     Returns true on success.  If the attribute is not found,
     nothing is done and false is returned.
+
+    \sa attributeIds(), addAttribute(), attribute(), clearAttributes()
 */
 bool QBluetoothSdpRecord::removeAttribute(quint16 id)
 {
@@ -366,10 +456,13 @@ bool QBluetoothSdpRecord::removeAttribute(quint16 id)
 }
 
 /*!
-    Gets the attribute with id \a id from the service.  If the attribute is not
+    Returns the attribute with id \a id from the service.  If the
+    attribute is not
     found, a null QSDPAttribute is returned.  For extra error information,
     you can pass in the \a ok flag, which specifies whether an error occurred,
     or an actual NULL attribute was returned.
+
+    \sa attributeIds(), addAttribute(), removeAttribute(), clearAttributes()
 */
 QVariant QBluetoothSdpRecord::attribute(quint16 id, bool *ok) const
 {
@@ -390,6 +483,8 @@ QVariant QBluetoothSdpRecord::attribute(quint16 id, bool *ok) const
 
 /*!
     Clears all attributes.
+
+    \sa attributeIds(), addAttribute(), removeAttribute(), attribute()
 */
 void QBluetoothSdpRecord::clearAttributes()
 {

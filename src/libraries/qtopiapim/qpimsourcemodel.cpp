@@ -35,16 +35,24 @@ public:
 
 /*!
   \class QPimSourceModel
+  \mainclass
   \module qpepim
   \ingroup pim
-  \brief The QPimSourceModel class provides a Model class for managing the set of QPimSource
-  objects of a PIM Model. 
+  \brief The QPimSourceModel class provides a Model class for manipulating a set of QPimSource
+  objects.
 
-  The QPimSourceModel class is an aid to creating widget for applications to manage PIM
-  data from multiple sources.  It provides sorting of the sources, accessing
-  translated strings for source titles, and the ability to check and uncheck
-  items for use with setting the set of visible sources for one of the pim
-  models, QContactModel, QTaskModel or QAppointmentModel.
+  This is intended to be used with a QAbstractItemView derived class like
+  \l QListView, in order to provide the user with a way to select a source
+  (or sources) for their PIM data.  It provides sorting of the sources,
+  accessing translated strings for source titles, and the ability to check
+  and uncheck sources for use with one of the PIM models (\l QContactModel,
+  \l QTaskModel and \l QAppointmentModel).
+
+  By default, this model will provide a non-checkable model, suitable for
+  selecting a single source, but if \l setCheckedSources() is called this
+  model will allow for multiple sources to be selected.
+
+  \sa QPimModel, QPimContext
 */
 
 /*!
@@ -67,8 +75,10 @@ QPimSourceModel::~QPimSourceModel()
 
 /*!
   Sets the contexts defining the PIM data sources to display to \a contexts
-  Available sources for each context is build into the list of PIM
-  data sources included in the model.
+  The available sources for each context are built into a list of PIM
+  data sources.
+
+  Typically, the list of contexts is provided by \l QPimModel::contexts().
 */
 void QPimSourceModel::setContexts(const QList<QPimContext *> &contexts)
 {
@@ -88,9 +98,9 @@ void QPimSourceModel::setContexts(const QList<QPimContext *> &contexts)
 }
 
 /*!
-  Sets the contexts defining the PIM data sources to display to \a contexts
-  Available sources for each context is build into the list of PIM
-  data sources included in the model.
+  \overload
+
+  This is a convenience function for the contexts of a \l QContactModel.
 */
 
 void QPimSourceModel::setContexts(const QList<QContactContext *> &contexts)
@@ -108,9 +118,9 @@ void QPimSourceModel::setContexts(const QList<QContactContext *> &contexts)
 }
 
 /*!
-  Sets the contexts defining the PIM data sources to display to \a contexts
-  Available sources for each context is build into the list of PIM
-  data sources included in the model.
+  \overload
+
+  This is a convenience function for the contexts of a \l QAppointmentModel.
 */
 void QPimSourceModel::setContexts(const QList<QAppointmentContext *> &contexts)
 {
@@ -127,9 +137,9 @@ void QPimSourceModel::setContexts(const QList<QAppointmentContext *> &contexts)
 }
 
 /*!
-  Sets the contexts defining the PIM data sources to display to \a contexts
-  Available sources for each context is build into the list of PIM
-  data sources included in the model.
+  \overload
+
+  This is a convenience function for the contexts of a \l QTaskModel.
 */
 void QPimSourceModel::setContexts(const QList<QTaskContext *> &contexts)
 {
@@ -147,7 +157,13 @@ void QPimSourceModel::setContexts(const QList<QTaskContext *> &contexts)
 
 /*!
   Sets the sources that should be marked as checked to those contained in
-  \a set.  Will also mark items as checkable.
+  \a set.  Calling this function will also indicate that this
+  model should allow multiple selections.
+
+  Typically, this function will be called with the results from
+  \l QPimModel::visibleSources().
+
+  \sa checkedSources()
 */
 void QPimSourceModel::setCheckedSources(const QSet<QPimSource> &set)
 {
@@ -159,6 +175,8 @@ void QPimSourceModel::setCheckedSources(const QSet<QPimSource> &set)
 
 /*!
   Returns the set of checked sources.
+
+  \sa setCheckedSources()
 */
 QSet<QPimSource> QPimSourceModel::checkedSources() const
 {
@@ -167,6 +185,8 @@ QSet<QPimSource> QPimSourceModel::checkedSources() const
 
 /*!
   Returns the PIM data source at \a index.
+
+  \sa context()
 */
 QPimSource QPimSourceModel::source(const QModelIndex &index) const
 {
@@ -175,6 +195,10 @@ QPimSource QPimSourceModel::source(const QModelIndex &index) const
 
 /*!
   Returns the context that controls the PIM data source at \a index.
+  Returns 0 if no context controlling the PIM data source is found,
+  or if the index is invalid.
+
+  \sa source()
 */
 QPimContext *QPimSourceModel::context(const QModelIndex &index) const
 {
@@ -187,7 +211,7 @@ QPimContext *QPimSourceModel::context(const QModelIndex &index) const
 }
 
 /*!
-  Returns the index where the PIM data \a source is positioned in the model.
+  Returns the index for this model that corresponds to the PIM data \a source.
   Returns a null index if the source is not listed in the model.
 */
 QModelIndex QPimSourceModel::index(const QPimSource &source) const
@@ -209,6 +233,10 @@ int QPimSourceModel::rowCount(const QModelIndex &parent) const
 
 /*!
   Returns the item flags for the given \a index.
+
+  If \l setCheckedSources() has been called, these flags will
+  include \c Qt::ItemIsUserCheckable, as a hint to the view
+  to provide multiple selection capabilities.
 */
 Qt::ItemFlags QPimSourceModel::flags(const QModelIndex &index) const
 {
@@ -221,6 +249,12 @@ Qt::ItemFlags QPimSourceModel::flags(const QModelIndex &index) const
 /*!
   Returns the data stored under the given \a role for the item referred to by the
   \a index.
+
+  This function will return the QPimSource's title for role \c Qt::DisplayRole,
+  the icon for the corresponding QPimContext for role \c Qt::DecorationRole, and the
+  appropriate check state for \c Qt::CheckStateRole.
+
+  \sa setData()
 */
 QVariant QPimSourceModel::data(const QModelIndex &index, int role) const
 {
@@ -247,8 +281,10 @@ QVariant QPimSourceModel::data(const QModelIndex &index, int role) const
   Sets the \a role data for the item at \a index to \a value.
   Returns true if successful, otherwise returns false.
 
-  In this implementation only the dat for the Qt::CheckStateRole can be modified
-  this way.
+  In this implementation only the data for the \c Qt::CheckStateRole
+  can be modified this way.
+
+  \sa data()
 */
 bool QPimSourceModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -264,6 +300,8 @@ bool QPimSourceModel::setData(const QModelIndex &index, const QVariant &value, i
 
 /*!
   Adds the PIM data \a source to the model
+
+  \sa removeSource(), updateSource()
 */
 void QPimSourceModel::addSource(const QPimSource &source)
 {
@@ -282,6 +320,8 @@ void QPimSourceModel::addSource(const QPimSource &source)
 
 /*!
   Removes the PIM data \a source from the model.
+
+  \sa addSource(), updateSource()
 */
 void QPimSourceModel::removeSource(const QPimSource &source)
 {
@@ -295,10 +335,13 @@ void QPimSourceModel::removeSource(const QPimSource &source)
 
 /*!
   Updates the PIM data source at \a index to \a source.  Because the model maintains
-  a sort order the new \a source may not appear at \a index.
+  a sort order, the new \a source may not appear at \a index.
+
+  \sa addSource(), removeSource()
 */
 void QPimSourceModel::updateSource(const QModelIndex &index, const QPimSource&source)
 {
     removeSource(QPimSourceModel::source(index));
     addSource(source);
 }
+

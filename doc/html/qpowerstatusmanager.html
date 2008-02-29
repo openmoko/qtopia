@@ -1,93 +1,57 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>QPowerStatusManager Class Reference</title>
+  <title>QPowerStatusManager Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPowerStatusManager Class Reference</h1>
 <p>The QPowerStatusManager class provides easy access to the power status of the Qtopia device. <a href="#details">More...</a></p>
-<pre>#include &lt;QPowerStatusManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QPowerStatusManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qpowerstatusmanager-members.html">List of all members, including inherited members</a></li>
-</ul>
-<a name="public-functions"></a>
-<h3>Public Functions</h3>
-<ul>
-<li><div class="fn"/><b><a href="qpowerstatusmanager.html#QPowerStatusManager">QPowerStatusManager</a></b> ( QObject * <i>parent</i> = 0 )</li>
-</ul>
-<ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-</ul>
-<a name="signals"></a>
-<h3>Signals</h3>
-<ul>
-<li><div class="fn"/>void <b><a href="qpowerstatusmanager.html#powerStatusChanged">powerStatusChanged</a></b> ( const QPowerStatus &amp; <i>newStatus</i> )</li>
-</ul>
-<ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>bool <b><a href="qpowerstatusmanager.html#APMEnabled">APMEnabled</a></b> ()</li>
 <li><div class="fn"/>QPowerStatus <b><a href="qpowerstatusmanager.html#readStatus">readStatus</a></b> ()</li>
 </ul>
 <ul>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
-<a name="static-protected-members"></a>
-<h3>Static Protected Members</h3>
-<ul>
-<li><div class="fn"/>bool <b><a href="qpowerstatusmanager.html#getProcApmStatus">getProcApmStatus</a></b> ( int &amp; <i>ac</i>, int &amp; <i>bs</i>, int &amp; <i>bf</i>, int &amp; <i>pc</i>, int &amp; <i>sec</i> )</li>
-<li><div class="fn"/>void <b><a href="qpowerstatusmanager.html#getStatus">getStatus</a></b> ()</li>
-</ul>
-<ul>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
-</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QPowerStatusManager class provides easy access to the power status of the Qtopia device.</p>
+<p>QPowerStatusManager allows the current power status to be read on demand.</p>
+<p><i>Note:</i> Use of the QPowerStatusManager class is discouraged. Its functionality has been integrated into the <a href="qpowerstatus.html">QPowerStatus</a> class in future versions of Qtopia.</p>
+<p>See also <a href="qpowerstatus.html">QPowerStatus</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPowerStatusManager"></a>QPowerStatusManager::QPowerStatusManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qpowerstatusmanager.html">QPowerStatusManager</a> object with the specified <i>parent</i>.</p>
-<h3 class="fn"><a name="APMEnabled"></a>bool QPowerStatusManager::APMEnabled ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns true if the device has enabled APM support.</p>
-<h3 class="fn"><a name="getProcApmStatus"></a>bool QPowerStatusManager::getProcApmStatus ( int &amp; <i>ac</i>, int &amp; <i>bs</i>, int &amp; <i>bf</i>, int &amp; <i>pc</i>, int &amp; <i>sec</i> )&nbsp;&nbsp;<tt> [static protected]</tt></h3>
-<p>This function implements a standard /proc/apm reader. The results are only valid if <tt>APMEnabled()</tt> returns true.</p>
-<ul>
-<li><i>ac</i> - AC line status</li>
-<li><i>bs</i> - battery status</li>
-<li><i>bf</i> - battery flag (not used by Qtopia)</li>
-<li><i>pc</i> - remaining battery life (percentage of charge)</li>
-<li><i>sec</i> - remaining battery life (time units)</li>
-</ul>
-<h3 class="fn"><a name="getStatus"></a>void QPowerStatusManager::getStatus ()&nbsp;&nbsp;<tt> [static protected]</tt></h3>
-<p>Implements the platform specific part of the status reader and is called by <tt>readStatus()</tt>. This function is defined in custom-{arch}-{platform}-g++.cpp files.</p>
-<p>See also <a href="qpowerstatusmanager.html#readStatus">readStatus</a>() and <a href="qpowerstatusmanager.html#getProcApmStatus">getProcApmStatus</a>().</p>
-<h3 class="fn"><a name="powerStatusChanged"></a>void QPowerStatusManager::powerStatusChanged ( const <a href="qpowerstatus.html">QPowerStatus</a> &amp; <i>newStatus</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Emitted whenever the power status of the device changes. <i>newStatus</i> will be the new power status.</p>
 <h3 class="fn"><a name="readStatus"></a><a href="qpowerstatus.html">QPowerStatus</a> QPowerStatusManager::readStatus ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Reads and returns the current power status of the device.</p>
-<p>See also <a href="qpowerstatusmanager.html#getStatus">getStatus</a>() and <a href="qpowerstatus.html">QPowerStatus</a>.</p>
+<p>See also <a href="qpowerstatus.html">QPowerStatus</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

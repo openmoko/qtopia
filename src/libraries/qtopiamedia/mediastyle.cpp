@@ -19,7 +19,7 @@
 **
 ****************************************************************************/
 
-#include "mediastyle.h"
+#include "mediastyle_p.h"
 
 static QPixmap generate_progress_bar( const QColor& start, const QColor& end, const QSize& size )
 {
@@ -38,6 +38,15 @@ static QPixmap generate_progress_bar( const QColor& start, const QColor& end, co
     return buffer;
 }
 
+/*!
+    \class MediaStyle
+    \internal
+*/
+
+/*!
+    \fn void MediaStyle::drawControl( ControlElement ce, const QStyleOption* opt, QPainter* p, const QWidget* widget ) const
+    \internal
+*/
 void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPainter *p, const QWidget *widget ) const
 {
     switch( ce )
@@ -100,6 +109,10 @@ void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPaint
     }
 }
 
+/*!
+    \fn int MediaStyle::pixelMetric( PixelMetric pm, const QStyleOption* opt, const QWidget* widget ) const
+    \internal
+*/
 int MediaStyle::pixelMetric( PixelMetric pm, const QStyleOption *opt, const QWidget *widget ) const
 {
     if( pm == PM_ProgressBarChunkWidth ) {

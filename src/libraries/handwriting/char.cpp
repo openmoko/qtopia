@@ -52,35 +52,155 @@ const QIMPenSpecialKeys qimpen_specialKeys[] = {
     { QIMPenChar::ModePopup,    QT_TRANSLATE_NOOP("Handwriting","[Mode Menu]"), 0x400A },
     { Qt::Key_unknown,          0, 0 } };
 
-
 /*!
   \class QIMPenChar
-  \brief The QIMPenChar class handles a single character.
+  \brief The QIMPenChar class handles a single character for the stroke recognition libraries.
+  \mainclass
+  \preliminary
 
-  Can calculate closeness of match to
-  another character.
+  Each QIMPenChar associates a unicode character with a series of strokes.
+
+  QIMPenChar can calculate closeness of match to another character.
 
   \ingroup userinput
 */
 
+/*!
+    \enum QIMPenChar::Mode
+
+    This enum is used to refer to several special characters used by Qtopia.  It includes modifiers like the shift and control keys, as well as system spefic values used to indicate actions to the system like SymbolPopup.
+
+    \value ModeBase  Base value for all Modes
+    \value Caps  Shift
+    \value Shortcut  Used by the system
+    \value CapsLock  Caps lock
+    \value Punctuation  Used by the system
+    \value Symbol  Used by the system
+    \value NextWord  Used by the system
+    \value WordPopup  Used by the system
+    \value SymbolPopup  Used by the system
+    \value ModePopup  Used by the system
+
+    \table
+    \header \o enum \o Value
+    \row \o    ModeBase \o 0x4000
+    \row \o    Caps \o 0x4001
+    \row \o    Shortcut \o 0x4002
+    \row \o    CapsLock \o 0x4003
+    \row \o    Punctuation \o 0x4004
+    \row \o    Symbol \o 0x4005
+    \row \o    NextWord \o 0x4007
+    \row \o    WordPopup \o 0x4008
+    \row \o    SymbolPopup \o 0x4009
+    \row \o    ModePopup \o 0x400A
+    \endtable
+
+*/
+
+/*!
+    \fn void QIMPenChar::setFlag( int f )
+    Set flag \a f for this character.
+*/
+
+/*!
+
+    \fn void QIMPenChar::clearFlag( int f )
+    Clear flag \a f for this character.
+*/
+
+/*!
+    \fn bool QIMPenChar::testFlag( int f )
+    Return true if flag \a f is set for this character, otherwise return false.
+*/
+
+/*!
+    \enum QIMPenChar::Flags
+
+    This enum specifies how split() should behave with respect to empty strings.
+
+    \value System  The character is a system character, and should be turned off rather than deleted when disabled
+    \value Deleted  The character is a system character that has been disabled.
+    \value CombineRight  The character is aligned to the right when combining characters to create some interantional characters like áâä, etc..
+    \value Data  Kept in order to read old files
+
+*/
+
+/*!
+    \fn uint QIMPenChar::key() const
+    Return the key for this character.
+    \sa setKey(), repCharacter()
+*/
+
+/*!
+    \fn const QIMPenStrokeList &QIMPenChar::penStrokes() const
+    Returns the list of penStrokes for this character.
+*/
+
+/*!
+    \fn QChar QIMPenChar::repCharacter() const
+    Returns the QChar this character represents.
+    \sa key(), setRepCharacter()
+*/
+
+/*!
+    \fn QPoint QIMPenChar::startingPoint() const
+    Returns the starting point of the first stroke of this character.
+    \sa strokeLength(), addStroke(), strokeCount(), isEmpty()
+*/
+
+/*!
+    \enum QIMPenCharSet::Type
+
+    This enum describes the types of characters contained in a QIMPenCharSet
+
+    \value Unknown
+    \value Lower  Lower case letters
+    \value Upper  Upper case letters
+    \value Combining  Letters formed by combining two parts (characters with umlauts, accents etc..)
+    \value Numeric
+    \value Punctuation
+    \value Symbol
+    \value Shortcut
+
+    \sa setType(), type()
+*/
+
+/*!
+    \fn uint QIMPenChar::strokeCount() const
+    Returns the number of strokes in this character.
+*/
+
+/*!
+    \fn bool QIMPenChar::isEmpty() const
+    Return true if this character has no strokes, otherwise return false.
+*/
+
+/*!
+    Constructs an empty QIMPenChar.
+*/
 QIMPenChar::QIMPenChar()
 {
     flags = 0;
 }
-
-QIMPenChar::QIMPenChar( const QIMPenChar &chr )
+/*!
+    Constructs a copy of the given \a character.
+*/
+QIMPenChar::QIMPenChar( const QIMPenChar &character )
 {
-    mUnicode = chr.mUnicode;
-    mKey = chr.mKey;
-    flags = chr.flags;
+    mUnicode = character.mUnicode;
+    mKey = character.mKey;
+    flags = character.flags;
     QIMPenStroke *s = 0;
-    foreach(QIMPenStroke *it, chr.strokes) {
+    foreach(QIMPenStroke *it, character.strokes) {
         s = new QIMPenStroke( *it );
         Q_CHECK_PTR( s );
         strokes.append( s );
     }
 }
 
+/*!
+    Destroys this character and cleans up.
+*/
 QIMPenChar::~QIMPenChar()
 {
     // "autodelete"
@@ -88,15 +208,18 @@ QIMPenChar::~QIMPenChar()
         delete strokes.takeLast();
 }
 
-QIMPenChar &QIMPenChar::operator=( const QIMPenChar &chr )
+/*!
+    Assigns a copy of the given \a character to this character and returns a refernece to this character.
+*/
+QIMPenChar &QIMPenChar::operator=( const QIMPenChar &character )
 {
     strokes.clear();
-    mUnicode = chr.mUnicode;
-    mKey = chr.mKey;
-    flags = chr.flags;
-    QIMPenStrokeConstIterator it = chr.strokes.constBegin();
+    mUnicode = character.mUnicode;
+    mKey = character.mKey;
+    flags = character.flags;
+    QIMPenStrokeConstIterator it = character.strokes.constBegin();
     QIMPenStroke *s = 0;
-    while ( it != chr.strokes.constEnd() ) {
+    while ( it != character.strokes.constEnd() ) {
         s = new QIMPenStroke( **it );
         Q_CHECK_PTR( s );
         strokes.append( s );
@@ -106,6 +229,25 @@ QIMPenChar &QIMPenChar::operator=( const QIMPenChar &chr )
     return *this;
 }
 
+/*!
+    Returns the name of this character.  This is usually the unicode of the character.  However, the following special keys have the following names:
+\table
+\header \o Key Code \o Name
+\row \o Qt::Key_Escape \o "[Esc]"
+\row \o Qt::Key_Tab \o "[Tab]"
+\row \o Qt::Key_Backspace \o "[BackSpace]"
+\row \o Qt::Key_Return \o "[Return]"
+\row \o QIMPenChar::Caps \o "[Uppercase]"
+\row \o QIMPenChar::CapsLock \o "[Caps Lock]"
+\row \o QIMPenChar::Shortcut \o "[Shortcut]"
+\row \o QIMPenChar::Punctuation \o "[Punctuation]"
+\row \o QIMPenChar::Symbol \o "[Symbol]"
+\row \o QIMPenChar::NextWord \o "[Next Word]"
+\row \o QIMPenChar::WordPopup \o "[Word Menu]"
+\row \o QIMPenChar::SymbolPopup \o "[Symbol Menu]"
+\row \o QIMPenChar::ModePopup \o "[Mode Menu]"
+\endtable
+*/
 QString QIMPenChar::name() const
 {
     if (mKey) {
@@ -120,6 +262,9 @@ QString QIMPenChar::name() const
     return QString(mUnicode);
 }
 
+/*!
+    Clears the data of this character.
+*/
 void QIMPenChar::clear()
 {
     mUnicode = 0;
@@ -128,14 +273,17 @@ void QIMPenChar::clear()
     strokes.clear();
 }
 
-unsigned int QIMPenChar::strokeLength( int s ) const
+/*!
+    Returns the length of stroke \a n.  Returns 0 if this character has less then \a n strokes.
+*/
+unsigned int QIMPenChar::strokeLength( int n ) const
 {
-    return strokes.count() > s ? strokes[s]->length() : 0;
+    return strokes.count() > n ? strokes[n]->length() : 0;
     /*
     QIMPenStrokeIterator it( strokes );
-    while ( it.current() && s ) {
+    while ( it.current() && n ) {
         ++it;
-        --s;
+        --n;
     }
 
     if ( it.current() )
@@ -146,12 +294,12 @@ unsigned int QIMPenChar::strokeLength( int s ) const
 }
 
 /*!
-  Add a stroke, \a st, to the character
+  Adds \a stroke to the character
 */
-void QIMPenChar::addStroke( QIMPenStroke *st )
+void QIMPenChar::addStroke( QIMPenStroke *stroke )
 {
-    QIMPenStroke *stroke = new QIMPenStroke( *st );
-    strokes.append( stroke );
+    QIMPenStroke *newStroke = new QIMPenStroke( *stroke );
+    strokes.append( newStroke );
 }
 
 /*!
@@ -292,9 +440,11 @@ void QIMPenChar::setRepCharacter(QChar code)
 
 
 /*!
-  Write the character's data to the stream.
+    This is an overloaded member function, provided for convenience.
+
+    Writes the given character \a ws to \a stream.
 */
-QDataStream &operator<< (QDataStream &s, const QIMPenChar &ws)
+QDataStream &operator<< (QDataStream &stream, const QIMPenChar &ws)
 {
     /* handle 2.3 legacy of only 16bit keys instead of 28.
        convert both times as needs to work with peoples old files.
@@ -308,33 +458,35 @@ QDataStream &operator<< (QDataStream &s, const QIMPenChar &ws)
         }
         k++;
     }
-    s << ch;
+    stream << ch;
 
     // never write data, its old hat.
     if ( ws.flags & QIMPenChar::Data )
-        s << (ws.flags ^ QIMPenChar::Data);
+        stream << (ws.flags ^ QIMPenChar::Data);
     else
-        s << ws.flags;
-    s << ws.strokes.count();
+        stream << ws.flags;
+    stream << ws.strokes.count();
     QIMPenStrokeConstIterator it = ws.strokes.constBegin();
     while ( it != ws.strokes.constEnd() ) {
-        s << **it;
+        stream << **it;
         ++it;
     }
 
-    return s;
+    return stream;
 }
 
 /*!
-  Read the character's data from the stream.
+    This is an overloaded member function, provided for convenience.
+
+    Read a character from \a stream and store in \a ws.
 */
-QDataStream &operator>> (QDataStream &s, QIMPenChar &ws)
+QDataStream &operator>> (QDataStream &stream, QIMPenChar &ws)
 {
     /* handle 2.3 legacy of only 16bit keys instead of 28.
        convert both times as needs to work with peoples old files.
        Only needs to handle keys in qimpen_specialKeys */
     uint ch;
-    s >> ch;
+    stream >> ch;
     ws.setRepCharacter(ch & 0x0000ffff);
     if (ch & 0xffff0000) {
         // is special key
@@ -349,35 +501,44 @@ QDataStream &operator>> (QDataStream &s, QIMPenChar &ws)
         }
     }
 
-    s >> ws.flags;
+    stream >> ws.flags;
     if ( ws.flags & QIMPenChar::Data ) {
         QString d;
-        s >> d;
+        stream >> d;
         // then throw away.
     }
     unsigned size;
-    s >> size;
+    stream >> size;
     for ( unsigned i = 0; i < size; i++ ) {
         QIMPenStroke *st = new QIMPenStroke();
-        s >> *st;
+        stream >> *st;
         ws.strokes.append( st );
     }
 
-    return s;
+    return stream;
 }
 
 //===========================================================================
 
+/*!
+    Returns true if \a m has a lower error than this (i.e. if m is a better match).  Returns false otherwise.
+*/
 bool QIMPenCharMatch::operator>( const QIMPenCharMatch &m ) const
 {
     return error > m.error;
 }
 
+/*!
+    Returns true if \a m has a higher error than this (i.e. if m is a worse match).  Returns false otherwise.
+*/
 bool QIMPenCharMatch::operator<( const QIMPenCharMatch &m ) const
 {
     return error < m.error;
 }
 
+/*!
+    Returns true if \a m has a lower or equal error than this (i.e. if m is not a worse match).  Returns false otherwise.
+*/
 bool QIMPenCharMatch::operator<=( const QIMPenCharMatch &m ) const
 {
     return error <= m.error;
@@ -387,10 +548,15 @@ bool QIMPenCharMatch::operator<=( const QIMPenCharMatch &m ) const
 
 /*!
   \class QIMPenCharSet
+  \mainclass
+  \preliminary
   \brief The QIMPenCharSet class maintains a set of related characters.
   \ingroup userinput
 */
 
+/*!
+    Construsts a default QIMPenCharSet() with title "abc", type Unknown, and a 0 stroke maximum.
+*/
 QIMPenCharSet::QIMPenCharSet()
 {
     desc = qApp->translate("Handwriting","Unnamed","Character set name");
@@ -411,6 +577,9 @@ QIMPenCharSet::QIMPenCharSet( const QString &fn )
     load( fn );
 }
 
+/*!
+    Delete this character set and clean up.
+*/
 QIMPenCharSet::~QIMPenCharSet()
 {
     // autodelete
@@ -418,6 +587,14 @@ QIMPenCharSet::~QIMPenCharSet()
         delete chars.takeLast();
 }
 
+/*!
+    \fn bool QIMPenCharSet::isEmpty() const
+    Returns true if this QIMPenCharSet contains no QIMPenChar, otherwise returns false.
+*/
+
+/*!
+    Clear all data.
+*/
 void QIMPenCharSet::clear()
 {
     if (count() > 0) {
@@ -425,32 +602,79 @@ void QIMPenCharSet::clear()
     }
 }
 
-void QIMPenCharSet::setDescription( const QString &d )
+/*!
+    \fn const QIMPenCharList &QIMPenCharSet::characters() const
+    Returns the list of characters in this QIMPenCharSet
+*/
+
+/*!
+    \fn uint QIMPenCharSet::count() const
+    Returns the number of QIMPenChars in this QIMPenCharSet
+*/
+
+/*!
+    Sets the human readable \a description of this QIMPenCharSet
+*/
+void QIMPenCharSet::setDescription( const QString &description )
 {
-    if (d != desc) {
-        desc = d;
+    if (description != desc) {
+        desc = description;
     }
 }
 
-void QIMPenCharSet::setTitle( const QString &t )
+/*!
+    \fn QString QIMPenCharSet::description() const
+    Returns the human readable description of this QIMPenCharSet
+*/
+
+/*!
+    Sets the \a title of this character set.
+    \bold{Note}: in early versions this dictates the type as well
+    \sa setType()
+*/
+void QIMPenCharSet::setTitle( const QString &title )
 {
-    if (t != csTitle) {
-        csTitle = t;
+    if (title != csTitle) {
+        csTitle = title;
     }
 }
 
-void QIMPenCharSet::setType( Type t )
+/*!
+    \fn QString QIMPenCharSet::title() const
+    Returns the title of this QIMPenCharSet
+    \sa setTitle()
+*/
+
+/*!
+    Sets the \a type of this character set (eg "abc", "ABC", "123" or "Combining");
+    \sa setTitle()
+*/
+void QIMPenCharSet::setType( Type type )
 {
-    if (t != csType) {
-        csType = t;
+    if (type != csType) {
+        csType = type;
     }
 }
 
+/*!
+    \fn Type QIMPenCharSet::type() const
+    returns the Type for this QIMPenCharSet
+    \sa Type, setType()
+*/
+
+/*!
+    Returns the filename used to save this character set.
+    \sa setFilename()
+*/
 const QString &QIMPenCharSet::filename( ) const
 {
     return userFilename;
 }
 
+/*!
+    Sets the filename \a fn to be used to save this character set.
+    \sa filename()
+*/
 void QIMPenCharSet::setFilename( const QString &fn )
 {
     if (fn != userFilename) {
@@ -459,6 +683,10 @@ void QIMPenCharSet::setFilename( const QString &fn )
 }
 
 #ifdef Q_WS_QWS
+/*!
+    Returns the complete path to the system file that will be loaded by load(), including the current filename.
+    \sa userPath(), load(), filename()
+*/
 QString QIMPenCharSet::systemPath( ) const
 {
     static const QString sysPath(Qtopia::qtopiaDir() + "etc/qimpen/"); // no tr
@@ -466,6 +694,10 @@ QString QIMPenCharSet::systemPath( ) const
     return sysPath + userFilename;
 }
 
+/*!
+    Returns the complete path to the user file that will be loaded by load(), including the current filename.
+    \sa systemPath(), load(), filename()
+*/
 QString QIMPenCharSet::userPath() const
 {
     return Qtopia::applicationFileName("qimpen",userFilename); // no tr
@@ -473,7 +705,7 @@ QString QIMPenCharSet::userPath() const
 #endif
 
 /*!
-  Load a character set from file \a fn, in the domain \a d.
+  Load a character set from file \a fn, checking both system and user directories.  Returns true if at least one file is opened with no errors.  If there characters in both the user and system files, entries in the user file override those in the system file.
 */
 bool QIMPenCharSet::load( const QString &fn )
 {
@@ -536,7 +768,7 @@ bool QIMPenCharSet::load( const QString &fn )
 }
 
 /*!
-  Save this character set, in the domain \a d.
+  Save this character set.  Returns true if the file was saved successfully, and false if there were any errors encountered while saving.
 */
 bool QIMPenCharSet::save( ) const
 {
@@ -588,11 +820,23 @@ bool QIMPenCharSet::save( ) const
     return ok;
 }
 
+/*!
+    Returns the item at index position \a i in the list. \a i must be a valid index position in the list.
+*/
 QIMPenChar *QIMPenCharSet::at( int i )
 {
     return chars.at(i);
 }
 
+/*!
+    \fn unsigned QIMPenCharSet::maximumStrokes() const
+    Returns the highest number of strokes any character in this QIMPenCharSet has had.
+    \bold{Note:} This is guaranteed to be at least as high as the current maximum number of strokes, but can be higher if the previous highest stroke character is deleted.
+*/
+
+/*!
+    Marks all system QIMPenChar that match \a ch as deleted.  Has no effect on user-created QIMPenChar.
+*/
 void QIMPenCharSet::markDeleted( const QIMPenChar &ch )
 {
     QIMPenCharIterator ci = chars.constBegin();
@@ -677,7 +921,7 @@ void QIMPenCharSet::removeChar( QIMPenChar *ch )
 }
 
 /*!
-  Move the character \a ch up the list of characters.
+  Move the character \a ch up the list of QIMPenChar.
 */
 void QIMPenCharSet::up( QIMPenChar *ch )
 {
@@ -689,7 +933,7 @@ void QIMPenCharSet::up( QIMPenChar *ch )
 }
 
 /*!
-  Move the character \a ch down the list of characters.
+  Move the character \a ch down the list of QIMPenChar.
 */
 void QIMPenCharSet::down( QIMPenChar *ch )
 {

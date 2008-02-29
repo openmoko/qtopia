@@ -51,6 +51,7 @@ public:
 
 /*!
     \class QDLBrowserClient
+    \mainclass
     \brief The QDLBrowserClient class displays rich-text containing QDLLinks.
 
     QDLBrowserClient manages and activates QDLLinks in collaboration with
@@ -60,7 +61,7 @@ public:
 
     \sa QDLClient, QDLEditClient
 
-  \ingroup ipc
+    \ingroup ipc
 */
 
 /*!
@@ -91,7 +92,7 @@ QDLBrowserClient::QDLBrowserClient( QWidget* parent, const QString& name )
 }
 
 /*!
-   \internal
+   Destroys a QDL Browser Client object.
 */
 QDLBrowserClient::~QDLBrowserClient()
 {
@@ -99,8 +100,7 @@ QDLBrowserClient::~QDLBrowserClient()
 }
 
 /*!
-    \overload
-    Sets the source of the rich-text document to \a name.
+    \reimp
 */
 void QDLBrowserClient::setSource( const QUrl & name )
 {
@@ -110,9 +110,11 @@ void QDLBrowserClient::setSource( const QUrl & name )
 }
 
 /*!
-    Loads the links stored in \a str into the QDL client.
-    \a str is the base64 encoded binary data of the links created by
+    Loads the links in \a str into the client object.
+    The \a str is the base64 encoded binary data of the links created by
     QDL::saveLinks().
+
+    \sa verifyLinks()
 */
 void QDLBrowserClient::loadLinks( const QString &str )
 {
@@ -137,7 +139,9 @@ void QDLBrowserClient::activateLink( const QUrl& link )
     links is removed from the parent widget's text.
 
     This method should only be called after QTextBrowser::setText() and
-    QDLBrowserClient::loadLinks() have been called.
+    loadLinks() have been called.
+
+    \sa loadLinks()
 */
 void QDLBrowserClient::verifyLinks()
 {

@@ -27,29 +27,31 @@
 
 /*!
     \class QAbstractIpcInterfaceGroupManager
+    \mainclass
     \brief The QAbstractIpcInterfaceGroupManager class provides a method to discover the active IPC interfaces and server interface groups.
     \ingroup ipc
 
-    The QAbstractIpcInterfaceGroupManager class provides a method to discover
-    the IPC interfaces and server interface groups that are active within
-    the system.
+    This class is used to query which IPC groups and interfaces are currently
+    present in the system, using groups() and interfaces() respectively.
+    It can also be used to receive notification of when IPC groups are
+    added to or removed from the system, using groupAdded() and groupRemoved()
+    respectively.
 
-    Each server interface group has a unique name, such as \c{GSM},
-    \c{VoIP}, etc.  Within each group is a list of interfaces for
+    Each server interface group has a unique name, such as \c{modem},
+    \c{voip}, etc.  Within each group is a list of interfaces for
     functionality areas, which have names such as
     QNetworkRegistration, QSMSSender, etc.
 
     Interface names correspond to class names elsewhere in the Qtopia
-    Communications and Telephony API's.  To use an interface, the caller
-    creates an instance of the corresponding class.  The caller can specify
-    an explicit group name, if more than one group implements the same
-    interface, or leave the group name empty to use the default group
-    for that interface.
+    API's.  To use an interface, the caller creates an instance of the
+    corresponding class.  The caller can specify an explicit group name,
+    if more than one group implements the same interface, or leave the group
+    name empty to use the default group for that interface.
 
     See the documentation for QAbstractIpcInterface for more information
     on writing and using interface classes.
 
-    \sa QAbstractIpcInterface
+    \sa QAbstractIpcInterface, QAbstractIpcInterfaceGroup
     \ingroup ipc
 */
 
@@ -125,7 +127,7 @@ QAbstractIpcInterfaceGroupManager::~QAbstractIpcInterfaceGroupManager()
 }
 
 /*!
-    Get the list of all groups that are currently active within the system.
+    Returns the list of all groups that are currently active within the system.
 */
 QStringList QAbstractIpcInterfaceGroupManager::groups() const
 {
@@ -134,7 +136,7 @@ QStringList QAbstractIpcInterfaceGroupManager::groups() const
 }
 
 /*!
-    Get the list of interfaces that are supported by \a group.
+    Returns the list of interfaces that are supported by \a group.
 */
 QStringList QAbstractIpcInterfaceGroupManager::interfaces
         ( const QString& group ) const
@@ -151,12 +153,12 @@ QStringList QAbstractIpcInterfaceGroupManager::interfaces
 /*!
     \fn QStringList QAbstractIpcInterfaceGroupManager::supports<T>() const
 
-    Get the list of groups that supports the interface \c{T}.  The following
+    Returns the list of groups that support the interface \c{T}.  The following
     example demonstrates how to get the list of groups that supports the
     QNetworkRegistration interface:
 
     \code
-    QCommServiceManager manager;
+    QAbstractIpcInterfaceGroupManager manager("/Communications");
     QStringList list = manager.supports<QNetworkRegistration>();
     \endcode
 */
@@ -164,12 +166,12 @@ QStringList QAbstractIpcInterfaceGroupManager::interfaces
 /*!
     \fn bool QAbstractIpcInterfaceGroupManager::supports<T>( const QString& group ) const
 
-    Determine if \a group supports the interface \c{T}.  The following
+    Determines if \a group supports the interface \c{T}.  The following
     example demonstrates how to determine if the \c modem group supports
     the QNetworkRegistration interface:
 
     \code
-    QCommServiceManager manager;
+    QAbstractIpcInterfaceGroupManager manager("/Communications");
     if ( manager.supports<QNetworkRegistration>( "modem" ) )
         ...
     \endcode
@@ -178,7 +180,7 @@ QStringList QAbstractIpcInterfaceGroupManager::interfaces
 /*!
     \fn int QAbstractIpcInterfaceGroupManager::priority<T>( const QString& group ) const
 
-    Get the priority of the interface \c{T} within \a group.  The priority
+    Returns the priority of the interface \c{T} within \a group.  The priority
     determines which group will be selected by default if an explicit
     group name is not supplied when constructing an interface object.
 

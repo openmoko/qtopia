@@ -29,28 +29,6 @@
 #include <QDialog>
 #include <QItemSelection>
 
-class QCategoryEditorData;
-class QCategoryEditor : public QDialog
-{
-    Q_OBJECT
-
-public:
-    explicit QCategoryEditor(QWidget *parent);
-    ~QCategoryEditor();
-
-    QString name() const;
-    bool global() const;
-
-    void setName(const QString &name);
-    void setGlobal(bool global);
-
-public slots:
-    void accept();
-
-private:
-    QCategoryEditorData *d;
-};
-
 class QCategorySelectData;
 class QTOPIA_EXPORT QCategorySelector : public QWidget
 {

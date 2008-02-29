@@ -32,6 +32,7 @@
 /*!
    \internal
    \class QBluetoothPairingAgent
+   \mainclass
    Convenience class for handling pairing and unpairing.
 
    This fills up the screen with a QWaitWidget when starting the pairing or

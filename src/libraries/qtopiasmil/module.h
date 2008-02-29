@@ -25,6 +25,9 @@
 #include <qstring.h>
 #include <qstringlist.h>
 
+// WARNING: These classes are not part of the Qtopia API.
+// They are subject to change at any time.
+
 class SmilElement;
 class SmilSystem;
 class SmilEvent;

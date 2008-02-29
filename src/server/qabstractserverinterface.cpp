@@ -26,6 +26,7 @@
   \brief The QAbstractServerInterface class allows the Qtopia Server UI to be
          replaced.
   \ingroup QtopiaServer
+  \ingroup QtopiaServer::PhoneUI::TTSmartPhone
 
   While it is usually easier to customize one of the existing Qtopia server
   interfaces, when building a product on top of the Qtopia system, it is
@@ -110,6 +111,8 @@
   server constructs it as a toplevel, frameless widget.  If during startup an
   appropriate QAbstractServerInterface implementation cannot be found, the
   system will run without a primary user interface.
+
+  For more details can be found in the \l {QtopiaServerApplication#qtopia-server-widgets}{server widget documentation}.
  */
 
 /*! \fn QAbstractServerInterface::QAbstractServerInterface(QWidget *parent, Qt::WFlags flags)

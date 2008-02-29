@@ -26,14 +26,18 @@
 
 /*!
     \class QAtChatScript
+    \mainclass
     \brief The QAtChatScript class provides a mechanism to run pppd chat scripts.
     \ingroup telephony::serial
 
-    The QAtChatScript class provides a mechanism to run pppd chat scripts,
-    such as those described in the chat(1) Unix man page.
-
     This class is intended for use by Qtopia's network component.  Other
     components should use QAtChat.
+
+    Chat scripts are started by calling runChat() or runChatFile().  When the
+    script completes successfully or unsuccessfully, the done() signal will be emitted.
+    Scripts can be aborted prematurely by calling stop().
+
+    The chat script format is based on that used by the Unix \c{chat(8)} utility.
 
     \sa QAtChat
 */
@@ -75,7 +79,9 @@ QAtChatScript::~QAtChatScript()
 }
 
 /*!
-    Get the total number of commands to be executed in the chat script.
+    Returns the total number of commands to be executed in the chat script.
+
+    \sa successfulCommands()
 */
 int QAtChatScript::totalCommands() const
 {
@@ -83,10 +89,12 @@ int QAtChatScript::totalCommands() const
 }
 
 /*!
-    Get the number of commands that were successful.  If this is less
+    Returns the number of commands that were successful.  If this is less
     than totalCommands() when the done() signal is emitted, then the
     script stopped with an error before the whole script could be
     executed.
+
+    \sa totalCommands(), done()
 */
 int QAtChatScript::successfulCommands() const
 {
@@ -94,7 +102,12 @@ int QAtChatScript::successfulCommands() const
 }
 
 /*!
-    Run the chat script within \a filename.
+    Run the chat script within \a filename.  The done() signal will be
+    emitted when the script completes.
+
+    The chat script format is based on that used by the Unix \c{chat(8)} utility.
+
+    \sa runChat(), done()
 */
 void QAtChatScript::runChatFile( const QString& filename )
 {
@@ -112,7 +125,11 @@ void QAtChatScript::runChatFile( const QString& filename )
 }
 
 /*!
-    Run a literal \a chatScript.
+    Run a literal \a chatScript.  The done() signal will be emitted when the script completes.
+
+    The chat script format is based on that used by the Unix \c{chat(8)} utility.
+
+    \sa runChatFile(), done()
 */
 void QAtChatScript::runChat( const QString& chatScript )
 {
@@ -171,7 +188,9 @@ void QAtChatScript::runChat( const QString& chatScript )
 
 /*!
     Run a list of \a commands which have already been parsed from a
-    chat script.
+    chat script.  The done() signal will be emitted when the script completes.
+
+    \sa runChatFile(), done()
 */
 void QAtChatScript::runChat( const QStringList& commands )
 {
@@ -184,6 +203,8 @@ void QAtChatScript::runChat( const QStringList& commands )
 
 /*!
     Stop the chat script.
+
+    \sa runChat(), runChatFile()
 */
 void QAtChatScript::stop()
 {
@@ -196,6 +217,8 @@ void QAtChatScript::stop()
     Signal that is emitted when the chat script is done.  The \a ok flag
     indicates whether the script succeeded or failed, and \a result
     indicates more information about the failure (busy, no carrier, etc).
+
+    \sa runChat(), runChatFile(), successfulCommands()
 */
 
 void QAtChatScript::commandDone( bool ok, const QAtResult& result )

@@ -1976,15 +1976,12 @@ void AbFullEditor::catCheckBoxChanged( bool  b )
     if( b )
     {
         QCategoryManager catman;
-        if( !curCats.contains( bcatid ) )
-        {
-            // Ensure the Business system categoy exists
-            catman.addCategory(bcatid, bcatid, QString(), false, true);
-            curCats.append(bcatid);
-            cmbCat->selectCategories( curCats );
-        }
-        if(!catman.isSystem( bcatid ))
-            catman.setSystem( bcatid );
+        // Ensure the Business system categoy exists
+        // For new code a more unique id should be used instead of using the untranslated text
+        // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
+        catman.ensureSystemCategory(bcatid, bcatid);
+        curCats.append(bcatid);
+        cmbCat->selectCategories( curCats );
     }
     else
     {
@@ -2180,8 +2177,6 @@ void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
     // make sure we see the default
     voipIdLE->home( false );
 
-    if (newEntry)
-        ent.setCustomField("VOIP_STATUS", "OFFLINE");
 #endif
 
     // set phoneMan numbers
@@ -2454,10 +2449,6 @@ bool AbFullEditor::isEmpty() const
 void AbFullEditor::contactFromFields(QContact &e)
 {
     QMap<QContactModel::Field, QString> fields;
-
-    e.setCustomField( "BUSINESS_CONTACT",
-            categoryCB->isChecked() ? QString("1") : QString() );
-
 
     //
     //  Contact Tab

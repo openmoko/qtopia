@@ -18,7 +18,7 @@ export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
 OPTION_REMOVE_FLASH_FILES=0
 OPTION_DONT_REBOOT=0
 OPTION_IGNORE_FIRSTRUN=0
-OPTION_NO_QUESTIOSN=0
+OPTION_NO_QUESTIONS=0
 QTOPIA_IMAGE_PATH=""
 
 while [ $# -gt 0 ]; do

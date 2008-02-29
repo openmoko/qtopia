@@ -25,19 +25,31 @@
 
 /*!
     \class QObexSocket
+    \mainclass
     \brief The QObexSocket class is an abstract base class for OBEX sockets.
 
-    This class provides a common base class for OBEX sockets. Subclasses
-    such as QBluetoothObexSocket and QIrObexSocket provide implementations
-    specific to their own types of transport.
+    This class provides a common base class for OBEX sockets. It is used to
+    implement different types of transport connections for the OBEX protocol.
+    For example, QBluetoothObexSocket and QIrObexSocket subclass QObexSocket
+    to provide OBEX connections over Bluetooth and IrDA, respectively.
 
-    \sa QObexPushClient, QObexPushService
+    QObexSocket is abstract and cannot be instantiated, but it is common to
+    use the interface it defines to provide transport-independent OBEX
+    features. For example, QObexPushClient and QObexPushService are
+    constructed using QObexSocket pointers, allowing them to be used with
+    various types of transport connections (such as Bluetooth or IrDA).
+
+    Call connect() to connect the transport connection. You can use
+    isConnected() to check whether the socket is connected, and
+    socketDescriptor() to get the socket's file descriptor.
+
+    \sa QBluetoothObexSocket, QIrObexSocket
 
     \ingroup qtopiaobex
  */
 
 /*!
-    Constructs a QObexSocket with parent object \a parent.
+    Constructs an OBEX socket with the given \a parent.
  */
 QObexSocket::QObexSocket(QObject *parent)
     : QObject(parent)
@@ -46,17 +58,21 @@ QObexSocket::QObexSocket(QObject *parent)
 }
 
 /*!
-    Destroys a QObexSocket.
+    Destroys the socket.
  */
 QObexSocket::~QObexSocket()
 {
-    OBEX_Cleanup(static_cast<obex_t *>(m_handle));
-    m_handle = NULL;
+    if (m_handle) {
+        OBEX_Cleanup(static_cast<obex_t *>(m_handle));
+        m_handle = NULL;
+    }
 }
 
 /*!
     Connects the underlying transport connection. Returns true if the socket
     was connected successfully.
+
+    \sa isConnected()
  */
 bool QObexSocket::connect()
 {
@@ -64,8 +80,7 @@ bool QObexSocket::connect()
 }
 
 /*!
-    Closes the socket and disconnects the transport connection. Returns true
-    if the socket was able to be closed.
+    Closes the socket and disconnects the transport connection.
  */
 void QObexSocket::close()
 {
@@ -74,7 +89,9 @@ void QObexSocket::close()
 }
 
 /*!
-    Returns whether the transport for this socket is connected.
+    Returns whether the socket is connected.
+
+    \sa connect()
  */
 bool QObexSocket::isConnected() const
 {
@@ -82,13 +99,25 @@ bool QObexSocket::isConnected() const
 }
 
 /*!
+    Returns the socket descriptor associated with this OBEX Socket.
+
+    \bold {Note:} This implies that transports which are not socket based cannot
+    be used with this class.
+*/
+int QObexSocket::socketDescriptor() const
+{
+    return OBEX_GetFD(static_cast<obex_t *>(const_cast<void *>(m_handle)));
+}
+
+/*!
+    \internal
     \fn void QObexSocket::setHandle(void *handle)
 
-    Sets the underlying implementation handle to \a handle.
+    Sets the implementation-dependent handle to \a handle.
  */
 
 /*!
     \fn void *QObexSocket::handle()
 
-    Returns the underlying implementation handle.
+    Returns the implementation-dependent handle.
  */

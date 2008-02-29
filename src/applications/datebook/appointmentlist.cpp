@@ -25,6 +25,7 @@ AppointmentList::AppointmentList(QWidget *parent)
 : QListView(parent)
 {
     maxFoldedHeight = 0;
+    maxUnfoldedHeight = 0;
     maxRows = 0;
     folded = false;
     occurrenceModel = 0;
@@ -56,10 +57,24 @@ void AppointmentList::recalculateHeight()
         if (folded && rows > maxRows) {
             //  Show 1 less than technically possible; save room for "more" label
             maxRows--;
-            setFixedHeight((maxRows * itemHeight) + 1);
+            setFixedHeight(maxRows * itemHeight);
             emit changeHiddenCount(rows - maxRows);
         } else {
-            setFixedHeight(qMin(parentWidget()->height(), (rows * itemHeight) + 1));
+            int h = rows * itemHeight;
+            int unfoldedrows = maxUnfoldedHeight / itemHeight;
+
+            if (parentWidget()) {
+                int parentRows = parentWidget()->height() / itemHeight;
+                if (unfoldedrows > 0) {
+                    if (parentRows < unfoldedrows)
+                        unfoldedrows = parentRows;
+                } else
+                    unfoldedrows = parentRows;
+            }
+            if (unfoldedrows > 0)
+                h = qMin(h, itemHeight * unfoldedrows);
+
+            setFixedHeight(h);
             emit changeHiddenCount(0);
         }
 
@@ -93,6 +108,12 @@ int AppointmentList::visibleRowCount() const
 void AppointmentList::setMaximumFoldedHeight(int height)
 {
     maxFoldedHeight = height;
+    recalculateHeight();
+}
+
+void AppointmentList::setMaximumUnfoldedHeight(int height)
+{
+    maxUnfoldedHeight = height;
     recalculateHeight();
 }
 

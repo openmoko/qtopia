@@ -46,8 +46,8 @@
 
 /*!
     \class QDLEditClient
-    \brief The QDLEditClient class is used to add QDLLinks to rich-text
-           documents
+    \mainclass
+    \brief The QDLEditClient class is used to add QDLLinks to rich-text documents.
 
     QDLEditClient is a subclass of QDLClient which manages the QDLLinks in
     collaboration with the rich-text in QTextEdit. This allows the anchor text
@@ -56,7 +56,7 @@
 
     \sa QDLClient, QDLBrowserClient
 
-  \ingroup ipc
+    \ingroup ipc
 */
 
 /*!
@@ -64,6 +64,8 @@
     is identified by \a name, which should be unique within a group of
     QDLClients. \a name should only contain alpha-numeric characters,
     underscores and spaces.
+
+    \sa isValid()
 */
 QDLEditClient::QDLEditClient( QTextEdit *edit, const QString& name )
 :   QDLClient( edit, name ),
@@ -73,7 +75,7 @@ QDLEditClient::QDLEditClient( QTextEdit *edit, const QString& name )
 }
 
 /*!
-    \internal
+    Destroys a QDL Edit Client.
 */
 QDLEditClient::~QDLEditClient()
 {
@@ -84,6 +86,8 @@ QDLEditClient::~QDLEditClient()
 /*!
     Adds an "Insert Link" action item to \a context which connects to
     QDLEditClient::requestLinks().
+
+    \sa requestLinks()
 */
 QMenu* QDLEditClient::setupStandardContextMenu( QMenu *context )
 {
@@ -115,7 +119,7 @@ QMenu* QDLEditClient::setupStandardContextMenu( QMenu *context )
 #endif
 
 /*!
-    Determines if the client object is valid. Calls to methods on an invalid
+    Returns true if the client object is valid; otherwise returns false. Calls to methods on an invalid
     client will fail.
 */
 bool QDLEditClient::isValid() const
@@ -145,13 +149,7 @@ QString QDLEditClient::hint() const
 }
 
 /*!
-    Adds the link stored in \a link to the client object and inserts the anchor
-    text for the link to the parent widget's text. The link Id is returned if
-    the link is added correctly, otherwise 0 is returned.
-
-    QDL sources create \a link, which is returned during
-    QDLEditClient::requestLinks(). Therefore in normal usage this method isn't
-    called directly by a client.
+    \reimp
 */
 int QDLEditClient::addLink( QDSData& link )
 {
@@ -170,8 +168,7 @@ int QDLEditClient::addLink( QDSData& link )
 }
 
 /*!
-    Updates the link stored identified by \a linkId with \a link, and updates
-    the anchor text for the link in the parent widget's text.
+    \reimp
 */
 void QDLEditClient::setLink( const int linkId, const QDLLink& link )
 {
@@ -221,8 +218,7 @@ void QDLEditClient::setLink( const int linkId, const QDLLink& link )
 }
 
 /*!
-    Removes the link stored identified by \a linkId, and updates the
-    anchor text for the link in the parent widget's text.
+    \reimp
 */
 void QDLEditClient::removeLink( const int linkId )
 {
@@ -264,6 +260,8 @@ void QDLEditClient::removeLink( const int linkId )
     source from a list of available QDL sources. Returned links
     from the source are automatically added to the client using
     QDLEditClient::addLink().
+
+    \sa addLink()
 */
 void QDLEditClient::requestLinks()
 {
@@ -275,10 +273,7 @@ void QDLEditClient::requestLinks()
 }
 
 /*!
-    Verifies the correctness of the links stored by the client object. This
-    method determines if QDLLinks are broken, ensures all stored links have
-    anchor text in the parent widget's text, and anchor text for unstored
-    links is removed from the parent widget's text.
+    \reimp
 */
 void QDLEditClient::verifyLinks()
 {

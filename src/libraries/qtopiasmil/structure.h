@@ -25,6 +25,9 @@
 #include <qtopia/smil/module.h>
 #include <qtopia/smil/timing.h>
 
+// WARNING: These classes are not part of the Qtopia API.
+// They are subject to change at any time.
+
 
 class Smil : public SmilElement
 {

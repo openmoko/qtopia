@@ -26,12 +26,32 @@
 
 #include <qtopialog.h>
 
+/*!
+  \class ScriptThread
+  \brief The ScriptThread class provides serialized execution of applications/scripts.
+  \internal
+  \mainclass
+
+  The ScriptThread class is used by the Qtopia network plug-ins. It allows the serialized execution 
+  of scripts without blocking the caller. New scripts can be added via addScriptToRun() and
+  are added to queue. The excution is based on the FIFO principle. Each time when 
+  */
+
+//This class is used by the Qtopia network plug-ins and is not a public class.
+//In the future this might be replaced by Qt's improved concurrency API.
+
+/*!
+  Constructs a ScriptThread instance with the given \a parent.
+  */
 ScriptThread::ScriptThread( QObject * parent )
     : QThread( parent ), quit( false )
 {
 
 }
 
+/*!
+  Destroys the ScriptThread instance
+  */
 ScriptThread::~ScriptThread()
 {
     quit = true;
@@ -39,6 +59,12 @@ ScriptThread::~ScriptThread()
     wait();
 }
 
+/*!
+  \internal
+  \threadsafe
+  Adds the script with the give \a scriptPath to the queue of executable scripts. \a parameter
+  is the list of parameters that should be passed to the script.
+  */
 void ScriptThread::addScriptToRun( const QString& scriptPath, const QStringList& parameter )
 {
     QMutexLocker lock(&mutex);
@@ -52,12 +78,23 @@ void ScriptThread::addScriptToRun( const QString& scriptPath, const QStringList&
         waitCond.wakeOne();
 }
 
+/*!
+  \internal
+  \threadsafe
+
+  Returns the number of remaining jobs (including the currently running one) to be executed.
+  */
 int ScriptThread::remainingTasks() const
 {
     QMutexLocker lock( &mutex );
     return scripts.count();
 }
 
+/*!
+  \internal
+
+  Executes the scripts queued up for this thread instance.
+  */
 void ScriptThread::run()
 {
     mutex.lock();

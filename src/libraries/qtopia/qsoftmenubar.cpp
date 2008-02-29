@@ -40,7 +40,8 @@
 
 /*!
   \class QSoftMenuBar
-  \brief The QSoftMenuBar class allows the label in the phone
+  \mainclass
+  \brief The QSoftMenuBar class allows the labels in the phone
   soft menu bar to be set.
 
   QSoftMenuBar is only available in the Qtopia phone edition.  It is
@@ -68,10 +69,8 @@
   the key event will be sent directly to the ancestor.
 \endlist
 
-  QSoftMenuBar labels specify both a pixmap and a text label.  Currently,
-  Qtopia Phone Edition will always use the pixmap rather than text.  The
-  text label must still be provided because future versions of Qtopia
-  Phone Edition may allow the user to choose to view text labels.
+  QSoftMenuBar labels specify both a pixmap and a text label.  The user
+  can choose whether the text or pixmap labels are shown.
 
   QSoftMenuBar is only available in the Qtopia Phone Edition.
 
@@ -118,10 +117,10 @@ QSoftMenuBar::QSoftMenuBar()
 
 
 /*!
-  When widget \a w gains focus, sets the label in the soft menu bar for key
-  \a key to text \a t and pixmap \a pm when in state \a state.
+  \fn void QSoftMenuBar::setLabel(QWidget *widget, int key, const QString &pixmap, const QString &text, FocusState state)
 
-  The pixmaps used in the soft menu bar may be no larger than 22x16 pixels.
+  When \a widget gains the specified focus \a state, the label for \a key
+  is set to \a text and \a pixmap.
 */
 void QSoftMenuBar::setLabel(QWidget *w, int key, const QString &pm, const QString &t, FocusState state)
 {
@@ -130,22 +129,22 @@ void QSoftMenuBar::setLabel(QWidget *w, int key, const QString &pm, const QStrin
 }
 
 /*!
-  When widget \a w gains focus, sets the label in the soft menu bar for key
-  \a key to the standard label \a label when in state \a state.
+  When \a widget gains the specified focus \a state, the label for
+  \a key is set to the standard \a label.
 */
-void QSoftMenuBar::setLabel(QWidget *w, int key, StandardLabel label, FocusState state)
+void QSoftMenuBar::setLabel(QWidget *widget, int key, StandardLabel label, FocusState state)
 {
-    ContextKeyManager::instance()->setContextStandardLabel(w, key, label, state);
+    ContextKeyManager::instance()->setContextStandardLabel(widget, key, label, state);
 }
 
 /*!
-  Clears any label set for widget \a w, key \a key in state \a state.
+  Clears any label set for \a widget and \a key in focus \a state.
 
   \sa setLabel()
 */
-void QSoftMenuBar::clearLabel(QWidget *w, int key, FocusState state)
+void QSoftMenuBar::clearLabel(QWidget *widget, int key, FocusState state)
 {
-    ContextKeyManager::instance()->clearContextLabel(w, key, state);
+    ContextKeyManager::instance()->clearContextLabel(widget, key, state);
 }
 
 /*!
@@ -347,8 +346,8 @@ private:
 QPointer<MenuManager> MenuManager::mmgr = 0;
 
 /*!
-  Returns the QMenu assigned to widget \a widget in focus
-  state \a state.  If a QMenu does not yet exist for the widget,
+  Returns the QMenu assigned to \a widget in focus
+  \a state.  If a QMenu does not yet exist for the widget,
   an empty menu will be created with \a widget as its parent.
 
   \sa addMenuTo()
@@ -359,8 +358,8 @@ QMenu *QSoftMenuBar::menuFor(QWidget *widget, FocusState state)
 }
 
 /*!
-  Returns true if the widget \a widget has a menu assigned to it
-  in focus state \a state.
+  Returns true if the \a widget has a menu assigned to it
+  in focus \a state.
 
   \sa menuFor()
 */
@@ -370,7 +369,7 @@ bool QSoftMenuBar::hasMenu(QWidget *widget, FocusState state)
 }
 
 /*!
-  Adds QMenu \a menu to widget \a widget for focus state \a state.
+  Adds \a menu to \a widget for focus \a state.
 
   \sa removeMenuFrom()
 */
@@ -380,7 +379,7 @@ void QSoftMenuBar::addMenuTo(QWidget *widget, QMenu *menu, FocusState state)
 }
 
 /*!
-  Removes this QMenu \a menu from widget \a widget for focus state \a state.
+  Removes the \a menu from \a widget for focus \a state.
 
   \sa addMenuTo()
 */
@@ -390,9 +389,12 @@ void QSoftMenuBar::removeMenuFrom(QWidget *widget, QMenu *menu, FocusState state
 }
 
 /*!
-  Sets whether help is available for widget \a widget when a menu
-  attached to it is shown.  If \a enable is true help will be available
-  for the widget.
+  Sets whether the Help menu option is available for \a widget when a menu
+  associated with it is shown.  The Help option will only be shown if there
+  is a \l {File Name Standards}{help file} available.
+  If \a enable is true the help menu option may be displayed for the widget.
+
+  The default is true.
 */
 void QSoftMenuBar::setHelpEnabled(QWidget *widget, bool enable)
 {
@@ -400,9 +402,11 @@ void QSoftMenuBar::setHelpEnabled(QWidget *widget, bool enable)
 }
 
 /*!
-  Sets whether inputMethod is available for widget \a widget when a menu
-  attached to it is shown.  If \a enable is true inputMethod's menu action will be available
-  for the widget.
+  Sets whether the Input Method menu option is available for \a widget when a
+  menu associated with it is shown.  If \a enable is true an Input Method
+  menu action may be displayed for the widget.
+
+  The default is true.
 */
 void QSoftMenuBar::setInputMethodEnabled(QWidget *widget, bool enable)
 {
@@ -410,9 +414,12 @@ void QSoftMenuBar::setInputMethodEnabled(QWidget *widget, bool enable)
 }
 
 /*!
-  Sets whether cancel is available for widget \a widget when a menu
-  attached to it is shown and the widget's top level window is a QDialog.
-  If \a enable is true cancel will be available for the dialog.
+  Sets whether Cancel is available for \a widget when a menu
+  associated with it is shown. The Cancel option is only shown if the
+  widget's top level window is a QDialog.
+  If \a enable is true a Cancel menu action will be displayed for a dialog.
+
+  The default is true.
 */
 void QSoftMenuBar::setCancelEnabled(QWidget *widget, bool enable)
 {

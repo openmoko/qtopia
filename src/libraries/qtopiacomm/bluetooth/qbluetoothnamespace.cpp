@@ -38,6 +38,29 @@
 using namespace QBluetooth;
 
 /*!
+    \class QBluetooth
+    \mainclass
+    \brief The QBluetooth namespace contains miscellaneous Bluetooth functionality.
+
+    The QBluetooth namespace defines various functions and enums
+    that are used globally by the Bluetooth library.
+*/
+
+/*!
+    \enum QBluetooth::SecurityOption
+
+    Defines possible security settings for Bluetooth L2CAP and RFCOMM
+    connections.
+
+    \value Authenticated The connection is authenticated.
+    \value Encrypted The connection is encrypted.
+    \value Secure The is secure.  Generally this means that the
+    connection is authenticated and encrypted.  Please
+    note that the meaning of this value is implementation dependent, it
+    is more portable to use the Authenticated and Encrypted options.
+*/
+
+/*!
     \enum QBluetooth::SDPProfile
     Defines possible profiles in use by the system.
 
@@ -59,6 +82,8 @@ using namespace QBluetooth;
     \value AdvancedAudioSinkProfile Represents the A2DP Sink profile.
     \value AudioVideoRemoteControlProfile Represents the AVRCP Controller (CT) profile.
     \value AudioVideoTargetProfile Represents the AVRCP Target (TG) profile.
+    \value HeadsetAudioGatewayProfile Represents the HS AG profile.
+    \value HandsFreeAudioGatewayProfile Represents the HF AG profile.
  */
 
 /*!
@@ -73,6 +98,7 @@ using namespace QBluetooth;
     \value Audio Device has Audio services (Speaker, Microphone, Headset service, ...)
     \value Telephony Device has Telephony services (Cordless telephony, Modem, Headset service, ...)
     \value Information Device has Information services (WEB-server, WAP-server, ...)
+    \value AllServiceClasses Special value that represents all service     classes.
 */
 
 /*!
@@ -432,6 +458,16 @@ QBluetooth::DeviceMajor major_to_device_major(quint8 major)
     return static_cast<QBluetooth::DeviceMajor>(major);
 }
 
+/*!
+    \internal
+
+    Returns the device icon for a particular remote device.
+
+    This uses the deviceMajor and deviceMinor information
+    to come up with the icon.
+
+    This ideally should be moved to the bluetooth ui library.
+*/
 QIcon find_device_icon(const QBluetoothRemoteDevice &remote)
 {
     if (remote.deviceMajor() == QBluetooth::Computer)
@@ -452,24 +488,46 @@ QIcon find_device_icon(const QBluetoothRemoteDevice &remote)
     return QIcon();
 }
 
+/*!
+    \class qint128
+    \internal
+*/
+
+/*!
+    \internal
+*/
 qint128::qint128()
 {
     for (unsigned int i = 0; i < 16; i++)
         data[i] = 0;
 }
 
+/*!
+    \internal
+*/
 qint128::qint128(const quint8 indata[16])
 {
     for (unsigned int i = 0; i < 16; i++)
         data[i] = indata[i];
 }
 
+/*!
+    \class quint128
+    \internal
+*/
+
+/*!
+    \internal
+*/
 quint128::quint128()
 {
     for (unsigned int i = 0; i < 16; i++)
         data[i] = 0;
 }
 
+/*!
+    \internal
+*/
 quint128::quint128(const quint8 indata[16])
 {
     for (unsigned int i = 0; i < 16; i++)

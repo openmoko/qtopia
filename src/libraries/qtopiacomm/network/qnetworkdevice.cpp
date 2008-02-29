@@ -96,10 +96,42 @@ private:
 
 /*!
   \class QNetworkDevice
-  \brief
-  The QNetworkDevice class provides information about the connectivity state of
-  a particular network device.
+  \mainclass
+  \brief The QNetworkDevice class provides information about the connectivity state of
+  a network device.
 
+  Network devices are always associated with a configuration file which serves as an 
+  identifier/handle for a particular device. The configuration file is device specific 
+  and is saved in \c{$HOME/Applications/Network/config/}.
+  The user can start start/stop/configure network devices via the Internet application. 
+  Network related application can start and stop the device via 
+  \l QtopiaNetwork::startInterface() and \l QtopiaNetwork::stopInterface() respectively. 
+  If the Qtopia device has more than one device online at a time the default gateway 
+  can be set via \l QtopiaNetwork::setDefaultGateway().
+
+  The following UML class diagram displays the general interaction of Qtopia's
+  network API.
+
+  \image NetworkAPI.png
+  
+  Qtopia keeps track of network devices with the help of a session manager. 
+  If an application starts a device the session manager records the identity of the 
+  application and will close the device if the application doesn't stop the device 
+  before it quits. If several applications requested the same device the device 
+  is closed when the last remaining application closes the device. Hence every 
+  application should call \l QtopiaNetwork::startInterface() 
+  no matter whether the device is active already as this call creates a new session 
+  for this application. Note that a device which has been configured to use
+  an internal timeout (e.g. timeouts of dial-up connections) may still stop when 
+  the timeout is triggered. 
+
+  If any network related application may stop a particular interface which has 
+  been started by another application. This may be necessary in use cases such as 
+  when the phone receives a notification about a pending MMS. If the dial-up 
+  connection is already running but the APN is not the required one for MMS download 
+  the mail application may stop the dial-up connection and start another dial-up interface.
+  
+  \sa QtopiaNetwork, QNetworkState
   \ingroup io
 */
 
@@ -125,7 +157,7 @@ QNetworkDevice::~QNetworkDevice()
 }
 
 /*!
-  Returns the interface handle.
+  Returns the interface handle which is the full path of the associated configuration file.
   */
 QString QNetworkDevice::handle() const
 {

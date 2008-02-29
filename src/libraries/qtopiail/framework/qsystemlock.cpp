@@ -63,6 +63,7 @@ public:
 
 /*!
    \class QSystemReadWriteLock
+   \mainclass
    \brief The QSystemReadWriteLock class provides read-write locking between
    processes.
 
@@ -73,16 +74,41 @@ public:
    blocked until the writing is complete.
 
    QSystemReadWriteLock behaves much like the QReadWriteLock class, but it also
-   works across multiple processes.  In order to clean up the system resources
-   used to coordinate cross process synchronization, one QReadWriteLock instance
-   is designated the lock "owner".  This instance is responsible for creating
-   the required resources, and removing them when it is destroyed.  The lock's
-   owner should always be instantiated before any others.
+   works across multiple processes (although it also works perfectly well, 
+   albeit slightly less efficiently, in a single process).  In order to clean up
+   the system resources used to coordinate cross process synchronization, one 
+   QReadWriteLock instance is designated the lock "owner".  This instance 
+   creates the required system resources, and removes them when it is destroyed.
+   The lock owner should always be instantiated before any others.
 
    System locks are identified by a 32-bit integer, which allows other processes
    to share the same lock.  While the selection of this identifier is left
    upto the caller, under Linux it is common to use the ftok(3) function call
    which uses the identity of a specified file to generate such an identifier.
+
+   For example, to create the lock owner:
+
+   \code
+   int id = (int)::ftok("/tmp/my_lock_identifier", 0);
+
+   QSystemReadWriteLock lock(id, true);
+   \endcode
+
+   The file passed to ftok(3) is only used to generate a unique identifier for
+   the lock and is otherwise unrelated to the lock.  It is possible, although 
+   bad practice due to potential unintended clashes with other applications that
+   do the same, to simply make up a number for the lock id.  
+
+   Other applications can then easily create a non-owner reference to the lock:
+   
+   \code
+   int id = (int)::ftok("/tmp/my_lock_identifier", 0);
+
+   QSystemReadWriteLock lock(id, false);
+   \endcode
+   
+   An ftok(3) call on the same file was used to ensure the owner and the 
+   non-owner use the same id and thus refer to the same system-global lock.
 
    \section1
    \section2 Algorithm
@@ -115,6 +141,12 @@ public:
        \o Writer Complete
        \o WAIT(Decrement WriteCount)
    \endtable
+
+   \sa QSystemMutex
+
+   \ingroup thread
+   \ingroup environment
+   \ingroup ipc
 */
 
 /*!
@@ -189,11 +221,16 @@ unsigned int QSystemReadWriteLock::id() const
 
   Aquisition of the read lock may fail if:
   \list 1
-  \i The timeout \a milliSec expired.
+  \i The timeout \a milliSec, in milliseconds, expired.
 
      If the caller wants to poll the lock in a non-blocking way, it should
      specify a timeout of 0.  If the caller would prefer to block until the lock
      is acquired it should specify a timeout of -1.
+
+     Currently, only systems that support the semtimedop(2) system call can 
+     perform non-blocking, or time blocked calls.  All other systems will block
+     indefinately until the lock is acquired, regardless of the \a milliSec
+     value.
 
   \i The QSystemReadWriteLock instance does not refer to a valid lock.
 
@@ -242,11 +279,16 @@ bool QSystemReadWriteLock::lockForRead(int milliSec)
 
   Aquisition of the write lock may fail if:
   \list 1
-  \i The timeout \a milliSec expired.
+  \i The timeout \a milliSec, in milliseconds, expired.
 
      If the caller wants to poll the lock in a non-blocking way, it should
      specify a timeout of 0.  If the caller would prefer to block until the lock
      is acquired it should specify a timeout of -1.
+
+     Currently, only systems that support the semtimedop(2) system call can 
+     perform non-blocking, or time blocked calls.  All other systems will block
+     indefinately until the lock is acquired, regardless of the \a milliSec
+     value.
 
   \i The QSystemReadWriteLock instance does not refer to a valid lock.
 
@@ -334,28 +376,61 @@ public:
 
 /*!
     \class QSystemMutex
+    \mainclass
     \brief The QSystemMutex class provides mutual exclusion between processes.
 
-    A mutex is a synchronization tool for protecting critical sections of the code.
-    The purpose of a QSystemMutex is to protect an object, data structure or section
-    of code so that only one thread can access it at a time.
+    A mutex is a synchronization tool for protecting critical sections of the 
+    code.  The purpose of a QSystemMutex is to protect an object, data structure
+    or section of code so that only one thread, or process, can access it at a 
+    time.
 
-    QSystemMutex behaves much like the QMutex class, but it also works across multiple
-    processes.  In order to clean up the system resources used to coordinate cross
-    process synchronization, one QSystemMutex instance is designated the lock "owner".
-    This instance is responsible for creating the required resources, and removing them
-    when it is destroyed.  The lock's owner should always be instantiated before any others.
+    QSystemMutex behaves much like the QMutex class, but it also works across 
+    multiple processes (although it also works perfectly well, albeit slightly 
+    less efficiently, in a single process).  In order to clean up the system 
+    resources used to coordinate cross process synchronization, one 
+    QSystemMutex instance is designated the lock "owner".  This instance creates
+    the required resources, and removes them when it is destroyed.  The lock 
+    owner should always be instantiated before any others.
 
-    System locks are identified by a 32-bit integer, which allows other processes
-    to share the same lock.  While the selection of this identifier is left
-    upto the caller, under Linux it is common to use the ftok(3) function call
-    which uses the identity of a specified file to generate such an identifier.
+    System locks are identified by a 32-bit integer, which allows other 
+    processes to share the same lock.  While the selection of this identifier is
+    left upto the caller, under Linux it is common to use the ftok(3) function 
+    call which uses the identity of a specified file to generate such an 
+    identifier.
+
+    \code
+    int id = (int)::ftok("/tmp/my_lock_identifier", 0);
+
+    QSystemMutex lock(id, true);
+    \endcode
+
+    The file passed to ftok(3) is only used to generate a unique identifier for
+    the mutex and is otherwise unrelated to the mutx.  It is possible, although 
+    bad practice due to potential unintended clashes with other applications 
+    that do the same, to simply make up a number for the mutex id.  
+
+    Other applications can then easily create a non-owner reference to the 
+    mutex:
+
+    \code
+    int id = (int)::ftok("/tmp/my_lock_identifier", 0);
+
+    QSystemMutex lock(id, false);
+    \endcode
+
+    An ftok(3) call on the same file was used to ensure the owner and the 
+    non-owner use the same id and thus refer to the same system-global mutex.
+
+    \sa QSystemReadWriteLock
+
+    \ingroup ipc
+    \ingroup environment
  */
 
 /*!
-    Construct a system read write lock from the provided \a id.  If \a owner is
-    true, the instance will create the system resources required for the lock and
-    will remove them when it is destructed.
+    Construct a system mutex from the provided \a id.  If \a owner is true, the
+    instance will create the system resources required for the mutex and will 
+    remove them when it is destructed.
  */
 QSystemMutex::QSystemMutex(unsigned int id, bool owner)
     : m_data(new QSystemMutex_Private(id, owner))
@@ -378,8 +453,8 @@ QSystemMutex::QSystemMutex(unsigned int id, bool owner)
 }
 
 /*!
-  Destroy the lock instance.  If owner was specified in the QSystemMutex
-  constructor, all the system resources used by this lock will also be removed
+  Destroy the mutex instance.  If owner was specified in the QSystemMutex
+  constructor, all the system resources used by this mutex will also be removed
   and further use of the lock by other threads or processes will fail.
  */
 QSystemMutex::~QSystemMutex()
@@ -397,7 +472,7 @@ QSystemMutex::~QSystemMutex()
 }
 
 /*!
-  Return true if the lock is invalid.
+  Return true if the mutex is invalid.
  */
 bool QSystemMutex::isNull() const
 {
@@ -405,7 +480,7 @@ bool QSystemMutex::isNull() const
 }
 
 /*!
-  Return the id of lock as passed to the constructor.
+  Return the id of mutex as passed to the constructor.
  */
 unsigned int QSystemMutex::id() const
 {
@@ -416,13 +491,18 @@ unsigned int QSystemMutex::id() const
   Attempt to acquire the lock.  This method will return true if the lock
   was successfully acquired, false otherwise.
 
-  Aquisition of the lock may fail if:
+  Aquisition of the mutex may fail if:
   \list 1
-  \i The timeout \a milliSec expired.
+  \i The timeout \a milliSec, in milliseconds, expired.
 
-     If the caller wants to poll the lock in a non-blocking way, it should
-     specify a timeout of 0.  If the caller would prefer to block until the lock
-     is acquired it should specify a timeout of -1.
+     If the caller wants to poll the mutex in a non-blocking way, it should
+     specify a timeout of 0.  If the caller would prefer to block until the 
+     mutex is acquired it should specify a timeout of -1.
+
+     Currently, only systems that support the semtimedop(2) system call can 
+     perform non-blocking, or time blocked calls.  All other systems will block
+     indefinately until the mutex is acquired, regardless of the \a milliSec
+     value.
 
   \i The QSystemMutex instance does not refer to a valid lock.
 
@@ -458,7 +538,7 @@ bool QSystemMutex::lock(int milliSec)
 }
 
 /*!
-  Release the lock.
+  Release the mutex.
  */
 void QSystemMutex::unlock()
 {

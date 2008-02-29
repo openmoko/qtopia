@@ -38,11 +38,12 @@
 
 /*!
     \class QDSServices
-    \brief The QDSServices class finds available QDS services.
+    \mainclass
+    \brief The QDSServices class provides a filtered list of available Qtopia Data Sharing (QDS) services.
 
     QDSServices can used to search for available QDS services. The search can
-    be filtered on a combination of request data type, response data type or
-    Qtopia service name.
+    be filtered on a combination of request data types, response data types, 
+    attributes, and Qtopia service names.
 
     For example if you wanted to find a QDS service which could convert a jpeg
     image into a bitmap image you would do the following:
@@ -62,16 +63,16 @@
     Qtopia service names may also use wildcards, e.g. \c "MyApp*", but attributes
     do not support wildcards.
 
-    \sa QDSServiceInfo
+    \sa QDSServiceInfo, {Qtopia Data Sharing (QDS)}
 
     \ingroup ipc
 */
 
 /*!
-    Finds all QDS services available on the device which have a request data type
-    \a requestDataType, a response data type of \a responseDataType (both case
-    insensitive), contains all the attributes listed in \a attributes (case insensitive),
-    and uses Qtopia services which match \a service (case sensitive).
+    Finds all QDS services available on the device which have a request data type of
+    \a requestDataType, have a response data type of \a responseDataType (both case
+    insensitive), contain all the attributes listed in \a attributes (case insensitive),
+    and use Qtopia services which match \a service (case sensitive).
 */
 QDSServices::QDSServices( const QString& requestDataType,
                           const QString& responseDataType,

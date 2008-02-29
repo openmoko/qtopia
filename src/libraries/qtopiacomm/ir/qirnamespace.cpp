@@ -33,6 +33,15 @@
 using namespace QIr;
 
 /*!
+    \class QIr
+    \mainclass
+    \brief The QIr namespace contains miscellaneous Infrared functionality.
+
+    The QIr namespace defines various functions and enums
+    that are used globally by the Infrared library.
+*/
+
+/*!
     \enum QIr::DeviceClass
     Defines possible DeviceTypes as defined by the IrDA standard.
 
@@ -49,6 +58,7 @@ using namespace QIr;
     \value Message Device is a messaging device.
     \value HTTP Device supports HTTP.
     \value OBEX Device supports the OBEX protocol.
+    \value All Special value representing all possible service types.
  */
 
 /*!

@@ -19,10 +19,49 @@
 **
 ****************************************************************************/
 
-#include "menumodel.h"
+#include "menumodel_p.h"
 
-#include <servicerequest.h>
+#include <private/servicerequest_p.h>
 
+/*!
+    \class PlaylistModel
+    \internal
+*/
+
+/*!
+    \fn PlaylistModel::~PlaylistModel()
+    \internal
+*/
+
+/*!
+    \fn Playlist* PlaylistModel::playlist() const = 0;
+    \internal
+*/
+
+/*!
+    \class MenuModel
+    \internal
+*/
+
+/*!
+    \fn MenuModel::MenuModel( QObject* parent = 0 )
+    \internal
+*/
+
+/*!
+    \fn ServiceRequest* MenuModel::action( const QModelIndex& index, ActionContext context = Select ) const = 0
+    \internal
+*/
+
+/*!
+    \class SimpleMenuModel
+    \internal
+*/
+
+/*!
+    \fn SimpleMenuModel::~SimpleMenuModel()
+    \internal
+*/
 SimpleMenuModel::~SimpleMenuModel()
 {
     foreach( TextRequestPair item, m_items ) {
@@ -30,6 +69,10 @@ SimpleMenuModel::~SimpleMenuModel()
     }
 }
 
+/*!
+    \fn void SimpleMenuModel::addItem( const QString& text, const ServiceRequest& request )
+    \internal
+*/
 void SimpleMenuModel::addItem( const QString& text, const ServiceRequest& request )
 {
     TextRequestPair pair;
@@ -39,6 +82,10 @@ void SimpleMenuModel::addItem( const QString& text, const ServiceRequest& reques
     m_items.append( pair );
 }
 
+/*!
+    \fn void SimpleMenuModel::addItem( const QString& text, QObject* receiver, const char* member )
+    \internal
+*/
 void SimpleMenuModel::addItem( const QString& text, QObject* receiver, const char* member )
 {
     TextRequestPair pair;
@@ -48,6 +95,10 @@ void SimpleMenuModel::addItem( const QString& text, QObject* receiver, const cha
     m_items.append( pair );
 }
 
+/*!
+    \fn void SimpleMenuModel::addItem( const QString& text, MenuModel* model )
+    \internal
+*/
 void SimpleMenuModel::addItem( const QString& text, MenuModel* model )
 {
     TextRequestPair pair;
@@ -60,6 +111,10 @@ void SimpleMenuModel::addItem( const QString& text, MenuModel* model )
     m_items.append( pair );
 }
 
+/*!
+    \fn ServiceRequest* SimpleMenuModel::action( const QModelIndex&, ActionContext context ) const
+    \internal
+*/
 ServiceRequest* SimpleMenuModel::action( const QModelIndex& index, ActionContext context ) const
 {
     if( context == Select ) {
@@ -71,6 +126,10 @@ ServiceRequest* SimpleMenuModel::action( const QModelIndex& index, ActionContext
     return 0;
 }
 
+/*!
+    \fn QVariant SimpleMenuModel::data( const QModelIndex& index, int role ) const
+    \internal
+*/
 QVariant SimpleMenuModel::data( const QModelIndex& index, int role ) const
 {
     if( role == Qt::DisplayRole ) {

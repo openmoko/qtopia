@@ -8,6 +8,8 @@ use File::Basename;
 use Qtopia::Cache;
 use Qtopia::Vars;
 use Qtopia::File;
+use Carp;
+$Carp::CarpLevel = 1;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -123,16 +125,16 @@ sub get_paths()
             }
         }
         if ( !defined($QPEDIR) ) {
-            print "ERROR: Could not locate the Qtopia build tree.\n";
-            print "       Did you run configure?\n";
+            my $msg = "ERROR: Could not locate the Qtopia build tree.\n";
+            $msg .= "       Did you run configure?\n";
             if ( $depotpath ) {
                 my $altscript = $0;
                 $altscript =~ s/^\Q$depotpath\E//;
                 $altscript =~ s/^\///;
-                print "       Please try running ".basename($0)." from the build tree.\n";
-                print "       eg. /path/to/build/$altscript\n";
+                $msg .= "       Please try running ".basename($0)." from the build tree.\n";
+                $msg .= "       eg. /path/to/build/$altscript\n";
             }
-            exit 1;
+            croak $msg;
         }
         # Use the values in config.cache
         my @cache_data = Qtopia::Cache::load("paths");

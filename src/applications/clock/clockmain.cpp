@@ -22,7 +22,6 @@
 #include "clock.h"
 #include "stopwatch.h"
 #include "alarm.h"
-#include "analogclock.h"
 #include "clockmain.h"
 
 #include <qtopiaapplication.h>

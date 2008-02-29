@@ -12,7 +12,6 @@ depends(3rdparty/libraries/inputmatch)
 
 QTOPIAPIM_HEADERS+=\
     qpimrecord.h\
-    qtopiapimwinexport.h\
     qtask.h\
     qappointment.h\
     qcontact.h\

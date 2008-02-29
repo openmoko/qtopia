@@ -167,13 +167,11 @@ int MAIN_FUNC( int argc, char** argv )
 #endif
     }
 
-    qLog(Performance) << QuickLauncher::app->applicationName().toLatin1().constData() << " : " << "Entering event loop : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(QuickLauncher::app->applicationName().toLatin1().constData()) << "Entering event loop";
     int rv = -1;
     if(QuickLauncher::app->willKeepRunning())
         QuickLauncher::app->exec();
-    qLog(Performance) << QuickLauncher::app->applicationName().toLatin1().constData() << " : " << "Exited event loop : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(QuickLauncher::app->applicationName().toLatin1().constData()) << "Exited event loop";
 
     if ( QuickLauncher::mainWindow )
         delete (QWidget*)QuickLauncher::mainWindow;
@@ -192,8 +190,7 @@ int MAIN_FUNC( int argc, char** argv )
     delete QuickLauncher::loader;
 #endif
 
-    qLog(Performance) << appName.toLatin1().constData() << " : " << "Exiting quicklauncher main : "
-                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    QPerformanceLog(appName.toLatin1().constData())  << "Exiting quicklauncher main";
 
     return rv;
 }

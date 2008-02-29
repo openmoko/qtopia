@@ -29,13 +29,36 @@
 #include <fcntl.h>
 
 /*!
+    \class QIrObexSocket
+    \mainclass
+    \brief The QIrObexSocket class represents an Infrared OBEX connection.
+
+    This allows the use of the OBEX protocol over an Infrared connection.
+    For example, a QIrObexSocket object could be used to create
+    a QObexPushClient object in order to push file objects over an
+    Infrared transport connection.
+
+    \ingroup qtopiair
+    \sa QIrObexServer
+*/
+
+
+class QIrObexSocketPrivate
+{
+public:
+    uint m_addr;
+    QString m_service;
+};
+
+/*!
     Constructs an new (invalid) Infrared OBEX socket with parent object
     \a parent.
  */
 QIrObexSocket::QIrObexSocket(QObject *parent) : QObexSocket(parent)
 {
-    m_service = QString();
-    m_addr = 0;
+    m_data = new QIrObexSocketPrivate;
+    m_data->m_service = QString();
+    m_data->m_addr = 0;
 }
 
 /*!
@@ -44,53 +67,65 @@ QIrObexSocket::QIrObexSocket(QObject *parent) : QObexSocket(parent)
     of the remote device to connect to. If the address is 0, all
     devices are searched and the first one found will be connected to.
     The \a parent specifies the parent object.
+
+    \sa service(), address()
 */
 QIrObexSocket::QIrObexSocket(const QString &service, uint addr, QObject *parent) : QObexSocket(parent)
 {
-    m_service = service;
-    m_addr = addr;
+    m_data = new QIrObexSocketPrivate;
+    m_data->m_service = service;
+    m_data->m_addr = addr;
 }
 
 /*!
-    Destructor.
+    Destroys the socket.
 */
 QIrObexSocket::~QIrObexSocket()
 {
-
+    delete m_data;
+    m_data = 0;
 }
 
 /*!
     Returns the service name on the remote device to connect
     to.
+
+    \sa setService()
 */
 const QString &QIrObexSocket::service() const
 {
-    return m_service;
+    return m_data->m_service;
 }
 
 /*!
-    Sets the service name to connect to on the remote device.
+    Sets the \a service name to connect to on the remote device.
+
+    \sa service()
 */
 void QIrObexSocket::setService(const QString &service)
 {
-    m_service = service;
+    m_data->m_service = service;
 }
 
 /*!
     Returns the address of the remote device to connect to.
+
+    \sa setAddress()
 */
 uint QIrObexSocket::address() const
 {
-    return m_addr;
+    return m_data->m_addr;
 }
 
 /*!
     Sets the \a addr address of the remote device to connect to, if the address
     is 0, all devices are searched and the first one found will be connected to.
+
+    \sa address()
 */
 void QIrObexSocket::setAddress(uint addr)
 {
-    m_addr = addr;
+    m_data->m_addr = addr;
 }
 
 // Need this to keep OpenOBEX happy, it will be reset as soon as the handle is passed
@@ -101,33 +136,36 @@ static void qobex_dummy_callback(obex_t *, obex_object_t *, int, int, int, int)
 
 /*!
     Tries to establish a connection to the remote device.  Returns true
-    if the connection was established successfully, and false otherwise
+    if the connection was established successfully, and false otherwise.
+
+    \bold{NOTE:} This call is blocking.  Single-threaded applications might
+    freeze for the duration of this call.
 */
 bool QIrObexSocket::connect()
 {
-    if (m_service.isNull())
+    if (m_data->m_service.isNull())
         return false;
 
     obex_t *self;
     self = OBEX_Init( OBEX_TRANS_IRDA, qobex_dummy_callback, OBEX_FL_KEEPSERVER );
 
     int retc = -1;
-    if (m_addr == 0) {
+    if (m_data->m_addr == 0) {
         // The obex implementation will pick a device for us.
-        retc = IrOBEX_TransportConnect(self, m_service.toAscii().constData());
+        retc = IrOBEX_TransportConnect(self, m_data->m_service.toAscii().constData());
     }
     else {
         struct sockaddr_irda sock;
         sock.sir_family = AF_IRDA;
-        sock.sir_addr = m_addr;
-        strncpy(sock.sir_name, m_service.toAscii().constData(), 25);
+        sock.sir_addr = m_data->m_addr;
+        strncpy(sock.sir_name, m_data->m_service.toAscii().constData(), 25);
         retc = OBEX_TransportConnect(self,
                                      reinterpret_cast<sockaddr *>(&sock),
                                      sizeof(sock));
     }
 
     if ( retc < 0 ) {
-        qLog(Infrared) << "Connection failed to service " << m_service;
+        qLog(Infrared) << "Connection failed to service " << m_data->m_service;
         return false;
     }
 

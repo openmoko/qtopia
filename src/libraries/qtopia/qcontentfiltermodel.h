@@ -51,13 +51,13 @@ public:
     public:
         Template();
         explicit Template( QContentFilter::FilterType type,
-                           const QString &subType = QString(),
+                           const QString &scope = QString(),
                            TemplateOptions options = NoTemplateOptions,
                            const QStringList &checked = QStringList() );
         explicit Template( QContent::Property property,
                            TemplateOptions options = NoTemplateOptions,
                            const QStringList &checked = QStringList() );
-        Template( const Template &target, QContentFilter::FilterType type, const QString &subType = QString(), TemplateOptions options = NoTemplateOptions, const QStringList &checked = QStringList() );
+        Template( const Template &target, QContentFilter::FilterType type, const QString &scope = QString(), TemplateOptions options = NoTemplateOptions, const QStringList &checked = QStringList() );
         Template( const Template &target, QContent::Property property, TemplateOptions options = NoTemplateOptions, const QStringList &defaultSelection = QStringList() );
         Template( const Template &other );
         ~Template();
@@ -74,10 +74,10 @@ public:
         void addLabel( const Template &target, const QString &title, bool checked = false );
         void addLabel( const QString &title, const QContentFilter &filter, bool checked = false );
         void addLabel( const Template &target, const QString &title, const QContentFilter &filter, bool checked = false );
-        void addList( QContentFilter::FilterType type, const QString &subType = QString(), const QStringList &checked = QStringList() );
-        void addList( const Template &target, QContentFilter::FilterType type, const QString &subType = QString(), const QStringList &checked = QStringList() );
-        void addList( const QContentFilter &filter, QContentFilter::FilterType type, const QString &subType = QString(), const QStringList &checked = QStringList() );
-        void addList( const Template &target, const QContentFilter &filter, QContentFilter::FilterType type, const QString &subType = QString(), const QStringList &checked = QStringList() );
+        void addList( QContentFilter::FilterType type, const QString &scope = QString(), const QStringList &checked = QStringList() );
+        void addList( const Template &target, QContentFilter::FilterType type, const QString &scope = QString(), const QStringList &checked = QStringList() );
+        void addList( const QContentFilter &filter, QContentFilter::FilterType type, const QString &scope = QString(), const QStringList &checked = QStringList() );
+        void addList( const Template &target, const QContentFilter &filter, QContentFilter::FilterType type, const QString &scope = QString(), const QStringList &checked = QStringList() );
         void addList( QContent::Property property, const QStringList &checked = QStringList() );
         void addList( const Template &target, QContent::Property property, const QStringList &checked = QStringList() );
         void addList( const QContentFilter &filter, QContent::Property property, const QStringList &checked = QStringList() );
@@ -101,7 +101,7 @@ public:
                                   QObject *parent = 0 );
 
     explicit QContentFilterModel( QContentFilter::FilterType type,
-                                  const QString &subType = QString(),
+                                  const QString &scope = QString(),
                                   TemplateOptions = SelectAll,
                                   const QStringList &checked = QStringList(),
                                   QObject *parent = 0 );

@@ -31,20 +31,33 @@
 //
 // ============================================================================
 
+struct QHardwareManagerPrivate;
+
 class QTOPIA_EXPORT QHardwareManager : public QAbstractIpcInterfaceGroupManager
 {
     Q_OBJECT
 public:
-    explicit QHardwareManager( QObject *parent = 0 );
+    explicit QHardwareManager(const QString& interface, QObject *parent = 0 );
     ~QHardwareManager();
 
-    QStringList accessoryIds() const;
-    QStringList accessoryTypes( const QString& id ) const;
+    QString interface() const;
+    QStringList providers() const;
+
+    template <typename T> static QStringList providers()
+    {
+        QAbstractIpcInterfaceGroupManager man("/Hardware/Accessories");
+        return man.supports<T>();
+    }
 
 signals:
-    void accessoriesChanged();
-    void accessoryAdded( const QString& id );
-    void accessoryRemoved( const QString& id );
+    void providerAdded( const QString& id );
+    void providerRemoved( const QString& id );
+
+private slots:
+    void changed();
+
+private:
+    QHardwareManagerPrivate* d;
 };
 
 #endif //QHARDWAREMANAGER_H

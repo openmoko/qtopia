@@ -30,6 +30,22 @@ static int indicatorSize = 11;
 static int exclusiveIndicatorSize = 10;
 static int buttonMargin = 4;
 
+/*!
+    \class QtopiaStyle
+    \mainclass
+    \brief The QtopiaStyle class encapsulates the common Look and Feel of a Qtopia GUI.
+
+    \ingroup appearance
+
+    This class implements some of the widget's look and feel that is common to all 
+    Qtopia GUI styles.
+
+    \sa QWindowsXPStyle, QMacStyle, QPlastiqueStyle, QCDEStyle, QMotifStyle
+*/
+
+/*!
+    Constructs a QtopiaStyle object.
+*/
 QtopiaStyle::QtopiaStyle()
 {
     d = 0;
@@ -45,17 +61,24 @@ QtopiaStyle::QtopiaStyle()
     exclusiveIndicatorSize = qRound(8.0 * dpi / 100.0);
 }
 
+/*!
+    Destroys the QtopiaStyle object.
+*/
 QtopiaStyle::~QtopiaStyle()
 {
 }
 
-
+/*!
+    \obsolete
+*/
 void QtopiaStyle::setTheme(const QString& themeconfig)
 {
     Q_UNUSED(themeconfig);
 }
 
-
+/*!
+    \reimp
+*/
 int QtopiaStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
                             const QWidget *widget) const
 {
@@ -134,6 +157,9 @@ int QtopiaStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
     return ret;
 }
 
+/*!
+    \reimp
+*/
 int QtopiaStyle::styleHint(StyleHint stylehint, const QStyleOption *option,
                       const QWidget *widget, QStyleHintReturn* returnData) const
 {
@@ -157,6 +183,9 @@ int QtopiaStyle::styleHint(StyleHint stylehint, const QStyleOption *option,
     return ret;
 }
 
+/*!
+    \reimp
+*/
 QPixmap QtopiaStyle::standardPixmap(StandardPixmap standardPixmap,
                 const QStyleOption *option, const QWidget *widget) const
 {

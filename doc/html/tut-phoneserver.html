@@ -1,32 +1,35 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Tutorial: Phone Server</title>
+  <title>Tutorial: Phone Server</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Phone Server<br /><small></small></h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Phone Server<br /><span class="subtitle"></span>
+</h1>
 <a name="top"></a><a name="wtphoneserver"></a><p>This section provides an example of the methods to route applications requests through the phone server to the AT command handlers and describes how the responses are returned to the application.</p>
 <p>Using the <tt>SIMIdentity</tt> query type, which returns the IMSI number of the SIM the method is as follows:</p>
 <ol type="1">
-<li>create <tt>PhoneLine</tt> object to handle the request:<pre>&nbsp;   PhoneLine *line = new PhoneLine();</pre>
+<li>create <tt>PhoneLine</tt> object to handle the request:<pre>    PhoneLine *line = new PhoneLine();</pre>
 </li>
 <li>create the <tt>PhoneLineQCop</tt> object to transmit requests from the application to the phone server.</li>
 <li>return responses to queries via the <tt>queryResult</tt> signal</li>
-<li>A slot is created and the signal is connected:<pre>&nbsp;   connect( line, SIGNAL(queryResult(PhoneLine::QueryType, const QString&amp;)),
+<li>A slot is created and the signal is connected:<pre>    connect( line, SIGNAL(queryResult(PhoneLine::QueryType, const QString&amp;)),
              this, SLOT(simIdResult(PhoneLine::QueryType, const QString&amp;)) );
     ...
     void AppClass::simIdResult( PhoneLine::QueryType type, const QString&amp; value )
     {
-        // Process the result &quot;value&quot;.
+        <span class="comment">// Process the result &quot;value&quot;.</span>
         ...
     }</pre>
 </li>
-<li>Once the signal has been connected, the application issues the query as follows:<pre>&nbsp;   line-&gt;query( PhoneLine::SIMIdentity );</pre>
+<li>Once the signal has been connected, the application issues the query as follows:<pre>    line-&gt;query( PhoneLine::SIMIdentity );</pre>
 </li>
 <li><tt>PhoneLine::query</tt> calls the private phone handler method <tt>query</tt>.<p>For this example the query method is <tt>PhoneLineQCop::query</tt> which sends a Qtopia IPC message to the phone server on the <tt>QPE/Phone</tt> channel.</p>
 </li>
@@ -40,8 +43,8 @@
 <p>This completes the example. Other commands and notifications within the phone library follow a similar pattern.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
-<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
 </tr></table></div></address></body>
 </html>

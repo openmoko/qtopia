@@ -444,7 +444,7 @@ void ReceiveWindow::fileSelected(const QModelIndex &index)
     QString saveAs = m_model->file(index.row()).filename();
     int pos = saveAs.lastIndexOf( "/" );
     if ( pos != -1 )
-        saveAs = saveAs.mid( pos );
+        saveAs = saveAs.mid( pos + 1 );
 
     QString tmpFile = Qtopia::tempDir() + "obex/in/" + saveAs;
 

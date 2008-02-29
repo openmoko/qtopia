@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QIrObexSocket Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QIrObexSocket Class Reference</h1>
+<p>The QIrObexSocket class represents an Infrared OBEX connection. <a href="#details">More...</a></p>
+<pre>    #include &lt;QIrObexSocket&gt;</pre><p>Inherits <a href="qobexsocket.html">QObexSocket</a>.</p>
+<ul>
+<li><a href="qirobexsocket-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qirobexsocket.html#QIrObexSocket">QIrObexSocket</a></b> ( QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qirobexsocket.html#QIrObexSocket-2">QIrObexSocket</a></b> ( const QString &amp; <i>service</i>, uint <i>addr</i> = 0, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/>virtual <b><a href="qirobexsocket.html#dtor.QIrObexSocket">~QIrObexSocket</a></b> ()</li>
+<li><div class="fn"/>uint <b><a href="qirobexsocket.html#address">address</a></b> () const</li>
+<li><div class="fn"/>virtual bool <b><a href="qirobexsocket.html#connect">connect</a></b> ()</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qirobexsocket.html#service">service</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qirobexsocket.html#setAddress">setAddress</a></b> ( uint <i>addr</i> )</li>
+<li><div class="fn"/>void <b><a href="qirobexsocket.html#setService">setService</a></b> ( const QString &amp; <i>service</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>5 public functions inherited from <a href="qobexsocket.html#public-functions">QObexSocket</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QIrObexSocket class represents an Infrared OBEX connection.</p>
+<p>This allows the use of the OBEX protocol over an Infrared connection. For example, a QIrObexSocket object could be used to create a <a href="qobexpushclient.html">QObexPushClient</a> object in order to push file objects over an Infrared transport connection.</p>
+<p>See also <a href="qirobexserver.html">QIrObexServer</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QIrObexSocket"></a>QIrObexSocket::QIrObexSocket ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs an new (invalid) Infrared OBEX socket with parent object <i>parent</i>.</p>
+<h3 class="fn"><a name="QIrObexSocket-2"></a>QIrObexSocket::QIrObexSocket ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, uint <i>addr</i> = 0, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new Infrared OBEX socket. The <i>service</i> specifies the service to connect to. The <i>addr</i> specifies the address of the remote device to connect to. If the address is 0, all devices are searched and the first one found will be connected to. The <i>parent</i> specifies the parent object.</p>
+<p>See also <a href="qirobexsocket.html#service">service</a>() and <a href="qirobexsocket.html#address">address</a>().</p>
+<h3 class="fn"><a name="dtor.QIrObexSocket"></a>QIrObexSocket::~QIrObexSocket ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroys the socket.</p>
+<h3 class="fn"><a name="address"></a>uint QIrObexSocket::address () const</h3>
+<p>Returns the address of the remote device to connect to.</p>
+<p>See also <a href="qirobexsocket.html#setAddress">setAddress</a>().</p>
+<h3 class="fn"><a name="connect"></a>bool QIrObexSocket::connect ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Tries to establish a connection to the remote device. Returns true if the connection was established successfully, and false otherwise.</p>
+<p><b>NOTE:</b> This call is blocking. Single-threaded applications might freeze for the duration of this call.</p>
+<p>Reimplemented from <a href="qobexsocket.html#connect">QObexSocket</a>.</p>
+<h3 class="fn"><a name="service"></a>const <a href="qstring.html">QString</a> &amp; QIrObexSocket::service () const</h3>
+<p>Returns the service name on the remote device to connect to.</p>
+<p>See also <a href="qirobexsocket.html#setService">setService</a>().</p>
+<h3 class="fn"><a name="setAddress"></a>void QIrObexSocket::setAddress ( uint <i>addr</i> )</h3>
+<p>Sets the <i>addr</i> address of the remote device to connect to, if the address is 0, all devices are searched and the first one found will be connected to.</p>
+<p>See also <a href="qirobexsocket.html#address">address</a>().</p>
+<h3 class="fn"><a name="setService"></a>void QIrObexSocket::setService ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )</h3>
+<p>Sets the <i>service</i> name to connect to on the remote device.</p>
+<p>See also <a href="qirobexsocket.html#service">service</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qtopia 4.2.4</div></td>
+</tr></table></div></address></body>
+</html>

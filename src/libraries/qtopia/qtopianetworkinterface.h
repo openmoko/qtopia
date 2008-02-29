@@ -122,15 +122,7 @@ public:
 struct QTOPIA_EXPORT QtopiaNetworkFactoryIface
 {
     virtual ~QtopiaNetworkFactoryIface();
-    /*!
-      Returns the instance of network interface defined by this plugin.
-      Multiple calls to this function will return several instances.
-    */
     virtual QPointer<QtopiaNetworkInterface> network(const QString& handle) = 0;
-
-    /*!
-      Returns all types of network interfaces that this plugin can handle.
-    */
     virtual QtopiaNetwork::Type type() const = 0;
 };
 

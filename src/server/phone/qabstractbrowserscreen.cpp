@@ -23,11 +23,16 @@
 
 /*!
   \class QAbstractBrowserScreen
-  \group QtopiaServer::PhoneUI::TTSmartPhone
   \brief The QAbstractBrowserScreen class allows developers to replace the "application browser screen" portion of the Phone UI.
 
-  The application browser is the portion of the phone UI that users navigate
+  The application browser is part of the \l {QtopiaServerApplication#qtopia-server-widgets}{server widgets framework}
+  and represents the portion of the phone UI that users navigate
   through to launch applications or view their documents.
+  
+  A small tutorial on how to develop new server widgets using one of the abstract widgets as base can
+  be found in QAbstractServerInterface class documentation.
+
+  \ingroup QtopiaServer::PhoneUI::TTSmartPhone
  */
 
 /*!

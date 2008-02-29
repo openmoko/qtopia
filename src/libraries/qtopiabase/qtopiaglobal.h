@@ -100,6 +100,19 @@
 #   define QTOPIAPRINTING_EXPORT QTOPIA_VISIBILITY
 #endif
 
+// This macro exports symbols only when building a test-enabled build.
+// Use this to make private classes available for test.
+
+#ifdef QTOPIA_TEST
+#   ifndef QTOPIA_AUTOTEST_EXPORT
+#       define QTOPIA_AUTOTEST_EXPORT QTOPIA_VISIBILITY
+#   endif
+#else
+#   ifndef QTOPIA_AUTOTEST_EXPORT
+#       define QTOPIA_AUTOTEST_EXPORT
+#   endif
+#endif
+
 // This is the magic that lets Qt and Qtopia plugins be compiled for singleexec
 
 #ifndef SINGLE_EXEC

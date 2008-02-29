@@ -90,9 +90,9 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
     camcat = QLatin1String("Camera");
     // Ensure the Camera system categoy exists
     QCategoryManager catman("Documents");
-    catman.addCategory(camcat, camcat, QString(), false, true);
-    if(!catman.isSystem(camcat))
-        catman.setSystem(camcat);
+    // For new code a more unique id should be used instead of using the untranslated text
+    // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
+    catman.ensureSystemCategory(camcat, camcat);
 
     new CameraService(this);
 

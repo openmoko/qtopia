@@ -23,11 +23,15 @@
 
 /*!
   \class QAbstractDialerScreen
-  \group QtopiaServer::PhoneUI::TTSmartPhone
   \brief The QAbstractDialerScreen class allows developers to replace the "dialer screen" portion of the Phone UI.
 
-  The QAbstractDialerScreen interface allows developers to replace the standard
-  touchscreen or quick dialers in Qtopia's phone UI.
+  The QAbstractDialerScreen interface is part of the 
+  \l {QtopiaServerApplication#qtopia-server-widgets}{server widgets framework} and allows developers 
+  to replace the standard touchscreen or quick dialers in Qtopia's phone UI.  
+  A small tutorial on how to develop new server widgets using one of the abstract widgets as base can
+  be found in QAbstractServerInterface class documentation.
+  
+  \ingroup QtopiaServer::PhoneUI::TTSmartPhone
  */
 
 /*!

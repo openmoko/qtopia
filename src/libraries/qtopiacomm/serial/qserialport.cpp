@@ -88,6 +88,7 @@ public:
 
 /*!
     \class QSerialPort
+    \mainclass
     \brief The QSerialPort class provides a simple serial device interface.
     \ingroup io
     \ingroup telephony::serial
@@ -99,7 +100,7 @@ public:
     The recommended way to create an instance of this class is to
     call the QSerialPort::create() method.
 
-    \sa QSerialIODevice
+    \sa QSerialPort::create(), QSerialIODevice
 */
 
 /*!
@@ -116,9 +117,9 @@ public:
     as the multiplexing mechanism has its own method of tracking
     status changes that does not require the use of a timeout.
 
-    The device name is usually something like "/dev/ttyS0", but it can
-    have the special form "sim:hostname", where "hostname" is the name
-    of a host running a phone simulator daemon (usually localhost).
+    The device name is usually something like \c{/dev/ttyS0}, but it can
+    have the special form \c{sim:hostname}, where \c hostname is the name
+    of a host running a phone simulator daemon (usually \c localhost).
     The phone simulator mode is intended for debugging purposes only.
 */
 QSerialPort::QSerialPort( const QString& device, int rate, bool trackStatus )
@@ -355,7 +356,7 @@ void QSerialPort::close()
 }
 
 /*!
-    Flush all buffered data to the physical serial device.
+    Returns true if able to flush all buffered data to the physical serial device; otherwise returns false.
 */
 bool QSerialPort::flush()
 {
@@ -368,8 +369,7 @@ bool QSerialPort::flush()
 }
 
 /*!
-    Wait up to \a msecs milliseconds for the serial device to
-    have data ready to read.
+    \reimp
 */
 bool QSerialPort::waitForReadyRead(int msecs)
 {
@@ -391,7 +391,7 @@ bool QSerialPort::waitForReadyRead(int msecs)
 }
 
 /*!
-    Return the number of bytes that are currently waiting to be read.
+    \reimp
 */
 qint64 QSerialPort::bytesAvailable() const
 {
@@ -413,8 +413,7 @@ qint64 QSerialPort::bytesAvailable() const
 }
 
 /*!
-    Read bytes from the serial port into the buffer \a data.
-    Up to \a maxlen bytes of data will be read.
+    \reimp
 */
 qint64 QSerialPort::readData( char *data, qint64 maxlen )
 {
@@ -450,7 +449,7 @@ qint64 QSerialPort::readData( char *data, qint64 maxlen )
 
 
 /*!
-    Write \a len bytes from the buffer \a data to the serial port.
+    \reimp
 */
 qint64 QSerialPort::writeData( const char *data, qint64 len )
 {
@@ -479,7 +478,7 @@ qint64 QSerialPort::writeData( const char *data, qint64 len )
 
 
 /*!
-    Get the serial device's baud rate.
+    \reimp
 */
 int QSerialPort::rate() const
 {
@@ -487,8 +486,10 @@ int QSerialPort::rate() const
 }
 
 /*!
-    Get the state of CTS/RTS flow control on the serial device.
+    Returns the state of CTS/RTS flow control on the serial device.
     The default value is false.
+
+    \sa setFlowControl()
 */
 bool QSerialPort::flowControl() const
 {
@@ -496,9 +497,11 @@ bool QSerialPort::flowControl() const
 }
 
 /*!
-    Set the state of CTS/RTS flow control on the serial device to \a value.
+    Sets the state of CTS/RTS flow control on the serial device to \a value.
     This must be called before QSerialPort::open().  Changes to
     the value after opening will be ignored.
+
+    \sa flowControl()
 */
 void QSerialPort::setFlowControl( bool value )
 {
@@ -506,8 +509,21 @@ void QSerialPort::setFlowControl( bool value )
 }
 
 /*!
-    Determine if tty devices should be kept open on a zero-byte read.
-    The default value is true.  For RFCOMM sockets, this should be false.
+    Returns true if tty devices should be kept open on a zero-byte read; otherwise returns false.
+    The default value is true.
+
+    Some serial devices return zero bytes when there is no data available,
+    instead of returning the system error \c EWOULDBLOCK.  When keepOpen()
+    is true, a zero-byte read will be treated the same as \c EWOULDBLOCK.
+    When keepOpen() is false, a zero-byte read will be interpreted as an
+    unrecoverable error and the serial port will be closed.
+
+    For Bluetooth RFCOMM sockets, keepOpen() should be false.
+
+    The keepOpen() state is ignored if the underlying serial device is a
+    socket connection to a phone simulator.
+
+    \sa setKeepOpen()
 */
 bool QSerialPort::keepOpen() const
 {
@@ -515,8 +531,20 @@ bool QSerialPort::keepOpen() const
 }
 
 /*!
-    Set the keep open flag to \a value.  The default value is true.
-    For RFCOMM sockets, this should be false.
+    Sets the keep open flag to \a value.  The default value is true.
+
+    Some serial devices return zero bytes when there is no data available,
+    instead of returning the system error \c EWOULDBLOCK.  When \a value
+    is true, a zero-byte read will be treated the same as \c EWOULDBLOCK.
+    When \a value is false, a zero-byte read will be interpreted as an
+    unrecoverable error and the serial port will be closed.
+
+    For Bluetooth RFCOMM sockets, \a value should be false.
+
+    The state of \a value is ignored if the underlying serial device is a
+    socket connection to a phone simulator.
+
+    \sa keepOpen()
 */
 void QSerialPort::setKeepOpen( bool value )
 {
@@ -524,7 +552,7 @@ void QSerialPort::setKeepOpen( bool value )
 }
 
 /*!
-    Get the current state of the DTR modem status line.
+    \reimp
 */
 bool QSerialPort::dtr() const
 {
@@ -532,7 +560,7 @@ bool QSerialPort::dtr() const
 }
 
 /*!
-    Set the state of the DTR modem status line to \a value.
+    \reimp
 */
 void QSerialPort::setDtr( bool value )
 {
@@ -549,7 +577,7 @@ void QSerialPort::setDtr( bool value )
 }
 
 /*!
-    Get the current state of the DSR modem status line.
+    \reimp
 */
 bool QSerialPort::dsr() const
 {
@@ -564,7 +592,7 @@ bool QSerialPort::dsr() const
 }
 
 /*!
-    Get the current state of the DCD (carrier) modem status line.
+    \reimp
 */
 bool QSerialPort::carrier() const
 {
@@ -579,7 +607,7 @@ bool QSerialPort::carrier() const
 }
 
 /*!
-    Get the current state of the RTS modem status line.
+    \reimp
 */
 bool QSerialPort::rts() const
 {
@@ -587,7 +615,7 @@ bool QSerialPort::rts() const
 }
 
 /*!
-    Set the state of the RTS modem status line to \a value.
+    \reimp
 */
 void QSerialPort::setRts( bool value )
 {
@@ -604,7 +632,7 @@ void QSerialPort::setRts( bool value )
 }
 
 /*!
-    Get the current state of the CTS modem status line.
+    \reimp
 */
 bool QSerialPort::cts() const
 {
@@ -619,9 +647,7 @@ bool QSerialPort::cts() const
 }
 
 /*!
-    Discard pending buffered data without transmitting it.  The companion
-    function QIODevice::flush() waits for the buffers to empty.  This function
-    will do nothing if the underlying implementation cannot discard buffers.
+    \reimp
 */
 void QSerialPort::discard()
 {
@@ -633,7 +659,7 @@ void QSerialPort::discard()
 }
 
 /*!
-    Determine if this device is valid.
+    \reimp
 */
 bool QSerialPort::isValid() const
 {
@@ -649,6 +675,7 @@ bool QSerialPort::isValid() const
 
     This class overrides QSerialIODevice::run() to run pppd directly on the
     underlying device name so that it isn't necessary to create a pseudo-tty.
+    This is generally more efficient for running pppd.
 */
 QProcess *QSerialPort::run( const QStringList& arguments,
                               bool addPPPdOptions )
@@ -714,11 +741,16 @@ void QSerialPort::pppdDestroyed()
 }
 
 /*!
-    Create and open a serial device from a \a name of the form "device:rate".
+    Create and open a serial device from a \a name of the form \c{device:rate}.
     Returns NULL if the device could not be opened.  The \a defaultRate
-    parameter indicates the default rate to use if ":rate" was not included
+    parameter indicates the default rate to use if \c{:rate} was not included
     in the device name.  If \a flowControl is true, then CTS/RTS flow
     control should be enabled on the device.
+
+    The \a name parameter can have the special form \c{sim:hostname},
+    where \c hostname is the name of a host running a phone simulator daemon
+    (usually \c localhost).  The phone simulator mode is intended for
+    debugging purposes only.
 */
 QSerialPort *QSerialPort::create( const QString& name, int defaultRate,
                                     bool flowControl )

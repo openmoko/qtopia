@@ -30,7 +30,7 @@
 #include <qmediawidgets.h>
 #include <qmediahelixsettingscontrol.h>
 #include <qmediavideocontrol.h>
-#include <keyhold.h>
+#include <private/keyhold_p.h>
 
 #ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>

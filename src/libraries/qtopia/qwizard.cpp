@@ -38,6 +38,7 @@
 
 /*!
   \class QWizard
+  \mainclass
   \brief The QWizard class provides a simple wizard implementation
 
   To use the Wizard follow these steps:
@@ -54,6 +55,12 @@
 
   Note: if one page of the wizard has controls which enable and disable other pages
   use connectPageEnabler instead of calling setAppropriate manually.
+
+  In Qtopia 4.2, this class is in the Qtopia libraries.
+  In Qtopia 4.3 and subsequent releases, a rewritten class of the same name
+  is part of the Qtopia Core libraries. Usage of this class with Qtopia 4.2
+  will therefore require porting to work with Qtopia 4.3. Porting documentation
+  in provided in the Qtopia 4.3 packaging.
 
   \ingroup dialogs
 */

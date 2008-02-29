@@ -272,7 +272,32 @@ bool QPasswordWidget::eventFilter( QObject *obj, QEvent *e )
     return false;
 }
 
+/*!
+    \class QPasswordDialog
+    \mainclass
 
+    \brief The QPasswordDialog class provides a dialog widget for inputting a password.
+*/
+
+/*!
+    \enum QPasswordDialog::InputMode
+
+    This enum describes the various input modes. The input mode for a dialog
+    is used to specify how the password is returned (encrypted or plain text),
+    as well as other UI differences if the dialog is shown using \l {QPasswordDialog::}{getPassword()}.
+
+    \value Crypted  Password will be returned one-way encrypted (using MD5). If the dialog is shown 
+                    using \l {QPasswordDialog::}{getPassword()}, it will be maximized.
+    \value Plain  Password will be returned as plain text. If the dialog is shown 
+                    using \l {QPasswordDialog::}{getPassword()}, it will \bold not be maximized.
+    \value Pin  Same as Plain, but '#' can also be used to accept the dialog.
+*/
+
+/*!
+    Constructs a new QPasswordDialog with the given \a parent and widget \a flags.
+
+    The input mode for the dialog is set by default to \l {Crypted}.
+*/
 QPasswordDialog::QPasswordDialog( QWidget* parent, Qt::WFlags flags)
     : QDialog( parent, flags )
 {
@@ -293,35 +318,59 @@ QPasswordDialog::QPasswordDialog( QWidget* parent, Qt::WFlags flags)
              this, SLOT(accept()) );
 }
 
+/*!
+    Destroys the QPasswordDialog.
+*/
 QPasswordDialog::~QPasswordDialog()
 {
 }
 
+/*!
+    Sets the \a prompt to be displayed by the dialog.
+*/
 void QPasswordDialog::setPrompt(const QString& prompt)
 {
     m_passw->setPrompt( prompt );
 }
 
+/*!
+    Returns the prompt used by the dialog.
+*/
 QString QPasswordDialog::prompt() const
 {
     return m_passw->prompt->text();
 }
 
+/*!
+    Sets the input mode for the dialog to \a mode.
+*/
 void QPasswordDialog::setInputMode( QPasswordDialog::InputMode mode )
 {
     m_passw->mode = mode;
 }
 
+/*!
+    Returns the input mode used by the dialog.
+*/
 QPasswordDialog::InputMode QPasswordDialog::inputMode() const
 {
     return m_passw->mode;
 }
 
+/*!
+    Resets any password previously entered in the dialog.
+*/
 void QPasswordDialog::reset()
 {
     m_passw->reset();
 }
 
+/*!
+    Returns the password entered in the dialog.
+
+    If the input mode is \l {Crypted}, the password will be returned one-way encrypted (using MD5);
+    otherwise it will be returned as plain text.
+*/
 QString QPasswordDialog::password() const
 {
     return m_passw->password();
@@ -329,18 +378,17 @@ QString QPasswordDialog::password() const
 
 
 /*!
-  Returns a crypted password entered by the user when prompted with \a prompt.
-  \a mode specifies whether the returned password is one-way encrypted or
-  plain text. If the operation is required to accept more than one password, for example,
-  if accepting an old password and a new password, set \a last to false to set the context label to Next.
+  Creates and displays a password dialog with the given \a parent and \a prompt; returns the entered password.
+  
+  \a mode specifies whether the returned password is one-way encrypted (using MD5) or
+  plain text. It also determines whether or not the dialog will be maximized. 
+  If the operation is required to accept more than one password -- for example,
+  if accepting an old password and a new password -- set \a last to false to set the context label to 'Next'.
 
-  The returned value is QString() if the user cancels the operation,
-  or the empty string if the user enters no password (but confirms the
+  The returned value is a null string if the user cancels the operation,
+  or an empty string if the user enters no password (but confirms the
   dialog).
-
-  The \a parent argument specifies the QWidget parent.
 */
-
 QString QPasswordDialog::getPassword( QWidget* parent,
                                       const QString& prompt,
                                       InputMode mode,
@@ -373,13 +421,12 @@ QString QPasswordDialog::getPassword( QWidget* parent,
 
 
 /*!
+  \obsolete
   Prompt, fullscreen, for the user's passcode until they get it right.
 
   If \a atPowerOn is true, the dialog is only used if the user's
-  preference request it at poweron; either way, the screen is always repainted
-  by this function.  (this functionality may move to the caller of this function).
+  preference request it at poweron.
 */
-
 void QPasswordDialog::authenticateUser( QWidget* parent, bool atPowerOn )
 {
     QSettings cfg( "Trolltech", "Security" );
@@ -412,6 +459,10 @@ void QPasswordDialog::authenticateUser( QWidget* parent, bool atPowerOn )
     }
 }
 
+/*!
+    \obsolete
+    Returns true if \a text matches the user's passcode; otherwise returns false.
+*/
 bool QPasswordDialog::authenticateUser(const QString &text)
 {
     QSettings cfg("Trolltech","Security");

@@ -863,7 +863,7 @@ void QAbstractCommDeviceManager_Private::closeAllSessions()
     the device is brought up automatically.  Once all sessions are closed, the device
     can be brought down automatically if required to conserve power.
 
-    \sa QCommDeviceSession
+    \sa QCommDeviceSession, QCommDeviceController
  */
 
 /*!
@@ -871,6 +871,8 @@ void QAbstractCommDeviceManager_Private::closeAllSessions()
     the UNIX socket path for the manager to listen on.  This should usually be
     in Qtopia temp directory.  The \a devId contains the unique device identifier,
     e.g. irda0 or hci0.  The \a parent contains the QObject parent.
+
+    \sa serverPath(), deviceId()
 */
 QAbstractCommDeviceManager::QAbstractCommDeviceManager(const QByteArray &path,
         const QByteArray &devId, QObject *parent) : QObject(parent)
@@ -888,7 +890,9 @@ QAbstractCommDeviceManager::~QAbstractCommDeviceManager()
 }
 
 /*!
-    Starts the manager.
+    Returns if able to start the manager; otherwise returns false.
+
+    \sa isStarted(), stop()
 */
 bool QAbstractCommDeviceManager::start()
 {
@@ -897,6 +901,8 @@ bool QAbstractCommDeviceManager::start()
 
 /*!
     Returns true if the manager is started, false otherwise.
+
+    \sa start(), stop()
 */
 bool QAbstractCommDeviceManager::isStarted() const
 {
@@ -905,6 +911,8 @@ bool QAbstractCommDeviceManager::isStarted() const
 
 /*!
     Stops the manager.
+
+    \sa isStarted(), start()
 */
 void QAbstractCommDeviceManager::stop()
 {
@@ -913,6 +921,8 @@ void QAbstractCommDeviceManager::stop()
 
 /*!
     Returns the UNIX server socket path of the device.
+
+    \sa deviceId()
 */
 const QByteArray &QAbstractCommDeviceManager::serverPath() const
 {
@@ -921,6 +931,8 @@ const QByteArray &QAbstractCommDeviceManager::serverPath() const
 
 /*!
     Returns the unique device id of the device this manager is responsible for.
+
+    \sa serverPath()
 */
 const QByteArray &QAbstractCommDeviceManager::deviceId() const
 {
@@ -990,6 +1002,8 @@ bool QAbstractCommDeviceManager::shouldBringDown(QUnixSocket *socket) const
     Clients should reimplement this method to bring down the device.  If the operation
     is successful, clients should emit the downStatus signal.  If an error occurred,
     the downStatus signal should be emitted with error set to true.
+
+    \sa downStatus()
 */
 
 /*!
@@ -997,6 +1011,8 @@ bool QAbstractCommDeviceManager::shouldBringDown(QUnixSocket *socket) const
 
     Clients should reimplement this method to return true if the device is currently
     available, and false otherwise.
+
+    \sa bringUp(), bringDown()
 */
 
 /*!
@@ -1006,6 +1022,8 @@ bool QAbstractCommDeviceManager::shouldBringDown(QUnixSocket *socket) const
     If the operation succeeds, the \a error parameter should be set to false.  Otherwise
     the \a error paramter should be set to true and the \a msg paramter can contain an
     optional error message.
+
+    \sa bringUp()
 */
 
 /*!
@@ -1015,6 +1033,8 @@ bool QAbstractCommDeviceManager::shouldBringDown(QUnixSocket *socket) const
     If the operation succeeds, the \a error parameter should be set to false.  Otherwise
     the \a error paramter should be set to true and the \a msg paramter can contain an
     optional error message.
+
+    \sa bringDown()
 */
 
 #include "qabstractdevicemanager.moc"

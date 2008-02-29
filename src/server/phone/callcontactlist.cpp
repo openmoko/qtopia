@@ -467,6 +467,8 @@ void CallContactView::updateMenu(const QModelIndex& current, const QModelIndex& 
     CallContactItem* cci = cclm->itemAt(current);
     if (!cci)
         return;
+    if (cci->number().trimmed().isEmpty())
+        return;
 
     QContactModel::Field fieldType = cci->fieldType();
     if ( fieldType == QContactModel::HomeMobile ||
