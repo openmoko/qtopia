@@ -1,4 +1,4 @@
-Files: bin/example apps/Applications/example.desktop pics/Example.png help/html/example.html
+Files: bin/example apps/Applications/example.desktop pics/example/Example.png help/html/example.html
 Priority: optional
 Section: qpe/applications
 Maintainer: Your Name <you@your.domain.com>

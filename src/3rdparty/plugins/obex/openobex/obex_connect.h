@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*********************************************************************
  *                
  * Filename:      obex_connect.h
@@ -6,7 +27,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Wed May  5 11:55:41 1999
- * CVS ID:        $Id: obex_connect.h,v 1.3 2000/12/01 13:21:16 pof Exp $
+ * CVS ID:        $Id: obex_connect.h,v 1.4 2002/10/28 21:51:18 holtmann Exp $
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -32,8 +53,8 @@
 
 #include "obex_main.h"
 
-gint obex_insert_connectframe(obex_t *self, obex_object_t *object);
-gint obex_parse_connect_header(obex_t *self, GNetBuf *msg);
+int obex_insert_connectframe(obex_t *self, obex_object_t *object);
+int obex_parse_connect_header(obex_t *self, GNetBuf *msg);
 
 #endif
 

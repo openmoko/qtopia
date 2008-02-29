@@ -1,22 +1,38 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************//*
+**********************************************************************/
+/*
  * KAsteroids - Copyright (c) Martin R. Jones 1997
  *
  * Part of the KDE project
@@ -33,11 +49,15 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define IMG_BACKGROUND "qasteroids/bg.png"
+#define IMG_BACKGROUND "qasteroids/bg"
 
 #define REFRESH_DELAY           33
 #define SHIP_SPEED              0.3
-#define MISSILE_SPEED           10.0
+#ifndef QTOPIA_PHONE
+# define MISSILE_SPEED           10.0
+#else
+# define MISSILE_SPEED           6.0
+#endif
 #define SHIP_STEPS              64
 #define ROTATE_RATE             2
 #define SHIELD_ON_COST          1
@@ -101,7 +121,7 @@ KAsteroidsView::KAsteroidsView( QWidget *parent, const char *name )
     field.setBackgroundPixmap( pm );
 
     textSprite = new QCanvasText( &field );
-    QFont font( "helvetica", 14 );
+    QFont font( "helvetica", 12 );
     textSprite->setFont( font );
 
     shield = 0;
@@ -115,10 +135,11 @@ KAsteroidsView::KAsteroidsView( QWidget *parent, const char *name )
     mTimerId = -1;
 
     shipPower = MAX_POWER_LEVEL;
-    vitalsChanged = TRUE;
+    vitalsChanged = FALSE;
     can_destroy_powerups = FALSE;
 
     mPaused = TRUE;
+    gameover = TRUE;
 }
 
 // - - -
@@ -144,7 +165,6 @@ void KAsteroidsView::reset()
     powerupSpeed = 1.0;
     mFrameNum = 0;
     mPaused = FALSE;
-    gameover = FALSE;
 
     ship->hide();
     shield->hide();
@@ -160,6 +180,7 @@ void KAsteroidsView::reset()
 
 void KAsteroidsView::newGame()
 {
+    gameover = FALSE;
     if ( shieldOn )
     {
       shield->hide();
@@ -308,7 +329,7 @@ void KAsteroidsView::addRocks( int num )
 
 void KAsteroidsView::showText( const QString &text, const QColor &color, bool scroll )
 {
-    textSprite->setTextFlags( AlignLeft | AlignVCenter );
+    textSprite->setTextFlags( AlignLeft | AlignVCenter);
     textSprite->setText( text );
     textSprite->setColor( color );
 
@@ -424,7 +445,12 @@ void KAsteroidsView::wrapSprite( QCanvasItem *s )
 void KAsteroidsView::rockHit( QCanvasItem *hit )
 {
     KPowerup *nPup = 0;
-    int rnd = static_cast<int>(randDouble()*30.0) % 30;
+#ifdef QTOPIA_PHONE
+    const int range = 60;
+#else
+    const int range = 30;
+#endif
+    int rnd = static_cast<int>(randDouble()*range) % range;
     switch( rnd )
     {
       case 4:
@@ -496,7 +522,8 @@ void KAsteroidsView::rockHit( QCanvasItem *hit )
 		emit rockHit( 1 );
 	    }
 
-	    nrock->move( hit->x(), hit->y(), 0 );
+	    int rockOffs = nrock->boundingRect().width()/4;
+	    nrock->move( hit->x()+addx[i]*rockOffs, hit->y()+addy[i]*rockOffs, 0 );
 	    nrock->setVelocity( dx+addx[i]*rockSpeed+r, dy+addy[i]*rockSpeed+r );
 	    nrock->setFrame( randInt( nrock->frameCount() ) );
 	    nrock->show( );
@@ -757,15 +784,24 @@ void KAsteroidsView::processShip()
 
 	if ( shootShip )
 	{
-	    if ( !shootDelay && (int)missiles.count() < mShootCount + 2 )
+#ifndef QTOPIA_PHONE
+	    int maxMissiles = mShootCount + 2;
+#else
+	    int maxMissiles = mShootCount + 1;
+#endif
+	    if ( !shootDelay && (int)missiles.count() < maxMissiles )
 	    {
 	      KMissile *missile = new KMissile( animation[ID_MISSILE], &field );
+#ifdef QTOPIA_PHONE
+	      missile->setExpiry(12);
+#endif
 	      missile->move( 11+ship->x()+cosangle*11,
 			     11+ship->y()+sinangle*11, 0 );
 	      missile->setVelocity( shipDx + cosangle*MISSILE_SPEED,
 				    shipDy + sinangle*MISSILE_SPEED );
 	      missile->show( );
 	      missiles.append( missile );
+	      emit missileFired();
 	      shotsFired++;
 	      reducePower( 1 );
 

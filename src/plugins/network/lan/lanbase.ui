@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>278</width>
+            <width>270</width>
             <height>393</height>
         </rect>
     </property>
@@ -120,7 +120,7 @@
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>Configure IP automatically (DHCP)</string>
+                            <string>IP via DHCP</string>
                         </property>
                     </widget>
                     <widget row="1"  column="0"  rowspan="1"  colspan="2" >
@@ -691,4 +691,30 @@
         <slot>setEnabled(bool)</slot>
     </connection>
 </connections>
+<tabstops>
+    <tabstop>wlan_infrastructure</tabstop>
+    <tabstop>wlan_ssid</tabstop>
+    <tabstop>wlan_channel</tabstop>
+    <tabstop>wep_type</tabstop>
+    <tabstop>wep_passphrase_on</tabstop>
+    <tabstop>wep_key0_on</tabstop>
+    <tabstop>wep_key1_on</tabstop>
+    <tabstop>wep_key2_on</tabstop>
+    <tabstop>wep_key3_on</tabstop>
+    <tabstop>wep_passphrase</tabstop>
+    <tabstop>wep_key0</tabstop>
+    <tabstop>wep_key1</tabstop>
+    <tabstop>wep_key2</tabstop>
+    <tabstop>wep_key3</tabstop>
+    <tabstop>tabs</tabstop>
+    <tabstop>acname</tabstop>
+    <tabstop>manualIP</tabstop>
+    <tabstop>autoIP</tabstop>
+    <tabstop>ip</tabstop>
+    <tabstop>gateway</tabstop>
+    <tabstop>subnet</tabstop>
+    <tabstop>broadcast</tabstop>
+    <tabstop>dns2</tabstop>
+    <tabstop>dns1</tabstop>
+</tabstops>
 </UI>

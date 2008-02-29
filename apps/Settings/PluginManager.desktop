@@ -1,7 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Plugin Manager
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=pluginmanager
 Icon=PluginManager
-Name=Plugin Manager
-Name[ja]=プラグインマネージャ
+Name[]=Plug­in Man­ager
 CanFastload=0

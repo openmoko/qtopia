@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "avformat.h"
+#include "mpegts.h"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -72,74 +73,76 @@ typedef enum {
   RTCP_SDES_SOURCE = 11
 } rtcp_sdes_type_t;
 
-enum RTPPayloadType {
-    RTP_PT_ULAW = 0,
-    RTP_PT_GSM = 3,
-    RTP_PT_G723 = 4,
-    RTP_PT_ALAW = 8,
-    RTP_PT_S16BE_STEREO = 10,
-    RTP_PT_S16BE_MONO = 11,
-    RTP_PT_MPEGAUDIO = 14,
-    RTP_PT_JPEG = 26,
-    RTP_PT_H261 = 31,
-    RTP_PT_MPEGVIDEO = 32,
-    RTP_PT_MPEG2TS = 33,
-    RTP_PT_H263 = 34, /* old H263 encapsulation */
-    RTP_PT_PRIVATE = 96,
-};
-
-typedef struct RTPContext {
+struct RTPDemuxContext {
+    AVFormatContext *ic;
+    AVStream *st;
     int payload_type;
-    UINT32 ssrc;
-    UINT16 seq;
-    UINT32 timestamp;
-    UINT32 base_timestamp;
-    UINT32 cur_timestamp;
+    uint32_t ssrc;
+    uint16_t seq;
+    uint32_t timestamp;
+    uint32_t base_timestamp;
+    uint32_t cur_timestamp;
     int max_payload_size;
+    MpegTSContext *ts; /* only used for RTP_PT_MPEG2TS payloads */
+    int read_buf_index;
+    int read_buf_size;
+    
     /* rtcp sender statistics receive */
-    INT64 last_rtcp_ntp_time;
-    UINT32 last_rtcp_timestamp;
+    int64_t last_rtcp_ntp_time;
+    int64_t first_rtcp_ntp_time;
+    uint32_t last_rtcp_timestamp;
     /* rtcp sender statistics */
     unsigned int packet_count;
     unsigned int octet_count;
     unsigned int last_octet_count;
     int first_packet;
     /* buffer for output */
-    UINT8 buf[RTP_MAX_PACKET_LENGTH];
-    UINT8 *buf_ptr;
-} RTPContext;
+    uint8_t buf[RTP_MAX_PACKET_LENGTH];
+    uint8_t *buf_ptr;
+};
 
 int rtp_get_codec_info(AVCodecContext *codec, int payload_type)
 {
     switch(payload_type) {
     case RTP_PT_ULAW:
+        codec->codec_type = CODEC_TYPE_AUDIO;
         codec->codec_id = CODEC_ID_PCM_MULAW;
         codec->channels = 1;
         codec->sample_rate = 8000;
         break;
     case RTP_PT_ALAW:
+        codec->codec_type = CODEC_TYPE_AUDIO;
         codec->codec_id = CODEC_ID_PCM_ALAW;
         codec->channels = 1;
         codec->sample_rate = 8000;
         break;
     case RTP_PT_S16BE_STEREO:
+        codec->codec_type = CODEC_TYPE_AUDIO;
         codec->codec_id = CODEC_ID_PCM_S16BE;
         codec->channels = 2;
         codec->sample_rate = 44100;
         break;
     case RTP_PT_S16BE_MONO:
+        codec->codec_type = CODEC_TYPE_AUDIO;
         codec->codec_id = CODEC_ID_PCM_S16BE;
         codec->channels = 1;
         codec->sample_rate = 44100;
         break;
     case RTP_PT_MPEGAUDIO:
+        codec->codec_type = CODEC_TYPE_AUDIO;
         codec->codec_id = CODEC_ID_MP2;
         break;
     case RTP_PT_JPEG:
+        codec->codec_type = CODEC_TYPE_VIDEO;
         codec->codec_id = CODEC_ID_MJPEG;
         break;
     case RTP_PT_MPEGVIDEO:
+        codec->codec_type = CODEC_TYPE_VIDEO;
         codec->codec_id = CODEC_ID_MPEG1VIDEO;
+        break;
+    case RTP_PT_MPEG2TS:
+        codec->codec_type = CODEC_TYPE_DATA;
+        codec->codec_id = CODEC_ID_MPEG2TS;
         break;
     default:
         return -1;
@@ -169,7 +172,7 @@ int rtp_get_payload_type(AVCodecContext *codec)
         }
         break;
     case CODEC_ID_MP2:
-    case CODEC_ID_MP3LAME:
+    case CODEC_ID_MP3:
         payload_type = RTP_PT_MPEGAUDIO;
         break;
     case CODEC_ID_MJPEG:
@@ -178,58 +181,102 @@ int rtp_get_payload_type(AVCodecContext *codec)
     case CODEC_ID_MPEG1VIDEO:
         payload_type = RTP_PT_MPEGVIDEO;
         break;
+    case CODEC_ID_MPEG2TS:
+        payload_type = RTP_PT_MPEG2TS;
+        break;
     default:
         break;
     }
     return payload_type;
 }
 
-static inline UINT32 decode_be32(const UINT8 *p)
+static inline uint32_t decode_be32(const uint8_t *p)
 {
     return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
-static inline UINT32 decode_be64(const UINT8 *p)
+static inline uint64_t decode_be64(const uint8_t *p)
 {
-    return ((UINT64)decode_be32(p) << 32) | decode_be32(p + 4);
+    return ((uint64_t)decode_be32(p) << 32) | decode_be32(p + 4);
 }
 
-static int rtcp_parse_packet(AVFormatContext *s1, const unsigned char *buf, int len)
+static int rtcp_parse_packet(RTPDemuxContext *s, const unsigned char *buf, int len)
 {
-    RTPContext *s = s1->priv_data;
-
     if (buf[1] != 200)
         return -1;
     s->last_rtcp_ntp_time = decode_be64(buf + 8);
+    if (s->first_rtcp_ntp_time == AV_NOPTS_VALUE)
+        s->first_rtcp_ntp_time = s->last_rtcp_ntp_time;
     s->last_rtcp_timestamp = decode_be32(buf + 16);
     return 0;
 }
 
 /**
- * Parse an RTP packet directly sent as raw data. Can only be used if
- * 'raw' is given as input file
- * @param s1 media file context
- * @param pkt returned packet
- * @param buf input buffer
- * @param len buffer len
- * @return zero if no error.
+ * open a new RTP parse context for stream 'st'. 'st' can be NULL for
+ * MPEG2TS streams to indicate that they should be demuxed inside the
+ * rtp demux (otherwise CODEC_ID_MPEG2TS packets are returned) 
  */
-int rtp_parse_packet(AVFormatContext *s1, AVPacket *pkt, 
-                     const unsigned char *buf, int len)
+RTPDemuxContext *rtp_parse_open(AVFormatContext *s1, AVStream *st, int payload_type)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s;
+
+    s = av_mallocz(sizeof(RTPDemuxContext));
+    if (!s)
+        return NULL;
+    s->payload_type = payload_type;
+    s->last_rtcp_ntp_time = AV_NOPTS_VALUE;
+    s->first_rtcp_ntp_time = AV_NOPTS_VALUE;
+    s->ic = s1;
+    s->st = st;
+    if (payload_type == RTP_PT_MPEG2TS) {
+        s->ts = mpegts_parse_open(s->ic);
+        if (s->ts == NULL) {
+            av_free(s);
+            return NULL;
+        }
+    }
+    return s;
+}
+
+/**
+ * Parse an RTP or RTCP packet directly sent as a buffer. 
+ * @param s RTP parse context.
+ * @param pkt returned packet
+ * @param buf input buffer or NULL to read the next packets
+ * @param len buffer len
+ * @return 0 if a packet is returned, 1 if a packet is returned and more can follow 
+ * (use buf as NULL to read the next). -1 if no packet (error or no more packet).
+ */
+int rtp_parse_packet(RTPDemuxContext *s, AVPacket *pkt, 
+                     const uint8_t *buf, int len)
+{
     unsigned int ssrc, h;
-    int payload_type, seq, delta_timestamp;
+    int payload_type, seq, delta_timestamp, ret;
     AVStream *st;
-    UINT32 timestamp;
+    uint32_t timestamp;
     
+    if (!buf) {
+        /* return the next packets, if any */
+        if (s->read_buf_index >= s->read_buf_size)
+            return -1;
+        ret = mpegts_parse_packet(s->ts, pkt, s->buf + s->read_buf_index, 
+                                  s->read_buf_size - s->read_buf_index);
+        if (ret < 0)
+            return -1;
+        s->read_buf_index += ret;
+        if (s->read_buf_index < s->read_buf_size)
+            return 1;
+        else
+            return 0;
+    }
+
     if (len < 12)
         return -1;
 
     if ((buf[0] & 0xc0) != (RTP_VERSION << 6))
         return -1;
     if (buf[1] >= 200 && buf[1] <= 204) {
-        rtcp_parse_packet(s1, buf, len);
+        rtcp_parse_packet(s, buf, len);
         return -1;
     }
     payload_type = buf[1] & 0x7f;
@@ -237,20 +284,6 @@ int rtp_parse_packet(AVFormatContext *s1, AVPacket *pkt,
     timestamp = decode_be32(buf + 4);
     ssrc = decode_be32(buf + 8);
     
-    if (s->payload_type < 0) {
-        s->payload_type = payload_type;
-        
-        if (payload_type == RTP_PT_MPEG2TS) {
-            /* XXX: special case : not a single codec but a whole stream */
-            return -1;
-        } else {
-            st = av_new_stream(s1, 0);
-            if (!st)
-                return -1;
-            rtp_get_codec_info(&st->codec, payload_type);
-        }
-    }
-
     /* NOTE: we can handle only one payload type */
     if (s->payload_type != payload_type)
         return -1;
@@ -263,94 +296,91 @@ int rtp_parse_packet(AVFormatContext *s1, AVPacket *pkt,
 #endif
     len -= 12;
     buf += 12;
-    st = s1->streams[0];
-    switch(st->codec.codec_id) {
-    case CODEC_ID_MP2:
-        /* better than nothing: skip mpeg audio RTP header */
-        if (len <= 4)
+
+    st = s->st;
+    if (!st) {
+        /* specific MPEG2TS demux support */
+        ret = mpegts_parse_packet(s->ts, pkt, buf, len);
+        if (ret < 0)
             return -1;
-        h = decode_be32(buf);
-        len -= 4;
-        buf += 4;
-        av_new_packet(pkt, len);
-        memcpy(pkt->data, buf, len);
-        break;
-    case CODEC_ID_MPEG1VIDEO:
-        /* better than nothing: skip mpeg audio RTP header */
-        if (len <= 4)
-            return -1;
-        h = decode_be32(buf);
-        buf += 4;
-        len -= 4;
-        if (h & (1 << 26)) {
-            /* mpeg2 */
+        if (ret < len) {
+            s->read_buf_size = len - ret;
+            memcpy(s->buf, buf + ret, s->read_buf_size);
+            s->read_buf_index = 0;
+            return 1;
+        }
+    } else {
+        switch(st->codec.codec_id) {
+        case CODEC_ID_MP2:
+            /* better than nothing: skip mpeg audio RTP header */
             if (len <= 4)
                 return -1;
+            h = decode_be32(buf);
+            len -= 4;
+            buf += 4;
+            av_new_packet(pkt, len);
+            memcpy(pkt->data, buf, len);
+            break;
+        case CODEC_ID_MPEG1VIDEO:
+            /* better than nothing: skip mpeg audio RTP header */
+            if (len <= 4)
+                return -1;
+            h = decode_be32(buf);
             buf += 4;
             len -= 4;
-        }
-        av_new_packet(pkt, len);
-        memcpy(pkt->data, buf, len);
-        break;
-    default:
-        av_new_packet(pkt, len);
-        memcpy(pkt->data, buf, len);
-        break;
-    }
-
-    if (s->last_rtcp_ntp_time != AV_NOPTS_VALUE) {
-        /* compute pts from timestamp with received ntp_time */
-        delta_timestamp = timestamp - s->last_rtcp_timestamp;
-        /* XXX: do conversion, but not needed for mpeg at 90 KhZ */
-        pkt->pts = s->last_rtcp_ntp_time + delta_timestamp;
-    }
-    return 0;
-}
-
-static int rtp_read_header(AVFormatContext *s1,
-                           AVFormatParameters *ap)
-{
-    RTPContext *s = s1->priv_data;
-    s->payload_type = -1;
-    s->last_rtcp_ntp_time = AV_NOPTS_VALUE;
-    return 0;
-}
-
-static int rtp_read_packet(AVFormatContext *s1, AVPacket *pkt)
-{
-    char buf[RTP_MAX_PACKET_LENGTH];
-    int ret;
-
-    /* XXX: needs a better API for packet handling ? */
-    for(;;) {
-        ret = url_read(url_fileno(&s1->pb), buf, sizeof(buf));
-        if (ret < 0)
-            return AVERROR_IO;
-        if (rtp_parse_packet(s1, pkt, buf, ret) == 0)
+            if (h & (1 << 26)) {
+                /* mpeg2 */
+                if (len <= 4)
+                    return -1;
+                buf += 4;
+                len -= 4;
+            }
+            av_new_packet(pkt, len);
+            memcpy(pkt->data, buf, len);
             break;
+        default:
+            av_new_packet(pkt, len);
+            memcpy(pkt->data, buf, len);
+            break;
+        }
+        
+        switch(st->codec.codec_id) {
+        case CODEC_ID_MP2:
+        case CODEC_ID_MPEG1VIDEO:
+            if (s->last_rtcp_ntp_time != AV_NOPTS_VALUE) {
+                int64_t addend;
+                /* XXX: is it really necessary to unify the timestamp base ? */
+                /* compute pts from timestamp with received ntp_time */
+                delta_timestamp = timestamp - s->last_rtcp_timestamp;
+                /* convert to 90 kHz without overflow */
+                addend = (s->last_rtcp_ntp_time - s->first_rtcp_ntp_time) >> 14;
+                addend = (addend * 5625) >> 14;
+                pkt->pts = addend + delta_timestamp;
+            }
+            break;
+        default:
+            /* no timestamp info yet */
+            break;
+        }
+        pkt->stream_index = s->st->index;
     }
     return 0;
 }
 
-static int rtp_read_close(AVFormatContext *s1)
+void rtp_parse_close(RTPDemuxContext *s)
 {
-    //    RTPContext *s = s1->priv_data;
-    return 0;
-}
-
-static int rtp_probe(AVProbeData *p)
-{
-    if (strstart(p->filename, "rtp://", NULL))
-        return AVPROBE_SCORE_MAX;
-    return 0;
+    if (s->payload_type == RTP_PT_MPEG2TS) {
+        mpegts_parse_close(s->ts);
+    }
+    av_free(s);
 }
 
 /* rtp output */
 
 static int rtp_write_header(AVFormatContext *s1)
 {
-    RTPContext *s = s1->priv_data;
-    int payload_type, max_packet_size;
+    RTPDemuxContext *s = s1->priv_data;
+    int payload_type, max_packet_size, n;
     AVStream *st;
 
     if (s1->nb_streams != 1)
@@ -374,12 +404,19 @@ static int rtp_write_header(AVFormatContext *s1)
 
     switch(st->codec.codec_id) {
     case CODEC_ID_MP2:
-    case CODEC_ID_MP3LAME:
+    case CODEC_ID_MP3:
         s->buf_ptr = s->buf + 4;
         s->cur_timestamp = 0;
         break;
     case CODEC_ID_MPEG1VIDEO:
         s->cur_timestamp = 0;
+        break;
+    case CODEC_ID_MPEG2TS:
+        n = s->max_payload_size / TS_PACKET_SIZE;
+        if (n < 1)
+            n = 1;
+        s->max_payload_size = n * TS_PACKET_SIZE;
+        s->buf_ptr = s->buf;
         break;
     default:
         s->buf_ptr = s->buf;
@@ -390,9 +427,9 @@ static int rtp_write_header(AVFormatContext *s1)
 }
 
 /* send an rtcp sender report packet */
-static void rtcp_send_sr(AVFormatContext *s1, INT64 ntp_time)
+static void rtcp_send_sr(AVFormatContext *s1, int64_t ntp_time)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s = s1->priv_data;
 #if defined(DEBUG)
     printf("RTCP: %02x %Lx %x\n", s->payload_type, ntp_time, s->timestamp);
 #endif
@@ -409,9 +446,9 @@ static void rtcp_send_sr(AVFormatContext *s1, INT64 ntp_time)
 
 /* send an rtp packet. sequence number is incremented, but the caller
    must update the timestamp itself */
-static void rtp_send_data(AVFormatContext *s1, UINT8 *buf1, int len)
+static void rtp_send_data(AVFormatContext *s1, const uint8_t *buf1, int len)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s = s1->priv_data;
 
 #ifdef DEBUG
     printf("rtp_send_data size=%d\n", len);
@@ -435,9 +472,9 @@ static void rtp_send_data(AVFormatContext *s1, UINT8 *buf1, int len)
 /* send an integer number of samples and compute time stamp and fill
    the rtp send buffer before sending. */
 static void rtp_send_samples(AVFormatContext *s1,
-                             UINT8 *buf1, int size, int sample_size)
+                             const uint8_t *buf1, int size, int sample_size)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s = s1->priv_data;
     int len, max_packet_size, n;
 
     max_packet_size = (s->max_payload_size / sample_size) * sample_size;
@@ -468,9 +505,9 @@ static void rtp_send_samples(AVFormatContext *s1,
 /* NOTE: we suppose that exactly one frame is given as argument here */
 /* XXX: test it */
 static void rtp_send_mpegaudio(AVFormatContext *s1,
-                               UINT8 *buf1, int size)
+                               const uint8_t *buf1, int size)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s = s1->priv_data;
     AVStream *st = s1->streams[0];
     int len, count, max_packet_size;
 
@@ -524,12 +561,12 @@ static void rtp_send_mpegaudio(AVFormatContext *s1,
 /* NOTE: a single frame must be passed with sequence header if
    needed. XXX: use slices. */
 static void rtp_send_mpegvideo(AVFormatContext *s1,
-                               UINT8 *buf1, int size)
+                               const uint8_t *buf1, int size)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s = s1->priv_data;
     AVStream *st = s1->streams[0];
     int len, h, max_packet_size;
-    UINT8 *q;
+    uint8_t *q;
 
     max_packet_size = s->max_payload_size;
 
@@ -560,9 +597,8 @@ static void rtp_send_mpegvideo(AVFormatContext *s1,
         q += len;
 
         /* 90 KHz time stamp */
-        /* XXX: overflow */
         s->timestamp = s->base_timestamp + 
-            (s->cur_timestamp * 90000LL * FRAME_RATE_BASE) / st->codec.frame_rate;
+            av_rescale((int64_t)s->cur_timestamp * st->codec.frame_rate_base, 90000, st->codec.frame_rate);
         rtp_send_data(s1, s->buf, q - s->buf);
 
         buf1 += len;
@@ -572,9 +608,9 @@ static void rtp_send_mpegvideo(AVFormatContext *s1,
 }
 
 static void rtp_send_raw(AVFormatContext *s1,
-                         UINT8 *buf1, int size)
+                         const uint8_t *buf1, int size)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s = s1->priv_data;
     AVStream *st = s1->streams[0];
     int len, max_packet_size;
 
@@ -586,9 +622,8 @@ static void rtp_send_raw(AVFormatContext *s1,
             len = size;
 
         /* 90 KHz time stamp */
-        /* XXX: overflow */
         s->timestamp = s->base_timestamp + 
-            (s->cur_timestamp * 90000LL * FRAME_RATE_BASE) / st->codec.frame_rate;
+            av_rescale((int64_t)s->cur_timestamp * st->codec.frame_rate_base, 90000, st->codec.frame_rate);
         rtp_send_data(s1, buf1, len);
 
         buf1 += len;
@@ -597,14 +632,38 @@ static void rtp_send_raw(AVFormatContext *s1,
     s->cur_timestamp++;
 }
 
+/* NOTE: size is assumed to be an integer multiple of TS_PACKET_SIZE */
+static void rtp_send_mpegts_raw(AVFormatContext *s1,
+                                const uint8_t *buf1, int size)
+{
+    RTPDemuxContext *s = s1->priv_data;
+    int len, out_len;
+
+    while (size >= TS_PACKET_SIZE) {
+        len = s->max_payload_size - (s->buf_ptr - s->buf);
+        if (len > size)
+            len = size;
+        memcpy(s->buf_ptr, buf1, len);
+        buf1 += len;
+        size -= len;
+        s->buf_ptr += len;
+        
+        out_len = s->buf_ptr - s->buf;
+        if (out_len >= s->max_payload_size) {
+            rtp_send_data(s1, s->buf, out_len);
+            s->buf_ptr = s->buf;
+        }
+    }
+}
+
 /* write an RTP packet. 'buf1' must contain a single specific frame. */
 static int rtp_write_packet(AVFormatContext *s1, int stream_index,
-                            UINT8 *buf1, int size, int force_pts)
+                            const uint8_t *buf1, int size, int64_t pts)
 {
-    RTPContext *s = s1->priv_data;
+    RTPDemuxContext *s = s1->priv_data;
     AVStream *st = s1->streams[0];
     int rtcp_bytes;
-    INT64 ntp_time;
+    int64_t ntp_time;
     
 #ifdef DEBUG
     printf("%d: write len=%d\n", stream_index, size);
@@ -615,7 +674,8 @@ static int rtp_write_packet(AVFormatContext *s1, int stream_index,
         RTCP_TX_RATIO_DEN;
     if (s->first_packet || rtcp_bytes >= 28) {
         /* compute NTP time */
-        ntp_time = force_pts; // ((INT64)force_pts << 28) / 5625
+        /* XXX: 90 kHz timestamp hardcoded */
+        ntp_time = (pts << 28) / 5625;
         rtcp_send_sr(s1, ntp_time); 
         s->last_octet_count = s->octet_count;
         s->first_packet = 0;
@@ -635,11 +695,14 @@ static int rtp_write_packet(AVFormatContext *s1, int stream_index,
         rtp_send_samples(s1, buf1, size, 2 * st->codec.channels);
         break;
     case CODEC_ID_MP2:
-    case CODEC_ID_MP3LAME:
+    case CODEC_ID_MP3:
         rtp_send_mpegaudio(s1, buf1, size);
         break;
     case CODEC_ID_MPEG1VIDEO:
         rtp_send_mpegvideo(s1, buf1, size);
+        break;
+    case CODEC_ID_MPEG2TS:
+        rtp_send_mpegts_raw(s1, buf1, size);
         break;
     default:
         /* better than nothing : send the codec raw data */
@@ -651,27 +714,16 @@ static int rtp_write_packet(AVFormatContext *s1, int stream_index,
 
 static int rtp_write_trailer(AVFormatContext *s1)
 {
-    //    RTPContext *s = s1->priv_data;
+    //    RTPDemuxContext *s = s1->priv_data;
     return 0;
 }
-
-AVInputFormat rtp_demux = {
-    "rtp",
-    "RTP input format",
-    sizeof(RTPContext),    
-    rtp_probe,
-    rtp_read_header,
-    rtp_read_packet,
-    rtp_read_close,
-    .flags = AVFMT_NOHEADER,
-};
 
 AVOutputFormat rtp_mux = {
     "rtp",
     "RTP output format",
     NULL,
     NULL,
-    sizeof(RTPContext),
+    sizeof(RTPDemuxContext),
     CODEC_ID_PCM_MULAW,
     CODEC_ID_NONE,
     rtp_write_header,
@@ -682,6 +734,5 @@ AVOutputFormat rtp_mux = {
 int rtp_init(void)
 {
     av_register_output_format(&rtp_mux);
-    av_register_input_format(&rtp_demux);
     return 0;
 }

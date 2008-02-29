@@ -18,7 +18,6 @@
  */
 #include "avformat.h"
 #include <unistd.h>
-#include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -48,7 +47,7 @@ typedef struct {
 } HTTPContext;
 
 static int http_connect(URLContext *h, const char *path, const char *hoststr);
-static int http_write(URLContext *h, UINT8 *buf, int size);
+static int http_write(URLContext *h, uint8_t *buf, int size);
 
 
 /* return non zero if error */
@@ -191,7 +190,7 @@ static int http_connect(URLContext *h, const char *path, const char *hoststr)
              "\n",
              post ? "POST" : "GET",
              path,
-             FFMPEG_VERSION,
+             LIBAVFORMAT_VERSION,
              hoststr);
     
     if (http_write(h, s->buffer, strlen(s->buffer)) < 0)
@@ -236,7 +235,7 @@ static int http_connect(URLContext *h, const char *path, const char *hoststr)
 }
 
 
-static int http_read(URLContext *h, UINT8 *buf, int size)
+static int http_read(URLContext *h, uint8_t *buf, int size)
 {
     HTTPContext *s = h->priv_data;
     int size1, len;
@@ -265,7 +264,7 @@ static int http_read(URLContext *h, UINT8 *buf, int size)
 }
 
 /* used only when posting data */
-static int http_write(URLContext *h, UINT8 *buf, int size)
+static int http_write(URLContext *h, uint8_t *buf, int size)
 {
     HTTPContext *s = h->priv_data;
     return url_write(s->hd, buf, size);

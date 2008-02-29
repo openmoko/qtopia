@@ -1,21 +1,21 @@
-TEMPLATE = lib
-CONFIG -= moc
-CONFIG += qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+CONFIG += qtopiaplugin 
 
-# Input
+TARGET = datebookplugin
+
 HEADERS = datebookplugin.h datebookpluginimpl.h datebookpluginoptions.h
 SOURCES = datebookplugin.cpp datebookpluginimpl.cpp datebookpluginoptions.cpp
 INTERFACES = datebookoptionsbase.ui
 
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
+
 INCLUDEPATH     += ../ ../library
 DEPENDPATH      += ../ ../library
 
-unix:LIBS+= -lqpepim
-win32:LIBS+= $(QPEDIR)/lib/qpepim.lib
+CONFIG+=pimlib
 
-DESTDIR = $(QPEDIR)/plugins/today
-TARGET = datebookplugin
+desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/today/datebookplugin.desktop
+desktop.path=/plugins/today/
 
-TRANSLATIONS = libdatebookplugin-en_GB.ts libdatebookplugin-de.ts libdatebookplugin-ja.ts libdatebookplugin-no.ts
+INSTALLS+=desktop
+
+PACKAGE_NAME	= qpe-today-datebookplugin

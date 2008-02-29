@@ -6,5 +6,5 @@ Architecture: $CPU_ARCH
 Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-10
 Depends: qpe-libqtopia
-Description: Advanced plugin for Qtopia calculator
+Description: Scientific plugin for Qtopia calculator
  An plugin providing trig, root and power functions for the Qtopia calculator

@@ -1,4 +1,25 @@
 /**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+/**********************************************************************
 ** Copyright (C) 2001 Devin Butterfield.  All rights reserved.
 **
 ** This file may be distributed and/or modified under the terms of the
@@ -37,17 +58,19 @@
   The CardMonitor applet is distributed under the terms of the GNU
   General Public License, Version 2.  The CardMonitor applet monitors
   PCMCIA and CF card insertion and removal.  The author and primary
-  copyright holder of the CardMonitor applet is Devin Butterfield
-  \<dbutter@wireless.net\>.
+  copyright holder of the CardMonitor applet is <a href="mailto:dbutter@wireless.net">Devin Butterfield</a>.
+
 */
+
+// QDOC_SKIP_BEGIN
 
 CardMonitor::CardMonitor( QWidget *parent ) : QWidget( parent ),
 	pm( Resource::loadPixmap( "cardmon/pcmcia" ) ), cardIn( FALSE )
 {
 #ifndef QT_NO_COP
     QCopChannel* pcmciaChannel = new QCopChannel( "QPE/Card", this );
-    connect( pcmciaChannel, SIGNAL(received(const QCString &, const QByteArray &)),
-             this, SLOT(pcmciaMessage( const QCString &, const QByteArray &)) );
+    connect( pcmciaChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+             this, SLOT(pcmciaMessage(const QCString&,const QByteArray&)) );
 #endif
 
     setFixedSize( pm.size() );
@@ -55,9 +78,13 @@ CardMonitor::CardMonitor( QWidget *parent ) : QWidget( parent ),
     getStatus();
 }
 
+/*! */
+
 CardMonitor::~CardMonitor()
 {
 }
+
+/*! */
 
 void CardMonitor::mousePressEvent( QMouseEvent * )
 {
@@ -72,7 +99,7 @@ void CardMonitor::mousePressEvent( QMouseEvent * )
 	err = system( (const char *) cmd );
 	if ( ( err == 127 ) || ( err < 0 ) ) {
 	    qDebug("Could not execute `/sbin/cardctl eject'! err=%d", err);
-	    QMessageBox::warning( this, tr("CardMonitor"), tr("Card eject failed!"),
+	    QMessageBox::warning( this, tr("CardMonitor"), tr("<qt>Card eject failed!</qt>"),
 	    			  tr("&OK") );
 	}
     }
@@ -87,6 +114,7 @@ void CardMonitor::pcmciaMessage( const QCString &msg, const QByteArray & )
     }
 }
 
+/*! */
 
 bool CardMonitor::getStatus( void )
 {
@@ -131,6 +159,8 @@ bool CardMonitor::getStatus( void )
     return ((cardWas == cardIn) ? FALSE : TRUE);
 }
 
+/*! */
+
 void CardMonitor::paintEvent( QPaintEvent * )
 {
     QPainter p( this );
@@ -143,4 +173,4 @@ void CardMonitor::paintEvent( QPaintEvent * )
     }
 }
 
-
+// QDOC_SKIP_END

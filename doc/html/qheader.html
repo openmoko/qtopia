@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -43,8 +45,8 @@ Inherits <a href="qwidget.html">QWidget</a>.
 <li><div class="fn">virtual void <a href="#5675dd"><b>setLabel</b></a> ( int, const QIconSet &amp;, const QString &amp;, int size = -1 ) </div>
 <li><div class="fn">QString <a href="#68506d"><b>label</b></a> ( int section ) const</div>
 <li><div class="fn">QIconSet* <a href="#ae2e7f"><b>iconSet</b></a> ( int section ) const</div>
-<li><div class="fn">virtual void <a href="#7d95fb"><b>setOrientation</b></a> ( Orientation ) </div>
-<li><div class="fn">Orientation <a href="#0e7a65"><b>orientation</b></a> () const</div>
+<li><div class="fn">virtual void <b>setOrientation</b> ( Orientation ) </div>
+<li><div class="fn">Orientation <b>orientation</b> () const</div>
 <li><div class="fn">virtual void <a href="#93359b"><b>setTracking</b></a> ( bool enable ) </div>
 <li><div class="fn">bool <a href="#7ab6c9"><b>tracking</b></a> () const</div>
 <li><div class="fn">virtual void <a href="#181587"><b>setClickEnabled</b></a> ( bool, int section = -1 ) </div>
@@ -105,7 +107,7 @@ Inherits <a href="qwidget.html">QWidget</a>.
 The QHeader class provides a table header.
 <p>
 This class provides a table header as known from spreadsheet-like widgets.
-QHeader can be used vertically or horizontally (see <a href="#7d95fb">setOrientation</a>()).
+QHeader can be used vertically or horizontally (see <a href="#14d50d">setOrientation</a>()).
 <p>With <a href="#15c139">addLabel</a>() you can add sections, and with <a href="#54d633">removeLabel</a>() you can remove
 them. If you enabled clicking for one or all sections (see <a href="#181587">setClickEnabled</a>()),
 the user can reorder the sections and click on them which may be used for
@@ -223,9 +225,6 @@ to the index <em>toIdx.</em>
 is displayed at the index <em>fromIndex</em> to the index <em>toIndex.</em>
 <h3 class="fn">int <a name="50da41"></a>QHeader::offset () const</h3>
 <p>Returns the leftmost (or uppermost for vertical headers) visible pixel.
-<h3 class="fn"><a href="qt.html#Orientation">Orientation</a> <a name="0e7a65"></a>QHeader::orientation () const</h3>
-<p>Returns <code>Horizontal</code> if the header is horizontal, <code>Vertical</code> if
-the header is vertical.
 <h3 class="fn">void <a name="bd2f39"></a>QHeader::paintEvent ( <a href="qpaintevent.html">QPaintEvent</a> * e ) <code>[virtual protected]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#e3d821">QWidget.</a>
@@ -250,7 +249,7 @@ widget coordinates.
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="755161"></a>QHeader::sRect ( int index ) <code>[protected]</code></h3>
 <p>Returns the rectangle covered by index <em>index.</em>
 <h3 class="fn">int <a name="d47f5f"></a>QHeader::sectionAt ( int pos ) const</h3>
-<p>Returns the <em>section</em> which contains the position <em>pos</em> given in pixels.
+<p>Returns the section which contains the position <em>pos</em> given in pixels.
 <p>See also  <a href="#50da41">offset</a>().
 <h3 class="fn">void <a name="18a094"></a>QHeader::sectionClicked ( int index ) <code>[signal]</code></h3>
 <p><b>This function is obsolete.</b> It is provided to keep old source working, and will probably be removed in a future version of Qt.  We strongly advise against using it in new code.<p>
@@ -294,12 +293,6 @@ the user moves a section.
 <h3 class="fn">void <a name="20f392"></a>QHeader::setOffset ( int x ) <code>[virtual slot]</code></h3>
 <p>Scrolls the header such that <em>x</em> becomes the leftmost (or uppermost
 for vertical headers) visible pixel.
-<h3 class="fn">void <a name="7d95fb"></a>QHeader::setOrientation ( <a href="qt.html#Orientation">Orientation</a> orientation ) <code>[virtual]</code></h3>
-<p>Sets the header orientation.  The <em>orientation</em> must be
-QHeader::Vertical or QHeader::Horizontal.
-<p>When adding labels without the size parameter, setOrientation
-should be called first, otherwise labels will be sized incorrectly.
-<p>See also  <a href="#0e7a65">orientation</a>().
 <h3 class="fn">void <a name="ca39d6"></a>QHeader::setResizeEnabled ( bool enable, int section = -1 ) <code>[virtual]</code></h3>
 <p>Enable user resizing of the section <em>section</em> if <em>enable</em> is TRUE,
 disable otherwise.  If <em>section</em> is negative (as it is by default), resizing is
@@ -343,7 +336,7 @@ typically connected to a slot that repaints the table.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -351,5 +344,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

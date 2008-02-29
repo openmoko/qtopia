@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -37,8 +52,6 @@
 #include <qvbuttongroup.h>
 #include <qmultilineedit.h>
 #include <qlayout.h>
-
-
 
 #include <qprogressbar.h>
 #include <qcombobox.h>
@@ -70,7 +83,7 @@ static QPixmap *pm_install=0;
 
 static QString packageId(const QString& name_or_file)
 {
-    // clean up pkg.  If we have a whole file, want just the name of the package.
+    // clean up pkg.  If we have a whole file, we want just the name of the package.
     // If we have a _VER_ARCH.ipk ending, try to slim down the name to what
     // the package name probably is.
     int start = name_or_file.find(QRegExp("[^/_]+_[^/]*_[^/_]*.ipk$"));
@@ -336,8 +349,64 @@ public:
     }
 };
 
+// ====================================================================
+
+class LabelMaker
+{
+public:
+    LabelMaker(QLabel *lbl)
+	: mLbl( lbl ), message(), extraPackages( 0 ), tooManyPackages( FALSE )
+    {
+	QWidget *gparent = mLbl->parentWidget()->parentWidget();
+	int gpheight = gparent->geometry().height();
+	int fheight = QFontMetrics(QFont()).height();
+	maxheight = gpheight - (3 * fheight);
+    }
+
+    void addString(QString s)
+    {
+	message += s;
+	mLbl->setText( message );
+    }
+
+    void addPackage(QString s)
+    {
+	if ( tooManyPackages ) {
+	    oneMorePackage();
+	    return;
+	}
+	QString adding = QString("<li>%1").arg(s);
+	uint curSize = message.length();
+	addString(adding);
+	mLbl->adjustSize();
+	if ( mLbl->geometry().height() >= maxheight ) {
+	    // oops, we're too long, take off that last line
+	    moreIndex = curSize;
+	    oneMorePackage();
+	    tooManyPackages = TRUE;
+	}
+    }
+
+private:
+    void oneMorePackage()
+    {
+	extraPackages++;
+	message.truncate( moreIndex );
+	addString( QString("<li>%1 more packages").arg( extraPackages ) );
+    }
+
+    QLabel *mLbl;
+    QString message;
+    int maxheight;
+    uint extraPackages;
+    uint moreIndex;
+    bool tooManyPackages;
+};
+
+// ====================================================================
+
 /* 
- *  Constructs a PackageWizard which is a child of 'parent', with the 
+ *  Constructs a PackageWizard that is a child of 'parent', with the
  *  name 'name' and widget flags set to 'f' 
  */
 PackageWizard::PackageWizard( QWidget* parent,  const char* name, WFlags fl )
@@ -491,42 +560,40 @@ void PackageWizard::showPage( QWidget* w )
 	    }
 	} else if ( w == page_share ) {
 	} else if ( w == page_location ) {
+	    if ( location->fileSystem() ) {
+		setNextEnabled( page_location, TRUE );
+	    } else {
+		setNextEnabled( page_location, FALSE );
+	    }
 	} else if ( w == page_confirmation ) {
-	    QString message;
-	    message = "<P>";
+	    LabelMaker lm( confirmation );
+	    lm.addString( "<P>" );
 	    if ( mode_doc->isChecked() || mode_net->isChecked() ) {
 		if ( mode_doc->isChecked() )
-		    message += "<p>"+tr("Installing on %1","eg. SD card").arg(location->fileSystem()->name());
+		    lm.addString( tr("Installing on %1","eg. SD card").arg(location->fileSystem()->name()) );
 		else
-		    message += "<p>"+tr("Installing from network to %1","eg. SD card").arg(location->fileSystem()->name());
-		message += "<ul>";
-		int n=0;
+		    lm.addString( tr("Installing from network to %1","eg. SD card").arg(location->fileSystem()->name()) );
+		lm.addString( "<ul>" );
 		for (QListViewItem* i = packagelist->firstChild(); i; i = i->nextSibling()) {
 		    PackageItem* item = (PackageItem*)i;
-		    if ( item->isSelected() && ++n <= 5 )
-			message += "<li>" + item->name();
+		    if ( item->isSelected() )
+			lm.addPackage( item->name() );
 		}
-		if ( n > 5 )
-		    message += "<li>"+tr("%1 more packages").arg(n-5);
-		message += "</ul>";
+		lm.addString( "</ul>" );
 		finishButton()->setText(tr("Install"));
 	    } else if ( mode_rm->isChecked() ) {
-		message += tr("Uninstall:");
-		message += "<ul>";
-		int n=0;
+		lm.addString( tr("Uninstall:") );
+		lm.addString( "<ul>" );
 		for (QListViewItem* i = packagelist->firstChild(); i; i = i->nextSibling()) {
 		    PackageItem* item = (PackageItem*)i;
-		    if ( item->isSelected() && ++n < 5 )
-			message += "<li>" + item->name();
+		    if ( item->isSelected() )
+			lm.addPackage( item->name() );
 		}
-		message += "</ul>";
-		if ( n > 5 )
-		    message += tr("%1 more packages").arg(n-5);
+		lm.addString( "</ul>" );
 		finishButton()->setText(tr("Remove"));
 	    } else {
 		// Sharing not implemented
 	    }
-	    confirmation->setText(message);
 	}
 
 	setAppropriates();
@@ -619,7 +686,7 @@ void PackageWizard::removeServer()
 	connect( servers, SIGNAL(currentChanged(QListViewItem*)), this, SLOT(editServer(QListViewItem*)) );
 
 	//
-	// Disable edits if there's no more servers.
+	// Disable edits if there are no more servers.
 	//
 	if (!editedserver) {
 	    servername->clear();
@@ -1127,7 +1194,7 @@ QStringList PackageWizard::findPackages( const QRegExp& r )
 }
 
 /*!
-  Install \a ipk to \a location. Returns FALSE on error, TRUE otherwise.
+  Install \a ipk to \a location. Returns FALSE on error, otherwise TRUE.
   */
 
 bool PackageWizard::installIpkg( const QString &ipk, const QString &location, QString& out )

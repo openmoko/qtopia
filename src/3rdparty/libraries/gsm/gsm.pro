@@ -1,5 +1,4 @@
 TEMPLATE	=   lib
-CONFIG		+=  warn_on release
 CONFIG		-= qt
 HEADERS		=   gsm.h
 SOURCES		=   add.c \
@@ -17,8 +16,9 @@ SOURCES		=   add.c \
 		    short_term.c \
 		    table.c
 TARGET		=   gsm
-DESTDIR		=   $(QPEDIR)/lib
-INCLUDEPATH	+=  $(QPEDIR)/include
-DEPENDPATH	+=  $(QPEDIR)/include
+DESTDIR		=   $$(QPEDIR)/lib
 VERSION		=   1.0.0
 DEFINES    +=  FAST SASR WAV49
+PACKAGE_NAME=gsm
+
+TRANSLATIONS=

@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/qdl_specification.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Data Linking - Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Data Linking - Specification</h1>
+
+
+
+<a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Definitions
+</a>
+<li><a href="#3"> Overview
+</a>
+<li><a href="#4"> Services
+</a>
+<li><a href="#5"> Link format
+</a>
+<li><a href="#6"> Client Responsibilities
+</a>
+<li><a href="#7"> Link Resolution
+</a>
+<li><a href="#8"> Global Find
+</a>
+<li><a href="#9"> Questions and answers
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> People frequently want to associate data from one application with another application. Consider the following cases:
+<ul>
+<li> I create an appointment in my calendar with Joe and Mary. Later when thinking about the meeting, I want to read the notes I've written about Joe.
+<li> I want to associate a contact with my appointment so I can quickly ring them when the alarm goes off.
+<li> I create a todo based on an email I got, so I associate the email with the todo in order to allow a quick reply when the action is complete.
+</ul>
+This document attempts to provide a high-level solution to the problem of data linking. This document will be used as a basis for an implementation of data linking in Qtopia. For implementation details, please see <a href="protocol.html">The <a href="qdl.html">QDL</a> Protocol</a>.
+<p> <h2> Definitions
+</h2>
+<a name="2"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#f0f0f0"> <td valign="top">QDL <td valign="top">Qtopia Data Linking is the name given to the protocol/applications that govern data linking in the Qtopia environment.
+<tr bgcolor="#d0d0d0"> <td valign="top">QDL Source <td valign="top">The application providing the link
+<tr bgcolor="#f0f0f0"> <td valign="top">QDL Client <td valign="top">The application embedding the link
+<tr bgcolor="#d0d0d0"> <td valign="top">Link ID <td valign="top">A number of superscript characters (0-9) that are logically connected to the non-user visible Data References.
+</table></center>
+<p> <h2> Overview
+</h2>
+<a name="3"></a><p> Qtopia needs a consistent, global, application-independent way of associating data from one application with another. The application embedding the link should not need special knowledge of the source application. A typical link embed operation is outlined below:
+<ul>
+<li> User is entering text in a <a href="qdl.html">QDL</a>-supported field
+<li> User selects &quot;insert link...&quot; from the context menu
+<li> User selects the application that will provide the link
+<li> The Client requests a link from the Source, optionally sending text to help the Source
+<li> The Source prompts the user for a record to link
+<li> The Source sends the link to the Client
+</ul>
+<p> QDL-support is required in a text field since not all fields will be appropriate for data linking. This support will likely be via a flag in the text editing widgets. Support for linking is not likely to be restricted to text editing widgets, however such an implementation is outside the scope of this paper. An application must register itself as a QDL Source with the Qtopia services framework. It is assumed that any text can be sent to the Source as a hint. The Source is responsible for using the data in a sensible way. An example of a hint is typing someone's name before selecting the address book as the Source. Assuming a name was sent to the address book, it may be able to identify the record the user wants. The Source must prompt the user even if the hint makes it obvious what the user wants. A list of choices should be presented, allowing the user to select the desired record. For example, using the address book as the Source, the user would be shown the addresses address book thinks are likely matches (based on the hint) what the user wants. The Source should allow the user to easily select records that did not match the hint. The user will of course want to activate links that have been created. A typical link activation operation is outlined below:
+<p> <ul>
+<li> The user is viewing a record with embedded links
+<li> The user selects a link
+<li> Client sends a message to the Source, requesting the link be displayed
+<li> The Source opens and displays the linked data
+</ul>
+<p> <h2> Services
+</h2>
+<a name="4"></a><p> Qtopia has a services mechanism whereby applications can notify the system that they support particular qcop messages. <a href="qdl.html">QDL</a> Source applications will need to register as supporting the create link function in order to appear in the list of applications given to the user.
+<p> <h2> Link format
+</h2>
+<a name="5"></a><p> The link that is sent to the Client should include the following:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#f0f0f0"> <td valign="top">Application Reference
+<td valign="top">This identifies the Source. It is used when activating a link. This is not shown to the user.
+<tr bgcolor="#d0d0d0"> <td valign="top">Data Reference
+<td valign="top">This uniquely identifies some data to the Source. It is used when activating a link. This is not shown to the user.
+<tr bgcolor="#f0f0f0"> <td valign="top">Descriptive Text
+<td valign="top">This is added to the text field so the user is able to see what the link is to.
+<tr bgcolor="#d0d0d0"> <td valign="top">Icon
+<td valign="top">This is shown in rich text views as part (possibly all) of the link.
+</table></center>
+<p> <h2> Client Responsibilities
+</h2>
+<a name="6"></a><p> In order to maximise consistency between applications, the Client is expected to act in particular ways with regards to links. While these points are not requirements of using <a href="qdl.html">QDL</a>, they are recommended to minimize user confusion.
+<ul>
+<li> When a link is embedded, the Client will place the descriptive text and a generated Link ID into the text widget.
+<li> The user can delete or modify the descriptive text at will without invalidating the link. Only removing the Link ID will remove the link.
+<li> The Client must provide a way to view it's records in rich text controls. (Preview mode)
+<li> When viewing the record in preview mode, the Link ID should be replaced with the appropriate icon and made into a selectable link. If the text before the Link ID matches the descriptive text from the link, it should also be part of the link.
+<li> The Client must ensure Link ID values are unique.
+<li> A Client should check the record's link storage after it's text fields have been edited to ensure links are deleted when their Link ID values are removed.
+<li> The link request must include a reference to the Client so the Source can send the link.
+<li> The Client is responsible for ensuring bogus Link ID values are handled in a sensible way (for example, creating a dummy link to nothing). This prevents link problems when copying/moving text or when the user manually places superscript characters in a text field.
+</ul>
+<p> <h2> Link Resolution
+</h2>
+<a name="7"></a><p> When the user selects a link, the Client activates that link by sending a message to the Application Reference with the Data Reference. The Source should open itself and display the indicated record. If the Source cannot find a record to display it will display an error message to the user. The Source should try to minimize the chance that a link will become invalid. Deleting a linked record is an example that would cause a link to become invalid.
+<p> <h2> <a href="global.html">Global</a> Find
+</h2>
+<a name="8"></a><p> It should be obvious that the infrastructure required to support data linking also lends itself to a Global Find function. In this case, the Client is the find application and it requests links from all Sources. It then displays the possible choices to the user. When the user selects a link, the find application activates the link, taking the user to the record they searched for. The biggest problem with <a href="qdl.html">QDL</a> for Global Find is the reliance on the Source to present the list of choices to the user. A special link request could be used to obtain a list of links from the Source. The descriptive text and icon should be enough for the user to identify the records. A get all links message will be required of a Source to work with Global Find.
+<p> <h2> Questions and answers
+</h2>
+<a name="9"></a><p> <ul>
+<li> <em>Should Link IDs be prevented from getting on the clipboard?</em>
+No. Insert a dummy link for each Link ID that is not accounted for. This also prevents issues when users insert superscript characters manually.
+<li> <em>Does Qtopia have a services framework?</em>
+Yes
+<li> <em>Should the link contain a pixmap or a path to a pixmap or an application name (and the application's icon gets used)?</em>
+Something that can be passed to <a href="resource.html#loadIconSet">Resource::loadIconSet</a>(...);
+<li> <em>Should the clipboard be extended to allow links to be placed on it?</em>
+No. Moving text in the same field should be possible (since the field checks for Link IDs after the editing operation is complete) but copying a link to another application is not supported.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* ------------------------------------------------------------------------ */
 /*                                                                          */
 /* [TEWidget.C]            Terminal Emulation Widget                        */
@@ -10,27 +31,25 @@
 /*                                                                          */
 /* ------------------------------------------------------------------------ */
 /*                        */
-/* Ported Konsole to Qt/Embedded                                              */
+/* Konsole ported to Qt/Embedded by Trolltech                               */
 /*                        */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
-/*                        */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------ */
+
 /* \class TEWidget
 
     \brief The TEWidget class represents the visible screen contents.
 
-   This class is responsible to map the `image' of a terminal emulation to the
-   display. All the dependency of the emulation to a specific GUI or toolkit is
-   localized here. Further, this widget has no knowledge about being part of an
-   emulation, it simply work within the terminal emulation framework by exposing
+   This class is responsible for mapping the `image' of a terminal emulation to the
+   display. The emulation's dependency on a specific GUI or toolkit is
+   localized here. Furthermore, this widget has no knowledge of being part of an
+   emulation, it simply works within the terminal emulation framework by exposing
    size and key events and by being ordered to show a new image.
 
    <ul>
    <li> The internal image has the size of the widget (evtl. rounded up)
    <li> The external image used in setImage can have any size.
    <li> (internally) the external image is simply copied to the internal
-        when a setImage happens. During a resizeEvent no painting is done
-        a paintEvent is expected to follow anyway.
+        when a setImage happens. During a resizeEvent no painting is done, but a paintEvent is expected to follow anyway.
    </ul>
 
    \sa TEScreen \sa Emulation
@@ -38,7 +57,7 @@
 
 /* FIXME:
    - 'image' may also be used uninitialized (it isn't in fact) in resizeEvent
-   - 'font_a' not used in mouse events
+   - 'font_a' is not used in mouse events
    - add destructor
 */
 
@@ -178,7 +197,7 @@ void TEWidget::setColorTable(const ColorEntry table[])
    QT's iso mapping leaves 0x00..0x7f without any changes. But the graphicals
    come in here as proper unicode characters.
 
-   We treat non-iso10646 fonts as VT100 extended and do the requiered mapping
+   We treat non-iso10646 fonts as VT100 extended and do the required mapping
    from unicode to 0x00..0x1f. The remaining translation is then left to the
    QCodec.
 */
@@ -464,7 +483,7 @@ void TEWidget::paintEvent( QPaintEvent* pe )
 HCNT("paintEvent");
 
   // Note that the actual widget size can be slightly larger
-  // that the image (the size is truncated towards the smaller
+  // than the image (the size is truncated towards the smaller
   // number of characters in `resizeEvent'. The paint rectangle
   // can thus be larger than the image, but less then the size
   // of one character.
@@ -608,7 +627,7 @@ void TEWidget::setScrollbarLocation(int loc)
 /* ------------------------------------------------------------------------- */
 
 /*?
-    Three different operations can be performed using the mouse, and the
+    Three different operations can be performed using the mouse and the
     routines in this section serve all of them:
 
     1) The press/release events are exposed to the application
@@ -690,7 +709,7 @@ void TEWidget::mouseMoveEvent(QMouseEvent* ev)
   int    scroll = scrollbar->value();
 
   // we're in the process of moving the mouse with the left button pressed
-  // the mouse cursor will kept catched within the bounds of the text in
+  // the mouse cursor will remain caught within the bounds of the text in
   // this widget.
 
   // Adjust position within text area bounds. See FIXME above.
@@ -1174,8 +1193,8 @@ void TEWidget::dragEnterEvent(QDragEnterEvent* e)
 
 void TEWidget::dropEvent(QDropEvent* event)
 {
-    // The current behaviour when url(s) are dropped is
-    // * if there is only ONE url and if it's a LOCAL one, ask for paste or cd
+    // The current behaviour when URL(s) are dropped is:
+    // * if there is only ONE URL and if it's a LOCAL one, ask for paste or cd
     // * in all other cases, just paste
     //   (for non-local ones, or for a list of URLs, 'cd' is nonsense)
   QStrList strlist;
@@ -1256,6 +1275,8 @@ void TEWidget::drop_menu_activated(int item)
 //    KWM::activate((Window)this->winId());
       break;
   }
+#else
+  Q_UNUSED(item);
 #endif
 }
 

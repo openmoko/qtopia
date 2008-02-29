@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/compile_run_examples.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Compile and Run SDK Example Application</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Compile and Run SDK Example Application</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Developing for Qtopia
+</a>
+<li><a href="#2"> The Qtopia SDK
+</a>
+<ul>
+<li><a href="#2-1"> The Example Application
+</a>
+<li><a href="#2-2"> Building Your Own Applications
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Developing for Qtopia
+</h2>
+<a name="1"></a><p> <em>Qtopia</em> is a windowing system for handheld devices. It offers
+developers the powerful Qt API, and provides users with fast and
+intuitive interaction.
+<p> Since <em>Qtopia</em> offers the complete Qt API, you can do much of your
+development on any of the other platforms for which Qt is available:
+Windows, Unix/X11, or Mac OS X. However, for optimal tailoring of your
+application to the smaller screen and other limitations of a small
+device, we recommend that you use the <em>Qtopia SDK</em>.
+<p> <h2> The Qtopia SDK
+</h2>
+<a name="2"></a><p> The <em>Qtopia SDK</em> allows you to develop <em>Qtopia</em> applications under
+the Linux desktop environment using the Qt Virtual Framebuffer, which
+completely emulates the handheld <em>Qtopia</em> environment. It also
+includes cross-compiler software so that you can compile your
+application to run on the target device. If you do not already have
+the <em>Qtopia SDK</em> (this document is normally part of the SDK),
+contact <a href="mailto:info@trolltech.com">info@trolltech.com</a>, or
+see the <a href="http://www.trolltech.com">Trolltech web site</a>.
+<p> To build applications for the SHARP SL5000 or similar StrongARM-based
+devices, you will also need a StrongARM cross compiler. 
+
+<p> <h3> The Example Application
+</h3>
+<a name="2-1"></a><p> The SDK includes an example application. We recommend that you compile and
+run this example to learn how things work, before tackling your own
+projects.
+<p> Here are the steps necessary to compile and run the example program on
+the Linux desktop:
+<p> <ol type=1>
+<li> Check that the environment is correct:
+For the <em>Qtopia SDK</em> use
+<pre>
+   export QPEDIR=/opt/Qtopia
+   export QTDIR=$QPEDIR
+   export PATH=$QPEDIR/bin:$PATH
+   export QMAKESPEC=qws/linux-generic-g++
+   export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
+</pre>
+ 
+<p> <li> Make a copy of the example:
+<pre>
+   cd somewhere
+   cp -r $QPEDIR/examples/application .
+   chmod +w application/*
+   cd application
+</pre>
+ 
+<p> <li> Generate a Makefile:
+<pre>
+   qmake -o Makefile application.pro
+</pre>
+ 
+<p> <li> Build the example:
+<pre>
+   make
+</pre>
+ 
+<p> <li> Install the example (requires root privelges):
+<pre>
+   su # root privileges required to install
+   make install INSTALL_ROOT=$QPEDIR
+   exit # no need to be root anymore
+</pre>
+ 
+<p> <li> To run the example, first run the Qt Virtual Framebuffer:
+<pre>
+   qvfb &amp;
+</pre>
+ 
+<p> <li> Then run the <em>Qtopia</em> environment:
+<pre>
+   qpe
+</pre>
+ 
+Your application should now be available in the Applications tab which is visible
+inside the Qt Virtual Framebuffer window.
+<p> <li> If you want to distribute your applications to others, build an RPM
+package. For example:
+<pre>
+   mkipks -rpm -arch i386 example.control
+</pre>
+ 
+<p> <li> To uninstall the example (requires root privelges):
+<pre>
+   su # root privileges required to install
+   make uninstall INSTALL_ROOT=$QPEDIR
+   exit # no need to be root anymore
+</pre>
+ 
+<p> </ol>
+<p> To make your own application, use the example program as a model. Make sure that
+when you add files to your project, you also add them to your project file (i.e.
+to <tt>application.pro</tt>) and rerun the <tt>qmake</tt>
+command to update the <tt>Makefile</tt> whenever you update the <tt>.pro</tt>
+file. This is not always required as qmake will rebuild the Makefile when the
+.pro file has changed.
+<p> To build you application for the SHARP SL5000 rather than just running
+on the desktop, the process is similar.  The example below assumes
+you have installed the cross compiler in /usr/local/arm.
+<p> <ol type=1>
+<li> Check the environment is correctly set for the SHARP SL5000:
+For the <em>Qtopia SDK</em> use
+<pre>
+   export QPEDIR=/opt/Qtopia/arm
+   export QTDIR=$QPEDIR
+   export DQTDIR=/opt/Qtopia
+   export QMAKESPEC=qws/linux-sharp-g++
+   export PATH=$QPEDIR/bin:/usr/local/arm/bin:$PATH
+</pre>
+ 
+otherwise the following example may be used:
+<pre>
+   cd ~/dev
+   export QTOPIA_PREFIX=$PWD
+   export QPEDIR=`echo $QTOPIA_PREFIX/arm/qtopia-*2.*.0`
+   if ! test -d "$QPEDIR";then echo 'A Qtopia directory was not found!';fi
+   export QTDIR="$QTOPIA_PREFIX/qt-2.3.2"
+   export QTEDIR="$QTOPIA_PREFIX/arm/qt-2.3.9"
+   if ! test -d "$QTEDIR";then echo 'Qt/Embedded directory was not found!';fi
+   export PATH=$QPEDIR/bin/:$QTEDIR/bin:$QTDIR/bin:/usr/local/arm:$PATH
+   export QMAKESPEC=qws/linux-sharp-g++
+   export QTDIR=$QTEDIR
+   export DQTDIR=`echo $QTOPIA_PREFIX/qt-x11-*3.3.0`
+   if ! test -d "$DQTDIR";then echo 'Qt/X11-3.3 directory was not found!';fi
+</pre>
+ 
+where  ~/dev is replaced by the path where all packages that Qtopia depends on were extracted to for the target device.
+<p> <li> Rebuild the makefile (<tt>$QMAKESPEC</tt> has changed) above:
+<pre>
+   make clean
+   qmake -o Makefile application.pro
+</pre>
+ 
+<p> <li> Build it:
+<pre>
+   make
+</pre>
+ 
+<p> <li> Install it (note that this is now going into the <tt>/opt/Qtopia/sharp/</tt> directory):
+<pre>
+   su # root privileges required to install
+   make install INSTALL_ROOT=$QPEDIR
+   exit # no need to be root anymore
+</pre>
+ 
+<p> <li> To install it on a device, build an <tt>ipk</tt> package file:
+<pre>
+   su -m # root privileges required to strip the executable
+   make packages
+   exit # no need to be root anymore
+</pre>
+ 
+</ol>
+<p> The resulting <tt>$QPEDIR/ipkg/example-1.0.0.ipk</tt> can be installed on the SL5000 
+using <em>Qtopia Desktop</em>.
+<p> <h3> Building Your Own Applications
+</h3>
+<a name="2-2"></a><p> Once you have built the example, you can proceed with writing your own
+applicatons. If you are not familiar with Qt, you should consult the Qt documentation when you have installed the
+SDK, or use the online <a href="http://doc.trolltech.com/">Trolltech
+Documentation Site</a>. The <a href="http://www.trolltech.com/products/qt/whitepaper.html">Qt
+Whitepaper</a> provides a good overview of, and introduction to,
+the Qt API.
+<p> When you add more files to your application, just edit the project
+file (e.g. <tt>application.pro</tt>) and rerun <tt>qmake</tt>.
+<p> If you add conditional directives to your .pro file (eg. QTOPIA_PHONE for phone specific files)
+you should ensure that the TRANSLATABLES variable contains sources from ALL builds. This is so
+that you will have one set of translations to maintain for all your "editions". It is easiest
+if you create globally scoped variables to contain all the files. Like this:
+<p> <pre>
+SOURCES=main.cpp
+HEADERS=main.h
+PHONE_SOURCES=main_ph.cpp
+PHONE_HEADERS=main_ph.h
+QTOPIA_PHONE {
+    SOURCES+=$$PHONE_SOURCES
+    HEADERS+=$$PHONE_HEADERS
+}
+TRANSLATABLES+=$$PHONE_SOURCES $$PHONE_HEADERS # Add this now so we don't forget later
+
+TRANSLATABLES*=$$HEADERS $$SOURCES # The * avoids duplicates
+</pre>
+ 
+<p> The <tt>.ui</tt> files are <em>Qt Designer</em> user interface files.
+You can create and edit these using <em>Qt Designer</em>:
+<pre>
+   designer example.ui
+</pre>
+ 
+<p> <em>Qt Designer</em>'s online documentation (accessible from the links
+mentioned above) includes a complete tutorial.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

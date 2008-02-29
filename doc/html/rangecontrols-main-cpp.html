@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -31,7 +33,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/rangecontrols/rangecontrols.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/rangecontrols/rangecontrols.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -65,7 +67,7 @@ private:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/rangecontrols/rangecontrols.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/rangecontrols/rangecontrols.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -125,7 +127,7 @@ RangeControls::RangeControls( <a href="qwidget.html">QWidget</a> *parent, const 
     <a href="qlcdnumber.html">QLCDNumber</a> *lcd2 = new <a href="qlcdnumber.html">QLCDNumber</a>( 2, cell3 );
     lcd2-&gt;<a href="qlcdnumber.html#ecdf88">display</a>( 33 );
     lcd2-&gt;<a href="qlcdnumber.html#8aa01c">setSegmentStyle</a>( QLCDNumber::Filled );
-    <a href="qobject.html#7f8e37">connect</a>( hslider, SIGNAL( valueChanged( int ) ), lcd2, SLOT( display( int ) ) );
+    <a href="qobject.html#fbde73">connect</a>( hslider, SIGNAL( valueChanged( int ) ), lcd2, SLOT( display( int ) ) );
 
     <a href="qhbox.html">QHBox</a> *cell4 = new <a href="qhbox.html">QHBox</a>( row2 );
     cell4-&gt;<a href="qframe.html#558f79">setFrameStyle</a>( QFrame::WinPanel | QFrame::Sunken );
@@ -133,7 +135,7 @@ RangeControls::RangeControls( <a href="qwidget.html">QWidget</a> *parent, const 
     <a href="qslider.html">QSlider</a> *vslider = new <a href="qslider.html">QSlider</a>( 0, 64, 1, 8, Qt::Vertical, cell4 );
     <a href="qlcdnumber.html">QLCDNumber</a> *lcd3 = new <a href="qlcdnumber.html">QLCDNumber</a>( 3, cell4 );
     lcd3-&gt;<a href="qlcdnumber.html#ecdf88">display</a>( 8 );
-    <a href="qobject.html#7f8e37">connect</a>( vslider, SIGNAL( valueChanged( int ) ), lcd3, SLOT( display( int ) ) );
+    <a href="qobject.html#fbde73">connect</a>( vslider, SIGNAL( valueChanged( int ) ), lcd3, SLOT( display( int ) ) );
 }
 </pre>
 
@@ -142,7 +144,7 @@ RangeControls::RangeControls( <a href="qwidget.html">QWidget</a> *parent, const 
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/rangecontrols/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/rangecontrols/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -170,5 +172,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

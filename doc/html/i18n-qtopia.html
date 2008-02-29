@@ -1,8 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/i18n.doc:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/i18n-qtopia.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Internationalization</title>
 <style type="text/css"><!--
 h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
@@ -13,65 +14,105 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Internationalization</h1>
+
+
 <p> 
-<p> <h2> Qtopia - Internationalization
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Program Internationalization
+</a>
+<ul>
+<li><a href="#2-1"> Placing Application Files
+</a>
+<li><a href="#2-2"> Placing Plugin Files
+</a>
+</ul>
+<li><a href="#3"> Desktop File Internationalization
+</a>
+<li><a href="#4"> Documentation Internationalization
+</a>
+<li><a href="#5"> Other Internationalization Files
+</a>
+<li><a href="#6"> Translating Qtopia to Additional Languages
+</a>
+<li><a href="#7"> How to Localize Qtopia
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
 </h2>
 <a name="1"></a><p> Internationalizing Qtopia software is much the same as
-internationalizing any <a href="qt.html">Qt</a>-based software. See the <a
-href="i18n.html">Qt i18n documentation</a>. You should be familiar
-with that documentation, the <tt>tr()</tt> macros, <em>Qt Linguist</em>, and the
-internationalization process in general before you proceed with this
+internationalizing any Qt-based software. You should be familiar
+with the Qt internationalization documentation, the <tt>tr()</tt> macros, <em>Qt Linguist</em> from Qt 3.3 or later,
+and the internationalization process in general before you proceed with this
 document.
-<p> <h3> Program Internationalization
+<p> <h2> Program Internationalization
+</h2>
+<a name="2"></a><p> The process of internationalization produces Qt message files (<tt>.qm</tt> files).
+<p> <h3> Placing Application Files
 </h3>
-<a name="1-1"></a><p> The process of internationalization produces Qt message files (<tt>.qm</tt> files).
-For applications, these files must be placed as follows:
+<a name="2-1"></a><p> Application files must be placed as follows:
 <p> &nbsp;&nbsp;/opt/Qtopia/i18n/<b>language</b>/<b>appname</b>.qm
 <p> The <b>language</b> is an ISO 639 language code optionally followed by an underscore
 and an ISO 3166 territory, eg. "en", "en_GB", "ja", "ja_JP".
-The <b>appname</b> is the application executable filename.
-<p> For plugins, which are shared libraries, the files must be placed in
+The <b>appname</b> is the filename of the application executable.
+<p> <h3> Placing Plugin Files
+</h3>
+<a name="2-2"></a><p> For plugins that are shared libraries the files must be placed in
 the following directory:
 <p> &nbsp;&nbsp;/opt/Qtopia/i18n/<b>language</b>/<b>pluginname</b>.qm
-<p> The <b>pluginname</b> is the filename of the plugin shared object,
-without any extensions, but including "lib" if the plugin includes
-that prefix.
-<p> Locales suffixes are supported - so for example, your application may
-use British English, and then have a
-/opt/Qtopia/i18n/en_US/<b>appname</b>.qm file specifying some changes
+<p> The <b>pluginname</b> is the filename of the plugin shared object minus any extensions, but including "lib" if the plugin incorporates that prefix.
+<p> Locale suffixes are supported. For example, if your application uses British English it can have a
+/opt/Qtopia/i18n/en_US/<b>appname</b>.qm file specifying changes
 for American English. Translations with locale suffixes take
 precedence over translations without such suffixes.
-<p> <h3> Desktop file Internationalization
-</h3>
-<a name="1-2"></a><p> Desktop files (eg.
-/opt/Qtopia/apps/Application/<b>appname</b>.desktop) follow the
-standard for those files - each value in the file can be
-internationalized. For example, the <tt>texteditor.desktop</tt> file begins
-like this:
+<p> <h2> Desktop File Internationalization
+</h2>
+<a name="3"></a><p> Desktop files (eg.
+/opt/Qtopia/apps/Application/<b>appname</b>.desktop) can also be
+translated.
+For example, the <tt>texteditor.desktop</tt> file begins with:
 <p> <pre>
+[Translation]
+File=QtopiaApplications
+Context=Notes
 [Desktop Entry]
-Comment=A Text Editing Program
+Comment[]=A Text Editing Program
 Exec=textedit
 Icon=TextEditor
 Type=Application
 MimeType=text/*
-Name=Text Editor
-Name[no]=Teksteditor
-Name[de]=Texteditor
+Name[]=Notes
 </pre>
  
+<p> This causes the file /opt/Qtopia/i18n/<b>language</b>/QtopiaApplications.qm
+to be loaded (if it isn't already) and the strings marked with "[]" to be translated in the
+"Text Editor" context. The "bin/nct_lupdate" script can be used to
+maintain .ts files from .desktop files.
 <p> These files are encoded in UTF-8.
-<p> <h3> Documentation Internationalization
-</h3>
-<a name="1-3"></a><p> On-line documentation for applications is written in the HTML subset
-supported by the <a href="qtextview.html">Qt richtext widget</a>.
+<p> <h2> Documentation Internationalization
+</h2>
+<a name="4"></a><p> Online documentation for applications is written in the HTML subset
+supported by the Qt richtext widget.
 Such documentation files must be placed as follows:
 <p> English documentation:
 <p> &nbsp;&nbsp;/opt/Qtopia/help/html/<b>appname</b><b>-suffixes</b>.html
@@ -79,28 +120,65 @@ Such documentation files must be placed as follows:
 <p> &nbsp;&nbsp;/opt/Qtopia/help/<b>language</b>/html/<b>appname</b><b>-suffixes</b>.html
 <p> The <b>-suffixes</b> is optional. It always starts with "-" to avoid namespace conflicts.
 <p> These files are encoded in UTF-8.
-<p> <h3> Translating Qtopia to additional languages
-</h3>
-<a name="1-4"></a><p> Qtopia ships with a number of supported languages. To translate it to
+<p> <h2> Other Internationalization Files
+</h2>
+<a name="5"></a><p> Other files that are language-specific are:
+<p> <ul>
+<li> /opt/Qtopia/etc/dict/words-<b>language</b>
+- list of words in <b>language</b>.
+<li> /opt/Qtopia/etc/dict/words-<b>language</b>.dawg
+- above, converted to dawg format.
+<li> /opt/Qtopia/etc/dict/common-<b>language</b>
+- list of common words in <b>language</b> that input methods
+might conflict with less common words.
+<li> /opt/Qtopia/etc/dict/common-<b>language</b>.dawg
+- above, converted to dawg format.
+<li> /opt/Qtopia/pics/pkim/dict-<b>language</b>-lc.png
+- image representing input in <b>language</b> to non-native speakers.
+A flag is one possibility.
+<li> /opt/Qtopia/pics/pkim/dict-<b>language</b>-uc.png
+- above, but representing Uppercase input.
+</ul>
+<p> <h2> Translating Qtopia to Additional Languages
+</h2>
+<a name="6"></a><p> Qtopia ships with a number of supported languages. To translate it into
 an additional language, you must perform the translation process
-described above for all the application, desktop files, and help
-documentation which you wish to have in the additional language.
-Additionally, you will need to translate the library texts, which are
-found in:
+described above for all the application and desktop files, and any help
+documentation that you wish to have available in that language.
+In addition to this you will need to translate the library texts found in:
 <p> &nbsp;&nbsp;/opt/Qtopia/i18n/<b>language</b>/libqpe.qm
 <p> <em>Qt Linguist</em> supports incremental translation, which helps you keep
-track of any additional content which is added to Qtopia that needs
+track of any additional content that is added to Qtopia and needs
 translation.
-<p> <h3> How to localize Qtopia
-</h3>
-<a name="1-5"></a><p> <ol>
+<p> Qtopia uses Helvetica as default font. However, this font does not specify 
+the characters for Chinese for instance. The default font can be changed in
+~/Settings/<b>qpe</b>.conf. The line 
+<p> FontFamily=helvetica
+<p> needs to be replaced by 
+<p> FontFamily=<em><the new font family></em> e.g. unifont for Chinese.
+<p> Also, the configuration file ~/Settings/<tt>FontMap.conf</tt> has to be changed. It defines 
+the font which can be selected by users within Qtopia. If this configuration file is
+empty, Qtopia will use Helvetica font. Therefore, a valid FontMap.conf file is required to 
+suppress helvetica a selectable choice. <tt>FontMap.conf</tt> might look like this:
+<p> <pre>
+[Map]
+Font0=small-uni,unifont,12
+Font1=normal-uni,unifont,13
+Font2=large-helv,helvetica,14
+</pre>
+ 
+<p> This file is encoded in UTF-8. The first parameter in the comma seperated list
+is the textual string that is presented to the user. The second parameter specifies the
+font family and the last parameter determines the font size.
+<p> <h2> How to Localize Qtopia
+</h2>
+<a name="7"></a><p> <ol>
 <li>Acquire <tt><i>application</i>-<i>LanguageCode</i>.ts</tt> for each
 application.
-<li>Use <a href="qt.html">Qt</a> Linguist (from Qt 3) to translate the <tt>.ts</tt> files.
-<li><p>Any strings which are ambiguous or otherwise unclear or suspect
-in any way should be translated to whatever degree is possible,
-but left in the <i>unfinished</i> state, and a comment should be
-appended to the translation in square brackets:
+<li>Use Qt Linguist (from Qt 3) to translate the <tt>.ts</tt> files.
+<li><p>Any strings that are ambiguous or otherwise unclear or suspect
+in some way should be translated to whatever degree is possible, and then left in the <i>unfinished</i> state. A comment [in square brackets] should be
+appended to the these kinds of translations:
 </p>
 <br>
 <p>(ambiguous)
@@ -121,23 +199,18 @@ written "30bar14"]
 <br>
 <br>
 </p>
-<li>Submit entire <tt>.ts</tt> file to Trolltech, you will receive
-feedback on all comments to unfinished items (usually by adding comments
+<li>Submit entire <tt>.ts</tt> file to Trolltech; you will receive
+feedback on all the comments to unfinished items and implementations will be changed as necessary/possible (which should hopefully be sufficient to complete the translation). The feedback usually takes the form of added comments
 to the <tt>.ts</tt> files so that future translators are similarly
-informed), and implementations will be changed as necessary/possible
-(which should hopefully be sufficient to complete the translation).
+informed),
 </ol>
-<p> <h3> Qtopia and the Operating System
-</h3>
-<a name="1-6"></a><p> Qtopia uses UTF8 for all file formats. System functions are also expected to
-use UTF8 encoding. For example, with $LANG set to "ja", strftime() must return
-a string in UTF8 encoding. Depending on the underlying operating system, this may
-require that "ja" be an alias for the "ja_JP.utf8" locale.
 <p> 
 <!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

@@ -1,6 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Font Factories
 [Desktop Entry]
-Name= Font Factories
-Comment=Font factories provide support for different font formats.
-Name[ja]=フォントファクトリー
-Comment[ja]=フォントファクトリーは異なるフォント形式のサポートを提供します。
+Name[]=Font Factories
+Comment[]=Font factories provide support for different font formats.
 Apply=QPE/System restart()

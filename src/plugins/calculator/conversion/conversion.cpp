@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
-** This file is part of Qtopia Environment.
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,6 +37,7 @@
 #include <qtopia/calc/doubleinstruction.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/resource.h>
+#include <qtopia/config.h>
 
 #include <qlayout.h>
 #include <qfile.h>
@@ -29,155 +45,226 @@
 #include <qdir.h>
 #include <qregexp.h>
 
-FormConversion::FormConversion(QWidget *parent,const char *name,WFlags fl)
-:QWidget(parent,name,fl) {
-    if ( !name )
-	setName( "Conversion" ); // No tr
-    resize( 384, 476 );
+double UnitConversionInstruction::from = 0;
+double UnitConversionInstruction::to = 0;
+char UnitConversionInstruction::tempFrom = 'n';
+char UnitConversionInstruction::tempTo = 'n';
+
+FormConversion::FormConversion(QWidget *parent) : QWidget(parent) {
+    systemEngine->registerInstruction(new UnitConversionInstruction());
+
+    setName( tr("Conversion") ); 
+    //resize( 384, 476 );
     setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)7, (QSizePolicy::SizeType)7, sizePolicy().hasHeightForWidth() ) );
 
-    QVBoxLayout *vbl = new QVBoxLayout(this);
+    currentButton = 0;
+
+    QVBoxLayout *vbl = new QVBoxLayout(this, 0, 3);
     QFont big(font());
     big.setWeight(QFont::Bold);
 
-    // Row 1
     QHBoxLayout *hbl = new QHBoxLayout(vbl);
 
-    PBMPlus = new QPushButton(this,"PBM+");
-    PBMPlus->setText(tr("M+"));
-    hbl->insertWidget(-1,PBMPlus);
-    PBMPlus->setFont(big);
-
-    PBMR = new QPushButton(this,"PBMR");
-    PBMR->setText(tr("MR"));
-    hbl->insertWidget(-1,PBMR);
-    PBMR->setFont(big);
-
-    PBMC = new QPushButton(this,"PBMC");
-    PBMC->setText(tr("MC"));
-    hbl->insertWidget(-1,PBMC);
-    PBMC->setFont(big);
-
-    PBDel = new QPushButton(this,"PBDel");
-    PBDel->setText(tr("<-"));
-    hbl->insertWidget(-1,PBDel);
-    PBDel->setFont(big);
+    typeSelector = new QComboBox(this,"typeSelector");
+    hbl->insertWidget(-1,typeSelector);
 
     PBC = new QPushButton(this,"PBC");
     PBC->setText(tr("CE/C"));
     hbl->insertWidget(-1,PBC);
     PBC->setFont(big);
 
-    // Row 2
-    typeSelector = new QComboBox(this,"typeSelector");
-    vbl->insertWidget(1,typeSelector);
-
-    // Row 3
-    // read conversion data files
+    modeList = new QList<conversionMode>();
+    conversionMode *nextMode;
+    QWidget *w;
+    QGridLayout *gl;
+    conversionData *nextData;
     conversionStack = new QWidgetStack(this);
+
+    // TODO temperature conversions are builtin
+    nextMode = new conversionMode;
+    nextMode->name = QString( tr("Temperature") );
+    nextMode->dataList = new QList<conversionData>();
+    typeSelector->insertItem(nextMode->name);
+    w = new QWidget(this,nextMode->name);
+    QHBoxLayout *gl2 = new QHBoxLayout(w, 0, 3);
+    gl2->setAutoAdd(TRUE);
+    conversionStack->addWidget(w,modeList->count());
+
+    nextData = new conversionData;
+    nextData->name = QString( tr("fahrenheit") );
+    nextData->button = new QPushButton(w);
+    nextData->button->setToggleButton(TRUE);
+    nextData->button->setText(nextData->name);
+    connect(nextData->button,SIGNAL(clicked()),this,SLOT(fahrenheitButtonClicked()));
+    nextMode->dataList->append(nextData);
+
+    nextData = new conversionData;
+    nextData->name = QString( tr("celcius") );
+    nextData->button = new QPushButton(w);
+    nextData->button->setToggleButton(TRUE);
+    nextData->button->setText(nextData->name);
+    connect(nextData->button,SIGNAL(clicked()),this,SLOT(celciusButtonClicked()));
+    nextMode->dataList->append(nextData);
+
+    nextData = new conversionData;
+    nextData->name = QString( tr("kelvin") );
+    nextData->button = new QPushButton(w);
+    nextData->button->setToggleButton(TRUE);
+    nextData->button->setText(nextData->name);
+    connect(nextData->button,SIGNAL(clicked()),this,SLOT(kelvinButtonClicked()));
+    nextMode->dataList->append(nextData);
+
+    modeList->append(nextMode);
+    conversionStack->addWidget(w,modeList->count());
+    // end setting up temperature conversion
+
+    // read conversion data files
     QString path = QPEApplication::qpeDir() + "etc/calculator/";
     QDir directory;
-    directory.setPath(path);
-    QStringList fileList = directory.entryList("*.cvt");
+    directory.setPath( path );
+    QStringList fileList = directory.entryList("*.conf");
 
-    if ( !fileList.count() ) {
-	qDebug("No conversion data files available");
-    } else {
-	QFile myfile;
-	modeList = new QList<conversionMode>();
-	QString line;
+    if ( !fileList.count() ) 
+        qDebug("No conversion data files are available.");
+    else {
+        QFile myFile;
 
-	// iterate over found *.cvt files
-	for (uint i = 0;i < fileList.count();i++) {
-	    QString fileName = fileList[i];
-	    QString fullFileName = path + fileName;
-	    QFile myfile;
-	    myfile.setName(fullFileName);
-	    if ( !myfile.open( IO_Translate | IO_ReadOnly ) ) {
-		qDebug("Cant open conversion data file %s",fullFileName.latin1());
-	    } else {
-		QTextStream ts(&myfile);
-		conversionMode *nextMode = new conversionMode;
-		// strip the .cvt extension from the file name
-		nextMode->name = fileName.left(fileName.length() - 4);
-		nextMode->dataList = new QList<conversionData>();
-		typeSelector->insertItem(nextMode->name);
-		// add a new widget to the widgetstack
-		QWidget *w = new QWidget(this,nextMode->name);
-		QGridLayout *gl = new QGridLayout(w,2,5);
-		gl->setAutoAdd(TRUE);
-		conversionStack->addWidget(w,modeList->count());
-#ifdef QTEST
-qDebug("MODE name = %s",nextMode->name.latin1());
-#endif
-		while ( !ts.eof() ) {
-		    line = ts.readLine();
-		    if (!line.contains("*") && line.contains(QRegExp("\\S"))) {
-			conversionData *nextData = new conversionData;
-			int pos = line.findRev(' ');
-			nextData->name = line.left(pos);
-			nextData->factor = line.right(line.length()-pos-1).toDouble();
-#ifdef QTEST
-qDebug("DATA name = %s",nextData->name.latin1());
-qDebug("DATA string value = %s",line.right(line.length()-pos-1).latin1());
-qDebug("DATA value = %f",nextData->factor);
-#endif
-			if (nextData->factor == 1) 
-			    nextMode->defaultType = nextData;
-			nextMode->dataList->append(nextData);
-			// add a new button to the widget on the widgetstack
-			QPushButton *pb = new QPushButton(w);
-			pb->setToggleButton(TRUE);
-			pb->setText(nextData->name);
-			connect(pb,SIGNAL(clicked()),this,SLOT(conversionButtonClicked()));
-		    }
-		}
-		modeList->append(nextMode);
-		myfile.close();
-	    }
-	}
+        //iterate over found conf files
+        for (uint i = 0; i < fileList.count(); i++) {
+            QString fileName = fileList[i];
+            Config cfg(path+fileName, Config::File);
+            QStringList groups = cfg.allGroups();
+            nextMode = new conversionMode;
+            nextMode->dataList = new QList<conversionData>();
+            w = new QWidget(this);
+            gl = new QGridLayout(w,2,5);
+            gl->setAutoAdd(TRUE);
+            conversionStack->addWidget(w,modeList->count()); 
+            for (uint j = 0; j < groups.count(); j++) {
+                QString group = groups[j];
+                if (group == "Translation")
+                    continue;
+                cfg.setGroup(group);
+                if (group == "Name") {
+                    nextMode->name = cfg.readEntry("Name");
+                    typeSelector->insertItem(nextMode->name);
+                } else {
+                    nextData = new conversionData;
+                    nextData->name = cfg.readEntry("Name");
+                    nextData->factor = cfg.readEntry("Factor").toDouble();
+                    if (nextData->factor == 1)
+                       nextMode->defaultType = nextData;
+                    nextMode->dataList->append(nextData);
+                    
+                    //create the button for this data conversion
+                    QPushButton *pb = new QPushButton(w);
+                    pb->setToggleButton(TRUE);
+                    pb->setText(nextData->name);
+                    connect(pb, SIGNAL(clicked()), this, SLOT(conversionButtonClicked()));
+                    nextData->button = pb;
+                }
+            }
+            modeList->append(nextMode);
+            
+        }
     }
-    // TODO remember last selection
-    conversionStack->raiseWidget(0);
-    vbl->insertWidget(2,conversionStack);
+    
+    vbl->insertWidget(-1,conversionStack);
 
-    connect (PBMR, SIGNAL(clicked()), this, SLOT(MRClicked()));
-    connect (PBMC, SIGNAL(clicked()), this, SLOT(MCClicked()));
-    connect (PBMPlus, SIGNAL(clicked()), this, SLOT(MPlusClicked()));
     connect (PBC, SIGNAL(clicked()), this, SLOT(CClicked()));
-    connect (PBDel, SIGNAL(clicked()), this, SLOT(DelClicked()));
     connect (typeSelector, SIGNAL(activated(int)), this, SLOT(selectType(int)));
 
-    // Row 4
+    // Remember last selection
+    Config config("calculator"); // No tr
+    config.setGroup("Conversion plugin");
+    int lastView = config.readNumEntry("lastView",0);
+    if (lastView > (int)modeList->count()+1 || lastView < 0)
+	lastView = 0;
+
+    typeSelector->setCurrentItem(lastView);
+    conversionStack->raiseWidget(lastView);
+
     siw = new Type1DecimalInputWidget(this,"SIW");
-    vbl->insertWidget(3,siw);
+    vbl->insertWidget(-1,siw);
+}
+FormConversion::~FormConversion() {
+    Config config("calculator"); // No tr
+    config.setGroup("Conversion plugin"); // No tr
+    config.writeEntry("lastView", conversionStack->id(conversionStack->visibleWidget()));
 }
 
 void FormConversion::showEvent ( QShowEvent *e ) {
-    sys.setAccType("Double"); // No tr
+    systemEngine->setAccType("Double"); // No tr
+    
     QWidget::showEvent(e);
 }
 
 void FormConversion::selectType(int i) {
+    UnitConversionInstruction::tempFrom = UnitConversionInstruction::tempTo = 'n';
+
+    int currentMode = conversionStack->id(conversionStack->visibleWidget());
+    QList<conversionData> dataList = *(modeList->at(currentMode))->dataList;
+
+    for (unsigned int c = 0;c < dataList.count(); c++) {
+	QPushButton *b = (*(dataList.at(c))).button;
+	if (b->isOn())
+	    b->toggle();
+    }
+    currentButton = 0;
     conversionStack->raiseWidget(i);
 }
+
 void FormConversion::conversionButtonClicked() {
-    qDebug("cb clicked");
+    doConversion();
 }
 
-void FormConversion::MCClicked() {
-    sys.memoryReset();
+void FormConversion::doConversion() {
+    int currentMode = conversionStack->id(conversionStack->visibleWidget());
+    QList<conversionData> dataList = *(modeList->at(currentMode))->dataList;
+
+    bool newButtonFound = FALSE;
+    for (unsigned int c = 0;c < dataList.count(); c++) {
+	QPushButton *b = (*(dataList.at(c))).button;
+	if (b->isOn()) {
+	    if (b == currentButton) {
+		b->toggle();
+	    } else {
+		newButton = b;
+		newFactor = (*(dataList.at(c))).factor;
+		newButtonFound = TRUE;
+	    }
+	}
+    }
+    if (newButtonFound) {
+	if (currentButton) { // temp convert ignores these anyway
+	    UnitConversionInstruction::from = currentFactor;
+	    UnitConversionInstruction::to = newFactor;
+	    systemEngine->pushInstruction("UnitConversion");
+	}
+	currentButton = newButton;
+	currentFactor = newFactor;
+    } else { // current button toggled off
+	currentButton = 0;
+    }
 }
-void FormConversion::MRClicked() {
-    sys.memoryRecall();
+
+void FormConversion::kelvinButtonClicked() {
+    UnitConversionInstruction::tempFrom = UnitConversionInstruction::tempTo;
+    UnitConversionInstruction::tempTo = 'k';
+    doConversion();
 }
-void FormConversion::MPlusClicked() {
-    sys.memorySave();
+void FormConversion::celciusButtonClicked() {
+    UnitConversionInstruction::tempFrom = UnitConversionInstruction::tempTo;
+    UnitConversionInstruction::tempTo = 'c';
+    doConversion();
 }
+void FormConversion::fahrenheitButtonClicked() {
+    UnitConversionInstruction::tempFrom = UnitConversionInstruction::tempTo;
+    UnitConversionInstruction::tempTo = 'f';
+    doConversion();
+}
+
 void FormConversion::CClicked() {
-    sys.dualReset();
-}
-void FormConversion::DelClicked() {
-    sys.delChar();
+    systemEngine->hardReset();
 }
 

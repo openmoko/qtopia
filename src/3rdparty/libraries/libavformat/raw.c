@@ -18,29 +18,29 @@
  */
 #include "avformat.h"
 
+#ifdef CONFIG_ENCODERS
 /* simple formats */
-int raw_write_header(struct AVFormatContext *s)
+static int raw_write_header(struct AVFormatContext *s)
 {
     return 0;
 }
 
-int raw_write_packet(struct AVFormatContext *s, 
-                     int stream_index,
-                     unsigned char *buf, int size, int force_pts)
+static int raw_write_packet(struct AVFormatContext *s, int stream_index,
+			    const uint8_t *buf, int size, int64_t pts)
 {
     put_buffer(&s->pb, buf, size);
     put_flush_packet(&s->pb);
     return 0;
 }
 
-int raw_write_trailer(struct AVFormatContext *s)
+static int raw_write_trailer(struct AVFormatContext *s)
 {
     return 0;
 }
+#endif //CONFIG_ENCODERS
 
 /* raw input */
-static int raw_read_header(AVFormatContext *s,
-                           AVFormatParameters *ap)
+static int raw_read_header(AVFormatContext *s, AVFormatParameters *ap)
 {
     AVStream *st;
     int id;
@@ -63,9 +63,11 @@ static int raw_read_header(AVFormatContext *s,
             st->codec.channels = ap->channels;
             break;
         case CODEC_TYPE_VIDEO:
-            st->codec.frame_rate = ap->frame_rate;
+            st->codec.frame_rate      = ap->frame_rate;
+            st->codec.frame_rate_base = ap->frame_rate_base;
             st->codec.width = ap->width;
             st->codec.height = ap->height;
+	    st->codec.pix_fmt = ap->pix_fmt;
             break;
         default:
             return -1;
@@ -78,11 +80,10 @@ static int raw_read_header(AVFormatContext *s,
 
 #define RAW_PACKET_SIZE 1024
 
-int raw_read_packet(AVFormatContext *s,
-                    AVPacket *pkt)
+static int raw_read_packet(AVFormatContext *s, AVPacket *pkt)
 {
     int ret, size;
-    AVStream *st = s->streams[0];
+    //    AVStream *st = s->streams[0];
     
     size= RAW_PACKET_SIZE;
 
@@ -101,13 +102,13 @@ int raw_read_packet(AVFormatContext *s,
     return ret;
 }
 
-int raw_read_close(AVFormatContext *s)
+static int raw_read_close(AVFormatContext *s)
 {
     return 0;
 }
 
-/* mp3 read */
-static int mp3_read_header(AVFormatContext *s,
+/* ac3 read */
+static int ac3_read_header(AVFormatContext *s,
                            AVFormatParameters *ap)
 {
     AVStream *st;
@@ -117,7 +118,7 @@ static int mp3_read_header(AVFormatContext *s,
         return AVERROR_NOMEM;
 
     st->codec.codec_type = CODEC_TYPE_AUDIO;
-    st->codec.codec_id = CODEC_ID_MP2;
+    st->codec.codec_id = CODEC_ID_AC3;
     /* the parameters will be extracted from the compressed bitstream */
     return 0;
 }
@@ -138,9 +139,11 @@ static int video_read_header(AVFormatContext *s,
     /* for mpeg4 specify it too (most mpeg4 streams dont have the fixed_vop_rate set ...)*/
     if (st->codec.codec_id == CODEC_ID_MJPEG || st->codec.codec_id == CODEC_ID_MPEG4) {
         if (ap) {
-            st->codec.frame_rate = ap->frame_rate;
+            st->codec.frame_rate      = ap->frame_rate;
+            st->codec.frame_rate_base = ap->frame_rate_base;
         } else {
-            st->codec.frame_rate = 25 * FRAME_RATE_BASE;
+            st->codec.frame_rate      = 25;
+            st->codec.frame_rate_base = 1;
         }
     }
     return 0;
@@ -153,64 +156,57 @@ static int video_read_header(AVFormatContext *s,
 /* XXX: improve that by looking at several start codes */
 static int mpegvideo_probe(AVProbeData *p)
 {
-    int code, c, i;
-    code = 0xff;
+    int code;
+    const uint8_t *d;
 
     /* we search the first start code. If it is a sequence, gop or
        picture start code then we decide it is an mpeg video
        stream. We do not send highest value to give a chance to mpegts */
-    for(i=0;i<p->buf_size;i++) {
-        c = p->buf[i];
-        code = (code << 8) | c;
-        if ((code & 0xffffff00) == 0x100) {
-            if (code == SEQ_START_CODE ||
-                code == GOP_START_CODE ||
-                code == PICTURE_START_CODE)
-                return 50 - 1;
-            else
-                return 0;
-        }
+    /* NOTE: the search range was restricted to avoid too many false
+       detections */
+
+    if (p->buf_size < 6)
+        return 0;
+    d = p->buf;
+    code = (d[0] << 24) | (d[1] << 16) | (d[2] << 8) | (d[3]);
+    if ((code & 0xffffff00) == 0x100) {
+        if (code == SEQ_START_CODE ||
+            code == GOP_START_CODE ||
+            code == PICTURE_START_CODE)
+            return 50 - 1;
+        else
+            return 0;
     }
     return 0;
 }
 
-AVInputFormat mp3_iformat = {
-    "mp3",
-    "MPEG audio",
-    0,
-    NULL,
-    mp3_read_header,
-    raw_read_packet,
-    raw_read_close,
-    .extensions = "mp2,mp3", /* XXX: use probe */
-};
+static int h263_probe(AVProbeData *p)
+{
+    int code;
+    const uint8_t *d;
 
-AVOutputFormat mp2_oformat = {
-    "mp2",
-    "MPEG audio layer 2",
-    "audio/x-mpeg",
-    "mp2,mp3",
-    0,
-    CODEC_ID_MP2,
-    0,
-    raw_write_header,
-    raw_write_packet,
-    raw_write_trailer,
-};
-
+    if (p->buf_size < 6)
+        return 0;
+    d = p->buf;
+    code = (d[0] << 14) | (d[1] << 6) | (d[2] >> 2);
+    if (code == 0x20) {
+        return 50;
+    }
+    return 0;
+}
 
 AVInputFormat ac3_iformat = {
     "ac3",
     "raw ac3",
     0,
     NULL,
-    raw_read_header,
+    ac3_read_header,
     raw_read_packet,
     raw_read_close,
     .extensions = "ac3",
-    .value = CODEC_ID_AC3,
 };
 
+#ifdef CONFIG_ENCODERS
 AVOutputFormat ac3_oformat = {
     "ac3",
     "raw ac3",
@@ -223,7 +219,21 @@ AVOutputFormat ac3_oformat = {
     raw_write_packet,
     raw_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
+AVInputFormat h263_iformat = {
+    "h263",
+    "raw h263",
+    0,
+    h263_probe,
+    video_read_header,
+    raw_read_packet,
+    raw_read_close,
+//    .extensions = "h263", //FIXME remove after writing mpeg4_probe
+    .value = CODEC_ID_H263,
+};
+
+#ifdef CONFIG_ENCODERS
 AVOutputFormat h263_oformat = {
     "h263",
     "raw h263",
@@ -236,6 +246,7 @@ AVOutputFormat h263_oformat = {
     raw_write_packet,
     raw_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
 AVInputFormat m4v_iformat = {
     "m4v",
@@ -249,6 +260,7 @@ AVInputFormat m4v_iformat = {
     .value = CODEC_ID_MPEG4,
 };
 
+#ifdef CONFIG_ENCODERS
 AVOutputFormat m4v_oformat = {
     "m4v",
     "raw MPEG4 video format",
@@ -261,6 +273,34 @@ AVOutputFormat m4v_oformat = {
     raw_write_packet,
     raw_write_trailer,
 };
+#endif //CONFIG_ENCODERS
+
+AVInputFormat h264_iformat = {
+    "h264",
+    "raw H264 video format",
+    0,
+    NULL /*mpegvideo_probe*/,
+    video_read_header,
+    raw_read_packet,
+    raw_read_close,
+    .extensions = "h26l,h264", //FIXME remove after writing mpeg4_probe
+    .value = CODEC_ID_H264,
+};
+
+#ifdef CONFIG_ENCODERS
+AVOutputFormat h264_oformat = {
+    "h264",
+    "raw H264 video format",
+    NULL,
+    "h264",
+    0,
+    CODEC_ID_NONE,
+    CODEC_ID_H264,
+    raw_write_header,
+    raw_write_packet,
+    raw_write_trailer,
+};
+#endif //CONFIG_ENCODERS
 
 AVInputFormat mpegvideo_iformat = {
     "mpegvideo",
@@ -273,6 +313,7 @@ AVInputFormat mpegvideo_iformat = {
     .value = CODEC_ID_MPEG1VIDEO,
 };
 
+#ifdef CONFIG_ENCODERS
 AVOutputFormat mpeg1video_oformat = {
     "mpeg1video",
     "MPEG video",
@@ -285,6 +326,7 @@ AVOutputFormat mpeg1video_oformat = {
     raw_write_packet,
     raw_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
 AVInputFormat mjpeg_iformat = {
     "mjpeg",
@@ -298,6 +340,7 @@ AVInputFormat mjpeg_iformat = {
     .value = CODEC_ID_MJPEG,
 };
 
+#ifdef CONFIG_ENCODERS
 AVOutputFormat mjpeg_oformat = {
     "mjpeg",
     "MJPEG video",
@@ -310,8 +353,25 @@ AVOutputFormat mjpeg_oformat = {
     raw_write_packet,
     raw_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
 /* pcm formats */
+#if !defined(CONFIG_ENCODERS) && defined(CONFIG_DECODERS)
+
+#define PCMDEF(name, long_name, ext, codec) \
+AVInputFormat pcm_ ## name ## _iformat = {\
+    #name,\
+    long_name,\
+    0,\
+    NULL,\
+    raw_read_header,\
+    raw_read_packet,\
+    raw_read_close,\
+    .extensions = ext,\
+    .value = codec,\
+};
+
+#else
 
 #define PCMDEF(name, long_name, ext, codec) \
 AVInputFormat pcm_ ## name ## _iformat = {\
@@ -338,6 +398,7 @@ AVOutputFormat pcm_ ## name ## _oformat = {\
     raw_write_packet,\
     raw_write_trailer,\
 };
+#endif //CONFIG_ENCODERS
 
 #ifdef WORDS_BIGENDIAN
 #define BE_DEF(s) s
@@ -372,8 +433,7 @@ PCMDEF(mulaw, "pcm mu law format",
 PCMDEF(alaw, "pcm A law format", 
        "al", CODEC_ID_PCM_ALAW)
 
-int rawvideo_read_packet(AVFormatContext *s,
-                         AVPacket *pkt)
+static int rawvideo_read_packet(AVFormatContext *s, AVPacket *pkt)
 {
     int packet_size, ret, width, height;
     AVStream *st = s->streams[0];
@@ -381,21 +441,9 @@ int rawvideo_read_packet(AVFormatContext *s,
     width = st->codec.width;
     height = st->codec.height;
 
-    switch(st->codec.pix_fmt) {
-    case PIX_FMT_YUV420P:
-        packet_size = (width * height * 3) / 2;
-        break;
-    case PIX_FMT_YUV422:
-        packet_size = (width * height * 2);
-        break;
-    case PIX_FMT_BGR24:
-    case PIX_FMT_RGB24:
-        packet_size = (width * height * 3);
-        break;
-    default:
+    packet_size = avpicture_get_size(st->codec.pix_fmt, width, height);
+    if (packet_size < 0)
         av_abort();
-        break;
-    }
 
     if (av_new_packet(pkt, packet_size) < 0)
         return -EIO;
@@ -427,6 +475,7 @@ AVInputFormat rawvideo_iformat = {
     .value = CODEC_ID_RAWVIDEO,
 };
 
+#ifdef CONFIG_ENCODERS
 AVOutputFormat rawvideo_oformat = {
     "rawvideo",
     "raw video format",
@@ -439,10 +488,12 @@ AVOutputFormat rawvideo_oformat = {
     raw_write_packet,
     raw_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
+#ifdef CONFIG_ENCODERS
 static int null_write_packet(struct AVFormatContext *s, 
                              int stream_index,
-                             unsigned char *buf, int size, int force_pts)
+                             const uint8_t *buf, int size, int64_t pts)
 {
     return 0;
 }
@@ -464,19 +515,28 @@ AVOutputFormat null_oformat = {
     raw_write_trailer,
     .flags = AVFMT_NOFILE | AVFMT_RAWPICTURE,
 };
+#endif //CONFIG_ENCODERS
+
+#ifndef CONFIG_ENCODERS
+#define av_register_output_format(format)
+#endif
+#ifndef CONFIG_DECODERS
+#define av_register_input_format(format)
+#endif
 
 int raw_init(void)
 {
-    av_register_input_format(&mp3_iformat);
-    av_register_output_format(&mp2_oformat);
-    
     av_register_input_format(&ac3_iformat);
     av_register_output_format(&ac3_oformat);
 
+    av_register_input_format(&h263_iformat);
     av_register_output_format(&h263_oformat);
     
     av_register_input_format(&m4v_iformat);
     av_register_output_format(&m4v_oformat);
+    
+    av_register_input_format(&h264_iformat);
+    av_register_output_format(&h264_oformat);
 
     av_register_input_format(&mpegvideo_iformat);
     av_register_output_format(&mpeg1video_oformat);

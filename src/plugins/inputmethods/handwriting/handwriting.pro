@@ -1,33 +1,41 @@
-singleprocess:singleprocess=true
-TEMPLATE    = lib
-CONFIG	    += qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
-HEADERS	    = qimpenchar.h \
-		qimpenprofile.h \
-		qimpencombining.h \
-		qimpenhelp.h \
-		qimpeninput.h \
-		qimpenmatch.h \
-		qimpensetup.h \
-		qimpenstroke.h \
-		qimpenwidget.h \
-		qimpenwordpick.h \
-		handwritingimpl.h
-SOURCES	    = qimpenchar.cpp \
-		qimpenprofile.cpp \
-		qimpencombining.cpp \
-		qimpenhelp.cpp \
-		qimpeninput.cpp \
-		qimpenmatch.cpp \
-		qimpensetup.cpp \
-		qimpenstroke.cpp \
-		qimpenwidget.cpp \
-		qimpenwordpick.cpp \
-		handwritingimpl.cpp
-INTERFACES  = qimpenprefbase.ui
-TARGET	    = qhandwriting
-DESTDIR	    = $(QPEDIR)/plugins/inputmethods
-VERSION	    = 1.0.0
+CONFIG	    += qtopiaplugin 
 
-TRANSLATIONS = libqhandwriting-en_GB.ts libqhandwriting-de.ts libqhandwriting-ja.ts libqhandwriting-no.ts
+TARGET	    = qhandwriting
+
+HEADERS	    = handwritingimpl.h \
+		help.h \
+		penwidget.h \
+		qimpeninput.h \
+		wordpick.h
+SOURCES	    = handwritingimpl.cpp \
+		help.cpp \
+		penwidget.cpp \
+		qimpeninput.cpp \
+		wordpick.cpp
+
+LIBS += -lqmstroke
+
+TRANSLATABLES = $${SOURCES} $${HEADERS}
+
+TRANSLATABLES +=  qimpeninput.cpp \
+                    qimpeninput.h
+
+
+INTERFACES  = prefbase.ui
+
+TRANSLATABLES += $${INTERFACES}
+
+etc.files = $${QTOPIA_DEPOT_PATH}/etc/qimpen/asciilower.qpt\
+	$${QTOPIA_DEPOT_PATH}/etc/qimpen/asciiupper.qpt\
+	$${QTOPIA_DEPOT_PATH}/etc/qimpen/combining.qpt\
+	$${QTOPIA_DEPOT_PATH}/etc/qimpen/numeric.qpt\
+	$${QTOPIA_DEPOT_PATH}/etc/qimpen/popup.conf
+
+etc.path=/etc/qimpen/
+
+desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/inputmethods/qhandwriting.desktop
+desktop.path=/plugins/inputmethods/
+
+INSTALLS+=etc desktop
+
+PACKAGE_NAME = qpe-handwriting

@@ -1,14 +1,9 @@
-TEMPLATE = lib
-CONFIG -= moc
-CONFIG += qtopia debug
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+CONFIG += qtopiaplugin
 
-# Input
+TARGET=fraction
+
 HEADERS = fraction.h  fractionfactory.h
 SOURCES = fraction.cpp fractionfactory.cpp
 
-unix:LIBS   +=-lqtopiacalc
-win32:LIBS  += $(QPEDIR)/lib/qtopiacalc.lib
-
-DESTDIR = $(QPEDIR)/plugins/calculator
+TRANSLATABLES = $${HEADERS} $${SOURCES}
+LIBS   +=-lqtopiacalc

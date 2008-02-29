@@ -1,54 +1,31 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE    = lib
-quicklaunch:DESTDIR     = $(QPEDIR)/plugins/application
+include (datebook.pri)
 
-CONFIG		+= qtopia warn_on release
+CONFIG+=pimlib
 
-HEADERS		= dayview.h \
-		  datebook.h \
-		  dateentryimpl.h \
-		  dayviewheaderimpl.h \
-		  datebooksettings.h \
-		  datebookweek.h \
-		  datebookweekheaderimpl.h \
-		  monthview.h \
-		  layoutmanager.h \
-		  periodview.h \
-		  repeatentry.h \
-		  datebookdb.h \
-		  finddialog.h \
-		  findwidget_p.h
+HEADERS+=datebookgui.h
+SOURCES+=datebookgui.cpp\
+         main.cpp
 
-SOURCES		= dayview.cpp \
-		  datebook.cpp \
-		  dateentryimpl.cpp \
-		  dayviewheaderimpl.cpp \
-		  datebooksettings.cpp \
-		  datebookweek.cpp \
-		  datebookweekheaderimpl.cpp \
-		  monthview.cpp \
-		  layoutmanager.cpp \
-		  periodview.cpp \
-		  repeatentry.cpp \
-		  datebookdb.cpp \
-		  finddialog.cpp \
-		  findwidget_p.cpp
+TRANSLATABLES += datebookgui.h \
+                    datebookgui.cpp \
+                    main.cpp
 
-
-INTERFACES	= dateentry.ui \
-		  dayviewheader.ui \
-		  datebooksettingsbase.ui \
-		  datebookweekheader.ui \
-		  findwidgetbase_p.ui
-
-multiprocess:SOURCES += main.cpp
-
-unix:LIBS       += -lqpepim -luuid
-win32:LIBS      += $(QPEDIR)/lib/qpepim.lib 
-
-TARGET		= datebook
-
-TRANSLATIONS = datebook-en_GB.ts datebook-de.ts datebook-ja.ts datebook-no.ts
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/datebook.desktop
+desktop.path=/apps/Applications
+calservice.files=$${QTOPIA_DEPOT_PATH}/services/Calendar/datebook
+calservice.path=/services/Calendar
+timeservice.files=$${QTOPIA_DEPOT_PATH}/services/TimeMonitor/datebook
+timeservice.path=/services/TimeMonitor
+recservice.files=$${QTOPIA_DEPOT_PATH}/services/Receive/text/x-vCalendar-Events/datebook
+recservice.path=/services/Receive/text/x-vCalendar-Events
+qdlservice.files=$${QTOPIA_DEPOT_PATH}/services/qdl/datebook
+qdlservice.path=/services/qdl
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/datebook*
+help.path=/help/html
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/datebook/*
+pics.path=/pics/datebook
+INSTALLS+=desktop calservice timeservice recservice qdlservice help
+PICS_INSTALLS+=pics
+ 
+PACKAGE_DESCRIPTION=Qtopia datebook/appointment manager.
+PACKAGE_DEPENDS+=qpe-libqtopiapim1

@@ -7,13 +7,15 @@ Qt Tutorial - Chapter 11: Giving It a Shot
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 <p>
@@ -87,7 +89,7 @@ We include the math library because we need the sin() and cos() functions.  <pre
         f = 0;
         timerCount = 0;
         autoShootTimer = new <a href="qtimer.html">QTimer</a>( this, "movement handler" );
-        <a href="qobject.html#7f8e37">connect</a>( autoShootTimer, SIGNAL(timeout()),
+        <a href="qobject.html#fbde73">connect</a>( autoShootTimer, SIGNAL(timeout()),
                  this, SLOT(moveShot()) );
         shoot_ang = 0;
         shoot_f = 0;
@@ -226,13 +228,13 @@ integer.
 <p>
 The only addition is the shoot button.   <pre>
         <a href="qpushbutton.html">QPushButton</a> *shoot = new <a href="qpushbutton.html">QPushButton</a>( "&amp;Shoot", this, "shoot" );
-        shoot-&gt;<a href="qwidget.html#c52788">setFont</a>( <a href="qfont.html">QFont</a>( "Times", 18, QFont::Bold ) );
+        shoot-&gt;<a href="qwidget.html#090d60">setFont</a>( <a href="qfont.html">QFont</a>( "Times", 18, QFont::Bold ) );
 </pre>
 <p>
 In the constructor we create and set up the shoot button exactly like we
 did with the quit button.  Note that the first argument to the constructor
 is the button text and the third is the widget's name.  <pre>
-        <a href="qobject.html#7f8e37">connect</a>( shoot, SIGNAL(clicked()), cannonField, SLOT(shoot()) );
+        <a href="qobject.html#fbde73">connect</a>( shoot, SIGNAL(clicked()), cannonField, SLOT(shoot()) );
 </pre>
 <p>
 Connects the clicked() signal of the shoot button to the shoot() slot
@@ -258,5 +260,5 @@ You may now go on to <a href="t12.html">chapter twelve.</a>
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

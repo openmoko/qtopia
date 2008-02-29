@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -47,16 +62,29 @@
 
 #include <stdlib.h>
 
+extern bool qpe_fast_findPixmap;
+
 int AppLnk::lastId = 5000;
 
-static int smallSize = 14;
+static int smallSize = 16;
 static int bigSize = 32;
 
 static QString safeFileName(const QString& n)
 {
-    QString safename=n;
-    safename.replace(QRegExp("[^0-9A-Za-z.]"),"_");
-    safename.replace(QRegExp("^[^A-Za-z]*"),"");
+    QString safename;
+    QChar c;
+    QChar lowBoundChar('0'), safeSpaceChar('_');
+    
+    // Replace all special ASCII characters and ensure that name does not start with a number  
+    for ( uint i = 0; i < n.length(); i++ ){
+	c =  n.at(i);
+	if ( c < lowBoundChar ) {
+	   safename += safeSpaceChar;
+	}else{
+	    if ( !(safename.isEmpty() && c.isNumber()))
+		 safename += c; 
+	}
+    }	
     if ( safename.isEmpty() )
 	safename = "_";
     return safename;
@@ -114,8 +142,8 @@ static bool prepareDirectories(const QString& lf)
     if ( !fi.exists() ) {
 #ifndef Q_OS_WIN32
 	// May need to create directories
-	QString cmdLine(QString("mkdir -p ") + dirPath.latin1());
-	if ( system(cmdLine.latin1())){
+	QString cmdLine(QString("mkdir -p ") + dirPath);
+	if ( system(cmdLine.local8Bit().data())){
 #else
 	if ( !mkdirRecursive( dirPath ) ) {
 #endif
@@ -197,15 +225,22 @@ public:
 	int i;
 	QStringList::ConstIterator it;
 	ensureSCat();
+
+	QString appname = "Document View"; // No tr
+
 	for ( i = 0, it = mCatList.begin(); it != mCatList.end();
 	      ++it, i++ ) {
 
 	    bool number;
 	    int id = (*it).toInt( &number );
+
+	    if ( number && sCat->label(appname, id).isNull() )
+		number = FALSE; // Must supposed to be numeric
+
 	    if ( !number ) {
-		id = sCat->id( "Document View", *it ); // No tr
+		id = sCat->id( appname, *it );
 		if ( id == 0 ) {
-		    id = sCat->addCategory( "Document View", *it ); // No tr
+		    id = sCat->addCategory( appname, *it );
 		    sCat->saveSoon();
 		}
 	    }
@@ -219,12 +254,14 @@ public:
 	    return;
 
 	QPixmap *pm    = load_small ? &lnk->mPixmap : &lnk->mBigPixmap;
-	QString	suffix = load_small ? "_small" : "_big";
+	QString	suffix = load_small ? "_small" : "_big"; // No tr
 	int	size   = load_small ? smallSize : bigSize;
 
 	if ( lnk->mIconFile.isEmpty() ) {
+	    QString key = "_QPE_Global_" + lnk->type() + suffix;
+
 	    // Documents may have no icon.
-	    if (QPixmapCache::find(lnk->type() + suffix, *pm)) 
+	    if (QPixmapCache::find(key, *pm)) 
 		return;
 
 	    // Use the icon associated with the mime-type.
@@ -232,30 +269,46 @@ public:
 	    *pm = (load_small) ? mt.pixmap() : mt.bigPixmap();
 
 	    if ( !pm->isNull() ) {
-		QPixmapCache::insert(lnk->type() + suffix, *pm);
+		QPixmapCache::insert(key, *pm);
 		return;
 	    }
 	} else {
+	    QString key = "_QPE_" + lnk->mExec + '_' + lnk->mIconFile + suffix;
+
 	    // Applications have icons associated with them.
-	    if ( QPixmapCache::find(lnk->mIconFile + suffix, *pm) ) 
+	    if ( QPixmapCache::find(key, *pm) ) 
 		return;
 
+	    bool oldFast = qpe_fast_findPixmap;
+	    qpe_fast_findPixmap = TRUE;
+
 	    // Load up the application's icon.
-	    QImage unscaledIcon = Resource::loadImage( lnk->mIconFile );
+	    QImage unscaledIcon;
+	    if (size <= 16)
+		unscaledIcon = Resource::loadImage( lnk->mExec + '/' + lnk->mIconFile + "_16" );
+	    else if (size > 32)
+		unscaledIcon = Resource::loadImage( lnk->mExec + '/' + lnk->mIconFile + "_48" );
+	    if (unscaledIcon.isNull())
+		unscaledIcon = Resource::loadImage( lnk->mExec + '/' + lnk->mIconFile );
+	    if( unscaledIcon.isNull() ) // last try, load it from the main pics dir with no suffix
+		unscaledIcon = Resource::loadImage( lnk->mIconFile );
+
+	    qpe_fast_findPixmap = oldFast;
+		
 	    if ( !unscaledIcon.isNull() ) {
 		pm->convertFromImage( unscaledIcon.smoothScale( size, size ) );
-		QPixmapCache::insert(lnk->mIconFile + suffix, *pm);
+		QPixmapCache::insert(key, *pm);
 		return;
 	    }
 	}
 
 	// Fall through when we didn't find an icon
-	QString name = "UnknownDocument" + suffix;
+	QString name = "_QPE_Global_UnknownDocument" + suffix;
 	if (QPixmapCache::find(name, *pm))
 	    return;
 
 	// Create unknown document icons as required
-	pm->convertFromImage(Resource::loadImage("UnknownDocument").smoothScale(size,size));
+	pm->convertFromImage(Resource::loadImage("qpe/UnknownDocument").smoothScale(size,size));
 	QPixmapCache::insert(name, *pm);
     }
 };
@@ -728,13 +781,26 @@ void AppLnk::execute(const QStringList& args) const
 	int rot = QPEApplication::defaultRotation();
 	rot = (rot+mRotation.toInt())%360;
 	QCString old = getenv("QWS_DISPLAY");
+
+        //preserve current display id for new applink
+        int displayID = 0;
+        QRegExp regExp( ":[0-9]+" );  // supports more than 10 displays
+        int length;
+        int match = regExp.match( old , 0, &length );
+        if ( match >= 0 ) {
+	    QString num = QString(old).mid( match+1, length-1 );
+	    displayID = num.toInt();
+        }
+
 #ifndef Q_OS_WIN32
-	setenv("QWS_DISPLAY", QString("Transformed:Rot%1:0").arg(rot), 1);
+	setenv("QWS_DISPLAY", QString("Transformed:Rot%1:%2")
+                .arg(rot).arg(displayID), 1);
 	invoke(args);
 	setenv("QWS_DISPLAY", old.data(), 1);
 #else
 	QString	rotationEvn("QWS_DISPLAY=");
-	_putenv((rotationEvn + QString("Transformed:Rot%1:0").arg(rot)).latin1());
+	_putenv((rotationEvn + QString("Transformed:Rot%1:%2")
+                    .arg(rot).arg(displayID)).latin1());
 	invoke(args);
 	_putenv((rotationEvn + old.data()).latin1());
 #endif
@@ -1141,12 +1207,51 @@ void AppLnkSet::findChildren(const QString &dr, const QString& typ, const QStrin
 	typNameLocal = config.readEntry( "Name", typNameLocal );
 	if ( !typ.isEmpty() ) {
 	    QString iconFile = config.readEntry( "Icon", "AppsIcon" );
-	    QImage unscaledIcon = Resource::loadImage( iconFile );
-	    QPixmap pm, bpm;
-	    pm.convertFromImage( unscaledIcon.smoothScale( smallSize, smallSize ) );
-	    bpm.convertFromImage( unscaledIcon.smoothScale( bigSize, bigSize ) );
-	    d->typPix.insert(typ, new QPixmap(pm));
-	    d->typPixBig.insert(typ, new QPixmap(bpm));
+	    QPixmap bpm, pm;
+	    QImage standardIcon;
+
+	    QString key = "_QPE_Global_" + iconFile + "_small";
+	    if ( QPixmapCache::find(key, pm) ) {
+		d->typPix.insert(typ, new QPixmap(pm));
+	    } else {
+		QImage unscaledIcon;
+		bool oldFast = qpe_fast_findPixmap;
+		qpe_fast_findPixmap = TRUE;
+		// Small icon
+		if (smallSize <= 16)
+		    unscaledIcon = Resource::loadImage( iconFile + "_16" );
+		if (unscaledIcon.isNull())
+		    unscaledIcon = standardIcon = Resource::loadImage( iconFile );
+
+		QPixmap pm;
+		pm.convertFromImage( unscaledIcon.smoothScale( smallSize, smallSize ) );
+		d->typPix.insert(typ, new QPixmap(pm));
+		QPixmapCache::insert(key, pm);
+		qpe_fast_findPixmap = oldFast;
+	    }
+
+	    key = "_QPE_Global_" + iconFile + "_big";
+	    if ( QPixmapCache::find(key, bpm) ) {
+		d->typPixBig.insert(typ, new QPixmap(bpm));
+	    } else {
+		QImage unscaledIcon;
+		bool oldFast = qpe_fast_findPixmap;
+		qpe_fast_findPixmap = TRUE;
+		// big icon
+		if (bigSize > 32)
+		    unscaledIcon = Resource::loadImage( iconFile + "_48" );
+		if (unscaledIcon.isNull()) {
+		    if (standardIcon.isNull())
+			unscaledIcon = Resource::loadImage( iconFile );
+		    else
+			unscaledIcon = standardIcon;
+		}
+		bpm.convertFromImage( unscaledIcon.smoothScale( bigSize, bigSize ) );
+		d->typPixBig.insert(typ, new QPixmap(bpm));
+		QPixmapCache::insert(key, bpm);
+		qpe_fast_findPixmap = oldFast;
+	    }
+
 	    d->typName.insert(typ, new QString(typNameLocal));
 	}
     }
@@ -1348,7 +1453,9 @@ DocLnkSet::DocLnkSet( const QString &directory, const QString& mimefilter ) :
 	    DocLnk* dl = new DocLnk;
 	    QFileInfo fi( dit.currentKey() );
 	    dl->setFile(fi.filePath());
-	    dl->setName(fi.baseName());
+	    QString tmp = fi.fileName();
+	    int pos = tmp.findRev( '.' );
+	    dl->setName( (pos == -1) ? tmp : tmp.left( pos ) );
 	    // #### default to current path?
 	    // dl->setCategories( ... );
 	    bool match = mimefilter.isNull();
@@ -1356,8 +1463,7 @@ DocLnkSet::DocLnkSet( const QString &directory, const QString& mimefilter ) :
 		for( QValueList<QRegExp>::Iterator it = mimeFilters.begin(); it != mimeFilters.end() && !match; ++ it )
 		    if ( (*it).match(dl->type()) >= 0 )
 			match = TRUE;
-	    if ( match /* && dl->type() != "application/octet-stream" */
-		    && !!dl->exec() )
+	    if ( match )
 		add(dl);
 	    else
 		delete dl;

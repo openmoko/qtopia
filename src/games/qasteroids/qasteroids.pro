@@ -1,15 +1,19 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
+CONFIG		+= qtopiaapp
 
-CONFIG		+= qtopia warn_on release
-
-HEADERS		= ledmeter.h  sprites.h  toplevel.h  view.h
-SOURCES		= ledmeter.cpp  toplevel.cpp  view.cpp
-
-multiprocess:SOURCES+=main.cpp
+HEADERS		= ledmeter.h sprites.h toplevel.h view.h
+SOURCES		= ledmeter.cpp toplevel.cpp view.cpp main.cpp
 
 TARGET		= qasteroids
 
-TRANSLATIONS = qasteroids-en_GB.ts qasteroids-de.ts qasteroids-ja.ts qasteroids-no.ts
+TRANSLATABLES = $${HEADERS} $${SOURCES}
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/qasteroids*
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/qasteroids.desktop
+desktop.path=/apps/Games
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/qasteroids/*
+pics.path=/pics/qasteroids
+sounds.files=$${QTOPIA_DEPOT_PATH}/sounds/qasteroids/*
+sounds.path=/sounds/qasteroids
+INSTALLS+=desktop sounds help
+PICS_INSTALLS+=pics

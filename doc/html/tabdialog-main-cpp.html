@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -33,7 +35,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/tabdialog/tabdialog.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/tabdialog/tabdialog.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -73,7 +75,7 @@ protected:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/tabdialog/tabdialog.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/tabdialog/tabdialog.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -103,7 +105,7 @@ TabDialog::TabDialog( <a href="qwidget.html">QWidget</a> *parent, const char *na
     connect( this, SIGNAL( applyButtonPressed() ), qApp, SLOT( quit() ) );
 }
 
-void <a name="303"></a>TabDialog::setupTab1()
+void <a name="57"></a>TabDialog::setupTab1()
 {
     <a href="qvbox.html">QVBox</a> *tab1 = new <a href="qvbox.html">QVBox</a>( this );
     tab1-&gt;<a href="qframe.html#b11d00">setMargin</a>( 5 );
@@ -131,7 +133,7 @@ void <a name="303"></a>TabDialog::setupTab1()
     <a href="qtabdialog.html#193b2b">addTab</a>( tab1, "General" );
 }
 
-void <a name="304"></a>TabDialog::setupTab2()
+void <a name="58"></a>TabDialog::setupTab2()
 {
     <a href="qvbox.html">QVBox</a> *tab2 = new <a href="qvbox.html">QVBox</a>( this );
     tab2-&gt;<a href="qframe.html#b11d00">setMargin</a>( 5 );
@@ -163,7 +165,7 @@ void <a name="304"></a>TabDialog::setupTab2()
     <a href="qtabdialog.html#193b2b">addTab</a>( tab2, "Permissions" );
 }
 
-void <a name="305"></a>TabDialog::setupTab3()
+void <a name="59"></a>TabDialog::setupTab3()
 {
     <a href="qvbox.html">QVBox</a> *tab3 = new <a href="qvbox.html">QVBox</a>( this );
     tab3-&gt;<a href="qframe.html#b11d00">setMargin</a>( 5 );
@@ -189,7 +191,7 @@ void <a name="305"></a>TabDialog::setupTab3()
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/tabdialog/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/tabdialog/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -208,7 +210,7 @@ int main( int argc, char **argv )
     <a name="QApplication"></a><a href="qapplication.html">QApplication</a> a( argc, argv );
 
     TabDialog tabdialog( 0, "tabdialog", QString( argc &lt; 2 ? "." : argv[1] ) );
-    tabdialog.<a name="resize"></a><a href="qdialog.html#9d0e95">resize</a>( 450, 350 );
+    tabdialog.<a name="resize"></a><a href="qdialog.html#d7e510">resize</a>( 450, 350 );
     tabdialog.<a name="setCaption"></a><a href="qwidget.html#d6a291">setCaption</a>( "Qt Example - Tabbed Dialog" );
     a.<a name="setMainWidget"></a><a href="qapplication.html#7ad759">setMainWidget</a>( &amp;tabdialog );
     tabdialog.<a name="show"></a><a href="qtabdialog.html#46b852">show</a>();
@@ -219,5 +221,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

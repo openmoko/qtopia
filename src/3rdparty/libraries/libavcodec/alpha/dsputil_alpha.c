@@ -20,12 +20,20 @@
 #include "asm.h"
 #include "../dsputil.h"
 
+extern void simple_idct_axp(DCTELEM *block);
+extern void simple_idct_put_axp(uint8_t *dest, int line_size, DCTELEM *block);
+extern void simple_idct_add_axp(uint8_t *dest, int line_size, DCTELEM *block);
+
 void put_pixels_axp_asm(uint8_t *block, const uint8_t *pixels,
-			int line_size, int h);
+                        int line_size, int h);
 void put_pixels_clamped_mvi_asm(const DCTELEM *block, uint8_t *pixels,
-				int line_size);
+                                int line_size);
 void add_pixels_clamped_mvi_asm(const DCTELEM *block, uint8_t *pixels, 
-				int line_size);
+                                int line_size);
+void (*put_pixels_clamped_axp_p)(const DCTELEM *block, uint8_t *pixels,
+                                 int line_size);
+void (*add_pixels_clamped_axp_p)(const DCTELEM *block, uint8_t *pixels, 
+                                 int line_size);
 
 void get_pixels_mvi(DCTELEM *restrict block,
                     const uint8_t *restrict pixels, int line_size);
@@ -45,8 +53,6 @@ static void put_pixels_clamped_mvi(const DCTELEM *block, uint8_t *pixels,
 {
     int i = 8;
     uint64_t clampmask = zap(-1, 0xaa); /* 0x00ff00ff00ff00ff */
-
-    ASM_ACCEPT_MVI;
 
     do {
         uint64_t shorts0, shorts1;
@@ -75,8 +81,6 @@ void add_pixels_clamped_mvi(const DCTELEM *block, uint8_t *pixels,
     uint64_t clampmask = zap(-1, 0xaa); /* 0x00ff00ff00ff00ff */
     uint64_t signmask  = zap(-1, 0x33);
     signmask ^= signmask >> 1;  /* 0x8000800080008000 */
-
-    ASM_ACCEPT_MVI;
 
     do {
         uint64_t shorts0, pix0, signs0;
@@ -147,14 +151,14 @@ static inline uint64_t avg2(uint64_t a, uint64_t b)
 static inline uint64_t avg4(uint64_t l1, uint64_t l2, uint64_t l3, uint64_t l4)
 {
     uint64_t r1 = ((l1 & ~BYTE_VEC(0x03)) >> 2)
-		+ ((l2 & ~BYTE_VEC(0x03)) >> 2)
-		+ ((l3 & ~BYTE_VEC(0x03)) >> 2)
-		+ ((l4 & ~BYTE_VEC(0x03)) >> 2);
+                + ((l2 & ~BYTE_VEC(0x03)) >> 2)
+                + ((l3 & ~BYTE_VEC(0x03)) >> 2)
+                + ((l4 & ~BYTE_VEC(0x03)) >> 2);
     uint64_t r2 = ((  (l1 & BYTE_VEC(0x03))
-		    + (l2 & BYTE_VEC(0x03))
-		    + (l3 & BYTE_VEC(0x03))
-		    + (l4 & BYTE_VEC(0x03))
-		    + BYTE_VEC(0x02)) >> 2) & BYTE_VEC(0x03);
+                    + (l2 & BYTE_VEC(0x03))
+                    + (l3 & BYTE_VEC(0x03))
+                    + (l4 & BYTE_VEC(0x03))
+                    + BYTE_VEC(0x02)) >> 2) & BYTE_VEC(0x03);
     return r1 + r2;
 }
 #endif
@@ -281,7 +285,17 @@ void put_pixels16_axp_asm(uint8_t *block, const uint8_t *pixels,
     put_pixels_axp_asm(block + 8, pixels + 8, line_size, h);
 }
 
-void dsputil_init_alpha(DSPContext* c, unsigned mask)
+static int sad16x16_mvi(void *s, uint8_t *a, uint8_t *b, int stride)
+{
+    return pix_abs16x16_mvi_asm(a, b, stride);
+}
+
+static int sad8x8_mvi(void *s, uint8_t *a, uint8_t *b, int stride)
+{
+    return pix_abs8x8_mvi(a, b, stride);
+}
+
+void dsputil_init_alpha(DSPContext* c, AVCodecContext *avctx)
 {
     c->put_pixels_tab[0][0] = put_pixels16_axp_asm;
     c->put_pixels_tab[0][1] = put_pixels16_x2_axp;
@@ -332,10 +346,19 @@ void dsputil_init_alpha(DSPContext* c, unsigned mask)
 
         c->get_pixels       = get_pixels_mvi;
         c->diff_pixels      = diff_pixels_mvi;
+        c->sad[0]           = sad16x16_mvi;
+        c->sad[1]           = sad8x8_mvi;
         c->pix_abs8x8       = pix_abs8x8_mvi;
         c->pix_abs16x16     = pix_abs16x16_mvi_asm;
         c->pix_abs16x16_x2  = pix_abs16x16_x2_mvi;
         c->pix_abs16x16_y2  = pix_abs16x16_y2_mvi;
         c->pix_abs16x16_xy2 = pix_abs16x16_xy2_mvi;
     }
+
+    put_pixels_clamped_axp_p = c->put_pixels_clamped;
+    add_pixels_clamped_axp_p = c->add_pixels_clamped;
+    
+    c->idct_put = simple_idct_put_axp;
+    c->idct_add = simple_idct_add_axp;
+    c->idct = simple_idct_axp;
 }

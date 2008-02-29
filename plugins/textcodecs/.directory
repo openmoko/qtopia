@@ -1,7 +1,8 @@
+[Translation]
+File=QtopiaPlugins
+Context=Text Codecs
 [Desktop Entry]
-Name=Text Codecs
-Comment=Provides support for various international languages.
-Name[ja]=テキストコーデック
-Comment[ja]=多数の国際言語のサポートを提供します。
+Name[]=Text Codecs
+Comment[]=Provides support for various international languages.
 Required=jp,simple8
 Apply=QPE/System restart()

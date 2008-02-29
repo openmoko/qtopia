@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -113,9 +115,9 @@ This table shows the most useful combinations of styles and widths
 (and some rather useless ones):
 <p><img src=frames.png width=515 height=414 alt="Table of frame styles">
 <p>Examples:
- <a href="popup-popup-cpp.html#QFrame">popup/popup.cpp</a>
- <a href="scrollview-scrollview-cpp.html#QFrame">scrollview/scrollview.cpp</a>
  <a href="movies-main-cpp.html#QFrame">movies/main.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#QFrame">scrollview/scrollview.cpp</a>
+ <a href="popup-popup-cpp.html#QFrame">popup/popup.cpp</a>
 
 <hr><h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Shadow">QFrame::Shadow</a></h3>
@@ -171,7 +173,7 @@ transformation</a> before returning.
 inside the frame.  It should draw only inside <a href="#f558c2">contentsRect</a>(). The
 default function does nothing.
 <p>See also  <a href="#f558c2">contentsRect</a>(), <a href="qpainter.html#898839">QPainter::setClipRect</a>() and <a href="#ffb489">drawContentsMask</a>().
-<p>Reimplemented in <a href="qlcdnumber.html#66cd97">QLCDNumber</a>, <a href="qmenubar.html#9e8437">QMenuBar</a>, <a href="qlabel.html#957a42">QLabel</a>, <a href="qprogressbar.html#44664c">QProgressBar</a> and <a href="qpopupmenu.html#7142b1">QPopupMenu</a>.
+<p>Reimplemented in <a href="qmenubar.html#9e8437">QMenuBar</a>, <a href="qpopupmenu.html#7142b1">QPopupMenu</a>, <a href="qlcdnumber.html#66cd97">QLCDNumber</a>, <a href="qlabel.html#957a42">QLabel</a> and <a href="qprogressbar.html#44664c">QProgressBar</a>.
 <h3 class="fn">void <a name="ffb489"></a>QFrame::drawContentsMask ( <a href="qpainter.html">QPainter</a> * p ) <code>[virtual protected]</code></h3>
 <p>Virtual function that draws the mask of the frame's contents.
 <p>If you reimplemented <a href="#1991fc">drawContents</a>(<a href="qpainter.html">QPainter</a>*) and your widget should
@@ -197,7 +199,7 @@ mid-line width changes.
 <p>This function can be reimplemented by subclasses that need to know
 when the frame attributes change.
 <p>The default implementation calls <a href="qwidget.html#f3f721">update</a>().
-<p>Reimplemented in <a href="qhbox.html#42612e">QHBox</a>, <a href="qscrollview.html#6b9a7a">QScrollView</a>, <a href="qgrid.html#2b153c">QGrid</a> and <a href="qwidgetstack.html#44a356">QWidgetStack</a>.
+<p>Reimplemented in <a href="qwidgetstack.html#44a356">QWidgetStack</a>, <a href="qhbox.html#42612e">QHBox</a>, <a href="qgrid.html#2b153c">QGrid</a> and <a href="qscrollview.html#6b9a7a">QScrollView</a>.
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="1819f6"></a>QFrame::frameRect () const</h3>
 <p>Returns the frame rectangle.
 <p>The default frame rectangle is equivalent to the <a href="qwidget.html#75ae71">widget rectangle</a>.
@@ -314,18 +316,18 @@ frames.  The mid color of the current color group is used for
 drawing middle lines.
 <p>See also  <a href="#picture">Illustration</a>, <a href="#1dc726">frameStyle</a>(), <a href="qwidget.html#d92bf4">colorGroup</a>() and <a href="qcolorgroup.html">QColorGroup</a>.
 <p>Examples:
- <a href="xform-xform-cpp.html#setFrameStyle">xform/xform.cpp</a>
  <a href="cursor-cursor-cpp.html#setFrameStyle">cursor/cursor.cpp</a>
- <a href="layout-layout-cpp.html#setFrameStyle">layout/layout.cpp</a>
- <a href="popup-popup-cpp.html#setFrameStyle">popup/popup.cpp</a>
  <a href="scrollview-scrollview-cpp.html#setFrameStyle">scrollview/scrollview.cpp</a>
+ <a href="layout-layout-cpp.html#setFrameStyle">layout/layout.cpp</a>
  <a href="customlayout-main-cpp.html#setFrameStyle">customlayout/main.cpp</a>
+ <a href="xform-xform-cpp.html#setFrameStyle">xform/xform.cpp</a>
+ <a href="popup-popup-cpp.html#setFrameStyle">popup/popup.cpp</a>
 <h3 class="fn">void <a name="b76184"></a>QFrame::setLineWidth ( int w ) <code>[virtual]</code></h3>
 <p>Sets the line width to <em>w.</em>
 <p>See also  <a href="#07c4d2">frameWidth</a>(), <a href="#63cf95">lineWidth</a>() and <a href="#1e32b9">setMidLineWidth</a>().
 <p>Examples:
- <a href="xform-xform-cpp.html#setLineWidth">xform/xform.cpp</a>
  <a href="scrollview-scrollview-cpp.html#setLineWidth">scrollview/scrollview.cpp</a>
+ <a href="xform-xform-cpp.html#setLineWidth">xform/xform.cpp</a>
 <h3 class="fn">void <a name="b11d00"></a>QFrame::setMargin ( int w ) <code>[virtual]</code></h3>
 <p>Sets the width of the margin to <em>w.</em>
 <p>See also  <a href="#cb5472">margin</a>() and <a href="#b76184">setLineWidth</a>().
@@ -354,7 +356,7 @@ in subclasses.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -362,5 +364,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

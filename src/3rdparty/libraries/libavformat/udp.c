@@ -48,6 +48,7 @@ typedef struct {
  * option: 'multicast=1' : enable multicast 
  *         'ttl=n'       : set the ttl value (for multicast only)
  *         'localport=n' : set the local port
+ *         'pkt_size=n'  : set max packet size
  *
  * @param s1 media file context
  * @param uri of the remote server
@@ -104,6 +105,7 @@ static int udp_open(URLContext *h, const char *uri, int flags)
     char buf[256];
 
     h->is_streamed = 1;
+    h->max_packet_size = 1472;
 
     is_output = (flags & URL_WRONLY);
     
@@ -114,6 +116,7 @@ static int udp_open(URLContext *h, const char *uri, int flags)
     h->priv_data = s;
     s->ttl = 16;
     s->is_multicast = 0;
+    s->local_port = 0;
     p = strchr(uri, '?');
     if (p) {
         s->is_multicast = find_info_tag(buf, sizeof(buf), "multicast", p);
@@ -122,6 +125,9 @@ static int udp_open(URLContext *h, const char *uri, int flags)
         }
         if (find_info_tag(buf, sizeof(buf), "localport", p)) {
             s->local_port = strtol(buf, NULL, 10);
+        }
+        if (find_info_tag(buf, sizeof(buf), "pkt_size", p)) {
+            h->max_packet_size = strtol(buf, NULL, 10);
         }
     }
 
@@ -191,7 +197,6 @@ static int udp_open(URLContext *h, const char *uri, int flags)
     }
 
     s->udp_fd = udp_fd;
-    h->max_packet_size = 1472; /* XXX: probe it ? */
     return 0;
  fail:
     if (udp_fd >= 0)
@@ -204,7 +209,7 @@ static int udp_open(URLContext *h, const char *uri, int flags)
     return -EIO;
 }
 
-static int udp_read(URLContext *h, UINT8 *buf, int size)
+static int udp_read(URLContext *h, uint8_t *buf, int size)
 {
     UDPContext *s = h->priv_data;
     struct sockaddr_in from;
@@ -224,7 +229,7 @@ static int udp_read(URLContext *h, UINT8 *buf, int size)
     return len;
 }
 
-static int udp_write(URLContext *h, UINT8 *buf, int size)
+static int udp_write(URLContext *h, uint8_t *buf, int size)
 {
     UDPContext *s = h->priv_data;
     int ret;

@@ -17,6 +17,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+ 
+/**
+ * @file simple_idct.c
+ * simpleidct in C.
+ */
+ 
 /*
   based upon some outcommented c code from mpeg2dec (idct_mmx.c
   written by Aaron Holtzman <aholtzma@ess.engr.uvic.ca>) 
@@ -67,7 +73,7 @@
 
 #endif
 
-static inline void idctRowCondDC (int16_t * row)
+static inline void idctRowCondDC (DCTELEM * row)
 {
 	int a0, a1, a2, a3, b0, b1, b2, b3;
 #ifdef FAST_64BIT
@@ -82,26 +88,40 @@ static inline void idctRowCondDC (int16_t * row)
 #else
 #define ROW0_MASK 0xffffLL
 #endif
-	if ( ((((uint64_t *)row)[0] & ~ROW0_MASK) | 
-              ((uint64_t *)row)[1]) == 0) {
-            temp = (row[0] << 3) & 0xffff;
-            temp += temp << 16;
-            temp += temp << 32;
-            ((uint64_t *)row)[0] = temp;
-            ((uint64_t *)row)[1] = temp;
-            return;
-	}
+        if(sizeof(DCTELEM)==2){
+            if ( ((((uint64_t *)row)[0] & ~ROW0_MASK) | 
+                  ((uint64_t *)row)[1]) == 0) {
+                temp = (row[0] << 3) & 0xffff;
+                temp += temp << 16;
+                temp += temp << 32;
+                ((uint64_t *)row)[0] = temp;
+                ((uint64_t *)row)[1] = temp;
+                return;
+	    }
+        }else{
+            if (!(row[1]|row[2]|row[3]|row[4]|row[5]|row[6]|row[7])) {
+                row[0]=row[1]=row[2]=row[3]=row[4]=row[5]=row[6]=row[7]= row[0] << 3;
+                return;
+            }
+        }
 #else
-	if (!(((uint32_t*)row)[1] |
-              ((uint32_t*)row)[2] |
-              ((uint32_t*)row)[3] | 
-              row[1])) {
-            temp = (row[0] << 3) & 0xffff;
-            temp += temp << 16;
-            ((uint32_t*)row)[0]=((uint32_t*)row)[1] =
-		((uint32_t*)row)[2]=((uint32_t*)row)[3] = temp;
-		return;
-	}
+        if(sizeof(DCTELEM)==2){
+            if (!(((uint32_t*)row)[1] |
+                  ((uint32_t*)row)[2] |
+                  ((uint32_t*)row)[3] | 
+                  row[1])) {
+                temp = (row[0] << 3) & 0xffff;
+                temp += temp << 16;
+                ((uint32_t*)row)[0]=((uint32_t*)row)[1] =
+                ((uint32_t*)row)[2]=((uint32_t*)row)[3] = temp;
+                return;
+            }
+        }else{
+            if (!(row[1]|row[2]|row[3]|row[4]|row[5]|row[6]|row[7])) {
+                row[0]=row[1]=row[2]=row[3]=row[4]=row[5]=row[6]=row[7]= row[0] << 3;
+                return;
+            }
+        }
 #endif
 
         a0 = (W4 * row[0]) + (1 << (ROW_SHIFT - 1));
@@ -158,11 +178,11 @@ static inline void idctRowCondDC (int16_t * row)
 	row[4] = (a3 - b3) >> ROW_SHIFT;
 }
 
-static inline void idctSparseColPut (UINT8 *dest, int line_size, 
-                                     int16_t * col)
+static inline void idctSparseColPut (uint8_t *dest, int line_size, 
+                                     DCTELEM * col)
 {
 	int a0, a1, a2, a3, b0, b1, b2, b3;
-        UINT8 *cm = cropTbl + MAX_NEG_CROP;
+        uint8_t *cm = cropTbl + MAX_NEG_CROP;
 
         /* XXX: I did that only to give same values as previous code */
 	a0 = W4 * (col[8*0] + ((1<<(COL_SHIFT-1))/W4));
@@ -230,11 +250,11 @@ static inline void idctSparseColPut (UINT8 *dest, int line_size,
         dest[0] = cm[(a0 - b0) >> COL_SHIFT];
 }
 
-static inline void idctSparseColAdd (UINT8 *dest, int line_size, 
-                                     int16_t * col)
+static inline void idctSparseColAdd (uint8_t *dest, int line_size, 
+                                     DCTELEM * col)
 {
 	int a0, a1, a2, a3, b0, b1, b2, b3;
-        UINT8 *cm = cropTbl + MAX_NEG_CROP;
+        uint8_t *cm = cropTbl + MAX_NEG_CROP;
 
         /* XXX: I did that only to give same values as previous code */
 	a0 = W4 * (col[8*0] + ((1<<(COL_SHIFT-1))/W4));
@@ -302,7 +322,7 @@ static inline void idctSparseColAdd (UINT8 *dest, int line_size,
         dest[0] = cm[dest[0] + ((a0 - b0) >> COL_SHIFT)];
 }
 
-static inline void idctSparseCol (int16_t * col)
+static inline void idctSparseCol (DCTELEM * col)
 {
 	int a0, a1, a2, a3, b0, b1, b2, b3;
 
@@ -365,7 +385,7 @@ static inline void idctSparseCol (int16_t * col)
         col[56] = ((a0 - b0) >> COL_SHIFT);
 }
 
-void simple_idct_put(UINT8 *dest, int line_size, INT16 *block)
+void simple_idct_put(uint8_t *dest, int line_size, DCTELEM *block)
 {
     int i;
     for(i=0; i<8; i++)
@@ -375,7 +395,7 @@ void simple_idct_put(UINT8 *dest, int line_size, INT16 *block)
         idctSparseColPut(dest + i, line_size, block + i);
 }
 
-void simple_idct_add(UINT8 *dest, int line_size, INT16 *block)
+void simple_idct_add(uint8_t *dest, int line_size, DCTELEM *block)
 {
     int i;
     for(i=0; i<8; i++)
@@ -385,7 +405,7 @@ void simple_idct_add(UINT8 *dest, int line_size, INT16 *block)
         idctSparseColAdd(dest + i, line_size, block + i);
 }
 
-void simple_idct(INT16 *block)
+void simple_idct(DCTELEM *block)
 {
     int i;
     for(i=0; i<8; i++)
@@ -406,10 +426,10 @@ void simple_idct(INT16 *block)
    and the butterfly must be multiplied by 0.5 * sqrt(2.0) */
 #define C_SHIFT (4+1+12)
 
-static inline void idct4col(UINT8 *dest, int line_size, const INT16 *col)
+static inline void idct4col(uint8_t *dest, int line_size, const DCTELEM *col)
 {
     int c0, c1, c2, c3, a0, a1, a2, a3;
-    const UINT8 *cm = cropTbl + MAX_NEG_CROP;
+    const uint8_t *cm = cropTbl + MAX_NEG_CROP;
 
     a0 = col[8*0];
     a1 = col[8*2];
@@ -443,10 +463,10 @@ static inline void idct4col(UINT8 *dest, int line_size, const INT16 *col)
 /* XXX: I think a 1.0/sqrt(2) normalization should be needed to
    compensate the extra butterfly stage - I don't have the full DV
    specification */
-void simple_idct248_put(UINT8 *dest, int line_size, INT16 *block)
+void simple_idct248_put(uint8_t *dest, int line_size, DCTELEM *block)
 {
     int i;
-    INT16 *ptr;
+    DCTELEM *ptr;
     
     /* butterfly */
     ptr = block;
@@ -473,3 +493,93 @@ void simple_idct248_put(UINT8 *dest, int line_size, INT16 *block)
         idct4col(dest + line_size + i, 2 * line_size, block + 8 + i);
     }
 }
+
+/* 8x4 & 4x8 WMV2 IDCT */
+#undef CN_SHIFT
+#undef C_SHIFT
+#undef C_FIX
+#undef C1
+#undef C2
+#define CN_SHIFT 12
+#define C_FIX(x) ((int)((x) * 1.414213562 * (1 << CN_SHIFT) + 0.5))
+#define C1 C_FIX(0.6532814824)
+#define C2 C_FIX(0.2705980501)
+#define C3 C_FIX(0.5)
+#define C_SHIFT (4+1+12)
+static inline void idct4col_add(uint8_t *dest, int line_size, const DCTELEM *col)
+{
+    int c0, c1, c2, c3, a0, a1, a2, a3;
+    const uint8_t *cm = cropTbl + MAX_NEG_CROP;
+
+    a0 = col[8*0];
+    a1 = col[8*1];
+    a2 = col[8*2];
+    a3 = col[8*3];
+    c0 = (a0 + a2)*C3 + (1 << (C_SHIFT - 1));
+    c2 = (a0 - a2)*C3 + (1 << (C_SHIFT - 1));
+    c1 = a1 * C1 + a3 * C2;
+    c3 = a1 * C2 - a3 * C1;
+    dest[0] = cm[dest[0] + ((c0 + c1) >> C_SHIFT)];
+    dest += line_size;
+    dest[0] = cm[dest[0] + ((c2 + c3) >> C_SHIFT)];
+    dest += line_size;
+    dest[0] = cm[dest[0] + ((c2 - c3) >> C_SHIFT)];
+    dest += line_size;
+    dest[0] = cm[dest[0] + ((c0 - c1) >> C_SHIFT)];
+}
+
+#define RN_SHIFT 15
+#define R_FIX(x) ((int)((x) * 1.414213562 * (1 << RN_SHIFT) + 0.5))
+#define R1 R_FIX(0.6532814824)
+#define R2 R_FIX(0.2705980501)
+#define R3 R_FIX(0.5)
+#define R_SHIFT 11
+static inline void idct4row(DCTELEM *row)
+{
+    int c0, c1, c2, c3, a0, a1, a2, a3;
+    //const uint8_t *cm = cropTbl + MAX_NEG_CROP;
+
+    a0 = row[0];
+    a1 = row[1];
+    a2 = row[2];
+    a3 = row[3];
+    c0 = (a0 + a2)*R3 + (1 << (R_SHIFT - 1));
+    c2 = (a0 - a2)*R3 + (1 << (R_SHIFT - 1));
+    c1 = a1 * R1 + a3 * R2;
+    c3 = a1 * R2 - a3 * R1;
+    row[0]= (c0 + c1) >> R_SHIFT;
+    row[1]= (c2 + c3) >> R_SHIFT;
+    row[2]= (c2 - c3) >> R_SHIFT;
+    row[3]= (c0 - c1) >> R_SHIFT;
+}
+
+void simple_idct84_add(uint8_t *dest, int line_size, DCTELEM *block)
+{
+    int i;
+
+    /* IDCT8 on each line */
+    for(i=0; i<4; i++) {
+        idctRowCondDC(block + i*8);
+    }
+
+    /* IDCT4 and store */
+    for(i=0;i<8;i++) {
+        idct4col_add(dest + i, line_size, block + i);
+    }
+}
+
+void simple_idct48_add(uint8_t *dest, int line_size, DCTELEM *block)
+{
+    int i;
+
+    /* IDCT4 on each line */
+    for(i=0; i<8; i++) {
+        idct4row(block + i*8);
+    }
+
+    /* IDCT8 and store */
+    for(i=0; i<4; i++){
+        idctSparseColAdd(dest + i, line_size, block + i);
+    }
+}
+

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/qvfb-customize.doc:2 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Customizing a Skin for QVFB</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Customizing a Skin for QVFB</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Understanding the .skin File
+</a>
+<ul>
+<li><a href="#2-1"> Coordinates
+</a>
+<li><a href="#2-2"> defaultbuttons.conf
+</a>
+</ul>
+<li><a href="#3"> Specifying Screen Size Independent of Skin
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document explains how to customize the QVFB skin for a specific project.
+<p> The virtual framebuffer is located in <tt>$QTDIR/tools/qvfb</tt>.
+<p> QVFB is a development tool only.  No security issues have
+been considered in the virtual framebuffer design.  It should not be used
+in a production environment and <tt>QT_NO_QWS_VFB</tt> should always be defined
+in production libraries.
+<p> <h2> Understanding the .skin File
+</h2>
+<a name="2"></a><p> The <tt>.skin</tt> file consists of the following:
+<p> <ul>
+<li> it specifies 2 files, one for the "normal" skin and one for the "activated" skin.
+<li> the next 2 lines specify the offset and size of the virtual screen.
+<li> last comes the button definition. There is a number to specify how many buttons are available followed by the buttons. The format is name, keycode, coordinates.
+</ul>
+<p> <h3> Coordinates
+</h3>
+<a name="2-1"></a><p> The coordinates are a list of at least 2 points in a clockwise order that define a shape for the button. Two points are treated as opposite edges of a rectangle. Any click inside the points will be treated as a click on that button. While pressed, the pixels for the button are redrawn from the "activated" skin.
+<p> You can examine <tt>SmartPhone.skin</tt> and <tt>SmartPhone2.skin</tt> in $QTDIR/tools/QVFB to get an idea of how it all works.
+<p> <h3> defaultbuttons.conf
+</h3>
+<a name="2-2"></a><p> You can also include a <tt>defaultbuttons.conf</tt> file. This file customizes the launch screen applications and the ordering of the soft keys. There are also input method hints in this file.  If you include a <tt>defaultbuttons.conf</tt> file you will need to be aware of a few caveats for building and running Qtopia.
+<p> <ul>
+<li> QVFB makes <tt>$QPEDIR/etc/defaultbuttons.conf</tt> a symlink to the <tt>defaultbuttons.conf</tt> from the chosen skin.
+<li> configure will clobber this file unless you pass <tt>-no-defaultbuttons</tt>.
+<li> make install copies the contents of <tt>$QPEDIR/etc/defaultbuttons.conf</tt> into the image. If you subsequently change the file from the depot, you will need to make install before the image is updated.
+</ul>
+<p> If you run QVFB when <tt>$QPEDIR</tt> points to your image, the depot version of <tt>defaultbuttons.conf</tt> will not be updated and make install will clobber what's in the image.  Here is how you can get around this:
+<p> <ul>
+<li> always configure with <tt>-no-defaultbuttons</tt>
+<li> run QVFB and select your skin from a normal building environment
+<li> make install now copies the correct <tt>defaultbuttons.conf</tt> file into the image.
+<li> do not run QVFB from your image environment.
+</ul>
+<p> <h2> Specifying Screen Size Independent of Skin
+</h2>
+<a name="3"></a><p> QVFB allows the screen size to be specified independently of the skin. For example, you can use the SmartPhone.skin but specify a screen size of 240x320 pixels. The skin (if command-line arguments are used) or screen (if Configure is used) will be scaled accordingly. For example:
+<p> <pre> QVFB -skin SmartPhone.skin -width 240 -height 320 -zoom 0.7 </pre>
+ 
+<p> The above example uses the SmartPhone.skin (screen area 176x208 skin pixels) but with a 240x320 pixel virtual framebuffer (ie. what Qtopia draws to). The screen is scaled down by 0.7 resulting in a display that is a smooth-scaled 168x224 pixels.
+<p> Note that the SmartPhone.skin is 176x208, not 3:4 which means that 3:4 pixel screens are slightly distorted (but still pixel-correct).
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -39,12 +54,12 @@ int SortedLayoutItems::compareItems(Item i1, Item i2)
 	return -1;
     if (d2->occurrence().startInCurrentTZ() < d1->occurrence().startInCurrentTZ())
 	return 1;
-    return 0;
+    //return 0;
 
     if (d1->occurrence().endInCurrentTZ() < d2->occurrence().endInCurrentTZ())
-	return -1;
-    if (d2->occurrence().endInCurrentTZ() < d1->occurrence().endInCurrentTZ())
 	return 1;
+    if (d2->occurrence().endInCurrentTZ() < d1->occurrence().endInCurrentTZ())
+	return -1;
     return 0;
 }
 
@@ -56,9 +71,6 @@ void LayoutManager::setDate(const QDate &d)
 	return;
 
     referenceDate = d;
-
-    for (uint i = 0; i < mItems.count(); i++) 
-	initializeGeometry(mItems.at(i));
 }
 
 void LayoutManager::setSize(int w, int h) 
@@ -84,8 +96,9 @@ void LayoutManager::setOccurrences(QValueList<Occurrence> &events)
 void LayoutManager::addOccurrence(Occurrence &event)
 {
     LayoutItem *i = new LayoutItem(event);
-    initializeGeometry(i);
     addItem(i);
+    eventsChanged();
+    initializeGeometry(i);
 }
 
 void LayoutManager::addItem(LayoutItem *i)
@@ -101,11 +114,14 @@ void LayoutManager::layoutItems(bool resetMaxWidth)
 	maxWidth = width;
 
     int iCount = mItems.count();
+    if ( width < 1 || iCount == 0 ) {
+	return;
+    }
     int itemWidth = QMIN(width, maxWidth);
     int n = 1;
+    int groupStart = 0;
+    int last_bottom = -1;
 
-    if (width < 1)
-	return;
     if (iCount < (width/4)) {
 	int i = 0;
 	while (i < iCount) {
@@ -113,6 +129,14 @@ void LayoutManager::layoutItems(bool resetMaxWidth)
 	    int x = 0;
 	    int xp = 0;
 	    QRect geom = item->geometry();
+	    if ( geom.top() > last_bottom ) {
+		groupStart = i;
+		n = 1;
+		itemWidth = QMIN(width, maxWidth);
+	    }
+	    int b = geom.bottom();
+	    if ( b > last_bottom )
+		last_bottom = b;
 	    geom.setX( x );
 	    geom.setWidth(itemWidth);
 	    while ( xp < n && intersects(item, geom)) {
@@ -123,7 +147,7 @@ void LayoutManager::layoutItems(bool resetMaxWidth)
 	    if (xp >= n) {
 		n++;
 		itemWidth = QMIN(width / n, maxWidth);
-		i = 0; // Start again.
+		i = groupStart; // Start again.
 	    } else {
 		item->setGeometry( geom );
 		i++;
@@ -161,6 +185,24 @@ void LayoutManager::layoutItems(bool resetMaxWidth)
     }
     if (itemWidth < maxWidth)
 	maxWidth = itemWidth;
+
+    // expand items that can be wider
+    for ( int i = 0; i < iCount; i++ ) {
+	LayoutItem *item = mItems.at( i );
+	QRect geom = item->geometry();
+	geom.moveBy( 4, 0 );
+	if ( !intersects( item, geom, iCount ) ) {
+	    geom.moveBy( -4, 0 );
+	    int maxWidth = width;
+	    geom.setWidth( maxWidth - geom.x() );
+	    LayoutItem *other = intersects( item, geom, iCount );
+	    if ( other ) {
+		maxWidth = other->geometry().x();
+	    }
+	    geom.setWidth( maxWidth - geom.x() );
+	    item->setGeometry( geom );
+	}
+    }
 }
 
 int LayoutManager::timeToHeight( const QTime &time ) const
@@ -177,19 +219,23 @@ QTime LayoutManager::heightToTime( int ) const
     return QTime(0,0,0);
 }
 
-LayoutItem *LayoutManager::intersects(LayoutItem *item, QRect geom) const
+LayoutItem *LayoutManager::intersects(LayoutItem *item, QRect geom, int maxIndex, int *startIndex) const
 {
-    int i = 0;
     // allow overlapping
     geom.moveBy(1,1);
     geom.setSize( geom.size() - QSize(2,2) );
 
-    LayoutItem *it = mItems.at(i);
     int count = mItems.count();
-    while (i < count && it != item) {
+    if ( maxIndex && maxIndex < count )
+	count = maxIndex;
+    for ( int i = startIndex ? *startIndex : 0; i < count; i++ ) {
+	if ( startIndex ) *startIndex = i;
+	LayoutItem *it = mItems.at(i);
+	if ( it == item )
+	    if ( maxIndex ) continue;
+	    else break;
 	if (it->geometry().intersects( geom ) )
 	    return it;
-	it = mItems.at(++i);
     }
     return 0;
 }
@@ -207,7 +253,7 @@ void LayoutManager::initializeGeometry(LayoutItem *item)
 		item->occurrence().startInCurrentTZ().date().daysTo(item->occurrence().endInCurrentTZ().date())
 		)
 	    )
-	yend = timeToHeight(QTime(23,59,59));
+	yend = height;
     else
 	yend = timeToHeight(item->occurrence().endInCurrentTZ().time());
 

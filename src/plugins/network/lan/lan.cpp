@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -48,6 +63,9 @@
 #include <qlayout.h>
 
 #include <stdlib.h>
+
+static const char* wlanopts = "/etc/pcmcia/wlan-ng.opts";
+static const char* wirelessopts = "/etc/pcmcia/wireless.opts";
 
 #define USE_SCHEMES
 
@@ -147,6 +165,8 @@ public:
     //}
 };
 
+#include "../addscrollbars.cpp"
+
 Lan::Lan(Config& cfg, QWidget* parent) :
     LanBase(parent,0,TRUE),
     config(cfg)
@@ -158,9 +178,14 @@ Lan::Lan(Config& cfg, QWidget* parent) :
     connect( ipGroup, SIGNAL(clicked(int)), this, SLOT(ipSelect(int)) );
     ipGroup->setButton( 1 );
 
+    if ( !QFile::exists(wlanopts) && !QFile::exists(wirelessopts) )
+	tabs->setTabEnabled(wireless, FALSE);
+
     QBoxLayout *proxyLayout  = new QVBoxLayout( tab_2 ); 
     proxies = new ProxiesPage( tab_2 );
     proxyLayout->addWidget( proxies );
+
+    addScrollBars(tabs);
 
     connect(wep_passphrase, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
     connect(wep_key0, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
@@ -271,7 +296,7 @@ bool Lan::writeConfig()
 		) && cfg != config
 	    ) {
 		QMessageBox::warning(0, tr("LAN Setup"), 
-				     tr( "This name already\nexists. Please choose a\ndifferent name.") );
+				     tr( "<qt>This name already exists. Please choose a different name.</qt>") );
 		return FALSE;
 	    }
 	}
@@ -315,18 +340,22 @@ bool Lan::writeConfig()
 	config.writeEntry("dot11WEPDefaultKey2", wep_key2->text());
 	config.writeEntry("dot11WEPDefaultKey3", wep_key3->text());
 	QString wep;
-	if ( wep_passphrase_on->isChecked() )
-	    wep = "PP";
-	else if ( wep_key0_on->isChecked() )
-	    wep = "K0";
-	else if ( wep_key1_on->isChecked() )
-	    wep = "K1";
-	else if ( wep_key2_on->isChecked() )
-	    wep = "K2";
-	else if ( wep_key3_on->isChecked() )
-	    wep = "K3";
-	else
+	if ( wep_type->currentItem() == 0 ) {
 	    wep = "NO";
+	} else {
+	    if ( wep_passphrase_on->isChecked() )
+		wep = "PP";
+	    else if ( wep_key0_on->isChecked() )
+		wep = "K0";
+	    else if ( wep_key1_on->isChecked() )
+		wep = "K1";
+	    else if ( wep_key2_on->isChecked() )
+		wep = "K2";
+	    else if ( wep_key3_on->isChecked() )
+		wep = "K3";
+	    else
+		wep = "NO";
+	}
 	config.writeEntry("WEP",wep);
 
 	config.setGroup("Proxy");
@@ -362,16 +391,53 @@ bool Lan::writeBuiltinNetworkOpts( Config &config, QString scheme )
     //  2. stop the network.
     //  3. move the tmp file to the network config file.
     //  4. start the network.
+    Q_CONST_UNUSED(config);
+    Q_CONST_UNUSED(scheme);
 
     return FALSE;
+}
+
+static QString ngToWireless(Config& config, const QString& key)
+{
+    if ( key == "ESSID" ) {
+	QString ssid = config.readEntry("SSID");
+	if ( ssid.isEmpty() )
+	    ssid = "any";
+	return ssid;
+    } else if ( key == "INFO" ) {
+	config.setGroup("Info");
+	QString nm = config.readEntry("Name");
+	config.setGroup("Properties");
+	return nm;
+    } else if ( key == "MODE" ) {
+	bool ah=config.readEntry("IS_ADHOC").lower()=="y";
+	if ( ah )
+	    return "Ad-Hoc";
+	else
+	    return "Managed";
+    } else if ( key == "KEY" ) {
+	QString wep = config.readEntry("WEP");
+	if ( wep == "PP" ) {
+	    return "s:"+config.readEntry("PRIV_GENSTR");
+	} else {
+	    QString v=config.readEntry("dot11WEPDefaultKey"+wep[1]);
+	    v.replace(QRegExp(":"),"");
+	    return v;
+	}
+    } else {
+	return config.readEntry(key);
+    }
 }
 
 bool Lan::writePcmciaNetworkOpts( Config &config, QString scheme )
 {
     QString prev = "/etc/pcmcia/network.opts";
     QFile prevFile(prev);
-    if ( !prevFile.open( IO_ReadOnly ) )
+    if ( !prevFile.open( IO_ReadOnly ) ) {
+	QMessageBox::warning(0, tr("LAN Setup"), 
+		     tr( "<qt>The file /etc/pcmcia/network.opts does not exist. Please restore this file.</qt>") );
 	return FALSE;
+    }
 
     QString tmp = prev + "-qpe-new";
     QFile tmpFile(tmp);
@@ -385,7 +451,7 @@ bool Lan::writePcmciaNetworkOpts( Config &config, QString scheme )
 
     config.setGroup("Info");
     QString nm = config.readEntry( "Name" );
-    
+
     config.setGroup("Properties");
 
     //For DHCP to work, we have to remove the TCP/IP fields
@@ -467,82 +533,118 @@ bool Lan::writePcmciaNetworkOpts( Config &config, QString scheme )
     prevFile.close();
     tmpFile.close();
 
-    QString prev2 = "/etc/pcmcia/wlan-ng.opts";
-    prevFile.setName(prev2);
-    if ( !prevFile.open( IO_ReadOnly ) )
-	return FALSE;
+    QString prevng = wlanopts;
+    QString tmpng = prevng + "-qpe-new";
+    QString prevwl = wirelessopts;
+    QString tmpwl = prevwl + "-qpe-new";
 
-    QString tmp2 = prev2 + "-qpe-new";
-    tmpFile.setName(tmp2);
-    if ( !tmpFile.open( IO_WriteOnly ) )
-	return FALSE;
+    for (int ng=0; ng<2; ng++) {
+	prevFile.setName(ng ? prevng : prevwl);
+	if ( !prevFile.open( IO_ReadOnly ) ) {
+	    if ( ng )
+		prevng = QString::null;
+	    else
+		prevwl = QString::null;
+	    break;
+	}
 
-    QTextStream win( &prevFile );
-    QTextStream wout( &tmpFile );
+	tmpFile.setName(ng ? tmpng : tmpwl);
+	if ( !tmpFile.open( IO_WriteOnly ) )
+	    return FALSE;
 
-    found=FALSE;
-    done=FALSE;
-    QString wep = config.readEntry("WEP");
-    while ( !win.atEnd() ) {
-	QString line = win.readLine();
-	QString wline = line.simplifyWhiteSpace();
-	if ( !done ) {
-	    if ( found ) {
-		if ( wline == ";;" ) {
-		    done = TRUE;
+	QTextStream win( &prevFile );
+	QTextStream wout( &tmpFile );
+
+	found=FALSE;
+	done=FALSE;
+	QString wep = config.readEntry("WEP");
+	while ( !win.atEnd() ) {
+	    QString line = win.readLine();
+	    QString wline = line.simplifyWhiteSpace();
+	    if ( !done ) {
+		if ( found ) {
+		    if ( wline == ";;" ) {
+			done = TRUE;
+		    } else {
+			int eq=wline.find("=");
+			QString k,v;
+			if ( eq > 0 ) {
+			    k = wline.left(eq);
+			}
+			if ( !k.isNull() ) {
+			    QString v;
+			    if ( ng )
+				v = config.readEntry(k);
+			    else
+				v = ngToWireless(config,k);
+			    line = "    " + k + "=" + Global::shellQuote(v);
+			}
+		    }
 		} else {
-		    int eq=wline.find("=");
-		    QString k,v;
-		    if ( eq > 0 ) {
-			k = wline.left(eq);
+		    if ( wline.left(scheme.length()+7) == scheme + ",*,*,*)" ) {
+			found=TRUE;
+		    } else if ( wline == "esac" || wline == "*,*,*,*)" ) {
+			// end - add new entry
+
+			wout << scheme << ",*,*,*)" << "\n";
+
+			const char** f;
+			if ( ng ) {
+			    // Not all fields have a GUI, but all are supported
+			    // in the wlan configuration files.
+			    static const char* txtfields[] = {
+				"WLAN_ENABLE",
+				"USER_MIBS", "dot11ExcludeUnencrypted", "PRIV_GENERATOR",
+				"PRIV_KEY128", "BCNINT", "BASICRATES", "OPRATES",
+				"SSID", "IS_ADHOC", "CHANNEL", "PRIV_GENSTR",
+				"dot11WEPDefaultKey0", "dot11WEPDefaultKey1",
+				"dot11WEPDefaultKey2", "dot11WEPDefaultKey3",
+				"AuthType", "dot11PrivacyInvoked", "dot11WEPDefaultKeyID",
+				0
+			    };
+			    f = txtfields;
+			} else {
+			    static const char* txtfields[] = {
+				"NWID", "CHANNEL", "FREQ", "SENS", "RATE", "RTS", "FRAG",
+				"IWCONFIG", "IWSPY", "IWPRIV",
+
+				// these need translation
+				"ESSID", "INFO", "MODE", "KEY", 
+				0
+			    };
+			    f = txtfields;
+			}
+
+			while (*f) {
+			    QString v;
+			    if ( ng )
+				v = config.readEntry(*f,"");
+			    else
+				v = ngToWireless(config,*f);
+			    wout << "    " << *f << "=" 
+				    << Global::shellQuote(v) << "\n";
+			    ++f;
+			}
+			wout << "    ;;\n";
+			done = TRUE;
 		    }
-		    if ( !k.isNull() ) {
-			QString v = config.readEntry(k);
-			line = "    " + k + "=" + Global::shellQuote(v);
-		    }
-		}
-	    } else {
-		if ( wline.left(scheme.length()+7) == scheme + ",*,*,*)" ) {
-		    found=TRUE;
-		} else if ( wline == "esac" || wline == "*,*,*,*)" ) {
-		    // end - add new entry
-		    // Not all fields have a GUI, but all are supported
-		    // in the wlan configuration files.
-		    static const char* txtfields[] = {
-			"WLAN_ENABLE",
-			"USER_MIBS", "dot11ExcludeUnencrypted", "PRIV_GENERATOR",
-			"PRIV_KEY128", "BCNINT", "BASICRATES", "OPRATES",
-			"SSID", "IS_ADHOC", "CHANNEL", "PRIV_GENSTR",
-			"dot11WEPDefaultKey0", "dot11WEPDefaultKey1",
-			"dot11WEPDefaultKey2", "dot11WEPDefaultKey3",
-			"AuthType", "dot11PrivacyInvoked", "dot11WEPDefaultKeyID",
-			0
-		    };
-		    wout << scheme << ",*,*,*)" << "\n";
-		    const char** f = txtfields;
-		    while (*f) {
-			wout << "    " << *f << "=" 
-			    << Global::shellQuote(config.readEntry(*f,""))
-			    << "\n";
-			++f;
-		    }
-		    wout << "    ;;\n";
-		    done = TRUE;
 		}
 	    }
+	    wout << line << "\n";
 	}
-	wout << line << "\n";
-    }
 
-    prevFile.close();
-    tmpFile.close();
+	prevFile.close();
+	tmpFile.close();
+    }
 
     //system("cardctl suspend");
     system("cardctl eject");
 
     if ( system( "mv " + tmp + " " + prev ) )
 	retval = FALSE;
-    if ( system( "mv " + tmp2 + " " + prev2 ) )
+    if ( !prevng.isNull() && system( "mv " + tmpng + " " + prevng ) )
+	retval = FALSE;
+    if ( !prevwl.isNull() && system( "mv " + tmpwl + " " + prevwl ) )
 	retval = FALSE;
 #ifdef USE_SCHEMES
     if ( retval )
@@ -690,6 +792,8 @@ public:
 	QString scheme = findScheme(lans);
 	if ( lans.count() > 1 ) {
 	    services->insertStringList(lans);
+	    for(QStringList::Iterator it=lans.begin(); it!=lans.end(); ++it)
+		*it = toSchemeId(*it);
 	    services->setCurrentItem(lans.findIndex(scheme));
 	    SchemeChanger* sc = new SchemeChanger(this);
 	    QObject::connect(services,SIGNAL(activated(const QString&)),

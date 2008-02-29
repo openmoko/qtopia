@@ -4,15 +4,15 @@
     <class>QWidget</class>
     <property stdset="1">
         <name>name</name>
-        <cstring>Form1</cstring>
+        <cstring>NetworkSettingsBase</cstring>
     </property>
     <property stdset="1">
         <name>geometry</name>
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>296</width>
-            <height>332</height>
+            <width>396</width>
+            <height>401</height>
         </rect>
     </property>
     <property stdset="1">
@@ -40,6 +40,12 @@
                 <name>name</name>
                 <cstring>TabWidget5</cstring>
             </property>
+            <property>
+                <name>layoutMargin</name>
+            </property>
+            <property>
+                <name>layoutSpacing</name>
+            </property>
             <widget>
                 <class>QWidget</class>
                 <property stdset="1">
@@ -53,11 +59,11 @@
                 <vbox>
                     <property stdset="1">
                         <name>margin</name>
-                        <number>11</number>
+                        <number>6</number>
                     </property>
                     <property stdset="1">
                         <name>spacing</name>
-                        <number>6</number>
+                        <number>2</number>
                     </property>
                     <widget>
                         <class>QLabel</class>
@@ -72,10 +78,10 @@
                                 <vsizetype>1</vsizetype>
                             </sizepolicy>
                         </property>
-			<property stdset="1">
-			    <name>text</name>
-			    <string>&lt;p&gt;This is the state of your running network services.</string>
-			</property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>&lt;p&gt;This is the state of your running network services.</string>
+                        </property>
                     </widget>
                     <widget>
                         <class>QFrame</class>
@@ -132,67 +138,87 @@
                     <name>title</name>
                     <string>Services</string>
                 </attribute>
-                <grid>
+                <vbox>
                     <property stdset="1">
                         <name>margin</name>
-                        <number>11</number>
+                        <number>6</number>
                     </property>
                     <property stdset="1">
                         <name>spacing</name>
-                        <number>6</number>
+                        <number>4</number>
                     </property>
-                    <widget row="2"  column="0" >
-                        <class>QPushButton</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>add</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>text</name>
-                            <string>Add...</string>
-                        </property>
-                    </widget>
-                    <widget row="1"  column="0"  rowspan="1"  colspan="3" >
-                        <class>QListBox</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>settings</cstring>
-                        </property>
-                    </widget>
-                    <widget row="0"  column="0"  rowspan="1"  colspan="3" >
+                    <widget>
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel1</cstring>
+                            <cstring>service_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
                             <string>&lt;P&gt;These are the network services you currently have available.</string>
                         </property>
                     </widget>
-                    <widget row="2"  column="1" >
-                        <class>QPushButton</class>
+                    <widget>
+                        <class>QListBox</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>remove</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>text</name>
-                            <string>Remove</string>
+                            <cstring>settings</cstring>
                         </property>
                     </widget>
-                    <widget row="2"  column="2" >
-                        <class>QPushButton</class>
+                    <widget>
+                        <class>QLayoutWidget</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>props</cstring>
+                            <cstring>Layout4</cstring>
                         </property>
-                        <property stdset="1">
-                            <name>text</name>
-                            <string>Properties</string>
+                        <property>
+                            <name>layoutSpacing</name>
                         </property>
+                        <hbox>
+                            <property stdset="1">
+                                <name>margin</name>
+                                <number>0</number>
+                            </property>
+                            <property stdset="1">
+                                <name>spacing</name>
+                                <number>4</number>
+                            </property>
+                            <widget>
+                                <class>QPushButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>add</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Add...</string>
+                                </property>
+                            </widget>
+                            <widget>
+                                <class>QPushButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>remove</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Remove</string>
+                                </property>
+                            </widget>
+                            <widget>
+                                <class>QPushButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>props</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Properties</string>
+                                </property>
+                            </widget>
+                        </hbox>
                     </widget>
-                </grid>
+                </vbox>
             </widget>
         </widget>
     </vbox>

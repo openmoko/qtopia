@@ -1,22 +1,39 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
+
+#define QTOPIA_INTERNAL_FILEOPERATIONS
 
 #include "inlineedit.h"
 #include "filebrowser.h"
@@ -52,6 +69,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+static int fileViewInstances = 0;
 static QPixmap	*pmLockedFolder;
 static QPixmap	*pmFolder;
 static QPixmap	*pmLocked;
@@ -68,17 +86,21 @@ FileItem::FileItem( QListView * parent, const QFileInfo & fi )
     QDate d = fi.lastModified().date();
 
     setText( 0, fi.fileName() );
+#ifndef QTOPIA_PHONE
     setText( 1, sizeString( fi.size() ) + " " );
     setText( 2, QString().sprintf("%4d-%02d-%02d",d.year(), d.month(), d.day() ) );
+#endif
 
     MimeType mt(fi.filePath());
 
+#ifndef QTOPIA_PHONE
     if( fi.isDir() )
 	setText( 3, "directory" );
     else if( isLib() )
 	setText( 3, "library" );
     else
 	setText( 3, mt.description() );
+#endif
 
     QPixmap pm;
     if( fi.isDir() ){
@@ -188,16 +210,34 @@ int FileItem::launch()
     }
 
     QString type = mt.id();
-    Config cfg(Service::appConfig("Open/"+type),Config::File);
-    cfg.setGroup("Standard");
-    if ( cfg.readNumEntry("Version") > 100 ) {
-	// Use Open service
-	QCopEnvelope e(Service::channel("Open/"+type), "openFile(QString)");
-	e << fname_desktop;
+    if (isExecutable() && type.contains("application/octet-stream") ) {
+        int cpid = fork();
+        
+        switch (cpid){
+            case -1:
+	        QMessageBox::warning( 0, QObject::tr( "File Manager" ),
+                        QObject::tr( "<qt>Cannot fork this process.</qt>" ), QObject::tr( "&OK" ) );
+                break;
+            case 0:
+                qDebug("Filebrowser: executing " + file_to_launch);
+                execl(file_to_launch, file_to_launch, 0);
+                break;
+            default:
+                //parent
+                break;
+        }
     } else {
-	// Use setDocument()
-	DocLnk doc( fname_desktop, FALSE );
-	doc.execute();
+        Config cfg(Service::appConfig("Open/"+type),Config::File);
+        cfg.setGroup("Standard");
+        if ( cfg.readNumEntry("Version") > 100 ) {
+	    // Use Open service
+            QCopEnvelope e(Service::channel("Open/"+type), "openFile(QString)");
+	    e << fname_desktop;
+        } else {
+	    // Use setDocument()
+	    DocLnk doc( fname_desktop, FALSE );
+	    doc.execute();
+        }
     }
 
     listView()->clearSelection();
@@ -217,7 +257,7 @@ bool FileItem::rename( const QString & name )
     oldpath = fileInfo.filePath();
     newpath = fileInfo.dirPath() + "/" + name;
 
-    if ( ::rename( (const char *) oldpath, (const char *) newpath ) != 0 )
+    if ( ::rename( oldpath.local8Bit().data(), newpath.local8Bit().data() ) != 0 )
 		return FALSE;
     else
 		return TRUE;
@@ -235,46 +275,59 @@ FileView::FileView( const QString & dir, QWidget * parent,
 {
     setFrameStyle( NoFrame );
     addColumn( "Name" );
+#ifndef QTOPIA_PHONE
     addColumn( "Date" );
     addColumn( "Size" );
     addColumn( "Type" );
+#endif
 
     setMultiSelection( TRUE );
     header()->hide();
 
+#ifndef QTOPIA_PHONE
     setColumnWidthMode( 0, Manual );
     setColumnWidthMode( 3, Manual );
 
     // right align yize column
     setColumnAlignment( 1, AlignRight );
+#else
+    setColumnWidthMode( 0, Maximum );
+#endif
 
-    scaleIcons();
+    if ( fileViewInstances++ == 0 )
+	scaleIcons();
     generateDir( dir );
 
-    connect( this, SIGNAL( clicked( QListViewItem * )),
-			 SLOT( itemClicked( QListViewItem * )) );
-    connect( this, SIGNAL( doubleClicked( QListViewItem * )),
-			 SLOT( itemDblClicked( QListViewItem * )) );
+    connect( this, SIGNAL( clicked(QListViewItem*)),
+			 SLOT( itemClicked(QListViewItem*)) );
+    connect( this, SIGNAL( doubleClicked(QListViewItem*)),
+			 SLOT( itemDblClicked(QListViewItem*)) );
     connect( this, SIGNAL( selectionChanged() ), SLOT( cancelMenuTimer() ) );
     connect( &menuTimer, SIGNAL( timeout() ), SLOT( showFileMenu() ) );
 }
 
 FileView::~FileView(void)
 {
-    delete pmLockedFolder;
-    delete pmFolder;
-    delete pmLocked;
-    delete pmLibrary;
-    delete pmUnknown;
+    if ( --fileViewInstances == 0 ) {
+	delete pmLockedFolder;
+	delete pmFolder;
+	delete pmLocked;
+	delete pmLibrary;
+	delete pmUnknown;
+    }
 }
 
 void FileView::resizeEvent( QResizeEvent *e )
 {
+#ifndef QTOPIA_PHONE
     setColumnWidth( 0, width() - 2 * lineWidth() - 20 - columnWidth( 1 ) - columnWidth( 2 ) );
 
     // hide type column, we use it for "sort by type" only
     setColumnWidth( 3, 0 );
     QListView::resizeEvent( e );
+#else
+    Q_UNUSED(e);
+#endif
 }
 
 void FileView::updateDir()
@@ -287,7 +340,7 @@ void FileView::setDir( const QString & dir )
     if ( dir.startsWith( "/dev" ) ) {
 	menuTimer.stop();
 	QMessageBox::warning( this, tr( "File Manager" ),
-			      tr( "Can't show /dev/ directory." ), tr( "&OK" ) );
+			      tr( "<qt>Can't show /dev directory.</qt>" ), tr( "&OK" ) );
 	return;
     }
     dirHistory += currentDir;
@@ -300,7 +353,8 @@ void FileView::generateDir( const QString & dir )
 
     if( d.exists() && !d.isReadable() ) return;
 
-    currentDir = d.canonicalPath();
+    //currentDir = d.canonicalPath();
+    currentDir = d.path(); // store symlinks
 
     d.setFilter( QDir::Dirs | QDir::Files );
     d.setSorting( QDir::Name | QDir::DirsFirst | QDir::IgnoreCase |
@@ -347,7 +401,9 @@ void FileView::rename()
     if( le == NULL ){
 	le = new InlineEdit( this );
 	le->setFrame( FALSE );
+#ifndef QTOPIA_PHONE
 	connect( le, SIGNAL( lostFocus() ), SLOT( endRenaming() ) );
+#endif
 	connect(le, SIGNAL(returnPressed()), this, SLOT(endRenaming()));
     }
 
@@ -391,7 +447,8 @@ void FileView::copy()
     // dont keep cut files any longer than necessary
     // ##### a better inmplementation might be to rename the CUT file
     // ##### to ".QPE-FILEBROWSER-MOVING" rather than copying it.
-    system ( "rm -rf /tmp/qpemoving" );
+    QString sysCmd = QString("rm -rf %1qpemoving").arg(Global::tempDir());
+    system ( sysCmd.local8Bit().data() );
 
     FileItem * i;
 
@@ -419,10 +476,10 @@ void FileView::paste()
 		dest = cd + "/" + basename;
 		if( QFile( dest ).exists() ){
 			i = 1;
-			dest = cd + "/Copy of " + basename;
+			dest = cd + "/" + tr("Copy of %1").arg(basename);
 			while( QFile( dest ).exists() ){
-				dest.sprintf( "%s/Copy (%d) of %s", (const char *) cd, i++,
-							  (const char *) basename );
+				dest = cd + "/" + tr("Copy (%1) of %2","number,filename").
+				    arg(i++).arg(basename);
 			}
 		}
 
@@ -432,7 +489,7 @@ void FileView::paste()
 		//
 		if( QFileInfo( (*it) ).isDir() ){
 			cmd = "/bin/cp -fpR \"" + (*it) +"\" " + "\"" + dest + "\"";
-			err = system( (const char *) cmd );
+			err = system( cmd.local8Bit().data() );
 		} else if( !copyFile( dest, (*it) ) ){
 			err = -1;
 		} else {
@@ -505,7 +562,8 @@ void FileView::cut()
     int err;
     // ##### a better inmplementation might be to rename the CUT file
     // ##### to ".QPE-FILEBROWSER-MOVING" rather than copying it.
-    QString cmd, dest, basename, cd = "/tmp/qpemoving";
+    QString cmd, dest, basename;
+    QString cd = QString("%1qpemoving").arg(Global::tempDir());
 
     endRenaming();
 
@@ -513,9 +571,9 @@ void FileView::cut()
 	newflist.clear();
 	
 	cmd = "rm -rf " + cd;
-	system ( (const char *) cmd );
+	system ( cmd.local8Bit().data() );
 	cmd = "mkdir " + cd;
-	system( (const char *) cmd );
+	system( cmd.local8Bit().data() );
 
 // get the names of the files to cut
     FileItem * item;
@@ -539,7 +597,7 @@ void FileView::cut()
 		newflist += dest;
  
         cmd = "/bin/mv -f \"" + (*it) +"\" " + "\"" + dest + "\"";
-        err = system( (const char *) cmd );
+	err = system( cmd.local8Bit().data() );
  
         if ( err != 0 ) {
             QMessageBox::warning( this, tr("Cut file"), tr("Cut failed!"),
@@ -590,7 +648,7 @@ void FileView::del()
 		//
 		for ( QStringList::Iterator it = fl.begin(); it != fl.end(); ++it ) {
 			cmd = "/bin/rm -rf \"" + (*it) + "\"";
-			err = system( (const char *) cmd );
+			err = system( cmd.local8Bit().data() );
 			if ( err != 0 ) {
 				QMessageBox::warning( this, tr("Delete"), tr("Delete failed!"),
 									  tr("OK") );
@@ -610,26 +668,26 @@ void FileView::newFolder()
     endRenaming();
 
     while( QFile( nd ).exists() ){
-		nd.sprintf( "%s/NewFolder (%d)", (const char *) currentDir, t++ );
+	nd.sprintf( "%s/NewFolder (%d)", (const char *) currentDir, t++ );
     }
     QDir d;
     if(d.mkdir( nd) == FALSE){
-		QMessageBox::warning( this, tr( "New folder" ),
-							  tr( "Folder creation failed!" ),
-							  tr( "OK" ) );
-		return;
+	QMessageBox::warning( this, tr( "New folder" ),
+		tr( "<qt>Folder creation failed!</qt>" ),
+		tr( "OK" ) );
+	return;
     }
     updateDir();
 
     if((i = (FileItem *) firstChild()) == 0) return;
 
     while( i ){
-		if( i->isDir() && ( i->getFilePath() == nd ) ){
-			setCurrentItem( i );
-			rename();
-			break;
-		}
-		i = (FileItem *) i->nextSibling();
+	if( i->isDir() && ( i->getFilePath() == nd ) ){
+	    setCurrentItem( i );
+	    rename();
+	    break;
+	}
+	i = (FileItem *) i->nextSibling();
     }
 }
 
@@ -661,14 +719,15 @@ void FileView::itemDblClicked( QListViewItem * i)
 
     if(t == NULL) return;
     if(t->launch() == -1){
-		QMessageBox::warning( this, tr( "Launch Application" ),
-							  tr( "Launch failed!" ), tr( "OK" ) );
+	QMessageBox::warning( this, tr( "Launch Application" ),
+		tr( "Launch failed!" ), tr( "OK" ) );
     }
 }
 
 void FileView::parentDir()
 {
     endRenaming();
+    
     setDir( currentDir + "./.." );
 }
 
@@ -788,7 +847,7 @@ void    FileView::scaleIcons(void)
     img = Resource::loadImage("library").smoothScale(iconsize, iconsize);
     pmLibrary->convertFromImage(img);
 
-    img = Resource::loadImage("UnknownDocument-14").
+    img = Resource::loadImage("qpe/UnknownDocument-14").
 	smoothScale(iconsize, iconsize);
     pmUnknown->convertFromImage(img);
 }
@@ -886,8 +945,8 @@ void FileBrowser::init(const QString & dir)
 
 #ifndef QT_NO_COP
     QCopChannel* pcmciaChannel = new QCopChannel( "QPE/Card", this );
-    connect( pcmciaChannel, SIGNAL(received(const QCString &, const QByteArray &)),
-	 this, SLOT(pcmciaMessage( const QCString &, const QByteArray &)) );
+    connect( pcmciaChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	 this, SLOT(pcmciaMessage(const QCString&,const QByteArray&)) );
 #endif
 }
 

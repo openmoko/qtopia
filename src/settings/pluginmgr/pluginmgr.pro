@@ -1,13 +1,15 @@
-TEMPLATE	= app
-CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
+CONFIG		+= qtopiaapp
 
 HEADERS		= pluginmanager.h
 SOURCES		= pluginmanager.cpp main.cpp
 INTERFACES	= pluginmanagerbase.ui
-
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
 
 TARGET		= pluginmanager
-TRANSLATIONS	= pluginmanager-en_GB.ts pluginmanager-de.ts pluginmanager-ja.ts pluginmanager-no.ts
+
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/pluginmanager/*
+pics.path=/pics/pluginmanager/
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/PluginManager.desktop
+desktop.path=/apps/Settings
+INSTALLS += desktop
+PICS_INSTALLS+=pics

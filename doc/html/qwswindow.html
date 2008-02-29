@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -30,8 +32,8 @@ Server-specific functionality in Qt/Embedded
 <p><a href="qwswindow-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
-<li><div class="fn"><b>QWSWindow</b> ( int i, QWSClient * client ) </div>
-<li><div class="fn"><b>~QWSWindow</b> () </div>
+<li><div class="fn"><b>QWSWindow</b> ( int i, QWSClient * client ) (internal)</div>
+<li><div class="fn"><b>~QWSWindow</b> () (internal)</div>
 <li><div class="fn">int <a href="#b65bf4"><b>winId</b></a> () const</div>
 <li><div class="fn">const QString&amp; <a href="#8a7dd9"><b>name</b></a> () const</div>
 <li><div class="fn">const QString&amp; <a href="#38a088"><b>caption</b></a> () const</div>
@@ -91,11 +93,15 @@ any window decorations.
 <p>Shows the window.
 <h3 class="fn">int <a name="b65bf4"></a>QWSWindow::winId () const</h3>
 <p>Returns the Id of this window.
+<h3 class="fn"><a name="e41db4"></a>QWSWindow::QWSWindow ( int i, QWSClient * client )</h3>
+<p>For internal use only.
+<h3 class="fn"><a name="13a12e"></a>QWSWindow::~QWSWindow ()</h3>
+<p>For internal use only.
 <hr><p>
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -103,5 +109,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

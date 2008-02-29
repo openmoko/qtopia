@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -24,19 +39,20 @@
 #define QTEXTEDIT_OPEN_API
 
 #include <qtopia/filemanager.h>
+#include <qtopia/fileselector.h>
+#include <qtopia/contextmenu.h>
 
 #include <qmainwindow.h>
 #include <qmultilineedit.h>
 #include <qlist.h>
 #include <qmap.h>
+#include <qtoolbar.h>
+#include <qwidgetstack.h>
+#include <qtoolbutton.h>
+#include <qpopupmenu.h>
+#include <qlineedit.h>
+#include <qaction.h>
 
-class QWidgetStack;
-class QToolButton;
-class QPopupMenu;
-class QToolBar;
-class QLineEdit;
-class QAction;
-class FileSelector;
 class QpeEditor;
 
 class TextEdit : public QMainWindow
@@ -46,6 +62,9 @@ class TextEdit : public QMainWindow
 public:
     TextEdit( QWidget *parent = 0, const char *name = 0, WFlags f = 0 );
     ~TextEdit();
+
+protected:
+    void closeEvent( QCloseEvent* );
 
 public slots:
     void setDocument(const QString&);
@@ -64,6 +83,7 @@ private slots:
     void editFind(bool);
 
     void search();
+    void searchNext();
     void findWrapped();
     void findNotFound();
     void findFound();
@@ -76,8 +96,6 @@ private slots:
 
     void zoomIn();
     void zoomOut();
-    void setBold(bool y);
-    void setItalic(bool y);
     void setWordWrap(bool y);
     void setFixedWidth(bool y);
 
@@ -97,16 +115,31 @@ private:
     QWidgetStack *editorStack;
     FileSelector *fileSelector;
     QpeEditor* editor;
-    QToolBar *menu, *editBar, *searchBar;
+#ifndef QTOPIA_PHONE
+    QToolBar *menu, *editBar;
+#else
+    QToolButton *findTb;
+#endif
+    QToolBar *searchBar;
     QLineEdit *searchEdit;
     QAction *pasteAction;
     QAction *fixedAction;
+    QAction *findAction;
     DocLnk *doc;
+#ifdef QTOPIA_PHONE
+    QString backup;
+    bool qCopActivated, canceled, saved;
+#endif
+    bool wasCreated;
     bool searchVisible;
     QAction *zin, *zout;
     bool zinE,zoutE,zoomOutLast;
     int variableFontSize;
     QString calculateName(QString);
+#ifdef QTOPIA_PHONE
+    ContextMenu *contextMenu;
+    ContextMenu *fileContextMenu;
+#endif
 };
 
 #endif

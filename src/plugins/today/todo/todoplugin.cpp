@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -168,7 +183,7 @@ QString TodoPlugin::name() const
 
 QPixmap TodoPlugin::icon() const
 {
-    return Resource::loadPixmap("TodoList");
+    return Resource::loadPixmap("todolist/TodoList");
 }
 
 // lineHeight is currently unused.
@@ -182,27 +197,27 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
     // translation. If we have failed we will need to verbosify.
     QString open,due;
     if ( d->selection == 0 ) {
-	open = tr(" open","note space");
+	open = tr("open","inserted into: You have 'open' tasks");
 	due = "";
     } else {
 	open = "";
 	if ( d->days == 1 ) {
-	    due = tr(" due today");
+	    due = tr("due today", "eg you have open tasks 'due today'");
 	} else {
-	    due = tr(" due in the next %1 days").arg(d->days);
+	    due = tr("due in the next %1 days", "eg you have 5 open tasks due in the next 5 days").arg(d->days);
 	}
     }
 
     status = d->tasks.count() == 0
-	    ? tr("You have no%1 tasks%2","eg. 1=\" open\", 2=\" due today\"").
+	    ? tr("You have no %1 tasks %2","eg. 1=\"open\", 2=\"due today\"").
 		arg(open).arg(due)
 	    : (d->tasks.count() == 1
-		? tr("You have %1%2 task%3","eg. 1 open")
-		: tr("You have %1%2 tasks%3","eg. 2 open"))
+		? tr("You have %1 %2 task %3","eg. 1 open")
+		: tr("You have %1 %2 tasks %3","eg. 2 open"))
 		.arg(d->tasks.count()).arg(open).arg(due);
 
     QString str;
-    str = "<table> <tr> <td> <a href=\"raise:todolist\"><img src=\"TodoList\" alt=\"Todo\"></a> </td>";
+    str = "<table> <tr> <td> <a href=\"raise:todolist\"><img src=\"todolist/TodoList\" alt=\"Todo\"></a> </td>";
     str += "<td> <b> " + status + " </b> </td> </tr> </table> ";
 
     if ( d->tasks.count() ) {

@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -30,7 +32,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/helpviewer/helpwindow.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/helpviewer/helpwindow.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -95,7 +97,7 @@ private:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/helpviewer/helpwindow.cpp   2.3.7   edited 2001-10-20 $
+** &#36;Id&#58; qt/examples/helpviewer/helpwindow.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -121,7 +123,7 @@ private:
 #include &lt;<a href="qcombobox-h.html">qcombobox.h</a>&gt;
 #include &lt;<a href="qevent-h.html">qevent.h</a>&gt;
 #include &lt;<a href="qlineedit-h.html">qlineedit.h</a>&gt;
-#include &lt;qobjectlist.h&gt;
+#include &lt;<a href="qobjectlist-h.html">qobjectlist.h</a>&gt;
 #include &lt;<a href="qfileinfo-h.html">qfileinfo.h</a>&gt;
 #include &lt;<a href="qfile-h.html">qfile.h</a>&gt;
 #include &lt;<a href="qdatastream-h.html">qdatastream.h</a>&gt;
@@ -156,12 +158,12 @@ HelpWindow::HelpWindow( const QString&amp; home_, const QString&amp; _path,
     resize( 640,700 );
 
     <a href="qpopupmenu.html">QPopupMenu</a>* file = new <a href="qpopupmenu.html">QPopupMenu</a>( this );
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( tr("&amp;New Window"), this, SLOT( newWindow() ), ALT | Key_N );
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( tr("&amp;Open File"), this, SLOT( openFile() ), ALT | Key_O );
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( tr("&amp;Print"), this, SLOT( print() ), ALT | Key_P );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( tr("&amp;New Window"), this, SLOT( newWindow() ), ALT | Key_N );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( tr("&amp;Open File"), this, SLOT( openFile() ), ALT | Key_O );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( tr("&amp;Print"), this, SLOT( print() ), ALT | Key_P );
     file-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( tr("&amp;Close"), this, SLOT( close() ), ALT | Key_Q );
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( tr("E&amp;xit"), qApp, SLOT( closeAllWindows() ), ALT | Key_X );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( tr("&amp;Close"), this, SLOT( close() ), ALT | Key_Q );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( tr("E&amp;xit"), qApp, SLOT( closeAllWindows() ), ALT | Key_X );
 
     // The same three icons are used twice each.
     <a href="qiconset.html">QIconSet</a> icon_back( <a href="qpixmap.html">QPixmap</a>("back.xpm") );
@@ -169,17 +171,17 @@ HelpWindow::HelpWindow( const QString&amp; home_, const QString&amp; _path,
     <a href="qiconset.html">QIconSet</a> icon_home( <a href="qpixmap.html">QPixmap</a>("home.xpm") );
 
     <a href="qpopupmenu.html">QPopupMenu</a>* go = new <a href="qpopupmenu.html">QPopupMenu</a>( this );
-    backwardId = go-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( icon_back,
+    backwardId = go-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( icon_back,
                                  tr("&amp;Backward"), browser, SLOT( backward() ),
                                  ALT | Key_Left );
-    forwardId = go-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( icon_forward,
+    forwardId = go-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( icon_forward,
                                 tr("&amp;Forward"), browser, SLOT( forward() ),
                                 ALT | Key_Right );
-    go-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( icon_home, tr("&amp;Home"), browser, SLOT( home() ) );
+    go-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( icon_home, tr("&amp;Home"), browser, SLOT( home() ) );
 
     <a href="qpopupmenu.html">QPopupMenu</a>* help = new <a href="qpopupmenu.html">QPopupMenu</a>( this );
-    help-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( tr("&amp;About ..."), this, SLOT( about() ) );
-    help-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( tr("About &amp;<a href="qt.html">Qt</a> ..."), this, SLOT( aboutQt() ) );
+    help-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( tr("&amp;About ..."), this, SLOT( about() ) );
+    help-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( tr("About &amp;<a href="qt.html">Qt</a> ..."), this, SLOT( aboutQt() ) );
 
     hist = new <a href="qpopupmenu.html">QPopupMenu</a>( this );
     QStringList::Iterator it = history.begin();
@@ -239,17 +241,17 @@ HelpWindow::HelpWindow( const QString&amp; home_, const QString&amp; _path,
 
 }
 
-void <a name="166"></a>HelpWindow::setBackwardAvailable( bool b)
+void <a name="134"></a>HelpWindow::setBackwardAvailable( bool b)
 {
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;setItemEnabled( backwardId, b);
 }
 
-void <a name="167"></a>HelpWindow::setForwardAvailable( bool b)
+void <a name="135"></a>HelpWindow::setForwardAvailable( bool b)
 {
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;setItemEnabled( forwardId, b);
 }
 
-void <a name="168"></a>HelpWindow::textChanged()
+void <a name="136"></a>HelpWindow::textChanged()
 {
     if ( browser-&gt;documentTitle().isNull() ) {
         <a href="qwidget.html#d6a291">setCaption</a>( "Qt Example - Helpviewer - " + browser-&gt;context() );
@@ -304,7 +306,7 @@ HelpWindow::~HelpWindow()
     f2.<a href="qfile.html#64e640">close</a>();
 }
 
-void <a name="169"></a>HelpWindow::about()
+void <a name="137"></a>HelpWindow::about()
 {
     <a href="qmessagebox.html#f6c3cd">QMessageBox::about</a>( this, "HelpViewer Example",
                         "&lt;p&gt;This example implements a simple HTML help viewer "
@@ -313,12 +315,12 @@ void <a name="169"></a>HelpWindow::about()
                         );
 }
 
-void <a name="170"></a>HelpWindow::aboutQt()
+void <a name="138"></a>HelpWindow::aboutQt()
 {
     <a href="qmessagebox.html#b72270">QMessageBox::aboutQt</a>( this, "QBrowser" );
 }
 
-void <a name="171"></a>HelpWindow::openFile()
+void <a name="139"></a>HelpWindow::openFile()
 {
 #ifndef QT_NO_FILEDIALOG
     <a href="qstring.html">QString</a> fn = QFileDialog::getOpenFileName( QString::null, QString::null, this );
@@ -327,12 +329,12 @@ void <a name="171"></a>HelpWindow::openFile()
 #endif
 }
 
-void <a name="172"></a>HelpWindow::newWindow()
+void <a name="140"></a>HelpWindow::newWindow()
 {
     ( new HelpWindow(browser-&gt;source(), "qbrowser") )-&gt;show();
 }
 
-void <a name="173"></a>HelpWindow::print()
+void <a name="141"></a>HelpWindow::print()
 {
 #ifndef QT_NO_PRINTER
     <a href="qprinter.html">QPrinter</a> printer;
@@ -370,7 +372,7 @@ void <a name="173"></a>HelpWindow::print()
 #endif
 }
 
-void <a name="174"></a>HelpWindow::pathSelected( const QString &amp;_path )
+void <a name="142"></a>HelpWindow::pathSelected( const QString &amp;_path )
 {
     browser-&gt;setSource( _path );
     <a href="qmap.html">QMap</a>&lt;int, QString&gt;::Iterator it = mHistory.begin();
@@ -385,7 +387,7 @@ void <a name="174"></a>HelpWindow::pathSelected( const QString &amp;_path )
         mHistory[ hist-&gt;insertItem( _path ) ] = _path;
 }
 
-void <a name="175"></a>HelpWindow::readHistory()
+void <a name="143"></a>HelpWindow::readHistory()
 {
     if ( <a href="qfile.html#900285">QFile::exists</a>( <a href="qdir.html#2ec6fd">QDir::currentDirPath</a>() + "/.history" ) ) {
         <a href="qfile.html">QFile</a> f( <a href="qdir.html#2ec6fd">QDir::currentDirPath</a>() + "/.history" );
@@ -398,7 +400,7 @@ void <a name="175"></a>HelpWindow::readHistory()
     }
 }
 
-void <a name="176"></a>HelpWindow::readBookmarks()
+void <a name="144"></a>HelpWindow::readBookmarks()
 {
     if ( <a href="qfile.html#900285">QFile::exists</a>( <a href="qdir.html#2ec6fd">QDir::currentDirPath</a>() + "/.bookmarks" ) ) {
         <a href="qfile.html">QFile</a> f( <a href="qdir.html#2ec6fd">QDir::currentDirPath</a>() + "/.bookmarks" );
@@ -409,19 +411,19 @@ void <a name="176"></a>HelpWindow::readBookmarks()
     }
 }
 
-void <a name="177"></a>HelpWindow::histChosen( int i )
+void <a name="145"></a>HelpWindow::histChosen( int i )
 {
     if ( mHistory.contains( i ) )
         browser-&gt;setSource( mHistory[ i ] );
 }
 
-void <a name="178"></a>HelpWindow::bookmChosen( int i )
+void <a name="146"></a>HelpWindow::bookmChosen( int i )
 {
     if ( mBookmarks.contains( i ) )
         browser-&gt;setSource( mBookmarks[ i ] );
 }
 
-void <a name="179"></a>HelpWindow::addBookmark()
+void <a name="147"></a>HelpWindow::addBookmark()
 {
     mBookmarks[ bookm-&gt;insertItem( <a href="qwidget.html#f852bc">caption</a>() ) ] = caption();
 }
@@ -440,7 +442,7 @@ void <a name="179"></a>HelpWindow::addBookmark()
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/helpviewer/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/helpviewer/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -483,5 +485,5 @@ int main( int argc, char ** argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -89,6 +104,7 @@ QPixmap *CardMetrics::cardsSpade = NULL;
 QPixmap *CardMetrics::cardsPictures = NULL;
 QPixmap *CardMetrics::cardsPicturesUpsideDown = NULL;
 QPixmap *CardMetrics::cardsChars = NULL;
+QPixmap *CardMetrics::cardsBigChars = NULL;
 QPixmap *CardMetrics::cardsSuits = NULL;
 QPixmap *CardMetrics::cardsSuitsSmall = NULL;
 QPixmap *CardMetrics::cardsCharsUpsideDown = NULL;
@@ -128,7 +144,7 @@ void CardMetrics::loadMetrics( int width, int height ) {
 
     if ( cardsFaces == NULL || cardSizes != oldSize ) {
 
-	int cardSizesGaps[] = { 2, 7, 10 };
+	int cardSizesGaps[] = { 3, 7, 10 };
 	g = cardSizesGaps[cardSizes];
     
 	QString cardImagePath = QString("cards/") + CardMetrics::path() + "/";
@@ -143,7 +159,9 @@ void CardMetrics::loadMetrics( int width, int height ) {
 
 	delete cardsPictures;
 	cardsPictures = new QPixmap( Resource::loadPixmap( cardImagePath + "pictures" ) );
+#ifndef QTOPIA_PHONE
 	cardsPicturesUpsideDown = Create180RotatedPixmap( cardsPictures );
+#endif
 
 	QBitmap *tCardsSpade = new QBitmap( Resource::loadBitmap( cardImagePath + "spade" ) );
 	delete cardsSpade;
@@ -151,38 +169,58 @@ void CardMetrics::loadMetrics( int width, int height ) {
 	cardsSpade->setMask( *tCardsSpade );
 	delete tCardsSpade;
 
+#ifdef QTOPIA_PHONE
+	QBitmap *tCardsBigChars = new QBitmap( Resource::loadBitmap( "cards/normal/ranks" ) ); // No tr
+	delete cardsBigChars;
+	cardsBigChars = new QPixmap( *tCardsBigChars );
+	cardsBigChars->setMask( *tCardsBigChars );
+	delete tCardsBigChars;
+#endif
+
 	QBitmap *tCardsChars = new QBitmap( Resource::loadBitmap( cardImagePath + "ranks" ) ); // No tr
+#ifndef QTOPIA_PHONE
 	QBitmap *tCardsCharsUpsideDown = Create180RotatedBitmap( tCardsChars );
+#endif
 	delete cardsChars;
 	cardsChars = new QPixmap( *tCardsChars );
 	cardsChars->setMask( *tCardsChars );
+#ifndef QTOPIA_PHONE
 	delete cardsCharsUpsideDown;
 	cardsCharsUpsideDown = new QPixmap( *tCardsCharsUpsideDown );
 	cardsCharsUpsideDown->setMask( *tCardsCharsUpsideDown );
-	delete tCardsChars;
 	delete tCardsCharsUpsideDown;
+#endif
+	delete tCardsChars;
 
 	QBitmap *tCardsSuitsSmall = new QBitmap( Resource::loadBitmap( cardImagePath + "suits01" ) ); // No tr
+#ifndef QTOPIA_PHONE
 	QBitmap *tCardsSuitsSmallUpsideDown = Create180RotatedBitmap( tCardsSuitsSmall );
+#endif
 	delete cardsSuitsSmall;
 	cardsSuitsSmall = new QPixmap( *tCardsSuitsSmall );
 	cardsSuitsSmall->setMask( *tCardsSuitsSmall );
+#ifndef QTOPIA_PHONE
 	delete cardsSuitsSmallUpsideDown;
 	cardsSuitsSmallUpsideDown = new QPixmap( *tCardsSuitsSmallUpsideDown );
 	cardsSuitsSmallUpsideDown->setMask( *tCardsSuitsSmallUpsideDown );
-	delete tCardsSuitsSmall;
 	delete tCardsSuitsSmallUpsideDown;
+#endif
+	delete tCardsSuitsSmall;
 
 	QBitmap *tCardsSuits = new QBitmap( Resource::loadBitmap( cardImagePath + "suits02" ) ); // No tr
+#ifndef QTOPIA_PHONE
 	QBitmap *tCardsSuitsUpsideDown = Create180RotatedBitmap( tCardsSuits );
+#endif
 	delete cardsSuits;
 	cardsSuits = new QPixmap( *tCardsSuits );
 	cardsSuits->setMask( *tCardsSuits );
+#ifndef QTOPIA_PHONE
 	delete cardsSuitsUpsideDown;
 	cardsSuitsUpsideDown = new QPixmap( *tCardsSuitsUpsideDown );
 	cardsSuitsUpsideDown->setMask( *tCardsSuitsUpsideDown );
-	delete tCardsSuits;
 	delete tCardsSuitsUpsideDown;
+#endif
+	delete tCardsSuits;
 
 	w = cardsFaces->width();
 	h = cardsFaces->height();
@@ -200,16 +238,24 @@ void CardMetrics::loadMetrics( int width, int height ) {
 	cardsJoker->setOptimization( QPixmap::BestOptim );
 
 	cardsPictures->setOptimization( QPixmap::BestOptim );
+#ifndef QTOPIA_PHONE
 	cardsPicturesUpsideDown->setOptimization( QPixmap::BestOptim );
+#endif
 
 	cardsChars->setOptimization( QPixmap::BestOptim );
+#ifndef QTOPIA_PHONE
 	cardsCharsUpsideDown->setOptimization( QPixmap::BestOptim );
+#endif
 
 	cardsSuitsSmall->setOptimization( QPixmap::BestOptim );
+#ifndef QTOPIA_PHONE
 	cardsSuitsSmallUpsideDown->setOptimization( QPixmap::BestOptim );
+#endif
 
 	cardsSuits->setOptimization( QPixmap::BestOptim );
+#ifndef QTOPIA_PHONE
 	cardsSuitsUpsideDown->setOptimization( QPixmap::BestOptim );
+#endif
     }
     od = rh + ssh / 2 + 4;
     while (od > rh+2 && h*2+od*16 > height ) {

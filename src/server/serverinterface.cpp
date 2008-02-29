@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -25,18 +40,22 @@
 #include <qwindowsystem_qws.h>
 #include <qgfx_qws.h>
 
-class LayoutManager : public QObject
+class ServerLayoutManager : public QObject
 {
     Q_OBJECT
 public:
-    LayoutManager();
+    ServerLayoutManager();
 
-    void addDocked( QWidget *w, ServerInterface::DockArea placement );
+    void addDocked( QWidget *w, ServerInterface::DockArea placement, const QSize &s );
+
+private slots:
+    void removeWidget();
 
 private:
     struct Item {
 	QWidget *w;
 	ServerInterface::DockArea p;
+	QSize fixed;
     };
 
     bool eventFilter( QObject *object, QEvent *event );
@@ -46,23 +65,41 @@ private:
     QList<Item> docked;
 };
 
-LayoutManager::LayoutManager()
+ServerLayoutManager::ServerLayoutManager()
 {
     docked.setAutoDelete( TRUE );
     qApp->desktop()->installEventFilter( this );
 }
 
-void LayoutManager::addDocked( QWidget *w, ServerInterface::DockArea placement )
+void ServerLayoutManager::addDocked( QWidget *w, ServerInterface::DockArea placement, const QSize &s )
 {
+    Item *oldItem = findWidget(w);
+    if (oldItem)
+	docked.removeRef(oldItem);
+    
     Item *i = new Item;
     i->w = w;
     i->p = placement;
-    w->installEventFilter( this );
+    i->fixed = s;
+    if (!oldItem) {
+	w->installEventFilter( this );
+	connect(w, SIGNAL(destroyed()), this, SLOT(removeWidget()));
+    }
     docked.append(i);
     layout();
 }
 
-bool LayoutManager::eventFilter( QObject *object, QEvent *event )
+void ServerLayoutManager::removeWidget()
+{
+    QWidget *w = (QWidget*)sender();
+    Item *item = findWidget(w);
+    if ( item ) {
+	docked.removeRef( item );
+	layout();
+    }
+}
+
+bool ServerLayoutManager::eventFilter( QObject *object, QEvent *event )
 {
     if ( object == qApp->desktop() ) {
 	if ( event->type() == QEvent::Resize )
@@ -73,14 +110,6 @@ bool LayoutManager::eventFilter( QObject *object, QEvent *event )
     Item *item;
 
     switch ( event->type() ) {
-	case QEvent::Destroy:
-	    item = findWidget( (QWidget *)object );
-	    if ( item ) {
-		docked.removeRef( item );
-		layout();
-	    }
-	    break;
-
 	case QEvent::Hide:
 	case QEvent::Show:
 	    item = findWidget( (QWidget *)object );
@@ -95,7 +124,7 @@ bool LayoutManager::eventFilter( QObject *object, QEvent *event )
     return QObject::eventFilter( object, event );
 }
 
-void LayoutManager::layout()
+void ServerLayoutManager::layout()
 {
     QRect mwr( qApp->desktop()->geometry() );
     QListIterator<Item> it( docked );
@@ -104,25 +133,27 @@ void LayoutManager::layout()
 	QWidget *w = item->w;
 	if ( !w->isVisible() )
 	    continue;
+	QSize sh = w->sizeHint();
+	QSize fs = item->fixed.isValid() ? item->fixed : sh;
 	switch ( item->p ) {
 	    case ServerInterface::Top:
-		w->resize( mwr.width(), w->sizeHint().height() );
-		w->move( mwr.topLeft() );
-		mwr.setTop( w->geometry().bottom() + 1 );
+		w->setGeometry(mwr.left(), mwr.top(),
+		    mwr.width(), sh.height() );
+		mwr.setTop( mwr.top() + fs.height() - 1 );
 		break;
 	    case ServerInterface::Bottom:
-		w->resize( mwr.width(), w->sizeHint().height() );
-		w->move( mwr.left(), mwr.bottom()-w->height()+1 );
-		mwr.setBottom( w->geometry().top() - 1 );
+		w->setGeometry( mwr.left(), mwr.bottom()-sh.height()+1,
+		    mwr.width(), sh.height() );
+		mwr.setBottom( mwr.bottom()-fs.height() );
 		break;
 	    case ServerInterface::Left:
-		w->resize( w->sizeHint().width(), mwr.height() );
-		w->move( mwr.topLeft() );
+		w->setGeometry( mwr.left(), mwr.top(),
+		    sh.width(), mwr.height() );
 		mwr.setLeft( w->geometry().right() + 1 );
 		break;
 	    case ServerInterface::Right:
-		w->resize( w->sizeHint().width(), mwr.height() );
-		w->move( mwr.right()-w->width()+1, mwr.top() );
+		w->setGeometry( mwr.right()-sh.width()+1, mwr.top(),
+		    sh.width(), mwr.height() );
 		mwr.setRight( w->geometry().left() - 1 );
 		break;
 	}
@@ -138,7 +169,7 @@ void LayoutManager::layout()
 #endif
 }
 
-LayoutManager::Item *LayoutManager::findWidget( const QWidget *w ) const
+ServerLayoutManager::Item *ServerLayoutManager::findWidget( const QWidget *w ) const
 {
     QListIterator<Item> it( docked );
     Item *item;
@@ -170,6 +201,15 @@ LayoutManager::Item *LayoutManager::findWidget( const QWidget *w ) const
   \fn ServerInterface::createGUI()
 
   Implement this function to create the custom launcher UI.
+
+  \sa showGUI()
+*/
+
+/*!
+  \fn ServerInterface::showGUI()
+
+  Implement this function to show the custom launcher UI for
+  the first time. Will be called after createGUI().
 */
 
 /*!
@@ -355,12 +395,17 @@ ServerInterface::~ServerInterface()
 
 void ServerInterface::dockWidget( QWidget *w, DockArea placement )
 {
-    static LayoutManager *lm = 0;
+    dockWidget(w, placement, QSize());
+}
+
+void ServerInterface::dockWidget( QWidget *w, DockArea placement, const QSize &s )
+{
+    static ServerLayoutManager *lm = 0;
 
     if ( !lm )
-	lm = new LayoutManager;
+	lm = new ServerLayoutManager;
 
-    lm->addDocked( w, placement );
+    lm->addDocked( w, placement, s );
 }
 
 const AppLnkSet& ServerInterface::appLnks()

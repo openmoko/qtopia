@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/phone_library.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Phone library</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Phone library</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<ul>
+<li><a href="#1-1"> Dialing a number
+</a>
+<li><a href="#1-2"> Receiving an incoming SMS message
+</a>
+<li><a href="#1-3"> Adding a new handler
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the architecture of the "qtopiaphone" library, which is used to access the phone hardware to make and receive calls, send SMS messages, access the SIM card, etc.  The basic architecture is demonstrated in the following diagram:
+<p> <center><img src="phonelibrary.png" width="276" height="310"></center> 
+<p> An application, such as the dialer, uses C++ API's to access information about a phone line, the phone book in the SIM card, or the SMS message system.
+<p> Requests are transmitted to the phone server, which co-ordinates access to the phone functionality from multiple applications.  This allows the dialer and the SMS messaging client to both access the phone hardware at the same time.
+<p> The phone server then passes the requests onto the device handler, which communicates with the hardware device to effect the requests. Responses and status messages are passed back in the reverse direction.
+<p> Currently, we have implemented a device handler based on "AT" commands. The actual device itself is accessed via a serial port.  This is the recommended way to interface phone functionality with Qtopia Phone.
+<p> If "AT" commands are not available, the backend handler can be replaced with code that effects the requests in some other manner.
+<p> In the remainder of this document, we will demonstrate how requests and responses flow through the system with two examples: dialing a number and receiving an incoming SMS message.
+<p> <h3> Dialing a number
+</h3>
+<a name="1-1"></a><p> When the application wishes to dial a phone number, it performs the following actions:
+<p> <ul>
+<li> Create an instance of the "<tt>PhoneLine"</tt> class.
+<li> Call the "<tt>PhoneLine::createCall</tt>" method to get an instance of the "<tt>PhoneCall</tt>" class that represents the call.
+<li> Call the "<tt>PhoneCall::dial</tt>" method to dial the number.
+<li> "<tt>PhoneCall::dial</tt>" then transmits the request to the hone server.
+</ul>
+<p> There will normally be only one instance of the "<tt>PhoneLine</tt>" class per application.  There may be multiple instances of "<tt>PhoneCall</tt>" if there are calls on hold or a multi-party conference call is in progress.
+<p> The phone library will transmit the dial request to the phone server using <a href="qcop.html">QCop</a>. The phone server will then take the following actions:
+<p> <ul>
+<li> Obtain an instance of "<tt>PhoneLineAt</tt>", which represents the AT command handler for the phone line.
+<li> Call the "<tt>PhoneLineAt::createCall</tt>" method to create an instance of the "<tt>PhoneCallAt</tt>" class.
+<li> Call the "<tt>PhoneCallAt::dial</tt>" method to dial the number.
+<li> "<tt>PhoneCallAt::dial</tt>" will then send the "<tt>ATD"</tt> command to the phone device to effect the dial request.
+</ul>
+<p> As can be seen, the sequence of operations directly mirrors the sequence
+in the application.  The only difference is the final step: the application
+side sends the request to the phone server, and the handler side performs the
+low-level device operations directly.
+<p> If your device does not support AT commands, you would write new handler
+classes, modelled on the structure of "<tt>PhoneLineAt</tt>" and
+"<tt>PhoneCallAt</tt>".  The exact details of how your device effects
+the dial command is beyond the scope of this document.
+<p> <h3> Receiving an incoming SMS message
+</h3>
+<a name="1-2"></a><p> When the AT command handler starts up, it registers for new message
+indications using the "<tt>AT+CNMI</tt>" command.  This causes the
+phone device to send "<tt>+CMTI</tt>" indications whenever a new
+message arrives at the device.
+<p> In the code, "<tt>+CMTI</tt>" is detected by
+"<tt>SMSRequestAt::notification</tt>", and causes the AT command
+handler to initiate a message count check ("<tt>SMSRequestAt::check</tt>").
+Once the check completes, the number of messages is transmitted to the
+application via the "<tt>SMSRequestPrivate::messageCount</tt>" signal.
+<p> An alternative device handler would similarly need to arrange for the
+"<tt>SMSRequestPrivate::messageCount</tt>" signal to be emitted
+when new messages arrive.
+<p> This signal is broadcast on the "<tt>QPE/Phone</tt>" QCop channel.
+Applications can listen on this channel to receive notification of
+new messages.  More than one application can listen for new message
+notifications, but only one (usually the mail client) should subsequently
+retrieve the message contents.
+<p> When the mail client receives the signal, it calls the
+"<tt>SMSRequest::firstMessage</tt>" and
+"<tt>SMSRequest::nextMessage</tt>" methods to retrieve the
+SMS message contents from the incoming queue.  Each message is returned to
+the application via the "<tt>SMSRequestPrivate::fetched</tt>"
+signal.
+<p> Finally, once the application has received the message, it will delete
+it from the incoming queue using "<tt>SMSRequest::deleteMessage</tt>".
+The application (usually the mail client) will save the message in
+another location so that the message is never permanently lost
+(the message store in the device is treated as a temporary buffer
+in our system).
+<p> Note: we always use signals to pass messages and status reports back to
+the application rather than function returns.  This is because the entire
+phone system is asynchronous: the information may not be available
+when the request is made and so must be transmitted later.
+<p> <h3> Adding a new handler
+</h3>
+<a name="1-3"></a><p> If you wish to add a new phone device handler, you should inherit the
+class "<tt>PhoneLinePrivate</tt>" and override all of the functionality
+that is specified therein.  The "<tt>PhoneLineAt</tt>" class can be
+used as a guide to the necessary structure.
+<p> You will also need to modify the "<tt>PhoneLinePrivate::create</tt>"
+method to return an instance of your class instead of
+"<tt>PhoneLineAt</tt>".
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

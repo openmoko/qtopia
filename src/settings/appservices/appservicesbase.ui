@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>201</width>
-            <height>207</height>
+            <width>334</width>
+            <height>341</height>
         </rect>
     </property>
     <property stdset="1">
@@ -89,6 +89,7 @@
                     <property stdset="1">
                         <name>text</name>
                         <string>many applications available</string>
+                        <comment>appended to "Show services which have..."</comment>
                     </property>
                     <property stdset="1">
                         <name>checked</name>
@@ -104,6 +105,7 @@
                     <property stdset="1">
                         <name>text</name>
                         <string>one application available</string>
+                        <comment>appended to "Show services which have..."</comment>
                     </property>
                 </widget>
                 <widget>
@@ -115,6 +117,7 @@
                     <property stdset="1">
                         <name>text</name>
                         <string>no applications available</string>
+                        <comment>appended to "Show services which have..."</comment>
                     </property>
                 </widget>
             </vbox>

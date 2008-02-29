@@ -1,10 +1,18 @@
-TEMPLATE	= app
-CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
+CONFIG		+= qtopiaapp
 
-HEADERS		= settings.h
+HEADERS		= rotation.h
 SOURCES		= rotation.cpp main.cpp
 INTERFACES	= rotationsettingsbase.ui
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
 
 TARGET		= rotation 
-TRANSLATIONS = rotation-en_GB.ts rotation-de.ts rotation-ja.ts rotation-no.ts
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/rotation.html
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/Rotation.desktop
+desktop.path=/apps/Settings
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/rotation/*
+pics.path=/pics/rotation
+INSTALLS	+= desktop help
+PICS_INSTALLS+=pics
+

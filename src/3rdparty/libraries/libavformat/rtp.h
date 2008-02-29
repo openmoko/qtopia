@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*
  * RTP definitions
  * Copyright (c) 2002 Fabrice Bellard.
@@ -19,14 +40,35 @@
 #ifndef RTP_H
 #define RTP_H
 
+enum RTPPayloadType {
+    RTP_PT_ULAW = 0,
+    RTP_PT_GSM = 3,
+    RTP_PT_G723 = 4,
+    RTP_PT_ALAW = 8,
+    RTP_PT_S16BE_STEREO = 10,
+    RTP_PT_S16BE_MONO = 11,
+    RTP_PT_MPEGAUDIO = 14,
+    RTP_PT_JPEG = 26,
+    RTP_PT_H261 = 31,
+    RTP_PT_MPEGVIDEO = 32,
+    RTP_PT_MPEG2TS = 33,
+    RTP_PT_H263 = 34, /* old H263 encapsulation */
+    RTP_PT_PRIVATE = 96,
+};
+
 #define RTP_MIN_PACKET_LENGTH 12
 #define RTP_MAX_PACKET_LENGTH 1500 /* XXX: suppress this define */
 
 int rtp_init(void);
 int rtp_get_codec_info(AVCodecContext *codec, int payload_type);
 int rtp_get_payload_type(AVCodecContext *codec);
-int rtp_parse_packet(AVFormatContext *s1, AVPacket *pkt, 
-                     const unsigned char *buf, int len);
+
+typedef struct RTPDemuxContext RTPDemuxContext;
+
+RTPDemuxContext *rtp_parse_open(AVFormatContext *s1, AVStream *st, int payload_type);
+int rtp_parse_packet(RTPDemuxContext *s, AVPacket *pkt, 
+                     const uint8_t *buf, int len);
+void rtp_parse_close(RTPDemuxContext *s);
 
 extern AVOutputFormat rtp_mux;
 extern AVInputFormat rtp_demux;

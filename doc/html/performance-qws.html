@@ -9,29 +9,31 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
-<h1 align=center> Qt/Embedded Performance Tuning</h1><br clear="all">
+<h1 align="center"> Qt/Embedded Performance Tuning</h1><br clear="all">
 When building embedded applications on low-powered devices, a number
 of options are available that would not be considered in a desktop
 application environment. These options reduce the memory and/or CPU
 requirements at the cost of other factors.
 <p>
 <ul>
- <li><a href=features.html><b>Tuning the functionality of Qt</b></a>
- <li><a href=#general>General programming style</a>
- <li><a href=#static>Static vs. Dynamic linking</a>
- <li><a href=#alloc>Alternative memory allocation</a>
+ <li><a href="features.html"><b>Tuning the functionality of Qt</b></a>
+ <li><a href="#general">General programming style</a>
+ <li><a href="#static">Static vs. Dynamic linking</a>
+ <li><a href="#alloc">Alternative memory allocation</a>
 </ul>
 <p>
-<a name=general>
+<a name="general">
 <h3>General programming style</h3>
 </a>
 <p>
@@ -45,10 +47,10 @@ The following guidelines will improve CPU performance:
         (only create the Find dialog the first time the user invokes it).
 </ul>
 <p>
-<a name=static>
+<a name="static">
 <h3>Static vs. Dynamic linking</h3>
 </a>
-<p>Much CPU and memory is used by the ELF linking process. You can make
+Much CPU and memory is used by the ELF linking process. You can make
 significant savings by using a static build of your application suite.
 This means that rather than having a dynamic library (<tt>libqte.so</tt>)
 and a collection of executables which link dynamically to that library,
@@ -68,7 +70,7 @@ To build your application suite as an all-in-one application, design each
 application as a stand-alone widget or set of widgets, with only minimal
 code in the <tt>main()</tt> function. Then, write an application that gives
 some way to choose among the applications (eg. a QIconView). The
-<a href=http://www.trolltech.com/products/qt/embedded/qpe.html>QPE</a>
+<a href="http://www.trolltech.com/products/qt/embedded/qpe.html">QPE</a>
 is an example of this - it can be built either as a set of dynamically-linked
 executables, or as a single static application.
 <p>
@@ -79,7 +81,7 @@ on your device.
 <a name=alloc>
 <h3>Alternative memory allocation</h3>
 </a>
-<p>We have found that the libraries shipped with some C++ compilers on
+We have found that the libraries shipped with some C++ compilers on
 some platforms have poor performance in the built-in "new" and "delete"
 operators. You might gain performance by re-implementing these
 functions. For example, you can switch to the plain C allocators
@@ -120,5 +122,5 @@ void operator delete(void* p, size_t size)
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,10 +37,16 @@
 #define QTOPIA_INTERNAL_LANGLIST
 #include "config.h"
 #include "global.h"
+#include "qpeapplication.h"
+#include "localtr_p.h"
 #include <qdir.h>
 #include <qfile.h>
+#include <qdict.h>
+#include <qlist.h>
+#include <qtranslator.h>
 #include <qfileinfo.h>
 #include <qmessagebox.h>
+#include <qtranslator.h>
 #if QT_VERSION <= 230 && defined(QT_NO_CODECS)
 #include <qtextcodec.h>
 #endif
@@ -37,11 +58,212 @@
 #include <stdlib.h>
 #ifndef Q_OS_WIN32
 #include <unistd.h>
+#include <sys/time.h>
 #include <qfileinfo.h>
 #endif
 
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#endif
 
 #include <qapplication.h> //for translate
+
+QString qtopia_internal_homeDirPath();
+
+class ConfigPrivate {
+public:
+    ConfigPrivate() : multilang(FALSE) {}
+    ConfigPrivate(const ConfigPrivate& o) :
+	trfile(o.trfile),
+	trcontext(o.trcontext),
+	multilang(o.multilang)
+    {}
+    ConfigPrivate& operator=(const ConfigPrivate& o)
+    {
+	trfile = o.trfile;
+	trcontext = o.trcontext;
+	multilang = o.multilang;
+	return *this;
+    }
+
+    QString trfile;
+    QCString trcontext;
+    bool multilang;
+};
+
+// ==========================================================================
+
+
+#ifndef Q_OS_WIN32
+
+//#define DEBUG_CONFIG_CACHE
+
+const int CONFIG_CACHE_SIZE = 8192;
+const int CONFIG_CACHE_TIMEOUT = 1000;
+
+class ConfigData
+{
+public:
+    ConfigData(const ConfigData& o) :
+	cfg(o.cfg),
+	priv(o.priv ? new ConfigPrivate(*o.priv) : 0),
+	mtime(o.mtime),
+	size(o.size),
+	used(o.used)
+    { }
+
+    ConfigData& operator=(const ConfigData& o)
+    {
+	cfg = o.cfg;
+	delete priv;
+	priv = o.priv ? new ConfigPrivate(*o.priv) : 0;
+	mtime = o.mtime;
+	size = o.size;
+	used = o.used;
+	return *this;
+    }
+
+    ConfigData() : priv(0) {}
+    ~ConfigData() { delete priv; }
+
+    ConfigGroupMap cfg;
+    ConfigPrivate *priv; // Owned by this object
+    time_t mtime;
+    unsigned int size;
+    struct timeval used;
+};
+
+class ConfigCache : public QObject
+{
+public:
+    ConfigCache();
+
+    void insert(const QString &filename, const ConfigGroupMap &cfg, const ConfigPrivate* priv);
+    bool find(const QString &filename, ConfigGroupMap &cfg, ConfigPrivate*& priv);
+    void remove(const QString &filename);
+
+protected:
+    void timerEvent(QTimerEvent *);
+
+private:
+    void removeLru();
+
+    QMap<QString, ConfigData> configData;
+    unsigned int totalsize;
+    int tid;
+};
+
+ConfigCache::ConfigCache() : QObject(), totalsize(0), tid(0)
+{
+}
+
+void ConfigCache::insert(const QString &filename, const ConfigGroupMap &cfg, const ConfigPrivate* priv)
+{
+    // use stat() rather than QFileInfo for speed.
+    struct stat sbuf;
+    stat(filename.local8Bit().data(), &sbuf);
+
+    if (sbuf.st_size < CONFIG_CACHE_SIZE/2) {
+	ConfigData data;
+	data.cfg = cfg;
+	data.priv = priv ? new ConfigPrivate(*priv) : 0;
+	data.mtime = sbuf.st_mtime;
+	data.size = sbuf.st_size;
+	gettimeofday(&data.used, 0);
+
+	remove(filename);
+	configData.insert(filename, data);
+
+	totalsize += data.size;
+#ifdef DEBUG_CONFIG_CACHE
+	qDebug("++++++ insert %s", filename.latin1());
+#endif
+    }
+
+    if (totalsize > (uint)CONFIG_CACHE_SIZE) {
+	// We'll delay deleting anything until later.
+	// This lets us grow quite large during some operations,
+	// but we'll be reduced to a decent size later.
+	// This works well with the main use case - app startup.
+	if (!tid)
+	    tid = startTimer(CONFIG_CACHE_TIMEOUT);
+    }
+}
+
+bool ConfigCache::find(const QString &filename, ConfigGroupMap &cfg, ConfigPrivate*& priv)
+{
+    QMap<QString, ConfigData>::Iterator it = configData.find(filename);
+    if (it != configData.end()) {
+	ConfigData data = *it;
+	// use stat() rather than QFileInfo for speed.
+	struct stat sbuf;
+	stat(filename.local8Bit().data(), &sbuf);
+
+	if (data.mtime == sbuf.st_mtime && (int)data.size == sbuf.st_size) {
+	    cfg = data.cfg;
+	    delete priv;
+	    priv = data.priv ? new ConfigPrivate(*data.priv) : 0;
+	    gettimeofday(&data.used, 0);
+#ifdef DEBUG_CONFIG_CACHE
+	    qDebug("******* Cache hit: %s", filename.latin1());
+#endif
+	    return TRUE;
+	}
+    }
+
+#ifdef DEBUG_CONFIG_CACHE
+    qDebug("------- Cache miss: %s", filename.latin1());
+#endif
+
+    return FALSE;
+}
+
+void ConfigCache::remove(const QString &filename)
+{
+    QMap<QString, ConfigData>::Iterator it = configData.find(filename);
+    if (it != configData.end()) {
+	totalsize -= (*it).size;
+	configData.remove(it);
+    }
+}
+
+void ConfigCache::timerEvent(QTimerEvent *)
+{
+#ifdef DEBUG_CONFIG_CACHE
+    qDebug( "cache size: %d", totalsize);
+#endif
+    while (totalsize > (uint)CONFIG_CACHE_SIZE)
+	removeLru();
+    killTimer(tid);
+    tid = 0;
+}
+
+void ConfigCache::removeLru()
+{
+    QMap<QString, ConfigData>::Iterator it = configData.begin();
+    QMap<QString, ConfigData>::Iterator lru = it;
+    ++it;
+    for (; it != configData.end(); ++it) {
+	if ((*it).used.tv_sec < (*lru).used.tv_sec ||
+	    ((*it).used.tv_sec == (*lru).used.tv_sec &&
+	     (*it).used.tv_usec < (*lru).used.tv_usec))
+	    lru = it;
+    }
+
+#ifdef DEBUG_CONFIG_CACHE
+    qDebug("Cache full, removing: %s", lru.key().latin1());
+#endif
+    totalsize -= (*lru).size;
+    configData.remove(lru);
+}
+
+static ConfigCache *qpe_configCache = 0;
+
+#endif /* Q_OS_WIN32 */
+
+
+// ==========================================================================
+
 
 /*!
   \internal
@@ -55,10 +277,7 @@ QString Config::configFilename(const QString& name, Domain d)
 	    break;
 
 	case User: {
-	  QString homeDirPath = QDir::homeDirPath();
-#ifdef QTOPIA_DESKTOP
-	  homeDirPath += "/.palmtopcenter/";
-#endif
+	  QString homeDirPath = ::qtopia_internal_homeDirPath();
 
 	  QDir dir = (homeDirPath + "/Settings");
 	    if ( !dir.exists() )
@@ -103,6 +322,9 @@ void Config::read( QTextStream &s )
   to be able to change the state. There is no locking currently, but there
   may be in the future.
 
+  Note that in Qtopia before 1.6, the 'const' forms of the read functions
+  where not available.
+
   \ingroup qtopiaemb
 */
 
@@ -132,20 +354,17 @@ Config::Config( const QString &name, Domain domain )
     : filename( configFilename(name,domain) )
 {
     git = groups.end();
+    d = 0;
     read();
-    QStringList l = Global::languageList();
-    lang = l[0];
-    glang = l[1];
 }
 
 #ifdef QTOPIA_DESKTOP
 Config::Config( QTextStream &s, Domain domain )
 {
+    Q_UNUSED( domain );
     git = groups.end();
+    d = 0;
     read( s );
-    QStringList l = Global::languageList();
-    lang = l[0];
-    glang = l[1];
 }
 #endif
 
@@ -156,6 +375,7 @@ Config::~Config()
 {
     if ( changed )
 	write();
+    delete d;
 }
 
 /*!
@@ -167,6 +387,15 @@ bool Config::hasKey( const QString &key ) const
     if ( groups.end() == git )
 	return FALSE;
     ConfigGroup::ConstIterator it = ( *git ).find( key );
+    if ( it == ( *git ).end() ) {
+	if ( d && !d->trcontext.isNull() ) {
+	    it = ( *git ).find( key + "[]" );
+	} else if ( d && d->multilang ) {
+	    it = ( *git ).find( key + "["+lang+"]" );
+	    if ( it == ( *git ).end() && !glang.isEmpty() )
+		it = ( *git ).find( key + "["+glang+"]" );
+	}
+    }
     return it != ( *git ).end();
 }
 
@@ -373,15 +602,30 @@ void Config::removeEntry( const QString &key )
 */
 QString Config::readEntry( const QString &key, const QString &deflt )
 {
-    QString res = readEntryDirect( key+"["+lang+"]" );
-    if ( !res.isNull() )
-	return res;
-    if ( !glang.isEmpty() ) {
-	res = readEntryDirect( key+"["+glang+"]" );
-	if ( !res.isNull() )
-	    return res;
+    QString r;
+    if ( d && !d->trcontext.isNull() ) {
+	// Still try untranslated first, becuase:
+	//  1. It's the common case
+	//  2. That way the value can be WRITTEN (becoming untranslated)
+	r = readEntryDirect( key );
+	if ( !r.isNull() )
+	    return r;
+	r = readEntryDirect( key + "[]" );
+	if ( !r.isNull() )
+	    return LocalTranslator::translate(d->trfile,d->trcontext,r);
+    } else if ( d && d->multilang ) {
+	// For compatibilitity
+	r = readEntryDirect( key + "["+lang+"]" );
+	if ( !r.isNull() )
+	    return r;
+	if ( !glang.isEmpty() ) {
+	    r = readEntryDirect( key + "["+glang+"]" );
+	    if ( !r.isNull() )
+		return r;
+	}
     }
-    return readEntryDirect( key, deflt );
+    r = readEntryDirect( key, deflt );
+    return r;
 }
 
 /*!
@@ -400,11 +644,7 @@ QString Config::readEntry( const QString &key, const QString &deflt )
 */
 QString Config::readEntryCrypt( const QString &key, const QString &deflt )
 {
-    QString res = readEntryDirect( key+"["+lang+"]" );
-    if ( res.isNull() && glang.isEmpty() )
-	res = readEntryDirect( key+"["+glang+"]" );
-    if ( res.isNull() )
-	res = readEntryDirect( key, QString::null );
+    QString res = readEntry( key );
     if ( res.isNull() )
 	return deflt;
     return decipher(res);
@@ -504,7 +744,7 @@ QStringList Config::readListEntry( const QString &key, const QChar &sep )
 /*!
   Removes all entries from the current group.
 
-  \sa removeEntry()
+  \sa removeEntry() removeGroup()
 */
 void Config::clearGroup()
 {
@@ -530,6 +770,11 @@ void Config::write( const QString &fn )
     QFile f( strNewFile );
     if ( !f.open( IO_WriteOnly|IO_Raw ) ) {
 	qWarning( "could not open for writing `%s'", strNewFile.latin1() );
+#ifndef QT_NO_COP
+        //send this msg to make sure user is notified if it is
+        //"out of disk space" problem
+        QCopEnvelope e("QPE/System", "checkDiskSpace()");
+#endif
 	git = groups.end();
 	return;
     }
@@ -549,15 +794,25 @@ void Config::write( const QString &fn )
     int total_length;
     total_length = f.writeBlock( cstr.data(), cstr.length() );
     if ( total_length != int(cstr.length()) ) {
-	QMessageBox::critical( 0, qApp->translate( "Config", "Out of Space"),
-			       qApp->translate( "Config", "There was a problem creating\nConfiguration Information \nfor this program.\n\nPlease free up some space and\ntry again.") );
-	f.close();
+        QString msg = qApp->translate( "Config", "<qt>There was a problem creating "
+				                "Configuration Information for this program."
+						"<br>Please free up some space and try again.</qt>");
+	qWarning( "unable to write configuration information" );
+#ifndef QT_NO_COP
+        QCopEnvelope e("QPE/System", "outOfDiskSpace(QString)");
+        e << msg;
+#endif
+        f.close();
 	QFile::remove( strNewFile );
 	return;
     }
 
     f.close();
     qtopia_renameFile( strNewFile, filename );
+#ifndef Q_OS_WIN32
+    if (qpe_configCache)
+	qpe_configCache->insert(filename, groups, d);
+#endif
     changed = FALSE;
 }
 
@@ -577,12 +832,42 @@ void Config::read()
 {
     changed = FALSE;
 
-    if ( !QFileInfo( filename ).exists() ) {
-	git = groups.end();
-	return;
+    QString readFilename(filename);
+
+    if ( !QFile::exists(filename) ) {
+	bool failed = TRUE;
+	QFileInfo fi(filename);
+	QString settingsDir = QDir::homeDirPath() + "/Settings";
+	if (fi.dirPath(TRUE) == settingsDir) {
+	    // User setting - see if there is a default in $QPEDIR/etc/default/
+	    QString dftlFile = QPEApplication::qpeDir() + "/etc/default/" + fi.fileName();
+	    if (QFile::exists(dftlFile)) {
+		readFilename = dftlFile;
+		failed = FALSE;
+	    }
+	}
+	if (failed) {
+	    git = groups.end();
+	    return;
+	}
     }
 
-    QFile f( filename );
+#ifndef Q_OS_WIN32
+    if (!qpe_configCache)
+	qpe_configCache = new ConfigCache;
+
+    if (qpe_configCache->find(readFilename, groups, d)) {
+	if ( d && d->multilang ) {
+	    QStringList l = Global::languageList();
+	    lang = l[0];
+	    glang = l[1];
+	}
+	git = groups.begin();
+	return;
+    }
+#endif
+
+    QFile f( readFilename );
     if ( !f.open( IO_ReadOnly ) ) {
 	git = groups.end();
 	return;
@@ -597,6 +882,10 @@ void Config::read()
     QTextStream s( &f );
     read( s );
     f.close();
+
+#ifndef Q_OS_WIN32
+    qpe_configCache->insert(readFilename, groups, d);
+#endif
 }
 
 /*!
@@ -619,8 +908,37 @@ bool Config::parse( const QString &l )
 	    return FALSE;
 	QString key = line.left(eq).stripWhiteSpace();
 	QString value = line.mid(eq+1).stripWhiteSpace();
+
+	if ( git.key() == "Translation" ) {
+	    if ( key == "File" ) {
+		if ( !d )
+		    d = new ConfigPrivate;
+		d->trfile = value;
+	    } else if ( key == "Context" ) {
+		if ( !d )
+		    d = new ConfigPrivate;
+		d->trcontext = value.latin1();
+            } else if ( key.startsWith("Comment") ) {
+                return TRUE; // ignore comment for ts file
+	    } else {
+		return FALSE; // Unrecognized
+	    }
+	}
+
+	int kl = key.length();
+	if ( kl > 1 && key[kl-1] == ']' && key[kl-2] != '[' ) {
+	    // Old-style translation (inefficient)
+	    if ( !d )
+		d = new ConfigPrivate;
+	    if ( !d->multilang ) {
+	        QStringList l = Global::languageList();
+		lang = l[0];
+		glang = l[1];
+		d->multilang = TRUE;
+	    }
+	}
+
 	( *git ).insert( key, value );
     }
     return TRUE;
 }
-

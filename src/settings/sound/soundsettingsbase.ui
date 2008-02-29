@@ -11,13 +11,13 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>246</width>
+            <width>242</width>
             <height>299</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Sound Settings</string>
+        <string>Sound</string>
     </property>
     <property>
         <name>layoutMargin</name>

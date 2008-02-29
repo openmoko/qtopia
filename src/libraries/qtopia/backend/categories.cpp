@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -21,6 +36,7 @@
 #include <qtopia/categories.h>
 #include <qtopia/stringutil.h>
 #include <qtopia/global.h>
+#include "localtr_p.h"
 #include <qfile.h>
 #include <qdir.h>
 #include <qfileinfo.h>
@@ -67,7 +83,7 @@ UidGen CategoryGroup::sUidGen( UidGen::Qtopia );
 */
 int CategoryGroup::add( const QString &label )
 {
-    if ( label == Categories::tr("All") || label == Categories::tr("Unfiled") )
+    if ( label == "_All" || label == "_Unfiled" )
 	return 0;
 
     QMap<QString,int>::Iterator findIt = mLabelIdMap.find( label );
@@ -89,7 +105,7 @@ void CategoryGroup::insert( int uid, const QString &label )
  */
 bool CategoryGroup::add( int uid, const QString &label )
 {
-    if ( label == Categories::tr("All") || label == Categories::tr("Unfiled") )
+    if ( label == "_All" || label == "_Unfiled" )
 	return FALSE;
 
     QMap<QString,int>::ConstIterator labelIt = mLabelIdMap.find( label );
@@ -136,7 +152,7 @@ bool CategoryGroup::remove( int uid )
  */
 bool CategoryGroup::rename( int uid, const QString &newLabel )
 {
-    if ( newLabel == Categories::tr("All") || newLabel == Categories::tr("Unfiled") )
+    if ( newLabel == "_All" || newLabel == "_Unfiled" )
 	return FALSE;
 
     QMap<int, QString>::Iterator idIt = mIdLabelMap.find( uid );
@@ -148,7 +164,6 @@ bool CategoryGroup::rename( int uid, const QString &newLabel )
 	if ( it != idIt && (*it) == newLabel )
 	    return FALSE;
     }
-
 
     mLabelIdMap.remove( *idIt );
     mLabelIdMap[newLabel] = uid;
@@ -475,14 +490,14 @@ QStringList Categories::labels( const QString &app,
     switch ( extra ) {
     case NoExtra: break;
     case AllUnfiled:
-	cats.append( tr("All") );
-	cats.append( tr("Unfiled") );
+	cats.append( "_All" );
+	cats.append( "_Unfiled" );
 	break;
     case AllLabel:
-	cats.append( tr("All") );
+	cats.append( "_All" );
 	break;
     case UnfiledLabel:
-	cats.append( tr("Unfiled") );
+	cats.append( "_Unfiled" );
 	break;
     }
 
@@ -503,6 +518,26 @@ QString Categories::label( const QString &app, int id ) const
     return (*appIt).label( id );
 }
 
+QString qpe_translateLabel(const QString& s)
+{
+    if ( s[0] == '_' ) {
+	return LocalTranslator::translate("Categories-*","Categories",s.mid(1).latin1());
+    } else {
+	return LocalTranslator::translate("Categories-*","Categories", s.latin1());
+    }
+}
+
+void qpe_translateLabels(QStringList& strs)
+{
+    for (QStringList::Iterator it = strs.begin(); it!=strs.end(); ++it) {
+        QString sd = (*it);
+        if ( (*it)[0] == '_' )
+            *it = qpe_translateLabel(*it);
+        else
+            *it = qpe_translateLabel(*it);
+    }
+}
+
 /*!
   Returns a single string associated with \a catids for applications \a app.
   The returned string is for display in a
@@ -514,6 +549,10 @@ QString Categories::label( const QString &app, int id ) const
   first string. If \a display is set to ShowAll, then a space
   seperated string is returned with all categories.  If ShowFirst is
   set, the just the first string is returned.
+
+  Note that the returned string may be translated, so while it is
+  ideal for display to the user, it should not be passed back to Categories
+  functions as a 'label'.
 */
 QString Categories::displaySingle( const QString &app,
 				   const QArray<int> &catids,
@@ -521,6 +560,7 @@ QString Categories::displaySingle( const QString &app,
 {
     QStringList strs = mGlobalCats.labels( catids );
     strs += mAppCats[app].labels( catids );
+    qpe_translateLabels(strs);
 
     if ( !strs.count() )
 	return tr("Unfiled");
@@ -572,7 +612,7 @@ QArray<int> Categories::ids( const QString &app, const QStringList &labels) cons
 */
 int Categories::id( const QString &app, const QString &cat ) const
 {
-    if ( cat == tr("Unfiled") || cat.contains( tr(" (multi.)") ) )
+    if ( cat == "_Unfiled" )
 	return 0;
     int uid = mGlobalCats.id( cat );
     if ( uid != 0 )
@@ -771,8 +811,8 @@ bool Categories::load( const QString &fname )
     if ( !file.open( IO_ReadOnly ) ) {
 	qWarning("Unable to open %s", fname.latin1());
 
-	addGlobalCategory(tr("Business"));
-	addGlobalCategory(tr("Personal"));
+	addGlobalCategory("_Business"); // No tr
+	addGlobalCategory("_Personal"); // No tr
 	save(fname);
 
 	return FALSE;
@@ -909,11 +949,6 @@ void CheckedListView::setChecked( const QStringList &checked )
   Performs deep copy of \a c.
  */
 
-
-/*! \fn  QStringList Categories::labels( const QString & app, const QArray<int> &catids ) const
-
-  Returns list of labels associated with the application \a app and \a catids.
-*/
 
 /*! \fn QStringList Categories::globalCategories() const
 

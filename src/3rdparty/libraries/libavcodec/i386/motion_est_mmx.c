@@ -20,15 +20,15 @@
  */
 #include "../dsputil.h"
 
-static const __attribute__ ((aligned(8))) UINT64 round_tab[3]={
-0x0000000000000000,
-0x0001000100010001,
-0x0002000200020002,
+static const __attribute__ ((aligned(8))) uint64_t round_tab[3]={
+0x0000000000000000ULL,
+0x0001000100010001ULL,
+0x0002000200020002ULL,
 };
 
-static __attribute__ ((aligned(8))) uint64_t bone= 0x0101010101010101LL;
+static __attribute__ ((aligned(8), unused)) uint64_t bone= 0x0101010101010101LL;
 
-static inline void sad8_mmx(UINT8 *blk1, UINT8 *blk2, int stride, int h)
+static inline void sad8_mmx(uint8_t *blk1, uint8_t *blk2, int stride, int h)
 {
     int len= -(stride<<h);
     asm volatile(
@@ -64,7 +64,7 @@ static inline void sad8_mmx(UINT8 *blk1, UINT8 *blk2, int stride, int h)
     );
 }
 
-static inline void sad8_mmx2(UINT8 *blk1, UINT8 *blk2, int stride, int h)
+static inline void sad8_mmx2(uint8_t *blk1, uint8_t *blk2, int stride, int h)
 {
     int len= -(stride<<h);
     asm volatile(
@@ -86,7 +86,7 @@ static inline void sad8_mmx2(UINT8 *blk1, UINT8 *blk2, int stride, int h)
     );
 }
 
-static inline void sad8_2_mmx2(UINT8 *blk1a, UINT8 *blk1b, UINT8 *blk2, int stride, int h)
+static inline void sad8_2_mmx2(uint8_t *blk1a, uint8_t *blk1b, uint8_t *blk2, int stride, int h)
 {
     int len= -(stride<<h);
     asm volatile(
@@ -112,13 +112,13 @@ static inline void sad8_2_mmx2(UINT8 *blk1a, UINT8 *blk1b, UINT8 *blk2, int stri
     );
 }
 
-static inline void sad8_4_mmx2(UINT8 *blk1, UINT8 *blk2, int stride, int h)
+static inline void sad8_4_mmx2(uint8_t *blk1, uint8_t *blk2, int stride, int h)
 { //FIXME reuse src
     int len= -(stride<<h);
     asm volatile(
         ".balign 16			\n\t"
         "movq "MANGLE(bone)", %%mm5	\n\t"
-        "1:				\n\t" 
+        "1:				\n\t"
         "movq (%1, %%eax), %%mm0	\n\t"
         "movq (%2, %%eax), %%mm2	\n\t"
         "movq 1(%1, %%eax), %%mm1	\n\t"
@@ -149,7 +149,7 @@ static inline void sad8_4_mmx2(UINT8 *blk1, UINT8 *blk2, int stride, int h)
     );
 }
 
-static inline void sad8_2_mmx(UINT8 *blk1a, UINT8 *blk1b, UINT8 *blk2, int stride, int h)
+static inline void sad8_2_mmx(uint8_t *blk1a, uint8_t *blk1b, uint8_t *blk2, int stride, int h)
 {
     int len= -(stride<<h);
     asm volatile(
@@ -165,7 +165,7 @@ static inline void sad8_2_mmx(UINT8 *blk1a, UINT8 *blk1b, UINT8 *blk2, int strid
         "punpckhbw %%mm7, %%mm3		\n\t"
         "paddw %%mm0, %%mm1		\n\t"
         "paddw %%mm2, %%mm3		\n\t"
-        "movq (%3, %%eax), %%mm4	\n\t" 
+        "movq (%3, %%eax), %%mm4	\n\t"
         "movq (%3, %%eax), %%mm2	\n\t"
         "paddw %%mm5, %%mm1		\n\t"
         "paddw %%mm5, %%mm3		\n\t"
@@ -187,7 +187,7 @@ static inline void sad8_2_mmx(UINT8 *blk1a, UINT8 *blk1b, UINT8 *blk2, int strid
     );
 }
 
-static inline void sad8_4_mmx(UINT8 *blk1, UINT8 *blk2, int stride, int h)
+static inline void sad8_4_mmx(uint8_t *blk1, uint8_t *blk2, int stride, int h)
 {
     int len= -(stride<<h);
     asm volatile(
@@ -215,8 +215,8 @@ static inline void sad8_4_mmx(UINT8 *blk1, UINT8 *blk2, int stride, int h)
         "punpckhbw %%mm7, %%mm4		\n\t"
         "paddw %%mm3, %%mm2		\n\t"
         "paddw %%mm4, %%mm1		\n\t"
-        "movq (%3, %%eax), %%mm3	\n\t" 
-        "movq (%3, %%eax), %%mm4	\n\t" 
+        "movq (%3, %%eax), %%mm3	\n\t"
+        "movq (%3, %%eax), %%mm4	\n\t"
         "paddw %%mm5, %%mm2		\n\t"
         "paddw %%mm5, %%mm1		\n\t"
         "psrlw $2, %%mm2		\n\t"
@@ -237,7 +237,7 @@ static inline void sad8_4_mmx(UINT8 *blk1, UINT8 *blk2, int stride, int h)
     );
 }
 
-static inline int sum_mmx()
+static inline int sum_mmx(void)
 {
     int ret;
     asm volatile(
@@ -253,7 +253,7 @@ static inline int sum_mmx()
     return ret&0xFFFF;
 }
 
-static inline int sum_mmx2()
+static inline int sum_mmx2(void)
 {
     int ret;
     asm volatile(
@@ -263,8 +263,18 @@ static inline int sum_mmx2()
     return ret;
 }
 
+
 #define PIX_SAD(suf)\
-int pix_abs8x8_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int pix_abs8x8_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
+{\
+    asm volatile("pxor %%mm7, %%mm7		\n\t"\
+                 "pxor %%mm6, %%mm6		\n\t":);\
+\
+    sad8_ ## suf(blk1, blk2, stride, 3);\
+\
+    return sum_ ## suf();\
+}\
+static int sad8x8_ ## suf(void *s, uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t":);\
@@ -274,7 +284,7 @@ int pix_abs8x8_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
     return sum_ ## suf();\
 }\
 \
-int pix_abs8x8_x2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int pix_abs8x8_x2_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t"\
@@ -282,12 +292,12 @@ int pix_abs8x8_x2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
                  :: "m"(round_tab[1]) \
                  );\
 \
-    sad8_2_ ## suf(blk1, blk2+1, blk2, stride, 3);\
+    sad8_2_ ## suf(blk1, blk1+1, blk2, stride, 3);\
 \
     return sum_ ## suf();\
 }\
 \
-int pix_abs8x8_y2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int pix_abs8x8_y2_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t"\
@@ -300,7 +310,7 @@ int pix_abs8x8_y2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
     return sum_ ## suf();\
 }\
 \
-int pix_abs8x8_xy2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int pix_abs8x8_xy2_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t"\
@@ -313,7 +323,7 @@ int pix_abs8x8_xy2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
     return sum_ ## suf();\
 }\
 \
-int pix_abs16x16_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int pix_abs16x16_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t":);\
@@ -323,7 +333,17 @@ int pix_abs16x16_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
 \
     return sum_ ## suf();\
 }\
-int pix_abs16x16_x2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int sad16x16_ ## suf(void *s, uint8_t *blk2, uint8_t *blk1, int stride)\
+{\
+    asm volatile("pxor %%mm7, %%mm7		\n\t"\
+                 "pxor %%mm6, %%mm6		\n\t":);\
+\
+    sad8_ ## suf(blk1  , blk2  , stride, 4);\
+    sad8_ ## suf(blk1+8, blk2+8, stride, 4);\
+\
+    return sum_ ## suf();\
+}\
+static int pix_abs16x16_x2_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t"\
@@ -336,7 +356,7 @@ int pix_abs16x16_x2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
 \
     return sum_ ## suf();\
 }\
-int pix_abs16x16_y2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int pix_abs16x16_y2_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t"\
@@ -349,7 +369,7 @@ int pix_abs16x16_y2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
 \
     return sum_ ## suf();\
 }\
-int pix_abs16x16_xy2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
+static int pix_abs16x16_xy2_ ## suf(uint8_t *blk2, uint8_t *blk1, int stride)\
 {\
     asm volatile("pxor %%mm7, %%mm7		\n\t"\
                  "pxor %%mm6, %%mm6		\n\t"\
@@ -365,3 +385,36 @@ int pix_abs16x16_xy2_ ## suf(UINT8 *blk2, UINT8 *blk1, int stride)\
 
 PIX_SAD(mmx)
 PIX_SAD(mmx2)
+
+void dsputil_init_pix_mmx(DSPContext* c, AVCodecContext *avctx)
+{
+    if (mm_flags & MM_MMX) {
+        c->pix_abs16x16     = pix_abs16x16_mmx;
+        c->pix_abs16x16_x2  = pix_abs16x16_x2_mmx;
+        c->pix_abs16x16_y2  = pix_abs16x16_y2_mmx;
+        c->pix_abs16x16_xy2 = pix_abs16x16_xy2_mmx;
+        c->pix_abs8x8     = pix_abs8x8_mmx;
+        c->pix_abs8x8_x2  = pix_abs8x8_x2_mmx;
+        c->pix_abs8x8_y2  = pix_abs8x8_y2_mmx;
+        c->pix_abs8x8_xy2 = pix_abs8x8_xy2_mmx;
+
+	c->sad[0]= sad16x16_mmx;
+        c->sad[1]= sad8x8_mmx;
+    }
+    if (mm_flags & MM_MMXEXT) {
+	c->pix_abs16x16     = pix_abs16x16_mmx2;
+	c->pix_abs8x8     = pix_abs8x8_mmx2;
+
+	c->sad[0]= sad16x16_mmx2;
+	c->sad[1]= sad8x8_mmx2;
+        
+        if(!(avctx->flags & CODEC_FLAG_BITEXACT)){
+            c->pix_abs16x16_x2  = pix_abs16x16_x2_mmx2;
+            c->pix_abs16x16_y2  = pix_abs16x16_y2_mmx2;
+            c->pix_abs16x16_xy2 = pix_abs16x16_xy2_mmx2;
+            c->pix_abs8x8_x2  = pix_abs8x8_x2_mmx2;
+            c->pix_abs8x8_y2  = pix_abs8x8_y2_mmx2;
+            c->pix_abs8x8_xy2 = pix_abs8x8_xy2_mmx2;
+        }
+    }
+}

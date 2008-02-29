@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* ------------------------------------------------------------------------- */
 /*                                                                           */
 /* [TEmuVt102.C]            VT102 Terminal Emulation                         */
@@ -10,11 +31,9 @@
 /*                                                                           */
 /* ------------------------------------------------------------------------- */
 /*									      */
-/* Ported Konsole to Qt/Embedded                                              */
+/* Konsole ported to Qt/Embedded by Trolltech                                */
 /*									      */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
-/*									      */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 /* \class TEmuVt102
 
@@ -38,8 +57,8 @@
 
 /* VT102 Terminal Emulation
 
-   This class puts together the screens, the pty and the widget to a
-   complete terminal emulation. Beside combining it's componentes, it
+   This class puts together the screens, the pty and the widget to create a
+   complete terminal emulation. Besides combining it's components, it
    handles the emulations's protocol.
 
    This module consists of the following sections:
@@ -61,7 +80,7 @@
 /* ------------------------------------------------------------------------- */
 
 /*
-   Nothing really intesting happens here.
+   Nothing really interesting happens here.
 */
 
 /*
@@ -104,8 +123,8 @@ void TEmuVt102::reset()
 /* Incoming Bytes Event pipeline
 
    This section deals with decoding the incoming character stream.
-   Decoding means here, that the stream is first seperated into `tokens'
-   which are then mapped to a `meaning' provided as operations by the
+   In this context decoding means that the stream is first seperated into `tokens'
+   that are then mapped to a `meaning' provided as operations by the
    `TEScreen' class or by the emulation class itself.
 
    The pipeline proceeds as follows:
@@ -122,33 +141,33 @@ void TEmuVt102::reset()
 
 /*
    Since the tokens are the central notion if this section, we've put them
-   in front. They provide the syntactical elements used to represent the
-   terminals operations as byte sequences.
+   at the top. They provide the syntactical elements used to represent the
+   terminal's operations as byte sequences.
 
-   They are encodes here into a single machine word, so that we can later
-   switch over them easily. Depending on the token itself, additional
+   They are encoded here into a single machine word, so that later we can
+   easily switch them over. Depending on the token itself, additional
    argument variables are filled with parameter values.
 
    The tokens are defined below:
 
    - CHR        - Printable characters     (32..255 but DEL (=127))
    - CTL        - Control characters       (0..31 but ESC (= 27), DEL)
-   - ESC        - Escape codes of the form <ESC><CHR but `[]()+*#'>
-   - ESC_DE     - Escape codes of the form <ESC><any of `()+*#%'> C
-   - CSI_PN     - Escape codes of the form <ESC>'['     {Pn} ';' {Pn} C
-   - CSI_PS     - Escape codes of the form <ESC>'['     {Pn} ';' ...  C
-   - CSI_PR     - Escape codes of the form <ESC>'[' '?' {Pn} ';' ...  C
+   - ESC        - Escape codes in the form <ESC><CHR but `[]()+*#'>
+   - ESC_DE     - Escape codes in the form <ESC><any of `()+*#%'> C
+   - CSI_PN     - Escape codes in the form <ESC>'['     {Pn} ';' {Pn} C
+   - CSI_PS     - Escape codes in the form <ESC>'['     {Pn} ';' ...  C
+   - CSI_PR     - Escape codes in the form <ESC>'[' '?' {Pn} ';' ...  C
    - VT52       - VT52 escape codes
                   - <ESC><Chr>
                   - <ESC>'Y'{Pc}{Pc}
    - XTE_HA     - Xterm hacks              <ESC>`]' {Pn} `;' {Text} <BEL>
                   note that this is handled differently
 
-   The last two forms allow list of arguments. Since the elements of
-   the lists are treated individually the same way, they are passed
-   as individual tokens to the interpretation. Further, because the
-   meaning of the parameters are names (althought represented as numbers),
-   they are includes within the token ('N').
+   The last two forms allow lists of arguments. Since the individual elements of
+   the lists are treated the same way, they are passed
+   as individual tokens to the interpretation. Furthermore, because the
+   meaning of the parameters are names (although represented as numbers),
+   they are included within the token ('N').
 
 */
 
@@ -167,11 +186,11 @@ void TEmuVt102::reset()
 
 // Tokenizer --------------------------------------------------------------- --
 
-/* The tokenizers state
+/* The tokenizer's state
 
    The state is represented by the buffer (pbuf, ppos),
    and accompanied by decoded arguments kept in (argv,argc).
-   Note that they are kept internal in the tokenizer.
+   Note that they are kept internal to the tokenizer.
 */
 
 void TEmuVt102::resetToken()
@@ -223,13 +242,13 @@ void TEmuVt102::initTokenizer()
    token scanned so far. It is then immediately combined with
    the current character to form a scanning decision.
 
-   This is done by the following defines.
+   This is done using the following defines:
 
    - P is the length of the token scanned so far.
    - L (often P-1) is the position on which contents we base a decision.
    - C is a character or a group of characters (taken from 'tbl').
 
-   Note that they need to applied in proper order.
+   Note that they need to applied in the proper order.
 */
 
 #define lec(P,L,C) (p == (P) &&                     s[(L)]         == (C))
@@ -324,8 +343,8 @@ void TEmuVt102::XtermHack()
    The token to be interpreteted comes in as a machine word
    possibly accompanied by two parameters.
 
-   Likewise, the operations assigned to, come with up to two
-   arguments. One could consider to make up a proper table
+   Likewise, the assigned operations, come with up to two
+   arguments. One could consider making up a proper table
    from the function below.
 
    The technical reference manual provides more informations
@@ -572,7 +591,7 @@ void TEmuVt102::tau( int token, int p, int q )
     case TY_CSI_PR('h', 1048) :      saveCursor           (          ); break; //XTERM
     case TY_CSI_PR('l', 1048) :      restoreCursor        (          ); break; //XTERM
 
-    //FIXME: every once new sequences like this pop up in xterm.
+    //FIXME: every once in a while new sequences like this pop up in xterm.
     //       Here's a guess of what they could mean.
     case TY_CSI_PR('h', 1049) :          setMode      (MODE_AppScreen); break; //XTERM
     case TY_CSI_PR('l', 1049) :        resetMode      (MODE_AppScreen); break; //XTERM
@@ -609,7 +628,7 @@ void TEmuVt102::tau( int token, int p, int q )
 /* 
    Outgoing bytes originate from several sources:
 
-   - Replies to Enquieries.
+   - Replies to Enquiries.
    - Mouse Events
    - Keyboard Events
 */
@@ -624,7 +643,7 @@ void TEmuVt102::sendString(const char* s)
 
 // Replies ----------------------------------------------------------------- --
 
-// This section copes with replies send as response to an enquiery control code.
+// This section copes with replies sent as responses to an enquiry control code.
 
 /*
 */
@@ -637,7 +656,7 @@ void TEmuVt102::reportCursorPosition()
 
 /*
    What follows here is rather obsolete and faked stuff.
-   The correspondent enquieries are neverthenless issued.
+   The correspondent enquiries are nevertheless issued.
 */
 
 /*
@@ -682,7 +701,7 @@ void TEmuVt102::reportAnswerBack()
 
 /*
     Mouse clicks are possibly reported to the client
-    application if it has issued interest in them.
+    application if it has expressed interest in them.
     They are normally consumed by the widget for copy
     and paste, but may be propagated from the widget
     when gui->setMouseMarks is set via setMode(MODE_Mouse1000).
@@ -771,13 +790,13 @@ void TEmuVt102::onKeyPress( QKeyEvent* ev )
    It's still in use and mainly responsible for the line drawing graphics.
 
    These and some other glyphs are assigned to codes (0x5f-0xfe)
-   normally occupied by the latin letters. Since this codes also
+   normally occupied by the latin letters. Since these codes also
    appear within control sequences, the extra code conversion
    does not permute with the tokenizer and is placed behind it
-   in the pipeline. It only applies to tokens, which represent
+   in the pipeline. It only applies to tokens that represent
    plain characters.
 
-   This conversion it eventually continued in TEWidget.C, since 
+   This conversion is eventually continued in TEWidget.C, since
    it might involve VT100 enhanced fonts, which have these
    particular glyphs allocated in (0x00-0x1f) in their code page.
 */
@@ -797,7 +816,7 @@ unsigned short TEmuVt102::applyCharset(unsigned short c)
    "Charset" related part of the emulation state.
    This configures the VT100 charset filter.
 
-   While most operation work on the current screen,
+   While most operations work on the current screen,
    the following two are different.
 */
 
@@ -867,15 +886,15 @@ void TEmuVt102::restoreCursor()
 /* ------------------------------------------------------------------------- */
 
 /*
-   Some of the emulations state is either added to the state of the screens.
+   Some of the emulations states are added to the state of the screens.
 
    This causes some scoping problems, since different emulations choose to
    located the mode either to the current screen or to both.
 
-   For strange reasons, the extend of the rendition attributes ranges over
+   For strange reasons, the extend/t? of the rendition attributes ranges over
    all screens and not over the actual screen.
 
-   We decided on the precise precise extend, somehow.
+   We decided on the precise precise extend/t?, somehow.
 */
 
 // "Mode" related part of the state. These are all booleans.
@@ -963,7 +982,7 @@ void TEmuVt102::setConnect(bool c)
 /*? shows the contents of the scan buffer.
 
     This functions is used for diagnostics. It is called by \e ReportErrorToken
-    to inform about strings that cannot be decoded or handled by the emulation.
+    to report about strings that cannot be decoded or handled by the emulation.
 
     \sa ReportErrorToken
 */

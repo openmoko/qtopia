@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -100,7 +102,7 @@ find(const <a href="qstring.html">QString</a>&, <a href="qpixmap.html">QPixmap</
 <h3 class="fn">bool <a name="920fbe"></a>QPixmapCache::find ( const <a href="qstring.html">QString</a> &amp; key, <a href="qpixmap.html">QPixmap</a> &amp; pm ) <code>[static]</code></h3>
 <p>Looks for a cached pixmap associated with <em>key</em> in the cache.  If a
 pixmap is found, the function sets <em>pm</em> to that pixmap and returns
-TRUE.  Otherwise, the function returns FALSE and does not change <em>pm.</em>
+TRUE.  Otherwise, the function returns false and does not change <em>pm.</em>
 <p>Example:
 <pre>    <a href="qpixmap.html">QPixmap</a> p;
     if ( !QPixmapCache::find("my_previous_copy", pm) ) {
@@ -112,10 +114,10 @@ TRUE.  Otherwise, the function returns FALSE and does not change <em>pm.</em>
 <h3 class="fn">bool <a name="edbcea"></a>QPixmapCache::insert ( const <a href="qstring.html">QString</a> &amp; key, <a href="qpixmap.html">QPixmap</a> * pm ) <code>[static]</code></h3>
 <p><b>This function is obsolete.</b> It is provided to keep old source working, and will probably be removed in a future version of Qt.  We strongly advise against using it in new code.<p>
 Inserts the pixmap <em>pm</em> associated with <em>key</em> into the cache.
-Returns TRUE if successful, or FALSE if the pixmap is too big for the cache.
+Returns TRUE if successful, or false if the pixmap is too big for the cache.
 <p><strong>
 NOTE: <em>pm</em> must be allocated on the heap (using <code>new).</code>
-<p>If this function returns FALSE, you must delete <em>pm</em> yourself.
+<p>If this function returns false, you must delete <em>pm</em> yourself.
 <p>If this function returns TRUE, do not use <em>pm</em> afterwards or
 keep references to it, as any other insertions into the cache,
 from anywhere in the application, or within Qt itself, could cause
@@ -141,7 +143,7 @@ when more space is needed.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -149,5 +151,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

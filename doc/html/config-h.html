@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/include/qtopia/config.h:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/include/qtopia/config.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>config.h</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>config.h</h1>
 
 <p>This is the verbatim text of the config.h include file. It is provided only for illustration; the copyright remains with Trolltech.
 <hr>
@@ -74,6 +82,8 @@ public:
 #endif
     ~Config();
 
+    static long timeStamp( const QString &amp;name, Domain domain=User );
+
     bool operator == ( const Config &amp; other ) const { return (filename == other.filename); }
     bool operator != ( const Config &amp; other ) const { return (filename != other.filename); }
 
@@ -89,6 +99,7 @@ public:
     void writeEntry( const QString &amp;key, bool b );
 #endif
     void writeEntry( const QString &amp;key, const QStringList &amp;lst, const QChar &amp;sep );
+    void writeEntry( const QString &amp;key, const QStringList &amp;lst ); // Qtopia 2
     void writeEntry( const QString &amp;key, const QByteArray&amp; byteArray); // libqtopia
     void removeEntry( const QString &amp;key );
 
@@ -99,6 +110,7 @@ public:
     int readNumEntry( const QString &amp;key, int deflt = -1 ) const;
     bool readBoolEntry( const QString &amp;key, bool deflt = FALSE ) const;
     QStringList readListEntry( const QString &amp;key, const QChar &amp;sep ) const;
+    QStringList readListEntry( const QString &amp;key ) const; // Qtopia 2
     QByteArray readByteArrayEntry(const QString&amp; key) const;
     QByteArray readByteArrayEntry(const QString&amp; key, const QByteArray&amp; deflt) const;
     // ... end.
@@ -110,7 +122,11 @@ public:
     int readNumEntry( const QString &amp;key, int deflt = -1 );
     bool readBoolEntry( const QString &amp;key, bool deflt = FALSE );
     QStringList readListEntry( const QString &amp;key, const QChar &amp;sep );
+
     void clearGroup();
+    void removeGroup(); // Qtopia 2
+    void removeGroup(const QString&amp;); // Qtopia 2
+    QStringList allGroups() const; // Qtopia 2
 
     void write( const QString &amp;fn = QString::null );
 
@@ -135,9 +151,11 @@ private:
 #endif
 </pre>
 <!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -30,14 +45,21 @@
 #include <qcheckbox.h>
 #include <qhbuttongroup.h>
 #include <qvbuttongroup.h>
+#include <qtoolbutton.h>
 #include <qdatetime.h>
 #include <qlabel.h>
 #include <qwidgetstack.h>
-#include <qtoolbutton.h>
 #include <qradiobutton.h>
 #include <qlayout.h>
 #include <qsimplerichtext.h>
 #include <qpainter.h>
+#include <qfocusdata.h>
+
+#ifdef QTOPIA_PHONE
+static const TimeString::Length TIMESTRING_LENGTH = TimeString::Medium;
+#else
+static const TimeString::Length TIMESTRING_LENGTH = TimeString::Long;
+#endif
 
 int currentID( QButtonGroup *group )
 {
@@ -65,13 +87,32 @@ protected:
     }
 };
 
+static void nextButton( QWidget **btns, int size, bool prev = FALSE )
+{
+    int move = 1;
+    if ( prev )
+	move = size - 1;
+
+    for ( int i = 0; i < size; i++ ) {
+	if ( btns[i]->hasFocus() ) {
+	    int index = i;
+	    do {
+		index = (index + move) % size;
+	    } while ( !btns[index]->isEnabled() );
+	    btns[index]->setFocus();
+	    break;
+	}
+    }
+}
+
+// ====================================================================
 
 class WeekGroup : public QButtonGroup
 {
     Q_OBJECT
 
 public:
-    WeekGroup(int oM, QWidget *parent = 0);
+    WeekGroup(int dayOfWeek, bool startOnMonday, QWidget *parent = 0);
 
     ~WeekGroup() {}
 
@@ -83,91 +124,56 @@ public slots:
 signals:
     void dayToggled(int, bool);
 
+protected:
+    void keyPressEvent( QKeyEvent *e );
+
 private slots:
     void setDay(int);
 
 private:
-    //int firstDayOfWeek;
-    QToolButton *first;
-    QToolButton *last;
+    QToolButton *dayBtn[7];
 };
 
-WeekGroup::WeekGroup(int oM, QWidget *parent)
-    : QButtonGroup(QString("Repeat On"), parent)
-{
+// ====================================================================
 
+WeekGroup::WeekGroup(int dayOfWeek, bool startOnMonday, QWidget *parent)
+    : QButtonGroup(tr("Repeat On"), parent)
+{
     setColumnLayout(0, Qt::Vertical);
     layout()->setSpacing(0);
     layout()->setMargin(0);
+    setExclusive(FALSE);
+    layout()->setSpacing(0);
+
     QHBoxLayout *fe = new QHBoxLayout(layout());
     fe->setAlignment( Qt::AlignTop );
     fe->setSpacing(0);
     fe->setMargin(6);
 
-    setExclusive(FALSE);
-    layout()->setSpacing(0);
+    TimeString::Length len = TimeString::Short;
+    int approxSize = QFontMetrics(QFont()).width(" Wed ") * 7;
+    if ( QApplication::desktop()->width() > approxSize )
+	len = TimeString::Medium;
 
-    /*
-    first = new QToolButton(this);
-    first->setText(tr("Sun"));
-    first->setToggleButton(TRUE);
-    fe->addWidget(first);
-    */
-
-    QToolButton *b1;
-    for (int i = 0; i < 7; i++) {
-	b1 = new QToolButton(this);
-	b1->setToggleButton(TRUE);
-	if (!i) {
-	    b1->setEnabled(FALSE);
+    int j = 0;
+    if ( !startOnMonday )
+	j = 6;
+    for (int i = 0; i <= 6; i++) {
+	dayBtn[i] = new QToolButton(this);
+	dayBtn[i]->setToggleButton(TRUE);
+	if ( j == (dayOfWeek - 1) ) {
+	    dayBtn[i]->setEnabled(FALSE);
 	    //b1->setOn(TRUE);
 	}
-	b1->setText(Calendar::nameOfDay(oM));
-	insert(b1, oM);
-	fe->addWidget(b1);
-	oM++;
-	if (oM > 7)
-	    oM = 1;
+	dayBtn[i]->setText(TimeString::localDayOfWeek(j + 1, len));
+	insert(dayBtn[i], j + 1);
+	fe->addWidget(dayBtn[i]);
 
-	b1->setFocusPolicy(QWidget::StrongFocus);
+	dayBtn[i]->setFocusPolicy(QWidget::StrongFocus);
+	if ( ++j == 7 )
+	    j = 0;
     }
 
-   /*
-    QToolButton *b1 = new QToolButton(this);
-    b1->setText(tr("Mon"));
-    b1->setToggleButton(TRUE);
-    fe->addWidget(b1);
-    b1 = new QToolButton(this);
-    b1->setText(tr("Tue"));
-    b1->setToggleButton(TRUE);
-    fe->addWidget(b1);
-    b1 = new QToolButton(this);
-    b1->setText(tr("Wed"));
-    b1->setToggleButton(TRUE);
-    fe->addWidget(b1);
-    b1 = new QToolButton(this);
-    b1->setText(tr("Thu"));
-    b1->setToggleButton(TRUE);
-    fe->addWidget(b1);
-    b1 = new QToolButton(this);
-    b1->setText(tr("Fri"));
-    b1->setToggleButton(TRUE);
-    fe->addWidget(b1);
-    b1 = new QToolButton(this);
-    b1->setText(tr("Sat"));
-    b1->setToggleButton(TRUE);
-    fe->addWidget(b1);
-
-    last = new QToolButton(this);
-    last->setText(tr("Sun"));
-    last->setToggleButton(TRUE);
-    fe->addWidget(last);
-
-    if (onMonday)
-	first->hide();
-    else
-	last->hide();
-*/
     connect(this, SIGNAL(clicked(int)), this, SLOT(setDay(int)));
 }
 
@@ -219,55 +225,77 @@ void WeekGroup::setDay(int i)
     }
 }
 
-QString RepeatEntry::trSmallOrdinal(int n) const
+void WeekGroup::keyPressEvent( QKeyEvent *e )
 {
-    if ( n == 1 ) return tr("first","eg. first Friday of month");
-    else if ( n == 2 ) return tr("second");
-    else if ( n == 3 ) return tr("third");
-    else if ( n == 4 ) return tr("fourth");
-    else if ( n == 5 ) return tr("fifth");
-    else return QString::number(n);
+    //qDebug( "key %d (up %d, down %d)", e->key(), Key_Up, Key_Down );
+#ifdef QTOPIA_PHONE
+    switch ( e->key() ) {
+	case Key_Left:
+	    nextButton( (QWidget**)dayBtn, 7, TRUE );
+	    break;
+	case Key_Right:
+	    nextButton( (QWidget**)dayBtn, 7 );
+	    break;
+	default:
+	    QButtonGroup::keyPressEvent( e );
+	    break;
+    }
+#else
+    QButtonGroup::keyPressEvent( e );
+#endif
 }
 
-RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
-	QWidget *parent, const char *name, bool modal,
-	WFlags fl) : QDialog(parent, name, modal, fl), mEvent(rp)
+// ====================================================================
+
+RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
+	QWidget *parent, const char *name, bool modal, WFlags fl)
+    : QDialog(parent, "event-repeat", modal, fl), mEvent(rp)
 {
+    Q_UNUSED( name );
+#ifdef QTOPIA_PHONE
+    setCaption(tr("Repeat"));
+#else
     setCaption(tr("Repeating Event"));
+#endif
     // RepeatType
     QVBoxLayout *layout = new QVBoxLayout(this);
+#ifdef QTOPIA_PHONE
+    layout->setMargin(0);
+    layout->setSpacing(0);
+#else
     layout->setMargin(6);
     layout->setSpacing(6);
+#endif
 
     QHBoxLayout *buttonLayout = new QHBoxLayout(layout);
     buttonLayout->setSpacing(0);
     typeSelector = new QButtonGroup(this);
     typeSelector->hide();
     typeSelector->setExclusive(TRUE);
-    QPushButton *pb = new QPushButton(tr("Day","Day, not date"), this);
-    pb->setToggleButton(TRUE);
-    pb->setFocusPolicy(StrongFocus);
-    pb->setAutoDefault(FALSE);
-    buttonLayout->addWidget(pb);
-    typeSelector->insert(pb, 0);
-    pb = new QPushButton(tr("Week"), this);
-    pb->setToggleButton(TRUE);
-    pb->setFocusPolicy(StrongFocus);
-    pb->setAutoDefault(FALSE);
-    buttonLayout->addWidget(pb);
-    typeSelector->insert(pb, 1);
-    pb = new QPushButton(tr("Month"), this);
-    pb->setToggleButton(TRUE);
-    buttonLayout->addWidget(pb);
-    pb->setFocusPolicy(StrongFocus);
-    pb->setAutoDefault(FALSE);
-    typeSelector->insert(pb, 2);
-    pb = new QPushButton(tr("Year"), this);
-    pb->setToggleButton(TRUE);
-    pb->setFocusPolicy(StrongFocus);
-    pb->setAutoDefault(FALSE);
-    buttonLayout->addWidget(pb);
-    typeSelector->insert(pb, 3);
+    typeBtn[0] = new QPushButton(tr("Day","Day, not date"), this);
+    typeBtn[0]->setToggleButton(TRUE);
+    typeBtn[0]->setFocusPolicy(StrongFocus);
+    typeBtn[0]->setAutoDefault(FALSE);
+    buttonLayout->addWidget(typeBtn[0]);
+    typeSelector->insert(typeBtn[0], 0);
+    typeBtn[1] = new QPushButton(tr("Week"), this);
+    typeBtn[1]->setToggleButton(TRUE);
+    typeBtn[1]->setFocusPolicy(StrongFocus);
+    typeBtn[1]->setAutoDefault(FALSE);
+    buttonLayout->addWidget(typeBtn[1]);
+    typeSelector->insert(typeBtn[1], 1);
+    typeBtn[2] = new QPushButton(tr("Month"), this);
+    typeBtn[2]->setToggleButton(TRUE);
+    typeBtn[2]->setFocusPolicy(StrongFocus);
+    typeBtn[2]->setAutoDefault(FALSE);
+    buttonLayout->addWidget(typeBtn[2]);
+    typeSelector->insert(typeBtn[2], 2);
+    typeBtn[3] = new QPushButton(tr("Year"), this);
+    typeBtn[3]->setToggleButton(TRUE);
+    typeBtn[3]->setFocusPolicy(StrongFocus);
+    typeBtn[3]->setAutoDefault(FALSE);
+    buttonLayout->addWidget(typeBtn[3]);
+    typeSelector->insert(typeBtn[3], 3);
 
     switch(mEvent.repeatType()) {
 	case PimEvent::NoRepeat:
@@ -292,11 +320,16 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
     // Frequency and end date
     fStack = new QWidgetStack(this);
     fStack->addWidget(new QWidget(fStack), 0);
+#ifdef QTOPIA_PHONE
+    fStack->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding));
+#endif
 
     QWidget *freqBox = new QWidget(fStack);
     QVBoxLayout *subLayout = new QVBoxLayout(freqBox);
     QHBoxLayout *subLayout2 = new QHBoxLayout(subLayout);
+#ifndef QTOPIA_PHONE
     subLayout2->setSpacing(6);
+#endif
 
     everyLabel = new QLabel("", freqBox);
     subLayout2->addWidget(everyLabel);
@@ -330,11 +363,15 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
     subStack = new QWidgetStack(this);
     subStack->addWidget(new QWidget(subStack), 0);
 
-    weekGroup = new WeekGroup(mEvent.start().date().dayOfWeek(), subStack);
+    weekGroup = new WeekGroup(mEvent.start().date().dayOfWeek(), startOnMonday, subStack);
     subStack->addWidget(weekGroup, 1);
 
     monthGroup = new QVButtonGroup(tr("Repeat On"), subStack);
     monthGroup->setExclusive(TRUE);
+#ifdef QTOPIA_PHONE
+    monthGroup->layout()->setSpacing(0);
+    monthGroup->layout()->setMargin(6);
+#endif
 
     QString strEndWeekDay1 = tr("the last %1.","eg. %1 = Friday");
     strEndWeekDay = tr("the %1 last %2.","eg. %1 last %2 = 2nd last Friday");
@@ -345,7 +382,7 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
     strWeekDay = tr("the %1 %2.","eg. %1 %2 = 2nd Friday")
 	.arg(trSmallOrdinal(
 		    Calendar::weekInMonth(mEvent.start().date())))
-	.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long));
+	.arg(TimeString::localDayOfWeek(mEvent.start().date(), TIMESTRING_LENGTH));
 
     int fromEndOfWeek = mEvent.start().date().daysInMonth()
 	- mEvent.start().date().day();
@@ -355,7 +392,7 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
 	((fromEndOfWeek > 1)
 	    ? strEndWeekDay.arg( trSmallOrdinal(fromEndOfWeek) )
 	    : strEndWeekDay1)
-	.arg( TimeString::localDayOfWeek( mEvent.start().date(), TimeString::Long ) );
+	.arg( TimeString::localDayOfWeek( mEvent.start().date(), TIMESTRING_LENGTH ) );
 
     QRadioButton *r1 = new QRadioButton(strDate, monthGroup);
     r1 = new QRadioButton(strWeekDay, monthGroup);
@@ -371,6 +408,7 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
     //layout->addItem(si);
     // and last but not least, the label.. later.
     //QFrame
+#ifndef QTOPIA_PHONE
     QFrame *fr = new QFrame(this);
     fr->setMinimumSize(QSize(40, 50));
     fr->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding));
@@ -382,6 +420,7 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
     descLabel->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding));
     subLayout->addWidget(descLabel);
     layout->addWidget(fr);
+#endif
 
     // pretend we just changed repeat types.
     setRepeatType(currentID(typeSelector));
@@ -403,15 +442,29 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
     connect(typeSelector, SIGNAL(clicked(int)), this, SLOT(setRepeatType(int)));
     connect(freqSelector, SIGNAL(valueChanged(int)),
 	    this, SLOT(setFrequency(int)));
-    connect(weekGroup, SIGNAL(dayToggled(int, bool)),
+    connect(weekGroup, SIGNAL(dayToggled(int,bool)),
 	    this, SLOT(setRepeatOnWeekDay(int,bool)));
     connect(monthGroup, SIGNAL(clicked(int)),
 	    this, SLOT(setSubRepeatType(int)));
 
+#ifndef QTOPIA_PHONE
     resize(100,100);
+#endif
 }
 
-RepeatEntry::~RepeatEntry() {}
+RepeatEntry::~RepeatEntry()
+{
+}
+
+QString RepeatEntry::trSmallOrdinal(int n) const
+{
+    if ( n == 1 ) return tr("first","eg. first Friday of month");
+    else if ( n == 2 ) return tr("second");
+    else if ( n == 3 ) return tr("third");
+    else if ( n == 4 ) return tr("fourth");
+    else if ( n == 5 ) return tr("fifth");
+    else return QString::number(n);
+}
 
 void RepeatEntry::refreshLabels()
 {
@@ -419,18 +472,23 @@ void RepeatEntry::refreshLabels()
     switch (mEvent.repeatType())
     {
 	case PimEvent::NoRepeat:
+#ifndef QTOPIA_PHONE
 	    descLabel->setText(tr("Don't repeat."));
+#endif
 	    break;
 	case PimEvent::Daily:
+#ifndef QTOPIA_PHONE
 	    if (mEvent.frequency() == 1)
 		descLabel->setText(tr("Repeat every day."));
 	    else
 		descLabel->setText(tr("Repeat every %1 days.").arg(mEvent.frequency()));
+#endif
 	    type = tr("Every %1 day(s)");
 	    break;
 	case PimEvent::Weekly:
 	    {
 		type = tr("Every %1 week(s)");
+#ifndef QTOPIA_PHONE
 		// first work out how many items in the list of weeks
 		int i;
 		int count = 0;
@@ -519,9 +577,11 @@ void RepeatEntry::refreshLabels()
 		    }
 		}
 		descLabel->setText(buf);
+#endif
 	    }
 	    break;
 	case PimEvent::MonthlyDate:
+#ifndef QTOPIA_PHONE
 	    if (mEvent.frequency() == 1)
 		descLabel->setText(
 			tr("Repeat every month on day %1 of the month.","eg. %1 = 3")
@@ -533,9 +593,11 @@ void RepeatEntry::refreshLabels()
 			.arg(mEvent.frequency())
 			.arg(mEvent.start().date().day())
 			);
+#endif
 	    type = tr("Every %1 month(s)");
 	    break;
 	case PimEvent::MonthlyDay:
+#ifndef QTOPIA_PHONE
 	    if (mEvent.frequency() == 1)
 		descLabel->setText(tr("Repeat every month on the %1 %2 of the month.", "eg. %1 %2 = 2nd Friday")
 			.arg(trSmallOrdinal(
@@ -549,16 +611,18 @@ void RepeatEntry::refreshLabels()
 				Calendar::weekInMonth(mEvent.start().date())))
 			.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 			);
+#endif
 	    type = tr("Every %1 month(s)");
 	    break;
 	case PimEvent::MonthlyEndDay:
 	    {
+#ifndef QTOPIA_PHONE
 		int fromEndOfWeek = mEvent.start().date().daysInMonth()
 		    - mEvent.start().date().day();
 		fromEndOfWeek = fromEndOfWeek > 0 ? fromEndOfWeek / 7 + 1 : 1;
 
 		if (mEvent.frequency() == 1) {
-		    if (fromEndOfWeek > 1) {
+		    if (fromEndOfWeek == 1) {
 			descLabel->setText(
 				tr("Repeat every month on the last %1 of the month.","eg. %1 = Friday")
 				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
@@ -571,7 +635,7 @@ void RepeatEntry::refreshLabels()
 				);
 		    }
 		} else {
-		    if (fromEndOfWeek > 1) {
+		    if (fromEndOfWeek == 1) {
 			descLabel->setText(
 				tr("Repeat every %2 months on the last %1 of the month.","eg. %1 = Friday, %2 = 4")
 				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
@@ -586,18 +650,24 @@ void RepeatEntry::refreshLabels()
 				);
 		    }
 		}
+#endif
 		type = tr("Every %1 month(s)");
 	    }
 	    break;
 	case PimEvent::Yearly:
+#ifndef QTOPIA_PHONE
 	    if (mEvent.frequency() == 1)
 		descLabel->setText(tr("Repeat every year."));
 	    else
 		descLabel->setText(tr("Repeat every %1 years.").arg(mEvent.frequency()));
+#endif
 	    type = tr("Every %1 year(s)");
 	    break;
 	default:
+#ifndef QTOPIA_PHONE
 	    descLabel->setText("Bug <2316>"); // No tr
+#endif
+	    break;
     }
     int spinbox = type.find("%1");
     everyLabel->setText(type.left(spinbox));
@@ -689,6 +759,26 @@ void RepeatEntry::setRepeatOnWeekDay(int d, bool b)
 void RepeatEntry::setStartOnMonday(bool b)
 {
     weekGroup->setStartOnMonday(b);
+}
+
+void RepeatEntry::keyPressEvent( QKeyEvent *e )
+{
+    //qDebug( "key %d (up %d, down %d)", e->key(), Key_Up, Key_Down );
+#ifdef QTOPIA_PHONE
+    switch ( e->key() ) {
+	case Key_Left:
+	    nextButton( (QWidget**)typeBtn, 4, TRUE );
+	    break;
+	case Key_Right:
+	    nextButton( (QWidget**)typeBtn, 4 );
+	    break;
+	default:
+	    QDialog::keyPressEvent( e );
+	    break;
+    }
+#else
+    QDialog::keyPressEvent( e );
+#endif
 }
 
 #include "repeatentry.moc"

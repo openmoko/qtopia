@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia/contextmenu.cpp:79 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ContextMenu Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>ContextMenu Class Reference</h1>
+
+<p>The ContextMenu class provides a QPopupMenu that is bound to a
+context button.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="contextmenu-h.html">qtopia/contextmenu.h</a>&gt;</tt>
+<p><a href="contextmenu-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn>enum <b>EditingState</b> { Modal = 1, NonModal = 2 }</div></li>
+<li><div class=fn><a href="#ContextMenu"><b>ContextMenu</b></a> ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;state = 0 )</div></li>
+<li><div class=fn><b>~ContextMenu</b> ()</div></li>
+<li><div class=fn>void <a href="#setEnableHelp"><b>setEnableHelp</b></a> ( bool&nbsp;b )</div></li>
+<li><div class=fn>void <a href="#addTo"><b>addTo</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )</div></li>
+<li><div class=fn>void <a href="#removeFrom"><b>removeFrom</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )</div></li>
+<li><div class=fn>void <a href="#insertAction"><b>insertAction</b></a> ( QAction&nbsp;*&nbsp;a, int&nbsp;idx = -1 )</div></li>
+<li><div class=fn>void <a href="#addAction"><b>addAction</b></a> ( QAction&nbsp;*&nbsp;a )</div></li>
+<li><div class=fn>void <a href="#popup"><b>popup</b></a> ()</div></li>
+<li><div class=fn>void <a href="#popup-2"><b>popup</b></a> ( const&nbsp;QPoint&nbsp;&amp;&nbsp;pos )</div></li>
+<li><div class=fn>virtual bool <a href="#helpExists"><b>helpExists</b></a> () const</div></li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li><div class=fn>virtual void <a href="#help"><b>help</b></a> ()</div></li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li><div class=fn>int <a href="#key"><b>key</b></a> ()</div></li>
+<li><div class=fn>ContextMenu * <a href="#menuFor"><b>menuFor</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The ContextMenu class provides a QPopupMenu that is bound to a
+context button.
+<p> The Context Bar will be updated when the ContextMenu is available.  Pressing
+the context button will popup the ContextMenu.
+<p> Note that the rules for context button assignment are identical as
+those for <a href="contextbar.html">ContextBar</a>, i.e. if the current focus widget does not claim
+the context key or have a context menu, then the context menu or label of
+an ancestor will be active.
+<p> ContextMenu is only available in the Qtopia Phone Edition.
+<p> <p>See also <a href="contextbar.html">ContextBar</a> and <a href="qtopiaphone.html">Qtopia Phone Classes</a>.
+
+<p> 
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="ContextMenu"></a>ContextMenu::ContextMenu ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;state = 0 )
+</h3>
+Constructs a ContextMenu which will popup when Key_Menu is pressed and
+widget <em>parent</em> has focus and is in modal editing state <em>state</em>.
+The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
+<p> <p>See also <a href="contextbar.html">ContextBar</a>.
+
+<h3 class=fn>void <a name="addAction"></a>ContextMenu::addAction ( QAction&nbsp;*&nbsp;a )
+</h3>
+Adds action <em>a</em> to the end of the menu.
+<p> <p>See also insertAction.
+
+<h3 class=fn>void <a name="addTo"></a>ContextMenu::addTo ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )
+</h3>
+Adds this ContextMenu to widget <em>w</em> for modal editing state <em>state</em>.
+<p> <p>See also removeFrom.
+
+<h3 class=fn>void <a name="help"></a>ContextMenu::help ()<tt> [virtual slot]</tt>
+</h3>
+Invokes end-user help for the parent widget.
+<p> This slot is automatically connected to a 'Help' item
+if <a href="#helpExists">helpExists</a>().
+
+<h3 class=fn>bool <a name="helpExists"></a>ContextMenu::helpExists () const<tt> [virtual]</tt>
+</h3>
+Returns whether help exists for the parent widget.
+
+<h3 class=fn>void <a name="insertAction"></a>ContextMenu::insertAction ( QAction&nbsp;*&nbsp;a, int&nbsp;idx = -1 )
+</h3>
+Inserts action <em>a</em> at position <em>idx</em> in the menu.
+<p> <p>See also addAction.
+
+<h3 class=fn>int <a name="key"></a>ContextMenu::key ()<tt> [static]</tt>
+</h3>
+Returns the context menu key.
+
+<h3 class=fn><a href="contextmenu.html">ContextMenu</a>&nbsp;* <a name="menuFor"></a>ContextMenu::menuFor ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )<tt> [static]</tt>
+</h3>
+Returns the ContextMenu assigned to widget <em>w</em> in modal editing
+state <em>state</em>.  If a ContextMenu does not yet exist for the widget,
+an empty menu will be created.
+<p> 
+<h3 class=fn>void <a name="popup"></a>ContextMenu::popup ()
+</h3>
+Opens the popup menu in a standard position.
+
+<h3 class=fn>void <a name="popup-2"></a>ContextMenu::popup ( const&nbsp;QPoint&nbsp;&amp;&nbsp;pos )
+</h3>
+Opens the popup menu at <em>pos</em>.
+
+<h3 class=fn>void <a name="removeFrom"></a>ContextMenu::removeFrom ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )
+</h3>
+Removes this ContextMenu from widget <em>w</em> for modal editing state <em>state</em>.
+<p> <p>See also addTo.
+
+<h3 class=fn>void <a name="setEnableHelp"></a>ContextMenu::setEnableHelp ( bool&nbsp;b )
+</h3>
+Sets whether help is enabled in the context menu.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

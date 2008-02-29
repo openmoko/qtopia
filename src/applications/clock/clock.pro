@@ -1,19 +1,33 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE	= lib
-quicklaunch:DESTDIR	= $(QPEDIR)/plugins/application
+CONFIG		+= qtopiaapp
+HEADERS		= clockmain.h \
+		    clock.h \
+		    stopwatch.h \
+		    alarm.h \
+		    analogclock.h
+SOURCES		= clockmain.cpp \
+		    clock.cpp \
+		    stopwatch.cpp \
+		    analogclock.cpp \
+		    alarm.cpp \
+		    main.cpp
 
-CONFIG	+= qtopia warn_on release
-HEADERS		= clock.h \
-		analogclock.h
-SOURCES		= clock.cpp \
-		analogclock.cpp
-
-multiprocess:SOURCES+=main.cpp
-
-INTERFACES	= clockbase.ui
+INTERFACES	= clockbase.ui stopwatchbase.ui alarmbase.ui
 TARGET		= clock
 
-TRANSLATIONS = clock-en_GB.ts clock-de.ts clock-ja.ts clock-no.ts
+TRANSLATABLES   =   $$INTERFACES \
+                    $$SOURCES \
+                    $$HEADERS
+
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/clock.desktop
+desktop.path=/apps/Applications
+service.files=$${QTOPIA_DEPOT_PATH}/services/Alarm/clock
+service.path=/services/Alarm
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/clock*
+help.path=/help/html/
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/clock/*
+pics.path=/pics/clock
+INSTALLS+=desktop help service
+PICS_INSTALLS+=pics
+
+PACKAGE_DESCRIPTION=A simple clock and stop-watch for the Qtopia environment.
+

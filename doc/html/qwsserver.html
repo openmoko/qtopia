@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -34,11 +36,11 @@ Inherits <a href="qobject.html">QObject</a>.
 <ul>
 <li><div class="fn"><a href="#c34aad"><b>QWSServer</b></a> ( int flags = 0, QObject * parent=0, const char * name=0 ) </div>
 <li><div class="fn"><a href="#890981"><b>~QWSServer</b></a> () </div>
-<li><div class="fn">enum <b>ServerFlags</b> { DisableKeyboard = 0x01, DisableMouse = 0x02 }</div>
-<li><div class="fn">enum <b>GUIMode</b> { NoGui = FALSE, NormalGUI = TRUE, Server }</div>
-<li><div class="fn">enum <b>IMState</b> { Reserved, IMCompose, IMEnd, IMInternal = 42, IMMarkedText }</div>
-<li><div class="fn">enum <b>IMMouse</b> { MousePress, MouseRelease, MouseMove }</div>
-<li><div class="fn">void <b>sendIMEvent</b> ( IMState state, const QString &amp; txt, int cpos, int selLen ) </div>
+<li><div class="fn">enum <a href="#ServerFlags"><b>ServerFlags</b></a> { DisableKeyboard = 0x01, DisableMouse = 0x02 }</div>
+<li><div class="fn">enum <a href="#GUIMode"><b>GUIMode</b></a> { NoGui = FALSE, NormalGUI = TRUE, Server }</div>
+<li><div class="fn">enum <a href="#IMState"><b>IMState</b></a> { Reserved, IMCompose, IMEnd, IMInternal = 42, IMMarkedText }</div>
+<li><div class="fn">enum <a href="#IMMouse"><b>IMMouse</b></a> { MousePress, MouseRelease, MouseMove }</div>
+<li><div class="fn">void <b>sendIMEvent</b> ( IMState state, const QString &amp; txt, int cpos, int selLen ) (internal)</div>
 <li><div class="fn">class KeyboardFilter { public: virtual bool <b>filter</b> ( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat ) </div>
 <li><div class="fn">QWSWindow* <a href="#a5ed99"><b>windowAt</b></a> ( const QPoint &amp; pos ) </div>
 <li><div class="fn">const QList&lt;QWSWindow&gt;&amp; <a href="#330cf8"><b>clientWindows</b></a> () </div>
@@ -47,17 +49,18 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn">void <a href="#26c201"><b>openKeyboard</b></a> () </div>
 <li><div class="fn">void <a href="#6848ca"><b>closeKeyboard</b></a> () </div>
 <li><div class="fn">void <a href="#4e0b40"><b>refresh</b></a> () </div>
+<li><div class="fn">void <a href="#778d0a"><b>refresh</b></a> ( const QRegion &amp; ) </div>
 <li><div class="fn">void <a href="#194113"><b>enablePainting</b></a> ( bool ) </div>
 <li><div class="fn">void <b>sendPropertyNotifyEvent</b> ( int property, int state ) (internal)</div>
-<li><div class="fn">QWSPropertyManager* <b>manager</b> () </div>
-<li><div class="fn">enum <a href="#WindowEvent"><b>WindowEvent</b></a> { Create=0x01, Destroy=0x02, Hide=0x04, Show=0x08, Raise=0x10, Lower=0x20, Geometry=0x40, Active=0x80 }</div>
+<li><div class="fn">QWSPropertyManager* <a href="#84f386"><b>manager</b></a> () </div>
+<li><div class="fn">enum <a href="#WindowEvent"><b>WindowEvent</b></a> { Create=0x0001, Destroy=0x0002, Hide=0x0004, Show=0x0008, Raise=0x0010, Lower=0x0020, Geometry=0x0040, Active=0x0080, Name=0x0100 }</div>
 </ul>
 <h2>Signals</h2>
 <ul>
 <li><div class="fn">void <a href="#aa0e84"><b>windowEvent</b></a> ( QWSWindow * w, QWSServer::WindowEvent e ) </div>
 <li><div class="fn">void <a href="#064f8e"><b>newChannel</b></a> ( const QString &amp; channel ) </div>
 <li><div class="fn">void <a href="#433fce"><b>removedChannel</b></a> ( const QString &amp; channel ) </div>
-<li><div class="fn">void <b>markedText</b> ( const QString &amp; ) </div>
+<li><div class="fn">void <a href="#f9a485"><b>markedText</b></a> ( const QString &amp; ) </div>
 </ul>
 <h2>Static Public Members</h2>
 <ul>
@@ -66,10 +69,12 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn">typedef const KeyMap* <b>keyMap</b> () </div>
 <li><div class="fn">void <a href="#4bc540"><b>setOverrideKeys</b></a> ( QIntDict&lt;QWSServer::KeyMap&gt; * map ) </div>
 <li><div class="fn">void <a href="#386c38"><b>setKeyboardFilter</b></a> ( KeyboardFilter * f ) </div>
-<li><div class="fn">void <b>setCurrentInputMethod</b> ( QWSInputMethod * im ) </div>
-<li><div class="fn">void <b>resetInputMethod</b> () </div>
+<li><div class="fn">void <a href="#852b96"><b>setCurrentInputMethod</b></a> ( QWSInputMethod * im ) </div>
+<li><div class="fn">void <a href="#42a268"><b>resetInputMethod</b></a> () </div>
 <li><div class="fn">void <b>setMicroFocus</b> ( int x, int y ) </div>
-<li><div class="fn">void <b>requestMarkedText</b> () </div>
+<li><div class="fn">void <b>requestMarkedText</b> () (internal)</div>
+<li><div class="fn">void <b>setCurrentGestureMethod</b> ( QWSGestureMethod * im ) (internal)</div>
+<li><div class="fn">void <b>resetGestureMethod</b> () (internal)</div>
 <li><div class="fn">void <a href="#e0f937"><b>setDefaultMouse</b></a> ( const char * ) </div>
 <li><div class="fn">void <a href="#840f3b"><b>setDefaultKeyboard</b></a> ( const char * ) </div>
 <li><div class="fn">void <a href="#482fbe"><b>setMaxWindowRect</b></a> ( const QRect &amp; ) </div>
@@ -80,11 +85,14 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn">void <b>setMouseHandler</b> ( QWSMouseHandler * ) (internal)</div>
 <li><div class="fn">QWSKeyboardHandler* <a href="#52b0b9"><b>keyboardHandler</b></a> () </div>
 <li><div class="fn">void <a href="#3ed48f"><b>setKeyboardHandler</b></a> ( QWSKeyboardHandler * kh ) </div>
-<li><div class="fn">void <b>setScreenSaver</b> ( QWSScreenSaver * ) </div>
+<li><div class="fn">void <b>setScreenSaver</b> ( QWSScreenSaver * ) (internal)</div>
+<li><div class="fn">void <a href="#860d00"><b>setScreenSaverIntervals</b></a> ( int * ms, int eventBlockLevel ) </div>
+<li><div class="fn">void <a href="#be2f87"><b>setScreenSaverInterval</b></a> ( int, int eventBlockLevel ) </div>
 <li><div class="fn">void <a href="#aa8d5a"><b>setScreenSaverIntervals</b></a> ( int * ms ) </div>
-<li><div class="fn">void <b>setScreenSaverInterval</b> ( int ) </div>
+<li><div class="fn">void <a href="#7f42d5"><b>setScreenSaverInterval</b></a> ( int ) </div>
 <li><div class="fn">bool <a href="#82e378"><b>screenSaverActive</b></a> () </div>
 <li><div class="fn">void <a href="#c26d71"><b>screenSaverActivate</b></a> ( bool ) </div>
+<li><div class="fn">void <b>restartScreenSaverTimer</b> () </div>
 <li><div class="fn">void <b>processEventQueue</b> () (internal)</div>
 <li><div class="fn">QList&lt;QWSInternalWindowInfo&gt;* <b>windowList</b> () (internal)</div>
 <li><div class="fn">void <b>startup</b> ( int flags ) (internal)</div>
@@ -106,6 +114,18 @@ You should never construct this class yourself.
 qwsServer variable.
 
 <hr><h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="GUIMode">QWSServer::GUIMode</a></h3>
+For internal use only.
+<h3 class="fn"><a name="IMMouse">QWSServer::IMMouse</a></h3>
+For internal use only.
+<h3 class="fn"><a name="IMState">QWSServer::IMState</a></h3>
+This enum type defines the Qt/Embedded Input Method events: <ul>
+<li> <code>IMCompose</code> - an input method has sent composition text.
+<li> <code>IMEnd</code> - an input method has sent accepted text.
+</ul>
+<p>See also  <a href="qwsinputmethod.html#244465">QWSInputMethod::sendIMEvent</a>().
+<h3 class="fn"><a name="ServerFlags">QWSServer::ServerFlags</a></h3>
+For internal use only.
 <h3 class="fn"><a name="WindowEvent">QWSServer::WindowEvent</a></h3>
 This enum type defines the Qt/Embedded window system events: <ul>
 <li> <code>Create</code> - a new window has been created.
@@ -140,6 +160,10 @@ use.  The windows are sorted in stacking order from top-most to lowest.
 <p>See also  <a href="#8e84d2">setCursorVisible</a>().
 <h3 class="fn">QWSKeyboardHandler* <a name="52b0b9"></a>QWSServer::keyboardHandler () <code>[static]</code></h3>
 <p>Returns the primary keyboard handler.
+<h3 class="fn">QWSPropertyManager * <a name="84f386"></a>QWSServer::manager ()</h3>
+<p>For internal use only.
+<h3 class="fn">void <a name="f9a485"></a>QWSServer::markedText ( const <a href="qstring.html">QString</a> &amp; marked ) <code>[signal]</code></h3>
+<p>For internal use only.
 <h3 class="fn">QWSMouseHandler * <a name="65a378"></a>QWSServer::mouseHandler () <code>[static]</code></h3>
 <p>Returns the primary mouse handler.
 <h3 class="fn">void <a name="064f8e"></a>QWSServer::newChannel ( const <a href="qstring.html">QString</a> &amp; channel ) <code>[signal]</code></h3>
@@ -150,9 +174,16 @@ use.  The windows are sorted in stacking order from top-most to lowest.
 <p>Opens the mouse device(s).
 <h3 class="fn">void <a name="4e0b40"></a>QWSServer::refresh ()</h3>
 <p>Refreshes the entire display.
+<h3 class="fn">void <a name="778d0a"></a>QWSServer::refresh ( const <a href="qregion.html">QRegion</a> &amp; region )</h3>
+<p>Refreshes the display defined by <em>region.</em>
 <h3 class="fn">void <a name="433fce"></a>QWSServer::removedChannel ( const <a href="qstring.html">QString</a> &amp; channel ) <code>[signal]</code></h3>
 <p>This signal is emitted immediately after the <a href="qcopchannel.html">QCopChannel</a> <em>channel</em> is destroyed.
 Note that a channel is not destroyed until all listeners have unregistered.
+<h3 class="fn">void <a name="42a268"></a>QWSServer::resetInputMethod () <code>[static]</code></h3>
+<p>Resets the state of the current input method if one is set and currently
+in a compose text state.
+<p>If input method doesn't send an accept or reject the compose text will
+force a reject of compose text.
 <h3 class="fn">void <a name="c26d71"></a>QWSServer::screenSaverActivate ( bool activate ) <code>[static]</code></h3>
 <p>Activates the screensaver immediately if <code>activate</code> is TRUE otherwise
 deactivates the screensaver.
@@ -163,6 +194,12 @@ deactivates the screensaver.
 "virtual keyboards".
 <h3 class="fn">void <a name="a5f1a0"></a>QWSServer::sendMouseEvent ( const <a href="qpoint.html">QPoint</a> &amp; pos, int state ) <code>[static]</code></h3>
 <p>Send a mouse event.
+<h3 class="fn">void <a name="852b96"></a>QWSServer::setCurrentInputMethod ( <a href="qwsinputmethod.html">QWSInputMethod</a> * im ) <code>[static]</code></h3>
+<p>Sets the current <a href="qwsinputmethod.html">QWSInputMethod</a> to <em>im.</em>  The current input method 
+is able to filter keys produced by keyboard devices before they are
+sent to any Qt/Embedded applications. If <em>im</em> is 0 clears the current
+input method.
+<p>See also  <a href="#42a268">resetInputMethod</a>().
 <h3 class="fn">void <a name="8e84d2"></a>QWSServer::setCursorVisible ( bool visible ) <code>[static]</code></h3>
 <p>Shows the cursor if <em>visible</em> is TRUE, otherwise hides the cursor.
 <p>See also  <a href="#65e92e">isCursorVisible</a>().
@@ -196,10 +233,24 @@ mappings from <em>map.</em> The server takes over ownership of <em>map</em>
 and will delete it. Use <a href="qcollection.html#a8ef9f">QCollection::setAutoDelete</a>() to control
 whether the contents of <em>map</em> should be deleted.
 <p>Passing a null pointer for <em>map</em> will revert to the default keymap.
+<h3 class="fn">void <a name="7f42d5"></a>QWSServer::setScreenSaverInterval ( int ms ) <code>[static]</code></h3>
+<p>Sets a timeout for the screensaver to a <em>ms</em> milliseconds.
+A setting of zero turns off the screensaver.
+Events will be blocked at level -1.
+<h3 class="fn">void <a name="be2f87"></a>QWSServer::setScreenSaverInterval ( int ms, int eventBlockLevel ) <code>[static]</code></h3>
+<p>Sets a timeout for the screensaver to a <em>ms</em> milliseconds.
+A setting of zero turns off the screensaver.
+<em>eventBlockLevel</em> is the level at which events get blocked.
 <h3 class="fn">void <a name="aa8d5a"></a>QWSServer::setScreenSaverIntervals ( int * ms ) <code>[static]</code></h3>
 <p>Sets an array of timeouts for the screensaver to a list of
 <em>ms</em> milliseconds. A setting of zero turns off the screensaver.
 The array must be 0-terminated.
+Events will be blocked at level -1.
+<h3 class="fn">void <a name="860d00"></a>QWSServer::setScreenSaverIntervals ( int * ms, int eventBlockLevel ) <code>[static]</code></h3>
+<p>Sets an array of timeouts for the screensaver to a list of
+<em>ms</em> milliseconds. A setting of zero turns off the screensaver.
+The array must be 0-terminated.
+<em>eventBlockLevel</em> is the level at which events get blocked.
 <h3 class="fn"><a href="qwswindow.html">QWSWindow</a> * <a name="a5ed99"></a>QWSServer::windowAt ( const <a href="qpoint.html">QPoint</a> &amp; pos )</h3>
 <p>Returns the window containing the point <code>pos</code> or 0 if there is no window
 under the point.
@@ -216,9 +267,19 @@ processed for <em>window.</em>
 <p>For internal use only.
 <h3 class="fn">void <a name="17a94e"></a>QWSServer::processKeyEvent ( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat ) <code>[static]</code></h3>
 <p>For internal use only.
+<h3 class="fn">void <a name="5d183b"></a>QWSServer::requestMarkedText () <code>[static]</code></h3>
+<p>For internal use only.
+<h3 class="fn">void <a name="5e4884"></a>QWSServer::resetGestureMethod () <code>[static]</code></h3>
+<p>For internal use only.
+<h3 class="fn">void <a name="548bbe"></a>QWSServer::sendIMEvent ( <a href="qwsserver.html#IMState">QWSServer::IMState</a> state, const <a href="qstring.html">QString</a> &amp; txt, int cpos, int selLen )</h3>
+<p>For internal use only.
 <h3 class="fn">void <a name="953c8f"></a>QWSServer::sendPropertyNotifyEvent ( int property, int state )</h3>
 <p>For internal use only.
+<h3 class="fn">void <a name="23f80c"></a>QWSServer::setCurrentGestureMethod ( QWSGestureMethod * im ) <code>[static]</code></h3>
+<p>For internal use only.
 <h3 class="fn">void <a name="001100"></a>QWSServer::setMouseHandler ( QWSMouseHandler * mh ) <code>[static]</code></h3>
+<p>For internal use only.
+<h3 class="fn">void <a name="3e4e58"></a>QWSServer::setScreenSaver ( QWSScreenSaver * ss ) <code>[static]</code></h3>
 <p>For internal use only.
 <h3 class="fn">void <a name="0e4621"></a>QWSServer::startup ( int flags ) <code>[static]</code></h3>
 <p>For internal use only.
@@ -228,7 +289,7 @@ processed for <em>window.</em>
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -236,5 +297,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

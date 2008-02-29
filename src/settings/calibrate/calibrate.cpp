@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -32,6 +47,7 @@
 #include <qmessagebox.h>
 #include <qwindowsystem_qws.h>
 #include <qgfx_qws.h>
+#include <qsimplerichtext.h>
 #include <stdlib.h>
 
 
@@ -63,9 +79,9 @@ Calibrate::init(void)
     setGeometry( 0, 0, desk.width(), desk.height() );
     if ( desk.height() < 250 ) {
 	int w = desk.height()/3;
-	logo.convertFromImage(Resource::loadImage("qtlogo").smoothScale(w,w));
+	logo.convertFromImage(Resource::loadImage("qpelogo").smoothScale(w,w));
     } else {
-	logo = Resource::loadPixmap( "qtlogo" );
+	logo = Resource::loadPixmap( "qpelogo" );
     }
     cd.screenPoints[QWSPointerCalibrationData::TopLeft] = QPoint( offset, offset );
     cd.screenPoints[QWSPointerCalibrationData::BottomLeft] = QPoint( offset, qt_screen->deviceHeight() - offset );
@@ -152,10 +168,12 @@ bool Calibrate::checkTouch()
     if ( !touch ) {
 	bool grab = QWidget::mouseGrabber() == this;
 	releaseMouse();
+	hide();
 	QMessageBox::warning( this, tr("Calibrate"), 
-	    tr("<qt>Calibration may only be performed on the touch screen.") );
+	    tr("<qt>Calibration can only be performed on a touch screen.") );
 	if ( grab )
 	    grabMouse();
+	reject();
     }
 
     return touch;
@@ -183,23 +201,26 @@ void Calibrate::paintEvent( QPaintEvent * )
 {
     QPainter p( this );
 
-    int y;
+    int y = height()/4;
 
     if ( !logo.isNull() ) {
-	y = height() / 2 - logo.height() - 15;
+	y = height() / 2 - (logo.height()+p.font().pixelSize()) - 15;
 	p.drawPixmap( (width() - logo.width())/2, y, logo );
+	y += logo.height()+5;
     }
-
-    y = height() / 2 + 15;
-
-    p.drawText( 0, y+height()/8, width(), height() - y, AlignHCenter,
-	tr("Touch the crosshairs firmly and\n"
-            "accurately to calibrate your screen.") );
 
     QFont f = p.font(); f.setBold(TRUE);
     p.setFont( f );
     p.drawText( 0, y, width(), height() - y, AlignHCenter|WordBreak, 
 	    tr("Welcome to Qtopia") );
+
+    y = height() / 2 + 10;
+
+    QSimpleRichText rt(tr("<qt><center>Touch the crosshairs firmly and accurately to calibrate your screen.</center></qt>"),
+			font());
+    rt.setWidth(width()-60);
+    rt.draw(&p, 30, y,
+	    QRegion(0, y, width(), height() - y), colorGroup());
 
 /*
     saveUnder = QPixmap::grabWindow( winId(), crossPos.x()-8, crossPos.y()-8,
@@ -261,11 +282,8 @@ void Calibrate::mouseReleaseEvent( QMouseEvent * )
     if ( timer->isActive() )
 	return;
 
-    if ( !checkTouch() ) {
-	hide();
-	reject();
+    if ( !checkTouch() )
 	return;
-    }
 
     bool doMove = TRUE;
 
@@ -322,9 +340,7 @@ void Calibrate::timeout()
 void Calibrate::doGrab()
 {
     if ( !QWidget::mouseGrabber() ) {
-	if ( !checkTouch() )
-	    reject();
-	else
+	if ( checkTouch() )
 	    grabMouse();
     } else {
 	QTimer::singleShot( 50, this, SLOT(doGrab()) );

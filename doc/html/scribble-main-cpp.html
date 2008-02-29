@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -31,7 +33,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/scribble/scribble.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/scribble/scribble.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -124,7 +126,7 @@ protected slots:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/scribble/scribble.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/scribble/scribble.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -167,30 +169,30 @@ Canvas::Canvas( <a href="qwidget.html">QWidget</a> *parent, const char *name )
 #endif
 }
 
-void <a name="279"></a>Canvas::save( const QString &amp;filename, const QString &amp;format )
+void <a name="440"></a>Canvas::save( const QString &amp;filename, const QString &amp;format )
 {
     if ( !no_writing )
         buffer.save( filename, format.<a href="qstring.html#c4017b">upper</a>() );
 }
 
-void <a name="280"></a>Canvas::clearScreen()
+void <a name="441"></a>Canvas::clearScreen()
 {
     buffer.fill( <a href="qwidget.html#d92bf4">colorGroup</a>().base() );
     <a href="qwidget.html#7569b1">repaint</a>( FALSE );
 }
 
-void <a name="281"></a>Canvas::mousePressEvent( <a href="qmouseevent.html">QMouseEvent</a> *e )
+void <a name="442"></a>Canvas::mousePressEvent( <a href="qmouseevent.html">QMouseEvent</a> *e )
 {
     mousePressed = TRUE;
     polyline[2] = polyline[1] = polyline[0] = e-&gt;pos();
 }
 
-void <a name="282"></a>Canvas::mouseReleaseEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
+void <a name="443"></a>Canvas::mouseReleaseEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
 {
     mousePressed = FALSE;
 }
 
-void <a name="283"></a>Canvas::mouseMoveEvent( <a href="qmouseevent.html">QMouseEvent</a> *e )
+void <a name="444"></a>Canvas::mouseMoveEvent( <a href="qmouseevent.html">QMouseEvent</a> *e )
 {
     if ( mousePressed ) {
         <a href="qpainter.html">QPainter</a> painter;
@@ -213,7 +215,7 @@ void <a name="283"></a>Canvas::mouseMoveEvent( <a href="qmouseevent.html">QMouse
     }
 }
 
-void <a name="284"></a>Canvas::resizeEvent( <a href="qresizeevent.html">QResizeEvent</a> *e )
+void <a name="445"></a>Canvas::resizeEvent( <a href="qresizeevent.html">QResizeEvent</a> *e )
 {
     <a href="qwidget.html#7d375f">QWidget::resizeEvent</a>( e );
 
@@ -228,7 +230,7 @@ void <a name="284"></a>Canvas::resizeEvent( <a href="qresizeevent.html">QResizeE
     <a href="qpaintdevice.html#35ae2e">bitBlt</a>( &amp;buffer, 0, 0, &amp;tmp, 0, 0, tmp.<a href="qpixmap.html#86dbc5">width</a>(), tmp.<a href="qpixmap.html#d5bb33">height</a>() );
 }
 
-void <a name="285"></a>Canvas::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> *e )
+void <a name="446"></a>Canvas::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> *e )
 {
     <a href="qwidget.html#e3d821">QWidget::paintEvent</a>( e );
 
@@ -249,28 +251,28 @@ Scribble::Scribble( <a href="qwidget.html">QWidget</a> *parent, const char *name
 
     <a href="qtoolbar.html">QToolBar</a> *tools = new <a href="qtoolbar.html">QToolBar</a>( this );
 
-    bSave = new <a href="qtoolbutton.html">QToolButton</a>( <a href="qpixmap.html">QPixmap</a>(), "Save", "Save as PNG image", this, SLOT( <a href=#286>slotSave</a>() ), tools );
+    bSave = new <a href="qtoolbutton.html">QToolButton</a>( <a href="qpixmap.html">QPixmap</a>(), "Save", "Save as PNG image", this, SLOT( <a href=#447>slotSave</a>() ), tools );
     bSave-&gt;setText( "Save as..." );
 
     tools-&gt;<a href="qtoolbar.html#af219d">addSeparator</a>();
 
-    bPColor = new <a href="qtoolbutton.html">QToolButton</a>( <a href="qpixmap.html">QPixmap</a>(), "Choose Pen Color", "Choose Pen Color", this, SLOT( <a href=#287>slotColor</a>() ), tools );
+    bPColor = new <a href="qtoolbutton.html">QToolButton</a>( <a href="qpixmap.html">QPixmap</a>(), "Choose Pen Color", "Choose Pen Color", this, SLOT( <a href=#448>slotColor</a>() ), tools );
     bPColor-&gt;setText( "Choose Pen Color..." );
 
     tools-&gt;<a href="qtoolbar.html#af219d">addSeparator</a>();
 
     bPWidth = new <a href="qspinbox.html">QSpinBox</a>( 1, 20, 1, tools );
     <a href="qtooltip.html#184bfe">QToolTip::add</a>( bPWidth, "Choose Pen Width" );
-    <a href="qobject.html#7f8e37">connect</a>( bPWidth, SIGNAL( valueChanged( int ) ), this, SLOT( <a href=#288>slotWidth</a>( int ) ) );
+    <a href="qobject.html#fbde73">connect</a>( bPWidth, SIGNAL( valueChanged( int ) ), this, SLOT( <a href=#449>slotWidth</a>( int ) ) );
     bPWidth-&gt;setValue( 3 );
 
     tools-&gt;<a href="qtoolbar.html#af219d">addSeparator</a>();
 
-    bClear = new <a href="qtoolbutton.html">QToolButton</a>( <a href="qpixmap.html">QPixmap</a>(), "Clear Screen", "Clear Screen", this, SLOT( <a href=#289>slotClear</a>() ), tools );
+    bClear = new <a href="qtoolbutton.html">QToolButton</a>( <a href="qpixmap.html">QPixmap</a>(), "Clear Screen", "Clear Screen", this, SLOT( <a href=#450>slotClear</a>() ), tools );
     bClear-&gt;setText( "Clear Screen" );
 }
 
-void <a name="286"></a>Scribble::slotSave()
+void <a name="447"></a>Scribble::slotSave()
 {
     <a href="qpopupmenu.html">QPopupMenu</a> *menu = new <a href="qpopupmenu.html">QPopupMenu</a>( 0 );
     <a href="qintdict.html">QIntDict</a>&lt;<a href="qstring.html">QString</a>&gt; formats;
@@ -278,7 +280,7 @@ void <a name="286"></a>Scribble::slotSave()
 
     for ( unsigned int i = 0; i &lt; <a href="qimageio.html#040fd9">QImageIO::outputFormats</a>().count(); i++ ) {
         <a href="qstring.html">QString</a> str = QString( <a href="qimageio.html#040fd9">QImageIO::outputFormats</a>().at( i ) );
-        formats.<a href="qintdict.html#8ec12f">insert</a>( menu-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( <a href="qstring.html">QString</a>( "%1..." ).arg( str ) ), new <a href="qstring.html">QString</a>( str ) );
+        formats.<a href="qintdict.html#8ec12f">insert</a>( menu-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( <a href="qstring.html">QString</a>( "%1..." ).arg( str ) ), new <a href="qstring.html">QString</a>( str ) );
     }
 
     menu-&gt;<a href="qwidget.html#36406c">setMouseTracking</a>( TRUE );
@@ -295,18 +297,18 @@ void <a name="286"></a>Scribble::slotSave()
     delete menu;
 }
 
-void <a name="287"></a>Scribble::slotColor()
+void <a name="448"></a>Scribble::slotColor()
 {
     <a href="qcolor.html">QColor</a> c = QColorDialog::getColor( canvas-&gt;penColor(), this );
     canvas-&gt;setPenColor( c );
 }
 
-void <a name="288"></a>Scribble::slotWidth( int w )
+void <a name="449"></a>Scribble::slotWidth( int w )
 {
     canvas-&gt;setPenWidth( w );
 }
 
-void <a name="289"></a>Scribble::slotClear()
+void <a name="450"></a>Scribble::slotClear()
 {
     canvas-&gt;clearScreen();
 }
@@ -317,7 +319,7 @@ void <a name="289"></a>Scribble::slotClear()
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/scribble/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/scribble/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -349,5 +351,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

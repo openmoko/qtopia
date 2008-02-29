@@ -1,6 +1,27 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*!
     \class FreeType
-    \brief The FreeType class is a dummy class.
+    \brief The FreeType class is a placeholder for licensing information.
 
     The FreeType License from FTL.txt is reproduced here for your
     convenience.
@@ -176,7 +197,8 @@ Legal Terms
 
     FreeType is distributed under one of two licenses, either the
     GNU General Public License, or the FreeType License. More information
-    about FreeType can be found at http://freetype.sourceforge.net/
+    about FreeType can be found at <a href="http://freetype.sourceforge.net/">http://freetype.sourceforge.net/</a>
 */
 
+/*! */
 FreeType::FreeType() {}

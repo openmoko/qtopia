@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=Camera
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Exec=camera
+Icon=Camera
+Type=Application
+Name[]=Cam­era

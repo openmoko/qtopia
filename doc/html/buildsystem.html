@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/buildsystem.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Build System</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Build System</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Naming conventions
+</a>
+<li><a href="#3"> Requirements
+</a>
+<li><a href="#4"> Project Lists
+</a>
+<li><a href="#5"> Project List files
+</a>
+<li><a href="#6"> Modifying Project Lists
+</a>
+<li><a href="#7"> Internal build system files
+</a>
+<li><a href="#8"> Details of the automatic include process
+</a>
+<li><a href="#9"> How Makefiles are used
+</a>
+<li><a href="#10"> Using .pri includes to simplify building for Qtopia and Qtopia Desktop.
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the Qtopia build system.
+<p> <h2> Naming conventions
+</h2>
+<a name="2"></a><p> <ul>
+<li> .pri files are intended for inclusion by .pri or .pro files.
+<li> .pro files are directly used to generate Makefile files.
+</ul>
+<p> <h2> Requirements
+</h2>
+<a name="3"></a><p> <ul>
+<li> Computer: X86, 256MB RAM and 300MB disk space
+<li> Compiler: Cross-compiler based on gcc 2.95 or later
+<li> Linux distribution: SuSE 8.0/8.2 or later, RedHat 9
+</ul>
+<p> Actually, other architectures/platforms and operating systems are likely to work, it's just that they're not tested.
+For example, Qtopia and Qtopia Desktop built fine on a PowerPC machine running Yellow Dog Linux 3.0.1.
+<p> <h2> Project Lists
+</h2>
+<a name="4"></a><p> There are four Project Lists in the Qtopia Build system.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Project List <th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top">LIBRARY_PROJECTS 
+<td valign="top">The list of library components that are used by both applications
+and plugins.
+<tr bgcolor="#d0d0d0">
+<td valign="top">APP_PROJECTS 
+<td valign="top">The list of application components.
+<tr bgcolor="#f0f0f0">
+<td valign="top">PLUGIN_PROJECTS 
+<td valign="top">the list of plugin and applet components.
+<tr bgcolor="#d0d0d0">
+<td valign="top">THEME_PROJECTS
+<td valign="top">the list of theme components.
+</table></center>
+<p> The Project Lists are processed in order, such that all library components
+are built before any application components are built.
+<p> <h2> Project List files
+</h2>
+<a name="5"></a><p> Project List files can be found in $QPEDIR/src.  The are used to populate
+the Project Lists based on the configuration of Qtopia.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File <th valign="top">Description
+<tr bgcolor="#f0f0f0"> <td valign="top">general.pri
+<td valign="top">Lists build components included in all Qtopia source packages.
+This includes all core Qtopia functionality along with those components
+that are released both under the GPL and under the commercial licences.
+<tr bgcolor="#d0d0d0"> <td valign="top">commercial.pri
+<td valign="top">Lists build components that are included in the commercial Qtopia
+source packages, but not the GPL source packages.
+This file is not provided included in the GPL Qtopia source packages.
+<tr bgcolor="#f0f0f0"> <td valign="top">custom.pri
+<td valign="top">Lists custom configuration components.  The custom.pri file included
+with the Qtopia source packages can be extended to add components specific
+to device, organisation or group.  The custom.pri file provided in Qtopia
+source packages is an example only and does not include any active build
+information.  See Modifying Project Lists below for more information.
+<tr bgcolor="#d0d0d0"> <td valign="top">local.pri
+<td valign="top">Lists local configuration components.  The local.pri file is not
+shipped with any Qtopia package, and Qtopia will build without the file
+present.  If the file is provided Qtopia will read it after
+custom.pri. The local.pri file enables individuals in a group to have
+different component lists while still sharing components specified using
+custom.pri.
+</table></center>
+<p> <h2> Modifying Project Lists
+</h2>
+<a name="6"></a><p> The custom and local Project List files are provided for modifying the
+Project Lists.  To add a component to a Project List use
+"<PROJECT_LIST> += <component>" and to remove a component from a Project
+use "<PROJECT_LIST> -= <component>".
+<p> To specify more than one component pass them as a space separated list.
+The &#92; character can be used to continue the list on the following line.
+<p> <pre>
+APP_PROJECTS += applications/addressbook applications/calculator \
+        applications/clock applications/datebook
+</pre>
+ 
+<p> As the Project List files are qmake project files so you can also use
+the conditional processing qmake provides.  See the
+<a href="qmake-manual.html">qmake manual</a> for more
+information on the format of project files.
+<p> <h2> Internal build system files
+</h2>
+<a name="7"></a><p> <ul>
+<li> $QPEDIR/src/config.pri is generated by the configure script and turns specified options
+into qmake variables. It is processed before every project file and it's values can be
+overwritten.
+<li> src/global.pri is processed after every project file, and contains globally applicable
+settings, such as how to make an ipkg, and how to link against common libs.
+<li> src/ipk_groups.pri - in most cases, one project = one ipkg. Sometimes, more
+then one project needs to be in an ipkg. This file specifies how to build
+such a package.
+<li> projects.pri marshalls the list of projects from general.pri, commercial.pri, custom.pri
+and local.pri.
+<li> src.pro and src-components.pro specify the projects to build. The src.pro file marshalls
+projects that need to be built in a specific order, while src-components.pro marshalls
+projects that can be built in any order. Projects from src.pro are built before projects
+from src-components.pro.
+<li> src.pro is the file that the top-level Makefile is generated from. It
+also knows how to build the ipkgs that are specified in control files because
+they dont have a .pro file.
+</ul>
+<p> <h2> Details of the automatic include process
+</h2>
+<a name="8"></a><p> For all qws/* qmake specs (eg. QMAKESPEC=qws/linux-generic-g++), there is an explicit include of
+$QPEDIR/src/config.pri if it exists.
+<p> Projects from inside the Qtopia source tree are subject to this rule but they need some processing
+that external projects do not. Also, Qtopia Desktop projects do not use qws/* QMAKESPEC values.
+To handle this, configure writes $QPEDIR/src/.qmake.cache which sets a flag and includes
+$QPEDIR/src/config.pri. qmake finds this file by searching all directories above the one in which
+the project file exists.
+<p> config.pri tells qmake to process global.pri after processing the main project file.
+<p> There are include guards on the important .pri files to ensure they are not processed more than once.
+<p> <h2> How Makefiles are used
+</h2>
+<a name="9"></a><p> When you type 'make', it reads the file Makefile to determine what must be done. Since Qtopia requires
+some differences to what qmake creates in it's output, the qmake-generated files are called
+Makefile.target.
+<p> It is not safe to try manually recreating Makefiles since you may overwrite the special
+Makefile created by configure. Re-running configure is the only supported way to recreate both
+Makefile and Makefile.target. However, to allow easier development, it is possible to run
+"make qmake" to regenerate Makefile.target. This uses a qmake-generated rule or the 'regenerate' target
+to recreate Makefile.target. The 'regenerate' target also recreates the special Makefile.
+<p> The special Makefile exists so that the installation destination is handled in a sane way. There are
+two variables, PREFIX and DPREFIX that specify the install locations for Qtopia and Qtopia Desktop.
+configure puts default values for these in the special Makefile but they can be overridden on the
+commandline (eg. make PREFIX=/opt/Qtopia DPREFIX=/opt/QtopiaDesktop).
+<p> In order to allow maximum flexibility, the special Makefile uses all of the targets defined in
+Makefile.target. If Makefile.target is rebuilt, the targets may no longer match what is in the
+special Makefile. Running 'make regenerate' will rectify this situation. Note that this is not normally
+a problem since the 'usual' targets are always created even if they are not available in Makefile.target.
+<p> The special Makefile turns PREFIX (or DPREFIX) into INSTALL_ROOT since that is the variable qmake uses
+for it's install prefix. If you do not have a special Makefile (eg. because you have manually run qmake
+on a project that lives outside of the depot), you must set INSTALL_ROOT to the location you want
+everything installed to (eg. make INSTALL_ROOT=/opt/Qtopia). It is generally better to pass the directory
+to configure -build (eg. configure -build /path/to/my/extra/stuff).
+<p> <h2> Using .pri includes to simplify building for Qtopia and Qtopia Desktop.
+</h2>
+<a name="10"></a><p> A typical project might have three project files, consisting of one .pri file and two .pro files.
+<p> Taking src/libraries/qtopiapim as an example:
+<ul>
+<li> qtopiapim.pri lists all the files that are common between the Qtopia application and the Qtopia Desktop.
+<li> qtopiapim.pro includes qtopiapim.pri and adds Qtopia-specific configuration.
+<li> src/qtopiadesktop/libraries/qtopiapim.pro also includes qtopiapim.pri and adds Qtopia Desktop-specific configuration.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

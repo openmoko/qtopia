@@ -1,18 +1,19 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -37,8 +38,10 @@
   of GLIB, which is distributed under the terms of the GNU Library General Public
   License (LGPL). The primary copyright holders of GLIB are Peter Mattis,
   Spencer Kimball and Josh MacDonald. More information about OpenOBEX can
-  be found at http://openobex.sourceforge.net/
+  be found at <a href="http://openobex.sourceforge.net/">http://openobex.sourceforge.net/</a>
 */
+
+// QDOC_SKIP_BEGIN
 
 QObex::QObex()
   : ref( 0 )
@@ -46,12 +49,16 @@ QObex::QObex()
     qir = new QIr();
 }
 
+/*! \internal */
+
 QObex::~QObex()
 {
     delete qir;
 }
 
 #ifndef QT_NO_COMPONENT
+/*! \internal */
+
 QRESULT QObex::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
 {
     *iface = 0;
@@ -71,3 +78,5 @@ Q_EXPORT_INTERFACE()
     Q_CREATE_INSTANCE( QObex )
 }
 #endif
+
+// QDOC_SKIP_END

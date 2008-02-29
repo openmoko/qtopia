@@ -1,0 +1,11 @@
+[Desktop Entry]
+Comment[]=Music Player
+Exec=music
+Icon=SoundPlayer
+Type=Application
+MimeType=audio/*
+Name[]=Mu­sic
+[Translation]
+File=QtopiaApplications
+Context=Music
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation

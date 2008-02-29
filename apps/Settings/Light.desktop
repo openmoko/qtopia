@@ -1,10 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Light & Power
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=light-and-power
 Icon=Light
-Name=Light & Power
-Name[ja]=明るさと電力
-Name[no]=Lys
-Name[de]=Helligkeit
-Name[hu]=Fényerõ
+Name[]=Pow­er Man­age­ment
 CanFastload=0

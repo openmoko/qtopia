@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -29,6 +44,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <shadow.h>
+#include <fcntl.h>
 
 extern "C" {
 #include <uuid/uuid.h>
@@ -57,7 +73,6 @@ extern "C" {
 #include <qtopia/process.h>
 #include <qtopia/global.h>
 #include <qtopia/config.h>
-#include <qtopia/private/contact.h>
 #include <qtopia/quuid.h>
 #include <qtopia/version.h>
 #ifdef Q_WS_QWS
@@ -76,6 +91,10 @@ TransferServer::TransferServer( Q_UINT16 port, QObject *parent,
     connections.setAutoDelete( TRUE );
     if ( !ok() )
 	qWarning( "Failed to bind to port %d", port );
+#ifdef F_SETFD
+    else
+	::fcntl( socket(), F_SETFD, FD_CLOEXEC );
+#endif
 }
 
 void TransferServer::authorizeConnections()
@@ -83,7 +102,7 @@ void TransferServer::authorizeConnections()
     QListIterator<ServerPI> it(connections);
     while ( it.current() ) {
 	if ( !it.current()->verifyAuthorised() ) {
-	    disconnect( it.current(), SIGNAL(connectionClosed(ServerPI *)), this, SLOT( closed(ServerPI *)) );
+	    disconnect( it.current(), SIGNAL(connectionClosed(ServerPI*)), this, SLOT( closed(ServerPI*)) );
 	    connections.removeRef( it.current() );
 	} else
 	    ++it;
@@ -102,7 +121,7 @@ TransferServer::~TransferServer()
 void TransferServer::newConnection( int socket )
 {
     ServerPI *ptr = new ServerPI( socket, this );
-    connect( ptr, SIGNAL(connectionClosed(ServerPI *)), this, SLOT( closed(ServerPI *)) );
+    connect( ptr, SIGNAL(connectionClosed(ServerPI*)), this, SLOT( closed(ServerPI*)) );
     connections.append( ptr );
 }
 
@@ -114,15 +133,6 @@ QString SyncAuthentication::serverId()
 QString SyncAuthentication::ownerName()
 {
     return Global::ownerName();
-    QString vfilename = Global::applicationFileName("addressbook",
-                "businesscard.vcf");
-    if (QFile::exists(vfilename)) {
-	Contact c;
-	c = Contact::readVCard( vfilename )[0];
-	return c.fullName();
-    }
-
-    return "";
 }
 
 QString SyncAuthentication::loginName()
@@ -139,7 +149,7 @@ QString SyncAuthentication::loginName()
 
 int SyncAuthentication::isAuthorized(QHostAddress peeraddress)
 {
-    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
+    Config cfg("Security");
     cfg.setGroup("Sync");
     QString allowedstr = cfg.readEntry("auth_peer","192.168.0.0");
     QHostAddress allowed;
@@ -210,7 +220,7 @@ bool SyncAuthentication::checkPassword( const QString& password )
 
     ++lock;
     if ( password.left(6) == "Qtopia" ) {
-	Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
+	Config cfg("Security");
 	cfg.setGroup("Sync");
 	QStringList pwds = cfg.readListEntry("Passwords",' ');
 	for (QStringList::ConstIterator it=pwds.begin(); it!=pwds.end(); ++it) {
@@ -233,13 +243,13 @@ bool SyncAuthentication::checkPassword( const QString& password )
 	    tr(	"<p>An unrecognized system is requesting access to this device."
 		"<p>If you have just initiated a Sync for the first time, this is normal."),
 		QMessageBox::Warning,
-		QMessageBox::Cancel, QMessageBox::Yes, QMessageBox::NoButton,
+		QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape, QMessageBox::NoButton,
 		0, QString::null, TRUE, WStyle_StaysOnTop);
-	unrecbox.setButtonText(QMessageBox::Cancel, tr("Deny"));
 	unrecbox.setButtonText(QMessageBox::Yes, tr("Allow"));
+	unrecbox.setButtonText(QMessageBox::No, tr("Deny"));
 
 	if ( (denials > 2 && now < lastdenial+600)
-	    || unrecbox.exec() != QMessageBox::Yes)
+	    || unrecbox.exec() == QMessageBox::No )
 	{
 	    denials++;
 	    lastdenial=now;
@@ -278,6 +288,10 @@ ServerPI::ServerPI( int socket, QObject *parent, const char* name )
 
     setSocket( socket );
 
+#ifdef F_SETFD
+    ::fcntl( socket, F_SETFD, FD_CLOEXEC );
+#endif
+
     peerport = peerPort();
     peeraddress = peerAddress();
 
@@ -301,7 +315,7 @@ ServerPI::ServerPI( int socket, QObject *parent, const char* name )
 	dtp = new ServerDTP( this );
 	connect( dtp, SIGNAL( completed() ), SLOT( dtpCompleted() ) );
 	connect( dtp, SIGNAL( failed() ), SLOT( dtpFailed() ) );
-	connect( dtp, SIGNAL( error( int ) ), SLOT( dtpError( int ) ) );
+	connect( dtp, SIGNAL( error(int) ), SLOT( dtpError(int) ) );
 
 
 	directory = QDir::currentDirPath();
@@ -312,8 +326,8 @@ ServerPI::ServerPI( int socket, QObject *parent, const char* name )
 	    delete serversocket;
 	    serversocket = new ServerSocket( ++p, this );
 	}
-	connect( serversocket, SIGNAL( newIncomming( int ) ),
-		 SLOT( newConnection( int ) ) );
+	connect( serversocket, SIGNAL( newIncomming(int) ),
+		 SLOT( newConnection(int) ) );
     }
 }
 
@@ -343,14 +357,18 @@ void ServerPI::connectionClosed()
 void ServerPI::send( const QString& msg )
 {
     QTextStream os( this );
+    os.setEncoding(QTextStream::UnicodeUTF8);
     os << msg << endl;
     //qDebug( "Reply: %s", msg.latin1() );
 }
 
 void ServerPI::read()
 {
-    while ( canReadLine() )
-	process( readLine().stripWhiteSpace() );
+    while ( canReadLine() ) {
+	QString s = readLine().stripWhiteSpace();
+	// QSocket just deal with bytes, NOT real QStrings. So fix.
+	process( QString::fromUtf8(s.latin1()) );
+    }
 }
 
 bool ServerPI::checkReadFile( const QString& file )
@@ -628,7 +646,7 @@ void ServerPI::process( const QString& message )
 	    send( "500 Syntax error, command unrecognized" ); // No tr
 	else {
 	    QFile file( absFilePath( args ) ) ;
-	    if ( file.remove() ) {
+	    if ( !QFileInfo(file).exists() || file.remove() ) {
 		send( "250 Requested file action okay, completed" ); // No tr
 		QCopEnvelope e("QPE/System", "linkChanged(QString)" );
 		e << file.name();
@@ -1052,7 +1070,7 @@ ServerDTP::ServerDTP( QObject *parent, const char* name)
 
   connect( this, SIGNAL( connected() ), SLOT( connected() ) );
   connect( this, SIGNAL( connectionClosed() ), SLOT( connectionClosed() ) );
-  connect( this, SIGNAL( bytesWritten( int ) ), SLOT( bytesWritten( int ) ) );
+  connect( this, SIGNAL( bytesWritten(int) ), SLOT( bytesWritten(int) ) );
   connect( this, SIGNAL( readyRead() ), SLOT( readyRead() ) );
 
   createTargzProc = new QProcess( QString("tar"), this, "createTargzProc"); // No tr

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -23,13 +38,14 @@
 
 #include <qtopia/config.h>
 #include <qtopia/qpeapplication.h>
-#include <qtopia/inputmethodinterface.h>
+#include <qtopia/private/inputmethodinterface_p.h>
 #include <qtopia/qlibrary.h>
 #include <qtopia/global.h>
 #include <qtopia/pluginloader.h>
 
 #include <qpopupmenu.h>
 #include <qpushbutton.h>
+#include <qiconset.h>
 #include <qtoolbutton.h>
 #include <qwidgetstack.h>
 #include <qwidget.h>
@@ -55,24 +71,58 @@
 
 /* XPM */
 static const char * tri_xpm[]={
-"9 9 2 1",
+"9 5 2 1",
 "a c #000000",
 ". c None",
-".........",
-".........",
 ".........",
 "....a....",
 "...aaa...",
 "..aaaaa..",
-".aaaaaaa.",
-".........",
-"........."};
+".aaaaaaa."};
 
 static const int inputWidgetStyle = QWidget::WStyle_Customize | 
 				    QWidget::WStyle_Tool |
 				    QWidget::WStyle_StaysOnTop |
 				    QWidget::WGroupLeader;
 
+
+/*
+  Slightly hacky: We use WStyle_Tool as a flag to say "this widget
+  belongs to the IM system, so clicking it should not cause a reset".
+ */
+class IMToolButton : public QToolButton
+{
+public:
+    IMToolButton::IMToolButton( QWidget *parent ) : QToolButton( parent )
+    { setWFlags( WStyle_Tool ); }
+    QSize sizeHint() const {
+	if (pixmap() && ! pixmap()->isNull()) {
+	    return pixmap()->size()+QSize(2,2);
+	} else {
+	    return QToolButton::sizeHint();
+	}
+    };
+};
+
+InputMethod::InputMethod(const InputMethod &o)
+{
+    widget = o.widget;
+    statusWidget = o.statusWidget;
+    libName = o.libName;
+    interface = o.interface;
+    style = o.style;
+}
+
+InputMethod &InputMethod::operator=(const InputMethod &o)
+{
+    widget = o.widget;
+    statusWidget = o.statusWidget;
+    libName = o.libName;
+    interface = o.interface;
+    style = o.style;
+
+    return *this;
+}
 
 int InputMethod::operator <(const InputMethod& o) const
 {
@@ -88,70 +138,336 @@ int InputMethod::operator <=(const InputMethod& o) const
 }
 
 
-/*
-  Slightly hacky: We use WStyle_Tool as a flag to say "this widget
-  belongs to the IM system, so clicking it should not cause a reset".
- */
-class IMToolButton : public QToolButton
+QString InputMethod::name() const
 {
-public:
-    IMToolButton::IMToolButton( QWidget *parent ) : QToolButton( parent )
-    { setWFlags( WStyle_Tool ); }
-};
+    switch (style)
+    {
+	case Original:
+	    return interface->name();
+	case Extended:
+	    return extInterface->name();
+	case Cooperative:
+	    return coopInterface->name();
+    }
+    return QString::null;
+}
+
+QPixmap *InputMethod::icon() const
+{
+    switch (style)
+    {
+	case Original:
+	    return interface->icon();
+	case Extended:
+	    return extInterface->icon();
+	case Cooperative:
+	    return coopInterface->icon();
+    }
+    return 0;
+}
+
+QUnknownInterface *InputMethod::iface()
+{
+    switch (style)
+    {
+	case Original:
+	    return (QUnknownInterface *)interface;
+	case Extended:
+	    return (QUnknownInterface *)extInterface;
+	case Cooperative:
+	    return (QUnknownInterface *)coopInterface;
+    }
+    return 0;
+}
+
+void InputMethod::resetState()
+{
+    switch (style) {
+	case Original:
+	    interface->resetState();
+	    break;
+	case Extended:
+	    extInterface->resetState();
+	    break;
+	case Cooperative:
+	    coopInterface->resetState();
+	    break;
+    }
+}
+
+bool InputMethod::compatible(const QString &name)
+{
+    switch (style) {
+	case Original:
+	    return TRUE;
+	case Extended:
+	    if (name.isEmpty())
+		return (extInterface->compatible().count() == 0);
+	    else
+		return extInterface->compatible().contains(name);
+	case Cooperative:
+	    if (name.isEmpty())
+		return (coopInterface->compatible().count() == 0);
+	    else
+		return coopInterface->compatible().contains(name);
+	default:
+	    return FALSE;
+    }
+}
+
+bool InputMethod::requirePen()
+{
+    switch (style) {
+	default:
+	case Original:
+	    return TRUE;
+	case Extended:
+	    if (widget)
+		return TRUE;
+	    return FALSE;
+	case Cooperative:
+	    if (coopInterface->properties() & CoopInputMethodInterface::RequireMouse)
+		return TRUE;
+	    return FALSE;
+    }
+}
 
 
-InputMethods::InputMethods( QWidget *parent ) :
+InputMethodSelector::InputMethodSelector(QWidget *parent)
+    : QHBox(parent, 0), mCurrent(0), mCount(0)
+{
+    setBackgroundMode(PaletteButton);
+
+    // some will want to open up the 'input' widget.
+    // for that.. well we will see.
+    mButton = new QWidgetStack(this);
+    mButton->setBackgroundMode(PaletteButton);
+    mButton->setFocusPolicy(NoFocus);
+
+    mChoice = new QToolButton(this);
+    mChoice->setBackgroundMode(PaletteButton);
+    mChoice->setPixmap( QPixmap((const char **)tri_xpm) );
+    mChoice->setFixedWidth( 13 );
+    mChoice->setAutoRaise( TRUE );
+    connect( mChoice, SIGNAL(clicked()), this, SLOT(showList()) );
+    mChoice->hide();// until more than one.
+}
+
+InputMethodSelector::~InputMethodSelector()
+{
+    // doesn't own anything other than children... do nothing.
+}
+
+// before, need to set libName, iface, style.
+void InputMethodSelector::add(const InputMethod &im)
+{
+    InputMethod i = im;
+    QWidget *status = 0;
+    // use statusWidget, or make up button out of icon.
+    // (if always on like pkim or full screen im, just a label.
+    switch(i.style) {
+	default:
+	case InputMethod::Original:
+	    break;
+	case InputMethod::Extended:
+	case InputMethod::Cooperative:
+	    status = i.statusWidget;
+	    break;
+    }
+    if (!status) {
+	IMToolButton *iButton = new IMToolButton(mButton);
+	iButton->setFocusPolicy(NoFocus);
+	iButton->setToggleButton( TRUE );
+	iButton->setAutoRaise( TRUE );
+	iButton->setUsesBigPixmap( TRUE );
+	iButton->setPixmap(*(i.icon()));
+	status = iButton;
+	connect(iButton, SIGNAL(toggled(bool)), this, SLOT(activateCurrent(bool)));
+	i.statusWidget = iButton;
+    }
+    list.append(i);
+    status->setBackgroundMode(PaletteButton);
+    mButton->addWidget(status, mCount++);
+    if (mCurrent == 0) {
+	emit aboutToActivate();
+	mCurrent = &list[list.count()-1];
+	emit activated(mCurrent);
+	mButton->raiseWidget(status);
+    }
+    if (mCount > 1)
+	mChoice->show();
+}
+
+void InputMethodSelector::filterAgainst(const QString &n)
+{
+    imname = n;
+    if ( mCurrent && !mCurrent->compatible(imname) )
+	activateCurrent(FALSE);
+}
+
+void InputMethodSelector::showList()
+{
+    QPopupMenu pop( this );
+    pop.setFocusPolicy( NoFocus ); //don't reset IM
+   
+   // don't have compatible list? need to add this later. 
+
+    int i = 0;
+    int firstDepKbd = 0;
+
+    QValueList<InputMethod>::Iterator it;
+    for ( it = list.begin(); it != list.end(); ++it, i++ ) {
+	// add empty new items, all old items.
+	if ((*it).compatible(QString::null)) {
+	    pop.insertItem( (*it).name(), i, firstDepKbd);
+	    if ( mCurrent == &(*it) )
+		pop.setItemChecked( i, TRUE );
+
+	    firstDepKbd++;
+	} else if ( (*it).compatible(imname)) {
+	    // check if we need to insert a sep.
+	    if (firstDepKbd == i)
+		pop.insertSeparator();
+	    pop.insertItem( (*it).name(), i, -1);
+	    if ( mCurrent == &(*it) )
+		pop.setItemChecked( i, TRUE );
+	}
+    }
+
+    QPoint pt = mapToGlobal(mButton->geometry().topRight());
+    QSize s = pop.sizeHint();
+    pt.ry() -= s.height();
+    pt.rx() -= s.width();
+    i = pop.exec( pt );
+    if ( i == -1 )
+	return;
+    if (mCurrent != &list[i]) {
+	activateCurrent(FALSE);
+	emit aboutToActivate();
+	mCurrent = &list[i];
+	emit activated(mCurrent);
+	mButton->raiseWidget(i);
+	activateCurrent(TRUE);
+    }
+}
+
+void InputMethodSelector::activateCurrent( bool on )
+{
+    if (mCurrent && mCurrent->widget) {
+	if ( on ) {
+	    mCurrent->resetState();
+	    // HACK... Make the texteditor fit with all input methods
+	    // Input methods should also never use more than about 40% of the screen
+	    int height = QMIN( mCurrent->widget->sizeHint().height(), 134 );
+	    mCurrent->widget->resize( qApp->desktop()->width(), height );
+	    if (mapToGlobal( QPoint() ).y() - height > 0)
+		mCurrent->widget->move( 0, mapToGlobal( QPoint() ).y() - height );
+	    else 
+		mCurrent->widget->move( 0, mapToGlobal( QPoint() ).y() + mCurrent->statusWidget->height() );
+	    if (mCurrent->statusWidget->inherits("QToolButton")) 
+		((QToolButton*)mCurrent->statusWidget)->setOn(TRUE);
+	    mCurrent->widget->show();
+	} else {
+	    if (mCurrent->statusWidget->inherits("QToolButton")) 
+		((QToolButton*)mCurrent->statusWidget)->setOn(FALSE);
+	    mCurrent->widget->hide();
+	}
+	// should be emitted if the screen is changing sizes.
+	emit inputWidgetShown( on );
+    }
+}
+
+void InputMethodSelector::clear()
+{
+    mChoice->hide();
+    emit aboutToActivate();
+    mCurrent = 0;
+    emit activated(mCurrent);
+    // could remove by id to.
+
+    // also need to empty the stack.
+    // for each interface, remove its widget.
+    QValueList<InputMethod>::Iterator it;
+    for ( it = list.begin(); it != list.end(); ++it ) {
+	InputMethod im = *it;
+	mButton->removeWidget(im.statusWidget);
+    }
+    list.clear();
+    mCount = 0;
+}
+
+void InputMethodSelector::sort()
+{
+    if (list.count() > 1) {
+	qHeapSort( list );
+	QValueList<InputMethod>::Iterator it;
+	for ( it = list.begin(); it != list.end(); ++it ) {
+	    InputMethod im = *it;
+	    mButton->removeWidget(im.statusWidget);
+	}
+	int i = 0;
+	for ( it = list.begin(); it != list.end(); ++it, ++i ) {
+	    InputMethod im = *it;
+	    mButton->addWidget(im.statusWidget, i);
+	}
+	mButton->raiseWidget(mCurrent->statusWidget);
+    }
+}
+
+InputMethod *InputMethodSelector::current() const
+{
+    return mCurrent;
+}
+
+void InputMethodSelector::setInputMethod(const QString &s)
+{
+    // set to current.
+    QValueList<InputMethod>::Iterator it;
+    int i = 0;
+    for ( it = list.begin(); it != list.end(); ++it, ++i ) {
+	InputMethod im = *it;
+	if (im.name() == s) {
+	    mButton->raiseWidget(i);
+	    break;
+	}
+    }
+}
+
+
+InputMethods::InputMethods( QWidget *parent, IMType t ) :
     QWidget( parent, "InputMethods", WStyle_Tool | WStyle_Customize ),
-    mkeyboard(0), imethod(0), loader(0)
+    loader(0), type(t), currentIM(0), currentGM(0), guessesConnected(FALSE),
+    lastActiveWindow(0)
 {
     QHBoxLayout *hbox = new QHBoxLayout( this );
 
-    kbdButton = new IMToolButton( this);
-    kbdButton->setFocusPolicy(NoFocus);
-    kbdButton->setToggleButton( TRUE );
-    if (parent->sizeHint().height() > 0)
-	kbdButton->setFixedHeight( parent->sizeHint().height() );
-    kbdButton->setFixedWidth( 32 );
-    kbdButton->setAutoRaise( TRUE );
-    kbdButton->setUsesBigPixmap( TRUE );
-    hbox->addWidget( kbdButton );
-    connect( kbdButton, SIGNAL(toggled(bool)), this, SLOT(showKbd(bool)) );
+    penBased = new InputMethodSelector(this);
+    connect(penBased, SIGNAL(activated(InputMethod *)),
+	    this, SLOT(choosePenBased(InputMethod *)));
+    connect(penBased, SIGNAL(aboutToActivate()),
+	    this, SLOT(checkDisconnect()));
+    connect(penBased, SIGNAL(inputWidgetShown(bool)),
+	    this, SIGNAL(inputToggled(bool)));
+    hbox->addWidget(penBased);
 
-    kbdChoice = new IMToolButton( this );
-    kbdChoice->setFocusPolicy(NoFocus);
-    kbdChoice->setPixmap( QPixmap( (const char **)tri_xpm ) );
-    if (parent->sizeHint().height() > 0)
-	kbdChoice->setFixedHeight( parent->sizeHint().height() );
-    kbdChoice->setFixedWidth( 13 );
-    kbdChoice->setAutoRaise( TRUE );
-    hbox->addWidget( kbdChoice );
-    connect( kbdChoice, SIGNAL(clicked()), this, SLOT(chooseKbd()) );
-
-    connect( (QPEApplication*)qApp, SIGNAL(clientMoused()),
-	    this, SLOT(resetStates()) );
-
-
-    imButton = new QWidgetStack( this ); // later a widget stack
-    imButton->setFocusPolicy(NoFocus);
-    if (parent->sizeHint().height() > 0)
-	imButton->setFixedHeight( parent->sizeHint().height() );
-    hbox->addWidget(imButton);
-
-    imChoice = new QToolButton( this );
-    imChoice->setFocusPolicy(NoFocus);
-    imChoice->setPixmap( QPixmap( (const char **)tri_xpm ) );
-    if (parent->sizeHint().height() > 0)
-	imChoice->setFixedHeight( parent->sizeHint().height() );
-    imChoice->setFixedWidth( 13 );
-    imChoice->setAutoRaise( TRUE );
-    hbox->addWidget( imChoice );
-    connect( imChoice, SIGNAL(clicked()), this, SLOT(chooseIm()) );
+    keyBased = new InputMethodSelector(this);
+    connect(keyBased, SIGNAL(activated(InputMethod *)),
+	    this, SLOT(chooseKeyBased(InputMethod *)));
+    connect(keyBased, SIGNAL(aboutToActivate()),
+	    this, SLOT(checkDisconnect()));
+    connect(keyBased, SIGNAL(inputWidgetShown(bool)),
+	    this, SIGNAL(inputToggled(bool)));
+    hbox->addWidget(keyBased);
 
     loadInputMethods();
 
     QCopChannel *channel = new QCopChannel( "QPE/IME", this );
-    connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
-	     this, SLOT(qcopReceive(const QCString&, const QByteArray&)) );
+    connect( channel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(qcopReceive(const QCString&,const QByteArray&)) );
+    connect( qwsServer, SIGNAL(windowEvent(QWSWindow *, QWSServer::WindowEvent)),
+	    this, SLOT(updateHintMap(QWSWindow *, QWSServer::WindowEvent)));
+
+    // might also add own win id since wouldn't have been added at start up.
 }
 
 InputMethods::~InputMethods()
@@ -161,47 +477,51 @@ InputMethods::~InputMethods()
 
 void InputMethods::hideInputMethod()
 {
-    kbdButton->setOn( FALSE );
+    penBased->activateCurrent(FALSE);
 }
 
 void InputMethods::showInputMethod()
 {
-    kbdButton->setOn( TRUE );
+    penBased->activateCurrent(TRUE);
 }
 
 void InputMethods::showInputMethod(const QString& name)
 {
-    int i = 0;
-    QValueList<InputMethod>::Iterator it;
-    InputMethod *im = 0;
-    for ( it = inputMethodList.begin(); it != inputMethodList.end(); ++it, i++ ) {
-	QString lname = (*it).libName.mid((*it).libName.findRev('/') + 1);
-	if ( (*it).name() == name || lname == name ) {
-	    im = &(*it);
-	    break;
-	}
-    }
-    if ( im )
-	chooseKeyboard(im);
+    penBased->setInputMethod(name);
+    penBased->activateCurrent(TRUE);
 }
 
 void InputMethods::resetStates()
 {
-    if ( mkeyboard && !mkeyboard->newIM )
-	mkeyboard->interface->resetState();
+    // just the current ones.
+    if (penBased->current())
+	    penBased->current()->resetState();
+    if (keyBased->current())
+	    keyBased->current()->resetState();
 }
 
 QRect InputMethods::inputRect() const
 {
-    if ( !mkeyboard || !mkeyboard->widget || !mkeyboard->widget->isVisible() )
-	return QRect();
-    else
-	return mkeyboard->widget->geometry();
+    if (penBased->current() && penBased->current()->widget 
+	    && penBased->current()->widget->isVisible())
+	return penBased->current()->widget->geometry();
+    return QRect();
 }
 
 void InputMethods::unloadInputMethods()
 {
+    checkGuessConnection(FALSE);
+    if (currentIM) {
+	QWSServer::setCurrentInputMethod( 0 );
+	currentIM = 0;
+    }
+    if (currentGM) {
+	QWSServer::setCurrentGestureMethod( 0 );
+	currentGM = 0;
+    }
     if ( loader ) {
+	penBased->clear();
+	keyBased->clear();
 #ifndef QT_NO_COMPONENT
 	int i;
 	// reverse order of load
@@ -210,8 +530,6 @@ void InputMethods::unloadInputMethods()
 	}
 	ifaceList.clear();
 #endif
-	inputMethodList.clear();
-	inputModifierList.clear();
 	delete loader;
 	loader = 0;
     }
@@ -219,10 +537,10 @@ void InputMethods::unloadInputMethods()
 
 void InputMethods::loadInputMethods()
 {
+    keyBased->blockSignals(TRUE);
+    penBased->blockSignals(TRUE);
 #ifndef QT_NO_COMPONENT
     hideInputMethod();
-    mkeyboard = 0;
-
     unloadInputMethods();
 
     loader = new PluginLoader( "inputmethods" );
@@ -230,275 +548,409 @@ void InputMethods::loadInputMethods()
     QStringList list = loader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
-	InputMethodInterface *iface = 0;
-	ExtInputMethodInterface *eface = 0;
-
-	if ( loader->queryInterface( *it, IID_InputMethod, (QUnknownInterface**)&iface ) == QS_OK ) {
-	    InputMethod input;
-	    input.newIM = FALSE;
-	    input.libName = *it;
-	    input.interface = iface;
+	QUnknownInterface *face = 0;
+	InputMethod input;
+	input.libName = *it;
+	// get the plugin.
+	if ( loader->queryInterface( *it, IID_InputMethod, &face ) == QS_OK ) {
+	    input.style = InputMethod::Original;
+	    input.interface = (InputMethodInterface *)face;
 	    input.widget = input.interface->inputMethod( 0, inputWidgetStyle );
 	    input.interface->onKeyPress( this, SLOT(sendKey(ushort,ushort,ushort,bool,bool)) );
-	    inputMethodList.append( input );
-	    ifaceList.append( iface );
-	} else if ( loader->queryInterface( *it, IID_ExtInputMethod, (QUnknownInterface**)&eface ) == QS_OK ) {
-	    InputMethod input;
-	    input.newIM = TRUE;
-	    input.libName = *it;
-	    input.extInterface = eface;
+	} else if ( loader->queryInterface( *it, IID_ExtInputMethod, &face ) == QS_OK ) {
+	    input.extInterface = (ExtInputMethodInterface *)face;
+	    input.style = InputMethod::Extended;
 	    input.widget = input.extInterface->keyboardWidget( 0, inputWidgetStyle );
-	    // may be either a simple, or advanced.
-	    if (input.widget) {
-		//qDebug("its a keyboard");
-		inputMethodList.append( input );
+	    input.statusWidget = input.extInterface->statusWidget( 0, 0 );
+	} else if ( loader->queryInterface( *it, IID_CoopInputMethod, &face ) == QS_OK ) {
+	    input.coopInterface = (CoopInputMethodInterface *)face;
+	    input.style = InputMethod::Cooperative;
+	    input.widget = input.coopInterface->inputWidget( 0, 0 );
+	    input.statusWidget = input.coopInterface->statusWidget( 0, 0 );
+	} else {
+	    face = 0;
+	}
+	// put plugin in right place.
+	if (face) {
+	    if (input.requirePen()) {
+		if (type == Keypad) {
+		    loader->releaseInterface(face);
+		    face = 0;
+		} else {
+		    penBased->add(input);
+		    ifaceList.append(face);
+		}
 	    } else {
-		//qDebug("its a real im");
-		input.widget = input.extInterface->statusWidget( 0, 0 );
-		if (input.widget) { 
-		    //qDebug("blah");
-		    inputModifierList.append( input );
-		    imButton->addWidget(input.widget, inputModifierList.count());
+		if (type == Mouse) {
+		    loader->releaseInterface(face);
+		    face = 0;
+		} else {
+		    keyBased->add(input);
+		    ifaceList.append(face);
 		}
 	    }
-	    ifaceList.append( eface );
 	}
     }
-    qHeapSort( inputMethodList );
+    // TODO: should do sort on lists somehow.
+    penBased->sort();
+    keyBased->sort();
+    //qHeapSort( inputModifierList );
 #else
     InputMethod input;
     input.interface = new HandwritingImpl();
+    input.style = InputMethod::Original;
     input.widget = input.interface->inputMethod( 0, inputWidgetStyle );
     input.interface->onKeyPress( this, SLOT(sendKey(ushort,ushort,ushort,bool,bool)) );
-    inputMethodList.append( input );
+    penBased.add(input);
     input.interface = new KeyboardImpl();
     input.widget = input.interface->inputMethod( 0, inputWidgetStyle );
     input.interface->onKeyPress( this, SLOT(sendKey(ushort,ushort,ushort,bool,bool)) );
-    inputMethodList.append( input );
+    penBased.add(input);
     input.interface = new PickboardImpl();
     input.widget = input.interface->inputMethod( 0, inputWidgetStyle );
     input.interface->onKeyPress( this, SLOT(sendKey(ushort,ushort,ushort,bool,bool)) );
-    inputMethodList.append( input );
+    penBased.add(input);
 #endif
     
-    QWSServer::setCurrentInputMethod( 0 );
-    if ( !inputModifierList.isEmpty() ) {
-	imethod = &inputModifierList[0];
-	imButton->raiseWidget(imethod->widget);
-	QWSServer::setCurrentInputMethod( imethod->extInterface->inputMethod() );
+
+    if ( keyBased->current()) {
+	//keyBased->show?
+	InputMethod *imethod = keyBased->current();
+	if (imethod->style == InputMethod::Extended)
+	    currentIM = imethod->extInterface->inputMethod();
+	else
+	    currentIM = imethod->coopInterface->inputModifier();
+	QWSServer::setCurrentInputMethod( currentIM );
+
+	// we need to update keyboards afterwards, as some of them
+	// may not be compatible with the current input method
+	updateKeyboards(imethod);
     } else {
-	imethod = 0;
+	currentIM = 0;
     }
-    
-    // we need to update keyboards afterwards, as some of them may not be compatible with
-    // the current input method
-    updateKeyboards(imethod);
 
-    if ( !inputModifierList.isEmpty() )
-	imButton->show();
-    else
-	imButton->hide();
-    
-    if ( inputModifierList.count() > 1 )
-	imChoice->show();
-    else
-	imChoice->hide();
-}
 
-void InputMethods::chooseKbd()
-{
-    QPopupMenu pop( this );
-    pop.setFocusPolicy( NoFocus ); //don't reset IM
-    
-    QString imname;
-    if (imethod)
-	imname = imethod->libName.mid(imethod->libName.findRev('/') + 1);
-
-    int i = 0;
-    int firstDepKbd = 0;
-
-    QValueList<InputMethod>::Iterator it;
-    for ( it = inputMethodList.begin(); it != inputMethodList.end(); ++it, i++ ) {
-	// add empty new items, all old items.
-	if (!(*it).newIM || (*it).extInterface->compatible().count() == 0 ) {
-	    pop.insertItem( (*it).name(), i, firstDepKbd);
-	    if ( mkeyboard == &(*it) )
-		pop.setItemChecked( i, TRUE );
-
-	    firstDepKbd++;
-	} else if ( (*it).extInterface->compatible().contains(imname)) {
-	    // check if we need to insert a sep.
-	    if (firstDepKbd == i)
-		pop.insertSeparator();
-	    pop.insertItem( (*it).name(), i, -1);
-	    if ( mkeyboard == &(*it) )
-		pop.setItemChecked( i, TRUE );
+    if ( penBased->current() ) {
+	InputMethod *imethod = penBased->current();
+	if (imethod->style == InputMethod::Cooperative) {
+	    currentGM = imethod->coopInterface->gestureModifier();
+	    QWSServer::setCurrentGestureMethod( currentGM );
 	}
     }
 
-    QPoint pt = mapToGlobal(kbdChoice->geometry().topRight());
-    QSize s = pop.sizeHint();
-    pt.ry() -= s.height();
-    pt.rx() -= s.width();
-    i = pop.exec( pt );
-    if ( i == -1 )
-	return;
-    InputMethod *im = &inputMethodList[i];
-    chooseKeyboard(im);
+    checkGuessConnection(TRUE);
+    updateIMVisibility();
+    keyBased->blockSignals(FALSE);
+    penBased->blockSignals(FALSE);
 }
 
-void InputMethods::chooseIm()
+void InputMethods::checkConnect()
 {
-    QPopupMenu pop( this );
+    checkGuessConnection(TRUE);
+}
 
-    int i = 0;
-    QValueList<InputMethod>::Iterator it;
-    for ( it = inputModifierList.begin(); it != inputModifierList.end(); ++it, i++ ) {
-	pop.insertItem( (*it).name(), i );
-	if ( imethod == &(*it) )
-	    pop.setItemChecked( i, TRUE );
+void InputMethods::checkDisconnect()
+{
+    checkGuessConnection(FALSE);
+}
+
+void InputMethods::checkGuessConnection(bool connect)
+{
+    if (penBased->current() || keyBased->current()) {
+	InputMethod *pen = penBased->current();
+	InputMethod *key = keyBased->current();
+	bool penCoop = (pen && pen->style == InputMethod::Cooperative
+		    && pen->coopInterface->properties() & CoopInputMethodInterface::ProvidesGuess);
+	bool keyCoop = (key && key->style == InputMethod::Cooperative
+		&& key->coopInterface->properties() & CoopInputMethodInterface::InterpretsGuess);
+	if (penCoop || keyCoop)
+	{
+	    if (connect)
+		connectGuesses(penCoop ? pen->coopInterface : 0, keyCoop ? key->coopInterface : 0);
+	    else
+		disconnectGuesses(penCoop ? pen->coopInterface : 0, keyCoop ? key->coopInterface : 0);
+	}
+    }
+}
+
+void InputMethods::connectGuesses(CoopInputMethodInterface *peni,
+	CoopInputMethodInterface *keyi)
+{
+    if (!guessesConnected) {
+	guessesConnected = TRUE;
+	if (peni && keyi) {
+	    peni->connectAppendGuess(this,
+		    SLOT(addGuessToKey(const IMIGuessList &)));
+	    peni->connectRevertGuess(this,
+		    SLOT(revertGuessToKey()));
+	    peni->connectFunction(this,
+		    SLOT(functionToKey(const QString &)));
+
+	    keyi->connectAppendGuess(this,
+		    SLOT(addGuessToPen(const IMIGuessList &)));
+	    keyi->connectRevertGuess(this,
+		    SLOT(revertGuessToPen()));
+	    keyi->connectFunction(this,
+		    SLOT(functionToPen(const QString &)));
+	}
+	if (peni)
+	    peni->connectStateChanged(this, SLOT(updateIMVisibility()));
+	if (keyi)
+	    keyi->connectStateChanged(this, SLOT(updateIMVisibility()));
+    }
+}
+
+void InputMethods::disconnectGuesses(CoopInputMethodInterface *peni,
+	CoopInputMethodInterface *keyi)
+{
+    if (guessesConnected) {
+	guessesConnected = FALSE;
+	if (peni && keyi) {
+	    peni->disconnectAppendGuess(this,
+		    SLOT(addGuessToKey(const IMIGuessList &)));
+	    peni->disconnectRevertGuess(this,
+		    SLOT(revertGuessToKey()));
+	    peni->disconnectFunction(this,
+		    SLOT(functionToPen(const QString &)));
+
+	    keyi->disconnectAppendGuess(this,
+		    SLOT(addGuessToPen(const IMIGuessList &)));
+	    keyi->disconnectRevertGuess(this,
+		    SLOT(revertGuessToPen()));
+	    keyi->disconnectFunction(this,
+		    SLOT(functionToPen(const QString &)));
+	}
+	if (peni)
+	    peni->disconnectStateChanged(this, SLOT(updateIMVisibility()));
+	if (keyi)
+	    keyi->disconnectStateChanged(this, SLOT(updateIMVisibility()));
+    }
+}
+
+void InputMethods::addGuessToKey(const IMIGuessList &list)
+{
+    if (keyBased->current()
+	    && keyBased->current()->style == InputMethod::Cooperative)
+	keyBased->current()->coopInterface->appendGuess(list);
+}
+
+void InputMethods::revertGuessToKey()
+{
+    //XXX
+}
+
+void InputMethods::functionToKey(const QString &s)
+{
+    if (keyBased->current()
+	    && keyBased->current()->style == InputMethod::Cooperative)
+	keyBased->current()->coopInterface->function(s);
+}
+
+void InputMethods::addGuessToPen(const IMIGuessList &list)
+{
+    if (penBased->current()
+	    && penBased->current()->style == InputMethod::Cooperative)
+	penBased->current()->coopInterface->appendGuess(list);
+}
+
+void InputMethods::revertGuessToPen()
+{
+    //XXX
+}
+
+void InputMethods::functionToPen(const QString &s)
+{
+    if (penBased->current()
+	    && penBased->current()->style == InputMethod::Cooperative) {
+	penBased->current()->coopInterface->function(s);
+    }
+}
+
+void InputMethods::updateIMVisibility()
+{
+    // could use the int, but would need to check both types anyway.
+    //keyBased, penBased
+    if ( keyBased->count() == 0
+	    ||
+	    (keyBased->count() == 1 && keyBased->current()
+	    && keyBased->current()->style == InputMethod::Cooperative
+	    &&
+	    (keyBased->current()->coopInterface->state() == CoopInputMethodInterface::Sleeping 
+	     || keyBased->current()->coopInterface->restrictToHint() ) ) ) {
+	keyBased->hide();
+    } else {
+	keyBased->show();
     }
 
-    QPoint pt = mapToGlobal(imChoice->geometry().topRight());
-    QSize s = pop.sizeHint();
-    pt.ry() -= s.height();
-    pt.rx() -= s.width();
-    i = pop.exec( pt );
-    if ( i == -1 )
-	return;
-    InputMethod *im = &inputModifierList[i];
-
-    chooseMethod(im);
-}
-
-void InputMethods::chooseKeyboard(InputMethod* im)
-{
-    if ( im != mkeyboard ) {
-	if ( mkeyboard && mkeyboard->widget->isVisible() )
-	    mkeyboard->widget->hide();
-	mkeyboard = im;
-	kbdButton->setPixmap( *mkeyboard->icon() );
+    if ( penBased->count() == 0
+	    ||
+	    (penBased->count() == 1 && keyBased->current()
+	    && penBased->current()->style == InputMethod::Cooperative
+	    &&
+	    (penBased->current()->coopInterface->state() == CoopInputMethodInterface::Sleeping 
+	     || penBased->current()->coopInterface->restrictToHint() ) ) ) {
+	penBased->hide();
+#ifndef QTOPIA_PHONE
+    } else {
+	penBased->show();
+#endif
     }
-    if ( !kbdButton->isOn() )
-	kbdButton->setOn( TRUE );
-    else
-	showKbd( TRUE );
 }
 
-static bool keyboardCompatible(InputMethod *keyb, const QString &imname ) 
+void InputMethods::choosePenBased(InputMethod* imethod)
 {
-    if ( !keyb || !keyb->newIM || !keyb->extInterface->compatible().count() )
-	return TRUE;
-
-    if ( keyb->extInterface->compatible().contains(imname) )
-	return TRUE;
-    
-    return FALSE;
+    if (imethod && imethod->style == InputMethod::Cooperative) {
+	currentGM = imethod->coopInterface->gestureModifier();
+	QWSServer::setCurrentGestureMethod( currentGM );
+    } else {
+	QWSServer::setCurrentGestureMethod( 0 );
+	currentGM = 0;
+    }
+    checkGuessConnection(TRUE);
 }
 
 // Updates the display of the soft keyboards available to the current input method
 void InputMethods::updateKeyboards(InputMethod *im)
 {
-    uint count;
-
     if ( im ) {
 	QString imname = im->libName.mid(im->libName.findRev('/') + 1);
-
-	if ( mkeyboard && !keyboardCompatible(mkeyboard, imname) ) {
-	    kbdButton->setOn( FALSE );
-	    showKbd( FALSE );
-	    mkeyboard = 0;
-	}
-	
-	count = 0;
-
-	QValueList<InputMethod>::Iterator it;
-	for ( it = inputMethodList.begin(); it != inputMethodList.end(); ++it ) {
-	    if ( keyboardCompatible( &(*it), imname ) ) {
-		if ( !mkeyboard ) {
-		    mkeyboard = &(*it);
-		    kbdButton->setPixmap( *mkeyboard->icon() );
-		}
-
-		count++;
-	    } 
-	}
-    } else {
-	count = inputMethodList.count();
-	if ( count && !mkeyboard ) {
-	    mkeyboard = &inputMethodList[0];
-	    kbdButton->setPixmap( *mkeyboard->icon() );
-	} else {
-	    mkeyboard = 0;  //might be redundant
-	}
+	penBased->filterAgainst(imname);
     }
-
-    if ( count > 1 )
-	kbdChoice->show();
-    else 
-	kbdChoice->hide();
-
-    if ( count )
-	kbdButton->show();
-    else
-	kbdButton->hide();
 }
 
-void InputMethods::chooseMethod(InputMethod* im)
+void InputMethods::chooseKeyBased(InputMethod* imethod)
 {
-    if ( im != imethod ) {
-	updateKeyboards( im );
-	
+    updateKeyboards( imethod );
+
+    if ( imethod && imethod->style != InputMethod::Original ) {
+	if (imethod->style == InputMethod::Extended)
+	    currentIM = imethod->extInterface->inputMethod();
+	else
+	    currentIM = imethod->coopInterface->inputModifier();
+	QWSServer::setCurrentInputMethod( currentIM );
+    } else if (currentIM) {
 	QWSServer::setCurrentInputMethod( 0 );
-	imethod = im;
-	if ( imethod && imethod->newIM )
-	    QWSServer::setCurrentInputMethod( imethod->extInterface->inputMethod() );
-	else
-	    QWSServer::setCurrentInputMethod( 0 );
-	
-	if ( im )
-	    imButton->raiseWidget(im->widget);
-	else
-	    imButton->hide(); //### good UI? make sure it is shown again!
+	currentIM = 0;
     }
+    checkGuessConnection(TRUE);
 }
 
 void InputMethods::qcopReceive( const QCString &msg, const QByteArray &data )
 {
-    if ( imethod && imethod->newIM )
-	imethod->extInterface->qcopReceive( msg, data );
+    Q_INT32 wid = 0;
+    if ( msg == "inputMethodHint(int,int)" ) {
+	QDataStream ds(data, IO_ReadOnly);
+	int h;
+	ds >> h;
+	ds >> wid;
+	if (hintMap.contains(wid)) {
+	    switch (h) {
+		case (int)QPEApplication::Number:
+		    hintMap[wid] = "int";
+		    break;
+		case (int)QPEApplication::PhoneNumber:
+		    hintMap[wid] = "phone";
+		    break;
+		case (int)QPEApplication::Words:
+		    hintMap[wid] = "words";
+		    break;
+		case (int)QPEApplication::Text:
+		    hintMap[wid] = "text";
+		    break;
+		default:
+		    hintMap[wid] = QString::null;
+		    break;
+	    }
+	}
+    } else if ( msg == "inputMethodHint(QString,int)" ) {
+	QDataStream ds(data, IO_ReadOnly);
+	QString h;
+	ds >> h;
+	ds >> wid;
+	bool r;
+	if (h.right(4) == "only") {
+	    r = TRUE;
+	} else {
+	    r = FALSE;
+	}
+	if (hintMap.contains(wid))
+	    hintMap[wid] = h;
+	if (restrictMap.contains(wid))
+	    restrictMap[wid] = r;
+    }
+    if (wid && wid == lastActiveWindow)
+	updateHint(wid);
 }
 
-
-void InputMethods::showKbd( bool on )
+void InputMethods::updateHintMap(QWSWindow *w, QWSServer::WindowEvent e)
 {
-    if ( !mkeyboard )
+    if (!w)
 	return;
-
-    if ( on ) {
-	mkeyboard->resetState();
-	// HACK... Make the texteditor fit with all input methods
-	// Input methods should also never use more than about 40% of the screen
-	int height = QMIN( mkeyboard->widget->sizeHint().height(), 134 );
-	mkeyboard->widget->resize( qApp->desktop()->width(), height );
-	mkeyboard->widget->move( 0, mapToGlobal( QPoint() ).y() - height );
-	mkeyboard->widget->show();
-    } else {
-	mkeyboard->widget->hide();
+    // one signal can be multiple events.
+    if ((e & QWSServer::Create) == QWSServer::Create) {
+	if (!hintMap.contains(w->winId()))
+	    hintMap.insert(w->winId(), QString::null);
+	if (!restrictMap.contains(w->winId()))
+	    restrictMap.insert(w->winId(), FALSE);
+    } else if ((e & QWSServer::Destroy) == QWSServer::Destroy) {
+	if (hintMap.contains(w->winId()))
+	    hintMap.remove(w->winId());
+	if (restrictMap.contains(w->winId()))
+	    restrictMap.remove(w->winId());
     }
 
-    emit inputToggled( on );
+    if ( (e & QWSServer::Active) == QWSServer::Active
+	 && w->winId() != lastActiveWindow)  {
+	lastActiveWindow = w->winId();
+	updateHint(lastActiveWindow);
+    }
+}
+
+/* TODO: Also... if hint null, don't just set the hint, remove the IM/GM
+   Not a problem now, (well behaved plugins) but should be done for 
+   misbehaved plugins.
+ */
+void InputMethods::updateHint(int wid)
+{
+    InputMethod *imethod = keyBased->current();
+    if ( imethod ) {
+	if ( imethod->style == InputMethod::Extended ) {
+	    // fake a qcop
+	    QByteArray fakeData;
+	    QDataStream ds(fakeData, IO_WriteOnly);
+	    ds << hintMap[wid];
+	    imethod->extInterface->qcopReceive("inputMethodHint(QString)", fakeData);
+	} else if (imethod->style == InputMethod::Cooperative ) {
+	    imethod->coopInterface->setHint(hintMap[wid]);
+	    imethod->coopInterface->setRestrictToHint(restrictMap[wid]);
+	}
+    }
+
+    imethod = penBased->current();
+    if ( imethod ) {
+	if ( imethod->style == InputMethod::Extended ) {
+	    // fake a qcop
+	    QByteArray fakeData;
+	    QDataStream ds(fakeData, IO_WriteOnly);
+	    ds << hintMap[wid];
+	    imethod->extInterface->qcopReceive("inputMethodHint(QString)", fakeData);
+	} else if (imethod->style == InputMethod::Cooperative ) {
+	    imethod->coopInterface->setHint(hintMap[wid]);
+	    imethod->coopInterface->setRestrictToHint(restrictMap[wid]);
+	}
+    }
+    updateIMVisibility();
 }
 
 bool InputMethods::shown() const
 {
-    return mkeyboard && mkeyboard->widget->isVisible();
+    return penBased->current() && penBased->current()->widget && penBased->current()->widget->isVisible();
 }
 
 QString InputMethods::currentShown() const
 {
-    return mkeyboard && mkeyboard->widget->isVisible()
-	? mkeyboard->name() : QString::null;
+    return penBased->current() && penBased->current()->widget && penBased->current()->widget->isVisible()
+	? penBased->current()->name() : QString::null;
 }
 
 void InputMethods::sendKey( ushort unicode, ushort scancode, ushort mod, bool press, bool repeat )

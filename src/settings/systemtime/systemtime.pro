@@ -1,15 +1,22 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-
-CONFIG		+= qtopia warn_on release
+CONFIG		+= qtopiaapp
 
 HEADERS		= settime.h
-SOURCES		= settime.cpp
-
-multiprocess:SOURCES+=main.cpp
-
+SOURCES		= settime.cpp main.cpp
+TRANSLATABLES = $${HEADERS} $${SOURCES} 
 TARGET		= systemtime
 
-TRANSLATIONS = systemtime-en_GB.ts systemtime-de.ts systemtime-ja.ts systemtime-no.ts
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/systemtime*
+help.path=/help/html
+
+timeservice.files+=$${QTOPIA_DEPOT_PATH}/services/Time/systemtime
+dateservice.files+=$${QTOPIA_DEPOT_PATH}/services/Date/systemtime
+timeservice.path=/services/Time
+dateservice.path=/services/Date
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/datetime.desktop
+desktop.path=/apps/Settings
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/systemtime/*
+pics.path=/pics/systemtime
+INSTALLS	+= desktop help dateservice timeservice
+PICS_INSTALLS+=pics
+
+PACKAGE_DESCRIPTION=Date/time setting dialog for the Qtopia environment.

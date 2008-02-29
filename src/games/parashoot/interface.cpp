@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,6 +37,7 @@
 #include "man.h"
 
 #include <qtopia/resource.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qlabel.h>
 #include <qmessagebox.h>
@@ -29,18 +45,28 @@
 #include <qstyle.h>
 #include <qtopia/qpetoolbar.h>
 #include <qtoolbutton.h>
+#include <qaction.h>
+
+#ifdef QTOPIA_PHONE
+#include <qtopia/contextmenu.h>
+#endif
  
 ParaShoot::ParaShoot(QWidget* parent, const char* name, WFlags f) :
     QMainWindow(parent,name,f),
     cannon(NULL),
     base(NULL),
+    updatespeed(80),
+    gamestopped(true),
+    finished(true),
+    waitover(true),
     fanfare("level_up"),
     score(0)
 {
+    QPEApplication::grabKeyboard();
+    QPEApplication::setInputMethodHint( this, QPEApplication::AlwaysOff );
     canvas.setAdvancePeriod(80);
 
     pb = new QCanvasView(&canvas, this);
-    pb->setFocus();
 
     setToolBarsMovable( FALSE );
 
@@ -48,8 +74,21 @@ ParaShoot::ParaShoot(QWidget* parent, const char* name, WFlags f) :
     toolbar->setHorizontalStretchable( TRUE );
 
     setCaption( tr("ParaShoot") );
-    new QToolButton( Resource::loadIconSet("ParaShoot"), tr("New Game"), 0,
+
+#ifdef QTOPIA_PHONE
+
+    ContextMenu *menu = new ContextMenu( this );
+    QAction *action;
+    action = new QAction( tr("New Game"), QString::null, 0, this, 0 );
+    connect( action, SIGNAL(activated()), this, SLOT(newGame()) );
+    action->setWhatsThis( tr("Start a new game") );
+    action->addTo( menu );
+    action->setEnabled( TRUE );
+
+#else
+    new QToolButton( Resource::loadPixmap("ParaShoot"), tr("New Game"), 0,
                            this, SLOT(newGame()), toolbar, "New Game");
+#endif
 
     levelscore = new QLabel(toolbar);
     levelscore->setBackgroundMode( PaletteButton );
@@ -66,8 +105,23 @@ ParaShoot::ParaShoot(QWidget* parent, const char* name, WFlags f) :
     connect(pauseTimer, SIGNAL(timeout()), this, SLOT(wait()) ); 
 
     setFocusPolicy(StrongFocus);
+
+#ifdef QTOPIA_PHONE
+    newGame();
+#endif
 }
 
+#ifndef QTOPIA_PHONE
+void ParaShoot::closeEvent( QCloseEvent* e )
+{
+    clear();
+    pauseTimer->stop();
+    showScore(0,0);
+    finished = gamestopped = false;
+    waitover = true;
+    e->accept();
+}
+#endif
 
 void ParaShoot::resizeEvent(QResizeEvent *)
 {
@@ -93,14 +147,20 @@ void ParaShoot::resizeEvent(QResizeEvent *)
 
 void ParaShoot::focusOutEvent (QFocusEvent *) 
 {
-    if (!gamestopped)
+    if ( !gamestopped )
+    {
 	canvas.setAdvancePeriod(-1);
+	gamestopped = true;
+    }
 }
 
 void ParaShoot::focusInEvent (QFocusEvent *) 
 {
-    if (!gamestopped)
+    if ( gamestopped )
+    {
 	canvas.setAdvancePeriod(updatespeed);
+	gamestopped = false;
+    }
 }
 
 void ParaShoot::showScore( int score, int level )
@@ -124,7 +184,7 @@ void ParaShoot::newGame()
     level = 0;
     updatespeed = 80;
     showScore(0,0);
-    gamestopped = false;
+    finished = gamestopped = false;
     Helicopter::deleteAll();
     waitover = true;
     base = new Base(&canvas);
@@ -146,6 +206,8 @@ void ParaShoot::clear()
 
 void ParaShoot::gameOver()
 {
+#define DEFAULT_TEXT_SIZE 20
+
     QCanvasItem* item;
     QCanvasItemList l = canvas.allItems();
     for (QCanvasItemList::Iterator it=l.begin(); it!=l.end(); ++it) { 
@@ -162,18 +224,24 @@ void ParaShoot::gameOver()
     if ( shotsFired == 0 ) 
 	shotsFired = 1;
     QCanvasText* gameover = new QCanvasText(
-		     tr( "       GAME OVER!\n"
-			 "       Your Score:  %1\n"
-			 " Parachuters Killed: %2\n"
-			 "        Accuracy: %3% " ).arg(score).arg(shots).arg(shots * 100 / shotsFired ), 
-		                     &canvas);
-    gameover->setColor(red);
-    gameover->setFont( QFont("times", 16, QFont::Bold) );
-    gameover->move((canvas.width() - gameover->boundingRect().width()) / 2,
-	(canvas.height() - gameover->boundingRect().height()) / 2);
+        tr( "GAME OVER!\n"
+        "Your Score: %1\n"
+        "Parachuters Killed: %2\n"
+        "Accuracy: %3% " )
+        .arg( score ).arg( shots ).arg( shots * 100 / shotsFired ), &canvas );
+    gameover->setTextFlags( Qt::AlignCenter );
+    gameover->setColor( Qt::yellow );
+    
+    int size = DEFAULT_TEXT_SIZE;
+    do gameover->setFont( QFont( "times", size, QFont::Bold ) );
+    while( ( gameover->boundingRect().width() > canvas.width() ||
+        gameover->boundingRect().height() > canvas.height() ) && --size );
+    
+    gameover->move( canvas.width() / 2, canvas.height() / 2 );
+    
     gameover->setZ(500);
     gameover->show();
-    gamestopped = true;
+    finished = gamestopped = true;
     waitover = false;
     pauseTimer->start(3000);
 }
@@ -235,8 +303,12 @@ void ParaShoot::moveFaster()
 
 void ParaShoot::keyPressEvent(QKeyEvent* event)
 {
-    if (gamestopped) {
-	if (waitover)
+#ifdef QTOPIA_PHONE
+    if (event->key() == Key_Back || event->key() == Key_No)
+	QMainWindow::keyPressEvent(event);
+#endif
+    if ( gamestopped || finished ) {
+	if ( finished && waitover )
 	    newGame();
 	else 
 	    return;
@@ -246,6 +318,9 @@ void ParaShoot::keyPressEvent(QKeyEvent* event)
 	  case Key_F1:
 	  case Key_F9:
 	  case Key_Space:
+#ifdef QTOPIA_PHONE
+	  case Key_Select:
+#endif
 	    cannon->shoot();
 	    break;
 	  case Key_Left:

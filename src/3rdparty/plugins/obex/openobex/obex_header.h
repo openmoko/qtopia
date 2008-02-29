@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*********************************************************************
  *                
  *                
@@ -7,7 +28,7 @@
  * Status:        Stable.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon Mar  1 10:30:54 1999
- * CVS ID:        $Id: obex_header.h,v 1.5 2000/12/01 13:21:16 pof Exp $
+ * CVS ID:        $Id: obex_header.h,v 1.7 2002/11/13 19:51:42 zany Exp $
  * 
  *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *     
@@ -40,7 +61,9 @@
 #define OBEX_INT         0xc0
 
 #ifdef _WIN32
+#ifndef PACKED
 #define PACKED
+#endif
 #else
 #define PACKED __attribute__((packed))
 #endif
@@ -51,8 +74,8 @@
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_common_hdr {
-	guint8  opcode;
-	guint16 len;
+	uint8_t  opcode;
+	uint16_t len;
 } PACKED;
 
 
@@ -63,9 +86,9 @@ typedef struct obex_common_hdr obex_common_hdr_t;
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_connect_hdr {
-	guint8  version;
-	guint8  flags;
-	guint16 mtu;
+	uint8_t  version;
+	uint8_t  flags;
+	uint16_t mtu;
 } PACKED;
 typedef struct obex_connect_hdr obex_connect_hdr_t;
 
@@ -73,49 +96,49 @@ typedef struct obex_connect_hdr obex_connect_hdr_t;
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_uint_hdr {
-	guint8  hi;
-	guint32 hv;
+	uint8_t  hi;
+	uint32_t hv;
 } PACKED;
 
 #ifdef _WIN32
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_ubyte_hdr {
-	guint8 hi;
-	guint8 hv;
+	uint8_t hi;
+	uint8_t hv;
 } PACKED;
 
 #ifdef _WIN32
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_unicode_hdr {
-	guint8  hi;
-	guint16 hl;
-	guint8  hv[0];
+	uint8_t  hi;
+	uint16_t hl;
+	uint8_t  hv[0];
 } PACKED;
 
 #define obex_byte_stream_hdr obex_unicode_hdr
 
 typedef struct {
-	guint8 identifier;    /* Header ID */
-	gint  length;         /* Total lenght of header */
+	uint8_t identifier;    /* Header ID */
+	int  length;         /* Total lenght of header */
 
-	gint  val_size;       /* Size of value */
+	int  val_size;       /* Size of value */
 	union {
-		gint   integer;
+		int   integer;
 		char   *string;
-		guint8 *oct_seq;
+		uint8_t *oct_seq;
 	} t;
 } obex_header_t;
 
-gint insert_uint_header(GNetBuf *msg, guint8 identifier, guint32 value);
-gint insert_ubyte_header(GNetBuf *msg, guint8 identifier, guint8 value);
-gint insert_unicode_header(GNetBuf *msg, guint8 opcode, const guint8 *text,
-				gint size);
+int insert_uint_header(GNetBuf *msg, uint8_t identifier, uint32_t value);
+int insert_ubyte_header(GNetBuf *msg, uint8_t identifier, uint8_t value);
+int insert_unicode_header(GNetBuf *msg, uint8_t opcode, const uint8_t *text,
+				int size);
 
-gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode, 
-			const guint8 *stream, gint size);
+int insert_byte_stream_header(GNetBuf *msg, uint8_t opcode, 
+			const uint8_t *stream, int size);
 
-gint obex_extract_header(GNetBuf *msg, obex_header_t *header);
+int obex_extract_header(GNetBuf *msg, obex_header_t *header);
 
 #endif

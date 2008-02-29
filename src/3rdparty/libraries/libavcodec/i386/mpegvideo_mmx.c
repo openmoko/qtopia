@@ -23,11 +23,9 @@
 #include "../dsputil.h"
 #include "../mpegvideo.h"
 #include "../avcodec.h"
-#include "../simple_idct.h"
 
-extern UINT8 zigzag_direct_noperm[64];
-extern UINT16 inv_zigzag_direct16[64];
-extern UINT32 inverse[256];
+extern uint8_t zigzag_direct_noperm[64];
+extern uint16_t inv_zigzag_direct16[64];
 
 static const unsigned long long int mm_wabs __attribute__ ((aligned(8))) = 0xffffffffffffffffULL;
 static const unsigned long long int mm_wone __attribute__ ((aligned(8))) = 0x0001000100010001ULL;
@@ -144,7 +142,7 @@ static void dct_unquantize_mpeg1_mmx(MpegEncContext *s,
                                      DCTELEM *block, int n, int qscale)
 {
     int nCoeffs;
-    const UINT16 *quant_matrix;
+    const uint16_t *quant_matrix;
 
     assert(s->block_last_index[n]>=0);
 
@@ -272,7 +270,7 @@ static void dct_unquantize_mpeg2_mmx(MpegEncContext *s,
                                      DCTELEM *block, int n, int qscale)
 {
     int nCoeffs;
-    const UINT16 *quant_matrix;
+    const uint16_t *quant_matrix;
     
     assert(s->block_last_index[n]>=0);
 
@@ -404,9 +402,9 @@ asm volatile(
 
 /* draw the edges of width 'w' of an image of size width, height 
    this mmx version can only handle w==8 || w==16 */
-static void draw_edges_mmx(UINT8 *buf, int wrap, int width, int height, int w)
+static void draw_edges_mmx(uint8_t *buf, int wrap, int width, int height, int w)
 {
-    UINT8 *ptr, *last_line;
+    uint8_t *ptr, *last_line;
     int i;
 
     last_line = buf + (height - 1) * wrap;
@@ -492,46 +490,20 @@ static void draw_edges_mmx(UINT8 *buf, int wrap, int width, int height, int w)
 
 #undef HAVE_MMX2
 #define RENAME(a) a ## _MMX
+#define RENAMEl(a) a ## _mmx
 #include "mpegvideo_mmx_template.c"
 
 #define HAVE_MMX2
 #undef RENAME
+#undef RENAMEl
 #define RENAME(a) a ## _MMX2
+#define RENAMEl(a) a ## _mmx2
 #include "mpegvideo_mmx_template.c"
-
-/* external functions, from idct_mmx.c */
-void ff_mmx_idct(DCTELEM *block);
-void ff_mmxext_idct(DCTELEM *block);
-
-/* XXX: those functions should be suppressed ASAP when all IDCTs are
-   converted */
-static void ff_libmpeg2mmx_idct_put(UINT8 *dest, int line_size, DCTELEM *block)
-{
-    ff_mmx_idct (block);
-    put_pixels_clamped_mmx(block, dest, line_size);
-}
-static void ff_libmpeg2mmx_idct_add(UINT8 *dest, int line_size, DCTELEM *block)
-{
-    ff_mmx_idct (block);
-    add_pixels_clamped_mmx(block, dest, line_size);
-}
-static void ff_libmpeg2mmx2_idct_put(UINT8 *dest, int line_size, DCTELEM *block)
-{
-    ff_mmxext_idct (block);
-    put_pixels_clamped_mmx(block, dest, line_size);
-}
-static void ff_libmpeg2mmx2_idct_add(UINT8 *dest, int line_size, DCTELEM *block)
-{
-    ff_mmxext_idct (block);
-    add_pixels_clamped_mmx(block, dest, line_size);
-}
 
 void MPV_common_init_mmx(MpegEncContext *s)
 {
     if (mm_flags & MM_MMX) {
-        int i;
         const int dct_algo = s->avctx->dct_algo;
-        const int idct_algo= s->avctx->idct_algo;
         
         s->dct_unquantize_h263 = dct_unquantize_h263_mmx;
         s->dct_unquantize_mpeg1 = dct_unquantize_mpeg1_mmx;
@@ -540,28 +512,11 @@ void MPV_common_init_mmx(MpegEncContext *s)
         draw_edges = draw_edges_mmx;
 
         if(dct_algo==FF_DCT_AUTO || dct_algo==FF_DCT_MMX){
-            s->fdct = ff_fdct_mmx;
-
             if(mm_flags & MM_MMXEXT){
                 s->dct_quantize= dct_quantize_MMX2;
             } else {
                 s->dct_quantize= dct_quantize_MMX;
             }
-        }
-
-        if(idct_algo==FF_IDCT_AUTO || idct_algo==FF_IDCT_SIMPLEMMX){
-            s->idct_put= ff_simple_idct_put_mmx;
-            s->idct_add= ff_simple_idct_add_mmx;
-            s->idct_permutation_type= FF_SIMPLE_IDCT_PERM;
-        }else if(idct_algo==FF_IDCT_LIBMPEG2MMX){
-            if(mm_flags & MM_MMXEXT){
-                s->idct_put= ff_libmpeg2mmx2_idct_put;
-                s->idct_add= ff_libmpeg2mmx2_idct_add;
-            }else{
-                s->idct_put= ff_libmpeg2mmx_idct_put;
-                s->idct_add= ff_libmpeg2mmx_idct_add;
-            }
-            s->idct_permutation_type= FF_LIBMPEG2_IDCT_PERM;
         }
     }
 }

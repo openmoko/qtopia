@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia1/datepicker.cpp:343 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia1/datepicker.cpp:394 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,19 +14,26 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QPEDatePicker Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QPEDatePicker Class Reference</h1>
 
 <p>The QPEDatePicker class allows a date to be selected from a
 calendar view.
 <a href="#details">More...</a>
 <p><tt>#include &lt;<a href="datepicker-h.html">qtopia/datepicker.h</a>&gt;</tt>
-<p>Inherits <a href="qvbox.html">QVBox</a>.
 <p><a href="qpedatepicker-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
@@ -58,38 +65,42 @@ The QPEDatePicker class allows a date to be selected from a
 calendar view.
 <p> QPEDatePicker comprises a header to select month and year and a
 calendar view to select the date.
+<p> First availability: Qtopia 1.6
 <p> 
 <p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
 
 <hr><h2>Member Function Documentation</h2>
-<h3 class=fn><a name="QPEDatePicker"></a>QPEDatePicker::QPEDatePicker ( <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+<h3 class=fn><a name="QPEDatePicker"></a>QPEDatePicker::QPEDatePicker ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
 </h3>
 Constructs a QPEDatePicker.
+The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
 
 <h3 class=fn><a name="~QPEDatePicker"></a>QPEDatePicker::~QPEDatePicker ()<tt> [virtual]</tt>
 </h3>
 Destructs QPEDatePicker.
 
-<h3 class=fn>void <a name="dateClicked"></a>QPEDatePicker::dateClicked ( const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;&nbsp;date )<tt> [signal]</tt>
+<h3 class=fn>void <a name="dateClicked"></a>QPEDatePicker::dateClicked ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )<tt> [signal]</tt>
 </h3>
 
 <p> This signal is emitted when a date in the calendar is clicked.
 <em>date</em> contains the date that was clicked
 
-<h3 class=fn>void <a name="paintDay"></a>QPEDatePicker::paintDay ( const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;&nbsp;cDay, <a href="qpainter.html">QPainter</a>&nbsp;*&nbsp;p, const&nbsp;<a href="qrect.html">QRect</a>&nbsp;&amp;&nbsp;cr, const&nbsp;<a href="qcolorgroup.html">QColorGroup</a>&nbsp;&amp;&nbsp;cg )<tt> [virtual protected]</tt>
+<h3 class=fn>void <a name="paintDay"></a>QPEDatePicker::paintDay ( const&nbsp;QDate&nbsp;&amp;&nbsp;cDay, QPainter&nbsp;*&nbsp;p, const&nbsp;QRect&nbsp;&amp;&nbsp;cr, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg )<tt> [virtual protected]</tt>
 </h3>
-Paints a single day <em>cDay</em> in the calendar using <em>p</em>.  The cell
-geometry is <em>cr</em>.
+Paints a single day <em>cDay</em> in the calendar using
+painter <em>p</em> and color group <em>cg</em>.
+The cell geometry is <em>cr</em>.
 <p> The default implementation draws the day of the month in the top left
 corner of the cell.
 
-<h3 class=fn>void <a name="paintDayBackground"></a>QPEDatePicker::paintDayBackground ( const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;, <a href="qpainter.html">QPainter</a>&nbsp;*&nbsp;p, const&nbsp;<a href="qrect.html">QRect</a>&nbsp;&amp;&nbsp;cr, const&nbsp;<a href="qcolorgroup.html">QColorGroup</a>&nbsp;&amp;&nbsp;cg )<tt> [virtual protected]</tt>
+<h3 class=fn>void <a name="paintDayBackground"></a>QPEDatePicker::paintDayBackground ( const QDate &amp;, QPainter&nbsp;*&nbsp;p, const&nbsp;QRect&nbsp;&amp;&nbsp;cr, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg )<tt> [virtual protected]</tt>
 </h3>
-Paints the background of a single day in the calendar using <em>p</em>.
+Paints the background of a single day in the calendar using
+painter <em>p</em> and color group <em>cg</em>.
 The cell geometry is <em>cr</em>.
 <p> The default implementation fills with the base color.
 
-<h3 class=fn><a href="qdate.html">QDate</a> <a name="selectedDate"></a>QPEDatePicker::selectedDate () const
+<h3 class=fn>QDate <a name="selectedDate"></a>QPEDatePicker::selectedDate () const
 </h3>
 Returns the selected date.
 
@@ -103,7 +114,7 @@ selected date.
 </h3>
 Sets the current date to year <em>y</em>, month <em>m</em> and day <em>d</em>.
 
-<h3 class=fn>void <a name="setDate-3"></a>QPEDatePicker::setDate ( const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;&nbsp;d )<tt> [virtual slot]</tt>
+<h3 class=fn>void <a name="setDate-3"></a>QPEDatePicker::setDate ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )<tt> [virtual slot]</tt>
 </h3>
 Sets the selected date to <em>d</em>.
 
@@ -120,11 +131,13 @@ Returns TRUE if the beginning of the week is Monday.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

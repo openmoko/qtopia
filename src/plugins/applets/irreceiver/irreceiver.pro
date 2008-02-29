@@ -1,11 +1,13 @@
-TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
-HEADERS		= irreceiver.h irreceiverappletimpl.h
-SOURCES		= irreceiver.cpp irreceiverappletimpl.cpp
-TARGET		= irreceiverapplet
-DESTDIR		= $(QPEDIR)/plugins/applets
-VERSION		= 1.0.0
+CONFIG		+= qtopiaplugin
 
-TRANSLATIONS = libirreceiverapplet-en_GB.ts libirreceiverapplet-de.ts libirreceiverapplet-ja.ts libirreceiverapplet-no.ts
+TARGET		= irreceiverapplet
+
+HEADERS		= irreceiver.h irreceiverappletimpl.h ircontroller.h
+SOURCES		= irreceiver.cpp irreceiverappletimpl.cpp ircontroller.cpp
+
+TRANSLATABLES = $${HEADERS} $${SOURCES}
+
+desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/applets/irreceiverapplet.desktop
+desktop.path=/plugins/applets/
+
+INSTALLS+=desktop

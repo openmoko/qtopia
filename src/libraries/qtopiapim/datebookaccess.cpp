@@ -1,19 +1,34 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
-** Contact info\@trolltech.com if any conditions of this licensing are
+** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
@@ -89,6 +104,8 @@ void DateBookAccess::updateEvent(const PimEvent& event)
     QCopEnvelope e(Service::channel("Calendar"),
 	    "updateEvent(PimEvent)");
     e << event;
+#else
+    Q_UNUSED( event );
 #endif
 }
 
@@ -105,6 +122,8 @@ void DateBookAccess::removeEvent(const PimEvent& ev)
 	    "removeEvent(PimEvent)");
 
     e << ev;
+#else
+    Q_UNUSED( ev );
 #endif
 }
 
@@ -113,6 +132,10 @@ void DateBookAccess::removeEvent(const PimEvent& ev)
  the pim data.
 
  Adding event requires the Events service to be available.
+
+ If the event is added correctly, an addedEvent(int,PimEvent) message will be 
+ sent to the QPE/PIM channel.  The event in this message can be used to determine
+ the assigned ID.
  */
 void DateBookAccess::addEvent(const PimEvent& ev)
 {
@@ -121,6 +144,8 @@ void DateBookAccess::addEvent(const PimEvent& ev)
 	    "addEvent(PimEvent)");
 
     e << ev;
+#else
+    Q_UNUSED( ev );
 #endif
 }
 

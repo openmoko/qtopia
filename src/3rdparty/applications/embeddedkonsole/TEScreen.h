@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* -------------------------------------------------------------------------- */
 /*                                                                            */
 /* [te_screen.h]                 Screen Data Type                             */
@@ -10,9 +31,7 @@
 /*                                                                            */
 /* -------------------------------------------------------------------------- */
 /*									      */
-/* Ported Konsole to Qt/Embedded                                              */
-/*									      */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
+/* Konsole ported to Qt/Embedded by Trolltech                                 */
 /*									      */
 /* -------------------------------------------------------------------------- */
 
@@ -180,12 +199,12 @@ private: // helper
 private:
 
     /*
-       The state of the screen is more complex as one would
-       expect first. The screem does really do part of the
-       emulation providing state informations in form of modes,
+       The state of the screen is more complex than one would
+       first expect. The screen actually does part of the
+       emulation, providing state information in the form of modes,
        margins, tabulators, cursor etc.
 
-       Even more unexpected are variables to save and restore
+       Even more unexpected are the variables to save and restore
        parts of the state.
     */
 
@@ -197,7 +216,7 @@ private:
 
     // history buffer ---------------
 
-    int histCursor;   // display position relative to start of the history buffer
+    int histCursor;   // display position relative to the start of the history buffer
     HistoryScroll hist;
     
     // cursor location

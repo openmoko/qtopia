@@ -1,11 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=Files
 [Desktop Entry]
-Comment = A File Manager Program
-Exec = filebrowser
-File = ../apps/Applications/filebrowser
-Icon = FileBrowser
-Name = File Manager
-Name[ja]=ファイルマネージャ
-Name[de] = Datei Manager
-Name[no] = Filviser
-Type = Application
-Name[hu]=Intézõ
+Comment[]=A File Manager Program
+Exec=filebrowser
+Icon=FileBrowser
+Name[]=Files
+Type=Application

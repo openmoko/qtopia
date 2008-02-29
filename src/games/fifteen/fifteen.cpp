@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,6 +37,7 @@
 
 #include <qtopia/resource.h>
 #include <qtopia/config.h>
+#include <qtopia/contextmenu.h>
 
 #include <qvbox.h>
 #include <qaction.h>
@@ -41,35 +57,43 @@
 FifteenMainWindow::FifteenMainWindow(QWidget *parent, const char* name, WFlags fl)
   : QMainWindow( parent, name, fl )
 {
-  // random seed
-  srand(time(0));
+    // random seed
+    srand(time(0));
 
-  setToolBarsMovable( FALSE );
-  QVBox *vbox = new QVBox( this );
-  PiecesTable *table = new PiecesTable( vbox );
-  setCentralWidget(vbox);
+    setCaption(tr("Fifteen Pieces"));
+    setToolBarsMovable( FALSE );
+    QVBox *vbox = new QVBox( this );
+    PiecesTable *table = new PiecesTable( vbox );
+    table->setFocus();
+    setCentralWidget(vbox);
 
-  QPEToolBar *toolbar = new QPEToolBar(this);
-  toolbar->setHorizontalStretchable( FALSE );
+    QIconSet   newicon( Resource::loadPixmap("Fifteen"));
 
-  QPixmap   newicon = Resource::loadPixmap("Fifteen");
-  (void)new QToolButton(newicon, tr("New Game"), 0,
-	table, SLOT(slotRandomize()), toolbar, "New Game");
+#ifdef QTOPIA_PHONE
+    ContextMenu* menu = new ContextMenu(this);
+    menu->insertItem(newicon, tr("Shuffle"), table, SLOT(slotRandomize()));
+#else
+    QPEToolBar *toolbar = new QPEToolBar(this);
+    toolbar->setHorizontalStretchable( FALSE );
+
+    (void)new QToolButton(newicon, tr("Shuffle"), 0,
+	  table, SLOT(slotRandomize()), toolbar, "New Game");
 
     /* This is pointless and confusing.
-  a = new QAction( tr( "Solve" ), Resource::loadIconSet( "repeat" ),
-		   QString::null, 0, this, 0 );
-  connect( a, SIGNAL( activated() ), table, SLOT( slotReset() ) );
-  a->addTo( game );
-  a->addTo( toolbar );
+    a = new QAction( tr( "Solve" ), Resource::loadIconSet( "repeat" ),
+		     QString::null, 0, this, 0 );
+    connect( a, SIGNAL( activated() ), table, SLOT( slotReset() ) );
+    a->addTo( game );
+    a->addTo( toolbar );
     */
+#endif
 }
 
 PiecesTable::PiecesTable(QWidget* parent, const char* name )
   : QTableView(parent, name), _menu(0), _randomized(false)
 {
   // setup table view
-  setFrameStyle(StyledPanel | Sunken);
+  setFrameStyle(NoFrame);
   setBackgroundMode(NoBackground);
   setMouseTracking(true);
 
@@ -269,7 +293,7 @@ void PiecesTable::checkwin()
 
   if (i == 16) {
     QMessageBox::information(this, tr("Fifteen Pieces"),
-			     tr("Congratulations!\nYou win the game!"));
+			     tr("Congratulations!<br>You win the game!"));
     _randomized = FALSE;
   }
 
@@ -284,6 +308,25 @@ void PiecesTable::slotReset()
 {
   initMap();
   repaint();
+}
+
+void PiecesTable::keyPressEvent(QKeyEvent* e)
+{
+    int fpos = _map.find(15);
+    int y = fpos / numCols();
+    int x = fpos % numCols();
+
+    switch ( e->key() ) {
+	case Key_Right: x--; x--;
+	case Key_Left: x++; y++;
+	case Key_Down: y--; y--;
+	case Key_Up: y++;
+	push(x,y);
+	e->accept();
+    default:
+	QTableView::keyPressEvent(e);
+	return;
+    }
 }
 
 void PiecesTable::mousePressEvent(QMouseEvent* e)
@@ -312,8 +355,16 @@ void PiecesTable::mousePressEvent(QMouseEvent* e)
     default:
       break;
     }
+  } else {
+    // find click position
+    int row = findRow(e->y());
+    int col = findCol(e->x());
+    push(col,row);
   }
-  else {
+}
+
+void PiecesTable::push(int col, int row)
+{
     // GAME LOGIC
 
     // find the free position
@@ -322,10 +373,6 @@ void PiecesTable::mousePressEvent(QMouseEvent* e)
 
     int frow = pos / numCols();
     int fcol = pos - frow * numCols();
-
-    // find click position
-    int row = findRow(e->y());
-    int col = findCol(e->x());
 
     // sanity check
     if (row < 0 || row >= numRows()) return;
@@ -373,5 +420,4 @@ void PiecesTable::mousePressEvent(QMouseEvent* e)
 
     // check if the player wins with this move
     checkwin();
-  }
 }

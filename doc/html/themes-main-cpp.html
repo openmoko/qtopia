@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -33,7 +35,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file of the Wood-Theme: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/themes/wood.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/themes/wood.h   2.3.9   edited 2004-12-13 $
 **
 ** Definition of something or other
 **
@@ -96,7 +98,7 @@ private:
   <hr>
 
   Implementation of the Wood-Theme: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/themes/wood.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/themes/wood.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -845,7 +847,7 @@ NorwegianWoodStyle::NorwegianWoodStyle( int sbext ) : <a href="qwindowsstyle.htm
 /*!
   Reimplementation from QStyle
  */
-void <a name="51"></a>NorwegianWoodStyle::polish( <a href="qapplication.html">QApplication</a> *app)
+void <a name="94"></a>NorwegianWoodStyle::polish( <a href="qapplication.html">QApplication</a> *app)
 {
 
     oldPalette = app-&gt;<a href="qapplication.html#3e6f87">palette</a>();
@@ -944,7 +946,7 @@ void <a name="51"></a>NorwegianWoodStyle::polish( <a href="qapplication.html">QA
 
 }
 
-void <a name="52"></a>NorwegianWoodStyle::unPolish( <a href="qapplication.html">QApplication</a> *app)
+void <a name="95"></a>NorwegianWoodStyle::unPolish( <a href="qapplication.html">QApplication</a> *app)
 {
     app-&gt;<a href="qapplication.html#63c60d">setPalette</a>(oldPalette, TRUE);
 }
@@ -952,7 +954,7 @@ void <a name="52"></a>NorwegianWoodStyle::unPolish( <a href="qapplication.html">
 /*!
   Reimplementation from QStyle
  */
-void <a name="51"></a>NorwegianWoodStyle::polish( <a href="qwidget.html">QWidget</a>* w)
+void <a name="94"></a>NorwegianWoodStyle::polish( <a href="qwidget.html">QWidget</a>* w)
 {
 
     // the polish function sets some widgets to transparent mode and
@@ -979,7 +981,7 @@ void <a name="51"></a>NorwegianWoodStyle::polish( <a href="qwidget.html">QWidget
     }
 }
 
-void <a name="52"></a>NorwegianWoodStyle::unPolish( <a href="qwidget.html">QWidget</a>* w)
+void <a name="95"></a>NorwegianWoodStyle::unPolish( <a href="qwidget.html">QWidget</a>* w)
 {
     // the polish function sets some widgets to transparent mode and
     // some to translate background mode in order to get the full
@@ -1065,7 +1067,7 @@ static void get_combo_parameters( const QRect &amp;r,
     ax = r.<a href="qrect.html#fccae7">x</a>() + r.<a href="qrect.html#45fe95">width</a>() - ew +(ew-awh)/2;
 }
 
-void <a name="53"></a>NorwegianWoodStyle::drawComboButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="96"></a>NorwegianWoodStyle::drawComboButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                                     const QColorGroup &amp;g,
                                     bool /* sunken */,
                                     bool editable,
@@ -1077,7 +1079,7 @@ void <a name="53"></a>NorwegianWoodStyle::drawComboButton( <a href="qpainter.htm
     int awh, ax, ay, sh, sy, dh, ew;
     get_combo_parameters( buttonRect(x,y,w,h), ew, awh, ax, ay, sh, dh, sy );
 
-    <a href=#56>drawButton</a>( p, x, y, w, h, g, FALSE, &amp;fill );
+    <a href=#99>drawButton</a>( p, x, y, w, h, g, FALSE, &amp;fill );
 
     qDrawArrow( p, DownArrow, MotifStyle, FALSE,
                 ax, ay, awh, awh, g, TRUE );
@@ -1100,7 +1102,7 @@ static inline int buttonthickness( int d )
 
 enum { PointUp, PointDown, PointLeft, PointRight };
 
-void <a name="54"></a>NorwegianWoodStyle::drawSemicircleButton( <a href="qpainter.html">QPainter</a> *p, const QRect &amp;r, 
+void <a name="97"></a>NorwegianWoodStyle::drawSemicircleButton( <a href="qpainter.html">QPainter</a> *p, const QRect &amp;r, 
                                                int dir, bool sunken,
                                                const QColorGroup &amp;g )
 {
@@ -1150,7 +1152,7 @@ void <a name="54"></a>NorwegianWoodStyle::drawSemicircleButton( <a href="qpainte
     p-&gt;<a href="qpainter.html#15cc78">setClipRegion</a>( oldClip );
 }
 
-void <a name="55"></a>NorwegianWoodStyle::drawScrollBarControls( <a href="qpainter.html">QPainter</a>* p, const QScrollBar* sb,
+void <a name="98"></a>NorwegianWoodStyle::drawScrollBarControls( <a href="qpainter.html">QPainter</a>* p, const QScrollBar* sb,
                                                 int sliderStart, uint controls,
                                                 uint activeControl )
 {
@@ -1167,19 +1169,19 @@ void <a name="55"></a>NorwegianWoodStyle::drawScrollBarControls( <a href="qpaint
         <a href="qrect.html">QRect</a> r( b, b, w-2*b, w-2*b ) ;
         if ( horz ) {
             r.<a href="qrect.html#3de222">moveBy</a>( sb-&gt;width() - w, 0 );
-            <a href=#54>drawSemicircleButton</a>( p, r, PointRight, sunken, g );
+            <a href=#97>drawSemicircleButton</a>( p, r, PointRight, sunken, g );
         } else {
             r.<a href="qrect.html#3de222">moveBy</a>( 0, sb-&gt;height() - w );
-            <a href=#54>drawSemicircleButton</a>( p, r, PointDown, sunken, g );
+            <a href=#97>drawSemicircleButton</a>( p, r, PointDown, sunken, g );
         }
     } 
     if ( controls &amp; SubLine ) {
         bool sunken = activeControl &amp; SubLine;
         <a href="qrect.html">QRect</a> r( b, b, w-2*b, w-2*b ) ;
         if ( horz ) {
-            <a href=#54>drawSemicircleButton</a>( p, r, PointLeft, sunken, g );
+            <a href=#97>drawSemicircleButton</a>( p, r, PointLeft, sunken, g );
         } else {
-            <a href=#54>drawSemicircleButton</a>( p, r, PointUp, sunken, g );
+            <a href=#97>drawSemicircleButton</a>( p, r, PointUp, sunken, g );
         }
     }
 }
@@ -1187,7 +1189,7 @@ void <a name="55"></a>NorwegianWoodStyle::drawScrollBarControls( <a href="qpaint
 /*!
   Reimplementation from QStyle
  */
-void <a name="56"></a>NorwegianWoodStyle::drawButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="99"></a>NorwegianWoodStyle::drawButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                              const QColorGroup &amp;g, bool sunken, const QBrush* fill)
 {
     int d = QMIN(w,h)/2;
@@ -1243,7 +1245,7 @@ void <a name="56"></a>NorwegianWoodStyle::drawButton( <a href="qpainter.html">QP
 
   \sa QStyle
   */
-void <a name="57"></a>NorwegianWoodStyle::drawBevelButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="100"></a>NorwegianWoodStyle::drawBevelButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                                 const QColorGroup &amp;g, bool sunken, const QBrush* fill)
 {
     <a href="qwindowsstyle.html#6ddbd6">QWindowsStyle::drawBevelButton</a>(p, x, y, w, h, g, sunken, fill);
@@ -1252,7 +1254,7 @@ void <a name="57"></a>NorwegianWoodStyle::drawBevelButton( <a href="qpainter.htm
 /*!
   Reimplementation from QStyle
  */
-void <a name="58"></a>NorwegianWoodStyle::drawPushButton( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
+void <a name="101"></a>NorwegianWoodStyle::drawPushButton( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
 {
     <a href="qcolorgroup.html">QColorGroup</a> g = btn-&gt;<a href="qwidget.html#d92bf4">colorGroup</a>();
     int x1, y1, x2, y2;
@@ -1277,7 +1279,7 @@ void <a name="58"></a>NorwegianWoodStyle::drawPushButton( <a href="qpushbutton.h
         y2 -= 2;
     }
 
-    <a href=#56>drawButton</a>( p, x1, y1, x2-x1+1, y2-y1+1, g, btn-&gt;<a href="qbutton.html#12ce08">isOn</a>() || btn-&gt;<a href="qbutton.html#ea8b93">isDown</a>(), &amp;fill);
+    <a href=#99>drawButton</a>( p, x1, y1, x2-x1+1, y2-y1+1, g, btn-&gt;<a href="qbutton.html#12ce08">isOn</a>() || btn-&gt;<a href="qbutton.html#ea8b93">isDown</a>(), &amp;fill);
 
     if ( btn-&gt;<a href="qpushbutton.html#ee0b8c">isDefault</a>() ) {
         <a href="qpen.html">QPen</a> pen( Qt::black, 4 );
@@ -1302,7 +1304,7 @@ void <a name="58"></a>NorwegianWoodStyle::drawPushButton( <a href="qpushbutton.h
 /*!
   Reimplementation from QStyle
  */
-void <a name="59"></a>NorwegianWoodStyle::drawPushButtonLabel( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
+void <a name="102"></a>NorwegianWoodStyle::drawPushButtonLabel( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
 {
     <a href="qrect.html">QRect</a> r = btn-&gt;<a href="qwidget.html#75ae71">rect</a>();
     int x, y, w, h;
@@ -1332,7 +1334,7 @@ void <a name="59"></a>NorwegianWoodStyle::drawPushButtonLabel( <a href="qpushbut
 /*!
   Reimplementation from QStyle
  */
-<a href="qrect.html">QRect</a> <a name="60"></a>NorwegianWoodStyle::buttonRect( int x, int y, int w, int h){
+<a href="qrect.html">QRect</a> <a name="103"></a>NorwegianWoodStyle::buttonRect( int x, int y, int w, int h){
     int d = QMIN(w,h)/2;
     int b = buttonthickness( d );
 
@@ -1348,7 +1350,7 @@ void <a name="59"></a>NorwegianWoodStyle::drawPushButtonLabel( <a href="qpushbut
 /*!
   Reimplementation from QStyle
  */
-void <a name="61"></a>NorwegianWoodStyle::drawButtonMask( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h)
+void <a name="104"></a>NorwegianWoodStyle::drawButtonMask( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h)
 {
     int d = QMIN(w,h)/2;
     drawroundrect( p, x, y, w, h, d );
@@ -1359,7 +1361,7 @@ void <a name="61"></a>NorwegianWoodStyle::drawButtonMask( <a href="qpainter.html
   <hr>
 
   Header file of the Metal-Theme: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/themes/metal.h   2.3.7   edited 2001-02-15 $
+** &#36;Id&#58; qt/examples/themes/metal.h   2.3.9   edited 2004-12-13 $
 **
 ** Definition of something or other
 **
@@ -1429,7 +1431,7 @@ private:
   <hr>
 
   Implementation of the Metal-Theme: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/themes/metal.cpp   2.3.7   edited 2001-03-22 $
+** &#36;Id&#58; qt/examples/themes/metal.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -1468,7 +1470,7 @@ MetalStyle::MetalStyle() : <a href="qwindowsstyle.html">QWindowsStyle</a>()
 /*!
   Reimplementation from QStyle
  */
-void <a name="64"></a>MetalStyle::polish( <a href="qapplication.html">QApplication</a> *app)
+void <a name="107"></a>MetalStyle::polish( <a href="qapplication.html">QApplication</a> *app)
 {
     oldPalette = app-&gt;<a href="qapplication.html#3e6f87">palette</a>();
 
@@ -1555,7 +1557,7 @@ void <a name="64"></a>MetalStyle::polish( <a href="qapplication.html">QApplicati
 /*!
   Reimplementation from QStyle
  */
-void <a name="65"></a>MetalStyle::unPolish( <a href="qapplication.html">QApplication</a> *app)
+void <a name="108"></a>MetalStyle::unPolish( <a href="qapplication.html">QApplication</a> *app)
 {
     app-&gt;<a href="qapplication.html#63c60d">setPalette</a>(oldPalette, TRUE);
     app-&gt;<a href="qapplication.html#3d926a">setFont</a>( app-&gt;<a href="qapplication.html#f31495">font</a>(), TRUE );
@@ -1564,7 +1566,7 @@ void <a name="65"></a>MetalStyle::unPolish( <a href="qapplication.html">QApplica
 /*!
   Reimplementation from QStyle
  */
-void <a name="64"></a>MetalStyle::polish( <a href="qwidget.html">QWidget</a>* w)
+void <a name="107"></a>MetalStyle::polish( <a href="qwidget.html">QWidget</a>* w)
 {
 
    // the polish function sets some widgets to transparent mode and
@@ -1596,7 +1598,7 @@ void <a name="64"></a>MetalStyle::polish( <a href="qwidget.html">QWidget</a>* w)
     }
 }
 
-void <a name="65"></a>MetalStyle::unPolish( <a href="qwidget.html">QWidget</a>* w)
+void <a name="108"></a>MetalStyle::unPolish( <a href="qwidget.html">QWidget</a>* w)
 {
 
    // the polish function sets some widgets to transparent mode and
@@ -1634,7 +1636,7 @@ void <a name="65"></a>MetalStyle::unPolish( <a href="qwidget.html">QWidget</a>* 
   /a horz is TRUE.
 */
 
-void <a name="66"></a>MetalStyle::drawMetalButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="109"></a>MetalStyle::drawMetalButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
   bool sunken, bool horz )
 {
     <a href="qcolor.html">QColor</a> top1("#878769691515");
@@ -1735,26 +1737,26 @@ void <a name="66"></a>MetalStyle::drawMetalButton( <a href="qpainter.html">QPain
 /*!
   Reimplementation from QStyle
  */
-void <a name="67"></a>MetalStyle::drawButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="110"></a>MetalStyle::drawButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                              const QColorGroup &amp;, bool sunken, const QBrush*)
 {
 
-    <a href=#66>drawMetalButton</a>( p, x, y, w, h, sunken, TRUE );
+    <a href=#109>drawMetalButton</a>( p, x, y, w, h, sunken, TRUE );
 }
 
 /*!
   Reimplementation from QStyle
  */
-void <a name="68"></a>MetalStyle::drawBevelButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="111"></a>MetalStyle::drawBevelButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                                 const QColorGroup &amp;, bool sunken, const QBrush*)
 {
-    <a href=#66><a name="66"></a>MetalStyle::drawMetalButton</a>(p, x, y, w, h, sunken, TRUE );
+    <a href=#109><a name="109"></a>MetalStyle::drawMetalButton</a>(p, x, y, w, h, sunken, TRUE );
 }
 
 /*!
   Reimplementation from QStyle
  */
-void <a name="69"></a>MetalStyle::drawPushButton( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
+void <a name="112"></a>MetalStyle::drawPushButton( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
 {
     <a href="qcolorgroup.html">QColorGroup</a> g = btn-&gt;<a href="qwidget.html#d92bf4">colorGroup</a>();
     int x1, y1, x2, y2;
@@ -1785,7 +1787,7 @@ void <a name="69"></a>MetalStyle::drawPushButton( <a href="qpushbutton.html">QPu
         y2 -= 2;
     }
 
-    <a href=#66>drawMetalButton</a>( p, x1, y1, x2-x1+1, y2-y1+1, btn-&gt;<a href="qbutton.html#12ce08">isOn</a>() || btn-&gt;<a href="qbutton.html#ea8b93">isDown</a>(),
+    <a href=#109>drawMetalButton</a>( p, x1, y1, x2-x1+1, y2-y1+1, btn-&gt;<a href="qbutton.html#12ce08">isOn</a>() || btn-&gt;<a href="qbutton.html#ea8b93">isDown</a>(),
                      TRUE ); // always horizontal
 
     if ( btn-&gt;<a href="qpushbutton.html#65d4c4">isMenuButton</a>() ) {
@@ -1803,7 +1805,7 @@ void <a name="69"></a>MetalStyle::drawPushButton( <a href="qpushbutton.html">QPu
 /*!
   Reimplementation from QStyle
  */
-void <a name="70"></a>MetalStyle::drawPushButtonLabel( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
+void <a name="113"></a>MetalStyle::drawPushButtonLabel( <a href="qpushbutton.html">QPushButton</a>* btn, QPainter *p)
 {
     <a href="qrect.html">QRect</a> r = btn-&gt;<a href="qwidget.html#75ae71">rect</a>();
     int x, y, w, h;
@@ -1834,7 +1836,7 @@ void <a name="70"></a>MetalStyle::drawPushButtonLabel( <a href="qpushbutton.html
         p-&gt;<a href="qpainter.html#eb778c">translate</a>( -dx, -dy );
 }
 
-void <a name="71"></a>MetalStyle::drawPanel( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="114"></a>MetalStyle::drawPanel( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                             const QColorGroup &amp;g, bool sunken,
                             int lineWidth, const QBrush *fill )
 {
@@ -1848,14 +1850,14 @@ void <a name="71"></a>MetalStyle::drawPanel( <a href="qpainter.html">QPainter</a
   Reimplemented
 */
 
-void <a name="72"></a>MetalStyle::drawSlider( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="115"></a>MetalStyle::drawSlider( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                              const QColorGroup &amp;, Orientation orient, 
                              bool /*tickAbove*/, bool /*tickBelow*/ )
 {
-    <a href=#66>drawMetalButton</a>( p, x, y, w, h, FALSE, orient == Horizontal );
+    <a href=#109>drawMetalButton</a>( p, x, y, w, h, FALSE, orient == Horizontal );
 }
 
-void <a name="73"></a>MetalStyle::drawScrollBarControls( <a href="qpainter.html">QPainter</a>* p, const QScrollBar* sb,
+void <a name="116"></a>MetalStyle::drawScrollBarControls( <a href="qpainter.html">QPainter</a>* p, const QScrollBar* sb,
                                         int sliderStart, uint controls,
                                         uint activeControl )
 {
@@ -1883,7 +1885,7 @@ void <a name="73"></a>MetalStyle::drawScrollBarControls( <a href="qpainter.html"
         else
             r.<a href="qrect.html#3de222">moveBy</a>( 0, sb-&gt;height() - w );
 
-        <a href=#66>drawMetalButton</a>( p, r.<a href="qrect.html#fccae7">x</a>(), r.<a href="qrect.html#f448f7">y</a>(), r.<a href="qrect.html#45fe95">width</a>(), r.<a href="qrect.html#581ab8">height</a>(), 
+        <a href=#109>drawMetalButton</a>( p, r.<a href="qrect.html#fccae7">x</a>(), r.<a href="qrect.html#f448f7">y</a>(), r.<a href="qrect.html#45fe95">width</a>(), r.<a href="qrect.html#581ab8">height</a>(), 
                          sunken, !horz );
         <a href="qwindowsstyle.html#0067ae">drawArrow</a>(  p, horz ? RightArrow : DownArrow,  sunken, 
                     r.<a href="qrect.html#fccae7">x</a>(), r.<a href="qrect.html#f448f7">y</a>(), r.<a href="qrect.html#45fe95">width</a>(), r.<a href="qrect.html#581ab8">height</a>(), g, !maxedOut );
@@ -1892,7 +1894,7 @@ void <a name="73"></a>MetalStyle::drawScrollBarControls( <a href="qpainter.html"
     if ( controls &amp; SubLine ) {
         bool sunken = activeControl &amp; SubLine;
         <a href="qrect.html">QRect</a> r( b, b, w-2*b, w-2*b ) ;
-        <a href=#66>drawMetalButton</a>( p, r.<a href="qrect.html#fccae7">x</a>(), r.<a href="qrect.html#f448f7">y</a>(), r.<a href="qrect.html#45fe95">width</a>(), r.<a href="qrect.html#581ab8">height</a>(), 
+        <a href=#109>drawMetalButton</a>( p, r.<a href="qrect.html#fccae7">x</a>(), r.<a href="qrect.html#f448f7">y</a>(), r.<a href="qrect.html#45fe95">width</a>(), r.<a href="qrect.html#581ab8">height</a>(), 
                          sunken, !horz );
         <a href="qwindowsstyle.html#0067ae">drawArrow</a>(  p, horz ? LeftArrow : UpArrow,  sunken, 
                     r.<a href="qrect.html#fccae7">x</a>(), r.<a href="qrect.html#f448f7">y</a>(), r.<a href="qrect.html#45fe95">width</a>(), r.<a href="qrect.html#581ab8">height</a>(), g, !maxedOut );
@@ -1906,7 +1908,7 @@ void <a name="73"></a>MetalStyle::drawScrollBarControls( <a href="qpainter.html"
     }
     if ( controls &amp; Slider ) {
         if ( !maxedOut ) {
-            <a href=#66>drawMetalButton</a>( p, sliderR.<a href="qrect.html#fccae7">x</a>(), sliderR.<a href="qrect.html#f448f7">y</a>(),
+            <a href=#109>drawMetalButton</a>( p, sliderR.<a href="qrect.html#fccae7">x</a>(), sliderR.<a href="qrect.html#f448f7">y</a>(),
                                  sliderR.<a href="qrect.html#45fe95">width</a>(), sliderR.<a href="qrect.html#581ab8">height</a>(),
                                  FALSE, horz ); 
         }
@@ -1914,7 +1916,7 @@ void <a name="73"></a>MetalStyle::drawScrollBarControls( <a href="qpainter.html"
 
 }
 
-void <a name="74"></a>MetalStyle::drawComboButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
+void <a name="117"></a>MetalStyle::drawComboButton( <a href="qpainter.html">QPainter</a> *p, int x, int y, int w, int h,
                                   const QColorGroup &amp;g, bool sunken,
                                   bool /*editable*/,
                                   bool enabled,
@@ -1925,7 +1927,7 @@ void <a name="74"></a>MetalStyle::drawComboButton( <a href="qpainter.html">QPain
                    fill?fill:(enabled?&amp;g.<a href="qcolorgroup.html#dc90ba">brush</a>( QColorGroup::Base ):
                                       &amp;g.<a href="qcolorgroup.html#dc90ba">brush</a>( QColorGroup::Background )));
 
-     <a href=#66>drawMetalButton</a>( p, x+w-2-16, y+2, 16, h-4, sunken, TRUE );
+     <a href=#109>drawMetalButton</a>( p, x+w-2-16, y+2, 16, h-4, sunken, TRUE );
 
      <a href="qwindowsstyle.html#0067ae">drawArrow</a>( p, QStyle::DownArrow, sunken,
                 x+w-2-16+ 2, y+2+ 2, 16- 4, h-4- 4, g, enabled );
@@ -1937,7 +1939,7 @@ void <a name="74"></a>MetalStyle::drawComboButton( <a href="qpainter.html">QPain
   <hr>
 
   Header file of the example: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/themes/themes.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/themes/themes.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -1992,7 +1994,7 @@ private:
   <hr>
 
   Implementation of the example: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/themes/themes.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/themes/themes.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -2049,60 +2051,60 @@ Themes::Themes( <a href="qwidget.html">QWidget</a> *parent, const char *name, WF
     style-&gt;<a href="qpopupmenu.html#672d77">setCheckable</a>( TRUE );
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;insertItem( "&amp;Style" , style );
 
-    sMetal = style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;Metal", this, SLOT( <a href=#76>styleMetal</a>() ) );
-    sWood = style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;Norwegian Wood", this, SLOT( <a href=#75>styleWood</a>() ) );
-    sPlatinum = style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;Platinum" , this ,SLOT( <a href=#77>stylePlatinum</a>() ) );
-    sWindows = style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;Windows", this, SLOT( <a href=#78>styleWindows</a>() ) );
-    sCDE = style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;CDE", this, SLOT( <a href=#79>styleCDE</a>() ) );
-    sMotif = style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "M&amp;otif", this, SLOT( <a href=#80>styleMotif</a>() ) );
-    sMotifPlus = style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Motif P&amp;lus", this, SLOT( <a href=#81>styleMotifPlus</a>() ) );
+    sMetal = style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;Metal", this, SLOT( <a href=#119>styleMetal</a>() ) );
+    sWood = style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;Norwegian Wood", this, SLOT( <a href=#118>styleWood</a>() ) );
+    sPlatinum = style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;Platinum" , this ,SLOT( <a href=#120>stylePlatinum</a>() ) );
+    sWindows = style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;Windows", this, SLOT( <a href=#121>styleWindows</a>() ) );
+    sCDE = style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;CDE", this, SLOT( <a href=#122>styleCDE</a>() ) );
+    sMotif = style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "M&amp;otif", this, SLOT( <a href=#123>styleMotif</a>() ) );
+    sMotifPlus = style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Motif P&amp;lus", this, SLOT( <a href=#124>styleMotifPlus</a>() ) );
     style-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-    style-&gt;<a href="qmenudata.html#0076cb">insertItem</a>("&amp;Quit", qApp, SLOT( quit() ), CTRL | Key_Q );
+    style-&gt;<a href="qmenudata.html#deddb9">insertItem</a>("&amp;Quit", qApp, SLOT( quit() ), CTRL | Key_Q );
 
     <a href="qpopupmenu.html">QPopupMenu</a> * help = new <a href="qpopupmenu.html">QPopupMenu</a>( this );
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;insertSeparator();
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;insertItem( "&amp;Help", help );
-    help-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;About", this, SLOT(<a href=#82>about</a>()), Key_F1);
-    help-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "About &amp;<a href="qt.html">Qt</a>", this, SLOT(<a href=#83>aboutQt</a>()));
+    help-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;About", this, SLOT(<a href=#125>about</a>()), Key_F1);
+    help-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "About &amp;<a href="qt.html">Qt</a>", this, SLOT(<a href=#126>aboutQt</a>()));
 
     qApp-&gt;setStyle( new NorwegianWoodStyle );
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;setItemChecked( sWood, TRUE );
 }
 
-void <a name="75"></a>Themes::styleWood()
+void <a name="118"></a>Themes::styleWood()
 {
     qApp-&gt;setStyle( new NorwegianWoodStyle );
     qApp-&gt;setFont( appFont, TRUE );
-    <a href=#84>selectStyleMenu</a>( sWood );
+    <a href=#127>selectStyleMenu</a>( sWood );
 }
 
-void <a name="76"></a>Themes::styleMetal()
+void <a name="119"></a>Themes::styleMetal()
 {
     qApp-&gt;setStyle( new MetalStyle );
     qApp-&gt;setFont( appFont, TRUE );
-    <a href=#84>selectStyleMenu</a>( sMetal );
+    <a href=#127>selectStyleMenu</a>( sMetal );
 }
 
-void <a name="77"></a>Themes::stylePlatinum()
+void <a name="120"></a>Themes::stylePlatinum()
 {
     qApp-&gt;setStyle( new QPlatinumStyle );
     <a href="qpalette.html">QPalette</a> p( <a href="qcolor.html">QColor</a>( 239, 239, 239 ) );
     qApp-&gt;setPalette( p, TRUE );
     qApp-&gt;setFont( appFont, TRUE );
-    <a href=#84>selectStyleMenu</a>( sPlatinum );
+    <a href=#127>selectStyleMenu</a>( sPlatinum );
 }
 
-void <a name="78"></a>Themes::styleWindows()
+void <a name="121"></a>Themes::styleWindows()
 {
     qApp-&gt;setStyle( new QWindowsStyle );
     qApp-&gt;setFont( appFont, TRUE );
-    <a href=#84>selectStyleMenu</a>( sWindows );
+    <a href=#127>selectStyleMenu</a>( sWindows );
 }
 
-void <a name="79"></a>Themes::styleCDE()
+void <a name="122"></a>Themes::styleCDE()
 {
     qApp-&gt;setStyle( new QCDEStyle( TRUE ) );
-    <a href=#84>selectStyleMenu</a>( sCDE );
+    <a href=#127>selectStyleMenu</a>( sCDE );
 
     <a href="qpalette.html">QPalette</a> p( <a href="qcolor.html">QColor</a>( 75, 123, 130 ) );
     p.<a href="qpalette.html#0a7342">setColor</a>( QPalette::Active, QColorGroup::Base, QColor( 55, 77, 78 ) );
@@ -2127,25 +2129,25 @@ void <a name="79"></a>Themes::styleCDE()
     qApp-&gt;setFont( <a href="qfont.html">QFont</a>( "times", appFont.pointSize() ), TRUE );
 }
 
-void <a name="80"></a>Themes::styleMotif()
+void <a name="123"></a>Themes::styleMotif()
 {
     qApp-&gt;setStyle( new QMotifStyle );
     <a href="qpalette.html">QPalette</a> p( <a href="qcolor.html">QColor</a>( 192, 192, 192 ) );
     qApp-&gt;setPalette( p, TRUE );
     qApp-&gt;setFont( appFont, TRUE );
-    <a href=#84>selectStyleMenu</a>( sMotif );
+    <a href=#127>selectStyleMenu</a>( sMotif );
 }
 
-void <a name="81"></a>Themes::styleMotifPlus()
+void <a name="124"></a>Themes::styleMotifPlus()
 {
     qApp-&gt;setStyle( new QMotifPlusStyle );
     <a href="qpalette.html">QPalette</a> p( <a href="qcolor.html">QColor</a>( 192, 192, 192 ) );
     qApp-&gt;setPalette( p, TRUE );
     qApp-&gt;setFont( appFont, TRUE );
-    <a href=#84>selectStyleMenu</a>( sMotifPlus );
+    <a href=#127>selectStyleMenu</a>( sMotifPlus );
 }
 
-void <a name="82"></a>Themes::about()
+void <a name="125"></a>Themes::about()
 {
     <a href="qmessagebox.html#f6c3cd">QMessageBox::about</a>( this, "Qt Themes Example",
                         "&lt;p&gt;This example demonstrates the concept of "
@@ -2153,12 +2155,12 @@ void <a name="82"></a>Themes::about()
                         " with the 2.0 release of Qt.&lt;/p&gt;" );
 }
 
-void <a name="83"></a>Themes::aboutQt()
+void <a name="126"></a>Themes::aboutQt()
 {
     <a href="qmessagebox.html#b72270">QMessageBox::aboutQt</a>( this, "Qt Themes Example" );
 }
 
-void <a name="84"></a>Themes::selectStyleMenu( int s )
+void <a name="127"></a>Themes::selectStyleMenu( int s )
 {
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;setItemChecked( sWood, FALSE );
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;setItemChecked( sMetal, FALSE );
@@ -2176,7 +2178,7 @@ void <a name="84"></a>Themes::selectStyleMenu( int s )
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/themes/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/themes/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -2208,5 +2210,5 @@ int main( int argc, char ** argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

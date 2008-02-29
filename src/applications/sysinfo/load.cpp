@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -31,40 +46,62 @@
 LoadInfo::LoadInfo( QWidget *parent, const char *name, WFlags f )
     : QWidget( parent, name, f )
 {
+#ifdef SYSINFO_GEEK_MODE
     QVBoxLayout *vb = new QVBoxLayout( this, 6 );
 
     QString cpuInfo = getCpuInfo();
     if ( !cpuInfo.isNull() )
 	vb->addWidget( new QLabel( cpuInfo, this ) );
     vb->addWidget( new Load( this ), 100 );
+    
+    QHBoxLayout *hb = new QHBoxLayout( vb );
     QLabel *l = new QLabel( this );
-    l->setPixmap( makeLabel( red, tr("Application CPU usage (%)") ) );
-    vb->addWidget( l, 1 );
+    l->setPixmap( makeLabel( red ) );
+    hb->addWidget( l );
+#ifndef QTOPIA_PHONE
+    l = new QLabel(tr("Application CPU usage (%)"), this );
+#else
+    l = new QLabel(tr("Application CPU (%)"), this );
+#endif
+    hb->addWidget( l );
+    hb->addStretch(20);
+    
+    hb = new QHBoxLayout( vb );
     l = new QLabel( this );
-    l->setPixmap( makeLabel( green, tr("System CPU usage (%)") ) );
-    vb->addWidget( l, 1 );
+    l->setPixmap( makeLabel( green ) );
+    hb->addWidget( l, 1 );
+#ifndef QTOPIA_PHONE
+    l = new QLabel(tr("System CPU usage (%)"), this );
+#else
+    l = new QLabel(tr("System CPU (%)"), this );
+#endif
+    hb->addWidget( l );
+    hb->addStretch(20);
     vb->addStretch(50);
+#endif
 }
 
-QPixmap LoadInfo::makeLabel( const QColor &col, const QString &text )
+QPixmap LoadInfo::makeLabel( const QColor &col )
 {
     int h = fontMetrics().height();
-    QPixmap pm( 20 + fontMetrics().width( text ), h );
+    QPixmap pm( 20 , h );
+#ifdef SYSINFO_GEEK_MODE
     QPainter p( &pm );
     p.fillRect( pm.rect(), colorGroup().background() );
-    p.fillRect( 0, h/2-4, 18, h/2+3, black );
+    p.fillRect( 0, 0, 20, h, black );
     p.setPen( col );
-    p.drawLine( 2, h/2, 15, h/2 );
-    p.setPen( colorGroup().text() );
-    p.drawText( 20, fontMetrics().ascent(), text );
-
+    p.drawLine( 2, h/2, 17, h/2 );
+#else
+    (void)col; //Q_UNUSED
+#endif
     return pm;
 }
 
 QString LoadInfo::getCpuInfo()
 {
-    bool haveInfo = FALSE;
     QString info = tr("Type: ");
+#ifdef SYSINFO_GEEK_MODE
+    bool haveInfo = FALSE;
     QFile f( "/proc/cpuinfo" );
     if ( f.open( IO_ReadOnly ) ) {
 	QTextStream ts( &f );
@@ -98,12 +135,14 @@ QString LoadInfo::getCpuInfo()
     if ( !haveInfo )
 	info = QString();
 
+#endif
     return info;
 }
 
 Load::Load( QWidget *parent, const char *name, WFlags f )
     : QWidget( parent, name, f ), lastUser(0), lastSys(0)
 {
+#ifdef SYSINFO_GEEK_MODE
     setMinimumHeight( 30 );
     setBackgroundColor( black );
     points = 100;
@@ -121,16 +160,20 @@ Load::Load( QWidget *parent, const char *name, WFlags f )
     gettimeofday( &last, 0 );
     first = TRUE;
     timeout();
+#endif
 }
 
 Load::~Load()
 {
+#ifdef SYSINFO_GEEK_MODE
     delete [] userLoad;
     delete [] systemLoad;
+#endif
 }
 
 void Load::paintEvent( QPaintEvent * )
 {
+#ifdef SYSINFO_GEEK_MODE
     QPainter p( this );
 
     int h = height() - 5;
@@ -157,10 +200,12 @@ void Load::paintEvent( QPaintEvent * )
 	p.drawLine( x1, h - int(userLoad[i-1] * mult),
 		    x2, h - int(userLoad[i] * mult) );
     }
+#endif
 }
 
 void Load::timeout()
 {
+#ifdef SYSINFO_GEEK_MODE
     int user;
     int usernice;
     int sys;
@@ -210,5 +255,5 @@ void Load::timeout()
     } else if ( tdiff < 0 ) {
 	last = now;
     }
+#endif
 }
-

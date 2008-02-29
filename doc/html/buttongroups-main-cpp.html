@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -31,7 +33,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/buttongroups/buttongroups.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/buttongroups/buttongroups.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -71,7 +73,7 @@ protected slots:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/buttongroups/buttongroups.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/buttongroups/buttongroups.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -148,7 +150,7 @@ ButtonsGroups::ButtonsGroups( <a href="qwidget.html">QWidget</a> *parent, const 
     state = new <a href="qcheckbox.html">QCheckBox</a>( "E&amp;nable Radiobuttons", grp3 );
     state-&gt;setChecked( TRUE );
     // ...and connect its SIGNAL clicked() with the SLOT slotChangeGrp3State()
-    <a href="qobject.html#7f8e37">connect</a>( state, SIGNAL( clicked() ), this, SLOT( <a href=#180>slotChangeGrp3State</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( state, SIGNAL( clicked() ), this, SLOT( <a href=#33>slotChangeGrp3State</a>() ) );
 
     // ------------ fourth group
 
@@ -171,7 +173,7 @@ ButtonsGroups::ButtonsGroups( <a href="qwidget.html">QWidget</a> *parent, const 
  * enables/disables the radiobuttons of the third buttongroup
  */
 
-void <a name="180"></a>ButtonsGroups::slotChangeGrp3State()
+void <a name="33"></a>ButtonsGroups::slotChangeGrp3State()
 {
     rb21-&gt;setEnabled( state-&gt;isChecked() );
     rb22-&gt;setEnabled( state-&gt;isChecked() );
@@ -184,7 +186,7 @@ void <a name="180"></a>ButtonsGroups::slotChangeGrp3State()
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/buttongroups/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/buttongroups/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -212,5 +214,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

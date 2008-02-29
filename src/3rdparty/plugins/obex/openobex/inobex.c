@@ -6,7 +6,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat Apr 17 16:50:35 1999
- * CVS ID:	  $Id: inobex.c,v 1.8 2000/12/01 13:13:07 pof Exp $
+ * CVS ID:	  $Id: inobex.c,v 1.12 2002/11/22 19:06:08 holtmann Exp $
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -26,7 +26,11 @@
  *     MA  02111-1307  USA
  *     
  ********************************************************************/
-#include "config.h"
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
 
 #ifdef _WIN32
@@ -43,39 +47,64 @@
 #define OBEX_PORT 650
 
 /*
+ * Function inobex_prepare_connect (self, service)
+ *
+ *    Prepare for INET-connect
+ *
+ */
+void inobex_prepare_connect(obex_t *self, struct sockaddr *saddr, int addrlen)
+{
+	memcpy(&self->trans.peer, saddr, addrlen);
+	/* Override to be safe... */
+	self->trans.peer.inet.sin_family = AF_INET;
+	self->trans.peer.inet.sin_port = htons(OBEX_PORT);
+}
+
+/*
+ * Function inobex_prepare_listen (self)
+ *
+ *    Prepare for INET-listen
+ *
+ */
+void inobex_prepare_listen(obex_t *self)
+{
+	/* Bind local service */
+	self->trans.self.inet.sin_family = AF_INET;
+	self->trans.self.inet.sin_port = htons(OBEX_PORT);
+	self->trans.self.inet.sin_addr.s_addr = INADDR_ANY;
+}
+
+/*
  * Function inobex_listen (self)
  *
  *    Wait for incomming connections
  *
  */
-gint inobex_listen(obex_t *self, const char *service)
+int inobex_listen(obex_t *self)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 
 	self->serverfd = obex_create_socket(self, AF_INET);
 	if(self->serverfd < 0) {
-		DEBUG(0, G_GNUC_FUNCTION "() Cannot create server-socket\n");
+		DEBUG(0, "Cannot create server-socket\n");
 		return -1;
 	}
 
-	/* Bind local service */
-	self->trans.self.inet.sin_family = AF_INET;
-	self->trans.self.inet.sin_port = htons(OBEX_PORT);
-	self->trans.self.inet.sin_addr.s_addr = INADDR_ANY;
-	
+	//printf("TCP/IP listen %d %X\n", self->trans.self.inet.sin_port,
+	//       self->trans.self.inet.sin_addr.s_addr);
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.inet,
 		 sizeof(struct sockaddr_in))) 
 	{
-		DEBUG(0, G_GNUC_FUNCTION "() bind() Failed\n");
+		DEBUG(0, "bind() Failed\n");
 		return -1;
 	}
 
 	if (listen(self->serverfd, 2)) {
-		DEBUG(0, G_GNUC_FUNCTION "() listen() Failed\n");
+		DEBUG(0, "listen() Failed\n");
 		return -1;
 	}
 
-	DEBUG(4, G_GNUC_FUNCTION "() Now listening for incomming connections. serverfd = %d\n", self->serverfd);
+	DEBUG(4, "Now listening for incomming connections. serverfd = %d\n", self->serverfd);
 	return 1;
 }
 
@@ -87,7 +116,7 @@ gint inobex_listen(obex_t *self, const char *service)
  * Note : don't close the server socket here, so apps may want to continue
  * using it...
  */
-gint inobex_accept(obex_t *self)
+int inobex_accept(obex_t *self)
 {
 	int addrlen = sizeof(struct sockaddr_in);
 
@@ -109,10 +138,10 @@ gint inobex_accept(obex_t *self)
  *    
  *
  */
-gint inobex_connect_request(obex_t *self)
+int inobex_connect_request(obex_t *self)
 {
-	guchar *addr;
-	gint ret;
+	unsigned char *addr;
+	int ret;
 
 	self->fd = obex_create_socket(self, AF_INET);
 	if(self->fd < 0)
@@ -124,21 +153,21 @@ gint inobex_connect_request(obex_t *self)
 
 	addr = (char *) &self->trans.peer.inet.sin_addr.s_addr;
 
-	DEBUG(2, G_GNUC_FUNCTION "(), peer addr = %d.%d.%d.%d\n",
+	DEBUG(2, "peer addr = %d.%d.%d.%d\n",
 		addr[0], addr[1], addr[2], addr[3]);
 
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.inet, 
 		      sizeof(struct sockaddr_in));
 	if (ret < 0) {
-		DEBUG(4, G_GNUC_FUNCTION "() Connect failed\n");
+		DEBUG(4, "Connect failed\n");
 		obex_delete_socket(self, self->fd);
 		self->fd = -1;
 		return ret;
 	}
 
 	self->trans.mtu = OBEX_DEFAULT_MTU;
-	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", self->trans.mtu);
+	DEBUG(3, "transport mtu=%d\n", self->trans.mtu);
 
 	return ret;
 }
@@ -149,10 +178,10 @@ gint inobex_connect_request(obex_t *self)
  *    Shutdown the TCP/IP link
  *
  */
-gint inobex_disconnect_request(obex_t *self)
+int inobex_disconnect_request(obex_t *self)
 {
-	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int ret;
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
@@ -168,10 +197,10 @@ gint inobex_disconnect_request(obex_t *self)
  * Used when we start handling a incomming request, or when the
  * client just want to quit...
  */
-gint inobex_disconnect_server(obex_t *self)
+int inobex_disconnect_server(obex_t *self)
 {
-	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int ret;
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
 	self->serverfd = -1;
 	return ret;	

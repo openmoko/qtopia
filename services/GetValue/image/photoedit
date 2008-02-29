@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaServices
+Context=Photo Edit
+[Standard]
+Version=100
+Actions=getImage(QCString,QString,int,int,QImage)
+[getImage(QCString,QString,int,int,QImage)]
+Name[]=Edit Photo
+Icon=ImageViewer

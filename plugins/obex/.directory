@@ -1,6 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=IR communications
 [Desktop Entry]
-Name=IR communications
-Comment=Provides support for Infrared communications.
-Name[ja]=IR(赤外線)通信
-Comment[ja]=赤外線通信に関するサポートを提供します。
+Name[]=IR communications
+Comment[]=Provides support for Infrared communications.
 Apply=QPE/System restart()

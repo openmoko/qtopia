@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
-** This file is part of Qtopia Environment.
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -20,119 +35,167 @@
 #include "fractioninstruction.h"
 #include "doubledata.h"
 
-// Automatic type casting
-Data *BaseFractionInstruction::eval(Data *d) {
-    fractionNum = (FractionData *)num;
-    Data *ret = doEval((FractionData *)d);
-    FractionData *fRet = (FractionData *)ret;
-    fRet->set(fRet->getNumerator(),fRet->getDenominator());
-    return ret;
+// Data type
+void BaseFractionInstruction::eval() {
+    FractionData *acc = (FractionData *)systemEngine->getData();
+    if (argCount == 1)
+	doEval(acc);
+    else {
+	FractionData *num = (FractionData *)systemEngine->getData();
+	doEval(acc,num);
+	delete num;
+    }
+    delete acc;
 }
-BaseFractionInstructionDescription::BaseFractionInstructionDescription()
-    : InstructionDescription() {
-	type = typeOne = typeTwo = "Fraction"; // No tr
+BaseFractionInstruction::BaseFractionInstruction()
+    : Instruction() {
+	type = retType = "Fraction"; // No tr
     }
 
 // Factory
-Data * iFractionFactory::eval(Data * /* d */) {
+void iFractionFactory::eval() {
     FractionData *ret = new FractionData();
     ret->clear();
-    return ret;
+    systemEngine->putData(ret);
 }
-FractionFactory::FractionFactory():BaseFractionInstructionDescription() {
-    instructionName = "Factory"; // No tr
+iFractionFactory::iFractionFactory():Instruction() {
+    type = retType = "Fraction"; // No tr
+    name = "Factory"; // No tr
 };
 
 // Copy
-Data *iFractionCopy::eval(Data *d) {
-    FractionData *ret = new FractionData();
-    ret->clear();
-    ret->set(((FractionData *)d)->getNumerator(),
-	    ((FractionData *)d)->getDenominator());
-    return ret;
+void iFractionCopy::eval() {
+    FractionData *src = (FractionData *)systemEngine->getData();
+    FractionData *tgt = new FractionData();
+    tgt->clear();
+    tgt->set(((FractionData *)src)->getNumerator(),
+	    ((FractionData *)src)->getDenominator());
+    systemEngine->putData(src);
+    systemEngine->putData(tgt);
 };
-FractionCopy::FractionCopy():BaseFractionInstructionDescription() {
-    instructionName = "Copy"; // No tr
+iFractionCopy::iFractionCopy():BaseFractionInstruction() {
+    name = "Copy"; // No tr
+    retType = type = "Fraction"; // No tr
+    argCount = 1;
 };
 
 // Conversion functions
-Data * iConvertDoubleFraction::eval(Data *d) {
+void iConvertDoubleFraction::eval() {
+
     FractionData *ret = new FractionData();
-    double target,tmp,upper,lower;
-    target = ((DoubleData *)d)->get();
-    if (target == 0)
-	ret->set(0,1);
-    else {
-	upper = lower = 1;
+    double target,tmp, diff;
+    int upper,lower;
+    
+    DoubleData *doubleD = (DoubleData *)systemEngine->getData();
+    target = doubleD->get();
+    QString formattedOutput = doubleD->getFormattedOutput();
+    bool ok=FALSE;
+    if (formattedOutput.contains('.') == 0) {
+	ret->set(formattedOutput.toInt(&ok),1);
+    }
+    int maxCycles = 0;
+    if (!ok) {
+	diff = upper = lower = 1;
 	tmp = 0;
-	while (tmp != target) {
+	while ( (diff > 0.0000001 || diff < -0.0000001) &&  maxCycles < 100000) { // limited precision
+            maxCycles++;
 	    if (tmp < target)
 		upper++;
 	    else {
 		lower++;
-		upper = target * lower;
+		upper = (int) target * lower;
 	    }
-	    tmp = upper / lower;
+	    tmp =  (double) upper / (double) lower;
+            diff = tmp-target;
 	}
 	ret->set(upper,lower);
     }
-    return ret;
+    if (ok || maxCycles < 100000) {
+        systemEngine->putData(ret);
+        delete doubleD;
+    } else {
+        delete ret;
+        systemEngine->putData(doubleD); // put data back on stack for recover
+        systemEngine->setError(eOutOfRange, FALSE);
+    }
 }
-ConvertDoubleFraction::ConvertDoubleFraction():InstructionDescription() {
-    instructionName = "Convert"; // No tr
-    typeOne = "Double"; // No tr
-    typeTwo = "Fraction"; // No tr
+iConvertDoubleFraction::iConvertDoubleFraction():Instruction() {
+    name = "Convert"; // No tr
+    retType = "Fraction"; // No tr
+    type = "Double"; // No tr
 }
 
 // Mathematical functions
-Data * iAddFractionFraction::doEval (FractionData *f) {
+void iAddFractionFraction::doEval (FractionData *f,FractionData *fractionNum) {
+    FractionData *result = new FractionData();
     int nn,nd,fn,fd;
     nn = fractionNum->getNumerator();
     nd = fractionNum->getDenominator();
     fn = f->getNumerator();
     fd = f->getDenominator();
-    fractionNum->set(nn * fd + nd * fn, nd * fd);
-    return fractionNum;
+    result->set(nn * fd + nd * fn, nd * fd);
+    systemEngine->putData(result);
 }
-Data * iSubtractFractionFraction::doEval (FractionData *f) {
+void iSubtractFractionFraction::doEval (FractionData *f,FractionData *fractionNum) {
+    FractionData *result = new FractionData();
     int nn = fractionNum->getNumerator();
     int nd = fractionNum->getDenominator();
     int fn = f->getNumerator();
     int fd = f->getDenominator();
-    fractionNum->set(nn * fd - nd * fn, nd * fd);
-    return fractionNum;
+    result->set(nn * fd - nd * fn, nd * fd);
+    systemEngine->putData(result);
 }
-Data * iMultiplyFractionFraction::doEval (FractionData *f) {
+void iMultiplyFractionFraction::doEval (FractionData *f,FractionData *fractionNum) {
+    FractionData *result = new FractionData();
     int nn = fractionNum->getNumerator();
     int nd = fractionNum->getDenominator();
     int fn = f->getNumerator();
     int fd = f->getDenominator();
-    fractionNum->set(nn * fn, nd * fd);
-    return fractionNum;
+    result->set(nn * fn, nd * fd);
+    systemEngine->putData(result);
 }
-Data * iDivideFractionFraction::doEval (FractionData *f) {
+void iDivideFractionFraction::doEval (FractionData *f,FractionData *fractionNum) {
+    FractionData *result = new FractionData();
     int nn = fractionNum->getNumerator();
     int nd = fractionNum->getDenominator();
     int fn = f->getNumerator();
     int fd = f->getDenominator();
-    fractionNum->set(nn * fd, nd * fn);
-    return fractionNum;
+    result->set(nn * fd, nd * fn);
+    systemEngine->putData(result);
 }
 
-AddFractionFraction::AddFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "Add"; // No tr
-    precedence = 10;
-}
-SubtractFractionFraction::SubtractFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "Subtract"; // No tr
-    precedence = 10;
-}
-MultiplyFractionFraction::MultiplyFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "Multiply"; // No tr
-    precedence = 15;
-}
-DivideFractionFraction::DivideFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "Divide"; // No tr
-    precedence = 15;
+void iNegateFractionFraction::doEval (FractionData *f) {
+    FractionData *result = new FractionData();
+    result->set( -f->getNumerator(), f->getDenominator() );
+    systemEngine->putData(result);
 }
 
+iAddFractionFraction::iAddFractionFraction():BaseFractionInstruction() {
+    name = "Add"; // No tr
+    precedence = 10;
+    displayString = "+";
+    argCount = 2;
+}
+iSubtractFractionFraction::iSubtractFractionFraction():BaseFractionInstruction() {
+    name = "Subtract"; // No tr
+    precedence = 10;
+    displayString = "-";
+    argCount = 2;
+}
+iMultiplyFractionFraction::iMultiplyFractionFraction():BaseFractionInstruction() {
+    name = "Multiply"; // No tr
+    precedence = 15;
+    displayString = "x";
+    argCount = 2;
+}
+iDivideFractionFraction::iDivideFractionFraction():BaseFractionInstruction() {
+    name = "Divide"; // No tr
+    precedence = 15;
+    displayString = "/";
+    argCount = 2;
+}
+iNegateFractionFraction::iNegateFractionFraction():BaseFractionInstruction() {
+    name = "Negate"; // No tr
+    precedence = 0;
+    argCount = 1;
+}

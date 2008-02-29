@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -26,9 +41,14 @@
 #include <qtopia/global.h>
 #include <qtopia/timestring.h>
 #include <qtopia/timezone.h>
+#include <qtopia/resource.h>
 #include <qtopia/tzselect.h>
 #if ( defined Q_WS_QWS || defined(_WS_QWS_) ) && !defined(QT_NO_COP)
 #include <qtopia/qcopenvelope_qws.h>
+#endif
+#ifdef QTOPIA_PHONE
+#include <qtopia/contextmenu.h>
+#include <qaction.h>
 #endif
 
 
@@ -38,76 +58,142 @@
 #include <qmessagebox.h>
 #include <qregexp.h>
 #include <qtextstream.h>
-#include <qpushbutton.h>
+#include <qtoolbutton.h>
 #include <qlayout.h>
+#include <qwidgetstack.h>
 
 #include <stdlib.h>
 
 WorldTime::WorldTime( QWidget *parent, const char* name,
                             WFlags fl )
-    : WorldTimeBase( parent, name, fl ),
+    : QWidget( parent, name, fl|Qt::WStyle_ContextHelp ),
       strRealTz(0),
       bAdded(false)
 {
 
-    Config config( "qpe" );
-    strRealTz = TimeZone::current().id();
-    // append the labels to their respective lists...
+
+#ifdef Q_WS_QWS
+    setCaption(tr("World Time"));
+#endif
     listCities.setAutoDelete( true );
     listTimes.setAutoDelete( true );
 
-    listCities.append( cmdCity1 );
-    listCities.append( cmdCity2 );
-    listCities.append( cmdCity3 );
-
-    listTimes.append( lblCTime1 );
-    listTimes.append( lblCTime2 );
-    listTimes.append( lblCTime3 );
-
-
-    // kludgy way of getting the screen size so we don't have to depend
-    // on a resize event...
-    QWidget *d = QApplication::desktop();
-    if ( d->width() < d->height() ) {
-        // append for that 4 down look
-
-        listCities.append( cmdCity4 );
-        listTimes.append( lblCTime4 );
-
-	if (d->height() >= 240) {
-	    listCities.append( cmdCity5 );
-	    listCities.append( cmdCity6 );
-	    listTimes.append( lblCTime5 );
-	    listTimes.append( lblCTime6 );
-	} else {
-	    cmdCity5->hide();
-	    cmdCity6->hide();
-	    lblCTime5->hide();
-	    lblCTime6->hide();
-	}
-
-        lblCTime7->hide();
-        lblCTime8->hide();
-        lblCTime9->hide();
-        cmdCity7->hide();
-        cmdCity8->hide();
-        cmdCity9->hide();
+    // checkSize;
+    int columns, rows;
+    QSize dsize = QApplication::desktop()->size();
+    if (dsize.height() < 300) {
+	mMode = Minimal;
+	columns = 2;
+	rows = 3;
     } else {
-        listCities.append( cmdCity7 );
-        listCities.append( cmdCity8 );
-        listCities.append( cmdCity9 );
-        listTimes.append( lblCTime7 );
-        listTimes.append( lblCTime8 );
-        listTimes.append( lblCTime9 );
+	if ( dsize.width() < dsize.height() ) {
+	    mMode = Tall;
+	    columns = 2;
+	    rows = 7;
+	} else {
+	    mMode = Wide;
+	    columns = 4;
+	    rows = 4;
+	}
+    }
 
-	delete lblCTime4;
-        delete lblCTime5;
-        delete lblCTime6;
-        delete cmdCity4;
-        delete cmdCity5;
-        delete cmdCity6;
+    // first, work out current number of columns?
+    QGridLayout *gl = new QGridLayout(this, rows, columns);
+    frmMap = new ZoneMap(this);
+    QSizePolicy sp = frmMap->sizePolicy();
+    sp.setHeightForWidth(TRUE);
+    sp.setVerData(QSizePolicy::Preferred);
+    sp.setHorData(QSizePolicy::Preferred);
+    frmMap->setSizePolicy(sp);
+    gl->addMultiCellWidget(frmMap, 0, 0, 0, columns-1);
+
+    if (mMode == Minimal) {
+	// all in widgetstack
+	// remember, hboxes and ...
+	mStack = new QWidgetStack(this);
+	mCombo = new QComboBox(this);
+#ifndef QTOPIA_PHONE
+	QToolButton *tb = new QToolButton(this);
+	tb->setIconSet(Resource::loadIconSet("edit"));
+
+	connect(tb, SIGNAL(clicked()), this, SLOT(beginNewTz()));
+
+	gl->addWidget(tb, 1, 1);
+	gl->addWidget(mCombo, 1, 0);
+#else
+	gl->addMultiCellWidget(mCombo, 1, 1, 0, 1);
+#endif
+	gl->addMultiCellWidget(mStack, 2, 2, 0, 1, AlignTop);
+	gl->setRowStretch(0, 0);
+	gl->setRowStretch(1, 0);
+	gl->setRowStretch(2, 1);
+
+	for (int i = 0; i < CITIES; i++) {
+	    listTimes.append(new CityInfo(mStack));
+
+	    mStack->addWidget(listTimes.at(i), i);
+	}
+	connect(mCombo, SIGNAL(activated(int)), mStack, SLOT(raiseWidget(int)));
+	mStack->raiseWidget(0);
+    } else {
+	int i, j;
+	mStack = 0;
+	mCombo = 0;
+	for (i = 0; i < CITIES; i++) {
+	    listCities.append(new QPushButton(this));
+	    listCities.at(i)->setIconSet(Resource::loadIconSet("edit"));
+	    listCities.at(i)->setToggleButton(TRUE);
+
+	    connect(listCities.at(i), SIGNAL(clicked()), this, SLOT(beginNewTz()));
+
+	    listTimes.append(new CityInfo(this));
+
+	    if (mMode == Tall) {
+		gl->addWidget(listCities.at(i),i+1, 0, i==5 ? AlignTop : 0);
+		gl->addWidget(listTimes.at(i), i+1, 1, i==5 ? AlignTop : 0);
+	    } else {
+		gl->addWidget(listCities.at(i),(i+2)/2, 2*(i%2), i >= 4 ? AlignTop : 0);
+		gl->addWidget(listTimes.at(i),(i+2)/2, 2*(i%2)+1, i >= 4 ? AlignTop : 0);
+	    }
+	    gl->setRowStretch(0, 0);
+	    gl->setRowStretch(1, 0);
+	    gl->setRowStretch(2, 2);
+	    if (mMode == Tall) {
+		gl->setRowStretch(3, 0);
+		gl->setRowStretch(4, 0);
+		gl->setRowStretch(5, 0);
+		gl->setRowStretch(6, 1);
+	    } else {
+		gl->setRowStretch(3, 1);
+	    }
+	}
+	for (i = 0; i < CITIES; i++)
+	    for (j = 0; j < CITIES; j++)
+		if (i!= j)
+		    connect(listCities.at(i),
+			    SIGNAL(toggled(bool)),
+			    listCities.at(j),
+			    SLOT(setDisabled(bool)));
 
     }
+
+#ifdef QTOPIA_PHONE
+    ContextMenu *contextMenu = new ContextMenu(this);
+    if (mMode == Minimal) {
+	QAction *a = new QAction(tr("Select City"),
+		Resource::loadIconSet("edit"), QString::null, 0, this, 0);
+	connect(a, SIGNAL(activated()), this, SLOT(beginNewTz()));
+	a->addTo(contextMenu);
+    }
+#endif
+
+    Config config( "qpe" );
+    strRealTz = TimeZone::current().id();
+    // append the labels to their respective lists...
+
+    gl->setSpacing(4);
+    gl->setMargin(4);
+
     bAdded = true;
     readInTimes();
     changed = FALSE;
@@ -115,6 +201,9 @@ WorldTime::WorldTime( QWidget *parent, const char* name,
                       this, SLOT( showTime() ) );
     // now start the timer so we can update the time quickly every second
     timerEvent( 0 );
+
+    frmMap->setFocus();
+    connect(frmMap, SIGNAL(signalTz(const QCString &)), this, SLOT(slotNewTz(const QCString &)));
 }
 
 WorldTime::~WorldTime()
@@ -142,30 +231,32 @@ void WorldTime::writeTimezoneChanges(void)
     qDebug("Writing changes");
     Config cfg("WorldTime");
 
-    QListIterator<QPushButton> itCity( listCities );
     cfg.setGroup("TimeZones");
 
     int i;
     bool realTzWritten = FALSE;
-    for ( i = 0, itCity.toFirst();  itCity.current(); i++, ++itCity ) {
+    for ( i = 0;  i < CITIES; i++) {
 	if ( !strCityTz[i].isNull() ) {
 	    cfg.writeEntry("Zone"+QString::number(i), strCityTz[i]);
-	    cfg.writeEntry("ZoneName"+QString::number(i), itCity.current()->text());
+	    cfg.writeEntry("ZoneName"+QString::number(i), 
+		    mMode == Minimal ? 
+		    mCombo->text(i) :
+		    listCities.at(i)->text());
 	    if ( strCityTz[i] == strRealTz )
 		realTzWritten = TRUE;
 	}
     }
     if ( realTzWritten ) {
-	cfg.removeEntry("Zone"+QString::number(listCities.count()));
-	cfg.removeEntry("ZoneName"+QString::number(listCities.count()));
+	cfg.removeEntry("Zone"+QString::number(CITIES));
+	cfg.removeEntry("ZoneName"+QString::number(CITIES));
     } else {
-	cfg.writeEntry("Zone"+QString::number(listCities.count()),
+	cfg.writeEntry("Zone"+QString::number(CITIES),
 	    strRealTz);
 	if ( nameRealTz.isEmpty() ) {
 	    int i =  strRealTz.find( '/' );
 	    nameRealTz = strRealTz.mid( i+1 );
 	}
-	cfg.writeEntry("ZoneName"+QString::number(listCities.count()),
+	cfg.writeEntry("ZoneName"+QString::number(CITIES),
 	    nameRealTz);
     }
 
@@ -191,64 +282,77 @@ void WorldTime::timerEvent( QTimerEvent *e )
     timerId = startTimer( ms );
 }
 
-void WorldTime::mousePressEvent( QMouseEvent * )
-{
-    // DEBUG enable this to get a look at the zone information DEBUG
-//    frmMap->showZones();
-}
-
 void WorldTime::showTime( void )
 {
     int i;
-    QListIterator<QLabel> itTime(listTimes);
-    TimeZone curZone;
-    QDateTime curUtcTime = TimeZone::utcDateTime(), cityTime;
+    QListIterator<CityInfo> itTime(listTimes);
+    QDateTime curUtcTime = TimeZone::utcDateTime();
 
     // traverse the list...
     for ( i = 0, itTime.toFirst(); itTime.current(); i++, ++itTime) {
-        if ( !strCityTz[i].isNull() ) {
-	    curZone = TimeZone( strCityTz[i] );
-	    if ( curZone.isValid() ){
-		cityTime = curZone.fromUtc( curUtcTime );
-                itTime.current()->setText( TimeString::localHMDayOfWeek( cityTime ) );
-	    }else{
-                QMessageBox::critical( this, tr( "Time Changing" ),
-                tr( "There was a problem setting timezone %1" )
-                .arg( QString::number( i + 1 ) ) );
-            }
-        }
+	itTime.current()->setUtcTime(curUtcTime);
     }
 }
 
+
 void WorldTime::beginNewTz()
 {
-    frmMap->setFocus();
+    //const QObject *c = sender();
+    //if ( c->inherits("QButton") && ((const QButton*)c)->isOn() ) {
+	frmMap->setFocus();
+	frmMap->beginEditing();
+    //}
 }
 
 void WorldTime::slotNewTz( const QCString & zoneID)
 {
-    // determine what to do based on what putton is pressed...
-    QListIterator<QPushButton> itCity(listCities);
+    // determine what to do based on what button is pressed...
     TimeZone curZone;
     int i = 0;
-    for ( ;itCity.current(); ++itCity) {
-	if ( strCityTz[i++] == zoneID.data() && !itCity.current()->isOn() )
-	    return;
-    }
+    if (mMode == Minimal) {
+	for (i = 0; i < CITIES; i++) {
+	    if (strCityTz[i] == zoneID.data() && i != mCombo->currentItem()) {
+		// city chose is already in the list.  Don't just abort, swap
+		// them instead, as that is the most likely desired result from
+		// the user.
+		strCityTz[i] = strCityTz[mCombo->currentItem()];
+		curZone = TimeZone( strCityTz[i] );
+		mCombo->changeItem( curZone.city(), i);
+		listTimes.at(i)->setZone(strCityTz[i]);
+		break;
+	    }
+	}
+
+	i = mCombo->currentItem();
+	strCityTz[i] = zoneID;
+	curZone = TimeZone( zoneID );
+	mCombo->changeItem( curZone.city(), i);
+	listTimes.at(i)->setZone(zoneID);
+	changed = TRUE;
+    } else {
+	QListIterator<QPushButton> itCity(listCities);
+	for ( ;itCity.current(); ++itCity) {
+	    if ( strCityTz[i++] == zoneID.data() && !itCity.current()->isOn() )
+		// should swap buttons instead of returning
+		// (user may be trying to reorder buttons)
+		return;
+	}
     
     // go through the list and make adjustments based on which button is on
-    for ( i = 0, itCity.toFirst(); itCity.current(); i++, ++itCity ) {
-        QPushButton *cmdTmp = itCity.current();
-        if ( cmdTmp->isOn() ) {
-            strCityTz[i] = zoneID;
-	    curZone = TimeZone( zoneID );
-            cmdTmp->setText( curZone.city() );
-            cmdTmp->toggle();
-            // we can actually break, since there is only one button
-            // that is ever pressed!
-	    changed = TRUE;
-            break;
-        }
+	for ( i = 0, itCity.toFirst(); itCity.current(); i++, ++itCity ) {
+	    QPushButton *cmdTmp = itCity.current();
+	    if ( cmdTmp->isOn() ) {
+		strCityTz[i] = zoneID;
+		curZone = TimeZone( zoneID );
+                cmdTmp->setText( curZone.city() );
+		listTimes.at(i)->setZone(zoneID);
+		cmdTmp->toggle();
+		// we can actually break, since there is only one button
+		// that is ever pressed!
+		changed = TRUE;
+		break;
+	    }
+	}
     }
 
 #ifndef QTOPIA_DESKTOP
@@ -263,43 +367,37 @@ void WorldTime::readInTimes( void )
 {
     Config cfg("WorldTime");
     cfg.setGroup("TimeZones");
-    QListIterator<QPushButton> itCity( listCities );
 
-    int i=0;
+    int i;
     nameRealTz = QString::null;
     QString zn;
     nameRealTz = "";
-    for ( ; i < int(listCities.count()) ; i++ ) {
+    if (mCombo) mCombo->clear();
+    for (i = 0; i < CITIES; i++ ) {
 	zn = cfg.readEntry("Zone"+QString::number(i), QString::null);
 	if ( zn.isNull() )
 	    break;
 	QString nm = cfg.readEntry("ZoneName"+QString::number(i));
 	strCityTz[i] = zn;
-	itCity.current()->setText(nm);
+	if (mMode == Minimal)
+	    mCombo->insertItem( nm, i);
+	else 
+	    listCities.at(i)->setText(nm);
+	listTimes.at(i)->setZone(zn);
 	if ( zn == strRealTz )
 	    nameRealTz = nm;
-	++itCity;
-    }
-    if ( i == 0 ) {
-        // This should never be needed as the server or qtopiadesktop should always
-	//     create this configuratation file if needed
-	qWarning("WorldTime is recreating it's configuration using non-translated city names"); // No tr
-        QStringList list = timezoneDefaults();
-        int i;
-        QStringList::Iterator it = list.begin();
-        for ( i = 0, itCity.toFirst(); itCity.current(); i++, ++itCity ) {
-            strCityTz[i] = *it++;
-            itCity.current()->setText( *it++ );
-        }
     }
     if ( nameRealTz.isEmpty() ) {
 	//remember the current time zone even if we don't have room
 	//to show it.
-	zn = cfg.readEntry("Zone"+QString::number(listCities.count()),
+	zn = cfg.readEntry("Zone"+QString::number(CITIES),
 	    QString::null);
 	if ( zn == strRealTz )
 	    nameRealTz = cfg.readEntry("ZoneName" +
-		QString::number(listCities.count()));
+		QString::number(CITIES));
 	i++;
     }
 }
+
+
+

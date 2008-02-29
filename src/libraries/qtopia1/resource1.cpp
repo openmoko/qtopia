@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,57 +37,20 @@
 
 #include <qtopia/resource.h>
 #include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qpixmapcache.h>
+
+#include "qpe_load_iconset.cpp"
 
 /*!
   Returns a QIconSet for the pixmap named \a pix.
   You should avoid including any filename type extension (eg. .png, .xpm).
   The icon size is determined by the Qtopia font setting.
+
+  First availability: Qtopia 1.6
 */
 QIconSet Resource::loadIconSet( const QString &pix ) 
 {
-    static int iconSetSize = -1;
-
-    if ( iconSetSize < 0 ) {
-	Config config( "qpe" );
-	config.setGroup( "Appearance" );
-	iconSetSize = config.readNumEntry("IconSize",0);
-    }
-
-    if ( iconSetSize ) {
-	// Force the icon to iconSetSize for small icons and 50% larger fo large icons.
-	QImage dimg = loadImage( pix + "_disabled" );
-	QImage img = loadImage(pix);
-	QPixmap pm;
-
-	QIconSet is;
-	if ( img.height()*2 >= iconSetSize*3 ) {
-	    pm.convertFromImage(img.smoothScale(iconSetSize,iconSetSize));
-	    is.reset(pm,QIconSet::Small);
-	    pm.convertFromImage(img.smoothScale(iconSetSize*3/2,iconSetSize*3/2));
-	    is.setPixmap(pm,QIconSet::Large);
-	    if ( !dimg.isNull() ) {
-		pm.convertFromImage(dimg.smoothScale(iconSetSize,iconSetSize));
-		is.setPixmap(pm,QIconSet::Small,QIconSet::Disabled);
-		pm.convertFromImage(dimg.smoothScale(iconSetSize*3/2,iconSetSize*3/2));
-		is.setPixmap(pm,QIconSet::Large,QIconSet::Disabled);
-	    }
-	} else {
-	    pm.convertFromImage(img.smoothScale(iconSetSize,iconSetSize));
-	    is.reset(pm,QIconSet::Small);
-	    if ( !dimg.isNull() ) {
-		pm.convertFromImage(dimg.smoothScale(iconSetSize,iconSetSize));
-		is.setPixmap(pm,QIconSet::Small,QIconSet::Disabled);
-	    }
-	}
-	return is;
-    } else {
-	QPixmap dpm = loadPixmap( pix + "_disabled" );
-	QPixmap pm = loadPixmap( pix );
-	QIconSet is( pm );
-	if ( !dpm.isNull() )
-	    is.setPixmap( dpm, pm.width() <= 22 ? QIconSet::Small : QIconSet::Large, QIconSet::Disabled );
-	return is;
-    }
+    return qpe_loadIconSet(pix);
 }
-
 

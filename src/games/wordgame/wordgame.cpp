@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -48,6 +63,7 @@
 #include <qlayout.h>
 #include <qregexp.h>
 #include <qgroupbox.h>
+#include <qscrollview.h>
 
 #include <stdlib.h>
 #ifndef Q_OS_WIN32
@@ -75,7 +91,7 @@ static int tile_btweak = -1;
 static const int rack_tiles=7;
 
 const char* sampleWGR=
-	"wordgame_shapes\n"
+	"wordgame/wordgame_shapes\n"
 	"15 15\n"
 	"400001040100004\n"
 	"030000000000030\n"
@@ -147,7 +163,6 @@ WordGame::WordGame( QWidget* parent, const char* name, WFlags fl ) :
 	tile_stweak = 0;
     }
 
-    setIcon( Resource::loadPixmap( "wordgame" ) );
     setCaption( tr("Word Game") );
 
     setToolBarsMovable( FALSE );
@@ -258,13 +273,18 @@ void WordGame::openGameSelector(const QStringList& /* initnames */)
     delete cpu;
     cpu = 0;
 
+    sv = new QScrollView(vbox);
+    sv->setResizePolicy(QScrollView::AutoOneFit);
+    sv->setFrameStyle(QFrame::NoFrame);
+
     newgame = new NewGame(vbox);
+    sv->addChild(newgame);
 
     newgame->player0->changeItem(defaultname,0);
     newgame->player1->setCurrentItem(1);
     newgame->updateRuleSets();
     newgame->playersbox->setColumnLayout(landscape ? 2 : 1, Horizontal);
-    newgame->show();
+    sv->show();
 
     connect(newgame->buttonOk, SIGNAL(clicked()), this, SLOT(startGame()));
     setCaption(tr("Word Game"));
@@ -283,6 +303,7 @@ void WordGame::startGame()
 	names.append(newgame->player4->currentText());
 	names.append(newgame->player5->currentText());
 	delete newgame;
+	delete sv;
 	startGame(names);
     } else {
 	// error...
@@ -320,7 +341,7 @@ bool WordGame::loadRules(const QString &name)
 
     QTextStream ts( &file );
 
-    QString title = "Word Game";
+    QString title = tr("Word Game");
     if (name) {
 	title += " - " + name;
 	title.truncate( title.length() - 6 );
@@ -482,7 +503,7 @@ bool WordGame::mayEndGame()
 	    out = i;
     if ( out<0 ) {
 	if ( QMessageBox::warning(this,tr("End game"),
-				  tr("Do you want to end the game early?"), 
+				  tr("<qt>Do you want to end the game early?</qt>"),
 				  tr("Yes"), tr("No") )!=0 )
 	{
 	    return FALSE;
@@ -840,6 +861,7 @@ QSize Board::sizeHint() const
 
 void Board::writeConfig(Config& cfg)
 {
+    unshowTurn(); // not simple to save this info
     QStringList t;
     int n=canvas()->tilesHorizontally()*canvas()->tilesVertically();
     for (int i=0; i<n; i++)

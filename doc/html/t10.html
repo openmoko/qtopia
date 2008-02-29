@@ -7,13 +7,15 @@ Qt Tutorial - Chapter 10: Smooth as Silk
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 <p>
@@ -195,9 +197,9 @@ The constructor is mostly the same, but some new bits have been added.  <pre>
 </pre>
 <p>
 We add a second LCDRange which will be used to set the force.  <pre>
-        <a href="qobject.html#7f8e37">connect</a>( force, SIGNAL(valueChanged(int)),
+        <a href="qobject.html#fbde73">connect</a>( force, SIGNAL(valueChanged(int)),
                  cannonField, SLOT(setForce(int)) );
-        <a href="qobject.html#7f8e37">connect</a>( cannonField, SIGNAL(forceChanged(int)),
+        <a href="qobject.html#fbde73">connect</a>( cannonField, SIGNAL(forceChanged(int)),
                  force, SLOT(setValue(int)) );
 </pre>
 <p>
@@ -242,5 +244,5 @@ You may now go on to <a href="t11.html">chapter eleven.</a>
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

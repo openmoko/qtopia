@@ -1,31 +1,14 @@
-/* FFT and MDCT tests */
+/**
+ * @file fft-test.c
+ * FFT and MDCT tests.
+ */
+
 #include "dsputil.h"
 #include <math.h>
-#include <getopt.h>
+#include <unistd.h>
 #include <sys/time.h>
 
 int mm_flags;
-
-void *av_malloc(int size)
-{
-    void *ptr;
-    ptr = malloc(size);
-    return ptr;
-}
-
-void av_free(void *ptr)
-{
-    /* XXX: this test should not be needed on most libcs */
-    if (ptr)
-        free(ptr);
-}
-
-/* cannot call it directly because of 'void **' casting is not automatic */
-void __av_freep(void **ptr)
-{
-    av_free(*ptr);
-    *ptr = NULL;
-}
 
 /* reference fft */
 
@@ -126,11 +109,11 @@ float frandom(void)
     return (float)((random() & 0xffff) - 32768) / 32768.0;
 }
 
-INT64 gettime(void)
+int64_t gettime(void)
 {
     struct timeval tv;
     gettimeofday(&tv,NULL);
-    return (INT64)tv.tv_sec * 1000000 + tv.tv_usec;
+    return (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
 }
 
 void check_diff(float *tab1, float *tab2, int n)
@@ -209,7 +192,7 @@ int main(int argc, char **argv)
             printf("IMDCT");
         else
             printf("MDCT");
-        mdct_init(m, fft_nbits, do_inverse);
+        ff_mdct_init(m, fft_nbits, do_inverse);
     } else {
         if (do_inverse)
             printf("IFFT");
@@ -233,12 +216,12 @@ int main(int argc, char **argv)
     if (do_mdct) {
         if (do_inverse) {
             imdct_ref((float *)tab_ref, (float *)tab1, fft_size);
-            imdct_calc(m, tab2, (float *)tab1, tabtmp);
+            ff_imdct_calc(m, tab2, (float *)tab1, tabtmp);
             check_diff((float *)tab_ref, tab2, fft_size);
         } else {
             mdct_ref((float *)tab_ref, (float *)tab1, fft_size);
             
-            mdct_calc(m, tab2, (float *)tab1, tabtmp);
+            ff_mdct_calc(m, tab2, (float *)tab1, tabtmp);
 
             check_diff((float *)tab_ref, tab2, fft_size / 2);
         }
@@ -254,7 +237,7 @@ int main(int argc, char **argv)
     /* do a speed test */
 
     if (do_speed) {
-        INT64 time_start, duration;
+        int64_t time_start, duration;
         int nb_its;
 
         printf("Speed test...\n");
@@ -265,9 +248,9 @@ int main(int argc, char **argv)
             for(it=0;it<nb_its;it++) {
                 if (do_mdct) {
                     if (do_inverse) {
-                        imdct_calc(m, (float *)tab, (float *)tab1, tabtmp);
+                        ff_imdct_calc(m, (float *)tab, (float *)tab1, tabtmp);
                     } else {
-                        mdct_calc(m, (float *)tab, (float *)tab1, tabtmp);
+                        ff_mdct_calc(m, (float *)tab, (float *)tab1, tabtmp);
                     }
                 } else {
                     memcpy(tab, tab1, fft_size * sizeof(FFTComplex));
@@ -286,7 +269,7 @@ int main(int argc, char **argv)
     }
     
     if (do_mdct) {
-        mdct_end(m);
+        ff_mdct_end(m);
     } else {
         fft_end(s);
     }

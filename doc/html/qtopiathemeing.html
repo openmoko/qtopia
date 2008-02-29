@@ -1,0 +1,418 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/themeing.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Theming</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Theming</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Qtopia - Theming the Phone Edition
+</a>
+<li><a href="#3"> Themed Views
+</a>
+<ul>
+<li><a href="#3-1"> Common Attributes
+</a>
+<ul>
+<li><a href="#3-1-1"> Naming Elements
+</a>
+<li><a href="#3-1-2"> Positioning Elements
+</a>
+<li><a href="#3-1-3"> Showing/hiding elements
+</a>
+<li><a href="#3-1-4"> Specifying Colors
+</a>
+<li><a href="#3-1-5"> Alignment
+</a>
+<li><a href="#3-1-6"> Stretching Images
+</a>
+</ul>
+<li><a href="#3-2"> Themed View Elements
+</a>
+<ul>
+<li><a href="#3-2-1"> page
+</a>
+<li><a href="#3-2-2"> rect
+</a>
+<li><a href="#3-2-3"> line
+</a>
+<li><a href="#3-2-4"> text
+</a>
+<li><a href="#3-2-5"> image
+</a>
+<li><a href="#3-2-6"> anim
+</a>
+<li><a href="#3-2-7"> status
+</a>
+<li><a href="#3-2-8"> level
+</a>
+<li><a href="#3-2-9"> plugin
+</a>
+<li><a href="#3-2-10"> layout
+</a>
+<li><a href="#3-2-11"> exclusive
+</a>
+</ul>
+<li><a href="#3-3"> Known Elements
+</a>
+</ul>
+<li><a href="#4"> Window Decorations
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The Qtopia Phone Edition has a powerful theming engine, allowing much
+of the user interface to be customized and personalized.
+<p> <h2> Qtopia - Theming the Phone Edition
+</h2>
+<a name="2"></a><p> The following can be themed:
+<p> <ul>
+<li> Color scheme
+<li> Font
+<li> Title area
+<li> Home screen
+<li> Context bar
+<li> Window decorations
+<li> Widget style
+<li> Icons
+<li> Media player
+</ul>
+<p> The color scheme, fonts and background image can be selected by the user in
+the Appearance settings.  It also allows a theme to be selected.  The
+themes presented in the Appearance settings modify one or more of the title,
+home screen, context bar, widget style and icons.  The Media player
+theme can be selected independantly in the media player settings.
+<p> In order to create a well integrated theme it will usually be necessary
+to implement the Title area, Home screen, Context bar and Window decorations.
+Widget style and icons can help to finish the effect, however since these
+are far more time consuming to produce it is common to use those provided
+by an existing theme.
+<p> A theme is defined by a desktop file in $QPEDIR/etc/themes/.  The
+theme desktop file contains:
+<p> <pre>
+[Theme]
+Name = &lt;name of theme (translatable)&gt;
+Style = &lt;name of the Style plugin that handles widget drawing&gt;
+WidgetsConfig = &lt;path for the configuration file (for the themed widget style)&gt;
+TitleConfig = &lt;path to the title configuration file&gt;
+HomeConfig = &lt;path to the home screen configuration file&gt;
+ContextConfig = &lt;path to the context bar configuration file&gt;
+DecorationConfig = &lt;path to the window decoration configuration file&gt;
+IconPath = &lt;list of semi-colon separated paths to substitute icons&gt;
+</pre>
+ 
+<p> For example, the Portal theme is defined by: $QPEDIR/etc/themes/portal.desktop:
+<p> <pre>
+[Theme]
+Name = Portal
+Style = Qtopia
+TitleConfig = portal/title.xml
+HomeConfig = portal/home.xml
+ContextConfig = portal/context.xml
+DecorationConfig = portal/decorationrc
+</pre>
+ 
+<p> The title, home screen and context bar share the same theming format.  The
+window decoration and widget themes have their own formats.
+<p> <h2> Themed Views
+</h2>
+<a name="3"></a><p> Themed views are used by the title, home screen and context bar.  The Qtopia
+system interacts with the themed views to display status information,
+text, animations, etc.  The themed views are defined by XML files which
+describe a heirachical group of visual and formatting elements.
+<p> <h3> Common Attributes
+</h3>
+<a name="3-1"></a><p> There are a number of attributes common to many of the elements.  These
+affect the placement of elements and their visual appearance.
+<p> <h4> Naming Elements
+</h4>
+<a name="3-1-1"></a><p> Qtopia Phone interacts with elements using their <tt>name</tt>.  All elements
+can be named, however only one element of each type should have the same name.
+For a list of the elements that Qtopia can interact with see the
+Known Elements section.
+<p> This attribute is available in all elements.
+<p> <h4> Positioning Elements
+</h4>
+<a name="3-1-2"></a><p> Elements are placed according to <i>rect</i> attributes.  The rects are
+relative to their parent's geometry.  The rect attributes can have one of
+two forms:
+<ul>
+<li> <tt>x,y,wxh</tt> - specifies the top, left corner and the width and height.
+<li> <tt>x1,y1,x2,y2</tt> - specifies the top, left and bottom, right corners.
+</ul>
+<p> If any of the top or left coordinates are negative, they are relative to the
+right/bottom of the parent element. If bottom or right coordinates are
+less than or equal to zero, they are relative to the right/bottom of the
+parent element.
+<p> This allows the theme to scale.  For example, to place a rect element that
+scales as the view gets wider:
+<p> <pre>
+&lt;rect rect="20,10,-20,50" color="Highlight" brush="Highlight"/&gt;
+</pre>
+ 
+<p> This places a rectangle, using the Highlight color, at 20,10 with height
+of 40 pixels and the y2 coordinate 20 pixels from the parent element's
+right side.
+<p> This attribute is available in all elements.
+<p> <h4> Showing/hiding elements
+</h4>
+<a name="3-1-3"></a><p> The Qtopia system may show or hide elements as appropriate depending
+upon the state of the system.  These elements can be specified by setting the
+<tt>transient</tt> attribute to "yes".  The <tt>active</tt> attribute
+determines whether the element will initially be visible.  The default
+is to show the element.  To hide the element set active to "no".  The
+elements which can be transient are listed in the Known Elements section.
+<p> This attribute is available in all elements.
+<p> <h4> Specifying Colors
+</h4>
+<a name="3-1-4"></a><p> Colors can be specifed by either their hex color code of the form #RRGGBB,
+by their Qt QColorGroup color roles:
+<p> <ul>
+<li> <tt>None</tt> - do not paint/blend with any color.
+<li> <tt>Background</tt> - general background color.
+<li> <tt>Foreground</tt> - general foreground color.
+<li> <tt>Base</tt> - used as background color for e.g. text entry widgets,
+usually white or another light color.
+<li> <tt>Text</tt> - the foreground color used with <tt>Base</tt>. Usually this
+is the same as the <tt>Foreground</tt>, in what case it must provide good
+contrast both with <tt>Background</tt> and <tt>Base</tt>.
+<li> <tt>Button</tt> - general button background color, where buttons need a
+background different from <tt>Background</tt>.
+<li> <tt>ButtonText</tt> - a foreground color used with the <tt>Button</tt> color.
+</ul>
+There are some color roles used mostly for 3D bevel and shadow effects:
+<ul>
+<li> <tt>Light</tt> - lighter than <tt>Button</tt> color.
+<li> <tt>Midlight</tt> - between <tt>Button</tt> and <tt>Light</tt>.
+<li> <tt>Dark</tt> - darker than <tt>Button</tt>.
+<li> <tt>Mid</tt> - between <tt>Button</tt> and <tt>Dark</tt>.
+<li> <tt>Shadow</tt> - a very dark color.
+</ul>
+All of these are normally derived from <tt>Background</tt>, and used
+in ways that depend on that relationship.  For example, buttons
+depend on it to make the bevels look good.
+<p> Selected (marked) items have two roles:
+<ul>
+<li> <tt>Highlight</tt>  - a color to indicate a selected or highlighted item.
+<li> <tt>HighlightedText</tt> - a text color that contrasts to <tt>Highlight</tt>.
+</ul>
+Finally, there is a special role for text that needs to be
+drawn where <tt>Text</tt> or <tt>Foreground</tt> would provide bad contrast,
+such as on pressed push buttons:
+<ul>
+<li> <tt>BrightText</tt> - a text color that is very different from <tt>Foreground</tt> and contrasts well with e.g. <tt>Dark</tt>.
+</ul>
+<p> <h4> Alignment
+</h4>
+<a name="3-1-5"></a><p> Some elements can be aligned by specifying:
+<ul>
+<li> left
+<li> hcenter
+<li> right
+<li> top
+<li> vcenter
+<li> bottom
+</ul>
+<p> To specify both horizontal and vertical alignment separate the alignment
+flags by a comma.
+<p> <h4> Stretching Images
+</h4>
+<a name="3-1-6"></a><p> Images and masks can be stretched to support themes that scale to different
+screen sizes.  Stretching specifies a portion of the image that can be
+duplicated to fill the area between the start and end of the stretched
+image.  The stretching can only be performed in one direction.
+<p> <center><img src="stretch_img.png"></center> 
+<p> This illustration shows that the area bewteen point S1 and S2 is duplicated
+as necessary when the image is drawn.  The stretch points are separated by
+a comma, e.g. stretch="16,48".
+<p> <h3> Themed View Elements
+</h3>
+<a name="3-2"></a><p> <h4> page
+</h4>
+<a name="3-2-1"></a><p> The top-level element.  Specifies the size and shape of the view.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#f0f0f0">    <td valign="top">name <td valign="top">The name of the view.  Qtopia expects one of title, home or
+contextbar
+<tr bgcolor="#d0d0d0">    <td valign="top">base <td valign="top">The base directory where the image data can be found relative
+to $QPEDIR/pics
+<tr bgcolor="#f0f0f0">    <td valign="top">rect <td valign="top">The size of the view.  The <i>x</i> and <i>y</i> coordinates
+are ignored.
+<tr bgcolor="#d0d0d0">    <td valign="top">mask <td valign="top">The mask used to set the widget shape.  This is useful for
+the title and context bar.
+<tr bgcolor="#f0f0f0">    <td valign="top">stretch <td valign="top">The stretch points for the mask.
+</table></center>
+<p> <h4> rect
+</h4>
+<a name="3-2-2"></a><p> Draws a rectangle which may be filled.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#d0d0d0">    <td valign="top">active <td valign="top">"yes" if this is a transient element.
+<tr bgcolor="#f0f0f0">    <td valign="top">color <td valign="top">The color of the line.
+<tr bgcolor="#d0d0d0">    <td valign="top">brush <td valign="top">The color to fill the interior with.
+</table></center>
+<p> <h4> line
+</h4>
+<a name="3-2-3"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#f0f0f0">    <td valign="top">color <td valign="top">The color of the line.
+</table></center>
+<p> <h4> text
+</h4>
+<a name="3-2-4"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#d0d0d0">    <td valign="top">size <td valign="top">The font size in points.
+<tr bgcolor="#f0f0f0">    <td valign="top">color <td valign="top">The color of the font.
+<tr bgcolor="#d0d0d0">    <td valign="top">shadow <td valign="top">Paints a shadow under the text to make it more visible
+when the background is textured.  The value is a number in the range 0 - 255.
+<tr bgcolor="#f0f0f0">    <td valign="top">align <td valign="top">The text alignment.
+<tr bgcolor="#d0d0d0">    <td valign="top">short <td valign="top">When set to "yes" Qtopia will supply a short version of
+the text, for example instead of "3 new messages", just "3" will be set.
+</table></center>
+<p> <h4> image
+</h4>
+<a name="3-2-5"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#f0f0f0">    <td valign="top">src <td valign="top">The image to be drawn.
+<tr bgcolor="#d0d0d0">    <td valign="top">color <td valign="top">A color to blend with the image.  This allows images to
+be colored to match the selected color scheme.
+<tr bgcolor="#f0f0f0">    <td valign="top">alpha <td valign="top">Add an alpha channel with value in the range 0-255
+<tr bgcolor="#d0d0d0">    <td valign="top">stretch <td valign="top">The stretch points for the image.
+<tr bgcolor="#f0f0f0">    <td valign="top">orientation <td valign="top">The direction to stretch the image.
+</table></center>
+<p> <h4> anim
+</h4>
+<a name="3-2-6"></a><p> Shows an animation.  Animations are costly in CPU and therefore power, so they
+must be used sparingly and only for transient elements with short active
+periods.  The animation is defined by an image with frames layed out horizontally
+next to each other.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#d0d0d0">    <td valign="top">src <td valign="top">The image containing the frames.
+<tr bgcolor="#f0f0f0">    <td valign="top">count <td valign="top">The number of frame in the image.
+<tr bgcolor="#d0d0d0">    <td valign="top">width <td valign="top">The width of the frames.
+<tr bgcolor="#f0f0f0">    <td valign="top">loop <td valign="top">The frame to loop back to when the last frame is reached.
+<tr bgcolor="#d0d0d0">    <td valign="top">revloop <td valign="top">The frame to loop back to, in reverse order, when
+the last frame is reached.
+<tr bgcolor="#f0f0f0">    <td valign="top">delay <td valign="top">The delay between frames.
+</table></center>
+<p> <h4> status
+</h4>
+<a name="3-2-7"></a><p> Displays an on/off status icon.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#d0d0d0">    <td valign="top">imageon <td valign="top">The filename of the image representing the on state.
+<tr bgcolor="#f0f0f0">    <td valign="top">imageoff <td valign="top">The filename of the image representing the off state.
+<tr bgcolor="#d0d0d0">    <td valign="top">coloron <td valign="top">A color to blend with the image in the on state.
+<tr bgcolor="#f0f0f0">    <td valign="top">coloroff <td valign="top">A color to blend with the image in the off state.
+<tr bgcolor="#d0d0d0">    <td valign="top">alphaon <td valign="top">The alpha level of the image in the on state (0-255).
+<tr bgcolor="#f0f0f0">    <td valign="top">alphaoff <td valign="top">The alpha level of the image in the off state (0-255).
+</table></center>
+<p> <h4> level
+</h4>
+<a name="3-2-8"></a><p> Displays a level such as battery charge.  The different levels are
+represented by an image with frames layed out horizontally next to each other.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#d0d0d0">    <td valign="top">src <td valign="top">The filename of the image containing the frames for the
+levels.
+<tr bgcolor="#f0f0f0">    <td valign="top">count <td valign="top">The number of levels.
+<tr bgcolor="#d0d0d0">    <td valign="top">width <td valign="top">The width of the frames.
+</table></center>
+<p> <h4> plugin
+</h4>
+<a name="3-2-9"></a><p> This is a special element which loads a plugin to do the drawing.  This is
+currently only used to display custom backgrounds in the home screen.
+<p> <h4> layout
+</h4>
+<a name="3-2-10"></a><p> This element does not do any drawing itself.  Its role is to layout its
+child elements in a horizontal or vertical orientation.  The default
+orientation is vertical.  If any of the child elements are shown/hidden
+then the remaining children will be layed out again.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Attribute <th valign="top">Description
+<tr bgcolor="#f0f0f0">    <td valign="top">orientation <td valign="top">The direction to layout the elements (vertical or
+<tr bgcolor="#d0d0d0">    <td valign="top">align <td valign="top">Set the alignment of the elements.
+horizontal).
+</table></center>
+<p> <h4> exclusive
+</h4>
+<a name="3-2-11"></a><p> This element will display only one of its children.  The children must be
+transient. This is useful for sharing an area in different states.
+<p> <h3> Known Elements
+</h3>
+<a name="3-3"></a><p> Qtopia interacts with the view using the element's names an the element
+type.  The names Qtopia supports are:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Name <th valign="top">Types <th valign="top">Description
+<tr bgcolor="#f0f0f0">     <td valign="top">time <td valign="top">text <td valign="top">The current time.
+<tr bgcolor="#d0d0d0">     <td valign="top">date <td valign="top">text <td valign="top">The current date.
+<tr bgcolor="#f0f0f0">     <td valign="top">location <td valign="top">text <td valign="top">The cell location.
+<tr bgcolor="#d0d0d0">     <td valign="top">caption <td valign="top">text <td valign="top">The caption set by applicaitone, e.g. the application name.
+<tr bgcolor="#f0f0f0">     <td valign="top">roaming <td valign="top">status <td valign="top">Set to on when roaming.
+<tr bgcolor="#d0d0d0">     <td valign="top">messages <td valign="top">text, status <td valign="top">New unread messages.
+<tr bgcolor="#f0f0f0">     <td valign="top">call_active <td valign="top">status <td valign="top">Call(s) are active.
+<tr bgcolor="#d0d0d0">     <td valign="top">signal <td valign="top">level <td valign="top">Signal strength.
+<tr bgcolor="#f0f0f0">     <td valign="top">battery <td valign="top">level <td valign="top">Battery charge.
+<tr bgcolor="#d0d0d0">     <td valign="top">inputmethod <td valign="top">rect <td valign="top">Placeholder for input method indicator.
+<tr bgcolor="#f0f0f0">     <td valign="top">calls <td valign="top">text, status <td valign="top">Missed calls.
+<tr bgcolor="#d0d0d0">     <td valign="top">alarm <td valign="top">status <td valign="top">An alarm has been set.
+<tr bgcolor="#f0f0f0">     <td valign="top">lock <td valign="top">status <td valign="top">Key lock is active.
+<tr bgcolor="#d0d0d0">     <td valign="top">calldivert <td valign="top">status <td valign="top">A call diversion is active.
+<tr bgcolor="#f0f0f0">     <td valign="top">profile <td valign="top">text <td valign="top">The current ring profile.
+<tr bgcolor="#d0d0d0">     <td valign="top">infobox <td valign="top">text, image <td valign="top">Displays various information to the user,
+e.g. "Searching for Network" <i>Home screen only.</i>
+<tr bgcolor="#f0f0f0">     <td valign="top">button0 <td valign="top">text, image <td valign="top">Context button 0
+<tr bgcolor="#d0d0d0">     <td valign="top">button1 <td valign="top">text, image <td valign="top">Context button 1
+<tr bgcolor="#f0f0f0">     <td valign="top">button2 <td valign="top">text, image <td valign="top">Context button 2
+</table></center>
+<p> <h2> Window Decorations
+</h2>
+<a name="4"></a><p> It is important that the window decoraton metrics match the title theme.
+The title is positioned over the window title of maximised windows.  If the
+window title size doesn't match the system title size, some of the applciation
+window will be obscured, or there will be an empty area at the top of the
+application.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

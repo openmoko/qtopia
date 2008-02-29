@@ -1,24 +1,26 @@
-multiprocess:TEMPLATE   = app
-multiprocess:DESTDIR    = $(QPEDIR)/bin
-singleprocess:TEMPLATE  = lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE    = lib
-quicklaunch:DESTDIR     = $(QPEDIR)/plugins/application
+CONFIG += qtopiaapp
 
-CONFIG += qtopia warn_on release
+INCLUDEPATH += ../../libraries/qtopiacalc	
 
-# Input
-HEADERS += 
-SOURCES += main.cpp 
-
-INCLUDEPATH += $(QPEDIR)/src/libraries/qtopiacalc	
-
-unix:LIBS   += -lqtopiacalc -Wl,-export-dynamic
-win32:LIBS  += $(QPEDIR)/lib/qtopiacalc.lib
-
+LIBS+=-lqtopiacalc
 #-Wl,-export-dynamic
 #export-dynamic costs around 3.5kb
 
+SOURCES+=main.cpp
+
 TARGET = calculator
 
-TRANSLATIONS = calculator-en_GB.ts calculator-de.ts calculator-ja.ts calculator-no.ts
+TRANSLATABLES = $${SOURCES}
+
+
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/calculator.desktop
+desktop.path=/apps/Applications
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/calculator*
+help.path=/help/html
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/calculator/*
+pics.path=/pics/calculator
+plugindir.files=$${QTOPIA_DEPOT_PATH}/plugins/calculator/.directory
+plugindir.path=/plugins/calculator/
+INSTALLS+=desktop help plugindir
+PICS_INSTALLS+=pics
+

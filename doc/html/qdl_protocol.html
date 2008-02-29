@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/qdl_protocol.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Data Linking - Protocol</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Data Linking - Protocol</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Overview
+The protocol is faily simple. A typical transaction between a client and source is as follows:
+<ul>
+<li> The client makes a request for a link by sending a QCop message to the source application's QCop channel. The request tells the source which channel to respond on.
+<li> The source receives the message and creates a list of records to respond with.
+<li> The source sends the list with a QCop message on the channel specified by the client. The source tells the client how many records it's sending.
+<li> The client receives the message and populates itself with the links.
+</ul>
+</a>
+<li><a href="#3"> Client Requests
+A client makes a request by sending the following QCop message on the source application's channel.
+\code
+    QDLRequestLink( QString channelName, QString hint )
+\endcode 
+<em>channelName</em> is the name of the channel the source should respond on.
+<em>hint</em> is some data to help the source find records. The hint may be empty.
+</a>
+<li><a href="#4"> Source Responses
+A source reponds to a QDLGetLink message by sending the following QCop message on the channel specified by the client.
+\code
+    QDLProvideLinks( int numLinks )
+\endcode 
+</a>
+<li><a href="#5"> Detecting a stalled Source
+The Client is notified by the QDL library if the Source application cannot be contacted. There is communication between the Source and the QDL library to ensure the Client is not kept waiting if the Source crashes.
+</a>
+<li><a href="#6"> Link Activation
+To activate a link an application sends the following message to the source
+\code
+    QDLActivateLink( QString dataRef )
+\endcode 
+<em>dataRef</em> is a unique reference to some data that the source application contains.
+</a>
+<li><a href="#7"> Global Find
+Global Find will send the following message to each Source.
+\code
+    QDLRequestAllLinks( QString channelName, QString hint )
+\endcode 
+<em>channelName</em> is the name of the channel the source should respond on.
+<em>hint</em> is some data to help the source find records.
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The <a href="qdl.html">QDL</a> protocol is a series of messages and behaviours that are defined for applications wishing to implement QDL. This document deals exclusively with the protocol of QDL. For more general information about QDL, please see the <a href="qdl_specification.html">specification</a>.
+<p> <h2> Overview
+The protocol is faily simple. A typical transaction between a client and source is as follows:
+<ul>
+<li> The client makes a request for a link by sending a QCop message to the source application's QCop channel. The request tells the source which channel to respond on.
+<li> The source receives the message and creates a list of records to respond with.
+<li> The source sends the list with a QCop message on the channel specified by the client. The source tells the client how many records it's sending.
+<li> The client receives the message and populates itself with the links.
+</ul>
+</h2>
+<a name="2"></a><p> <h2> Client Requests
+A client makes a request by sending the following QCop message on the source application's channel.
+<pre>
+    QDLRequestLink( QString channelName, QString hint )
+</pre>
+ 
+<em>channelName</em> is the name of the channel the source should respond on.
+<em>hint</em> is some data to help the source find records. The hint may be empty.
+</h2>
+<a name="3"></a><p> <h2> Source Responses
+A source reponds to a QDLGetLink message by sending the following QCop message on the channel specified by the client.
+<pre>
+    QDLProvideLinks( int numLinks )
+</pre>
+ 
+</h2>
+<a name="4"></a><p> <em>numLinks</em> is the number of links sent in this message. <em>numLinks</em> can be zero (ie. there are no links) or it can be a positive integer. In the latter case, the following information will be encoded into the QCop message <em>numLinks</em> times.
+<p> An example of how to handle this QCop message is given below:
+<pre>
+void receiveMessage( QString message, QByteArray data )
+{
+    if ( message == "QDLProvideLinks(int)" ) {
+        QDataStream source( data );
+        int numLinks;
+        source &gt;&gt; numLinks;
+        QString appRef, dataRef, description, icon;
+        for ( int i = 0; i &lt; numLinks; i++ ) {
+            source &gt;&gt; appRef &gt;&gt; dataRef &gt;&gt; description &gt;&gt; icon;
+            // do something with the link
+        }
+    }
+}
+</pre>
+ 
+<p> <em>appRef</em> is the application the link references.
+<em>dataRef</em> this is data to be passed to the Source so that it can perform an action.
+<em>description</em> is the descriptive text of the link.
+<em>icon</em> is the filename of the icon associated with the link.
+<p> Note: The Source is not required to allow selecting multiple links.
+<p> <h2> Detecting a stalled Source
+The Client is notified by the <a href="qdl.html">QDL</a> library if the Source application cannot be contacted. There is communication between the Source and the QDL library to ensure the Client is not kept waiting if the Source crashes.
+</h2>
+<a name="5"></a><p> <h2> Link Activation
+To activate a link an application sends the following message to the source
+<pre>
+    QDLActivateLink( QString dataRef )
+</pre>
+ 
+<em>dataRef</em> is a unique reference to some data that the source application contains.
+</h2>
+<a name="6"></a><p> <h2> <a href="global.html">Global</a> Find
+Global Find will send the following message to each Source.
+<pre>
+    QDLRequestAllLinks( QString channelName, QString hint )
+</pre>
+ 
+<em>channelName</em> is the name of the channel the source should respond on.
+<em>hint</em> is some data to help the source find records.
+</h2>
+<a name="7"></a><p> The Source is not expected to display anything when processing a Global Find operation since the Global Find application itself will display the results it received.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

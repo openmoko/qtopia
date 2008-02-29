@@ -1,3 +1,38 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
+**
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
+**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+
 /***************************************************************************
 (C) Copyright 1996 Apple Computer, Inc., AT&T Corp., International             
 Business Machines Corporation and Siemens Rolm Communications Inc.             
@@ -1014,7 +1049,6 @@ static int writeBase64(OFile *fp, unsigned char *s, long len)
 	appendsOFile(fp, ((cur >= len)?"\n" :(numQuads==MAXQUADS-1?"\n" : "")));
 	numQuads = (numQuads + 1) % MAXQUADS;
 	}
-    appendcOFile(fp,'\n');
 
     return 1;
 }
@@ -1099,19 +1133,40 @@ static void writeEncString(OFile *fp, const char *s, bool nosemi)
 	    break;
 	case Base64:
 	    writeBase64(fp, (unsigned char*)p, strlen(p));
+	    appendcOFile(fp,'\n');
 	    break;
     }
 }
 
-static bool includesUnprintable(VObject *o)
+static bool includesUnprintable(VObject *o, bool nosemi)
 {
     if (o) {
+	// if object o already has a VCEnodingProp
+	// don't try and encode it again(try to reencode b64 as QP
+	// because it has '=' chars for example)
+	VObjectIterator eit;
+	initPropIterator( &eit, o );
+	while( moreIteration( &eit ) )
+	{
+	    VObject *eo = nextVObject( &eit );
+	    if( eo )
+	    {
+		const char *n = vObjectName( eo );
+		if( QString(n) == VCEncodingProp )
+		{
+		    return FALSE;
+		}
+	    }
+	}	
+
+
 	if (VALUE_TYPE(o) == VCVT_STRINGZ) {
 	    const char *p = STRINGZ_VALUE_OF(o);
 	    if (p) {
 		while (*p) {
 		    if (*p==' ' && (!p[1] || p[1]=='\n') // RFC 1521: spaces at ends need quoting
-			     || qpReplaceChar(*p) )
+			    || qpReplaceChar(*p)
+			    || *p==';' && nosemi )
 			return TRUE;
 		    p++;
 		}
@@ -1161,7 +1216,7 @@ static void writeAttrValue(OFile *fp, VObject *o)
 	struct PreDefProp *pi;
 	pi = lookupPropInfo(NAME_OF(o));
 	if (pi && ((pi->flags & PD_INTERNAL) != 0)) return;
-	if ( includesUnprintable(o) )
+	if ( includesUnprintable(o,TRUE) )
 	    appendsOFileEncCs(fp);
 	appendcOFile(fp,';');
 	appendsOFile(fp,NAME_OF(o));
@@ -1229,7 +1284,7 @@ static void writeProp(OFile *fp, VObject *o)
 	    bool printable = TRUE;
 	    while (*fields && printable) {
 		VObject *t = isAPropertyOf(o,*fields);
-		if (includesUnprintable(t))
+		if (includesUnprintable(t,TRUE))
 		    printable = FALSE;
 		fields++;
 	    }
@@ -1254,7 +1309,7 @@ static void writeProp(OFile *fp, VObject *o)
 
 	
     if (VALUE_TYPE(o)) {
-	    if ( includesUnprintable(o) )
+	    if ( includesUnprintable(o,FALSE) )
 			appendsOFileEncCs(fp);
 	unsigned long size = 0;
         VObject *p = isAPropertyOf(o,VCDataSizeProp);

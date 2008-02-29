@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/include/qtopia/global.h:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/include/qtopia/global.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>global.h</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>global.h</h1>
 
 <p>This is the verbatim text of the global.h include file. It is provided only for illustration; the copyright remains with Trolltech.
 <hr>
@@ -59,18 +67,32 @@ class AppLnk;
 class DocLnkSet;
 class QFile;
 
+#if defined(__GNUC__) &amp;&amp; !defined(NO_DEBUG)
+// C99 defines __func__ instead of __FUNCTION__, possibly supported on windows
+# include &lt;time.h&gt;
+# include &lt;sys/times.h&gt;
+# define QTOPIA_HAVE_PROFILE
+# define QTOPIA_PROFILE(s)    extern struct tms qtopia_prof_times; qDebug("%fms %s (%s), line: %i file: %s", times(&amp;qtopia_prof_times)*1000.0/CLOCKS_PER_SEC, __FUNCTION__, s, __LINE__, __FILE__ )
+#else
+# define QTOPIA_PROFILE(s)
+#endif
+
 class QTOPIA_EXPORT Global
 {
 public:
     static QUuid generateUuid(); // libqtopia
 
+    static QStringList qtopiaPaths(); // libqtopia2
+    static QString defaultButtonsFile(); // libqtopia2
     static QString homeDirPath(); // libqtopia
     static bool renameFile( QString from, QString to ); // libqtopia
     static QString tempName(const QString &amp;filename); // libqtopia
     static QString journalFileName(const QString &amp;filename); // libqtopia
 
     static QString applicationFileName(const QString&amp; appname, const QString&amp; filename);
+#ifdef Q_WS_QWS
     static void findDocuments(DocLnkSet* folder, const QString &amp;mimefilter=QString::null);
+#endif
     static bool isDocumentFileName(const QString&amp; file); // libqtopia
     static bool isAppLnkFileName(const QString&amp; file); // libqtopia
 
@@ -94,6 +116,22 @@ public:
     static bool weekStartsOnMonday(); // libqtopia
     static void setWeekStartsMonday(bool ); // libqtopia
 
+    static bool mousePreferred(); // libqtopia2
+    static bool hasKey(int key); // libqtopia2
+
+    // System independant sleep
+    static void sleep( unsigned long secs ); // libqtopia2
+    static void msleep( unsigned long msecs ); // libqtopia2
+    static void usleep( unsigned long usecs ); // libqtopia2
+
+    // libqtopiamail relies on these so they need to be available to Qtopia Desktop
+#ifdef QTOPIA_DESKTOP
+    enum Lockflags {LockShare = 1, LockWrite = 2, LockBlock = 4};
+    static bool lockFile(QFile &amp;f, int flags = -1);
+    static bool unlockFile(QFile &amp;f);
+    static bool isFileLocked(QFile &amp;f, int flags = -1);
+#endif
+
 #ifdef Q_WS_QWS
 
     Global();
@@ -105,7 +143,10 @@ public:
 
     static void addWords(const QStringList&amp; word);
     static void addWords(const QString&amp; dictname, const QStringList&amp; word);
-    // static void removeWords(const QStringList&amp; word); -- if someone wants it
+#if defined(QTOPIA_PHONE) || defined(QTOPIA_INTERNAL_DICTOPERATIONS)
+    static void removeWords(const QStringList&amp; word);
+    static void removeWords(const QString&amp; dictname, const QStringList&amp; word);
+#endif
 
     static void createDocDir();
 
@@ -151,6 +192,7 @@ private:
     static void invoke( const QString &amp;exec);
     static Command* builtin;
     static QGuardedPtr&lt;QWidget&gt; *running;
+    static void removeRunningArray();
 #endif
 };
 
@@ -162,9 +204,11 @@ bool qtopia_renameFile( QString from, QString to );
 #endif
 </pre>
 <!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

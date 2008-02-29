@@ -7,13 +7,15 @@ Qt Tutorial - Chapter 6: Building Blocks Galore!
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 <p>
@@ -52,7 +54,7 @@ LCDRange::LCDRange( <a href="qwidget.html">QWidget</a> *parent, const char *name
     <a href="qslider.html">QSlider</a> * slider = new <a href="qslider.html">QSlider</a>( Horizontal, this, "slider" );
     slider-&gt;<a href="qrangecontrol.html#f2409c">setRange</a>( 0, 99 );
     slider-&gt;<a href="qslider.html#a03234">setValue</a>( 0 );
-    <a href="qobject.html#7f8e37">connect</a>( slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)) );
+    <a href="qobject.html#fbde73">connect</a>( slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)) );
 }
 
 class MyWidget : public QVBox
@@ -65,9 +67,9 @@ MyWidget::MyWidget( <a href="qwidget.html">QWidget</a> *parent, const char *name
         : <a href="qvbox.html">QVBox</a>( parent, name )
 {
     <a href="qpushbutton.html">QPushButton</a> *quit = new <a href="qpushbutton.html">QPushButton</a>( "Quit", this, "quit" );
-    quit-&gt;<a href="qwidget.html#c52788">setFont</a>( <a href="qfont.html">QFont</a>( "Times", 18, QFont::Bold ) );
+    quit-&gt;<a href="qwidget.html#090d60">setFont</a>( <a href="qfont.html">QFont</a>( "Times", 18, QFont::Bold ) );
 
-    <a href="qobject.html#7f8e37">connect</a>( quit, SIGNAL(clicked()), qApp, SLOT(quit()) );
+    <a href="qobject.html#fbde73">connect</a>( quit, SIGNAL(clicked()), qApp, SLOT(quit()) );
 
     <a href="qgrid.html">QGrid</a> *grid = new <a href="qgrid.html">QGrid</a>( 4, this );
 
@@ -105,7 +107,7 @@ we'll add some API. <pre>
         <a href="qslider.html">QSlider</a> * slider = new <a href="qslider.html">QSlider</a>( Horizontal, this, "slider" );
         slider-&gt;<a href="qrangecontrol.html#f2409c">setRange</a>( 0, 99 );
         slider-&gt;<a href="qslider.html#a03234">setValue</a>( 0 );
-        <a href="qobject.html#7f8e37">connect</a>( slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)) );
+        <a href="qobject.html#fbde73">connect</a>( slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)) );
     }
 </pre>
 <p>
@@ -125,9 +127,9 @@ MyWidget, too, contains no API except a constructor. <pre>
             : <a href="qvbox.html">QVBox</a>( parent, name )
     {
         <a href="qpushbutton.html">QPushButton</a> *quit = new <a href="qpushbutton.html">QPushButton</a>( "Quit", this, "quit" );
-        quit-&gt;<a href="qwidget.html#c52788">setFont</a>( <a href="qfont.html">QFont</a>( "Times", 18, QFont::Bold ) );
+        quit-&gt;<a href="qwidget.html#090d60">setFont</a>( <a href="qfont.html">QFont</a>( "Times", 18, QFont::Bold ) );
     
-        <a href="qobject.html#7f8e37">connect</a>( quit, SIGNAL(clicked()), qApp, SLOT(quit()) );
+        <a href="qobject.html#fbde73">connect</a>( quit, SIGNAL(clicked()), qApp, SLOT(quit()) );
 </pre>
 <p>
 The push button that used to be in what's now LCDRange has been
@@ -177,5 +179,5 @@ You may now go on to <a href="t7.html">chapter seven.</a>
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

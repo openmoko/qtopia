@@ -1,16 +1,28 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-#singleprocess:TEMPLATE	= lib
-#singleprocess:DESTDIR   = $(QPEDIR)/lib
+CONFIG		+= qtopiaapp
 
-CONFIG		+= qtopia warn_on release
+HEADERS		= light.h
+SOURCES		= light.cpp main.cpp
+INTERFACES	= lightsettingsbase.ui 
 
-HEADERS		= settings.h
-SOURCES		= light.cpp
-INTERFACES	= lightsettingsbase.ui
+PHONE_INTERFACES = displaysettingsbase.ui
 
-multiprocess:SOURCES+=main.cpp
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES} $${PHONE_INTERFACES}
+
+QTOPIA_PHONE{
+    INTERFACES += $${PHONE_INTERFACES}
+}
+
 
 TARGET		= light-and-power
 
-TRANSLATIONS = light-and-power-en_GB.ts light-and-power-de.ts light-and-power-ja.ts light-and-power-no.ts
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/light-and-power*
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/Light.desktop
+desktop.path=/apps/Settings
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/light-and-power/*
+pics.path=/pics/light-and-power
+INSTALLS	+= desktop help
+PICS_INSTALLS+=pics
+
+PACKAGE_DESCRIPTION=Light and Power settings dialog for the Qtopia environment.

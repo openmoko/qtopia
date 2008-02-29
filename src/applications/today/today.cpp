@@ -1,18 +1,32 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
-**
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -42,14 +56,12 @@
 #include <qwhatsthis.h>
 #include <qtimer.h>
 
-#include <qcopchannel_qws.h>
-
-Browser::Browser(QWidget *parent, const char *name)
+TodayBrowser::TodayBrowser(QWidget *parent, const char *name)
 	: QTextBrowser(parent, name)
 {
 }
 
-void Browser::setSource(const QString &name)
+void TodayBrowser::setSource(const QString &name)
 {
     emit taskClicked(name);
 }
@@ -65,13 +77,13 @@ Today::Today(QWidget *parent, const char *name, WFlags fl)
     connect(daytimer, SIGNAL(timeout()), this, SLOT(dayChange()));
 
     QCopChannel *c = new QCopChannel("QPE/System", this);
-    connect(c, SIGNAL(received(const QCString &, const QByteArray&)),
-	this, SLOT(sysMessage(const QCString &, const QByteArray&)));
+    connect(c, SIGNAL(received(const QCString&,const QByteArray&)),
+	this, SLOT(sysMessage(const QCString&,const QByteArray&)));
 
     init();
 
-    connect( qApp, SIGNAL(appMessage(const QCString &, const QByteArray &)),
-        this, SLOT(appMessage(const QCString &, const QByteArray &)) );
+    connect( qApp, SIGNAL(appMessage(const QCString&,const QByteArray&)),
+        this, SLOT(appMessage(const QCString&,const QByteArray&)) );
 }
 
 Today::~Today()
@@ -81,11 +93,11 @@ Today::~Today()
 
 void Today::init()
 {
-    todayView = new Browser(this, "todayView");
+    todayView = new TodayBrowser(this, "todayView");
     QWhatsThis::add(todayView, tr("Displays todays' activities.  Configure the view by tapping the Today icon."));
     setCentralWidget(todayView);
-    connect(todayView, SIGNAL( taskClicked(const QString &) ),
-	this, SLOT( taskSelected(const QString &) ) );
+    connect(todayView, SIGNAL( taskClicked(const QString&) ),
+	this, SLOT( taskSelected(const QString&) ) );
 
     loadPlugins();
     setupPluginMenu();
@@ -403,7 +415,7 @@ void Today::optionButtonClicked()
 
 void Today::reload()
 {
-    QString str = "reload called from plugin ";
+    QString str = "reload called from plugin "; // No tr
     str += sender()->name();
     qWarning( str );
 

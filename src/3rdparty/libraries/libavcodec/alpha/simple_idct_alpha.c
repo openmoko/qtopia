@@ -27,6 +27,11 @@
 #include "asm.h"
 #include "../dsputil.h"
 
+extern void (*put_pixels_clamped_axp_p)(const DCTELEM *block, uint8_t *pixels,
+                                        int line_size);
+extern void (*add_pixels_clamped_axp_p)(const DCTELEM *block, uint8_t *pixels, 
+                                        int line_size);
+
 // cos(i * M_PI / 16) * sqrt(2) * (1 << 14)
 // W4 is actually exactly 16384, but using 16383 works around
 // accumulating rounding errors for some encoders
@@ -44,7 +49,7 @@
 static inline int idct_row(DCTELEM *row)
 {
     int_fast32_t a0, a1, a2, a3, b0, b1, b2, b3, t;
-    uint64_t l, r;
+    uint64_t l, r, t2;
     l = ldq(row);
     r = ldq(row + 4);
 
@@ -55,12 +60,12 @@ static inline int idct_row(DCTELEM *row)
 
     if (((l & ~0xffffUL) | r) == 0) {
         a0 >>= ROW_SHIFT;
-        a0 = (uint16_t) a0;
-        a0 |= a0 << 16;
-        a0 |= a0 << 32;
+        t2 = (uint16_t) a0;
+        t2 |= t2 << 16;
+        t2 |= t2 << 32;
         
-        stq(a0, row);
-        stq(a0, row + 4);
+        stq(t2, row);
+        stq(t2, row + 4);
         return 1;
     }
 
@@ -296,11 +301,11 @@ void simple_idct_axp(DCTELEM *block)
 void simple_idct_put_axp(uint8_t *dest, int line_size, DCTELEM *block)
 {
     simple_idct_axp(block);
-    put_pixels_clamped(block, dest, line_size);
+    put_pixels_clamped_axp_p(block, dest, line_size);
 }
 
 void simple_idct_add_axp(uint8_t *dest, int line_size, DCTELEM *block)
 {
     simple_idct_axp(block);
-    add_pixels_clamped(block, dest, line_size);
+    add_pixels_clamped_axp_p(block, dest, line_size);
 }

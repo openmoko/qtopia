@@ -1,7 +1,4 @@
-TEMPLATE        = app
-
-CONFIG          += qtopia warn_on release
-DESTDIR         = $(QPEDIR)/bin
+CONFIG          += qtopiaapp
 
 HEADERS		= d3des.h \
 		  krfbbuffer.h \
@@ -28,7 +25,19 @@ SOURCES		= d3des.c \
 		  kvncconnectdlg.cpp \
 		  kvncoptionsdlg.cpp \
 		  main.cpp
+		  
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/keypebble*
+help.path=/help/html
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/keypebble/*
+pics.path=/pics/keypebble
+INSTALLS+=help
+PICS_INSTALLS+=pics
+
 INTERFACES	= vncoptionsbase.ui
+
+TRANSLATABLES = $${HEADERS} \
+                $${SOURCES} \
+                $${INTERFACES} 
+
 TARGET          = keypebble
 
-TRANSLATIONS = keypebble-en_GB.ts keypebble-de.ts keypebble-ja.ts keypebble-no.ts

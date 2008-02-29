@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -35,8 +37,8 @@ Inherits <a href="qgroupbox.html">QGroupBox</a>.
 <ul>
 <li><div class="fn"><a href="#563e29"><b>QButtonGroup</b></a> ( QWidget * parent=0, const char * name=0 ) </div>
 <li><div class="fn"><a href="#837c07"><b>QButtonGroup</b></a> ( const QString &amp; title, QWidget * parent=0, const char * name=0 ) </div>
-<li><div class="fn"><a href="#f00c6b"><b>QButtonGroup</b></a> ( int columns, Orientation o, QWidget * parent=0, const char * name=0 ) </div>
-<li><div class="fn"><a href="#a827d6"><b>QButtonGroup</b></a> ( int columns, Orientation o, const QString &amp; title, QWidget * parent=0, const char * name=0 ) </div>
+<li><div class="fn"><b>QButtonGroup</b> ( int columns, Orientation o, QWidget * parent=0, const char * name=0 ) </div>
+<li><div class="fn"><b>QButtonGroup</b> ( int columns, Orientation o, const QString &amp; title, QWidget * parent=0, const char * name=0 ) </div>
 <li><div class="fn">bool <a href="#1d6f90"><b>isExclusive</b></a> () const</div>
 <li><div class="fn">bool <a href="#0e8f21"><b>isRadioButtonExclusive</b></a> () const</div>
 <li><div class="fn">virtual void <a href="#1075ee"><b>setExclusive</b></a> ( bool ) </div>
@@ -97,9 +99,9 @@ using the <a href="#10bf2d">insert</a>() function with an identifer.
 <p><img src=qbttngrp-m.png> <img src=qbttngrp-w.png>
 <p>See also  <a href="qbutton.html">QButton</a>, <a href="qpushbutton.html">QPushButton</a>, <a href="qcheckbox.html">QCheckBox</a> and <a href="qradiobutton.html">QRadioButton</a>.
 <p>Examples:
- <a href="xform-xform-cpp.html#QButtonGroup">xform/xform.cpp</a>
- <a href="i18n-main-cpp.html#QButtonGroup">i18n/main.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#QButtonGroup">drawdemo/drawdemo.cpp</a>
+ <a href="i18n-main-cpp.html#QButtonGroup">i18n/main.cpp</a>
+ <a href="xform-xform-cpp.html#QButtonGroup">xform/xform.cpp</a>
 
 <hr><h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="563e29"></a>QButtonGroup::QButtonGroup ( <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0 )</h3>
@@ -107,14 +109,6 @@ using the <a href="#10bf2d">insert</a>() function with an identifer.
 <p>The <em>parent</em> and <em>name</em> arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.
 <h3 class="fn"><a name="837c07"></a>QButtonGroup::QButtonGroup ( const <a href="qstring.html">QString</a> &amp; title, <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0 )</h3>
 <p>Constructs a button group with a title.
-<p>The <em>parent</em> and <em>name</em> arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.
-<h3 class="fn"><a name="f00c6b"></a>QButtonGroup::QButtonGroup ( int strips, <a href="qt.html#Orientation">Orientation</a> orientation, <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0 )</h3>
-<p>Constructs a button group with no title. Child widgets will be arranged
-in <em>strips</em> rows or columns (depending on <em>orientation).</em>
-<p>The <em>parent</em> and <em>name</em> arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.
-<h3 class="fn"><a name="a827d6"></a>QButtonGroup::QButtonGroup ( int strips, <a href="qt.html#Orientation">Orientation</a> orientation, const <a href="qstring.html">QString</a> &amp; title, <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0 )</h3>
-<p>Constructs a button group with a <em>title.</em> Child widgets will be arranged
-in <em>strips</em> rows or columns (depending on <em>orientation).</em>
 <p>The <em>parent</em> and <em>name</em> arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.
 <h3 class="fn"><a name="53026e"></a>QButtonGroup::~QButtonGroup ()</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
@@ -202,7 +196,7 @@ mutually exclusive, and other buttons according to
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -210,5 +204,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

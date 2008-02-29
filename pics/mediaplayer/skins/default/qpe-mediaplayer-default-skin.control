@@ -1,0 +1,10 @@
+Files: pics/mediaplayer/skins/default
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-5
+Depends: ($QPE_VERSION)
+Description: Default Media Player skin.
+

@@ -8,6 +8,7 @@ application/dec-dx
 application/excel		xls
 application/ghostview		
 application/ipkg	ipk
+application/java-archive	jar
 application/mac-binhex40	hqx
 application/mac-compactpro	cpt
 application/macwriteii
@@ -76,6 +77,7 @@ audio/x-pn-realaudio		ra ram
 audio/x-pn-realaudio-plugin
 audio/x-realaudio		ra
 audio/x-wav			wav
+audio/amr			amr
 chemical/x-pdb			xyz
 image/gif			gif
 image/ief			ief

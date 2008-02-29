@@ -49,6 +49,7 @@ typedef struct {
     int tag;
 } SWFContext;
 
+#ifdef CONFIG_ENCODERS
 static void put_swf_tag(AVFormatContext *s, int tag)
 {
     SWFContext *swf = s->priv_data;
@@ -107,10 +108,10 @@ static void put_swf_rect(ByteIOContext *pb,
                          int xmin, int xmax, int ymin, int ymax)
 {
     PutBitContext p;
-    UINT8 buf[256];
+    uint8_t buf[256];
     int nbits, mask;
 
-    init_put_bits(&p, buf, sizeof(buf), NULL, NULL);
+    init_put_bits(&p, buf, sizeof(buf));
     
     nbits = 0;
     max_nbits(&nbits, xmin);
@@ -164,9 +165,9 @@ static void put_swf_matrix(ByteIOContext *pb,
                            int a, int b, int c, int d, int tx, int ty)
 {
     PutBitContext p;
-    UINT8 buf[256];
+    uint8_t buf[256];
 
-    init_put_bits(&p, buf, sizeof(buf), NULL, NULL);
+    init_put_bits(&p, buf, sizeof(buf));
     
     put_bits(&p, 1, 1); /* a, d present */
     put_bits(&p, 5, 20); /* nb bits */
@@ -193,8 +194,8 @@ static int swf_write_header(AVFormatContext *s)
     ByteIOContext *pb = &s->pb;
     AVCodecContext *enc, *audio_enc, *video_enc;
     PutBitContext p;
-    UINT8 buf1[256];
-    int i, width, height, rate;
+    uint8_t buf1[256];
+    int i, width, height, rate, rate_base;
 
     swf = av_malloc(sizeof(SWFContext));
     if (!swf)
@@ -215,11 +216,13 @@ static int swf_write_header(AVFormatContext *s)
         /* currenty, cannot work correctly if audio only */
         width = 320;
         height = 200;
-        rate = 10 * FRAME_RATE_BASE;
+        rate = 10;
+        rate_base= 1;
     } else {
         width = video_enc->width;
         height = video_enc->height;
         rate = video_enc->frame_rate;
+        rate_base = video_enc->frame_rate_base;
     }
 
     put_tag(pb, "FWS");
@@ -228,9 +231,9 @@ static int swf_write_header(AVFormatContext *s)
                                       (will be patched if not streamed) */ 
 
     put_swf_rect(pb, 0, width, 0, height);
-    put_le16(pb, (rate * 256) / FRAME_RATE_BASE); /* frame rate */
+    put_le16(pb, (rate * 256) / rate_base); /* frame rate */
     swf->duration_pos = url_ftell(pb);
-    put_le16(pb, (UINT16)(DUMMY_DURATION * (INT64)rate / FRAME_RATE_BASE)); /* frame count */
+    put_le16(pb, (uint16_t)(DUMMY_DURATION * (int64_t)rate / rate_base)); /* frame count */
     
     /* define a shape with the jpeg inside */
 
@@ -249,7 +252,7 @@ static int swf_write_header(AVFormatContext *s)
     put_byte(pb, 0); /* no line style */
     
     /* shape drawing */
-    init_put_bits(&p, buf1, sizeof(buf1), NULL, NULL);
+    init_put_bits(&p, buf1, sizeof(buf1));
     put_bits(&p, 4, 1); /* one fill bit */
     put_bits(&p, 4, 0); /* zero line bit */
     
@@ -305,7 +308,7 @@ static int swf_write_header(AVFormatContext *s)
         put_swf_tag(s, TAG_STREAMHEAD);
         put_byte(&s->pb, 0);
         put_byte(&s->pb, v);
-        put_le16(&s->pb, (audio_enc->sample_rate * FRAME_RATE_BASE) / rate);  /* avg samples per frame */
+        put_le16(&s->pb, (audio_enc->sample_rate * rate_base) / rate);  /* avg samples per frame */
         
         
         put_swf_end_tag(s);
@@ -316,7 +319,7 @@ static int swf_write_header(AVFormatContext *s)
 }
 
 static int swf_write_video(AVFormatContext *s, 
-                           AVCodecContext *enc, UINT8 *buf, int size)
+                           AVCodecContext *enc, const uint8_t *buf, int size)
 {
     ByteIOContext *pb = &s->pb;
     static int tag_id = 0;
@@ -364,7 +367,7 @@ static int swf_write_video(AVFormatContext *s,
     return 0;
 }
 
-static int swf_write_audio(AVFormatContext *s, UINT8 *buf, int size)
+static int swf_write_audio(AVFormatContext *s, const uint8_t *buf, int size)
 {
     ByteIOContext *pb = &s->pb;
 
@@ -378,7 +381,7 @@ static int swf_write_audio(AVFormatContext *s, UINT8 *buf, int size)
 }
 
 static int swf_write_packet(AVFormatContext *s, int stream_index, 
-                           UINT8 *buf, int size, int force_pts)
+                           const uint8_t *buf, int size, int64_t pts)
 {
     AVCodecContext *codec = &s->streams[stream_index]->codec;
     if (codec->codec_type == CODEC_TYPE_AUDIO)
@@ -416,6 +419,7 @@ static int swf_write_trailer(AVFormatContext *s)
     }
     return 0;
 }
+#endif //CONFIG_ENCODERS
 
 /***********************************/
 /* just to extract MP3 from swf */
@@ -479,15 +483,14 @@ static int swf_read_header(AVFormatContext *s, AVFormatParameters *ap)
             get_le16(pb);
             /* if mp3 streaming found, OK */
             if ((v & 0x20) != 0) {
-                st = av_mallocz(sizeof(AVStream));
+                st = av_new_stream(s, 0);
                 if (!st)
                     return -ENOMEM;
+
                 if (v & 0x01)
                     st->codec.channels = 2;
                 else
                     st->codec.channels = 1;
-                s->nb_streams = 1;
-                s->streams[0] = st;
 
                 switch((v>> 2) & 0x03) {
                 case 1:
@@ -550,6 +553,7 @@ static AVInputFormat swf_iformat = {
     swf_read_close,
 };
 
+#ifdef CONFIG_ENCODERS
 static AVOutputFormat swf_oformat = {
     "swf",
     "Flash format",
@@ -562,10 +566,13 @@ static AVOutputFormat swf_oformat = {
     swf_write_packet,
     swf_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
 int swf_init(void)
 {
     av_register_input_format(&swf_iformat);
+#ifdef CONFIG_ENCODERS
     av_register_output_format(&swf_oformat);
+#endif //CONFIG_ENCODERS
     return 0;
 }

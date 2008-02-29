@@ -21,9 +21,6 @@
 #include "../dsputil.h"
 #include "../mpegvideo.h"
 
-extern void simple_idct_put_axp(uint8_t *dest, int line_size, DCTELEM *block);
-extern void simple_idct_add_axp(uint8_t *dest, int line_size, DCTELEM *block);
-  
 static void dct_unquantize_h263_axp(MpegEncContext *s, DCTELEM *block,
                                     int n, int qscale)
 {
@@ -62,7 +59,6 @@ static void dct_unquantize_h263_axp(MpegEncContext *s, DCTELEM *block,
 #ifdef __alpha_max__
         /* I don't think the speed difference justifies runtime
            detection.  */
-	ASM_ACCEPT_MVI;
         negmask = maxsw4(levels, -1); /* negative -> ffff (-1) */
         negmask = minsw4(negmask, 0); /* positive -> 0000 (0) */
 #else
@@ -97,6 +93,4 @@ static void dct_unquantize_h263_axp(MpegEncContext *s, DCTELEM *block,
 void MPV_common_init_axp(MpegEncContext *s)
 {
     s->dct_unquantize_h263 = dct_unquantize_h263_axp;
-    s->idct_put = simple_idct_put_axp;
-    s->idct_add = simple_idct_add_axp;
 }

@@ -1,0 +1,6 @@
+[Translation]
+File=QtopiaServices
+Context=Photo Edit
+[Service]
+Icon=PhotoEdit
+Name[]=Photo Edit

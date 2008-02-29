@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -21,175 +36,238 @@
 #define QTOPIA_INTERNAL_LANGLIST
 
 #include "helpbrowser.h"
+#include "helppreprocessor.h"
 
 #include <qtopia/qpeapplication.h>
 #include <qtopia/resource.h>
 #include <qtopia/mimetype.h>
 #include <qtopia/applnk.h>
 #include <qtopia/global.h>
+#include <qtopia/stringutil.h>
+#include <qtopia/contextbar.h>
 
-#include <qstatusbar.h>
 #include <qdragobject.h>
-#include <qpixmap.h>
-#include <qpopupmenu.h>
-#include <qtopia/qpemenubar.h>
-#include <qtopia/qpetoolbar.h>
+#include <qtoolbar.h>
 #include <qtoolbutton.h>
-#include <qiconset.h>
+#include <qmenubar.h>
 #include <qfile.h>
-#include <qtextstream.h>
-#include <qstylesheet.h>
-#include <qmessagebox.h>
-#include <qfiledialog.h>
-#include <qevent.h>
-#include <qlineedit.h>
-#include <qobjectlist.h>
-#include <qfileinfo.h>
-#include <qfile.h>
-#include <qdatastream.h>
-#include <qprinter.h>
-#include <qsimplerichtext.h>
-#include <qpaintdevicemetrics.h>
-#include <qaction.h>
+#include <qvbox.h>
 
-#include <ctype.h>
+#define HOMEPAGE "index.html"
 
-
-HelpBrowser::HelpBrowser( QWidget* parent, const char *name, WFlags f )
-    : QMainWindow( parent, name, f ),
-      selectedURL()
+MagicTextBrowser::MagicTextBrowser( QWidget* parent )
+    : QTextBrowser( parent )
 {
-    init( "index.html" );
+    setTextFormat( RichText );
 }
 
-class MagicTextBrowser : public QTextBrowser {
-public:
-    MagicTextBrowser(QWidget* parent) :
-	QTextBrowser(parent)
-    {
+void MagicTextBrowser::clear()
+{
+    // Clear text browser
+    setCurrent( QString::null );
+    
+    // Clear backward history
+    if( !backStack.isEmpty() ) {
+        backStack.clear();
+        emit hasBack( FALSE );
     }
     
-    void setSource( const QString& source )
-    {
-	QTextBrowser::setSource(source);
-	if ( magic(source,"applications") || magic(source,"games") || magic(source,"settings") ) // No tr
-	    return;
-	// Just those are magic (for now). Could do CGI here,
-	// or in Qtopia's mime source factory.
+    // Clear forward history
+    if( !forwardStack.isEmpty() ) {
+        forwardStack.clear();
+        emit hasForward( FALSE );
     }
+}
 
-    bool magic(const QString& source, const QString& name)
-    {
-	if ( name+".html" == source ) {
-	    QString fn = mimeSourceFactory()->makeAbsolute( source, context() );
-	    const QMimeSource* m = mimeSourceFactory()->data( fn, context() );
-	    if ( m ) {
-		QString txt;
-		if ( QTextDrag::decode(m,txt) ) {
-		    QRegExp re("<qtopia-"+name+">.*</qtopia-"+name+">");
-		    int start,len;
-		    if ( (start=re.match(txt,0,&len))>=0 ) {
-			QString generated = generate(name);
-			txt.replace(start,len,generated);
-			setText(txt);
-			return TRUE;
-		    }
-		}
-	    }
-	}
-	return FALSE;
-    }
-
-    QString generate(const QString& name) const
-    {
-	QString dir = MimeType::appsFolderName()+"/"+name[0].upper()+name.mid(1);
-	AppLnkSet lnkset(dir);
-	AppLnk* lnk;
-	QString r;
-	for (QListIterator<AppLnk> it(lnkset.children()); (lnk=it.current()); ++it) {
-	    QString name = lnk->name();
-	    QString icon = lnk->icon();
-	    QString helpFile = lnk->exec()+".html";
-	    QStringList helpPath = Global::helpPath();
-	    bool helpExists = FALSE;
-	    for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end() && !helpExists; ++it)
-		helpExists = QFile::exists( *it + "/" + helpFile );
-	    if ( helpExists ) {
-		r += "<h3><a href="+helpFile+"><img src="+icon+">"+name+"</a></h3>\n";
-	    }
-	}
-	return r;
-    }
-};
-
-void HelpBrowser::init( const QString& _home )
+void MagicTextBrowser::setSource( const QString& file )
 {
+    if( file != current ) {
+        // If not first page, add current to backward history
+        if( !current.isNull() ) {
+            backStack.push( current );
+            if( backStack.count() == 1 ) emit hasBack( TRUE );
+        }
+        
+        // Clear forward history
+        if( !forwardStack.isEmpty() ) {
+            forwardStack.clear();
+            emit hasForward( FALSE );
+        }
+        
+        setCurrent( file );
+    }
+}
+
+void MagicTextBrowser::backward()
+{
+    if( !backStack.isEmpty() ) {
+        // Add current to forward history
+        forwardStack.push( current );
+        if( forwardStack.count() == 1 ) emit hasForward( TRUE );
+        
+        // Remove last page from backward history and set current
+        setCurrent( backStack.pop() );
+        if( backStack.isEmpty() ) emit hasBack( FALSE );
+    }
+}
+
+void MagicTextBrowser::forward()
+{
+    if( !forwardStack.isEmpty() ) {
+        // Add current to backward history
+        backStack.push( current );
+        if( backStack.count() == 1 ) emit hasBack( TRUE );
+        
+        // Remove last page from forward history and set current
+        setCurrent( forwardStack.pop() );
+        if( forwardStack.isEmpty() ) emit hasForward( FALSE );
+    }
+}
+
+void MagicTextBrowser::setCurrent( const QString& file )
+{
+    current = file;
+    if( current.isNull() ) QTextBrowser::setSource( QString::null );
+    else {
+        HelpPreProcessor hpp( file );
+        QString source = hpp.text();
+        if( !( magic( file, "applications", source ) || magic( file, "games", source ) || magic( file, "settings", source ) ) )
+            setText( source );
+    }
+}
+
+bool MagicTextBrowser::magic( const QString& file, const QString& name, const QString& source )
+{
+    if( "qpe-" + name + ".html" == file ) {
+        QRegExp re( "<qtopia-" + name + ">.*</qtopia-" + name + ">" );
+        int start, len;
+        if( ( start = re.match( source, 0, &len ) ) >= 0 ) {
+            QString copy = source;
+            setText( copy.replace( start, len, generate( name ) ) );
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+QString MagicTextBrowser::generate( const QString& name )
+{
+    QString dir = MimeType::appsFolderName() + "/" + name[ 0 ].upper() + name.mid( 1 );
+    AppLnkSet lnkset( dir );
+    AppLnk *lnk;
+    QString s;
+    QMap<QString,AppLnk*> ordered;
+    for( QListIterator<AppLnk> it( lnkset.children() ); ( lnk = it.current() ); ++it ) {
+	ordered[Qtopia::dehyphenate( lnk->name() )] = lnk;
+    }
+    for( QMap<QString,AppLnk*>::ConstIterator mit=ordered.begin(); mit!=ordered.end(); ++mit ) {
+        QString name = mit.key();
+	lnk = mit.data();
+        QString icon = lnk->icon();
+        QString helpFile = lnk->exec() + ".html";
+        QStringList helpPath = Global::helpPath();
+        QStringList::ConstIterator it;
+        for( it = helpPath.begin(); it != helpPath.end() && !QFile::exists( *it + "/" + helpFile ); ++it )
+	    ;
+        if( it != helpPath.end() ) {
+	    s += "<br><a href=" + helpFile + "><img src=" + icon + "> " + name + "</a>\n";
+	}
+    }
+    return s;
+}
+
+HelpBrowser::HelpBrowser( QWidget* parent, const char *name, WFlags f )
+    : QMainWindow( parent, name, f )
+{
+    init();
+}
+
+void HelpBrowser::init()
+{
+#ifdef QTOPIA_PHONE
+    pressed = closeOk = FALSE;
+#endif
     setIcon( Resource::loadPixmap( "HelpBrowser" ) );
     setBackgroundMode( PaletteButton );
-
+    
+#ifdef DEBUG
+    QVBox *box = new QVBox( this );
+    browser = new MagicTextBrowser( box );
+    location = new QLabel( box );
+#else
     browser = new MagicTextBrowser( this );
-    browser->setFrameStyle( QFrame::Panel | QFrame::Sunken );
+#endif
     connect( browser, SIGNAL( textChanged() ),
 	     this, SLOT( textChanged() ) );
 
+#ifdef DEBUG
+    setCentralWidget( box );
+#else
     setCentralWidget( browser );
+#endif
     setToolBarsMovable( FALSE );
 
-    if ( !_home.isEmpty() )
-	browser->setSource( _home );
-
-    QPEToolBar* toolbar = new QPEToolBar( this );
-    toolbar->setHorizontalStretchable( TRUE );
-    QPEMenuBar *menu = new QPEMenuBar( toolbar );
-
-    toolbar = new QPEToolBar( this );
-    // addToolBar( toolbar, "Toolbar");
-
-    //QPopupMenu* go = new QPopupMenu( this );
-    backAction = new QAction( tr( "Backward" ), Resource::loadIconSet( "back" ), QString::null, 0, this, 0 );
-    connect( backAction, SIGNAL( activated() ), browser, SLOT( backward() ) );
-    connect( browser, SIGNAL( backwardAvailable( bool ) ),
-	     backAction, SLOT( setEnabled( bool ) ) );
-    //backAction->addTo( go );
-    backAction->addTo( toolbar );
+    backAction = new QAction( tr( "Back" ), Resource::loadIconSet( "back" ), QString::null, 0, this, 0 );
+    backAction->setWhatsThis( tr( "Move backward one page." ) );
     backAction->setEnabled( FALSE );
+    connect( backAction, SIGNAL( activated() ), browser, SLOT( backward() ) );
+    connect( browser, SIGNAL( hasBack( bool ) ), backAction, SLOT( setEnabled( bool ) ) );
 
     forwardAction = new QAction( tr( "Forward" ), Resource::loadIconSet( "forward" ), QString::null, 0, this, 0 );
-    connect( forwardAction, SIGNAL( activated() ), browser, SLOT( forward() ) );
-    connect( browser, SIGNAL( forwardAvailable( bool ) ),
-	     forwardAction, SLOT( setEnabled( bool ) ) );
-    //forwardAction->addTo( go );
-    forwardAction->addTo( toolbar );
+    forwardAction->setWhatsThis( tr( "Move forward one page." ) );
     forwardAction->setEnabled( FALSE );
+    connect( forwardAction, SIGNAL( activated() ), browser, SLOT( forward() ) );
+    connect( browser, SIGNAL( hasForward( bool ) ), forwardAction, SLOT( setEnabled( bool ) ) );
 
-    QAction *a = new QAction( tr( "Home" ), Resource::loadIconSet( "home" ), QString::null, 0, this, 0 );
-    connect( a, SIGNAL( activated() ), browser, SLOT( home() ) );
-    //a->addTo( go );
-    a->addTo( toolbar );
+    QAction *homeAction = new QAction( tr( "Home" ), Resource::loadIconSet( "home" ), QString::null, 0, this, 0 );
+    homeAction->setWhatsThis( tr( "Go to the home page." ) );
+    connect( homeAction, SIGNAL( activated() ), this, SLOT( goHome() ) );
 
-    bookm = new QPopupMenu( this );
-    bookm->insertItem( tr( "Add Bookmark" ), this, SLOT( addBookmark() ) );
-    bookm->insertItem( tr( "Remove from Bookmarks" ), this, SLOT( removeBookmark() ) );
-    bookm->insertSeparator();
-    connect( bookm, SIGNAL( activated( int ) ),
-	     this, SLOT( bookmChosen( int ) ) );
+#ifdef QTOPIA_PHONE
+    contextMenu = new ContextMenu(this);
 
-    readBookmarks();
+    backAction->addTo( contextMenu );
+    forwardAction->addTo( contextMenu );
+    homeAction->addTo( contextMenu );
+#else
+    QToolBar* toolbar = new QToolBar( this );
+    toolbar->setHorizontalStretchable( TRUE );
+    
+    QMenuBar *menu = new QMenuBar( toolbar );
+    toolbar = new QToolBar( this );
+    
+    QPopupMenu *helpMenu = new QPopupMenu( this );
+    homeAction->addTo( helpMenu );
+    backAction->addTo( helpMenu );
+    forwardAction->addTo( helpMenu );
+    
+    menu->insertItem( tr( "Page" ), helpMenu );
 
-    //menu->insertItem( tr("Go"), go );
-    menu->insertItem( tr( "Bookmarks" ), bookm );
+    backAction->addTo( toolbar );
+    forwardAction->addTo( toolbar );
+    homeAction->addTo( toolbar );
+#endif
 
-    resize( 240, 300 );
-    browser->setFocus();
+    setFocusProxy( browser );
     browser->setFrameStyle( QFrame::NoFrame );
-
-    connect( qApp, SIGNAL(appMessage(const QCString&, const QByteArray&)),
-	     this, SLOT(appMessage(const QCString&, const QByteArray&)) );
+    
+    connect( qApp, SIGNAL(appMessage(const QCString&,const QByteArray&)),
+	     this, SLOT(appMessage(const QCString&,const QByteArray&)) );
+             
+#ifdef QTOPIA_PHONE
+    closeTimer = new QTimer( this );
+    connect( closeTimer, SIGNAL( timeout() ), this, SLOT( setBackDisabled() ) );
+    connect( browser, SIGNAL( hasBack( bool ) ), this, SLOT( setBack( bool ) ) );
+    browser->installEventFilter( this );
+#endif
+             
+    browser->setSource( HOMEPAGE );
 }
 
 void HelpBrowser::appMessage(const QCString& msg, const QByteArray& data)
 {
     if ( msg == "showFile(QString)" ) {
+        QPEApplication::setKeepRunning();
 	QDataStream ds(data,IO_ReadOnly);
 	QString fn;
 	ds >> fn;
@@ -199,11 +277,16 @@ void HelpBrowser::appMessage(const QCString& msg, const QByteArray& data)
 
 void HelpBrowser::setDocument( const QString &doc )
 {
-    if ( !doc.isEmpty() )
-	browser->setSource( doc );
-    raise();    
+    if ( !doc.isEmpty() ) {
+        browser->clear();
+        browser->setSource( doc );
+    }
 }
 
+void HelpBrowser::goHome()
+{
+    browser->setSource( HOMEPAGE );
+}
 
 void HelpBrowser::textChanged()
 {
@@ -211,83 +294,81 @@ void HelpBrowser::textChanged()
 	setCaption( tr("Help Browser") );
     else
 	setCaption( browser->documentTitle() ) ;
-
-    selectedURL = caption();
+#ifdef DEBUG
+    location->setText( browser->source() );
+#endif
 }
 
-HelpBrowser::~HelpBrowser()
+#ifdef QTOPIA_PHONE
+bool HelpBrowser::eventFilter( QObject*, QEvent* e )
 {
-    QStringList bookmarks;
-    QMap<int, Bookmark>::Iterator it2 = mBookmarks.begin();
-    for ( ; it2 != mBookmarks.end(); ++it2 )
-	bookmarks.append( (*it2).name + "=" + (*it2).file );
-
-    QFile f2( Global::applicationFileName("helpbrowser", "bookmarks") );
-    if ( f2.open( IO_WriteOnly ) ) {
-	QDataStream s2( &f2 );
-	s2 << bookmarks;
-	f2.close();
+#define TIMEOUT 500
+    switch( e->type() ) {
+    case QEvent::KeyPress:
+        {
+            QKeyEvent *ke = (QKeyEvent*)e;
+            if( (ke->key() == Qt::Key_Back || ke->key() == Key_No) && !ke->isAutoRepeat() ) {
+                if( backAction->isEnabled() ) closeTimer->start( TIMEOUT, TRUE );
+                else close();
+               pressed = TRUE;
+               return TRUE;
+            }
+        }
+        break;
+    case QEvent::KeyRelease:
+        {
+            QKeyEvent *ke = (QKeyEvent*)e;
+            if( ke->key() == Qt::Key_Back && !ke->isAutoRepeat() && pressed ) {
+                if( closeTimer->isActive() ) {
+                    closeTimer->stop();
+                    browser->backward();
+                } else close();
+                pressed = FALSE;
+                return TRUE;
+            }
+        }
+        break;
+    default:
+        // Ignore
+        break;
     }
+    
+    return FALSE;
+}
+#endif
+
+void HelpBrowser::setBackDisabled()
+{
+#ifdef QTOPIA_PHONE
+    setBack( FALSE );
+#endif
 }
 
-void HelpBrowser::pathSelected( const QString &_path )
+void HelpBrowser::setBack( bool b )
 {
-    browser->setSource( _path );
+#ifdef QTOPIA_PHONE
+    if( b ) ContextBar::setLabel( this, Qt::Key_Back, ContextBar::Previous );
+    else ContextBar::setLabel( this, Qt::Key_Back, ContextBar::Back );
+#else
+    Q_UNUSED( b );
+#endif 
 }
 
-void HelpBrowser::readBookmarks()
+#ifdef QTOPIA_PHONE
+void HelpBrowser::close()
 {
-    QString file = Global::applicationFileName("helpbrowser", "bookmarks");
-    if ( QFile::exists( file ) ) {
-	QStringList bookmarks;
-	QFile f( file );
-	if ( f.open( IO_ReadOnly ) ) {
-	    QDataStream s( &f );
-	    s >> bookmarks;
-	    f.close();
-	}
-	QStringList::Iterator it = bookmarks.begin();
-	for ( ; it != bookmarks.end(); ++it ) {
-	    Bookmark b;
-	    QString current = *it;
-	    int equal = current.find( "=" );
-	    if ( equal < 1 || equal == (int)current.length() - 1 )
-		continue;
-	    b.name = current.left( equal );
-	    b.file = current.mid( equal + 1 );
-	    mBookmarks[ bookm->insertItem( b.name ) ] = b;
-	} 
-    }
+    closeOk = TRUE;
+    QWidget::close();
 }
+#endif
 
-void HelpBrowser::bookmChosen( int i )
+void HelpBrowser::closeEvent( QCloseEvent* e )
 {
-    if ( mBookmarks.contains( i ) )
-	browser->setSource( mBookmarks[ i ].file );
-}
-
-void HelpBrowser::addBookmark()
-{
-    Bookmark b;
-    b.name = browser->documentTitle();
-    b.file = browser->source();
-    if (b.name.isEmpty() ) {
-	b.name = b.file.left( b.file.length() - 5 ); // remove .html
-    }
-    QMap<int, Bookmark>::Iterator it;
-    for( it = mBookmarks.begin(); it != mBookmarks.end(); ++it )
-	if ( (*it).file == b.file ) return;
-    mBookmarks[ bookm->insertItem( b.name ) ] = b;
-}
-
-void HelpBrowser::removeBookmark()
-{
-    QString file = browser->source();
-    QMap<int, Bookmark>::Iterator it = mBookmarks.begin();
-    for( ; it != mBookmarks.end(); ++it )
-	if ( (*it).file == file ) {
-	    bookm->removeItem( it.key() );
-	    mBookmarks.remove( it );
-		break;
-	}
+#ifdef QTOPIA_PHONE
+    if( closeOk ) e->accept();
+#else
+    browser->clear();
+    browser->setSource( HOMEPAGE );
+    e->accept();
+#endif
 }

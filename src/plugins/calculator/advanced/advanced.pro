@@ -1,18 +1,14 @@
-singleprocess:singleprocess=true
+CONFIG += qtopiaplugin 
 
-TEMPLATE = lib
-CONFIG -= moc
-CONFIG += qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+TARGET = scientific
 
-# Input
 HEADERS = advanced.h  advancedfactory.h
 SOURCES = advanced.cpp advancedfactory.cpp
 
-unix:LIBS   +=-lqtopiacalc
-win32:LIBS  +=$(QPEDIR)/lib/qtopiacalc.lib
+TRANSLATABLES = $${HEADERS} $${SOURCES}
 
-DESTDIR = $(QPEDIR)/plugins/calculator
+LIBS+=-lqtopiacalc
 
-TRANSLATIONS = libadvanced-en_GB.ts libadvanced-de.ts libadvanced-ja.ts libadvanced-no.ts
+DESTDIR = $$(QPEDIR)/plugins/calculator
+
+PACKAGE_NAME = qpe-calculator-advanced

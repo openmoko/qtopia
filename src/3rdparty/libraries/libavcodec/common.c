@@ -18,27 +18,37 @@
  *
  * alternative bitstream reader & writer by Michael Niedermayer <michaelni@gmx.at>
  */
+
+/**
+ * @file common.c
+ * common internal api.
+ */
+
 #include "avcodec.h"
 
-const UINT8 ff_sqrt_tab[128]={
+const uint8_t ff_sqrt_tab[128]={
         0, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5,
         5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
         9, 9, 9, 9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11
 };
 
-void init_put_bits(PutBitContext *s, 
-                   UINT8 *buffer, int buffer_size,
-                   void *opaque,
-                   void (*write_data)(void *, UINT8 *, int))
+const uint8_t ff_log2_tab[256]={
+        0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+        5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+        6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+        6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+        7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+        7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+        7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+        7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
+};
+
+void init_put_bits(PutBitContext *s, uint8_t *buffer, int buffer_size)
 {
     s->buf = buffer;
     s->buf_end = s->buf + buffer_size;
     s->data_out_size = 0;
-    if(write_data!=NULL) 
-    {
-    	fprintf(stderr, "write Data callback is not supported\n");
-    }
 #ifdef ALT_BITSTREAM_WRITER
     s->index=0;
     ((uint32_t*)(s->buf))[0]=0;
@@ -51,14 +61,16 @@ void init_put_bits(PutBitContext *s,
 }
 
 /* return the number of bits output */
-INT64 get_bit_count(PutBitContext *s)
+int64_t get_bit_count(PutBitContext *s)
 {
 #ifdef ALT_BITSTREAM_WRITER
     return s->data_out_size * 8 + s->index;
 #else
-    return (s->buf_ptr - s->buf + s->data_out_size) * 8 + 32 - (INT64)s->bit_left;
+    return (s->buf_ptr - s->buf + s->data_out_size) * 8 + 32 - (int64_t)s->bit_left;
 #endif
 }
+
+#ifdef CONFIG_ENCODERS
 
 void align_put_bits(PutBitContext *s)
 {
@@ -68,6 +80,8 @@ void align_put_bits(PutBitContext *s)
     put_bits(s,s->bit_left & 7,0);
 #endif
 }
+
+#endif //CONFIG_ENCODERS
 
 /* pad the end of the output stream with zeros */
 void flush_put_bits(PutBitContext *s)
@@ -87,6 +101,8 @@ void flush_put_bits(PutBitContext *s)
 #endif
 }
 
+#ifdef CONFIG_ENCODERS
+
 void put_string(PutBitContext * pbc, char *s)
 {
     while(*s){
@@ -98,18 +114,38 @@ void put_string(PutBitContext * pbc, char *s)
 
 /* bit input functions */
 
+#endif //CONFIG_ENCODERS
+
+/**
+ * init GetBitContext.
+ * @param buffer bitstream buffer, must be FF_INPUT_BUFFER_PADDING_SIZE bytes larger then the actual read bits
+ * because some optimized bitstream readers read 32 or 64 bit at once and could read over the end
+ * @param bit_size the size of the buffer in bits
+ */
 void init_get_bits(GetBitContext *s,
-                   UINT8 *buffer, int buffer_size)
+                   const uint8_t *buffer, int bit_size)
 {
+    const int buffer_size= (bit_size+7)>>3;
+
     s->buffer= buffer;
-    s->size= buffer_size;
+    s->size_in_bits= bit_size;
     s->buffer_end= buffer + buffer_size;
 #ifdef ALT_BITSTREAM_READER
     s->index=0;
 #elif defined LIBMPEG2_BITSTREAM_READER
+#ifdef LIBMPEG2_BITSTREAM_READER_HACK
+  if ((int)buffer&1) {
+     /* word alignment */
+    s->cache = (*buffer++)<<24;
+    s->buffer_ptr = buffer;
+    s->bit_count = 16-8;
+  } else
+#endif
+  {
     s->buffer_ptr = buffer;
     s->bit_count = 16;
     s->cache = 0;
+  }
 #elif defined A32_BITSTREAM_READER
     s->buffer_ptr = (uint32_t*)buffer;
     s->bit_count = 32;
@@ -119,12 +155,36 @@ void init_get_bits(GetBitContext *s,
     {
         OPEN_READER(re, s)
         UPDATE_CACHE(re, s)
-//        UPDATE_CACHE(re, s)
+        UPDATE_CACHE(re, s)
         CLOSE_READER(re, s)
     }
 #ifdef A32_BITSTREAM_READER
     s->cache1 = 0;
 #endif
+}
+
+/** 
+ * reads 0-32 bits.
+ */
+unsigned int get_bits_long(GetBitContext *s, int n){
+    if(n<=17) return get_bits(s, n);
+    else{
+        int ret= get_bits(s, 16) << (n-16);
+        return ret | get_bits(s, n-16);
+    }
+}
+
+/** 
+ * shows 0-32 bits.
+ */
+unsigned int show_bits_long(GetBitContext *s, int n){
+    if(n<=17) return show_bits(s, n);
+    else{
+        GetBitContext gb= *s;
+        int ret= get_bits_long(s, n);
+        *s= gb;
+        return ret;
+    }
 }
 
 void align_get_bits(GetBitContext *s)
@@ -136,7 +196,8 @@ void align_get_bits(GetBitContext *s)
 int check_marker(GetBitContext *s, const char *msg)
 {
     int bit= get_bits1(s);
-    if(!bit) printf("Marker bit missing %s\n", msg);
+    if(!bit)
+	    av_log(NULL, AV_LOG_INFO, "Marker bit missing %s\n", msg);
 
     return bit;
 }
@@ -147,16 +208,16 @@ int check_marker(GetBitContext *s, const char *msg)
 
 #define GET_DATA(v, table, i, wrap, size) \
 {\
-    const UINT8 *ptr = (UINT8 *)table + i * wrap;\
+    const uint8_t *ptr = (const uint8_t *)table + i * wrap;\
     switch(size) {\
     case 1:\
-        v = *(UINT8 *)ptr;\
+        v = *(const uint8_t *)ptr;\
         break;\
     case 2:\
-        v = *(UINT16 *)ptr;\
+        v = *(const uint16_t *)ptr;\
         break;\
     default:\
-        v = *(UINT32 *)ptr;\
+        v = *(const uint32_t *)ptr;\
         break;\
     }\
 }
@@ -169,8 +230,8 @@ static int alloc_table(VLC *vlc, int size)
     vlc->table_size += size;
     if (vlc->table_size > vlc->table_allocated) {
         vlc->table_allocated += (1 << vlc->bits);
-        vlc->table = realloc(vlc->table,
-                             sizeof(VLC_TYPE) * 2 * vlc->table_allocated);
+        vlc->table = av_realloc(vlc->table,
+                                sizeof(VLC_TYPE) * 2 * vlc->table_allocated);
         if (!vlc->table)
             return -1;
     }
@@ -181,10 +242,10 @@ static int build_table(VLC *vlc, int table_nb_bits,
                        int nb_codes,
                        const void *bits, int bits_wrap, int bits_size,
                        const void *codes, int codes_wrap, int codes_size,
-                       UINT32 code_prefix, int n_prefix)
+                       uint32_t code_prefix, int n_prefix)
 {
     int i, j, k, n, table_size, table_index, nb, n1, index;
-    UINT32 code;
+    uint32_t code;
     VLC_TYPE (*table)[2];
 
     table_size = 1 << table_nb_bits;
@@ -221,12 +282,12 @@ static int build_table(VLC *vlc, int table_nb_bits,
                 nb = 1 << (table_nb_bits - n);
                 for(k=0;k<nb;k++) {
 #ifdef DEBUG_VLC
-                    printf("%4x: code=%d n=%d\n",
+                    av_log(NULL, AV_LOG_DEBUG, "%4x: code=%d n=%d\n",
                            j, i, n);
 #endif
                     if (table[j][1] /*bits*/ != 0) {
-                        fprintf(stderr, "incorrect codes\n");
-                        exit(1);
+                        av_log(NULL, AV_LOG_ERROR, "incorrect codes\n");
+                        av_abort();
                     }
                     table[j][1] = n; //bits
                     table[j][0] = i; //code
@@ -322,33 +383,7 @@ void free_vlc(VLC *vlc)
     av_free(vlc->table);
 }
 
-int ff_gcd(int a, int b){
+int64_t ff_gcd(int64_t a, int64_t b){
     if(b) return ff_gcd(b, a%b);
     else  return a;
-}
-
-void ff_float2fraction(int *nom_arg, int *denom_arg, double f, int max){
-    double best_diff=1E10, diff;
-    int best_denom=1, best_nom=1;
-    int nom, denom, gcd;
-    
-    //brute force here, perhaps we should try continued fractions if we need large max ...
-    for(denom=1; denom<=max; denom++){
-        nom= (int)(f*denom + 0.5);
-        if(nom<=0 || nom>max) continue;
-        
-        diff= ABS( f - (double)nom / (double)denom );
-        if(diff < best_diff){
-            best_diff= diff;
-            best_nom= nom;
-            best_denom= denom;
-        }
-    }
-    
-    gcd= ff_gcd(best_nom, best_denom);
-    best_nom   /= gcd;
-    best_denom /= gcd;
-
-    *nom_arg= best_nom;
-    *denom_arg= best_denom;
 }

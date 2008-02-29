@@ -1,25 +1,38 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
-#include "documentlist.h"
 #include "serverinterface.h"
-
 #include <qtopia/mimetype.h>
 #include <qtopia/resource.h>
 #include <qtopia/global.h>
@@ -30,18 +43,12 @@
 #ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>
 #endif
-
-#include <qtimer.h>
 #include <qfileinfo.h>
 #include <qtextstream.h>
-#include <qfile.h>
 #include <qdir.h>
-#include <qpainter.h>
-#include <qimage.h>
-#include <qcopchannel_qws.h>
-#include <qlistview.h>
-#include <qlist.h>
-#include <qpixmap.h>
+#include <qtimer.h>
+#include "documentlist.h"
+#include "serverapp.h"
 
 
 AppLnkSet *DocumentList::appLnkSet = 0;
@@ -49,8 +56,7 @@ AppLnkSet *DocumentList::appLnkSet = 0;
 static const int MAX_SEARCH_DEPTH = 10;
 
 
-class DocumentListPrivate : public QObject {
-    Q_OBJECT
+class DocumentListPrivate {
 public:
     DocumentListPrivate( ServerInterface *gui );
     ~DocumentListPrivate();
@@ -58,7 +64,7 @@ public:
     void initialize();
 
     const QString nextFile();
-    const DocLnk *iterate();
+    const DocLnk *iterate(bool &finished);
     bool store( DocLnk* dl );
     void estimatedPercentScanned();
 
@@ -86,111 +92,6 @@ public:
     bool sendDocLnks;
     bool scanDocs;
 };
-
-
-DocumentList::DocumentList( ServerInterface *serverGui, bool scanDocs,
-			    QObject *parent, const char *name )
- : QObject( parent, name )
-{
-    appLnkSet = new AppLnkSet( MimeType::appsFolderName() );
-    d = new DocumentListPrivate( serverGui );
-    d->scanDocs = scanDocs;
-    d->needToSendAllDocLinks = false;
-
-    QTimer::singleShot( 10, this, SLOT( startInitialScan() ) );
-}
-
-void DocumentList::startInitialScan()
-{
-    reloadAppLnks();
-    reloadDocLnks();
-}
-
-DocumentList::~DocumentList()
-{
-    delete appLnkSet;
-    delete d;
-}
-
-
-void DocumentList::add( const DocLnk& doc )
-{
-    if ( d->serverGui && QFile::exists( doc.file() ) )
-	d->serverGui->documentAdded( doc );
-}
-
-
-void DocumentList::start()
-{
-    resume();
-}
-
-
-void DocumentList::pause()
-{
-    //qDebug("pause %i", d->tid);
-    killTimer( d->tid );
-    d->tid = 0;
-}
-
-
-void DocumentList::resume()
-{
-    if ( d->tid == 0 ) {
-	d->tid = startTimer( 0 );
-	//qDebug("resumed %i", d->tid);
-    }
-}
-
-/*
-void DocumentList::resend()
-{
-    // Re-emits all the added items to the list (firstly letting everyone know to
-    // clear what they have as it is being sent again)
-    pause();
-    emit allRemoved();
-    QTimer::singleShot( 5, this, SLOT( resendWorker() ) );
-}
-
-
-void DocumentList::resendWorker()
-{
-    const QList<DocLnk> &list = d->dls.children();
-    for ( QListIterator<DocLnk> it( list ); it.current(); ++it )
-	add( *(*it) );
-    resume();
-}
-*/
-
-void DocumentList::rescan()
-{
-    //qDebug("rescan");
-    pause();
-    d->initialize();
-    resume();
-}
-
-
-void DocumentList::timerEvent( QTimerEvent *te )
-{
-    if ( te->timerId() == d->tid ) {
-	// Do 3 at a time
-	for (int i = 0; i < 3; i++ ) {
-	    const DocLnk *lnk = d->iterate();
-	    if ( lnk ) {
-		add( *lnk );
-	    } else {
-		// stop when done
-		pause();
-		if ( d->serverGui )
-		    d->serverGui->documentScanningProgress( 100 );
-		if ( d->needToSendAllDocLinks )
-		    sendAllDocLinks();
-		break;
-	    }
-	}
-    }
-}
 
 
 void DocumentList::reloadAppLnks()
@@ -238,8 +139,23 @@ void DocumentList::reloadAppLnks()
     AppLnk* l;
     while ( (l=itapp.current()) ) {
 	++itapp;
-	if ( d->sendAppLnks && d->serverGui )
-	    d->serverGui->applicationAdded( l->type(), *l );
+	if ( d->sendAppLnks && d->serverGui ) {
+	    // Only add applications if all of their requirements are satisifed
+	    bool reqsSatisfied = TRUE;
+	    QString req = l->property("Requires");
+	    if (!req.isEmpty()) {
+		QStringList appReqs = QStringList::split(',', req);
+		QStringList::ConstIterator it;
+		for (it = appReqs.begin(); it != appReqs.end(); ++it) {
+		    if (!ServerApplication::haveFeature(*it)) {
+			reqsSatisfied = FALSE;
+			break;
+		    }
+		}
+	    }
+	    if (reqsSatisfied)
+		d->serverGui->applicationAdded( l->type(), *l );
+	}
     }
 
     if ( d->sendAppLnks && d->serverGui ) 
@@ -283,6 +199,7 @@ void DocumentList::linkChanged( QString arg )
 		    //qDebug( "change case" );
 		    if ( d->serverGui )
 			d->serverGui->documentChanged( *doc, *dl );
+		    sendDocLnk( doc );
 
 		} else {
 		    // Link has been removed or doesn't match the mimetypes any more
@@ -290,6 +207,7 @@ void DocumentList::linkChanged( QString arg )
 		    //qDebug( "removal case" );
 		    if ( d->serverGui )
 			d->serverGui->documentRemoved( *doc );
+		    sendDocLnk( doc );
 
 		}
 		d->dls.remove( doc ); // remove old link from docLnkSet
@@ -303,6 +221,7 @@ void DocumentList::linkChanged( QString arg )
 	    // Add if it's a link we are interested in
 	    //qDebug( "add case" );
 	    add( *dl );
+	    sendDocLnk( dl );
 	}
 
     }
@@ -335,72 +254,128 @@ void DocumentList::sendAllDocLinks()
 	return;
     }
 
-    QString contents;
-    Categories cats;
-    for ( QListIterator<DocLnk> it( d->dls.children() ); it.current(); ++it ) {
-	DocLnk *doc = it.current();
-	QFileInfo fi( doc->file() );
-	if ( !fi.exists() )
-	    continue;
+    // First send over all the icons that are needed for the documents
+    QStringList processedIcons;
+    AppLnkSet a( MimeType::appsFolderName() );
+    for ( QListIterator<AppLnk> it( a.children() ); it.current(); ++it ) {
+	const AppLnk &lnk = *it.current();
+	QStringList icons = lnk.mimeTypeIcons();
+	QStringList types = lnk.mimeTypes();
+	QString icon;
+	QString type;
+	QString exe = lnk.exec();
 
-	bool fake = !doc->linkFileKnown();
-	if ( !fake ) {
-	    QFile f( doc->linkFile() );
-	    if ( f.open( IO_ReadOnly ) ) {
-		QTextStream ts( &f );
-		ts.setEncoding( QTextStream::UnicodeUTF8 );
-		contents += ts.read();
-		f.close();
-	    } else
-		fake = TRUE;
+	// Mime Type icons
+	for (QStringList::ConstIterator t=types.begin(),i=icons.begin(); t!=types.end() && i!=icons.end(); ++i,++t) {
+	    icon = exe + '/' + *i;
+	    type = *t;
+	    if ( !processedIcons.contains( icon ) ) {
+		processedIcons.append( icon );
+		sendIcon( exe, icon, type );
+	    }
 	}
-	if (fake) {
-	    contents += "[Desktop Entry]\n"; // No tr
-	    contents += "Categories = " + // No tr
-		cats.labels("Document View",doc->categories()).join(";") + "\n"; // No tr
-	    contents += "Name = "+doc->name()+"\n"; // No tr
-	    contents += "Type = "+doc->type()+"\n"; // No tr
+
+	// Normal "app' icon
+	if ( icon.isNull() ) {
+	    icon = lnk.icon();
+	    type = *types.begin();
+	    // Only send if there is a mime type for this app
+	    if ( type != QString::null && !processedIcons.contains( icon ) ) {
+		processedIcons.append( icon );
+		sendIcon( exe, icon, type );
+	    }
 	}
-	contents += "File = "+doc->file()+"\n"; // No tr // (resolves path)
-	contents += QString("Size = %1\n").arg( fi.size() ); // No tr
+
     }
 
-    //qDebug( "sending length %d", contents.length() );
+    // Now send all the doc links
+    bool sentADocLink = FALSE;
+    for ( QListIterator<DocLnk> it( d->dls.children() ); it.current(); ++it ) {
+	sentADocLink = TRUE;
+	sendDocLnk( it.current() );
+    }
+
+    if ( !sentADocLink ) {
 #ifndef QT_NO_COP
-    QCopEnvelope e( "QPE/Desktop", "docLinks(QString)" );
-    e << contents;
+	QCopEnvelope e( "QPE/Desktop", "docLinks(QString)" );
+	e << "";
 #endif
-    //qDebug( "================ \n\n%s\n\n===============", contents.latin1() );
+    }
 
     d->needToSendAllDocLinks = false;
 }
 
+void DocumentList::sendDocLnk( DocLnk *doc )
+{
+    Categories cats;
+    QString contents;
+    QFileInfo fi( doc->file() );
+    if ( !fi.exists() ) {
+#ifndef QT_NO_COP
+	QCopEnvelope e( "QPE/Desktop", "linkFileRemoved(QString)" );
+	e << doc->file();
+#endif
+	return;
+    }
 
+    bool fake = !doc->linkFileKnown();
+    if ( !fake ) {
+	QFile f( doc->linkFile() );
+	if ( f.open( IO_ReadOnly ) ) {
+	    QTextStream ts( &f );
+	    ts.setEncoding( QTextStream::UnicodeUTF8 );
+	    QString docLnk = ts.read();
+	    // Strip out the (stale) LinkFile entry
+	    int start = docLnk.find( "\nLinkFile = " ) + 1;
+	    if ( start > 0 ) {
+		int end = docLnk.find( "\n", start + 1 ) + 1;
+		contents += docLnk.left(start);
+		contents += docLnk.mid(end);
+	    } else {
+		contents += docLnk;
+	    }
+	    contents += "LinkFile = " + doc->linkFile() + "\n";
+	    f.close();
+	} else
+	    fake = TRUE;
+    }
+    if (fake) {
+	contents += "[Desktop Entry]\n"; // No tr
+	contents += "Categories = " + // No tr
+	    cats.labels("Document View",doc->categories()).join(";") + "\n"; // No tr
+	contents += "Name = "+doc->name()+"\n"; // No tr
+	contents += "Type = "+doc->type()+"\n"; // No tr
+    }
+    contents += "File = "+doc->file()+"\n"; // No tr // (resolves path)
+    contents += QString("Size = %1\n").arg( fi.size() ); // No tr
+#ifndef QT_NO_COP
+    QCopEnvelope e( "QPE/Desktop", "docLink(QString)" );
+    e << contents;
+#endif
+}
 
+void DocumentList::sendIcon( QString exe, QString icon, QString type )
+{
+    QString pixmap = Resource::findPixmap( icon );
+    if ( pixmap.isNull() ) {
+	pixmap = Resource::findPixmap( icon.mid( exe.length() + 1 ) );
+	if ( pixmap.isNull() )
+	    return; // give up
+    }
+    QString realicon = pixmap.mid( pixmap.find("pics/") + 5 );
+    QFile f( pixmap );
+    f.open( IO_ReadOnly );
+    QByteArray data = f.readAll();
+#ifndef QT_NO_COP
+    QCopEnvelope e( "QPE/Desktop", "docLinkIcon(QString,QString,QByteArray)" );
+    e << type << realicon << data;
+#endif
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// ====================================================================
 
 DocumentListPrivate::DocumentListPrivate( ServerInterface *gui )
 {
-    storage = new StorageInfo( this );
     serverGui = gui;
     if ( serverGui ) {
 	sendAppLnks = serverGui->requiresApplications();
@@ -414,7 +389,6 @@ DocumentListPrivate::DocumentListPrivate( ServerInterface *gui )
 	lists[i] = 0;
 	listPositions[i] = 0;
     }
-    initialize();
     tid = 0;
 }
 
@@ -573,8 +547,10 @@ bool DocumentListPrivate::store( DocLnk* dl )
 
 #define MAGIC_NUMBER	((void*)2)
 
-const DocLnk *DocumentListPrivate::iterate()
+const DocLnk *DocumentListPrivate::iterate(bool &finished)
 {
+    int filesScanned = 0;
+    finished = false;
     if ( state == Find ) {
 	//qDebug("state Find");
 	QString file = nextFile();
@@ -585,6 +561,9 @@ const DocLnk *DocumentListPrivate::iterate()
 		    return dl;
 	    } else {
 		reference.insert( file, MAGIC_NUMBER );
+		filesScanned++;
+		if ( filesScanned > 10 )
+		    return 0;
 	    }
 	    file = nextFile();
 	}
@@ -618,7 +597,9 @@ const DocLnk *DocumentListPrivate::iterate()
 		DocLnk* dl = new DocLnk;
 		QFileInfo fi( dit->currentKey() );
 		dl->setFile( fi.filePath() );
-		dl->setName( fi.baseName() );
+		QString tmp = fi.fileName();
+		int pos = tmp.findRev( '.' );
+		dl->setName( (pos == -1) ? tmp : tmp.left( pos ) );
 		if ( store(dl) ) {
 		    ++*dit;
 		    iterationI++;
@@ -636,11 +617,113 @@ const DocLnk *DocumentListPrivate::iterate()
     }
 
     //qDebug("state Done");
-    return NULL;
+    finished = true;
+    return 0;
 }
 
 
-#include "documentlist.moc"
+DocumentList::DocumentList( ServerInterface *serverGui, bool scanDocs,
+			    QObject *parent, const char *name )
+ : QObject( parent, name )
+{
+    appLnkSet = new AppLnkSet( MimeType::appsFolderName() );
+    d = new DocumentListPrivate( serverGui );
+    d->storage = new StorageInfo( this );
+    d->initialize();
+    d->scanDocs = scanDocs;
+    d->needToSendAllDocLinks = false;
+
+    QTimer::singleShot( 10, this, SLOT( startInitialScan() ) );
+}
 
 
+void DocumentList::startInitialScan()
+{
+    reloadAppLnks();
+    reloadDocLnks();
+}
+
+
+DocumentList::~DocumentList()
+{
+    delete appLnkSet;
+    delete d;
+}
+
+
+void DocumentList::add( const DocLnk& doc )
+{
+    if ( d->serverGui && QFile::exists( doc.file() ) )
+	d->serverGui->documentAdded( doc );
+}
+
+
+void DocumentList::start()
+{
+    resume();
+}
+
+
+void DocumentList::pause()
+{
+    killTimer( d->tid );
+    d->tid = 0;
+}
+
+
+void DocumentList::resume()
+{
+    if ( d->tid == 0 ) 
+	d->tid = startTimer( 10 );
+}
+
+/*
+void DocumentList::resend()
+{
+    // Re-emits all the added items to the list (firstly letting everyone know to
+    // clear what they have as it is being sent again)
+    pause();
+    emit allRemoved();
+    QTimer::singleShot( 5, this, SLOT( resendWorker() ) );
+}
+
+
+void DocumentList::resendWorker()
+{
+    const QList<DocLnk> &list = d->dls.children();
+    for ( QListIterator<DocLnk> it( list ); it.current(); ++it )
+	add( *(*it) );
+    resume();
+}
+*/
+
+void DocumentList::rescan()
+{
+    pause();
+    d->initialize();
+    resume();
+}
+
+
+void DocumentList::timerEvent( QTimerEvent *te )
+{
+    if ( te->timerId() == d->tid ) {
+	// Do 3 at a time
+	for (int i = 0; i < 3; i++ ) {
+	    bool finished;
+	    const DocLnk *lnk = d->iterate(finished);
+	    if ( lnk ) {
+		add( *lnk );
+	    } else if ( finished ) {
+		// stop when done
+		pause();
+		if ( d->serverGui )
+		    d->serverGui->documentScanningProgress( 100 );
+		if ( d->needToSendAllDocLinks )
+		    sendAllDocLinks();
+		break;
+	    }
+	}
+    }
+}
 

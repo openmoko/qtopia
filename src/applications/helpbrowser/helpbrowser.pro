@@ -1,15 +1,26 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE    = lib
-quicklaunch:DESTDIR     = $(QPEDIR)/plugins/application
-
-CONFIG		+= qtopia warn_on release
-HEADERS		= helpbrowser.h
-SOURCES		= helpbrowser.cpp 
-
-multiprocess:SOURCES+=main.cpp
+CONFIG		+= qtopiaapp
+HEADERS		= helpbrowser.h \
+		    helppreprocessor.h
+SOURCES		= helpbrowser.cpp main.cpp \
+		    helppreprocessor.cpp
 
 TARGET		= helpbrowser
-TRANSLATIONS = helpbrowser-en_GB.ts helpbrowser-de.ts helpbrowser-ja.ts helpbrowser-no.ts
+
+TRANSLATABLES   = $$HEADERS \
+                    $$SOURCES
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/helpbrowser*
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/helpbrowser.desktop
+desktop.path=/apps/Applications
+# See $QPEDIR/src/server/server.pro for the definition of extra html help files
+#    not associted with a specific application. Each application is responsible 
+#    for installing its own help
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/helpbrowser/*
+pics.path=/pics/helpbrowser
+pics2.files=$${QTOPIA_DEPOT_PATH}/pics/help/*
+pics2.path=/pics/help
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics pics2
+
+PACKAGE_DESCRIPTION=The HTML help browser for the Qtopia environment.

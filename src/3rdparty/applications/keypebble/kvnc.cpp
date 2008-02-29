@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 #include <qiconset.h>
 #include <qdialog.h>
 #include <qpixmap.h>
@@ -49,17 +70,21 @@ const int StatusTextId = 0;
   \brief The KVNC class is a VNC client.
 
   \legalese
-    Keypebble, the VNC client for Qtopia, is based on Keystone from 
+    Keypebble, the VNC client for Qtopia, is based on Keystone from
     the KDE project. Keystone and Keypebble are distributed
     under the terms of the GNU General Public License. The VNC server
     code in Qt/Embedded is copyright Trolltech.
 
-    A primary copyright holder is Richard Moore &lt;rich@kde.org&gt;.
+    A primary copyright holder is <a href="mailto:rich@kde.org">Richard Moore</a>.
 
     This software owes a lot to Markus Wuebben's kvncviewer,
     which some of the code is derived from. Thanks also go to ORL for
     making the RFB protocol and servers GPL.
 */
+
+// QDOC_SKIP_BEGIN
+
+/*! \a name */
 
 KVNC::KVNC( const char *name ) : QMainWindow( 0, name )
 {
@@ -70,10 +95,10 @@ KVNC::KVNC( const char *name ) : QMainWindow( 0, name )
     canvas = new KRFBCanvas( this, "canvas" ); // No tr
     setCentralWidget( canvas );
 
-    connect( canvas->connection(), SIGNAL(statusChanged(const QString &)),
-	    this, SLOT(statusMessage(const QString &)) );
-    connect( canvas->connection(), SIGNAL(error(const QString &)),
-	    this, SLOT(error(const QString &)) );
+    connect( canvas->connection(), SIGNAL(statusChanged(const QString&)),
+	    this, SLOT(statusMessage(const QString&)) );
+    connect( canvas->connection(), SIGNAL(error(const QString&)),
+	    this, SLOT(error(const QString&)) );
     connect( canvas->connection(), SIGNAL(connected()), this, SLOT(connected()) );
     connect( canvas->connection(), SIGNAL(loggedIn()), this, SLOT(loggedIn()) );
     connect( canvas->connection(), SIGNAL(disconnected()), this, SLOT(disconnected()) );
@@ -88,15 +113,21 @@ KVNC::KVNC( const char *name ) : QMainWindow( 0, name )
     QTimer::singleShot( 0, canvas, SLOT(openConnection()) );
 }
 
+/*! */
+
 KVNC::~KVNC()
 {
 
 }
 
+/*! \a url */
+
 void KVNC::openURL( const QUrl &url )
 {
     canvas->openURL( url );
 }
+
+/*! */
 
 void KVNC::setupActions()
 {
@@ -124,6 +155,8 @@ void KVNC::setupActions()
     connectAction->addTo( cornerMenu );
 }
 
+/*! \a f */
+
 void KVNC::toggleFullScreen( bool f )
 {
     if ( f ) {
@@ -147,6 +180,7 @@ void KVNC::toggleFullScreen( bool f )
     fullScreenAction->setOn(fullscreen);
 }
 
+/*! */
 void KVNC::connectToServer()
 {
     if ( isConnected ) {
@@ -158,12 +192,16 @@ void KVNC::connectToServer()
     }
 }
 
+/*! \a z */
+
 void KVNC::zoom( bool z )
 {
     if (isConnected) {
 	canvas->setViewScale( z ? 2 : 1 );
     }
 }
+
+/*! */
 
 void KVNC::showMenu()
 {
@@ -173,6 +211,8 @@ void KVNC::showMenu()
     pt.rx() -= s.width();
     cornerMenu->popup( pt );
 }
+
+/*! */
 
 void KVNC::connected()
 {
@@ -184,11 +224,15 @@ void KVNC::connected()
     isConnected = true;
 }
 
+/*! */
+
 void KVNC::loggedIn()
 {
     static QString msg = tr( "Logged in to remote host" );
     statusMessage( msg );
 }
+
+/*! */
 
 void KVNC::disconnected()
 {
@@ -203,15 +247,21 @@ void KVNC::disconnected()
     connectAction->setText( tr("Connect...") );
 }
 
+/*! \a m */
+
 void KVNC::statusMessage( const QString &m )
 {
     Global::statusMessage( m );
 }
 
+/*! \a msg */
+
 void KVNC::error( const QString &msg )
 {
     QMessageBox::warning( this, tr("VNC Viewer"), msg );
 }
+
+/*! */
 
 void KVNC::showOptions()
 {
@@ -224,3 +274,4 @@ void KVNC::showOptions()
     delete wdg;
 }
 
+// QDOC_SKIP_END

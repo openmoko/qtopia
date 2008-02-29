@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -47,7 +62,17 @@
 # define LOADER_INSTANCE pluginLibraryManagerInstance
 #endif
 
+#ifndef SINGLE_EXEC
 extern PluginLibraryManager *LOADER_INSTANCE();
+#else
+#include <qdict.h>
+typedef QDict<QUnknownInterface> PluginNameDict;
+#ifdef PLUGINLOADER_INTERN
+QDict<PluginNameDict> *ptd = 0;
+#else
+extern QDict<PluginNameDict> *ptd;
+#endif
+#endif
 
 static QString configFilename( const QString &name )
 {
@@ -134,6 +159,8 @@ static const char *cfgName();
     }
   \endcode
 
+  First availability: Qtopia 1.6
+
   \ingroup qtopiaemb
 */
 
@@ -186,7 +213,9 @@ void PluginLoader::clear()
 */
 void PluginLoader::init()
 {
+#ifndef SINGLE_EXEC
     LOADER_INSTANCE();
+#endif
 }
 
 /*!
@@ -205,6 +234,8 @@ const QStringList &PluginLoader::disabledList() const
     return d->disabled;
 }
 
+#include "../qtopia/global_qtopiapaths.cpp"
+
 /*!
   Query the plugin for the interface specified by \a id in plugin \a name.
   If the interface is available, \a iface will contain the pointer to it.
@@ -215,14 +246,20 @@ QRESULT PluginLoader::queryInterface( const QString &name, const QUuid &id, QUnk
 {
     QRESULT result = QS_FALSE;
     *iface = 0;
-
+#ifndef SINGLE_EXEC
     QString lname = stripSystem( name );
 
+    QString libFile;
+    QStringList qpepaths = global_qtopiapaths();
+    for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
 #ifndef Q_OS_WIN32
-    QString libFile = QPEApplication::qpeDir() + "plugins/" + d->type + "/lib" + lname + ".so";
+	libFile = *qit + "plugins/" + d->type + "/lib" + lname + ".so";
 #else
-    QString libFile = QPEApplication::qpeDir() + "plugins/" + d->type + "/" + lname + ".dll";
+	libFile = *qit + "plugins/" + d->type + "/" + lname + ".dll";
 #endif
+	if ( QFile::exists(libFile) )
+	    break;
+    }
     QLibrary *lib = LOADER_INSTANCE()->refLibrary( libFile );
     if ( !lib ) {
 	qDebug( "Plugin not loaded: %s", lname.latin1() );
@@ -239,15 +276,18 @@ QRESULT PluginLoader::queryInterface( const QString &name, const QUuid &id, QUnk
 	type = "lib" + type;
 #endif
 	QStringList langs = languageList();
-	for (QStringList::ConstIterator lit = langs.begin(); lit!=langs.end(); ++lit) {
-	    QString lang = *lit;
-	    QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
-	    if ( QFile::exists(tfn) ) {
-		QTranslator * trans = new QTranslator(qApp);
-		if ( trans->load( tfn ))
-		    qApp->installTranslator( trans );
-		else
-		    delete trans;
+	QStringList qpepaths = global_qtopiapaths();
+	for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
+	    for (QStringList::ConstIterator lit = langs.begin(); lit!=langs.end(); ++lit) {
+		QString lang = *lit;
+		QString tfn = *qit+"i18n/"+lang+"/"+type+".qm";
+		if ( QFile::exists(tfn) ) {
+		    QTranslator * trans = new QTranslator(qApp);
+		    if ( trans->load( tfn ))
+			qApp->installTranslator( trans );
+		    else
+			delete trans;
+		}
 	    }
 	}
 	result = QS_OK;
@@ -256,6 +296,17 @@ QRESULT PluginLoader::queryInterface( const QString &name, const QUuid &id, QUnk
     }
     if (enabled)
 	setEnabled( name, TRUE );
+#else
+    if (!ptd)
+	return result;
+    PluginNameDict *quil = ptd->find(d->type);
+    if (!quil)
+	return result;
+    QUnknownInterface *myIface = quil->find(name);
+    if (!myIface)
+	return result;
+    result = myIface->queryInterface(id,iface);
+#endif
 
     return result;
 }
@@ -266,74 +317,99 @@ QRESULT PluginLoader::queryInterface( const QString &name, const QUuid &id, QUnk
 */
 void PluginLoader::releaseInterface( QUnknownInterface *iface )
 {
+#ifndef SINGLE_EXEC
     if ( iface ) {
 	QLibrary *lib = d->interfaces.take( iface );
 	iface->release();
 	LOADER_INSTANCE()->derefLibrary( lib );
     }
+#endif
 }
 
 void PluginLoader::initType()
 {
-    QString path = QPEApplication::qpeDir() + "plugins/";
-    path += d->type;
+#ifndef SINGLE_EXEC
+    QStringList qpepaths = global_qtopiapaths();
+    for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
+	QString path = *qit + "plugins/";
+	path += d->type;
 #ifndef Q_OS_WIN32
-    DIR *dir = opendir( path.latin1() );
-    if ( !dir )
-	return;
+	DIR *dir = opendir( path.latin1() );
+	if ( !dir )
+	    continue;
 
-    QStringList list;
-    dirent *file;
-    while ( (file = readdir(dir)) ) {
-	if ( !strncmp( file->d_name, "lib", 3 ) ) {
-	    if ( !strcmp( file->d_name+strlen(file->d_name)-3, ".so" ) )
-		list.append( file->d_name );
+	QStringList list;
+	dirent *file;
+	while ( (file = readdir(dir)) ) {
+	    if ( !strncmp( file->d_name, "lib", 3 ) ) {
+		if ( !strcmp( file->d_name+strlen(file->d_name)-3, ".so" ) )
+		    list.append( file->d_name );
+	    }
 	}
-    }
-    closedir(dir);
+	closedir(dir);
 #else
-    QDir dir (path, "*.dll");
-    QStringList list = dir.entryList();
+	QDir dir (path, "*.dll");
+	QStringList list = dir.entryList();
 #endif
 
-    bool safeMode = FALSE;
+	bool safeMode = FALSE;
 
-    QString cfgFilename( configFilename(cfgName()) + ".lock" );
-    QFile lf( cfgFilename );
-    lf.open( lf.exists() ? IO_ReadOnly : IO_WriteOnly );
-    lockFile( lf );
-    Config cfg( cfgName() );
-    cfg.setGroup( "Global" );
-    safeMode = cfg.readEntry( "Mode", "Normal" ) == "Safe";
-    cfg.setGroup( d->type );
-    d->disabled = cfg.readListEntry( "Disabled", ',' );
-    unlockFile( lf );
+	QString cfgFilename( configFilename(cfgName()) + ".lock" );
+	QFile lf( cfgFilename );
+	lf.open( lf.exists() ? IO_ReadOnly : IO_WriteOnly );
+	lockFile( lf );
+	{
+	    Config cfg( cfgName() );
+	    cfg.setGroup( "Global" );
+	    safeMode = cfg.readEntry( "Mode", "Normal" ) == "Safe";
+	    cfg.setGroup( d->type );
+	    d->disabled = cfg.readListEntry( "Disabled", ',' );
+	}
+	unlockFile( lf );
 
-    QStringList required;
-    if ( QFile::exists( path + "/.directory" ) ) {
-	Config config( path + "/.directory", Config::File );
-	required = config.readListEntry( "Required", ',' );
+	QStringList required;
+	if ( QFile::exists( path + "/.directory" ) ) {
+	    Config config( path + "/.directory", Config::File );
+	    required = config.readListEntry( "Required", ',' );
+	}
+
+	QStringList::Iterator it;
+	for ( it = list.begin(); it != list.end(); ++it ) {
+	    QString name = stripSystem(*it);
+	    if ( (!safeMode && isEnabled(name)) || required.contains(name) )
+		d->plugins += name;
+	}
     }
-
-    QStringList::Iterator it;
-    for ( it = list.begin(); it != list.end(); ++it ) {
-	QString name = stripSystem(*it);
-	if ( (!safeMode && isEnabled(name)) || required.contains(name) )
-	    d->plugins += name;
+#else
+    QStringList *pnsl = new QStringList();
+    if (ptd) {
+	QDict<QUnknownInterface> *pnd = ptd->find(d->type);
+	if (pnd) {
+	    QDictIterator<QUnknownInterface> it( *pnd );
+	    while (it.current()) {
+		pnsl->append(it.currentKey());
+		++it;
+	    }
+	}
     }
+    d->plugins = *pnsl;
+#endif
 }
 
 QStringList PluginLoader::languageList() const
 {
+#if QT_VERSION >= 0x040000
+# error "Use Global::languageList()"
+#endif
     QString lang;
     if (lang.isEmpty())
 	lang = getenv("LANG");
 
     QStringList langs;
-    langs.append(lang);
     int i  = lang.find(".");
     if ( i > 0 )
 	lang = lang.left( i );
+    langs.append(lang);
     i = lang.find( "_" );
     if ( i > 0 )
 	langs.append(lang.left(i));
@@ -410,7 +486,8 @@ QString PluginLoader::stripSystem( const QString &libFile ) const
 //===========================================================================
 // Only compile this once under Win32 and single process
 #if !(defined(Q_OS_WIN32) && defined(PLUGINLOADER_INTERN)) && \
-    !(defined(SINGLE_APP) && defined(PLUGINLOADER_INTERN))
+    !(defined(SINGLE_EXEC) && defined(PLUGINLOADER_INTERN)) && \
+    !(defined(QPE_NO_COMPAT) && defined(PLUGINLOADER_INTERN))
 
 PluginLibraryManager::PluginLibraryManager()
 {

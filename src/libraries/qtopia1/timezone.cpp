@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -35,6 +50,10 @@
 
 #include "qtopia/qpeapplication.h"
 #include "qtopia/config.h"
+
+#ifdef QTOPIA_DESKTOP
+#include <qdconfig.h>
+#endif
 
 /*******************************************************************
  *
@@ -105,21 +124,12 @@ QCString TimeZonePrivate::sZonePath(0);
 QCString TimeZonePrivate::zonePath()
 {
     if ( sZonePath.isNull() ) {
-#ifdef Q_OS_UNIX
-# ifdef Q_OS_MAC
-	sZonePath = QPEApplication::qpeDir() + "etc/zoneinfo/";
-# else
-	sZonePath = "/usr/share/zoneinfo/";
-# endif
-#else
+#if defined(Q_OS_WIN32)
 	sZonePath = QPEApplication::qpeDir() + "etc\\zoneinfo\\";
-	QDir zoneDir(sZonePath);
-	if ( !zoneDir.exists() ) {
-	    // probably developing for Qtopia Deskop; try in it's etc directory
-	    sZonePath = QPEApplication::qpeDir() + "..\\..\\etc\\zoneinfo\\";
-	    zoneDir = sZonePath;
-	    sZonePath = zoneDir.absPath() + "\\";
-	}
+#elif defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+	sZonePath = "/usr/share/zoneinfo/";
+#else
+	sZonePath = QPEApplication::qpeDir() + "etc/zoneinfo/";
 #endif
     }
     return sZonePath;
@@ -129,15 +139,7 @@ QCString TimeZonePrivate::sZoneFile(0);
 QCString TimeZonePrivate::zoneFile()
 {
     if ( sZoneFile.isNull() ) {
-#ifdef Q_OS_UNIX
-# ifdef Q_OS_MAC
-	sZoneFile = QPEApplication::qpeDir() + "etc/zoneinfo/zone.tab";
-# else
-	sZoneFile = "/usr/share/zoneinfo/zone.tab";
-# endif
-#else
 	sZoneFile = zonePath() + "zone.tab";
-#endif
     }
     return sZoneFile;
 }
@@ -677,18 +679,26 @@ void TimeZoneLocation::dump() const
 
 QStringList TimeZoneLocation::languageList()
 {
+#if QT_VERSION >= 0x040000
+# error "Use Global::languageList()"
+#endif
+
     QString lang;
+    QStringList langs;
+#ifdef QTOPIA_DESKTOP
+    langs = gQtopiaDesktopConfig->langs();
+#else
     if (lang.isEmpty())
 	lang = getenv("LANG");
 
-    QStringList langs;
-    langs.append(lang);
     int i  = lang.find(".");
     if ( i > 0 )
 	lang = lang.left( i );
+    langs.append(lang);
     i = lang.find( "_" );
     if ( i > 0 )
 	langs.append(lang.left(i));
+#endif
     return langs;
 }
 
@@ -795,8 +805,10 @@ TimeZoneLocation *TzCache::location( const QCString &id )
     if ( id.isEmpty() )
 	return 0;
     TimeZoneLocation * l = mLocationDict[ id ];
+#if 0
     if ( !l )
 	qDebug("TzCache::location unable to find %s ", id.data());
+#endif
     return l;
 }
 
@@ -821,6 +833,8 @@ QStrList TzCache::ids()
 
   TimeZone provides access to timezone data and conversion between
   times in different time zones and formats.
+
+  First availability: Qtopia 1.6
 
   \ingroup qtopiaemb
 */
@@ -873,7 +887,7 @@ TimeZone &TimeZone::operator=( const TimeZone &from)
 }
 
 /*!
-  Returns TRUE if \c is equal to this, otherwise FALSE.
+  Returns TRUE if \a c is equal to this, otherwise FALSE.
 */
 bool TimeZone::operator==( const TimeZone &c) const
 {
@@ -881,7 +895,7 @@ bool TimeZone::operator==( const TimeZone &c) const
 }
 
 /*!
-  Returns TRUE if \c is not equal to this, otherwise FALSE.
+  Returns TRUE if \a c is not equal to this, otherwise FALSE.
 */
 bool TimeZone::operator!=( const TimeZone &c) const
 {
@@ -1073,6 +1087,7 @@ bool TimeZone::isValid() const
 {
     TimeZoneData *data = TzCache::instance().data( d->id );
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
+#if 0
     if ( data->isValid() && (!loc || !loc->isValid() )) {
 	if ( !loc )
 	    qWarning("data but no loc");
@@ -1081,6 +1096,7 @@ bool TimeZone::isValid() const
 	    loc->dump();
 	}
     }
+#endif
     return data->isValid() && loc && loc->isValid();
 }
 

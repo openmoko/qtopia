@@ -1,10 +1,10 @@
+[Translation]
+File=QtopiaGames
+Context=Word Game
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
-Comment=A word arranging game
+Comment[]=A word arranging game
 Exec=wordgame
 Icon=WordGame
 Type=Application
-Name=Word Game
-Name[ja]=ワードゲーム
-Name[no]=Kryss-Ord
-Name[de]=Wortspiel
-Name[hu]=Szójáték
+Name[]=Word Game

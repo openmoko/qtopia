@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -27,27 +42,29 @@
 #include <qstyle.h>
 #include <qapplication.h>
 #include <qmessagebox.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/contextbar.h>
 
 SnakeGame::SnakeGame(QWidget* parent, const char* name, WFlags f) :
     QMainWindow(parent,name,f),
-    canvas(232, 258),
-    ob_top(NULL), ob_bottom(NULL),
-    border_north(NULL), border_south(NULL),
-    border_east(NULL), border_west(NULL)
+    canvas(232, 258), gamemessage(0), gamemessagebkg(0)
 {
     setCaption( tr("Snake") );
-    QPixmap bg = Resource::loadPixmap("grass");
-    canvas.setBackgroundPixmap(bg);
+    canvas.setBackgroundPixmap(*(SpriteDB::spriteCache()->image(SpriteDB::ground())));
     canvas.setUpdatePeriod(100);
     snake = 0;
 
+    // when turned to true, get segfaults.
+    // shouldn't though... not sure what is happening.
+    obs.setAutoDelete(FALSE);
     cv = new QCanvasView(&canvas, this);
-
+    cv->setFrameStyle(QFrame::NoFrame);
+#ifndef QTOPIA_PHONE
     setToolBarsMovable( FALSE );
 
     QPEToolBar* toolbar = new QPEToolBar( this);
     toolbar->setHorizontalStretchable( TRUE );
-    (void)new QToolButton(Resource::loadIconSet("Snake"), tr("New Game"), 0,
+    (void)new QToolButton(Resource::loadPixmap("Snake"), tr("New Game"), 0,
                             this, SLOT(newGame()), toolbar, "New Game");
 
     scorelabel = new QLabel(toolbar);
@@ -55,19 +72,36 @@ SnakeGame::SnakeGame(QWidget* parent, const char* name, WFlags f) :
     scorelabel->setBackgroundMode( PaletteButton );
     scorelabel->setAlignment( AlignRight | AlignVCenter | ExpandTabs );
     toolbar->setStretchableWidget( scorelabel );
-
+#endif
     setFocusPolicy(StrongFocus);
 
     setCentralWidget(cv);
 
-    gamestopped = true; 
+    gamestopped = true;
     waitover = true;
+   QPEApplication::setInputMethodHint( this, QPEApplication::AlwaysOff );
+
+#ifdef QTOPIA_PHONE
+    contextMenu = new ContextMenu( this );
+    ContextBar::setLabel( this, Qt::Key_Select, ContextBar::Select );
+#endif
 }
 
 SnakeGame::~SnakeGame()
 {
    delete snake;
 }
+
+#ifndef QTOPIA_PHONE
+void SnakeGame::closeEvent( QCloseEvent* e )
+{
+    clear();
+    setupWalls();
+    gamestopped = true;
+    waitover = true;
+    e->accept();
+}
+#endif
 
 void SnakeGame::resizeEvent(QResizeEvent *)
 {
@@ -78,6 +112,7 @@ void SnakeGame::resizeEvent(QResizeEvent *)
     if (snake) {
 	newGame();
     } else {
+        clear();
 	setupWalls();
     }
 }
@@ -93,7 +128,10 @@ void SnakeGame::focusInEvent(QFocusEvent *) {
 }
 
 void SnakeGame::newGame()
-{   
+{
+#ifdef QTOPIA_PHONE
+    ContextBar::setLabel( this, Qt::Key_Select, ContextBar::NoLabel );
+#endif   
     clear();
     snake = new Snake(&canvas);
     connect(snake, SIGNAL(dead()), this, SLOT(gameOver()) );
@@ -116,30 +154,64 @@ void SnakeGame::newGame()
 //
 // Create walls and obstacles.
 //
-void
-SnakeGame::setupWalls(void)
+void SnakeGame::setupWalls(void)
 {
-    if (ob_top) {	    // if one is setup, all are setup
-	delete ob_top;
-	delete ob_bottom;
-	delete border_north;
-	delete border_west;
-	delete border_east;
-	delete border_south;
+    obs.clear();
+
+    int tilesize = SpriteDB::tileSize();
+    int screenwidth = canvas.width() / tilesize;
+    if ((canvas.width() % tilesize) > (tilesize >>1))
+	screenwidth++;
+    int screenheight = canvas.height() / tilesize;
+    if ((canvas.height() % tilesize) > (tilesize >>1))
+	screenheight++;
+    
+    // now for walls.
+    //corners
+    obs.append(new Obstacle(&canvas, 0, 0, FALSE, TRUE, FALSE, TRUE));
+    obs.append(new Obstacle(&canvas, tilesize*screenwidth-tilesize,
+		tilesize*screenheight-tilesize,
+		TRUE, FALSE, TRUE, FALSE));
+    obs.append(new Obstacle(&canvas, tilesize*screenwidth-tilesize, 0,
+		TRUE, FALSE, FALSE, TRUE));
+    obs.append(new Obstacle(&canvas, 0, tilesize*screenheight-tilesize,
+		FALSE, TRUE, TRUE, FALSE));
+    //sides
+    int i;
+    for (i = 1; i+1 < screenwidth; ++i) {
+	obs.append(new Obstacle(&canvas, i*tilesize, 0,
+		    TRUE, TRUE, FALSE, FALSE));
+	obs.append(new Obstacle(&canvas, i*tilesize, tilesize*screenheight-tilesize,
+		    TRUE, TRUE, FALSE, FALSE));
+    }
+    for (i = 1; i+1 < screenheight; ++i) {
+	obs.append(new Obstacle(&canvas, 0, i*tilesize,
+		    FALSE, FALSE, TRUE, TRUE));
+	obs.append(new Obstacle(&canvas, tilesize*screenwidth-tilesize, i*tilesize,
+		    FALSE, FALSE, TRUE, TRUE));
     }
 
-    ob_top = new Obstacle(&canvas, 64);
-    ob_bottom = new Obstacle(&canvas, canvas.height() - 50);
-    border_north = new Border(&canvas, Border::North);
-    border_west = new Border(&canvas, Border::West);
-    border_east = new Border(&canvas, Border::East);
-    border_south = new Border(&canvas, Border::South);
+    // now make a couple of med screen obsticals?
+
+    int obwidth = (screenwidth-2) >> 1;
+    int obstart = ((screenwidth-2) >> 2) + 1;
+    int oboffset = (screenheight-2) / 3;
+    for (i = obstart; i < obstart+obwidth; i++) {
+	obs.append(new Obstacle(&canvas, i*tilesize, tilesize+oboffset*tilesize,
+		    i!=obstart, i!=obstart+obwidth-1, FALSE, FALSE));
+	obs.append(new Obstacle(&canvas, i*tilesize, tilesize+2*oboffset*tilesize,
+		    i!=obstart, i!=obstart+obwidth-1, FALSE, FALSE));
+    }
+
+    //ob_top = new Obstacle(&canvas, tilesize,tilesize, FALSE, FALSE, FALSE, FALSE);
 }
 
 
 void SnakeGame::showScore(int score)
 {
+#ifndef QTOPIA_PHONE
     scorelabel->setText(tr("     Score :    %1   ").arg(score) );
+#endif
 }
 
 
@@ -189,43 +261,79 @@ void SnakeGame::clear()
    for (QCanvasItemList::Iterator it=l.begin(); it!=l.end(); ++it) {
         delete *it;
    }  
+   gamemessage = 0;
+   gamemessagebkg = 0;
 
-    ob_top = NULL;
-    ob_bottom = NULL;
-    border_north = NULL;
-    border_west = NULL;
-    border_east = NULL;
-    border_south = NULL;
+   if (obs.count() > 0)
+       obs.clear();
 }
 
+void SnakeGame::showMessage(const QString &text)
+{
+#define DEFAULT_TEXT_SIZE 20
+
+   if (!gamemessage) {
+       gamemessage = new QCanvasText(&canvas);
+       gamemessage->setZ(100);
+       //gamemessage->setColor(yellow);
+       gamemessage->setColor(palette().color(QPalette::Normal, QColorGroup::HighlightedText));
+   }
+   if (!gamemessagebkg) {
+       gamemessagebkg = new QCanvasRectangle(&canvas);
+       gamemessagebkg->setZ(99);
+       gamemessagebkg->setBrush(palette().color(QPalette::Normal, QColorGroup::Highlight));
+   }
+   gamemessage->setText(text);
+   
+   int size = DEFAULT_TEXT_SIZE;
+   do gamemessage->setFont( QFont( "times", size, QFont::Bold ) );
+   while( ( gamemessage->boundingRect().width() > canvas.width() ||
+       gamemessage->boundingRect().height() > canvas.height() ) && --size );
+       
+   int w = gamemessage->boundingRect().width();
+   int h = gamemessage->boundingRect().height();
+   gamemessage->move(canvas.width()/2 -w/2, canvas.height()/2 -h/2);
+   gamemessagebkg->setSize(w+10, h+10);
+   gamemessagebkg->move(canvas.width()/2 -w/2 - 5, canvas.height()/2 -h/2 - 5);
+   gamemessagebkg->show();
+   gamemessage->show();
+
+}
 void SnakeGame::gameOver()
 {
-   int score = snake->getScore();
-   QString scoreoutput="";
-   scoreoutput.setNum(score);
-   QCanvasText* gameover = new QCanvasText(tr("GAME OVER!\n Your Score: %1").arg( scoreoutput), &canvas); 
- 
-   gameover->setZ(100);
-   gameover->setColor(yellow);
-   gameover->setFont( QFont("times", 18, QFont::Bold) );
-   int w = gameover->boundingRect().width();
-   gameover->move(canvas.width()/2 -w/2, canvas.height()/2 -50);
-   gameover->show();
+#ifdef QTOPIA_PHONE
+    ContextBar::setLabel( this, Qt::Key_Select, ContextBar::Select );
+#endif
+   if( snake ) showMessage( tr( "GAME OVER!\nYour Score: %1" ).arg( snake->getScore() ) );
    gamestopped = true;
    waitover = false;
+   // timer on waitover?
+   QTimer::singleShot(2000, this, SLOT(endWait()));
+}
+
+void SnakeGame::endWait()
+{
+    waitover = true;
+    if( snake ) showMessage(tr("GAME OVER!\nYour Score: %1\nPress any\nkey to start\nnew game", "limited space for line length").arg(snake->getScore()));
 }
 
 void SnakeGame::keyPressEvent(QKeyEvent* event)
 { 
-   if (gamestopped) {
-        if (waitover) 
-           newGame();
-        else 
-           return;
-   }
-   else { 
-       int newkey = event->key();
-       snake->go(newkey);
-   }
+    switch( event->key() ) {
+#ifdef QTOPIA_PHONE
+    case Qt::Key_Select:
+        if( gamestopped && waitover ) newGame();
+        break;
+    case Qt::Key_Back:
+    case Qt::Key_No:
+        QMainWindow::keyPressEvent( event );
+        break;
+#endif
+    default:
+        if( gamestopped ) {
+            if( waitover ) newGame();
+        } else snake->go( event->key() );
+        break;
+    }
 }
 

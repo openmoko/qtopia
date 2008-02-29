@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -60,9 +75,11 @@ extern "C" {
   MPEG Layers, and is used by the MediaPlayer.
 
   The libmad library is distributed under the terms of the GNU General Public License,
-  Version 2. The primary copyright holder is Robert Leslie &lt;rob@mars.org&gt;.
-  More information about the Mad library can be found at http://www.mars.org/home/rob/proj/mpeg/
+  Version 2. The primary copyright holder is <a href="mailto:rob@mars.org">Robert Leslie</a>.
+  More information about the Mad library can be found at <a href="http://www.mars.org/home/rob/proj/mpeg/">http://www.mars.org/home/rob/proj/mpeg/</a>
 */
+
+// QDOC_SKIP_BEGIN
 
 class Input {
 public:
@@ -146,12 +163,135 @@ LibMadPlugin::LibMadPlugin() {
     info = qApp->translate( "MediaPlayer", "No Song Open", "libmad strings for mp3 file info" );
 }
 
+/*!
+    \fn LibMadPlugin::pluginComment();
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::pluginVersion();
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::fileInfo()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoStreams()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoWidth(int)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoHeight(int)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videFrameRate(int)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoFrames(int)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoSetFrame(long,int)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoGetFrame(int)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoReadFrame(unsigned char**, int, int, int, int, ColorFormat, int )
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoReadScaledFrame( unsigned char**, int, int, int, int, int, int, ColorFormat, int )
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoReadYUVFrame(char *, char *, char *, int, int, int, int, int )
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::setSMP(int)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::setMMX(bool)
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::supportsAudio()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::supportsVideo()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::supportsYUV()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::supportsMMX()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::supportsSMP()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::supportsStereo()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::supportsScaling()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::getPlayTime()
+    \internal
+*/
+
+/*!
+    \fn LibMadPlugin::videoFrameRate( int )
+    \internal
+*/
+
+/*! \internal */
 
 LibMadPlugin::~LibMadPlugin() {
     close();
     delete d;
 }
 
+
+/*! \a path \internal */
 
 bool LibMadPlugin::isFileSupported( const QString& path ) {
     debugMsg( "LibMadPlugin::isFileSupported" );
@@ -174,6 +314,8 @@ bool LibMadPlugin::isFileSupported( const QString& path ) {
     return FALSE;
 }
 
+
+/*! \a path \internal */
 
 bool LibMadPlugin::open( const QString& path ) {
     debugMsg( "LibMadPlugin::open" );
@@ -230,6 +372,8 @@ bool LibMadPlugin::open( const QString& path ) {
 }
 
 
+/*! \internal */
+
 bool LibMadPlugin::close() {
     debugMsg( "LibMadPlugin::close" );
 
@@ -266,17 +410,23 @@ bool LibMadPlugin::close() {
 }
 
 
+/*! \internal */
+
 bool LibMadPlugin::isOpen() {
     debugMsg( "LibMadPlugin::isOpen" );
     return ( d->input.fd != 0 );
 }
 
 
+/*! \internal */
+
 int LibMadPlugin::audioStreams() {
     debugMsg( "LibMadPlugin::audioStreams" );
     return 1;
 }
 
+
+/*! \internal */
 
 int LibMadPlugin::audioChannels( int ) {
     debugMsg( "LibMadPlugin::audioChannels" );
@@ -289,6 +439,8 @@ int LibMadPlugin::audioChannels( int ) {
 }
 
 
+/*! \internal */
+
 int LibMadPlugin::audioFrequency( int ) {
     debugMsg( "LibMadPlugin::audioFrequency" );
 #ifdef OLD_MEDIAPLAYER_API
@@ -300,6 +452,7 @@ int LibMadPlugin::audioFrequency( int ) {
     return d->frame.header.samplerate;
 }
 
+/*! \internal */
 
 int LibMadPlugin::audioSamples( int ) {
     debugMsg( "LibMadPlugin::audioSamples" );
@@ -313,11 +466,12 @@ int LibMadPlugin::audioSamples( int ) {
     if ( d->frame.header.bitrate == 0 )
 	return 0;
     int samples = (d->input.fileLength / (d->frame.header.bitrate/8)) * d->frame.header.samplerate;
-    qDebug( "LibMadPlugin::audioSamples: %i * %i * 8 / %i", (int)d->input.fileLength, (int)d->frame.header.samplerate, (int)d->frame.header.bitrate ); 
+    qDebug( "LibMadPlugin::audioSamples: %i * %i * 8 / %i", (int)d->input.fileLength, (int)d->frame.header.samplerate, (int)d->frame.header.bitrate );
     qDebug( "LibMadPlugin::audioSamples: %i", samples );
     return samples;
 }
 
+/*! \internal \a pos*/
 
 bool LibMadPlugin::audioSetSample( long pos, int ) {
     debugMsg( "LibMadPlugin::audioSetSample" );
@@ -340,6 +494,7 @@ bool LibMadPlugin::audioSetSample( long pos, int ) {
     return TRUE;
 }
 
+/*! \internal */
 
 long LibMadPlugin::audioGetSample( int ) {
     debugMsg( "LibMadPlugin::audioGetSample" );
@@ -350,11 +505,16 @@ long LibMadPlugin::audioGetSample( int ) {
 #ifdef OLD_MEDIAPLAYER_API
 
 
+/*!
+    \internal
+*/
+
 bool LibMadPlugin::audioReadSamples( short *, int, long, int ) {
     debugMsg( "LibMadPlugin::audioReadSamples" );
     return FALSE;
 }
 
+/*! \internal */
 
 bool LibMadPlugin::audioReReadSamples( short *, int, long, int ) {
     debugMsg( "LibMadPlugin::audioReReadSamples" );
@@ -364,6 +524,7 @@ bool LibMadPlugin::audioReReadSamples( short *, int, long, int ) {
 
 #endif
 
+/*! \internal */
 
 bool LibMadPlugin::read() {
     debugMsg( "LibMadPlugin::read" );
@@ -467,6 +628,7 @@ inline void audio_pcm( unsigned short *data, unsigned int nsamples, mad_fixed_t 
     }
 }
 
+/*! \a output \a samples \a samplesMade \internal */
 
 bool LibMadPlugin::decode( short *output, long samples, long& samplesMade ) {
     debugMsg( "LibMadPlugin::decode" );
@@ -533,6 +695,10 @@ bool LibMadPlugin::audioReadStereoSamples( short *output, long samples, long& sa
 
 #else
 
+/*!
+    \internal
+*/
+
 bool LibMadPlugin::audioReadSamples( short *output, int /*channels*/, long samples, long& samplesMade, int ) {
 
 #endif
@@ -540,7 +706,7 @@ bool LibMadPlugin::audioReadSamples( short *output, int /*channels*/, long sampl
     debugMsg( "LibMadPlugin::audioReadStereoSamples" );
 
     static bool needInput = TRUE;
-    
+
     if ( !isOpen() )
 	return FALSE;
 
@@ -575,9 +741,11 @@ bool LibMadPlugin::audioReadSamples( short *output, int /*channels*/, long sampl
     return TRUE;
 }
 
+/*! \internal */
 
 double LibMadPlugin::getTime() {
     debugMsg( "LibMadPlugin::getTime" );
     return 0.0;
 }
 
+// QDOC_SKIP_END

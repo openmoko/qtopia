@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaServices
+Context=Contacts
+[Standard]
+Name[]=Contacts
+Version=100
+Actions=beamVCard(QCString,QString,QCString,QString)
+[beamVCard(QCString,QString,QCString,QString)]
+Name[]=Infrared
+Icon=beam

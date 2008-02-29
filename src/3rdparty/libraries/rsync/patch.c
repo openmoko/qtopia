@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "rsync.h"
 #include "util.h"
@@ -226,8 +227,9 @@ static rs_result rs_patch_s_copying(rs_job_t *job)
     result = (job->copy_cb)(job->copy_arg, job->basis_pos, &len, &ptr);
     if (result != RS_DONE)
         return result;
-    else
+    else {
         rs_trace("copy callback returned %s", rs_strerror(result));
+    }
     
     rs_trace("got %.0f bytes back from basis callback", (double) len);
 
@@ -267,8 +269,9 @@ static rs_result rs_patch_s_header(rs_job_t *job)
                "got magic number %#x rather than expected value %#x",
                v, RS_DELTA_MAGIC);
         return RS_BAD_MAGIC;
-    } else
+    } else {
         rs_trace("got patch magic %#x", v);
+    }
 
 
     job->statefn = rs_patch_s_cmdbyte;

@@ -1,13 +1,13 @@
-TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
+CONFIG		+= qtopiaplugin 
+
 HEADERS		= battery.h batterystatus.h batteryappletimpl.h
 SOURCES		= battery.cpp batterystatus.cpp batteryappletimpl.cpp
+
+TRANSLATABLES = $${HEADERS} $${SOURCES}
+
 TARGET		= batteryapplet
-DESTDIR		= $(QPEDIR)/plugins/applets
-DEPENDPATH      += ..
-VERSION		= 1.0.0
 
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
-win32:CONFIG += dll
+desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/applets/batteryapplet.desktop
+desktop.path=/plugins/applets/
 
-TRANSLATIONS = libbatteryapplet-en_GB.ts libbatteryapplet-de.ts libbatteryapplet-ja.ts libbatteryapplet-no.ts
+INSTALLS+=desktop

@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* ---------------------------------------------------------------------- */
 /*                                                                        */
 /* [main.C]                        Konsole                                */
@@ -13,9 +34,7 @@
 /*                                                                        */
 /* ---------------------------------------------------------------------- */
 //
-// KDE's Konsole, ported to Qt/Embedded
-//
-// Copyright (C) 2000 by John Ryland <jryland@trolltech.com>
+// Konsole ported to Qt/Embedded by Trolltech
 //  some enhancements added by L.J. Potter <ljp@llornkcor.com>
 //
 
@@ -100,8 +119,8 @@ public:
     }
 };
 
-// This could be configurable or dynamicly generated from the bash history
-// file of the user
+// This could be configurable or dynamically generated from the bash history
+// file of the user.
 static const char *commonCmds[] =
 {
     "ls ", // I left this here, cause it looks better than the first alpha
@@ -173,24 +192,57 @@ static const char *commonCmds[] =
   The Terminal (embeddedkonsole) is based on the KDE Konsole
   application and is distributed under the terms of the GNU
   General Public License. A primary copyright holder of the
-  code is Lars Doelle &lt;lars.doelle@on-line.de&gt;.
+  code is <a href="mailto:lars.doelle@on-line.de">Lars Doelle</a>.
 */
+
+// QDOC_SKIP_BEGIN
+
+#include <qfile.h>
+
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 Konsole::Konsole(QWidget* parent, const char* name, WFlags fl) :
     QMainWindow(parent, name, fl)
 {
+    const char* shell = getenv("SHELL");
+    if (shell == NULL || *shell == '\0'){
+#if !defined (_OS_WIN32_)
+	shell = "/bin/sh"; // No tr
+
+	// sh is completely broken on familiar. Let's try to get something better
+	if ( qstrcmp( shell, "/bin/shell" ) == 0 && QFile::exists( "/bin/bash" ) )
+	    shell = "/bin/bash";
+#else
+	shell ="command"; // No tr
+#endif
+    }
+
     QStrList args;
-    init("/bin/sh",args);
+    init(shell,args);
 }
 
+/* not used
 Konsole::Konsole(const char* name, const char* _pgm, QStrList & _args, int)
  : QMainWindow(0, name)
 {
     init(_pgm,_args);
 }
+*/
 
 void Konsole::init(const char* _pgm, QStrList & _args)
 {
+#if !defined (_OS_WIN32_)
+  setuid(getuid()); setgid(getgid()); // drop privileges
+#endif
+#ifdef FAKE_CTRL_AND_ALT
+  QPEApplication::grabKeyboard(); // for CTRL and ALT
+#endif
+
+    putenv((char*)"COLORTERM="); // to trigger mc's color detection
+  setCaption( Konsole::tr("Terminal") );
+
   setMinimumSize(200, 200);
 
   b_scroll = TRUE; // histon;
@@ -198,7 +250,6 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   n_render = 0;
 
   setCaption( tr("Terminal") );
-  setIcon( Resource::loadPixmap( "konsole" ) );
 
   setBackgroundMode( PaletteButton );
 
@@ -246,10 +297,10 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   bool listHidden;
   cfg.setGroup("Menubar");
   if( cfg.readEntry("Hidden","FALSE") == "TRUE")  {
-      configMenu->insertItem(tr("Show command list"));
+      configMenu->insertItem(tr("Show Command List"));
       listHidden=TRUE;
   } else {
-      configMenu->insertItem(tr("Hide command list"));
+      configMenu->insertItem(tr("Hide Command List"));
       listHidden=FALSE;
   }
 
@@ -267,7 +318,7 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   colorMenu->insertItem(tr("Green on Black"));
   colorMenu->insertItem(tr("Black on White"));
   colorMenu->insertItem(tr("White on Black"));
-  colorMenu->insertItem(tr("Black on Transparent"));
+  colorMenu->insertItem(tr("Default"));
   colorMenu->insertItem(tr("Black on Red"));
   colorMenu->insertItem(tr("Red on Black"));
   colorMenu->insertItem(tr("Green on Yellow"));
@@ -290,17 +341,17 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   QAction *a;
 
   // Button Commands
-  a = new QAction( tr("New"), Resource::loadIconSet( "konsole" ), QString::null, 0, this, 0 );
-  connect( a, SIGNAL( activated() ), this, SLOT( newSession() ) ); a->addTo( toolbar );
+  newAct = new QAction( tr("New"), Resource::loadIconSet( "konsole" ), QString::null, 0, this, 0 );
+  connect( newAct, SIGNAL( activated() ), this, SLOT( newSession() ) ); newAct->addTo( toolbar );
   a = new QAction( tr("Enter"), Resource::loadIconSet( "konsole/enter" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitEnter() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Space"), Resource::loadIconSet( "konsole/space" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Space"), Resource::loadIconSet( "space" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitSpace() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Tab"), Resource::loadIconSet( "konsole/tab" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Tab"), Resource::loadIconSet( "tab" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitTab() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Up"), Resource::loadIconSet( "konsole/up" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Up"), Resource::loadIconSet( "up" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitUp() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Down"), Resource::loadIconSet( "konsole/down" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Down"), Resource::loadIconSet( "down" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitDown() ) ); a->addTo( toolbar );
   a = new QAction( tr("Paste"), Resource::loadIconSet( "paste" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitPaste() ) ); a->addTo( toolbar );
@@ -362,6 +413,7 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   layout()->setResizeMode(QLayout::FreeResize);
 }
 
+/*! */
 void Konsole::show()
 {
   if ( !nsessions ) {
@@ -375,6 +427,7 @@ void Konsole::initSession(const char*, QStrList &)
   QMainWindow::show();
 }
 
+/*! */
 Konsole::~Konsole()
 {
     while (nsessions > 0) {
@@ -469,7 +522,7 @@ void Konsole::hitDown()
 
 /**
    This function calculates the size of the external widget
-   needed for the internal widget to be
+   needed for the internal widget to be.............
  */
 QSize Konsole::calcSize(int columns, int lines) {
     TEWidget* te = getTe();
@@ -482,8 +535,8 @@ QSize Konsole::calcSize(int columns, int lines) {
     }
 }
 
-/**
-    sets application window to a size based on columns X lines of the te
+/*!
+    sets application window to a size based on \a columns X \a lines of the 
     guest widget. Call with (0,0) for setting default size.
 */
 
@@ -553,6 +606,8 @@ void Konsole::doneSession(TESession*, int )
     delete te->currentSession;
     delete te;
     nsessions--;
+    if (!newAct->isEnabled())
+        newAct->setEnabled(true);
   }
 
   if (nsessions == 0) {
@@ -574,6 +629,8 @@ void Konsole::newSession() {
     se->setHistory(b_scroll);
     tab->setCurrentPage(nsessions);
     nsessions++;
+    if (nsessions == 15) 
+        newAct->setEnabled(FALSE);
     setColor();
     }
 }
@@ -736,7 +793,7 @@ void Konsole::configMenuSelected(int iD)
     }
     if( iD  == -3) {
         cfg.setGroup("Tabs");
-        QString tmp=cfg.readEntry("Position","Top");
+        QString tmp=cfg.readEntry("Position","Bottom");
 
         if(tmp=="Top") { // No tr
             tab->setTabPosition(QTabWidget::Bottom);
@@ -777,11 +834,14 @@ void Konsole::changeCommand(const QString &text, int c)
     }
 }
 
+/*! */
 void Konsole::setColor()
 {
     Config cfg("Konsole");
     cfg.setGroup("Colors");
-    int scheme = cfg.readNumEntry("Schema",1); 
-    if(scheme != 1) colorMenuSelected( -scheme); 
+    int scheme = cfg.readNumEntry("Schema",8); 
+    colorMenuSelected( -scheme); 
 
 }
+
+// QDOC_SKIP_END

@@ -1,12 +1,40 @@
-TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
-HEADERS		= dialup.h ../proxiespage.h
-SOURCES		= dialup.cpp ../proxiespage.cpp
-INTERFACES	= dialupbase.ui ../proxiespagebase_p.ui
-TARGET		= dialup
-DESTDIR		= $(QPEDIR)/plugins/network
-VERSION		= 1.0.0
+CONFIG		+= qtopiaplugin
 
-TRANSLATIONS = libdialup-en_GB.ts libdialup-de.ts libdialup-ja.ts libdialup-no.ts
+TARGET		= dialup
+
+HEADERS		= dialup.h
+!buildSingleexec:HEADERS += ../proxiespage.h
+SOURCES		= dialup.cpp
+!buildSingleexec:SOURCES += ../proxiespage.cpp
+
+QTOPIA_PHONE{
+    INTERFACES  = dialupbase_phone.ui
+} else {
+    INTERFACES	= dialupbase.ui
+}
+
+!buildSingleexec:INTERFACES += ../proxiespagebase_p.ui
+
+bin.files	= $${QTOPIA_DEPOT_PATH}/bin/qtopia-dial-internal
+bin.path	= /bin
+!QTOPIA_PHONE:conf.files = \
+	$${QTOPIA_DEPOT_PATH}/etc/network/DialUpIR.conf \
+	$${QTOPIA_DEPOT_PATH}/etc/network/DialUp.conf
+QTOPIA_PHONE:conf.files = \
+	$${QTOPIA_DEPOT_PATH}/etc/network/DialUpGPRS*.conf \
+	$${QTOPIA_DEPOT_PATH}/etc/network/DialUpGSM*.conf
+conf.path	= /etc/network
+pics.files	= $${QTOPIA_DEPOT_PATH}/pics/Network/dialup.png
+pics.path	= /pics/Network
+
+INSTALLS	+= bin conf
+PICS_INSTALLS+=pics
+
+TRANSLATABLES = dialup.h \
+                ../proxiespage.h \
+                dialup.cpp \
+                ../proxiespage.cpp \
+                dialupbase.ui \
+                ../proxiespagebase_p.ui \
+                dialupbase_phone.ui
+

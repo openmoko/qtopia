@@ -1,12 +1,11 @@
-TEMPLATE	=  lib
-CONFIG		+= qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+CONFIG		+= qtopiaplugin 
+
+TARGET		=  wavplugin
+
 HEADERS		=  wavplugin.h wavpluginimpl.h
 SOURCES	        =  wavplugin.cpp wavpluginimpl.cpp
-TARGET		=  wavplugin
-DESTDIR		=  $(QPEDIR)/plugins/codecs
-INCLUDEPATH	+=  $(QPEDIR)/src/3rdparty/libraries/gsm
-unix:LIBS       += -lgsm
-win32:LIBS      += $(QPEDIR)/lib/gsm.lib
-VERSION		=  1.0.0
+
+INCLUDEPATH	+= ../../../3rdparty/libraries/gsm
+LIBS		+= -lgsm
+
+TRANSLATIONS=

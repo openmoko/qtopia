@@ -1,5 +1,6 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -12,6 +13,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -43,15 +45,13 @@
   based on a virtual keyboard combined with word-completion.
 
   This version of Pickboard is Dual Licensed Software. However, for you to be
-  able to license the technology to others, you may require a T9(R) Text
-  Input license from Tegic Communications Corporation. More information can
-  be found at http://www.t9.com/.
+  able to license the technology to others, you may require licensing from
+  input method patent holders.
 
   \legalese
   This version of Pickboard is Dual Licensed Software. However, for you to be
-  able to license the technology to others, you may require a T9(R) Text
-  Input license from Tegic Communications Corporation. More information can
-  be found at http://www.t9.com/.
+  able to license the technology to others, you may require licensing from
+  input method patent holders.
 */
 
 /* XPM */
@@ -75,6 +75,7 @@ public:
     {
 	picks = new PickboardPicks(parent);
 	picks->initialise();
+	picks->setBackgroundMode(QWidget::PaletteButton);
 	menu = new QPushButton(parent);
 	menu->setSizePolicy(QSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding));
 	menu->setPixmap(QPixmap((const char **)menu_xpm));
@@ -87,24 +88,31 @@ public:
     QPushButton* menu;
 };
 
+// QDOC_SKIP_BEGIN
+
 Pickboard::Pickboard(QWidget* parent, const char* name, WFlags f) :
     QFrame(parent,name,f)
 {
     (new QHBoxLayout(this))->setAutoAdd(TRUE);
     d = new PickboardPrivate(this);
-// under Win32 we may not have smallsmooth font 
+// under Win32 we may not have smallsmooth font
 #ifndef Q_OS_WIN32
     setFont( QFont( "smallsmooth", 9 ) );
 #endif
 }
+
+/*! \internal */
 
 Pickboard::~Pickboard()
 {
     delete d;
 }
 
+/*! \internal */
+
 void Pickboard::resetState()
 {
     d->picks->resetState();
 }
 
+// QDOC_SKIP_END

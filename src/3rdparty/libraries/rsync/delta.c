@@ -132,7 +132,7 @@ rs_delta_s_scan(rs_job_t *job)
     } 
 
     /* must read at least one block, or give up */
-    if ((avail_len < job->block_len) && !is_ending) {
+    if ((avail_len < (size_t)job->block_len) && !is_ending) {
         /* we know we won't get it, but we have to try for a whole
          * block anyhow so that it gets into the scoop. */
         rs_scoop_input(job, job->block_len);
@@ -182,7 +182,7 @@ rs_delta_scan(rs_job_t *job, rs_long_t avail_len, void *p)
     for (search_pos = 0; search_pos <= end_pos; search_pos++) {
         size_t this_len = job->block_len;
             
-        if (search_pos + this_len > avail_len) {
+        if (((rs_long_t)(search_pos + this_len)) > avail_len) {
             this_len = avail_len - search_pos;
             rs_trace("block reduced to %d", this_len);
         } else if (job->have_weak_sig) {

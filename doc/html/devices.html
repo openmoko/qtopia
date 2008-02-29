@@ -1,8 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/devices.doc:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/devices.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia - Customizing Qtopia for a Device</title>
 <style type="text/css"><!--
 h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
@@ -13,53 +14,173 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia - Customizing Qtopia for a Device</h1>
+
+
 <p> 
-<p> <h2> Qtopia - Customizing Qtopia for a Device
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Custom Qtopia Launcher User Interface
+</a>
+<ul>
+<li><a href="#2-1"> Launcher
+</a>
+<li><a href="#2-2"> Other User Interface Components
+</a>
+</ul>
+<li><a href="#3"> Device Hardware Factors
+</a>
+<ul>
+<li><a href="#3-1"> Device-Specific Code
+</a>
+</ul>
+<li><a href="#4"> Non-installed Components
+</a>
+<li><a href="#5"> Unsupported Components
+</a>
+<li><a href="#6"> Required Plugins
+</a>
+<li><a href="#7"> Power Management
+</a>
+<ul>
+<li><a href="#7-1"> Technical Details
+</a>
+<li><a href="#7-2"> For PDA Edition
+</a>
+<li><a href="#7-3"> For Phone Edition
+</a>
+</ul>
+<li><a href="#8"> Removable Storage Cards
+</a>
+<li><a href="#9"> I18N
+</a>
+<li><a href="#10"> Access Permissions and Read-only Filesystems
+</a>
+<li><a href="#11"> MMS Client
+</a>
+<ul>
+<li><a href="#11-1"> WAP Stack Integration
+</a>
+<li><a href="#11-2"> AMR Encoder
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
 </h2>
-<a name="1"></a><p> This document provides some recommendations for installing Qtopia on a device.
-<p> There are a number of aspects to customizing Qtopia for a specific
-device which must be considered.
+<a name="1"></a><p> This document sets out the implementation requirements for specific devices and makes recommendations for the optimal installation of Qtopia on a handheld device. How you install Qtopia on a given device will be determined by the functionality of that device.
+<p> See Also <a href="devices-keys-buttons.html">Qtopia - Customizing Qtopia for a Device: Keys and Buttons</a>.
+<p> <h2> Custom Qtopia Launcher User Interface
+</h2>
+<a name="2"></a><p> In some cases it is desirable to have a customized launcher interface
+that better suits the intended application of the target device.  Qtopia
+supports custom laucher user interfaces via the <a href="serverinterface.html">ServerInterface</a>.  This
+interface provides all of the infrastructure necessary to implement a
+launcher while maintaining compatibility with the Qtopia application and
+document models.
+<p> The launcher user interface is part of the Qtopia server
+($QPEDIR/src/server) which provides services such as syncing
+and filesystem management.
+<p> <h3> Launcher
+</h3>
+<a name="2-1"></a><p> The first step when writing a user interface is to implement a class
+derived from ServerInterface.  This interface provides the functionality
+necessary to show the available applications and documents available
+on a Qtopia device.
+<p> The createGUI() and destroyGUI() functions must be implemented to create
+and show the launcher and any other user interface components.
+<p> Most of the functions provided by the ServerInterface are to manage adding
+and removing applications and documents as necessary.  The ServerInterface
+documentation describes each one in detail.
+<p> The default Qtopia launcher is implemented by the Launcher class.
+<p> <h3> Other User Interface Components
+</h3>
+<a name="2-2"></a><p> In addition to the launcher itself, it is usually necessary to provide
+some system components, such as input methods and status display.
+<p> There are several classes in the
+default Qtopia user interface that may be reused in a custom interface.
+Most user interfaces will make use of some of these classes to ensure a
+useable system:
 <p> <ul>
-<li> If the device has a touch screen, Qtopia will need to enable calibration.
+<li> InputMethods - loads and displays input methods.
+<li> RunningAppBar - displays running application icons.
+<li> SysTray - loads and displays applets.
+<li> StartMenu - provides menus for launcher tabs and accessory plugins.
+</ul>
+<p> An interface providing these components will support most of the default
+Qtopia launcher functionality.
+<p> The Qtopia libraries also assume that QPE/Taskbar QCOP channel is available
+and supports the following functions:
+<p> <ul>
+<li> message(QString) - display a status message.
+<li> hideInputMethod() - hide any visible input method.
+<li> showInputMethod() - show the currently selected input method.
+<li> showInputMethod(QString) - show the specified input method.
+<li> reloadInputMethods() - release and reload the input method plugins.
+<li> reloadApplets() - release and reload the applets.
+</ul>
+<p> The default Qtopia launcher uses the TaskBar class to encapsulate the
+above functionality.
+<p> <h2> Device Hardware Factors
+</h2>
+<a name="3"></a><p> When planning to customize and install Qtopia on a specific device, there are a number of factors that must be taken into consideration. The following is a list of typical factors:
+<p> <ul>
+<li> If the device has a touch screen, Qtopia calibration must be enabled.
 <li> If the device runs off batteries, Qtopia may be required to call APM functions for power saving.
-See the Power Management section below for more details.
+See the <a href="#power-mgt">Power Management</a> section below for more details.
 <li> If the device has special hardware buttons, they may need to be mapped to
 applications and have associated images displayed in the user interface.
 <li> If the device has a buzzer for alarms and other beeps, Qtopia will need to know how to use this hardware
 and enable it for the associated events.
-<li> If the device has a LCD screen with a back light or front light, Qtopia will need to know how to adjust
-the brightness for it.
+<li> If the device has an LCD screen with a back or front light, Qtopia will need to know how to adjust
+its brightness.
 <li> If the device has any special LEDs to indicate status to the user, Qtopia will need to know how to
 set the LEDs.
+<li> If the device has or supports a camera, a Video4Linux kernel driver
+has to be provided so that the Qtopia Camera application can use it.
+<li> If the device has or supports phone hardware, a serial device that
+supports <a href="gsm.html">GSM</a> AT-commands should be provided, so that Qtopia Phone can use it.
+<li> If the device supports sound, the sound volume should be locked to the maximum intended volume.
 </ul>
-<p> Fortunately all of the changes required to add those device specific customizations are centralized in Qtopia 
-to just a few files which are described below. This document should make it easy for OEMs and system integrators
+<p> All of the changes required to add these device specific customizations are centralized in Qtopia and involve a small number of files (described below). This document should make it easy for OEMs and system integrators
 to understand how to make Qtopia aware of any special hardware that a device might have.
 <p> <h3> Device-Specific Code
 </h3>
-<a name="1-1"></a><p> During configure, the <tt>-platform</tt> option is used to
+<a name="3-1"></a><p> During configure, the <tt>-platform</tt> option is used to
 select which custom-&lt;platform-spec&gt;.h file will be used when compiling Qtopia.
 The following macros can be defined or undefined in a custom.h file to
 customize Qtopia for the specific hardware. The associated custom-&lt;platform-spec&gt;.cpp
-file will be compiled and linked to provide any custom functions that are also required.
+file will be compiled and linked to provide any custom functions that are required.
 <p> <ul>
 <li> QPE_USE_MALLOC_FOR_NEW - #define this to have memory alloced using malloc() instead of the default C++ new implementation (this is faster in some cases).
-<li> QPE_NEED_CALIBRATION - #define this if there is a touch screen which requires calibration.
-<li> QPE_OWNAPM - #define this if the device has existing APM settings which must be disabled first by qtopia via ioctls to /dev/apm_bios.
-<li> QPE_HAVE_TOGGLELIGHT - #define this if the device has a hardware button for turning on and off an LCD backlight if applicable.
+<li> QPE_NEED_CALIBRATION - #define this if there is a touch screen that requires calibration.
+<li> QPE_OWNAPM - #define this if the device has existing APM settings that must be disabled first by qtopia via ioctls to /dev/apm_bios.
+<li> QPE_HAVE_TOGGLELIGHT - #define this if the device has a hardware button for turning on and off an LCD backlight.
 <li> QPE_HAVE_MEMALERTER - #define this if the device needs Qtopia to alert the user of low memory conditions, a function called initMemalerter() must be implemented.
-<li> QPE_MEMALERTER_IMPL - #define this as a macro which implements any functions required to implement the MEMALERTER functionality (including initMemalerter()).
-<li> QPE_INITIAL_NUMLOCK_STATE  - #define this as a macro which implements any device specific methods used to initialize the numlock state.
+<li> QPE_MEMALERTER_IMPL - #define this as a macro that implements any functions required to implement the MEMALERTER functionality (including initMemalerter()).
+<li> QPE_INITIAL_NUMLOCK_STATE  - #define this as a macro that implements any device specific methods used to initialize the numlock state.
 <li> QPE_ARCHITECTURE - #define this with a string that contains the manufacturer and model that uniquely identifies the device, for example "SHARP/SL5500".
 <li> QPE_DEFAULT_TODAY_MODE - #define this as "Daily" or "Never" (including the quotes) to tell Qtopia if by default it should run the today program daily or never.
 <li> QPE_FONT_HEIGHT_TO_ICONSIZE(x) - #define this as a macro to provide a mapping from a font height to an icon size in pixels.
+<li> QPE_SYSTEM_SYSFILEMONITOR - #define this if your device's HotPlug system for Removable Storage Cards is Qtopia-aware.
 <li> CUSTOM_SOUND_INIT - #define this to call a function to initialize any custom sound devices like buzzers.
 <li> CUSTOM_SOUND_IMPL - #define this as a macro to define any custom functions required to be used by the other CUSTOM_SOUND macros.
 <li> CUSTOM_SOUND_ALARM - #define this as a macro which implements the device specific code to sound an alarm (perhaps using a buzzer).
@@ -74,54 +195,9 @@ file will be compiled and linked to provide any custom functions that are also r
 <li> void PowerStatusManager::getStatus(); - This function must be implemented to query the power status. The PowerStatus class in qtopia/power.h defines the power status abstraction. See the custom-linux-generic-g++.cpp file for details of a default implementation.
 </ul>
 <p> For reference implementations of the device specific code, the existing <tt>custom-*.*</tt> files found in src/libraries/qtopia/ may be of guidance.
-<p> <h3> Device-Specific Files
-</h3>
-<a name="1-2"></a><p> The default hardware button mappings for a device are defined
-by the etc/defaultbuttons-&lt;platform-spec&gt;.conf files.
-<p> The format of the file is as follows:
-<p> <pre>
-[Button]
-Count=&lt;number of button records below&gt;
-[Button&lt;button number counting from 0&gt;]
-Name=&lt;name of the button (in english)&gt;
-Name[ja]=&lt;japanese translations of the button name&gt;
-Name[&lt;lang&gt;]=&lt;other lang translations of the button name etc&gt;
-Key=&lt;associated key code emitted by the button eg. F9&gt;
-PressedActionService=&lt;name of default service associated with press&gt;
-PressedActionMessage=&lt;message to send to service (refer to services for details)&gt;
-HeldActionService=&lt;name of default service associated with press&gt;
-HeldActionMessage=&lt;message to send to service (refer to services for details)&gt;
-</pre>
- 
-<p> An example of what this may look like in a real example is:
-<p> <pre>
-[Button]
-Count=2
-[Button0]
-Name=Calendar Button
-Name[ja]=???
-Key=F9
-PressedActionService=Calendar
-PressedActionMessage=raiseToday()
-HeldActionService=Calendar
-HeldActionMessage=raise()
-[Button1]
-Name=Contacts Button
-Name[ja]=???
-Key=F10
-PressedActionService=Contacts
-PressedActionMessage=raise()
-HeldActionService=Contacts
-HeldActionMessage=beamBusinessCard()
-</pre>
- 
-<p> Images of the buttons, which should correspond
-to the appearance of the device hardware, are in pics/Button/<i>n</i>.png, with
-<i>n</i> corresponding to the button number in the configuration file.
-<p> See the existing files, especially the generic file, for guidance.
-<p> <h3> Non-installed Components
-</h3>
-<a name="1-3"></a><p> There are a number of applications/features supplied with Qtopia that are
+<p> <h2> Non-installed Components
+</h2>
+<a name="4"></a><p> There are a number of applications/features supplied with Qtopia that are
 not intended to be shipped with production devices:
 <p> <ul>
 <li> Rotation Setting - This is provided to test and demonstrate Qtopia's ability
@@ -141,26 +217,24 @@ familiar with Linux however it is not expected that the majority of users will
 find this tool at all useful, only confusing. Therefore it is recommended this
 program is not included.
 <li> File Manager - Provided as a development tool. Qtopia is functional without
-it using just Qtopia's document model. Files from external devices such as SD and CF cards
-are automatically scanned on insertion and supported documents are mapped in to Qtopia's
-document view. Files can also be transfered back and forth from a PC via Qtopia
-Desktop which also maps the documents to Qtopia's document view and model. Adding
+it using just Qtopia's document model.
+Adding
 the File Browser can make it possible for users to add and remove files from the
 device in a way which does not correspond to Qtopia's document model which can break the
 interface. We therefore do not recommend this program should be included on a device
 to ensure a consistent document model in addition to protecting critical user and system
 files and settings.
 </ul>
-<p> <h3> Unsupported Components
-</h3>
-<a name="1-4"></a><p> The following applications are unsupported 3rd party applications/ports
+<p> <h2> Unsupported Components
+</h2>
+<a name="5"></a><p> The following applications are unsupported 3rd party applications/ports
 intended purely to demonstrate the flexibility of Qtopia:
 <p> <ul>
 <li> VNC Viewer
 </ul>
-<p> <h3> Required Plugins
-</h3>
-<a name="1-5"></a><p> If Qtopia crashes twice in quick succession "Safe Mode" will be entered and
+<p> <h2> Required Plugins
+</h2>
+<a name="6"></a><p> If Qtopia crashes twice in quick succession "Safe Mode" will be entered and
 no plugins will be loaded in case the crash was caused by a misbehaving
 plugin.  In some cases there are plugins that are required for correct
 operation of the device.  These plugins can be specified in the .directory
@@ -174,9 +248,10 @@ Required=simple8
 Apply=QPE/System restart()
 </pre>
  
-<p> <h3> Power Management
-</h3>
-<a name="1-6"></a><p> A number of points should be considered when integrating Qtopia with a
+<p> <a name="power-mgt"></a>
+<p> <h2> Power Management
+</h2>
+<a name="7"></a><p> A number of points should be considered when integrating Qtopia with a
 device that has power management.
 <p> <ul>
 <li> Qtopia controls the power state (using pen and key
@@ -193,62 +268,165 @@ for 'dimming' and turning off the light.
 <li> The system's <tt>at</tt> daemon is used to write the RTC clock
 (because on some systems only one process can manipulate the RTC).
 </ul>
-<p> <h3> Custom Qtopia Launcher User Interface
+<p> <h3> Technical Details
 </h3>
-<a name="1-7"></a><p> In some cases it is desireable to have a cusomized launcher interface
-that better suits the intended application of the target device.  Qtopia
-supports custom laucher user interfaces via the ServerInterface.  This
-interface provides all of the infrastructure necessary to implement a
-launcher, while maintaining compatiblity with the Qtopia application and
-document models.
-<p> The launcher user interface is part of the Qtopia server
-($QPEDIR/src/server) which provides services such as syncing
-and filesystem management.
-<p> <h4> Launcher
-</h4>
-<a name="1-7-1"></a><p> The first step when writing a user interface is to implement a class
-derived from ServerInterface.  This interface provides the functionality
-necessary to show the available applications and documents available
-on a Qtopia device.
-<p> The createGUI() and destroyGUI() functions must be implemented to create
-and show the laucnher and any other user interface components.
-<p> Most of the functions provided by the ServerInterface are to manage adding
-and removing applications and documents as necessary.  The ServerInterface
-documentation describes each one in detail.
-<p> The default Qtopia launcher is implemented by the Launcher class.
-<p> <h4> Other User Interface Components
-</h4>
-<a name="1-7-2"></a><p> In addition to the launcher itself, it is ususally necessary to provide
-some system components, such as input methods and status display.
-<p> There are several classes in the
-default Qtopia user interface that may be reused in a custom interface.
-Most user interfaces will make use of some of these classes to ensure a
-useable system:
+<a name="7-1"></a><p> Qtopia's power management is handled by Qt embedded. The <tt>QWSServer</tt> uses the
+<tt>QWSScreenSaver</tt> interface in order to decide what to do. Qtopia provides the
+screensaver behaviour by extending from <tt>QWSScreenSaver</tt>. This screensaver
+(<tt>QPEScreenSaver</tt>) is implemented in <tt>qpeapplication.cpp</tt> and provides the following
+three screensaver levels:
 <p> <ul>
-<li> InputMethods - loads and displays input methods.
-<li> RunningAppBar - displays running application icons.
-<li> SysTray - loads and displays applets.
-<li> StartMenu - provides menus for launcher tabs and accessory plugins.
+<li> 0 - dims display light
+<li> 1 - turns display light off
+<li> 2 - depends on the Qtopia version
 </ul>
-<p> An interface providing these components will support most of the default
-Qtopia launcher functionality.
-<p> The Qtopia libraries aslo assume that QPE/Taskbar QCOP channel is available
-and supports the following functions:
+<p> Qtopia will call the platform-specific function <tt>qpe_setBrightness(int)</tt> in order
+to adjust the light for the display.
+<p> The last level depends on the specific version of Qtopia. The PDA version will
+use the APM daemon and suspends the execution of Qtopia whereas the phone editon
+closes open applications and returns to the home screen. For further information
+please refer to: <a name="power-mgt-for-pda">For PDA Edition</a> and <a name="power-mgt-for-phone">For Phone Edition</a>.
+<p> The <tt>QWSServer</tt> provides the following interface which allows the registration and
+customization of arbitrary screensavers:
+<p> <pre>
+\list
+\i - void setScreenSaver ( QWSScreenSaver * )
+\i - void setScreenSaverIntervals ( int * ms )
+\i - void screenSaverActivate ( bool )
+\endlist
+</pre>
+ 
+<p> Qtopia's screensaver can be adjusted by the user via the power management
+(Light & Power) application.
+<p> <a name="power-mgt-for-pda"></a>
+<h3> For PDA Edition
+</h3>
+<a name="7-2"></a><p> Qtopia runs the 'apm' command to suspend. The system's AT daemon is used to
+unsuspend upon RTC alarms. The system's AT daemon is used to write the RTC clock
+(because on some systems only one process can manipulate the RTC).
+<p> The system's "Power" key or the third screensaver level just sends a key
+(<tt>Qt::KeyF34</tt>) to Qtopia, which then does the actual suspend. It triggers the
+execution of <tt>ServerApplication::togglePower()</tt>. All CPU functions are suspended
+once
+<p> <pre> system("apm --suspend"); </pre>
+ 
+<p> is executed. Normal operation will resume once a "Wake up" event comes from <tt>apmd</tt>.
+<p> <a name="power-mgt-for-phone"></a>
+<h3> For Phone Edition
+</h3>
+<a name="7-3"></a><p> Suspension is not enabled in the phone edition. <pre> "apm --suspend" </pre>
+  would
+suspend the CPU and shutdown the device. This behaviour is acceptable for PDA's
+because they don't need to listen for incoming calls. However, the qpe server
+must be running in order to receive calls. If Qtopia shuts down the
+power, everything would stop working. We will assume that Qtopia Phone does not do
+that (or that if it does, Linux ensures resume on modem activity).
+<p> Rather than suspending the device the number of CPU cycles  has been minimized
+while the qpe server is showing the home screen. In addition to the first and
+second screensaver level (already known from the PDA edition) Qtopia Phone
+automatically closes applications and returns to the home screen. Background
+activities (like time/date updates and the execution of the battery monitor) are
+reduced to ensure that the CPU consumption is at the lowest possible level.
+<p> <h2> Removable Storage Cards
+</h2>
+<a name="8"></a><p> Files from external devices such as SD and CF cards
+are scanned on insertion and supported documents are mapped in to Qtopia's
+document view. 
+<p> The scanning is triggered when the Qtopia library receives one of
+the following messages via the QPE/Card QCOP channel: 
 <p> <ul>
-<li> message(<a href="qstring.html">QString</a>) - display a status message.
-<li> hideInputMethod() - hide any visible input method.
-<li> showInputMethod() - show the currently selected input method.
-<li> showInputMethod(QString) - show the specified input method.
-<li> reloadInputMethods() - release and reload the input method plugins.
-<li> reloadApplets() - release and reload the applets.
+<li> mtabChanged() - Sent when /etc/mtab have changed. 
+<li> stabChanged() - Sent when /var/run/stab, /var/state/pcmcia/stab, or /var/lib/pcmcia/stab have changed.
 </ul>
-<p> The default Qtopia launcher uses the TaskBar class to encapsulate the
-above functionality.
+<p> If QPE_SYSTEM_SYSFILEMONITOR (see above) is defined, Qtopia assumes
+that the surrounding system generates these messages (eg. by using the qcop
+command in the system HotPlug scripts). Otherwise, Qtopia polls every
+few seconds (wasting CPU).
+<p> When Qtopia scans for external devices such as SD and CF cards,
+it uses an heuristic to work out what is an external card.
+If this automatic detection is inadequate due to the specifics of your
+device, you may <em>alternatively</em> provide the file
+/opt/Qtopia/etc/default/Storage.conf, with a group for each
+relevant device in /etc/mtab, with settings
+of this form:
+<p> <pre>
+[/dev/hda1]
+Name = Internal Storage
+Removable = 0
+[/dev/sda1]
+Name = Card
+Removable = 1
+</pre>
+ 
+<p> With the above, /dev/hda1 will be internal storage, and
+when /dev/sda1 is mounted (eg. by Linux Hotplug system),
+a storage location named "Card" will be available to the user: any
+documents there will appear on the Documents page. This file can
+be translated as with any Qtopia <a href="config.html">Config</a> file.
+<p> <h2> I18N
+</h2>
+<a name="9"></a><p> Qtopia uses UTF8 for all file formats. System functions are also expected to
+use UTF8 encoding. For example, with $LANG set to "ja", strftime() must return
+a string in UTF8 encoding. Depending on the underlying operating system, this may
+require "ja" to be an alias for the "ja_JP.utf8" locale.
+<p> Note that Qtopia expects all file systems to use utf8 encoding. This usually
+requires attention in /etc/mtab and /usr/share/locale. Particular attention should
+be paid to removable media.
+<p> <h2> Access Permissions and Read-only Filesystems
+</h2>
+<a name="10"></a><p> Qtopia can run as any user, provided that user has read and write permissions to
+certain file areas for certain functionality:
+<p> <ul>
+<li> /dev/fb0 - Frame Buffer
+<li> /etc/ppp/... - PPP configuration options
+<li> /etc/pcmcia/... - LAN/wireless network options
+<li> /opt/Qtopia/... - Installing additional software
+</ul>
+<p> If a read-only filesystem is used, such as cramfs, then a symlink shadow should
+be created such that the above directories are writeable, but those files that
+are to be storeda in the cramfs filesystem are symbolic links to the actual
+files. For example, /opt/Qtopia/apps/Applications/calculator.desktop would be a symbolic link
+to /opt/Qtopia-ROM/apps/Applications/calculator.desktop.
+<p> As an alternative to the single directory specified by $QPEDIR, most Qtopia
+components support $QTOPIA_PATH, with is a colon-separated list of directories.
+By setting this variable (to, for example, "/opt/Qtopia:/opt/Qtopia-ROM"), and
+setting $PATH and $LD_LIBRARY_PATH appropriately, the following component
+directories can be searched in multiple places:
+<p> <ul>
+<li> $QPEDIR/bin
+<li> $QPEDIR/help
+<li> $QPEDIR/i18n
+<li> $QPEDIR/lib
+<li> $QPEDIR/pics
+<li> $QPEDIR/plugins
+<li> $QPEDIR/sounds
+</ul>
+<p> This greatly reduces the overhead of using symbolic links.
+<p> <h2> MMS Client
+</h2>
+<a name="11"></a><p> The Qtopia Phone Edition includes MMS functionality in the messages client.
+<p> <h3> WAP Stack Integration
+</h3>
+<a name="11-1"></a><p> Qtopia does not include a WAP stack with the MMS client.  Instead, an
+interface is provided which allows any WAP stack to be integrated.  The
+<a href="mmscomms.html">MmsComms class</a> must be subclassed and the
+virtual functions implemented and signals emitted as appropriate.
+The MmsCommsHttp class provides a sample implementation using HTTP over
+TCP/IP.
+<p> <h3> AMR Encoder
+</h3>
+<a name="11-2"></a><p> The AMR encoder included with Qtopia is a reference implementation only.
+It is recommended that an encoder optimized for the target platform
+be installed.  The media recorder plugin interface provides a convenient
+method of integrating the codec.
+See <a href="mediarecorderencoder.html">MediaRecorderEncoder class</a>.
 <p> 
 <!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

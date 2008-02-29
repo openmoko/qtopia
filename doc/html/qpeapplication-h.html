@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/include/qtopia/qpeapplication.h:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/include/qtopia/qpeapplication.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>qpeapplication.h</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>qpeapplication.h</h1>
 
 <p>This is the verbatim text of the qpeapplication.h include file. It is provided only for illustration; the copyright remains with Trolltech.
 <hr>
@@ -47,11 +55,14 @@ body { background: #ffffff; color: black; }
 #ifndef __QPE_APPLICATION_H__
 #define __QPE_APPLICATION_H__
 
-
 #include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qapplication.h&gt;
 #include &lt;qdialog.h&gt;
 #include &lt;qtopia/timestring.h&gt;
+
+#ifdef QTOPIA_TEST
+# include "qpetestslave.h"
+#endif
 
 class QCopChannel;
 class QPEApplicationData;
@@ -74,6 +85,7 @@ public:
     static void grabKeyboard();
     static void ungrabKeyboard();
 
+
     enum StylusMode {
 	LeftOnly,
 	RightOnHold
@@ -86,6 +98,12 @@ public:
 	Normal,
 	AlwaysOff,
 	AlwaysOn
+	,
+	Number,
+	PhoneNumber,
+	Words,
+	Text,
+	Named,
     };
 
     enum screenSaverHint {
@@ -95,13 +113,17 @@ public:
 	Enable = 100
     };
 
-    static void setInputMethodHint( QWidget *, InputMethodHint );
+    static void setInputMethodHint( QWidget *, InputMethodHint, const QString&amp; param=QString::null );
+    static void setInputMethodHint( QWidget *, const QString&amp; named );
     static InputMethodHint inputMethodHint( QWidget * );
+    static QString inputMethodHintParam( QWidget * );
 
     void showMainWidget( QWidget*, bool nomax=FALSE );
     void showMainDocumentWidget( QWidget*, bool nomax=FALSE );
     static void showDialog( QDialog*, bool nomax=FALSE );   // libqtopia
     static int execDialog( QDialog*, bool nomax=FALSE );    // libqtopia
+    static void setMenuLike( QDialog *, bool ); // libqtopia2
+    static bool isMenuLike( const QDialog* ); // libqtopia2
     static void setTempScreenSaverMode(screenSaverHint);    // libqtopia
 
     static void setKeepRunning();
@@ -111,6 +133,9 @@ public:
 
     int exec();
 
+#ifdef QTOPIA_INTERNAL_LOADTRANSLATIONS
+    static void loadTranslations(const QStringList&amp;);
+#endif
 #ifdef QTOPIA_INTERNAL_INITAPP
     void initApp( int argc, char **argv );
 #endif
@@ -127,15 +152,24 @@ signals:
     void flush();
     void reload();
     void linkChanged( const QString &amp;linkFile );
-
+    
 private slots:
     void systemMessage( const QCString &amp;msg, const QByteArray &amp;data );
     void pidMessage( const QCString &amp;msg, const QByteArray &amp;data );
     void removeSenderFromStylusDict();
+    void removeSenderFromIMDict();
     void hideOrQuit();
     void pluginLibraryManager(PluginLibraryManager**);
+    void lineEditTextChange(const QString &amp;);
+    void multiLineEditTextChange();
+
+    void removeFromWidgetFlags();
+    
 
 protected:
+#if defined(QTOPIA_PHONE) || defined(QTOPIA_TEST)  // since not binary compatible
+    bool notify(QObject*,QEvent*);
+#endif
     bool qwsEventFilter( QWSEvent * );
     void internalSetStyle( const QString &amp;style );
     void prepareForTermination(bool willrestart);
@@ -150,6 +184,10 @@ private:
     void mapToDefaultAction( QWSKeyEvent *ke, int defKey );
     void processQCopFile();
 
+#if defined(QTOPIA_INTERNAL_SENDINPUTHINT)
+    static void sendInputHintFor(QWidget*,QEvent::Type);
+#endif
+
 #if defined(Q_WS_QWS) &amp;&amp; !defined(QT_NO_COP)
     QCopChannel *sysChannel;
     QCopChannel *pidChannel;
@@ -158,8 +196,15 @@ private:
 
     bool reserved_sh;
 
-
-
+#if defined QTOPIA_TEST
+public:
+    QString appName();
+    void stopCycleCount() { hasPerfMonitor = FALSE; };
+    void startCycleCount() { hasPerfMonitor = TRUE; };
+    QPETestSlave app_slave;
+private:
+    bool hasPerfMonitor;
+#endif
 };
 
 #ifdef Q_OS_WIN32
@@ -183,6 +228,11 @@ typedef QMap&lt;QString,qpeAppCreateFunc&gt; QPEAppMap;
 	return new IMPLEMENTATION(p,n,f); } \
     QPEAppMap *qpeAppMap(); \
     static QPEAppMap::Iterator dummy_ ## IMPLEMENTATION = qpeAppMap()-&gt;insert(NAME,create_ ## IMPLEMENTATION);
+
+#ifdef QTOPIA_NO_MAIN
+#define QTOPIA_MAIN
+
+#else
 
 #ifdef QTOPIA_APP_INTERFACE
 
@@ -236,7 +286,7 @@ typedef QMap&lt;QString,qpeAppCreateFunc&gt; QPEAppMap;
 	else if ( qpeAppMap()-&gt;count() ) \
 	    mw = qpeAppMap()-&gt;begin().data()(0,0,0); \
 	if ( mw ) { \
-	    if ( mw-&gt;metaObject()-&gt;slotNames().contains("setDocument(const QString&amp;)") ) \
+	    if ( mw-&gt;metaObject()-&gt;slotNames(true).contains("setDocument(const QString&amp;)") ) \
 		a.showMainDocumentWidget( mw ); \
 	    else \
 		a.showMainWidget( mw ); \
@@ -254,11 +304,14 @@ typedef QMap&lt;QString,qpeAppCreateFunc&gt; QPEAppMap;
     } \
 
 #endif
+#endif
 </pre>
 <!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

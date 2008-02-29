@@ -32,8 +32,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>224</width>
-            <height>290</height>
+            <width>223</width>
+            <height>262</height>
         </rect>
     </property>
     <property stdset="1">
@@ -49,11 +49,11 @@
     <vbox>
         <property stdset="1">
             <name>margin</name>
-            <number>5</number>
+            <number>6</number>
         </property>
         <property stdset="1">
             <name>spacing</name>
-            <number>1</number>
+            <number>6</number>
         </property>
         <widget>
             <class>QGroupBox</class>
@@ -71,7 +71,7 @@
             </property>
             <property stdset="1">
                 <name>title</name>
-                <string>Start viewing events</string>
+                <string>Day starts at</string>
             </property>
             <vbox>
                 <property stdset="1">
@@ -105,7 +105,7 @@
                             </property>
                             <property stdset="1">
                                 <name>text</name>
-                                <string>Start Time:</string>
+                                <string>Day Start</string>
                             </property>
                         </widget>
                         <widget>
@@ -187,6 +187,13 @@
                                 <bool>false</bool>
                             </property>
                             <property stdset="1">
+                                <name>sizePolicy</name>
+                                <sizepolicy>
+                                    <hsizetype>5</hsizetype>
+                                    <vsizetype>0</vsizetype>
+                                </sizepolicy>
+                            </property>
+                            <property stdset="1">
                                 <name>suffix</name>
                                 <string> minutes</string>
                             </property>
@@ -211,6 +218,55 @@
                 </widget>
             </vbox>
         </widget>
+        <widget>
+            <class>QGroupBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>fraDayView</cstring>
+            </property>
+            <property stdset="1">
+                <name>title</name>
+                <string>Day View</string>
+            </property>
+            <vbox>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>11</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>6</number>
+                </property>
+                <widget>
+                    <class>QLayoutWidget</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>Layout4</cstring>
+                    </property>
+                    <hbox>
+                        <property stdset="1">
+                            <name>margin</name>
+                            <number>0</number>
+                        </property>
+                        <property stdset="1">
+                            <name>spacing</name>
+                            <number>6</number>
+                        </property>
+                        <widget>
+                            <class>QCheckBox</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>chkCompressDayView</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Compress Day View</string>
+                            </property>
+                        </widget>
+                    </hbox>
+                </widget>
+            </vbox>
+        </widget>
     </vbox>
 </widget>
 <connections>
@@ -226,7 +282,7 @@
         <receiver>DateBookSettingsBase</receiver>
         <slot>slot12Hour( int )</slot>
     </connection>
-    <slot access="public">slotChangeClock( bool )</slot>
     <slot access="public">slot12Hour( int )</slot>
+    <slot access="public">slotChangeClock( bool )</slot>
 </connections>
 </UI>

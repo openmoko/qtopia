@@ -1,17 +1,21 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-
-CONFIG		+= qtopia warn_on release
+CONFIG		+= qtopiaapp
 
 HEADERS		= minefield.h \
 		  minesweep.h
 SOURCES		= minefield.cpp \
-		  minesweep.cpp
+		  minesweep.cpp \
+		  main.cpp
 
-multiprocess:SOURCES+=main.cpp
-
+TRANSLATABLES = $${SOURCES} $${HEADERS}
+                  
 TARGET		= minesweep
 
-TRANSLATIONS = minesweep-en_GB.ts minesweep-de.ts minesweep-ja.ts minesweep-no.ts
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/minesweep.html
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/minesweep.desktop
+desktop.path=/apps/Games
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/minesweep/*
+pics.path=/pics/minesweep
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics

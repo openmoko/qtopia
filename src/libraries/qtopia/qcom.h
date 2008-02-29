@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -20,7 +35,7 @@
 
 #include <qnamespace.h>
 #include <qtopia/qpeglobal.h>
-#if (QT_VERSION-0 >= 0x030000)
+#if !defined(Q_QDOC) && (QT_VERSION-0 >= 0x030000)
 #include <private/qcom_p.h>
 #else
 
@@ -76,11 +91,6 @@ struct QTOPIA_PLUGIN_EXPORT QUnknownInterface
     virtual ulong   release() = 0;
 };
 
-#ifdef QTOPIA_FAKE_COMPONENT
-#include <qdict.h>
-extern QDict<QUnknownInterface> *fakeFiles;
-#endif
-
 // {D16111D4-E1E7-4C47-8599-24483DAE2E07}
 #ifndef IID_QLibrary
 #define IID_QLibrary QUuid( 0xd16111d4, 0xe1e7, 0x4c47, 0x85, 0x99, 0x24, 0x48, 0x3d, 0xae, 0x2e, 0x07)
@@ -93,21 +103,8 @@ struct QTOPIA_PLUGIN_EXPORT QLibraryInterface : public QUnknownInterface
     virtual bool    canUnload() const = 0;
 };
 
-#ifndef QTOPIA_FAKE_COMPONENT
-#define Q_CREATE_INSTANCE( IMPLEMENTATION )         \
-	IMPLEMENTATION *i = new IMPLEMENTATION; \
-	QUnknownInterface* iface = 0;                   \
-	i->queryInterface( IID_QUnknown, &iface );      \
-	return iface;
-#else
-#define Q_CREATE_INSTANCE( IMPLEMENTATION ) \
-	if (!fakeFiles) \
-	    fakeFiles = new QDict<QUnknownInterface> (); \
-	fakeFiles->insert(MYMAGICALPATH,new IMPLEMENTATION); \
-	return 1;
-#endif
+#ifndef SINGLE_EXEC
 
-#ifndef QTOPIA_FAKE_COMPONENT
 #ifndef Q_OS_WIN32 
 #define Q_EXPORT_INTERFACE() \
 	extern "C" QUnknownInterface* ucm_instantiate()
@@ -115,12 +112,45 @@ struct QTOPIA_PLUGIN_EXPORT QLibraryInterface : public QUnknownInterface
 #define Q_EXPORT_INTERFACE() \
 	extern "C" QTOPIA_PLUGIN_EXPORT QUnknownInterface* ucm_instantiate()
 #endif
-#else
-#define Q_EXPORT_INTERFACE() \
-    extern QDict<QUnknownInterface> *fakeFiles; \
-    static int exportInterface(); \
-    static int foo = exportInterface(); \
-    int exportInterface()
+
+#define Q_CREATE_INSTANCE( IMPLEMENTATION )         \
+	IMPLEMENTATION *i = new IMPLEMENTATION; \
+	QUnknownInterface* iface = 0;                   \
+	i->queryInterface( IID_QUnknown, &iface );      \
+	return iface;
+
+#else // SINGLE_EXEC
+
+#include <qdict.h>
+
+#define Q_CREATE_INSTANCE(T) \
+	} \
+	typedef QDict<QUnknownInterface> PluginNameDict; \
+	typedef QDict<PluginNameDict> PluginTypeDict; \
+	extern PluginTypeDict *ptd; \
+	class T##t {\
+	public: \
+	    T##t() {\
+		if (!ptd)\
+		    ptd = new PluginTypeDict();\
+		PluginNameDict *quil = ptd->find(QTOPIA_PLUGIN_TYPE); \
+		if (!quil) { \
+		    quil = new PluginNameDict();\
+		    ptd->insert(QTOPIA_PLUGIN_TYPE,quil);\
+		}\
+		T *t = new T;\
+		QUnknownInterface *iface = 0;\
+		t->queryInterface( IID_QUnknown, &iface);\
+		if (iface)\
+		    quil->insert(QTOPIA_PLUGIN_NAME,iface);\
+	    }; \
+	};\
+	static T##t T##tvar;\
+	static void dummy2() {
+
+#define Q_EXPORT_INTERFACE \
+	static void dummy
+
 #endif
 
 

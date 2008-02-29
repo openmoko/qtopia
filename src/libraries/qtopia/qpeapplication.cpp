@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -18,16 +33,26 @@
 **
 **********************************************************************/
 
+#define QTOPIA_INTERNAL_LOADTRANSLATIONS
 #define QTOPIA_INTERNAL_LANGLIST
 #ifndef QTOPIA_INTERNAL_FILEOPERATIONS
 #define QTOPIA_INTERNAL_FILEOPERATIONS
 #endif
-#include "custom.h"
-#include <stdlib.h>
-#include <qfile.h>
 
-#ifdef QTOPIA_DESKTOP
-#  include <qsettings.h>
+
+#include <qtopia/custom.h>
+
+#include <stdlib.h>
+
+#include <qfile.h>
+#include <qlist.h>
+#include <qqueue.h>
+#include <qpainter.h>
+#include <qvalidator.h>
+#include <qlineedit.h>
+#include <qmultilineedit.h>
+#ifndef QTOPIA_DESKTOP
+#include <qsoundqss_qws.h>
 #endif
 
 #ifdef Q_WS_QWS
@@ -35,10 +60,10 @@
 #    if QT_VERSION <= 231
 #      define private public
 #      define sendLocally processEvent
-#      include "qcopenvelope_qws.h"
+#      include <qtopia/qcopenvelope_qws.h>
 #      undef private
 #    else
-#      include "qcopenvelope_qws.h"
+#      include <qtopia/qcopenvelope_qws.h>
 #    endif
 #  endif
 #  include <qwindowsystem_qws.h>
@@ -46,6 +71,7 @@
 
 #include <qtextstream.h>
 #include <qpalette.h>
+#include <qwidgetlist.h>
 #include <qbuffer.h>
 #include <qptrdict.h>
 #include <qregexp.h>
@@ -56,12 +82,18 @@
 #include <qtextcodec.h>
 #include <qevent.h>
 #include <qtooltip.h>
+#include <qmessagebox.h>
 #include <qsignal.h>
 #include <qclipboard.h>
 #include <qtimer.h>
 #include <qpixmapcache.h>
+#include <qmessagebox.h>
+#include <qpushbutton.h>
+#include <qaccel.h>
+#include <qobjectlist.h>
 
 #ifdef Q_WS_QWS
+#define QTOPIA_INTERNAL_SENDINPUTHINT
 #include <qwsdisplay_qws.h>
 #endif
 
@@ -69,43 +101,46 @@
 #define QTOPIA_INTERNAL_INITAPP
 #endif
 
-#include "qpeapplication.h"
-#if QT_VERSION >= 0x030000
+#include <qtopia/qpeapplication.h>
+#if QT_VERSION >= 300
 #  include <qstylefactory.h>
 #else
 #  include <qwindowsstyle.h>
 #endif
-#include "global.h"
+#include <qtopia/global.h>
 #if QT_VERSION <= 230 && defined(QT_NO_CODECS)
-#  include "qutfcodec.h"
+#  include <qutfcodec.h>
 #endif
-#include "config.h"
-#include "network.h"
-#  include "applnk.h"
+#include <qtopia/config.h>
+#include <qtopia/storage.h>
+#include <qtopia/network.h>
+#include <qtopia/applnk.h>
+#include <qtopia/resource.h>
 #ifdef Q_WS_QWS
-#  include "fontmanager.h"
-#  include "fontdatabase.h"
-#  include "power.h"
-#  include "qpemenubar.h"
-#  include "imagecodecinterface.h"
-#  include "textcodecinterface.h"
-#  include "styleinterface.h"
-#  include "resource.h"
-#  include "qpestyle.h"
-#  include "qpedecoration_p.h"
+#  include <qtopia/fontmanager.h>
+#  include <qtopia/fontdatabase.h>
+#  include <qtopia/power.h>
+#  include <qtopia/qpemenubar.h>
+#  include <qtopia/imagecodecinterface.h>
+#  include <qtopia/textcodecinterface.h>
+#  include <qtopia/styleinterface.h>
+#  ifdef QTOPIA_PHONE
+#    include <qtopia/phonestyle.h>
+#  else
+#    include <qtopia/qpestyle.h>
+#  endif
+#  include <qtopia/private/qpedecoration_p.h>
 #endif
-#include "alarmserver.h"
-#include "pluginloader_p.h"
-
-#include <stdlib.h>
+#include <qtopia/alarmserver.h>
+#include <qtopia/private/pluginloader_p.h>
 
 #ifdef Q_OS_UNIX
 #include <unistd.h>
 #include <sys/file.h>
+#ifdef Q_WS_QWS
+#include <errno.h>
+#include <sys/stat.h>
 #endif
-
-#ifdef Q_OS_WIN32
-#include <windows.h>
 #endif
 
 #ifndef QTOPIA_DESKTOP
@@ -113,22 +148,88 @@
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
 #else
-#include <winbase.h>
 #include <mmsystem.h>
 #include <io.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#endif
-#endif
+#endif // Q_OS_WIN32
+#endif // QTOPIA_DESKTOP
 
 #include "../qtopia1/qpe_show_dialog.cpp"
+
+#if defined(QTOPIA_TEST)
+#include <asm/timex.h>
+#endif
+
+#ifdef QTOPIA_PHONE
+#include <qtopia/private/contextkeymanager_p.h>
+#include <qtopia/contextmenu.h>
+
+// from Resource
+extern QStringList qpe_pathCache[Resource::AllResources + 1];
+#endif
+
+QIconSet qtopia_internal_loadIconSet( const QString &pix );
+
+#ifdef QTOPIA_PHONE
+extern bool qt_modalEditingEnabled;
+bool mousePreferred = FALSE;
+#endif
+
+#ifdef QTOPIA_DESKTOP
+#include <qdconfig.h>
+#endif
+
+QString qtopia_internal_homeDirPath();
+QString qtopia_internal_defaultButtonsFile();
+
+#ifdef QTOPIA_PHONE
+const QArray<int> qpe_systemButtons()
+{
+    static QArray<int> *buttons = 0;
+
+    if (!buttons) {
+	buttons = new QArray<int>;
+	Config cfg(qtopia_internal_defaultButtonsFile(), Config::File);
+	cfg.setGroup("SystemButtons");
+	int count = cfg.readNumEntry("Count", 0);
+	if (count > 0) {
+	    buttons->resize(count);
+	    for (int i = 0; i < count; i++) {
+		QString is = QString::number(i);
+		(*buttons)[i] = QAccel::stringToKey(cfg.readEntry("Key"+is));
+	    }
+	}
+    }
+
+    return *buttons;
+}
+
+enum {
+    MenuLikeDialog = 0x01,
+} QPEWidgetFlags;
+
+QMap<const QWidget *, int> qpeWidgetFlags;
+
+#endif
+
+#if defined(QTOPIA_TEST)
+static cycles_t cycl_start, cycl_stop;
+#endif
+
 
 class HackWidget : public QWidget
 {
 public:
     bool needsOk()
-    { return (getWState() & WState_Reserved1 ); }
+    {
+#ifndef QTOPIA_DESKTOP
+	return (getWState() & WState_Reserved1 );
+#else
+	return FALSE;
+#endif
+    }
 
     QRect normalGeometry()
     { return topData()->normalGeometry; };
@@ -138,23 +239,53 @@ public:
 extern Q_EXPORT QRect qt_maxWindowRect;
 #endif
 
+static const int npressticks=10;
+
 class QPEApplicationData {
 public:
     QPEApplicationData() : presstimer(0), presswidget(0), rightpressed(FALSE),
 	kbgrabber(0), kbregrab(FALSE), notbusysent(FALSE), preloaded(FALSE),
 	forceshow(FALSE), nomaximize(FALSE), qpe_main_widget(0),
-	keep_running(TRUE), skiptimechanged(FALSE), execCalled(FALSE)
+	keep_running(TRUE), skiptimechanged(0), qcopQok(FALSE)
 #ifdef Q_WS_QWS
 	,styleLoader("styles"), styleIface(0), textPluginLoader("textcodecs"), // No tr
 	imagePluginLoader("imagecodecs")
 #endif
+#ifdef QTOPIA_PHONE
+	, editMenu(0)
+#endif
     {
-	qcopq.setAutoDelete(TRUE);
+    }
+
+    void drawPressTick()
+    {
+	if ( presstick < npressticks-2 ) {
+	    QPainter p(presswidget);
+	    Config cfg("presstick");
+	    cfg.setGroup("PressTick");
+	    QPixmap pm = Resource::loadPixmap(cfg.readEntry("Image"));
+	    cfg.setGroup("Tick"+QString::number(presstick));
+	    int dx = cfg.readNumEntry("Dx");
+	    int dy = cfg.readNumEntry("Dy");
+	    p.drawPixmap(presspos.x()+dx,presspos.y()+dy,pm);
+	    pressdirty |= QRect(presspos.x()+dx,presspos.y()+dy,pm.width(),pm.height());
+	}
+    }
+    void cancelPressAndHold()
+    {
+	if ( !pressdirty.isEmpty() ) {
+	    presswidget->repaint(pressdirty);
+	    pressdirty = QRect();
+	}
+	qApp->killTimer( presstimer );
+	presstimer = 0;
     }
 
     int presstimer;
     QWidget* presswidget;
     QPoint presspos;
+    int presstick;
+    QRect pressdirty;
     bool rightpressed;
     int kbgrabber;
     bool kbregrab;
@@ -179,25 +310,30 @@ public:
     bool nomaximize;
 
     QWidget* qpe_main_widget;
+    QGuardedPtr<QWidget> lastraised;
     bool keep_running;
     int skiptimechanged;
-    bool execCalled;
-    QList<QCopRec> qcopq;
+    bool qcopQok;
+    QQueue<QCopRec> qcopq;
 
     void enqueueQCop(const QCString &ch, const QCString &msg,
                                const QByteArray &data)
     {
-	qcopq.append(new QCopRec(ch,msg,data));
+	qcopq.enqueue(new QCopRec(ch,msg,data));
     }
     void sendQCopQ()
     {
-	if ( execCalled ) {
-#ifndef QT_NO_COP
+	if ( qcopQok ) {
 	    QCopRec* r;
-	    for (QListIterator<QCopRec> it(qcopq); (r=it.current()); ++it)
+	    while((r=qcopq.dequeue())) {
+		// remove from queue before sending... 
+		// event loop can come around again before getting
+		// back from sendLocally
+#ifndef QT_NO_COP
 		QCopChannel::sendLocally(r->channel,r->message,r->data);
 #endif
-	    qcopq.clear();
+		delete r;
+	    }
 	}
     }
 
@@ -368,6 +504,7 @@ public:
 	setWidgetCaptionFromAppName( mw, appName, QPEApplication::qpeDir() + "apps" );
 	nomaximize = nomax;
 	qpe_main_widget = mw;
+	qcopQok = TRUE;
 #ifndef QT_NO_COP
 	sendQCopQ();
 #endif
@@ -421,6 +558,11 @@ public:
     PluginLoaderIntern imagePluginLoader;
 #endif
     QString decorationName;
+    QString decorationTheme;
+#ifdef QTOPIA_PHONE
+    QGuardedPtr<ContextMenu> editMenu;
+    QStringList iconPath;
+#endif
 };
 
 
@@ -452,6 +594,8 @@ public:
 		    name = name.left(dot);
 #ifdef Q_WS_QWS
 		QImage img = Resource::loadImage(name);
+		if( img.isNull() )
+		    img = qtopia_internal_loadIconSet(name).pixmap( QIconSet::Small, TRUE ).convertToImage();
 		if ( !img.isNull() ) {
 		    ResourceMimeFactory *that = (ResourceMimeFactory*)this;
 		    delete that->resImage;
@@ -477,8 +621,10 @@ static void setVolume(int t=0, int percent=-1)
 	case 0: {
 	    Config cfg("Sound");
 	    cfg.setGroup("System");
-	    if ( percent < 0 )
+	    if ( percent < 0 ) {
 		percent = cfg.readNumEntry("Volume",50);
+		qtopia_muted = cfg.readBoolEntry("Muted",false);
+            }
 	    int fd = 0;
 #ifndef Q_OS_WIN32
 	    if ((fd = open("/dev/mixer", O_RDWR))>=0) { // Some devices require this, O_RDONLY doesn't always work
@@ -489,7 +635,7 @@ static void setVolume(int t=0, int percent=-1)
 		::close(fd);
 	    }
 #else
-	    HWAVEOUT handle;
+	    HWAVEOUT handle;      
 	    WAVEFORMATEX formatData;
 	    formatData.cbSize = sizeof(WAVEFORMATEX);
 	    formatData.wFormatTag = WAVE_FORMAT_PCM;
@@ -569,10 +715,14 @@ static bool dim_on = FALSE;
 static bool lightoff_on = FALSE;
 static bool networkedsuspend_on = FALSE;
 static bool poweredsuspend_on = FALSE;
+#ifdef QTOPIA_PHONE
+static int homescreen_level = -1;
+#endif
 
 #ifdef Q_WS_QWS
 static int disable_suspend = 100;
 
+#ifndef QTOPIA_PHONE
 static bool powerOnlineStopsSuspend()
 {
     return !poweredsuspend_on && PowerStatusManager::readStatus().acStatus() == PowerStatus::Online;
@@ -582,6 +732,7 @@ static bool networkOnlineStopsSuspend()
 {
     return !networkedsuspend_on && Network::networkOnline();
 }
+#endif
 
 class QPEScreenSaver : public QWSScreenSaver
 {
@@ -596,6 +747,18 @@ public:
     }
     bool save(int level)
     {
+#ifdef QTOPIA_PHONE
+        if (disable_suspend > 2 && homescreen_level != -1 && homescreen_level <= level) {
+            if (homescreen_level == level) {
+#ifndef QT_NO_COP
+                QCopEnvelope showHome( "QPE/System", "showHomeScreen()" );
+                QCopEnvelope closeApps( "QPE/System", "close()" );
+                return TRUE;
+#endif      
+            } else
+                --level; 
+        }
+#endif
 	switch ( level ) {
 	 case 0:
 	    if ( disable_suspend > 0 && dim_on ) {
@@ -611,16 +774,24 @@ public:
 	    return TRUE;
 	    break;
 	 case 2:
+#ifndef QTOPIA_PHONE
 	    if ( disable_suspend > 2 && !powerOnlineStopsSuspend() && !networkOnlineStopsSuspend() )
-	    {
-		QWSServer::processKeyEvent( 0xffff, Qt::Key_F34, FALSE, TRUE, FALSE );
-		return FALSE;
-	    }
+	    {   
+                if (PowerStatusManager::APMEnabled()) {
+    		    QWSServer::processKeyEvent( 0xffff, Qt::Key_F34, FALSE, TRUE, FALSE );
+		    return FALSE;
+                } else
+                    return TRUE;
+            }
+#else
+            //no need to suspend in Phone Edition -> do nothing 
+#endif
 	    return TRUE;
 	    break;
 	}
 	return FALSE;
     }
+    static const int eventBlockLevel = -1;
 };
 #endif
 
@@ -641,26 +812,73 @@ static void setScreenSaverIntervals(int i1, int i2, int i3)
     Config config( "qpe" );
     config.setGroup( "Screensaver" );
 
-    int v[4];
+    int v[5];
     i1 = ssi(i1, config, "Dim","Interval_Dim", 30); // No tr
     i2 = ssi(i2, config, "LightOff","Interval_LightOff", 20);
+#ifndef QTOPIA_PHONE
     i3 = ssi(i3, config, "","Interval", 60); // No tr
+#else
+     // phone edition doesn't have 3rd screensaver level
+#endif
 
     //qDebug("screen saver intervals: %d %d %d", i1, i2, i3);
 
     v[0] = QMAX( 1000*i1, 100);
     v[1] = QMAX( 1000*i2, 100);
+#ifndef QTOPIA_PHONE
     v[2] = QMAX( 1000*i3, 100);
+#else
+    v[2] = 0;
+#endif
     v[3] = 0;
+    v[4] = 0;
+   
+#ifdef QTOPIA_PHONE
+    config.setGroup( "HomeScreen" );
+    bool showhomescreen_on = config.readBoolEntry("ShowHomeScreen", FALSE);
+    if (showhomescreen_on) {
+        int showhomescreen_interval;
+        showhomescreen_interval = 1000*config.readNumEntry("Interval_HomeScreen", 30);
+        for (int level=0; level < 5; level++) {
+            if (v[level] && v[level] < showhomescreen_interval)
+                showhomescreen_interval -= v[level];
+            else if (!v[level]) {
+                v[level]=showhomescreen_interval;
+                homescreen_level = level;
+                break;  
+            } else {
+                for (int i = 3; i >= level; i--) {
+                    v[i+1] = v[i];
+                }
+                v[level] = showhomescreen_interval;
+                v[level+1] = QMAX(v[level+1]-showhomescreen_interval, 100);
+                homescreen_level = level;
+                break;
+            }
+        }
+        //qDebug(QString("%1 %2 %3 %4").arg(v[0]).arg(v[1]).arg(v[2]).arg(v[3]));
+    } else
+        homescreen_level = -1;
+
+#endif
     dim_on = ( (i1 != 0) ? config.readNumEntry("Dim",1) : FALSE );
     lightoff_on = ( (i2 != 0 ) ? config.readNumEntry("LightOff",1) : FALSE );
     poweredsuspend_on = config.readNumEntry("Suspend",0);
     networkedsuspend_on = config.readNumEntry("NetworkedSuspend",1);
 #ifdef Q_WS_QWS
-    if ( !i1 && !i2 && !i3 )
+    if ( !i1 && !i2 && !i3 
+#ifdef QTOPIA_PHONE
+            && !showhomescreen_on
+#endif
+        ){
 	QWSServer::setScreenSaverInterval(0);
-    else
+    }else{
+#if QT_VERSION > 237
+	QWSServer::setScreenSaverIntervals(v, QPEScreenSaver::eventBlockLevel);
+#else
 	QWSServer::setScreenSaverIntervals(v);
+#endif
+    }
 #endif
 }
 
@@ -874,6 +1092,54 @@ void QPEApplication::processQCopFile()
 #endif
 }
 
+#ifndef QT_NO_TRANSLATION
+#include "global_qtopiapaths.cpp"
+void QPEApplication::loadTranslations( const QStringList& qms )
+{
+    QStringList langs = Global::languageList();
+
+    QStringList qpepaths = global_qtopiapaths();
+    for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
+	for (QStringList::ConstIterator it = langs.begin(); it!=langs.end(); ++it) {
+	    QString lang = *it;
+
+	    QTranslator * trans;
+	    QString tfn;
+
+	    for (QStringList::ConstIterator qmit = qms.begin(); qmit!=qms.end(); ++qmit) {
+		trans = new QTranslator(qApp);
+		tfn = *qit + "i18n/" + lang + "/" + *qmit + ".qm";
+		if ( trans->load( tfn ))
+		    qApp->installTranslator( trans );
+		else
+		    delete trans;
+	    }
+	}
+    }
+}
+#endif
+
+static void qtopiaMsgHandler(QtMsgType type, const char* msg)
+{
+    switch ( type ) {
+	case QtDebugMsg:
+#ifdef DEBUG
+	    fprintf( stderr, "Debug: %s\n", msg );
+#endif
+	    break;
+	case QtWarningMsg:
+	    fprintf( stderr, "Warning: %s\n", msg );
+	    break;
+	case QtFatalMsg:
+	    fprintf( stderr, "Fatal: %s\n", msg );
+	    abort();
+    }
+}
+
+#if defined (_WS_QWS_)
+extern bool qt_lineedit_password_visible_on_focus;
+#endif
+
 /*!
   Constructs a QPEApplication just as you would construct
   a QApplication, passing \a argc, \a argv, and \a t.
@@ -886,7 +1152,53 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
 , pidChannel(0)
 #endif
+#if defined(QTOPIA_TEST)
+, hasPerfMonitor(0)
+#endif 
 {
+#if defined (_WS_QWS_)
+    // pdas and phones have uncertain input, so as long as line edit
+    // has focus, should be able to see password text.
+    qt_lineedit_password_visible_on_focus = TRUE;
+#endif
+  
+#if defined(Q_WS_QWS) && defined(Q_OS_UNIX)
+    QString dataDir(Global::tempDir()); 
+    if ( mkdir( dataDir.latin1(), 0700 ) ) {
+	if ( errno != EEXIST ) {
+	    qFatal( QString("Cannot create Qtopia data directory: %1")
+		    .arg( dataDir ) );
+	}
+    }
+
+    struct stat buf;
+    if ( lstat( dataDir.latin1(), &buf ) )
+	qFatal( QString( "stat failed for Qtopia data directory: %1" )
+		.arg( dataDir ) );
+
+    if ( !S_ISDIR( buf.st_mode ) )
+	qFatal( QString( "%1 is not a directory" ).arg( dataDir ) );
+
+    if ( buf.st_uid != getuid() )
+	qFatal( QString( "Qtopia data directory is not owned by user %1: %2" )
+		.arg( getuid() ).arg( dataDir ) );
+
+    if ( (buf.st_mode & 0677) != 0600 )
+	qFatal( QString( "Qtopia data directory has incorrect permissions: %1" )
+		.arg( dataDir ) );
+#endif
+    qInstallMsgHandler(qtopiaMsgHandler);
+
+#ifdef QTOPIA_PHONE
+    Config config( qtopia_internal_defaultButtonsFile(), Config::File );
+    config.setGroup( "Device" );
+    QString pi = config.readEntry( "PrimaryInput", "Keypad" ).lower();
+    // anything other than touchscreen means keypad modal editing gets enabled
+    qt_modalEditingEnabled = pi != "touchscreen";
+    mousePreferred = !qt_modalEditingEnabled;
+    qDebug( "Modal editing is %s", qt_modalEditingEnabled ? "ENABLED" : "DISABLED" );
+#endif
+
     QPixmapCache::setCacheLimit(256);  // sensible default for smaller devices.
     d = new QPEApplicationData;
 #ifdef Q_WS_QWS
@@ -899,7 +1211,11 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     if ( dw < 200 ) {
 	setFont( QFont( "helvetica", 8 ) );
 #ifdef Q_WS_QWS
+# ifdef QTOPIA_PHONE
+	AppLnk::setSmallIconSize(16);
+# else
 	AppLnk::setSmallIconSize(10);
+# endif
 	AppLnk::setBigIconSize(28);
 #endif
     } else if ( dw > 600 ) {
@@ -916,6 +1232,10 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 #endif
     }
 
+#ifdef QTOPIA_PHONE
+    setFont( QFont( "helvetica", 14, QFont::Normal ) );
+#endif
+
     QMimeSourceFactory::setDefaultFactory(new ResourceMimeFactory);
 
     connect(this, SIGNAL(lastWindowClosed()), this, SLOT(hideOrQuit()));
@@ -923,25 +1243,17 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
 
     sysChannel = new QCopChannel( "QPE/System", this );
-    connect( sysChannel, SIGNAL(received(const QCString &, const QByteArray &)),
-	     this, SLOT(systemMessage( const QCString &, const QByteArray &)) );
+    connect( sysChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(systemMessage(const QCString&,const QByteArray&)) );
     
 #if 0
-#ifdef Q_OS_UNIX
     QCString channel = QCString(argv[0]);
-#else
-    QCString channel;
-    if (QApplication::winVersion() != Qt::WV_98)
-	channel += QString(argv[0]); // append command name
-    else
-	channel += QString(argv[0]).lower(); // append command name
-#endif
     channel.replace(QRegExp(".*/"),"");
     d->appName = channel;
     channel = "QPE/Application/" + channel;
     pidChannel = new QCopChannel( channel, this);
-    connect( pidChannel, SIGNAL(received(const QCString &, const QByteArray &)),
-	    this, SLOT(pidMessage(const QCString &, const QByteArray &)));
+    connect( pidChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	    this, SLOT(pidMessage(const QCString&,const QByteArray&)));
 
     processQCopFile();
     d->keep_running = d->qcopq.isEmpty();
@@ -974,35 +1286,13 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 
 #ifndef QT_NO_TRANSLATION
     QStringList qms;
+    qms << "qt";
     qms << "libqpe";
     qms << "libqtopia";
+    qms << "libqtopia2";
     qms << d->appName;
 
-    QStringList langs = Global::languageList();
-
-    for (QStringList::ConstIterator it = langs.begin(); it!=langs.end(); ++it) {
-	QString lang = *it;
-
-	QTranslator * trans;
-	QString tfn;
-
-	for (QStringList::ConstIterator qmit = qms.begin(); qmit!=qms.end(); ++qmit) {
-	    trans = new QTranslator(this);
-	    tfn = qpeDir() + "i18n/" + lang + "/" + *qmit + ".qm";
-	    if ( trans->load( tfn ))
-		installTranslator( trans );
-	    else
-		delete trans;
-	}
-
-	//###language/font hack; should look it up somewhere
-#ifdef Q_WS_QWS
-	if ( lang == "ja" || lang == "zh_CN" || lang == "zh_TW" || lang == "ko" ) {
-	    QFont fn = FontManager::unicodeFont( FontManager::Proportional );
-	    setFont( fn );
-	}
-#endif
-    }
+    loadTranslations(qms);
 #endif
 
     applyStyle();
@@ -1027,6 +1317,7 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     // if we have no cursor, probably don't want tooltips
     QToolTip::setEnabled( FALSE );
 #endif
+
 }
 
 
@@ -1049,13 +1340,14 @@ void QPEApplication::initApp( int argc, char **argv )
 #endif
     channel.replace(QRegExp(".*/"),"");
     d->appName = channel;
+    loadTranslations(QStringList()<<channel);
 
     qt_fbdpy->setIdentity( channel ); // In Qt/E 2.3.6
 
     channel = "QPE/Application/" + channel;
     pidChannel = new QCopChannel( channel, this);
-    connect( pidChannel, SIGNAL(received(const QCString &, const QByteArray &)),
-	    this, SLOT(pidMessage(const QCString &, const QByteArray &)));
+    connect( pidChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	    this, SLOT(pidMessage(const QCString&,const QByteArray&)));
 
     processQCopFile();
     d->keep_running = d->qcopq.isEmpty();
@@ -1075,16 +1367,31 @@ void QPEApplication::initApp( int argc, char **argv )
 	}
     }
 
+#ifdef QPE_LAZY_APPLICATION_SHUTDOWN
+    if (!d->preloaded) {
+	d->preloaded = TRUE;
+	d->forceshow = TRUE;
+    }
+#endif
+
     /* overide stored arguments */
     setArgs(argc, argv);
 }
 #endif
 
-static QPtrDict<void>* inputMethodDict=0;
+struct InputMethodHintRec {
+    InputMethodHintRec(QPEApplication::InputMethodHint h, const QString& p) :
+	hint(h), param(p) {}
+    QPEApplication::InputMethodHint hint;
+    QString param;
+};
+static QPtrDict<InputMethodHintRec>* inputMethodDict=0;
 static void createInputMethodDict()
 {
-    if ( !inputMethodDict )
-	inputMethodDict = new QPtrDict<void>;
+    if ( !inputMethodDict ) {
+	inputMethodDict = new QPtrDict<InputMethodHintRec>;
+	inputMethodDict->setAutoDelete(TRUE);
+    }
 }
 
 /*!
@@ -1095,20 +1402,79 @@ static void createInputMethodDict()
 */
 QPEApplication::InputMethodHint QPEApplication::inputMethodHint( QWidget* w )
 {
-    if ( inputMethodDict && w )
-	return (InputMethodHint)(int)inputMethodDict->find(w);
+    if ( inputMethodDict && w ) {
+	InputMethodHintRec* r = inputMethodDict->find(w);
+	if ( r ) return r->hint;
+    }
     return Normal;
+}
+
+/*!
+  Returns the currently set hint parameter for
+  widget \a w.
+
+  \sa setInputMethodHint() InputMethodHint
+*/
+QString QPEApplication::inputMethodHintParam( QWidget* w )
+{
+    if ( inputMethodDict && w ) {
+	InputMethodHintRec* r = inputMethodDict->find(w);
+	if ( r ) return r->param;
+    }
+    return QString::null;
 }
 
 /*!
     \enum QPEApplication::InputMethodHint
 
-    \value Normal the application sometimes needs text input (the default).
-    \value AlwaysOff the application never needs text input.
-    \value AlwaysOn the application always needs text input.
+    \value Normal the widget sometimes needs text input.
+    \value AlwaysOff the widget never needs text input.
+    \value AlwaysOn the widget always needs text input.
+    \value Number the widget needs numeric input.
+    \value PhoneNumber the widget needs phone-style numeric input.
+    \value Words the widget needs word input.
+    \value Text the widget needs non-word input.
+    \value Named the widget needs special input, defined by param.
+	Each input method may support a different range of special
+	input types, but will default to Text if they do not know the
+	type.
+
+    By default, QLineEdit and QMultiLineEdit have the Words hint
+    unless they have a QIntValidator, in which case they have the Number hint.
+    This is appropriate for most cases, including the input of names (new
+    names being added to the user's dictionary).
+    All other widgets default to Normal mode.
 
     \sa inputMethodHint() setInputMethodHint()
 */
+
+/*!
+  Hints to the system that widget \a w has use for the text input method
+  specified by \a named. Such methods are input-method-specific and
+  are defined by the files in $QPEDIR/etc/im/ for each input method.
+
+  For example, the phone key input method includes support for the
+  names input methods:
+
+\list
+  \i "email"
+  \i "netmask"
+  \i "url"
+\endlist
+
+  The effect in the phone key input method is to modify the binding of
+  phone keys to characters (such as making "@" easier to input), and to
+  add additional "words" to the recognition word lists (such as "www").
+
+  If the current input method doesn't understand the hint, it will be
+  ignored.
+
+  \sa inputMethodHint() InputMethodHint
+*/
+void QPEApplication::setInputMethodHint( QWidget *w, const QString& named )
+{
+    setInputMethodHint(w,Named,named);
+}
 
 /*!
   Hints to the system that widget \a w has use for text input methods
@@ -1116,20 +1482,33 @@ QPEApplication::InputMethodHint QPEApplication::inputMethodHint( QWidget* w )
 
   \sa inputMethodHint() InputMethodHint
 */
-void QPEApplication::setInputMethodHint( QWidget* w, InputMethodHint mode )
+void QPEApplication::setInputMethodHint( QWidget* w, InputMethodHint mode, const QString& param )
 {
     createInputMethodDict();
     if ( mode == Normal ) {
 	inputMethodDict->remove(w);
     } else {
-	inputMethodDict->insert(w,(void*)mode);
+	InputMethodHintRec *r = inputMethodDict->find(w);
+	if ( r ) {
+	    r->hint = mode;
+	    r->param = param;
+	} else {
+	    r = new InputMethodHintRec(mode,param);
+	    inputMethodDict->replace(w,r);
+	}
     }
+#ifdef QTOPIA_INTERNAL_SENDINPUTHINT
+    if ( w->hasFocus() )
+	sendInputHintFor(w,QEvent::None);
+#endif
 }
 
 class HackDialog : public QDialog
 {
 public:
-    void acceptIt() { accept(); }
+    void acceptIt() {
+	qDebug("hack accept");
+	accept(); }
     void rejectIt() { reject(); }
 };
 
@@ -1148,6 +1527,8 @@ void QPEApplication::mapToDefaultAction( QWSKeyEvent *ke, int key )
 
 #ifdef Q_WS_QWS
     ke->simpleData.keycode = key;
+#else
+    Q_UNUSED( ke );
 #endif
 }
 
@@ -1168,6 +1549,7 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 	if ( d->kbgrabber == 1 )
 	    return TRUE;
 	QWSKeyEvent *ke = (QWSKeyEvent *)e;
+#ifndef QTOPIA_PHONE
 	if ( ke->simpleData.keycode == Qt::Key_F33 ) {
 	    // Use special "OK" key to press "OK" on top level widgets
 	    QWidget *active = activeWindow();
@@ -1183,7 +1565,12 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 			popup->close();
 		    if ( active->inherits( "QDialog" ) ) {
 			HackDialog *d = (HackDialog *)active;
-			d->acceptIt();
+#ifdef QTOPIA_PHONE
+			if (isMenuLike(d))
+			    d->rejectIt();
+			else
+#endif
+			    d->acceptIt();
 			return TRUE;
 		    } else if ( ((HackWidget *)active)->needsOk() ) {
 			QSignal s;
@@ -1214,6 +1601,62 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 		}
 	    }
 	}
+#else
+# ifdef QT_QWS_SL5XXX
+	if ( ke->simpleData.keycode == Qt::Key_F33 )
+	    ke->simpleData.keycode = Qt::Key_Back;
+	else if (ke->simpleData.keycode == Qt::Key_F30)
+	    ke->simpleData.keycode = Qt::Key_Select;
+	else if (ke->simpleData.keycode == Qt::Key_Escape)
+	    ke->simpleData.keycode = Qt::Key_Back;
+# endif
+
+	if (ke->simpleData.keycode == Qt::Key_Back ||
+	    ke->simpleData.keycode == Qt::Key_No) {
+	    QWidget *active = activeWindow();
+	    QWidget *popup = 0;
+	    if ( active && active->isPopup() ) {
+		popup = active;
+		active = active->parentWidget();
+	    } else if (active) {
+		// If the focus widget (or parent) requires the context key
+		// then we can't close the dialog.
+		QWidget *focus = active->focusWidget();
+		if (focus) {
+		    QWidget *tw =
+			ContextKeyManager::instance()
+			    ->findTargetWidget(focus, ke->simpleData.keycode,
+				(mousePreferred || focus->isModalEditing())
+				);
+		    if ( tw && tw != active )
+			active = 0;
+		}
+	    }
+
+	    if ( active && (int)active->winId() == ke->simpleData.window &&
+		 !active->testWFlags( WStyle_Customize|WType_Popup|WType_Desktop )) {
+		if ( ke->simpleData.is_press ) {
+		    if ( popup )
+			popup->close();
+		    bool qt_singleFocusWidget(const QWidget *in); // qwidget.cpp
+		    if ( active->inherits( "QDialog" )
+			&& (mousePreferred || (!active->editingWidget()
+			    || qt_singleFocusWidget(active->editingWidget())))
+			&& ke->simpleData.keycode != Qt::Key_No
+			&& active->testWFlags(WType_Modal))
+		    {
+			HackDialog *d = (HackDialog *)active;
+			if (isMenuLike(d)) {
+			    d->rejectIt();
+			} else {
+			    d->acceptIt();
+			}
+			return TRUE;
+		    }
+		}
+	    }
+	}
+#endif
 
 #if QT_VERSION < 231
 	// Filter out the F4/Launcher key from apps
@@ -1247,7 +1690,7 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 	} else {
 	    // make sure our modal widget is ALWAYS on top
 	    QWidget *topm = activeModalWidget();
-	    if ( topm ) {
+	    if ( topm && (int)topm->winId() != fe->simpleData.window) {
 		topm->raise();
 	    }
 	    if ( d->kbregrab ) {
@@ -1263,7 +1706,7 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 		Global::showInputMethod();
 	}
     }
-
+    
     return QApplication::qwsEventFilter( e );
 }
 #endif
@@ -1290,6 +1733,9 @@ QPEApplication::~QPEApplication()
     delete sysChannel;
     delete pidChannel;
 #endif
+#ifdef QTOPIA_PHONE
+    delete d->editMenu;
+#endif
     delete d;
 }
 
@@ -1298,48 +1744,12 @@ QPEApplication::~QPEApplication()
 */
 QString QPEApplication::qpeDir()
 {
+#ifdef QTOPIA_DESKTOP
+    return gQtopiaDesktopConfig->installedDir();
+#endif
+
 #ifdef Q_WS_QWS
-    QString base, dir;
-    if (getenv( "QPEDIR" ))
-    	base = QString(getenv("QPEDIR")).stripWhiteSpace();
-    if ( !base.isNull() && (base.length() > 0 )){
-#ifdef Q_OS_WIN32
-	QString temp(base);
-	if (temp[(int)temp.length()-1] != QDir::separator())
-	    temp.append(QDir::separator());
-	dir = temp;
-#else
-	dir = QString( base ) + "/";
-#endif
-    }else{
-	dir = QString( ".." ) + QDir::separator();
-    }
-
-    return dir;
-#elif defined(QTOPIA_DESKTOP)
-
-#ifdef __GNUG__
-#warning "Should be able to change given a 'developing' parameter"
-// qtopiadesktop has a 'debug' parameter, but we can't/shouldn't get it here.
-#endif
-
-    QSettings settings;
-    settings.insertSearchPath( QSettings::Unix,
-	    QDir::homeDirPath() + "/.palmtopcenter/" );
-    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
-
-    QString key = "/palmtopcenter/qtopiadir";
-    bool okay;
-    QString dir = settings.readEntry(key, QString::null, &okay) + "/";
-    if (!okay || dir.isNull()) {
-	dir = "/opt/Qtopia/qtopiadesktop";
-	settings.writeEntry( key, dir);
-    }
-
-    return dir;
-#else
-    qWarning("Cannot determine the install path");
-    return QString::null;
+    return *global_qtopiapaths().begin();
 #endif // Q_WS_QWS
 }
 
@@ -1348,10 +1758,7 @@ QString QPEApplication::qpeDir()
 */
 QString QPEApplication::documentDir()
 {
-    QString r = QDir::homeDirPath();
-#ifdef QTOPIA_DESKTOP
-    r += "/.palmtopcenter/";
-#endif
+    QString r = ::qtopia_internal_homeDirPath();
 
     QString base = r;
     if (base.length() > 0){
@@ -1389,11 +1796,21 @@ int QPEApplication::defaultRotation()
 /*!
   \internal
 */
+
+#ifdef Q_WS_QWS
+extern int qws_display_id;
+#endif
+
+/*!
+  Rotates Qtopia by \a r degrees. 
+*/
 void QPEApplication::setDefaultRotation(int r)
 {
     if ( qApp->type() == GuiServer ) {
 	deforient = r;
-	setenv("QWS_DISPLAY", QString("Transformed:Rot%1:0").arg(r).latin1(), 1);
+#if defined(Q_WS_QWS) && !defined(Q_OS_WIN32)
+	setenv("QWS_DISPLAY", QString("Transformed:Rot%1:%2").arg(r).arg(qws_display_id).latin1(), 1);
+#endif
 	Config config("qpe");
         config.setGroup( "Rotation" );
 	config.writeEntry( "Screen", getenv("QWS_DISPLAY") );
@@ -1405,47 +1822,162 @@ void QPEApplication::setDefaultRotation(int r)
     }
 }
 
+
+#define setPaletteEntry(pal, cfg, role, defaultVal) \
+    setPalEntry(pal, cfg, #role, QColorGroup::role, defaultVal)
+static void setPalEntry( QPalette &pal, const Config &config, const QString &entry,
+				QColorGroup::ColorRole role, const QString &defaultVal )
+{
+    QString value =
+	((Config*)&config)-> // FIX in Qtopia 4 (no need to cast)
+	readEntry( entry, defaultVal );
+    if ( value[0] == '#' )
+	pal.setColor( role, QColor(value) );
+    else {
+	QPixmap pix;
+#ifdef SIZE_WALLPAPER_TO_DESKTOP_SIZE  // Disabled at the moment
+	QSize siz = qApp->desktop()->size();
+	int wid = siz.width(), h = siz.height();
+	pix = Resource::loadImage(value).smoothScale(wid,h);
+#endif
+	pix = Resource::loadPixmap(value);
+	pal.setBrush( role, QBrush(QColor(defaultVal), pix) );
+    }
+}
+
+
 /*!
   \internal
 */
 void QPEApplication::applyStyle()
 {
+#ifdef Q_WS_QWS
+    QString styleName;
     Config config( "qpe" );
 
     config.setGroup( "Appearance" );
 
+#ifdef QTOPIA_PHONE
+    QString theme = config.readEntry("Theme", "qtopia.conf");
+    QString themeDir = QPEApplication::qpeDir() + "etc/themes/";
+    theme = theme.replace(QRegExp("\\.desktop"), ".conf"); // backwards compat
+
+    if (theme.isEmpty() || !QFile::exists(themeDir + theme))
+	theme = "qtopia.conf";
+
+    Config themeCfg(themeDir + theme, Config::File);
+    themeCfg.setGroup("Theme");
+
+    // Update the icon path
+    bool iconsChanged = FALSE;
+    QStringList extraPath = qpe_pathCache[Resource::PixResource];
+    if (d->iconPath.count()) {
+	// remove paths that the last theme set
+	QStringList::Iterator it;
+	for (it = d->iconPath.begin(); it != d->iconPath.end(); ++it) {
+	    extraPath.remove(QPEApplication::qpeDir() + *it);
+	    extraPath.remove(*it);
+	}
+	iconsChanged = TRUE;
+    }
+
+    d->iconPath = themeCfg.readListEntry("IconPath", ';');
+    if (d->iconPath.count())
+	iconsChanged = TRUE;
+    extraPath += d->iconPath;
+    qpe_pathCache[Resource::PixResource].clear();
+    for (QStringList::ConstIterator prefix = extraPath.begin(); prefix!=extraPath.end(); ++prefix) {
+	QString resourcePath = QPEApplication::qpeDir() + *prefix;
+	if (QFile::exists(resourcePath)) {
+	    qpe_pathCache[Resource::PixResource].append(resourcePath);
+	} else {
+	    if (QFile::exists( *prefix ))
+		qpe_pathCache[Resource::PixResource].append( *prefix );
+	}
+    }
+
+    if (iconsChanged)
+	QPixmapCache::clear();
+
+    styleName = config.readEntry( "Style", "phonestyle" );
+#else
+    styleName = config.readEntry( "Style", "Qtopia" );
+#endif
     // Widget style
-    QString style = config.readEntry( "Style", "Qtopia" );
-    internalSetStyle( style );
+    internalSetStyle( styleName );
 
     // Colors
-    QColor bgcolor( config.readEntry( "Background", "#E5E1D5" ) );
-    QColor btncolor( config.readEntry( "Button", "#D6CDBB" ) );
-    QPalette pal( btncolor, bgcolor );
-    QString color = config.readEntry( "Highlight", "#800000" );
-    pal.setColor( QColorGroup::Highlight, QColor(color) );
-    color = config.readEntry( "HighlightedText", "#FFFFFF" );
+    // This first bit is same as settings/appearence/appearence.cpp, readColorScheme()
+    QPalette tempPal;
+    setPaletteEntry( tempPal, config, Button, "#F0F0F0" );
+    setPaletteEntry( tempPal, config, Background, "#EEEEEE" );
+    QPalette pal( tempPal.normal().button(), tempPal.normal().background() );
+    setPaletteEntry( pal, config, Button, "#F0F0F0" );
+    setPaletteEntry( pal, config, Background, "#EEEEEE" );
+    setPaletteEntry( pal, config, Base, "#FFFFFF" );
+    setPaletteEntry( pal, config, Highlight, "#8BAF31" );
+    setPaletteEntry( pal, config, Foreground, "#000000" );
+    QString color = config.readEntry( "HighlightedText", "#FFFFFF" );
     pal.setColor( QColorGroup::HighlightedText, QColor(color) );
     color = config.readEntry( "Text", "#000000" );
     pal.setColor( QColorGroup::Text, QColor(color) );
     color = config.readEntry( "ButtonText", "#000000" );
     pal.setColor( QPalette::Active, QColorGroup::ButtonText, QColor(color) );
-    color = config.readEntry( "Base", "#FFFFFF" );
-    pal.setColor( QColorGroup::Base, QColor(color) );
 
-    pal.setColor( QPalette::Disabled, QColorGroup::Text,
-		  pal.color(QPalette::Active, QColorGroup::Background).dark() );
+    QString val = config.readEntry( "Shadow" );
+    if (!val.isEmpty()) {
+	pal.setColor( QColorGroup::Shadow, QColor(val));
+    } else {
+	pal.setColor( QColorGroup::Shadow,
+	    pal.color(QPalette::Normal, QColorGroup::Button).dark(400) );
+    }
+
+    val = config.readEntry( "Text_disabled" );
+    if (!val.isEmpty()) {
+	pal.setColor( QPalette::Disabled, QColorGroup::Text, QColor(val));
+    } else {
+	pal.setColor( QPalette::Disabled, QColorGroup::Text,
+	    pal.color(QPalette::Active, QColorGroup::Base).dark() );
+    }
+
+    val = config.readEntry( "Foreground_disabled" );
+    if (!val.isEmpty()) {
+	pal.setColor( QPalette::Disabled, QColorGroup::Foreground, QColor(val));
+    } else {
+	pal.setColor( QPalette::Disabled, QColorGroup::Foreground,
+	    pal.color(QPalette::Active, QColorGroup::Background).dark() );
+    }
 
     setPalette( pal, TRUE );
 
-#ifdef Q_WS_QWS
+    color = config.readEntry( "AlternateBase", "#EEF5D6" );
+    if ( color[0] == '#' )
+	style().setExtendedBrush(QStyle::AlternateBase, QColor(color));
+    else {
+	QPixmap pix;
+#ifdef SIZE_WALLPAPER_TO_DESKTOP_SIZE  // Disabled at the moment
+	QSize siz = qApp->desktop()->size();
+	int wid = siz.width(), h = siz.height();
+	pix = Resource::loadImage(color).smoothScale(wid,h);
+#endif
+	pix = Resource::loadPixmap(color);
+	style().setExtendedBrush(QStyle::AlternateBase, QBrush(QColor("#EEF5D6"),pix));
+    }
+
+    // Unpublished feature for now, since current windows will be broken.
+    // Need to go through all windows and poke QScrollViews to updateScrollbars.
+    extern bool qt_left_hand_scrollbars;
+    int lh = config.readNumEntry( "LeftHand", 0 );
+    qt_left_hand_scrollbars = lh;
+
     // Window Decoration
     QString dec = config.readEntry( "Decoration", "Qtopia" );
-    if ( dec != d->decorationName ) {
+    QString decTheme = config.readEntry( "DecorationTheme", "" );
+    if ( dec != d->decorationName || !decTheme.isEmpty()) {
 	qwsSetDecoration( new QPEDecoration( dec ) );
 	d->decorationName = dec;
+	d->decorationTheme = decTheme;
     }
-#endif
 
     // Font
     QString ff = config.readEntry( "FontFamily", font().family() );
@@ -1464,6 +1996,14 @@ void QPEApplication::applyStyle()
     }
 
     setFont( fn, TRUE );
+
+#ifdef QTOPIA_PHONE
+    if ( styleName == "phonestyle" || styleName == "Qtopia" ) {
+	QString path = themeCfg.readEntry("WidgetConfig");
+	((PhoneStyle*)&style())->setTheme(!!path ? themeDir+path : path);
+    }
+#endif
+#endif
 }
 
 void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
@@ -1520,6 +2060,9 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
     } else if ( msg == "quit()" ) {
 	if ( type() != GuiServer )
 	    tryQuit();
+    } else if ( msg == "close()" ) {
+	if ( type() != GuiServer )
+	    hideOrQuit();
     } else if ( msg == "forceQuit()" ) {
 	if ( type() != GuiServer )
 	    quit();
@@ -1539,6 +2082,7 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	if ( type() == GuiServer ) {
 	    QString l;
 	    stream >> l;
+	    l += ".utf8";
 	    QString cl = getenv("LANG");
 	    if ( cl != l ) {
 		if ( l.isNull() )
@@ -1549,15 +2093,19 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	    }
 	}
     } else if ( msg == "timeChange(QString)" ) {
-	d->skiptimechanged++;
-	QString t;
-	stream >> t;
-	if ( t.isNull() )
-	    unsetenv( "TZ" );
-	else
-	    setenv( "TZ", t.latin1(), 1 );
-	// emit the signal so everyone else knows...
-	emit timeChanged();
+	// doesn't make sense to do this if quicklauncher,
+	// and may steal call to something that needs it.
+	if (d->appName != "quicklauncher") {
+	    d->skiptimechanged++;
+	    QString t;
+	    stream >> t;
+	    if ( t.isNull() )
+		unsetenv( "TZ" );
+	    else
+		setenv( "TZ", t.latin1(), 1 );
+	    // emit the signal so everyone else knows...
+	    emit timeChanged();
+	}
     } else if ( msg =="categoriesChanged()" ) {
 	emit categoriesChanged();
     } else if ( msg == "addAlarm(QDateTime,QCString,QCString,int)" ) {
@@ -1596,10 +2144,15 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	}
 	emit volumeChanged( qtopia_muted );
     } else if ( msg == "volumeChange(bool)" ) {
-	stream >> qtopia_muted;
+        stream >> qtopia_muted;
 	if ( type() == GuiServer ) {
+            {
+            Config cfg("Sound");
+            cfg.setGroup("System");
+            cfg.writeEntry("Muted",qtopia_muted);
+            }
 	    setVolume();
-	}
+        }
 	emit volumeChanged( qtopia_muted );
     } else if ( msg == "flush()" ) {
 	emit flush();
@@ -1640,7 +2193,31 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	    processQCopFile();
 	    d->sendQCopQ();
 	}
+    } else if ( msg == "wordsChanged(QString,int)" ) {
+	QString dictname;
+	int pid;
+	stream >> dictname >> pid;
+	void qtopia_reload_words(const QString& dictname); // global.cpp
+	if ( pid != getpid() ) {
+	    qDebug("Reload words '%s' (I am %d, not %d)",
+		dictname.latin1(),getpid(),pid);
+	    qtopia_reload_words(dictname);
+	}
+    } else if ( msg == "RecoverMemory()" ) {
+	if (qApp->type() != GuiServer) {
+	    QPixmapCache::clear();
+	}
+    } 
+#ifdef QTOPIA_PHONE
+    else if ( msg == "updateContextBar()" ) {
+	if (activeWindow() && focusWidget()) {
+	    ContextKeyManager::instance()->updateContextLabels();
+	}
     }
+#endif
+#else
+    Q_UNUSED( msg );	
+    Q_UNUSED( data );	
 #endif
 }
 
@@ -1650,10 +2227,11 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 bool QPEApplication::raiseAppropriateWindow()
 {
     bool r=FALSE;
-    // ########## raise()ing main window should raise and set active
-    // ########## it and then all childen. This belongs in Qt/Embedded
+
+    // 1. Raise the main widget
     QWidget *top = d->qpe_main_widget;
-    if ( !top ) top =mainWidget();
+    if ( !top ) top = mainWidget();
+
     if ( top && d->keep_running ) {
 	if ( top->isVisible() )
 	    r = TRUE;
@@ -1667,22 +2245,56 @@ bool QPEApplication::raiseAppropriateWindow()
 
 	d->show_mx(top,d->nomaximize, d->appName);
 	top->raise();
-	top->setActiveWindow();
     }
+
     QWidget *topm = activeModalWidget();
+
+    // 2. Raise any parentless widgets (except top and topm, as they
+    //     are raised before and after this loop).  Order from most
+    //     recently raised as deepest to least recently as top, so
+    //     that repeated calls cycle through widgets.
+    QWidgetList *list = topLevelWidgets();
+    if ( list ) {
+	bool foundlast = FALSE;
+	QWidget* topsub = 0;
+	if ( d->lastraised ) {
+	    for (QWidget* w = list->first(); w; w = list->next()) {
+		if ( !w->parentWidget() && w != top && w != topm && w->isVisible() && !w->isDesktop() ) {
+		    if ( w == d->lastraised )
+			foundlast = TRUE;
+		    if ( foundlast ) {
+			w->raise();
+			topsub = w;
+		    }
+		}
+	    }
+	}
+	for (QWidget* w = list->first(); w; w = list->next()) {
+	    if ( !w->parentWidget() && w != top && w != topm && w->isVisible() && !w->isDesktop() ) {
+		if ( w == d->lastraised )
+		    break;
+		w->raise();
+		topsub = w;
+	    }
+	}
+	d->lastraised = topsub;
+	delete list;
+    }
+
+    // 3. Raise the active modal widget.
     if ( topm && topm != top ) {
 	topm->show();
 	topm->raise();
-	topm->setActiveWindow();
 	// If we haven't already handled the fastAppShowing message
 	if (!top && d->preloaded) {
 #ifndef QT_NO_COP
 	    QCopEnvelope e("QPE/System", "fastAppShowing(QString)");
 	    e << d->appName;
-#endif
+#endif           
 	}
 	r = FALSE;
     }
+
     return r;
 }
 
@@ -1701,8 +2313,10 @@ void QPEApplication::pidMessage( const QCString &msg, const QByteArray & data)
 	d->keep_running = TRUE;
 	/* so that quit will quit */
     } else if ( msg == "enablePreload()" ) {
-	if (d->qpe_main_widget)
+	if (d->qpe_main_widget) {
 	    d->preloaded = TRUE;
+	    d->forceshow = FALSE;
+	}
 	d->keep_running = TRUE;
 	/* so next quit won't quit */
     } else if ( msg == "raise()" ) {
@@ -1771,6 +2385,9 @@ void QPEApplication::pidMessage( const QCString &msg, const QByteArray & data)
 	if ( p )
 	    d->keep_running = p;
     }
+#else
+    Q_UNUSED( msg );	
+    Q_UNUSED( data );	
 #endif
 }
 
@@ -1844,12 +2461,24 @@ bool QPEApplication::keepRunning() const
 void QPEApplication::internalSetStyle( const QString &style )
 {
 #ifdef Q_WS_QWS
-    if ( style == d->styleName )
-	return;
+    if (style != "themedstyle"){
+	if ( style == d->styleName)
+	    return;
+    }else{
+	Config config( "qpe" );
+	config.setGroup( "Appearance" );
+	// For the Pixmap style we must remove the existing style here for theme changes to take effect
+	setStyle( new QWindowsStyle );
+#if QT_VERSION < 300
+	if ( d->styleIface )
+	    d->styleLoader.releaseInterface( d->styleIface );
+	d->styleIface = 0;
+#endif
+    }
 
     QStyle *newStyle = 0;
 
-#if QT_VERSION >= 0x030000
+#if QT_VERSION >= 300
     if ( style == "QPE"  || style == "Qtopia" ) {
 	newStyle = new QPEStyle;
     } else {
@@ -1861,8 +2490,14 @@ void QPEApplication::internalSetStyle( const QString &style )
 
     if ( style == "Windows" ) { // No tr
 	newStyle = new QWindowsStyle;
-    } else if ( style == "QPE" || style == "Qtopia" ) {
+    } else if ( style == "QPE" || style == "Qtopia" 
+# ifdef QTOPIA_PHONE
+	    || style == "phonestyle" ) {
+	newStyle = new PhoneStyle;
+# else
+	) {
 	newStyle = new QPEStyle;
+# endif
     } else {
 	if ( !d->styleLoader.inSafeMode() && d->styleLoader.isEnabled( style ) ) {
 	    StyleInterface *iface = 0;
@@ -1875,18 +2510,27 @@ void QPEApplication::internalSetStyle( const QString &style )
 #endif
 
     if ( !newStyle ) {
+#ifdef QTOPIA_PHONE
+	newStyle = new PhoneStyle;
+#else
 	newStyle = new QPEStyle;
+#endif
 	d->styleName = "QPE";
     } else {
 	d->styleName = style;
     }
-    setStyle( newStyle );
 
-#if QT_VERSION < 0x030000
+    if (&qApp->style() != newStyle)
+	setStyle( newStyle );
+
+
+#if QT_VERSION < 300
     // cleanup old plugin.
     if ( oldIface )
 	d->styleLoader.releaseInterface( oldIface );
 #endif
+#else
+    Q_UNUSED( style );
 #endif
 }
 
@@ -1924,7 +2568,7 @@ void QPEApplication::prepareForTermination(bool willrestart)
 #ifndef Q_OS_WIN32
     sleep(1); // You have 1 second to comply.
 #else
-    Sleep(1000);
+    Global::sleep(1); // In libqtopia2
 #endif
 #endif
 }
@@ -1992,6 +2636,17 @@ void QPEApplication::setStylusOperation( QWidget* w, StylusMode mode )
     }
 }
 
+static QPtrDict<QString>* imdict=0;
+
+void QPEApplication::removeSenderFromIMDict()
+{
+#ifdef QTOPIA_PHONE
+    imdict->remove((void*)sender());
+#else
+    Q_UNUSED(imdict);
+#endif
+}
+
 
 /*!
   \reimp
@@ -2009,25 +2664,22 @@ bool QPEApplication::eventFilter( QObject *o, QEvent *e )
 	    switch ( me->type() ) {
 	      case QEvent::MouseButtonPress:
 		if ( me->button() == LeftButton ) {
+		    d->presstick = npressticks;
 		    if ( !d->presstimer )
-			d->presstimer = startTimer(500); // #### pref.
+			d->presstimer = startTimer(500/d->presstick); // #### pref.
 		    d->presswidget = (QWidget*)o;
 		    d->presspos = me->pos();
 		    d->rightpressed = FALSE;
 		}
 		break;
 	      case QEvent::MouseMove:
-		if (d->presstimer && (me->pos()-d->presspos).manhattanLength() > 8) {
-		    killTimer(d->presstimer);
-		    d->presstimer = 0;
-		}
+		if (d->presstimer && (me->pos()-d->presspos).manhattanLength() > 8)
+		    d->cancelPressAndHold();
 		break;
 	      case QEvent::MouseButtonRelease:
 		if ( me->button() == LeftButton ) {
-		    if ( d->presstimer ) {
-			killTimer(d->presstimer);
-			d->presstimer = 0;
-		    }
+		    if ( d->presstimer )
+			d->cancelPressAndHold();
 		    if ( d->rightpressed && d->presswidget ) {
 			// Right released
 			postEvent( d->presswidget,
@@ -2054,17 +2706,318 @@ bool QPEApplication::eventFilter( QObject *o, QEvent *e )
 	}
     } else if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
 	QKeyEvent *ke = (QKeyEvent *)e;
-	if ( ke->key() == Key_Enter ) {
-	    if ( o->isA( "QRadioButton" ) || o->isA( "QCheckBox" ) ) {
+	if ( ke->key() == Key_Enter ) 
+	{
+	    if ( o->isA( "QRadioButton" ) || o->isA( "QCheckBox" ) ) 
+	    {
 		postEvent( o, new QKeyEvent( e->type(), Key_Space, ' ',
 		    ke->state(), " ", ke->isAutoRepeat(), ke->count() ) );
 		return TRUE;
 	    }
 	}
+#ifdef QTOPIA_PHONE
+	else if ( !mousePreferred && (ke->key() == Key_Left || ke->key() == Key_Right || ke->key() == Key_Up || ke->key() == Key_Down)) 
+	{
+	    if (o->inherits("QLineEdit")) 
+	    {
+		QLineEdit *l = (QLineEdit*)o;
+		if ( l->isModalEditing() ) 
+		{
+		    if (l->text().length() == 0 || l->isReadOnly())
+			ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::Cancel);
+		    else if (l->cursorPosition() == 0)
+			ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::NoLabel);
+		    else
+			ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::BackSpace);
+		}
+	    } else if (o->inherits("QMultiLineEdit")) {
+		QMultiLineEdit *l = (QMultiLineEdit*)o;
+		if (  l->isModalEditing() ) 
+		{
+		    if (l->length() == 0 || l->isReadOnly()) 
+		    {
+			ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::Cancel);
+		    } 
+		    else 
+		    {
+			int line, col;
+			l->getCursorPosition(&line, &col);
+			if (!line && !col)
+			    ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::NoLabel);
+			else
+			    ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::BackSpace);
+		    }
+		}
+	    }
+	} // end else if cursor dir.
+	else if (ke->key() == ContextMenu::key()) {
+	    QWidget *w = (QWidget *)o;
+	    QWidget *cw = ContextKeyManager::instance()->findTargetWidget(w, 
+			ke->key(), mousePreferred || w->isModalEditing());
+	    if (cw && cw != w) 
+	    {
+		qDebug("redirect to: %s from %s", cw->className(), w->className());
+		sendEvent(cw,e);
+		return TRUE;
+	    }
+	} // end elsif menu key
+#endif  // end QTOPIA_PHONE
+    } // end else if key event.
+#if defined(QTOPIA_INTERNAL_SENDINPUTHINT) || defined(QTOPIA_PHONE)
+    else if ( e->type() == QEvent::FocusIn 
+#ifdef QTOPIA_PHONE
+	      || (!mousePreferred && (e->type() == QEvent::EnterModalEdit ||
+	      e->type() == QEvent::LeaveModalEdit)) 
+#endif
+	      ) {
+
+	QWidget *w = (QWidget *)o;
+
+	if (!activeWindow())
+	    return FALSE;
+
+	sendInputHintFor(w, e->type());
+#ifdef QTOPIA_PHONE
+	if ( (mousePreferred || w->isModalEditing()) && 
+		(w->inherits("QLineEdit") || w->inherits("QMultiLineEdit"))) {
+	    if (!ContextMenu::internalMenuFor(w, ContextMenu::Modal)) {
+		if (!d->editMenu)
+		    d->editMenu = ContextMenu::createEditMenu(0, ContextMenu::Modal);
+		d->editMenu->addTo(w, ContextMenu::Modal);
+	    }
+	}
+#endif
     }
+#endif
+#ifdef QTOPIA_PHONE
+    else if ( e->type() == QEvent::FocusOut ) {
+	QWidget *w = (QWidget *)o;
+	if (!focusWidget() && w->topLevelWidget()->isVisible() && activeWindow()) {
+	    ContextKeyManager::instance()->updateContextLabels();
+	}
+	if (d->editMenu && (w->inherits("QLineEdit") || w->inherits("QMultiLineEdit")))
+	    d->editMenu->removeFrom(w);
+    } else if (e->type() == QEvent::Show && ((QWidget*)o)->isModal()) {
+	if (o->inherits("QMessageBox")) {
+	    QMessageBox *mb = (QMessageBox*)o;
+	    QPushButton *pb1 = (QPushButton*)mb->child("button1", "QPushButton"); // No tr
+	    QPushButton *pb2 = (QPushButton*)mb->child("button2", "QPushButton"); // No tr
+	    QPushButton *pb3 = (QPushButton*)mb->child("button3", "QPushButton"); // No tr
+	    if (mb->icon() == QMessageBox::Information)
+		mb->setIconPixmap(Resource::loadPixmap("alert_info"));
+	    else if (mb->icon() == QMessageBox::Warning)
+		mb->setIconPixmap(Resource::loadPixmap("alert_warning"));
+	    if (!pb3 && pb1) {
+		// We only handle MBs with 1 or 2 buttons.
+		// Currently we assume that the affirmative is pb1 and
+		// the negative is pb2.
+
+		// Calculate how big dlg is and resize to fit screen nicely.
+		QRect fg = mb->frameGeometry();
+		QRect cg = mb->geometry();
+		int maxX = desktop()->width() - (fg.width()-cg.width());
+		QLabel *label = (QLabel*)mb->child("text", "QLabel"); // No tr
+		int space = mb->width() - label->width();
+		int width = maxX - space - 2;
+		int reqHeight = QMAX(32,label->heightForWidth(width))+2*label->y();
+		mb->setMinimumSize(width, reqHeight);
+		QApplication::sendPostedEvents( this, QEvent::Resize );
+		if (reqHeight < qt_maxWindowRect.height()*3/4) {
+		    mb->setGeometry(cg.left()-fg.left(),
+			    qt_maxWindowRect.bottom() - reqHeight + 1,
+			    maxX, reqHeight);
+		} else {
+		    mb->showMaximized();
+		}
+		mb->setFocus();
+		if (label)
+		    label->resize(width, QMAX(label->font().pointSize()+4,label->heightForWidth(width)));
+		// Setup accels for buttons and hide the buttons.
+		pb1->setFocusPolicy(QWidget::NoFocus);
+		pb1->setDefault(FALSE);
+		int accel = 0;
+		if (pb2) {
+		    if (qpe_systemButtons().contains(Key_Yes)) {
+			accel = Key_Yes;
+		    } else {
+			const QArray<int> &cbtns = ContextBar::keys();
+			if (cbtns.count()) {
+			    if (cbtns[0] != Key_Back)
+				accel = cbtns[0];
+			    else if (cbtns.count() > 1)
+				accel = cbtns[cbtns.count()-1];
+			}
+		    }
+		}
+		if (accel) {
+		    pb1->setAccel(accel);
+		    ContextBar::setLabel(mb, accel, QString::null, pb1->text());
+		}
+		pb1->move(-1000, -1000);
+		if (pb2) {
+		    pb2->setFocusPolicy(QWidget::NoFocus);
+		    pb2->setDefault(FALSE);
+		    accel = qpe_systemButtons().contains(Key_No) ? Key_No : Key_Back;
+		    pb2->setAccel(accel);
+		    ContextBar::setLabel(mb, accel, QString::null, pb2->text());
+		    pb2->move(-1000, -1000);
+		}
+	    }
+	} else if (o->inherits("QDialog") && !qpe_systemButtons().contains(Key_No)) {
+	    QDialog *dlg = (QDialog *)o;
+	    if (!isMenuLike(dlg)) {
+		if (!dlg->testWFlags(WStyle_Customize) || dlg->testWFlags(WStyle_SysMenu)) {
+		    QObject *co = 0;
+		    QObjectList *childObjects = (QObjectList*)o->children();
+		    if (childObjects) {
+			for (co = childObjects->first(); co!=0; co = childObjects->next()) {
+			    if (co->isWidgetType() && co->isA("ContextMenu")) {
+				break;
+			    }
+			}
+		    }
+		    if (!co) {
+			// There is no context menu defined
+			(void)new ContextMenu((QWidget*)o);
+		    }
+		}
+	    }
+	}
+    }
+#endif  // QTOPIA_PHONE
 
     return FALSE;
 }
+
+#ifdef QTOPIA_INTERNAL_SENDINPUTHINT
+void QPEApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
+{
+#ifndef QTOPIA_PHONE
+    Q_UNUSED(etype);
+#endif
+    const QValidator* v = 0;
+    InputMethodHintRec *hr=0;
+    if ( inputMethodDict ) {
+	hr = inputMethodDict->find(w);
+	if ( !hr ) {
+	    QWidget* p = w->parentWidget();
+	    if ( p ) {
+		if ( p->focusProxy() == w ) {
+		    hr = inputMethodDict->find(p);
+		} else {
+		    p = p->parentWidget();
+		    if ( p && p->focusProxy() == w )
+			hr = inputMethodDict->find(p);
+		}
+	    }
+	}
+    }
+    int n = hr ? (int)hr->hint : 0;
+    if ( w->inherits("QLineEdit") ) {
+	QLineEdit* l = (QLineEdit*)w;
+	if ( !n && !l->isReadOnly()) {
+	    n = l->echoMode()==QLineEdit::Normal ? (int)Words : (int)Text;
+	    v = l->validator();
+	}
+#ifdef QTOPIA_PHONE
+	if( n && !mousePreferred ) {
+	    if (etype == QEvent::EnterModalEdit) {
+		connect(l, SIGNAL(textChanged(const QString&)),
+			qApp, SLOT(lineEditTextChange(const QString&)));
+	    } else if (etype == QEvent::LeaveModalEdit) {
+		disconnect(l, SIGNAL(textChanged(const QString&)),
+			qApp, SLOT(lineEditTextChange(const QString&)));
+	    }
+	}
+#endif
+    } else if ( w->inherits("QMultiLineEdit") ) {
+	QMultiLineEdit* l = (QMultiLineEdit*)w;
+	if ( !n && !l->isReadOnly()) {
+	    n = (int)Words;
+	    v = l->validator();
+	}
+#ifdef QTOPIA_PHONE
+	if( n && !mousePreferred ) {
+	    if (etype == QEvent::EnterModalEdit)
+		connect(l, SIGNAL(textChanged()),
+			qApp, SLOT(multiLineEditTextChange()));
+	    else if (etype == QEvent::LeaveModalEdit)
+		disconnect(l, SIGNAL(textChanged()),
+			qApp, SLOT(multiLineEditTextChange()));
+	}
+#endif
+    }
+    if ( !hr && v && v->inherits("QIntValidator") )
+	n = (int)Number;
+
+    Q_INT32 windowId = 0;
+    if (w) {
+	// popups don't send window active events... so need
+	// to find the window id for the actual active window,
+	// rather than that of the popup.
+	QWidget *p = w->topLevelWidget();;
+	while(p->isPopup() && p->parentWidget())
+	    p = p->parentWidget();
+	windowId = p->topLevelWidget()->winId();
+    }
+    // find ancestor.. top ancestor, then get its' window id
+    if ( n == Named ) {
+	QCopEnvelope env("QPE/IME", "inputMethodHint(QString,int)" );
+	env << (hr ? hr->param : QString::null);
+	env << windowId;
+    } else {
+	QCopEnvelope env("QPE/IME", "inputMethodHint(int,int)" );
+	env << n;
+	env << windowId;
+    }
+#ifdef QTOPIA_PHONE
+    if (qApp->focusWidget() == w && qApp->activeWindow()) {
+	ContextKeyManager::instance()->updateContextLabels();
+    }                    
+#endif
+}
+#endif
+
+#if defined(QTOPIA_PHONE) || defined(QTOPIA_TEST) // since not binary compatible
+/*!
+  \internal
+*/
+bool QPEApplication::notify(QObject* o, QEvent* e)
+{
+#if defined(QTOPIA_TEST)
+    QString objectName;
+    bool isMonitoring = FALSE; //racing condition
+    if ( hasPerfMonitor ) {
+        isMonitoring = TRUE;
+        objectName = o->className(); // save class name in case o is deleted after processing event
+        cycl_start = get_cycles(); // returns 0 if not available for cpu
+    }
+#endif
+    bool r = QApplication::notify(o,e);
+#if defined(QTOPIA_PHONE)
+    if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
+	QKeyEvent *ke = (QKeyEvent*)e;
+	if ( !ke->isAccepted() ) {
+	    // Send some unaccepted keys back to the server for processing.
+	    if ( ke->key() == Key_Hangup || ke->key() == Key_Call || ke->key() == Key_Flip ) {
+		QCopEnvelope e("QPE/System","serverKey(int,int)");
+		e << ke->key() << int(ke->type() == QEvent::KeyPress);
+	    }
+	}
+    }
+#endif
+    
+#if defined(QTOPIA_TEST) 
+    if ( hasPerfMonitor && isMonitoring) {
+        cycl_stop = get_cycles(); 
+        ulong cycl = (ulong)(cycl_stop-cycl_start);
+        app_slave.newCycleData(cycl, objectName, e->type()); 
+    }
+#endif
+    return r;
+}
+
+#endif
 
 /*!
   \reimp
@@ -2072,13 +3025,17 @@ bool QPEApplication::eventFilter( QObject *o, QEvent *e )
 void QPEApplication::timerEvent( QTimerEvent *e )
 {
     if ( e->timerId() == d->presstimer && d->presswidget ) {
-	// Right pressed
-	postEvent( d->presswidget,
-	    new QMouseEvent( QEvent::MouseButtonPress, d->presspos,
-			RightButton, LeftButton ) );
-	killTimer( d->presstimer );
-	d->presstimer = 0;
-	d->rightpressed = TRUE;
+	if ( d->presstick ) {
+	    d->presstick--;
+	    d->drawPressTick();
+	} else {
+	    // Right pressed
+	    d->cancelPressAndHold();
+	    postEvent( d->presswidget,
+		new QMouseEvent( QEvent::MouseButtonPress, d->presspos,
+			    RightButton, LeftButton ) );
+	    d->rightpressed = TRUE;
+	}
     }
 }
 
@@ -2122,10 +3079,14 @@ void QPEApplication::ungrabKeyboard()
   programs take over the launch keys in this way to make interaction
   easier.
 
+  Under Qtopia Phone Edition this function does nothing.  It is not
+  possible to grab the keyboard under Qtopia Phone Edition.
+
   \sa ungrabKeyboard()
 */
 void QPEApplication::grabKeyboard()
 {
+#ifndef QTOPIA_PHONE
     QPEApplicationData* d = ((QPEApplication*)qApp)->d;
     if ( qApp->type() == QApplication::GuiServer )
 	d->kbgrabber = 0;
@@ -2136,6 +3097,7 @@ void QPEApplication::grabKeyboard()
 #endif
 	d->kbgrabber = 2; // me
     }
+#endif
 }
 
 /*!
@@ -2143,7 +3105,7 @@ void QPEApplication::grabKeyboard()
 */
 int QPEApplication::exec()
 {
-    d->execCalled = TRUE;
+    d->qcopQok = TRUE;
 #ifndef QT_NO_COP
     d->sendQCopQ();
     if ( !d->keep_running )
@@ -2243,6 +3205,46 @@ void QPEApplication::pluginLibraryManager( PluginLibraryManager **m )
     \a nomax forces it to not be maximized.
 */
 
+void QPEApplication::lineEditTextChange(const QString &
+#ifdef QTOPIA_PHONE
+s
+#endif
+)
+{
+#ifdef QTOPIA_PHONE
+    if( !mousePreferred ) {
+	QLineEdit *l = (QLineEdit*)sender();
+	if (s.length() == 0 || l->isReadOnly())
+	    ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::Cancel);
+	else
+	    ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::BackSpace);
+    }
+#endif
+}
+
+void QPEApplication::multiLineEditTextChange()
+{
+#ifdef QTOPIA_PHONE
+    if( !mousePreferred ) {
+	QMultiLineEdit *l = (QMultiLineEdit*)sender();
+	if (l->length() == 0 || l->isReadOnly())
+	    ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::Cancel);
+	else
+	    ContextKeyManager::instance()->setStandard(Qt::Key_Back, ContextBar::BackSpace);
+    }
+#endif
+}
+
+void QPEApplication::removeFromWidgetFlags()
+{
+#ifdef QTOPIA_PHONE
+    // removes calling object from flags.
+    const QWidget *s = (const QWidget *)sender();
+    if (qpeWidgetFlags.contains(s))
+	qpeWidgetFlags.remove(s);
+#endif
+}
+
 #if (__GNUC__ > 2)
 extern "C" void __cxa_pure_virtual();
 
@@ -2274,22 +3276,68 @@ void* operator new(size_t size)
 
 void operator delete[](void* p)
 {
-    free(p);
+    if (p)
+	free(p);
 }
 
 void operator delete[](void* p, size_t /*size*/)
 {
-    free(p);
+    if (p)
+	free(p);
 }
 
 void operator delete(void* p)
 {
-    free(p);
+    if (p)
+	free(p);
 }
 
 void operator delete(void* p, size_t /*size*/)
 {
-    free(p);
+    if (p)
+	free(p);
 }
 
+#endif
+
+#ifdef QTOPIA_PHONE
+#include "../qtopia2/qpeapplication_menulike.cpp"
+#endif
+
+#if defined QTOPIA_TEST
+
+/*!
+  \fn void QPEApplication::stopCycleCount()
+
+  \internal
+*/
+
+/*!
+  \fn void QPEApplication::startCycleCount()
+  \internal
+*/
+
+/*!
+  \internal
+*/
+QString QPEApplication::appName()
+{
+    if (d != 0) {
+        return d->appName;
+    } else {
+        QFileInfo fi( QString(this->argv()[0]) );
+        QString app_name = fi.baseName();
+        int pos;
+        do {
+            pos = app_name.find("/");
+            if (pos >= 0)
+                app_name = app_name.mid(pos+1);
+        } while (pos >= 0);
+
+        if (app_name.isEmpty())
+            return "ERROR_NO_APPNAME";
+        else
+            return app_name;
+    }
+}
 #endif

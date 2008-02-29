@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -99,12 +114,14 @@ BrightnessControl::BrightnessControl(QWidget *parent, const char *name,
     WFlags f) : QFrame(parent, name, WStyle_StaysOnTop | WType_Popup | f)
 {
     setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
+    setBackgroundMode(PaletteButton);
 
     QGridLayout *gl = new QGridLayout( this, 3, 2, 6, 3 );
     gl->setRowStretch( 1, 100 );
 
     int	maxbright = qpe_sysBrightnessSteps();
     slider = new QSlider(this);
+    slider->setBackgroundMode(PaletteButton);
     slider->setMaxValue(maxbright);
     slider->setOrientation(QSlider::Vertical);
     slider->setTickmarks(QSlider::Right);
@@ -115,32 +132,42 @@ BrightnessControl::BrightnessControl(QWidget *parent, const char *name,
 
     QPixmap onPm( (const char **)light_on_xpm );
     QLabel *l = new QLabel( this );
+    l->setBackgroundMode(PaletteButton);
     l->setPixmap( onPm );
     gl->addWidget( l, 0, 1 );
 
     QPixmap offPm( (const char **)light_off_xpm );
     l = new QLabel( this );
+    l->setBackgroundMode(PaletteButton);
     l->setPixmap( offPm );
     gl->addWidget( l, 2, 1 );
 
     setFixedHeight(100);
     setFixedWidth(sizeHint().width());
     setFocusPolicy(QWidget::NoFocus);
+
 }
 
 //
 //
 //
 BrightnessApplet::BrightnessApplet(QWidget *parent, const char *name)
-    : QWidget(parent, name), bc(0)
+    : QWidget(parent, name), bc(0) 
 {
-    QImage  img = Resource::loadImage("Light");
+    QImage  img = Resource::loadImage("light-and-power/Light");
     img = img.smoothScale(AppLnk::smallIconSize(), AppLnk::smallIconSize());
     brightnessPixmap = new QPixmap();
     brightnessPixmap->convertFromImage(img);
 
     setFixedWidth(AppLnk::smallIconSize());
     setFixedHeight(AppLnk::smallIconSize());
+
+    brightness = -1;
+#ifndef QT_NO_COP
+    QCopChannel * sysChannel = new QCopChannel("QPE/System", this);
+    connect( sysChannel, SIGNAL(received(const QCString&, const QByteArray&)),
+                 this, SLOT(sysMessage(const QCString&, const QByteArray&)));
+#endif
 }
 
 //
@@ -169,7 +196,13 @@ int BrightnessApplet::calcBrightnessValue(void)
 int
 BrightnessApplet::calcSliderValue(void)
 {
-    int v = 255 - readSystemBrightness();
+    int v;
+    if (brightness == -1)
+        v = 255 - readSystemBrightness();
+    else {
+        v = 255 - brightness;
+        brightness = -1;
+    }
 
     return (bc->slider->maxValue() * v + 128) / 255;
 }
@@ -241,7 +274,7 @@ BrightnessApplet::readSystemBrightness(void)
 
     Config  cfg("qpe");
 
-    if (ps.acStatus() == PowerStatus::Online) {
+    if (PowerStatusManager::APMEnabled() && ps.acStatus() == PowerStatus::Online) {
 	cfg.setGroup("ExternalPower");
     } else {
 	cfg.setGroup("BatteryPower");
@@ -259,4 +292,19 @@ BrightnessApplet::paintEvent(QPaintEvent*)
     QPainter p(this);
 
     p.drawPixmap(0, 0, *brightnessPixmap);
+}
+
+//
+//
+//
+void BrightnessApplet::sysMessage(const QCString &msg, const QByteArray& data)
+{
+#ifndef QT_NO_COP
+    QDataStream s(data, IO_ReadOnly);
+    if (msg == "setBacklight(int)")
+    {
+        if (brightness != -1) //ignore msg before first update
+            s >> brightness;
+    }
+#endif
 }

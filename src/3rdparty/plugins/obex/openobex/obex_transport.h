@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*********************************************************************
  *                
  * Filename:      obex_transport.h
@@ -6,7 +27,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat May  1 20:16:45 1999
- * CVS ID         $Id: obex_transport.h,v 1.7 2000/12/04 16:01:16 pof Exp $
+ * CVS ID         $Id: obex_transport.h,v 1.9 2002/10/28 21:51:18 holtmann Exp $
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -39,6 +60,10 @@
 #ifdef HAVE_IRDA
 #include "irda_wrap.h"
 #endif /*HAVE_IRDA*/
+#ifdef HAVE_BLUETOOTH
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
+#endif /*HAVE_BLUETOOTH*/
 
 #include "obex_main.h"
 
@@ -47,29 +72,32 @@ typedef union {
 	struct sockaddr_irda irda;
 #endif /*HAVE_IRDA*/
 	struct sockaddr_in   inet;
+#ifdef HAVE_BLUETOOTH
+	struct sockaddr_rc   rfcomm;
+#endif /*HAVE_BLUETOOTH*/
 } saddr_t;
 
 typedef struct obex_transport {
-	gint	type;
-     	gboolean connected;	/* Link connection state */
-     	guint	mtu;		/* Tx MTU of the link */
+	int	type;
+     	int connected;	/* Link connection state */
+     	unsigned int	mtu;		/* Tx MTU of the link */
 	saddr_t	self;		/* Source address */
 	saddr_t	peer;		/* Destination address */
 
 } obex_transport_t;
 
-gint obex_transport_accept(obex_t *self);
+int obex_transport_accept(obex_t *self);
 
-gint obex_transport_handle_input(obex_t *self, gint timeout);
-gint obex_transport_connect_request(obex_t *self);
+int obex_transport_handle_input(obex_t *self, int timeout);
+int obex_transport_connect_request(obex_t *self);
 void obex_transport_disconnect_request(obex_t *self);
-gint obex_transport_listen(obex_t *self, const char *service);
+int obex_transport_listen(obex_t *self);
 void obex_transport_disconnect_server(obex_t *self);
-gint obex_transport_write(obex_t *self, GNetBuf *msg);
-gint obex_transport_read(obex_t *self, gint count, guint8 *buf, gint buflen);
+int obex_transport_write(obex_t *self, GNetBuf *msg);
+int obex_transport_read(obex_t *self, int count, uint8_t *buf, int buflen);
 
 
-#endif /* OBEX_TRANSPORT_H */
+#endif // OBEX_TRANSPORT_H
 
 
 

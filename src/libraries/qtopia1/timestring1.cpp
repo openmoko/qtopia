@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -58,7 +73,7 @@ private:
 		(::DateFormat::Order)config.readNumEntry("LongOrder", ::DateFormat::DayMonthYear));
 
 	connect( qApp, SIGNAL( dateFormatChanged(DateFormat) ),
-		 this, SLOT( formatChanged( DateFormat ) ) );
+		 this, SLOT( formatChanged(DateFormat) ) );
     }
 };
 
@@ -116,7 +131,7 @@ private:
 	ampm = config.readBoolEntry("AMPM",FALSE);
 
 	connect( qApp, SIGNAL( dateFormatChanged(DateFormat) ),
-		 this, SLOT( formatChanged( DateFormat ) ) );
+		 this, SLOT( formatChanged(DateFormat) ) );
 	connect( qApp, SIGNAL(clockChanged(bool)),
 		 this, SLOT(clockChanged(bool)) );
     }
@@ -133,6 +148,8 @@ LocalTimeFormat *LocalTimeFormat::self()
 
   You should connect to whatever methods retrieve TimeString values
   if you want those displays to be always up-to-date.
+
+  First availability: Qtopia 1.6
 */
 void TimeString::connectChange(QObject* obj,const char* member)
 {
@@ -144,6 +161,8 @@ void TimeString::connectChange(QObject* obj,const char* member)
 
   This is rarely need since it will be automatically disconnected
   if \a obj is deleted.
+
+  First availability: Qtopia 1.6
 */
 void TimeString::disconnectChange(QObject* obj,const char* member)
 {
@@ -151,9 +170,20 @@ void TimeString::disconnectChange(QObject* obj,const char* member)
 }
 
 
+/*!
+  Returns \a hour as a string, in either 12 hour (if \a ampm is TRUE) or
+  24 hour (if \a ampm is FALSE) format. 
+
+  If  \a hour is greater than 23 or less then 0 then hour will default to 0 
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::hourString( int hour, bool ampm )
 {
     QString s;
+    if ( (hour < 0) || (hour > 23))
+	hour = 0;
+	
     if ( ampm ) {
 	if ( hour == 0 ) {
 	    s = LocalTimeFormat::tr("%1am").arg(12);
@@ -178,30 +208,86 @@ struct TimeFormatDef {
     bool alt;
 };
 
+/*!
+  Returns \a hour as a string.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localH( int hour )
 {
     return hourString( hour, currentAMPM() );
 }
 
+/*!
+  Returns time \a t as a string,
+  showing hours and minutes.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localHM( const QTime &t )
 { return timeString( t, currentAMPM(), FALSE ); }
 
+/*!
+  Returns time \a t as a string,
+  showing hours, minutes, and seconds.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localHMS( const QTime &t )
 { return timeString( t, currentAMPM(), TRUE ); }
 
+static QString shortDayName( int weekday )
+{
+    switch ( weekday ) {
+	case 1: return qApp->translate("QDate", "M", "Single character representing Monday");
+	case 2: return qApp->translate("QDate", "T", "Single character representing Tuesday");
+	case 3: return qApp->translate("QDate", "W", "Single character representing Wednesday");
+	case 4: return qApp->translate("QDate", "T", "Single character representing Thursday");
+	case 5: return qApp->translate("QDate", "F", "Single character representing Friday");
+	case 6: return qApp->translate("QDate", "S", "Single character representing Saturday");
+	case 7: return qApp->translate("QDate", "S", "Single character representing Sunday");
+	default: return QString();
+    }
+}
+
+static const char* unTranslatedFullDayNames[] = {
+    QT_TRANSLATE_NOOP( "QDate", "Monday" ),
+    QT_TRANSLATE_NOOP( "QDate", "Tuesday" ),
+    QT_TRANSLATE_NOOP( "QDate", "Wednesday" ),
+    QT_TRANSLATE_NOOP( "QDate", "Thursday" ),
+    QT_TRANSLATE_NOOP( "QDate", "Friday" ),
+    QT_TRANSLATE_NOOP( "QDate", "Saturday" ),
+    QT_TRANSLATE_NOOP( "QDate", "Sunday" )
+};
+
 static QString dayname(int weekday, bool lng)
 {
-    char buffer[255];
-    struct tm tt;
-    memset( &tt, 0, sizeof( tm ) );
-    tt.tm_wday = ( weekday == 7 ) ? 0 : weekday;
-    if ( strftime( buffer, sizeof( buffer ), lng ? "%A" : "%a", &tt ) )
-	return QString::fromLocal8Bit( buffer );
-    else
-	return QDate().dayName(weekday);
+    if ( lng  && qApp )
+        return qApp->translate("QDate", unTranslatedFullDayNames[weekday-1]);
+    else { 
+#ifdef QTOPIA_DESKTOP
+        if (qApp)
+            return qApp->translate( "QDate", QDate().shortDayName( weekday ) );
+#endif   
+        return QDate().dayName(weekday);
+    }
 }
 
 
+/*!
+  Returns date/time \a t as a string,
+  showing hours, minutes, and day of the week.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localHMDayOfWeek( const QDateTime &t )
 {
     // just create a shorter time String
@@ -211,6 +297,14 @@ QString TimeString::localHMDayOfWeek( const QDateTime &t )
     return strTime;
 }
 
+/*!
+  Returns date/time \a t as a string,
+  showing hours, minutes, seconds, and day of the week.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localHMSDayOfWeek( const QDateTime &t )
 {
     // just create a shorter time String
@@ -220,11 +314,31 @@ QString TimeString::localHMSDayOfWeek( const QDateTime &t )
     return strTime;
 }
 
-QString TimeString::localYMDHMS( const QDateTime &t, Length )
+/*!
+  Returns date/time \a dt as a string,
+  showing year, month, date, hours, minutes, and seconds.
+  \a len determines the length of the resulting string.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
+QString TimeString::localYMDHMS( const QDateTime &dt, Length len )
 {
-    return dateString( t, currentAMPM(), TRUE, currentDateFormat() );
+    const QDate& d = dt.date();
+    const QTime& t = dt.time();
+    return LocalTimeFormat::tr("%1 %2","date,time").arg(localYMD(d,len)).arg(localHMS(t));
 }
 
+/*!
+  Returns date \a dt as a string,
+  showing month and date.
+  \a len determines the length of the resulting string.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localMD( const QDate &dt, Length len )
 {
     DateFormat dfo = currentDateFormat();
@@ -238,6 +352,15 @@ QString TimeString::localMD( const QDate &dt, Length len )
     return df.wordDate(dt,v);
 }
 
+/*!
+  Returns date \a dt as a string,
+  showing year, month, and date.
+  \a len determines the length of the resulting string.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localYMD( const QDate &dt, Length len )
 {
     if ( len == Short ) return shortDate(dt);
@@ -245,24 +368,54 @@ QString TimeString::localYMD( const QDate &dt, Length len )
     return longDateString(dt);
 }
 
-QString TimeString::localDayOfWeek( const QDate& dt, Length len )
+/*!
+  Returns the day of week at date \a d.
+  \a len determines the length of the resulting string.
+
+  First availability: Qtopia 1.6
+*/
+QString TimeString::localDayOfWeek( const QDate& d, Length len )
 {
     DateFormat dfo = currentDateFormat();
     DateFormat df(dfo.separator(),DateFormat::Order(0),DateFormat::Order(0));
     int v=DateFormat::showWeekDay;
     if ( len==Long )
 	v |= DateFormat::longWord;
-    return df.wordDate(dt,v);
+    if ( len == Short )
+	return ::shortDayName( d.dayOfWeek() );
+    else
+	return df.wordDate(d,v);
 }
 
+/*!
+  Returns the day of week \a day1to7, where
+  1 is Monday.
+  \a len determines the length of the resulting string.
+
+  The format, including order depends on the user's settings.
+
+  First availability: Qtopia 1.6
+*/
 QString TimeString::localDayOfWeek( int day1to7, Length len )
 {
-    return dayname(day1to7,len==Long);
+    if ( len == Short )
+        return ::shortDayName( day1to7 );
+    else
+	return dayname(day1to7,len==Long);
 }
 
+/*!
+  Returns the user's current preference for 12 hour time
+  over 24 hour time.
+
+  First availability: Qtopia 1.6
+*/
 bool TimeString::currentAMPM()
 { return LocalTimeFormat::currentAMPM(); }
 
+/*!
+  First availability: Qtopia 1.6
+*/
 QArray<DateFormat> TimeString::formatOptions()
 {
     QArray<DateFormat> options(4);

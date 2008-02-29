@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* -------------------------------------------------------------------------- */
 /*                                                                            */
 /* [TEmulation.cpp]        Terminal Emulation Decoder                         */
@@ -10,9 +31,7 @@
 /*                                                                            */
 /* -------------------------------------------------------------------------- */
 /*									      */
-/* Ported Konsole to Qt/Embedded                                              */
-/*									      */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
+/* Konsole ported to Qt/Embedded by Trolltech                                 */
 /*									      */
 /* -------------------------------------------------------------------------- */
 
@@ -20,12 +39,12 @@
 
     \brief The TEmulation class is the mediator between TEWidget and TEScreen.
 
-   This class is responsible to scan the escapes sequences of the terminal
-   emulation and to map it to their corresponding semantic complements.
-   Thus this module knows mainly about decoding escapes sequences and
-   is a stateless device w.r.t. the semantics.
+   This class is responsible for scanning the escape sequences of the terminal
+   emulation and for mapping them to their corresponding semantic complements.
+   Therefore this module is mainly concerned with decoding escape sequences and
+   is a stateless device with regard to the semantics.
 
-   It is also responsible to refresh the TEWidget by certain rules.
+   It is also responsible for refreshing the TEWidget using certain rules.
 
    \sa TEWidget \sa TEScreen
 
@@ -33,35 +52,34 @@
 
    Although the modifications to the current screen image could immediately
    be propagated via `TEWidget' to the graphical surface, we have chosen
-   another way here.
+   another way.
 
    The reason for doing so is twofold.
 
-   First, experiments show that directly displaying the operation results
-   in slowing down the overall performance of emulations. Displaying
+   Firstly, experiments show that directly displaying the operation slows down the overall performance of emulations, and displaying
    individual characters using X11 creates a lot of overhead.
 
-   Second, by using the following refreshing method, the screen operations
-   can be completely separated from the displaying. This greatly simplifies
+   Secondly, by using the following refresh method, the screen operations
+   can be completed separately from the displaying. This greatly simplifies
    the programmer's task of coding and maintaining the screen operations,
-   since one need not worry about differential modifications on the
-   display affecting the operation of concern.
+   since there is no need to worry about differential modifications on the
+   display effecting the operation of concern.
 
-   We use a refreshing algorithm here that has been adoped from rxvt/kvt.
+   We use a refresh algorithm here that has been adopted from rxvt/kvt.
 
-   By this, refreshing is driven by a timer, which is (re)started whenever
-   a new bunch of data to be interpreted by the emulation arives at `onRcvBlock'.
-   As soon as no more data arrive for `BULK_TIMEOUT' milliseconds, we trigger
-   refresh. This rule suits both bulk display operation as done by curses as
-   well as individual characters typed.
+   Using this, refreshing is driven by a timer, which is (re)started whenever
+   a new bunch of data arrives at `onRcvBlock' and has to be interpreted by the emulation.
+   As soon as no more data arrives for `BULK_TIMEOUT' milliseconds, we trigger
+   refresh. This rule suits both the bulk display operation as done by curses?? as
+   well as individual typed characters.
    (BULK_TIMEOUT < 1000 / max characters received from keyboard per second).
 
-   Additionally, we trigger refreshing by newlines comming in to make visual
-   snapshots of lists as produced by `cat', `ls' and likely programs, thereby
+   Additionally, we trigger refresh by newlines coming in to make visual
+   snapshots of lists as produced by `cat', `ls' and other likely programs, thereby
    producing the illusion of a permanent and immediate display operation.
 
    As a sort of catch-all needed for cases where none of the above
-   conditions catch, the screen refresh is also triggered by a count
+   conditions are applicable, the screen refresh is also triggered by a count
    of incoming bulks (`bulk_incnt').
 */
 
@@ -172,8 +190,8 @@ void TEmulation::setKeytrans(const char * no)
 
 /*
    This section deals with decoding the incoming character stream.
-   Decoding means here, that the stream is first seperated into `tokens'
-   which are then mapped to a `meaning' provided as operations by the
+   In this context decoding means that the stream is first seperated into `tokens'
+   that are then mapped to a `meaning' provided as operations by the
    `Screen' class.
 */
 
@@ -299,7 +317,7 @@ void TEmulation::showBulk()
                   scr->getLines(),
                   scr->getColumns());     // actual refresh
     free(image);
-    //FIXME: check that we do not trigger other draw event here.
+    //FIXME: check that we do not trigger other draw events here.
     gui->setScroll(scr->getHistCursor(),scr->getHistLines());
   }
 }

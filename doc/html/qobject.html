@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -29,7 +31,7 @@ The QObject class is the base class of all Qt objects.
 <code>#include &lt;<a href="qobject-h.html">qobject.h</a>&gt;</code>
 <p>
 Inherits <a href="qt.html">Qt</a>.
-<p>Inherited by <a href="qaccel.html">QAccel</a>, <a href="qaction.html">QAction</a>, <a href="qapplication.html">QApplication</a>, QAuServer, <a href="qcanvas.html">QCanvas</a>, <a href="qclipboard.html">QClipboard</a>, <a href="qcopchannel.html">QCopChannel</a>, <a href="qdatapump.html">QDataPump</a>, <a href="qdns.html">QDns</a>, QDnsSocket, QDragManager, <a href="qdragobject.html">QDragObject</a>, <a href="qfileiconprovider.html">QFileIconProvider</a>, QGuardedPtrPrivate, <a href="qlayout.html">QLayout</a>, <a href="qnpinstance.html">QNPInstance</a>, <a href="qnetworkoperation.html">QNetworkOperation</a>, <a href="qnetworkprotocol.html">QNetworkProtocol</a>, QSenderObject, <a href="qserversocket.html">QServerSocket</a>, <a href="qsessionmanager.html">QSessionManager</a>, <a href="qsignal.html">QSignal</a>, <a href="qsignalmapper.html">QSignalMapper</a>, <a href="qsocket.html">QSocket</a>, <a href="qsocketnotifier.html">QSocketNotifier</a>, <a href="qsound.html">QSound</a>, <a href="qstyle.html">QStyle</a>, <a href="qstylesheet.html">QStyleSheet</a>, <a href="qtimer.html">QTimer</a>, <a href="qtooltipgroup.html">QToolTipGroup</a>, <a href="qtranslator.html">QTranslator</a>, <a href="qurloperator.html">QUrlOperator</a>, <a href="qvalidator.html">QValidator</a>, QWSClient, QWSInputMethod, <a href="qwsserver.html">QWSServer</a> and <a href="qwidget.html">QWidget</a>.
+<p>Inherited by <a href="qaccel.html">QAccel</a>, <a href="qaction.html">QAction</a>, <a href="qapplication.html">QApplication</a>, QAuServer, <a href="qcanvas.html">QCanvas</a>, <a href="qclipboard.html">QClipboard</a>, <a href="qcopchannel.html">QCopChannel</a>, <a href="qdatapump.html">QDataPump</a>, <a href="qdns.html">QDns</a>, QDnsSocket, QDragManager, <a href="qdragobject.html">QDragObject</a>, <a href="qfileiconprovider.html">QFileIconProvider</a>, QGuardedPtrPrivate, <a href="qlayout.html">QLayout</a>, <a href="qnpinstance.html">QNPInstance</a>, <a href="qnetworkoperation.html">QNetworkOperation</a>, <a href="qnetworkprotocol.html">QNetworkProtocol</a>, QSenderObject, <a href="qserversocket.html">QServerSocket</a>, <a href="qsessionmanager.html">QSessionManager</a>, <a href="qsignal.html">QSignal</a>, <a href="qsignalmapper.html">QSignalMapper</a>, <a href="qsocket.html">QSocket</a>, <a href="qsocketnotifier.html">QSocketNotifier</a>, <a href="qsound.html">QSound</a>, <a href="qstyle.html">QStyle</a>, <a href="qstylesheet.html">QStyleSheet</a>, <a href="qtimer.html">QTimer</a>, <a href="qtooltipgroup.html">QToolTipGroup</a>, <a href="qtranslator.html">QTranslator</a>, <a href="qurloperator.html">QUrlOperator</a>, <a href="qvalidator.html">QValidator</a>, QWSClient, QWSGestureMethod, <a href="qwsinputmethod.html">QWSInputMethod</a>, <a href="qwsserver.html">QWSServer</a> and <a href="qwidget.html">QWidget</a>.
 <p><a href="qobject-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
@@ -227,10 +229,10 @@ event without a corresponding <code>ChildInserted</code> event.
 in functions that depend on the state. One notable example is
 <a href="qwidget.html#4511d1">QWidget::sizeHint</a>().
 <p>See also  <a href="#c67adb">event</a>() and <a href="qchildevent.html">QChildEvent</a>.
-<p>Reimplemented in <a href="qworkspace.html#985be5">QWorkspace</a>, <a href="qwidgetstack.html#fd77e4">QWidgetStack</a>, <a href="qgroupbox.html#7bebe3">QGroupBox</a>, <a href="qmainwindow.html#fba3da">QMainWindow</a> and <a href="qsplitter.html#22df18">QSplitter</a>.
-<h3 class="fn">const QObjectList * <a name="f790ce"></a>QObject::children () const</h3>
+<p>Reimplemented in <a href="qgroupbox.html#7bebe3">QGroupBox</a>, <a href="qwidgetstack.html#fd77e4">QWidgetStack</a>, <a href="qworkspace.html#985be5">QWorkspace</a>, <a href="qmainwindow.html#fba3da">QMainWindow</a> and <a href="qsplitter.html#22df18">QSplitter</a>.
+<h3 class="fn">const <a href="qobjectlist.html">QObjectList</a> * <a name="f790ce"></a>QObject::children () const</h3>
 <p>Returns a list of child objects, or 0 if this object has no children.
-<p>The QObjectList class is defined in the qobjectlist.h header file.
+<p>The <a href="qobjectlist.html">QObjectList</a> class is defined in the <a href="qobjectlist-h.html">qobjectlist.h</a> header file.
 <p>The latest child added is the <a href="qlist.html#e625f9">first</a> object
 in the list and the first child added is the <a href="qlist.html#cb27aa">last</a> object in the list.
 <p>Note that the list order changes when <a href="qwidget.html">QWidget</a> children are <a href="qwidget.html#4c1b49">raised</a> or <a href="qwidget.html#afe0aa">lowered.</a> A widget that is raised becomes the last object in
@@ -273,7 +275,7 @@ a SIGNAL().
     MyWidget::MyWidget()
     {
         aButton = new <a href="qpushbutton.html">QPushButton</a>( this );
-        <a href="#7f8e37">connect</a>( aButton, SIGNAL(clicked()), SIGNAL(aSignal()) );
+        <a href="#fbde73">connect</a>( aButton, SIGNAL(clicked()), SIGNAL(aSignal()) );
     }
 </pre>
 <p>In its constructor, MyWidget creates a private button and connects the
@@ -291,32 +293,33 @@ the slot.  It will return FALSE when it cannot connect the signal to
 the slot.
 <p>See also  <a href="#3ca0ec">disconnect</a>().
 <p>Examples:
- <a href="showimg-main-cpp.html#QObject::connect">showimg/main.cpp</a>
- <a href="action-main-cpp.html#connect">action/main.cpp</a>
- <a href="iconview-main-cpp.html#QObject::connect">iconview/main.cpp</a>
- <a href="grapher-grapher-cpp.html#connect">grapher/grapher.cpp</a>
- <a href="xform-xform-cpp.html#connect">xform/xform.cpp</a>
- <a href="application-main-cpp.html#connect">application/main.cpp</a>
- <a href="helpviewer-main-cpp.html#QObject::connect">helpviewer/main.cpp</a>
- <a href="i18n-main-cpp.html#QObject::connect">i18n/main.cpp</a>
- <a href="drawdemo-drawdemo-cpp.html#connect">drawdemo/drawdemo.cpp</a>
- <a href="popup-popup-cpp.html#connect">popup/popup.cpp</a>
- <a href="menu-menu-cpp.html#connect">menu/menu.cpp</a>
- <a href="qmag-qmag-cpp.html#connect">qmag/qmag.cpp</a>
- <a href="qwerty-main-cpp.html#connect">qwerty/main.cpp</a>
- <a href="forever-forever-cpp.html#connect">forever/forever.cpp</a>
- <a href="rot13-rot13-cpp.html#connect">rot13/rot13.cpp</a>
- <a href="scrollview-scrollview-cpp.html#QObject::connect">scrollview/scrollview.cpp</a>
- <a href="addressbook-main-cpp.html#connect">addressbook/main.cpp</a>
  <a href="movies-main-cpp.html#QObject::connect">movies/main.cpp</a>
  <a href="hello-main-cpp.html#QObject::connect">hello/main.cpp</a>
- <a href="customlayout-main-cpp.html#connect">customlayout/main.cpp</a>
- <a href="mdi-main-cpp.html#connect">mdi/main.cpp</a>
+ <a href="iconview-main-cpp.html#QObject::connect">iconview/main.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#QObject::connect">scrollview/scrollview.cpp</a>
+ <a href="i18n-main-cpp.html#QObject::connect">i18n/main.cpp</a>
+ <a href="helpviewer-main-cpp.html#QObject::connect">helpviewer/main.cpp</a>
+ <a href="showimg-main-cpp.html#QObject::connect">showimg/main.cpp</a>
 <h3 class="fn">bool <a name="fbde73"></a>QObject::connect ( const QObject * sender, const char * signal, const char * member ) const</h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <p>Connects <em>signal</em> from the <em>sender</em> object to <em>member</em> in this object.
 <p>Equivalent to: <code><a href="#7f8e37">QObject::connect</a>(sender, signal, this, member)</code>.
 <p>See also  <a href="#3ca0ec">disconnect</a>().
+<p>Examples:
+ <a href="qwerty-main-cpp.html#connect">qwerty/main.cpp</a>
+ <a href="drawdemo-drawdemo-cpp.html#connect">drawdemo/drawdemo.cpp</a>
+ <a href="mdi-main-cpp.html#connect">mdi/main.cpp</a>
+ <a href="action-main-cpp.html#connect">action/main.cpp</a>
+ <a href="forever-forever-cpp.html#connect">forever/forever.cpp</a>
+ <a href="addressbook-main-cpp.html#connect">addressbook/main.cpp</a>
+ <a href="customlayout-main-cpp.html#connect">customlayout/main.cpp</a>
+ <a href="qmag-qmag-cpp.html#connect">qmag/qmag.cpp</a>
+ <a href="menu-menu-cpp.html#connect">menu/menu.cpp</a>
+ <a href="xform-xform-cpp.html#connect">xform/xform.cpp</a>
+ <a href="popup-popup-cpp.html#connect">popup/popup.cpp</a>
+ <a href="rot13-rot13-cpp.html#connect">rot13/rot13.cpp</a>
+ <a href="grapher-grapher-cpp.html#connect">grapher/grapher.cpp</a>
+ <a href="application-main-cpp.html#connect">application/main.cpp</a>
 <h3 class="fn">void <a name="ceafe5"></a>QObject::connectNotify ( const char * signal ) <code>[virtual protected]</code></h3>
 <p>This virtual function is called when something has been connected to
 <em>signal</em> in this object.<p><b>Warning:</b> This function violates the object-oriented principle of modularity.
@@ -398,7 +401,7 @@ TRUE if the event was recognized and processed.
 <p>The event() function can be reimplemented to customize the behavior of
 an object.
 <p>See also  <a href="#185219">installEventFilter</a>(), <a href="#7fd5bf">timerEvent</a>(), <a href="qapplication.html#333290">QApplication::sendEvent</a>(), <a href="qapplication.html#96d77e">QApplication::postEvent</a>() and <a href="qwidget.html#6ff658">QWidget::event</a>().
-<p>Reimplemented in <a href="qsocketnotifier.html#8b1e95">QSocketNotifier</a>, <a href="qlineedit.html#21d697">QLineEdit</a>, <a href="qclipboard.html#77c9d0">QClipboard</a>, <a href="qgroupbox.html#a9f3d2">QGroupBox</a>, <a href="qwidget.html#6ff658">QWidget</a>, <a href="qtoolbar.html#3cb8e8">QToolBar</a>, <a href="qsplitter.html#1501ec">QSplitter</a>, <a href="qstatusbar.html#8964b0">QStatusBar</a>, <a href="qmainwindow.html#cad53d">QMainWindow</a>, <a href="qmultilineedit.html#eecece">QMultiLineEdit</a> and <a href="qtimer.html#180c8a">QTimer</a>.
+<p>Reimplemented in <a href="qsplitter.html#1501ec">QSplitter</a>, <a href="qwidget.html#6ff658">QWidget</a>, <a href="qmainwindow.html#cad53d">QMainWindow</a>, <a href="qtoolbar.html#3cb8e8">QToolBar</a>, <a href="qtimer.html#180c8a">QTimer</a>, <a href="qgroupbox.html#a9f3d2">QGroupBox</a>, <a href="qmultilineedit.html#eecece">QMultiLineEdit</a>, <a href="qlineedit.html#21d697">QLineEdit</a>, <a href="qclipboard.html#77c9d0">QClipboard</a>, <a href="qstatusbar.html#8964b0">QStatusBar</a> and <a href="qsocketnotifier.html#8b1e95">QSocketNotifier</a>.
 <h3 class="fn">bool <a name="bd20fe"></a>QObject::eventFilter ( QObject *, <a href="qevent.html">QEvent</a> * ) <code>[virtual]</code></h3>
 <p>Filters events if this object has been installed as an event filter for
 another object.
@@ -407,7 +410,7 @@ event should be stopped, or FALSE if the event should be dispatched normally.<p>
 If you return FALSE, Qt sends the event to the deleted object and the
 program will crash.
 <p>See also  <a href="#185219">installEventFilter</a>().
-<p>Reimplemented in <a href="qmotifplusstyle.html#56db39">QMotifPlusStyle</a>, <a href="qlayout.html#95c40e">QLayout</a>, <a href="qspinbox.html#1b4ed7">QSpinBox</a>, <a href="qfiledialog.html#9833fe">QFileDialog</a>, <a href="qiconview.html#a54a67">QIconView</a>, <a href="qsgistyle.html#feb905">QSGIStyle</a>, <a href="qcombobox.html#e7e973">QComboBox</a>, <a href="qworkspace.html#5aa15a">QWorkspace</a>, <a href="qaccel.html#593d37">QAccel</a>, <a href="qwizard.html#3693e3">QWizard</a>, <a href="qtoolbar.html#632f5a">QToolBar</a>, <a href="qtabwidget.html#f9d699">QTabWidget</a>, <a href="qlistview.html#3faa98">QListView</a>, <a href="qfontdialog.html#c9a592">QFontDialog</a>, <a href="qmenubar.html#041caa">QMenuBar</a>, <a href="qtable.html#4950de">QTable</a>, <a href="qscrollview.html#be68bd">QScrollView</a> and <a href="qmainwindow.html#0813af">QMainWindow</a>.
+<p>Reimplemented in <a href="qfontdialog.html#c9a592">QFontDialog</a>, <a href="qiconview.html#a54a67">QIconView</a>, <a href="qwizard.html#3693e3">QWizard</a>, <a href="qsgistyle.html#feb905">QSGIStyle</a>, <a href="qworkspace.html#5aa15a">QWorkspace</a>, <a href="qlistview.html#3faa98">QListView</a>, <a href="qspinbox.html#1b4ed7">QSpinBox</a>, <a href="qmenubar.html#041caa">QMenuBar</a>, <a href="qfiledialog.html#9833fe">QFileDialog</a>, <a href="qlayout.html#95c40e">QLayout</a>, <a href="qaccel.html#593d37">QAccel</a>, <a href="qcombobox.html#e7e973">QComboBox</a>, <a href="qtable.html#4950de">QTable</a>, <a href="qtoolbar.html#632f5a">QToolBar</a>, <a href="qmotifplusstyle.html#56db39">QMotifPlusStyle</a>, <a href="qmainwindow.html#0813af">QMainWindow</a>, <a href="qtabwidget.html#f9d699">QTabWidget</a> and <a href="qscrollview.html#be68bd">QScrollView</a>.
 <h3 class="fn">bool <a name="b837c5"></a>QObject::highPriority () const</h3>
 <p>Returns TRUE if the object is a high priority object, or FALSE if it is a
 standard priority object.
@@ -506,8 +509,8 @@ you, which is often not what you want.  Therefore, we recommend
 using a <a href="qtimer.html">QTimer</a>, or perhaps <a href="#46d1c6">killTimer</a>().
 <p>See also  <a href="#7fd5bf">timerEvent</a>(), <a href="#4c6b67">startTimer</a>() and <a href="#46d1c6">killTimer</a>().
 <p>Examples:
- <a href="xform-xform-cpp.html#killTimers">xform/xform.cpp</a>
  <a href="qmag-qmag-cpp.html#killTimers">qmag/qmag.cpp</a>
+ <a href="xform-xform-cpp.html#killTimers">xform/xform.cpp</a>
 <h3 class="fn"><a href="qmetaobject.html">QMetaObject</a> * <a name="ef2243"></a>QObject::metaObject () const <code>[virtual]</code></h3>
 <p>Returns a pointer to the meta object of this object.
 <p>A meta object contains information about a class that inherits
@@ -537,10 +540,10 @@ does not have a name.
 <h3 class="fn"><a href="qcstring.html">QCString</a> <a name="36423e"></a>QObject::normalizeSignalSlot ( const char * signalSlot ) <code>[static protected]</code></h3>
 <p>Normlizes the signal or slot definition <em>signalSlot</em> by removing
 unnecessary whitespaces.
-<h3 class="fn">const QObjectList * <a name="3cb047"></a>QObject::objectTrees () <code>[static]</code></h3>
+<h3 class="fn">const <a href="qobjectlist.html">QObjectList</a> * <a name="3cb047"></a>QObject::objectTrees () <code>[static]</code></h3>
 <p>Returns a pointer to the list of all object trees (respectively
 their root objects), or 0 if there are no objects.
-<p>The QObjectList class is defined in the qobjectlist.h header file.
+<p>The <a href="qobjectlist.html">QObjectList</a> class is defined in the <a href="qobjectlist-h.html">qobjectlist.h</a> header file.
 <p>The latest root object created is the <a href="qlist.html#e625f9">first</a> object in the list and the first root object added is
 the <a href="qlist.html#cb27aa">last</a> object in the list.
 <p>See also  <a href="#f790ce">children</a>(), <a href="#2fe9be">parent</a>(), <a href="#639da6">insertChild</a>() and <a href="#516272">removeChild</a>().
@@ -553,7 +556,7 @@ the <a href="qlist.html#cb27aa">last</a> object in the list.
 <p>Information about all available properties are provided through the
 <a href="#ef2243">metaObject</a>().
 <p>See also  <a href="#72ec3f">setProperty</a>(), <a href="qvariant.html#0f8cf1">QVariant::isValid</a>(), <a href="#ef2243">metaObject</a>(), <a href="qmetaobject.html#8c9b9c">QMetaObject::propertyNames</a>() and <a href="qmetaobject.html#843ead">QMetaObject::property</a>().
-<h3 class="fn">QObjectList * <a name="b0bff0"></a>QObject::queryList ( const char * inheritsClass = 0, const char * objName = 0, bool regexpMatch = TRUE, bool recursiveSearch = TRUE )</h3>
+<h3 class="fn"><a href="qobjectlist.html">QObjectList</a> * <a name="b0bff0"></a>QObject::queryList ( const char * inheritsClass = 0, const char * objName = 0, bool regexpMatch = TRUE, bool recursiveSearch = TRUE )</h3>
 <p>Searches the children and optinally grandchildren of this object,
 and returns a list of those objects that are named or matches <em>objName</em> and inherit <em>ineritsClass.</em>  If <em>inheritsClass</em> is 0 (the
 default), all classes match.  IF <em>objName</em> is 0 (the default), all
@@ -571,7 +574,7 @@ searches nth-generation as well as first-generation children.
 <a href="#bc1e8c">child</a>() may be what you want.
 <p>This somewhat contrived example disables all the buttons in this
 window:
-<pre>    QObjectList * l = topLevelWidget()-&gt;queryList( "QButton" );
+<pre>    <a href="qobjectlist.html">QObjectList</a> * l = topLevelWidget()-&gt;queryList( "QButton" );
     QObjectListIt it( *l );             // iterate over the buttons
     <a href="qobject.html">QObject</a> * obj;
     while ( (obj=it.current()) != 0 ) { // for each found object...
@@ -618,7 +621,7 @@ one assigned by the constructor.
 <p>You can find an object by name (and type) using <a href="#bc1e8c">child</a>(), and more
 than one using <a href="#b0bff0">queryList</a>().
 <p>See also  <a href="#53d9cc">name</a>(), <a href="#fa7716">className</a>(), <a href="#b0bff0">queryList</a>() and <a href="#bc1e8c">child</a>().
-<p>Reimplemented in <a href="qwidget.html#2d71e0">QWidget</a> and <a href="qsignal.html#5e96d5">QSignal</a>.
+<p>Reimplemented in <a href="qsignal.html#5e96d5">QSignal</a> and <a href="qwidget.html#2d71e0">QWidget</a>.
 <h3 class="fn">bool <a name="72ec3f"></a>QObject::setProperty ( const char * name, const <a href="qvariant.html">QVariant</a> &amp; value )</h3>
 <p>Sets the object's property <em>name</em> to <em>value.</em>
 <p>Returne TRUE is the operation was successful, FALSE otherwise.
@@ -672,8 +675,8 @@ handle 1 millisecond intervals.
 one-shot timers and timer signals instead of events.
 <p>See also  <a href="#7fd5bf">timerEvent</a>(), <a href="#46d1c6">killTimer</a>() and <a href="#0ef111">killTimers</a>().
 <p>Examples:
- <a href="qmag-qmag-cpp.html#startTimer">qmag/qmag.cpp</a>
  <a href="forever-forever-cpp.html#startTimer">forever/forever.cpp</a>
+ <a href="qmag-qmag-cpp.html#startTimer">qmag/qmag.cpp</a>
 <h3 class="fn"><a href="qmetaobject.html">QMetaObject</a>* <a name="ba522e"></a>QObject::staticMetaObject () <code>[static protected]</code></h3>
 <p>The functionality of <a href="#9c0b5a">initMetaObject</a>(), provided as a static function.
 <h3 class="fn"><a href="qstringlist.html">QStringList</a> <a name="341032"></a>QObject::superClasses ( bool includeThis = FALSE ) const</h3>
@@ -689,7 +692,7 @@ timer events for the object.
 <p><a href="qtimer.html">QTimer</a> provides a higher-level interface to the timer functionality,
 and also more general information about timers.
 <p>See also  <a href="#4c6b67">startTimer</a>(), <a href="#46d1c6">killTimer</a>(), <a href="#0ef111">killTimers</a>() and <a href="#c67adb">event</a>().
-<p>Reimplemented in <a href="qpopupmenu.html#a000a2">QPopupMenu</a> and <a href="qmultilineedit.html#051750">QMultiLineEdit</a>.
+<p>Reimplemented in <a href="qmultilineedit.html#051750">QMultiLineEdit</a> and <a href="qpopupmenu.html#a000a2">QPopupMenu</a>.
 <h3 class="fn"><a href="qstring.html">QString</a> <a name="2418a9"></a>QObject::tr ( const char * text, const char * comment ) <code>[static]</code></h3>
 <p>Returns a translated version of <em>text</em> in context QObject and and
 with <em>comment,</em> or <em>text</em> if there is no appropriate translated
@@ -724,7 +727,7 @@ which inherits type <em>type.</em>
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -732,5 +735,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

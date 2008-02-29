@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -29,15 +44,23 @@
 #include <qtopia/timestring.h>
 #include <qtopia/config.h>
 #include <qtopia/pim/private/xmlio_p.h>
+#include <qtopia/global.h>
+#include <qtopia/applnk.h>
 
 #include <qobject.h>
 #include <qapplication.h>
 #include <qregexp.h>
 #include <qstylesheet.h>
 #include <qfileinfo.h>
+#include <qimage.h>
+#include <qbuffer.h>
 #include <qtextcodec.h>
+#include <qpixmap.h>
+#include <qdatastream.h>
 
 #include <stdio.h>
+
+extern QTOPIA_EXPORT int q_DontDecodeBase64Photo;
 
 QString emailSeparator() { return " "; }
 
@@ -103,7 +126,7 @@ QString PimContact::toRichText() const
     QString value, comp, state;
 
     // name, jobtitle and company
-    if ( !(value = fullName()).isEmpty() )
+    if ( !(value = fileAs()).isEmpty() )
 	text += "<b>" + Qtopia::escapeString(value) + "</b><br>";
     // also part of name is how to pronounce it.
 
@@ -265,10 +288,7 @@ QString PimContact::toRichText() const
 
     // notes last
     if ( (value = notes()) ) {
-	QRegExp reg("\n");
-
-	QString tmp = QStyleSheet::convertFromPlainText(value);
-	text += "<br>" + tmp + "<br>";
+	text += "<br>" + Qtopia::escapeMultiLineString(value) + "<br>";
     }
     return text;
 }
@@ -485,120 +505,97 @@ QDate PimContact::anniversary() const
 
 /*!
   Returns the full name of the contact, generated from the
-  title, suffix, first, middle and last name of the contact.
+  current user preferences. fileAs() in general will be a cached
+  vopy of this.
+
+  \sa setFileAs()
 */
 QString PimContact::fullName() const
 {
     return fullName(*this);
 }
 
-static bool readConfig = FALSE;
+static bool nameFormatCache = FALSE;
 static QStringList formatList;
+
+static void readNameFormatConfig()
+{
+    // NameFormat
+    //   FirstName LastName
+    //   LastName , _ FirstName
+    //   LastName , _ FirstName | Company
+
+    // read config for formatted name order.
+    Config cfg("Contacts");
+    cfg.setGroup("formatting");
+    QStringList sl = cfg.readListEntry("NameFormat", ' ');
+    if (sl.isEmpty()) {
+	const QMap<int,QCString> k2i = PimContact::keyToIdentifierMap();
+
+	formatList.append(k2i[PimContact::NameTitle]);
+	formatList.append(k2i[PimContact::FirstName]);
+	formatList.append(k2i[PimContact::MiddleName]);
+	formatList.append(k2i[PimContact::LastName]);
+	formatList.append(k2i[PimContact::Suffix]);
+	formatList.append("|");
+	formatList.append(k2i[PimContact::Company]);
+    } else {
+	formatList = sl;
+    }
+}
+
+void qpe_setNameFormatCache(bool y)
+{
+    nameFormatCache = y;
+    if ( y )
+	readNameFormatConfig();
+}
 
 QString PimContact::fullName(const PimContact &cnt)
 {
-    if (!readConfig) {
-	// read config for formatted name order.
-	Config cfg("Contacts");
-	cfg.setGroup("formatting");
-	QStringList sl = cfg.readListEntry("NameFormat", ' ');
-	if (sl.isEmpty()) {
-	    const QMap<int,QCString> k2i = keyToIdentifierMap();
-
-	    formatList.append(k2i[NameTitle]);
-	    formatList.append(k2i[FirstName]);
-	    formatList.append(k2i[MiddleName]);
-	    formatList.append(k2i[LastName]);
-	    formatList.append(k2i[Suffix]);
-	} else {
-	    formatList = sl;
-	}
-	readConfig = TRUE;
-    }
+    if (!nameFormatCache)
+	readNameFormatConfig();
 
     QStringList::Iterator it;
     QString name;
     const QMap<QCString, int> i2k = identifierToKeyMap();
+    bool any = FALSE;
+    bool prev = FALSE;
     for( it = formatList.begin(); it != formatList.end(); ++it ) {
 	QCString cit(*it);
 	if (i2k.contains(cit)) {
 	    QString field = cnt.find(i2k[cit]);
 	    if (!field.isEmpty()) {
-		if ( !name.isEmpty() )
+		if ( prev )
 		    name += " ";
 		name += field;
+		any = TRUE;
+		prev = TRUE;
 	    }
+	} else if ( *it == "|" ) {
+	    if ( any )
+		break;
+	    name = "";
+	    prev = FALSE;
+	} else if ( *it == "_" ) {
+	    name += ' ';
+	    prev = FALSE;
 	} else {
-	    if ( !name.isEmpty() )
+	    if ( !name.isEmpty() ) {
 		name += *it;
+	    }
+	    prev = FALSE;
 	}
     }
-
-#if 0
-
-    if ( !firstName.isEmpty() ) {
-	if ( !name.isEmpty() )
-	    name += " ";
-	name += firstName;
-    }
-    if ( !middleName.isEmpty() ) {
-	if ( !name.isEmpty() )
-    }
-
-    QString title = find( NameTitle );
-    QString firstName = find( FirstName );
-    QString middleName = find( MiddleName );
-    QString lastName = find( LastName );
-    QString suffix = find( Suffix );
-
-    QString name = title;
-    if ( !firstName.isEmpty() ) {
-	if ( !name.isEmpty() )
-	    name += " ";
-	name += firstName;
-    }
-    if ( !middleName.isEmpty() ) {
-	if ( !name.isEmpty() )
-	    name += " ";
-	name += middleName;
-    }
-    if ( !lastName.isEmpty() ) {
-	if ( !name.isEmpty() )
-	    name += " ";
-	name += lastName;
-    }
-    if ( !suffix.isEmpty() ) {
-	if ( !name.isEmpty() )
-	    name += " ";
-	name += suffix;
-    }
-#endif
     return name.simplifyWhiteSpace();
 }
 
 /*!
-  Set the contact to be filed as a string constructed from the contact's
-  name fields.
+  Set the contact to be filed by the fullName().
 */
 void PimContact::setFileAs()
 {
-    QString lastName, firstName, middleName, fileas;
-
-    lastName = find( LastName );
-    firstName = find( FirstName );
-    middleName = find( MiddleName );
-    if ( !lastName.isEmpty() && !firstName.isEmpty()
-	 && !middleName.isEmpty() )
-	fileas = lastName + ", " + firstName + " " + middleName;
-    else if ( !lastName.isEmpty() && !firstName.isEmpty() )
-	fileas = lastName + ", " + firstName;
-    else if ( !lastName.isEmpty() || !firstName.isEmpty() ||
-	      !middleName.isEmpty() )
-	fileas = firstName + ( firstName.isEmpty() ? "" : " " )
-		 + middleName + ( middleName.isEmpty() ? "" : " " )
-		 + lastName;
-
-    replace( FileAs, fileas );
+    replace( FileAs, fullName() );
 }
 
 /*!
@@ -763,7 +760,7 @@ VObject *PimContact::createVObject( const PimContact &c )
     safeAddPropValue( vcard, VCUniqueStringProp, QString::number(c.p_uid().data1) );
 
     // full name
-    safeAddPropValue( vcard, VCFullNameProp, c.fullName() );
+    safeAddPropValue( vcard, VCFullNameProp, c.fileAs() );
 
     // name properties
     VObject *name = safeAddProp( vcard, VCNameProp );
@@ -836,6 +833,38 @@ VObject *PimContact::createVObject( const PimContact &c )
     }
     safeAddPropValue( vcard, "X-Qtopia-CSOUND", c.companyPronunciation() );
 
+    //photo
+    QString pfn = c.customField("photofile");
+    if ( !pfn.isEmpty() ) {
+	const char* format = "JPEG";
+
+#if 0 // load-and-save (allows non-JPEG images)
+	QImage sp;
+	if( !sp.load( pfn ) ) {
+	    qWarning("PimContact::createVObject - Unable to load contact photo");
+	} else {
+	    QBuffer buffer;
+	    buffer.open(IO_WriteOnly);
+	    QImageIO iio(&buffer,format);
+	    iio.setImage(sp);
+	    QString prettyEncPhoto;
+	    if ( iio.write() ) {
+		QByteArray buf = buffer.buffer();
+#else // Just use the file (avoid compounding JPEG lossiness)
+	QFile f(pfn);
+	if ( f.open(IO_ReadOnly) ) {
+	    QByteArray buf = f.readAll();
+	    if ( buf.size() ) {
+#endif
+
+		VObject *po = addPropSizedValue( vcard, VCPhotoProp, buf.data(), buf.size() );
+		safeAddPropValue( po, "TYPE", format );
+		// should really be done by vobject.cpp, since it decides to use base64
+		safeAddPropValue( po, VCEncodingProp, "BASE64" );
+	    }
+	}
+    }
+
     // some values we have to export as custom fields
     safeAddPropValue( vcard, "X-Qtopia-Profession", c.profession() );
     safeAddPropValue( vcard, "X-Qtopia-Manager", c.manager() );
@@ -856,6 +885,8 @@ VObject *PimContact::createVObject( const PimContact &c )
 static PimContact parseVObject( VObject *obj )
 {
     PimContact c;
+//    int ds = 0;
+//    char *photodata = 0;
 
     VObjectIterator it;
     initPropIterator( &it, obj );
@@ -1070,6 +1101,36 @@ static PimContact parseVObject( VObject *obj )
 		    c.setOffice( value );
 	    }
 	}
+	//support for photos
+	else if( name == VCPhotoProp )
+	{
+	    VObject *po;
+	    VObjectIterator pit;
+	    initPropIterator( &pit, o );
+	    while( moreIteration( &pit ) )
+	    {
+		po = nextVObject( &pit );	
+
+		QString pName( vObjectName( po ) );
+
+
+		/* Don't care what type it is,
+		   we're going to convert it to jpeg
+		   in any case.
+		if( pName == "TYPE" )
+		    pmt = vObjectStringZValue( po );
+
+		if( pName == VCDataSizeProp )
+		    ds = vObjectIntegerValue( po );
+		*/
+
+		//TODO : Is quoted printable encoding ever used?
+	    }
+
+	    c.setCustomField( "phototmp", QString(vObjectStringZValue( o )) );
+	    //actually save it in AddressBook::recieveFile when we know if it's a new contact 
+	   // or a duplicate
+	}
 	else if ( name == "X-Qtopia-CSOUND" )
 	    c.setCompanyPronunciation( value );
 	else if ( name == VCTitleProp ) {
@@ -1104,7 +1165,8 @@ static PimContact parseVObject( VObject *obj )
 	}
 	else if ( name == "X-Qtopia-Children" ) {
 	    c.setChildren( value );
-	} else {
+	} 
+	else {
 	    qpe_setVObjectProperty(name,value,"Address Book",&c); // No tr
 	}
 
@@ -1124,6 +1186,7 @@ static PimContact parseVObject( VObject *obj )
 #endif
     }
     c.setFileAs();
+
     return c;
 }
 
@@ -1180,13 +1243,17 @@ void PimContact::writeVCard( const QString &filename, const PimContact &contact)
 */
 QValueList<PimContact> PimContact::readVCard( const QString &filename )
 {
-    qDebug("trying to open %s, exists=%d", filename.utf8().data(), QFileInfo( filename.utf8().data() ).size() );
+//    qDebug("trying to open %s, exists=%d", filename.utf8().data(), QFileInfo( filename.utf8().data() ).size() );
+
+    q_DontDecodeBase64Photo++; // don't decode the base64 encoded data automatically - we want the base64 encoded version
+
     VObject *obj = Parse_MIME_FromFileName( (char *)filename.utf8().data() );
 
-    qDebug("vobject = %p", obj );
+//    qDebug("vobject = %p", obj );
 
     QValueList<PimContact> contacts;
 
+    qpe_setNameFormatCache(TRUE);
     qpe_startVObjectInput();
     while ( obj ) {
 	contacts.append( parseVObject( obj ) );
@@ -1196,6 +1263,9 @@ QValueList<PimContact> PimContact::readVCard( const QString &filename )
 	cleanVObject( t );
     }
     qpe_endVObjectInput();
+    qpe_setNameFormatCache(FALSE);
+
+    q_DontDecodeBase64Photo--;
 
     return contacts;
 }

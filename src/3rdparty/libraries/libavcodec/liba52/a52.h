@@ -1,6 +1,27 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*
  * a52.h
- * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of a52dec, a free ATSC A-52 stream decoder.
@@ -26,10 +47,19 @@
 
 #include "../avcodec.h"
 
-#ifndef LIBA52_DOUBLE
-typedef float sample_t;
-#else
+#undef malloc
+#undef free
+#undef realloc
+
+#if defined(LIBA52_FIXED)
+typedef int32_t sample_t;
+typedef int32_t level_t;
+#elif defined(LIBA52_DOUBLE)
 typedef double sample_t;
+typedef double level_t;
+#else
+typedef float sample_t;
+typedef float level_t;
 #endif
 
 typedef struct a52_state_s a52_state_t;
@@ -55,9 +85,9 @@ sample_t * a52_samples (a52_state_t * state);
 int a52_syncinfo (uint8_t * buf, int * flags,
 		  int * sample_rate, int * bit_rate);
 int a52_frame (a52_state_t * state, uint8_t * buf, int * flags,
-	       sample_t * level, sample_t bias);
+	       level_t * level, sample_t bias);
 void a52_dynrng (a52_state_t * state,
-		 sample_t (* call) (sample_t, void *), void * data);
+		 level_t (* call) (level_t, void *), void * data);
 int a52_block (a52_state_t * state);
 void a52_free (a52_state_t * state);
 

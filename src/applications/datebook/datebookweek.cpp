@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -39,51 +54,6 @@
 
 static const int allDayHeight = 8;
 static const int hourMargin = 4;
-
-class WeekViewContents : public QScrollView
-{
-    Q_OBJECT
-public:
-    WeekViewContents( WeekView *parent = 0, const char *name = 0 );
-
-    void showEvents( QValueList<Occurrence> &ev , const QDate &startDate );
-    void moveToHour( int h );
-    void setStartOfWeek( bool bOnMonday );
-
-    void alterDay( int );
-
-signals:
-    void activateWeekDay( int d );
-    void eventsSelected( QValueList<Occurrence> & );
-    void selectionCleared();
-
-protected slots:
-    void keyPressEvent(QKeyEvent *);
-    void timeStringChanged();
-
-private:
-    void positionItem( LayoutItem *i );
-    LayoutItem *intersects( const LayoutItem * );
-    void drawContents( QPainter *p, int cx, int cy, int cw, int ch );
-    void drawContents( QPainter *p);
-    void contentsMousePressEvent( QMouseEvent * );
-    void contentsMouseReleaseEvent( QMouseEvent * );
-    void mousePressEvent( QMouseEvent * );
-    void mouseReleaseEvent( QMouseEvent * );
-    void resizeEvent( QResizeEvent * );
-    void updateWeekNames(bool wsom);
-
-private:
-    int posOfHour(int h) const;
-    int hourAtPos(int p) const;
-    QHeader *header;
-    QVector<LayoutManager> items;
-    QList<LayoutItem> dayItems;
-    int rowHeight;
-    bool showingEvent;
-    WeekView *wv;
-};
-
 
 WeekViewContents::WeekViewContents( WeekView *parent, const char *name )
     : QScrollView( parent, name ),
@@ -115,43 +85,27 @@ void WeekViewContents::updateWeekNames(bool bOnMonday)
 {
     static bool bFirst = true;
     if ( bFirst ) {
-	if ( bOnMonday ) {
-	    header->addLabel( tr("M", "Monday" ) );
-	    header->addLabel( tr("T", "Tuesday") );
-	    header->addLabel( tr("W", "Wednesday" ) );
-	    header->addLabel( tr("T", "Thursday" ) );
-	    header->addLabel( tr("F", "Friday" ) );
-	    header->addLabel( tr("S", "Saturday" ) );
-	    header->addLabel( tr("S", "Sunday" ) );
-	} else {
-	    header->addLabel( tr("S", "Sunday" ) );
-	    header->addLabel( tr("M", "Monday") );
-	    header->addLabel( tr("T", "Tuesday") );
-	    header->addLabel( tr("W", "Wednesday" ) );
-	    header->addLabel( tr("T", "Thursday" ) );
-	    header->addLabel( tr("F", "Friday" ) );
-	    header->addLabel( tr("S", "Saturday" ) );
-	}
 	bFirst = false;
-    } else {
-	// we are change things...
-	if ( bOnMonday ) {
-	    header->setLabel( 1, tr("M", "Monday") );
-	    header->setLabel( 2, tr("T", "Tuesday") );
-	    header->setLabel( 3, tr("W", "Wednesday" ) );
-	    header->setLabel( 4, tr("T", "Thursday" ) );
-	    header->setLabel( 5, tr("F", "Friday" ) );
-	    header->setLabel( 6, tr("S", "Saturday" ) );
-	    header->setLabel( 7, tr("S", "Sunday" ) );
-	} else {
-	    header->setLabel( 1, tr("S", "Sunday" ) );
-	    header->setLabel( 2, tr("M", "Monday") );
-	    header->setLabel( 3, tr("T", "Tuesday") );
-	    header->setLabel( 4, tr("W", "Wednesday" ) );
-	    header->setLabel( 5, tr("T", "Thursday" ) );
-	    header->setLabel( 6, tr("F", "Friday" ) );
-	    header->setLabel( 7, tr("S", "Saturday" ) );
-	}
+	// NO TR. We are inserting dummy labels that are overwritten below.
+	header->addLabel( "Monday" );
+	header->addLabel( "Tuesday");
+	header->addLabel( "Wednesday" );
+	header->addLabel( "Thursday" );
+	header->addLabel( "Friday" );
+	header->addLabel( "Saturday" );
+	header->addLabel( "Sunday" );
+    }
+
+    TimeString::Length len = TimeString::Short;
+    int approxSize = QFontMetrics(QFont()).width(" Wed ") * 7;
+    if ( QApplication::desktop()->width() > approxSize )
+	len = TimeString::Medium;
+
+    for ( int i = 0; i < 7; i++ ) {
+	if ( bOnMonday )
+	    header->setLabel( i + 1, TimeString::localDayOfWeek( i + 1, len ) );
+	else
+	    header->setLabel( i + 1, TimeString::localDayOfWeek( ((i + 6) % 7) + 1, len ) );
     }
 }
 
@@ -505,14 +459,14 @@ WeekView::WeekView( DateBookTable *newDB, bool startOnMonday,
 
     tHide = new QTimer( this );
 
-    connect( contents, SIGNAL( activateWeekDay( int ) ),
-             this, SLOT( dayActivated( int ) ) );
+    connect( contents, SIGNAL( activateWeekDay(int) ),
+             this, SLOT( dayActivated(int) ) );
     connect( contents, SIGNAL(eventsSelected(QValueList<Occurrence>&)),
 	     this, SLOT(showEventsLabel(QValueList<Occurrence>&)) );
     connect( contents, SIGNAL(selectionCleared()),
 	     this, SLOT(hideEventsLabel()) );
-    connect( header, SIGNAL( dateChanged( int, int ) ),
-             this, SLOT( setWeek( int, int ) ) );
+    connect( header, SIGNAL( dateChanged(int,int) ),
+             this, SLOT( setWeek(int,int) ) );
     connect( tHide, SIGNAL( timeout() ),
              lblDesc, SLOT( hide() ) );
     connect( header->spinYear, SIGNAL(valueChanged(int)),
@@ -827,6 +781,4 @@ QDate WeekView::weekDate() const
 {
     return dateFromWeek( _week, year, bOnMonday );
 }
-
-#include "datebookweek.moc"
 

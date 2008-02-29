@@ -6,7 +6,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Jul 17 23:02:02 1998
- * CVS ID:        $Id: obex_main.c,v 1.16 2000/12/07 15:01:04 pof Exp $
+ * CVS ID:        $Id: obex_main.c,v 1.23 2002/11/22 19:06:11 holtmann Exp $
  * 
  *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
@@ -28,7 +28,10 @@
  *     
  ********************************************************************/
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #ifdef _WIN32
 #include <winsock.h>
 #else /* _WIN32 */
@@ -40,6 +43,11 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <stdio.h>
+
+#ifdef HAVE_BLUETOOTH
+#include <bluetooth/bluetooth.h>
+#endif /*HAVE_BLUETOOTH*/
 
 #endif /* _WIN32 */
 
@@ -49,6 +57,12 @@
 #include "obex_client.h"
 #include "obex_const.h"
 
+#ifdef OBEX_DEBUG
+int obex_debug;
+#endif
+#ifdef OBEX_DUMP
+int obex_dump;
+#endif
 
 /*
  * Function obex_create_socket()
@@ -56,12 +70,19 @@
  *    Create socket if needed.
  *
  */
-gint obex_create_socket(obex_t *self, gint domain)
+int obex_create_socket(obex_t *self, int domain)
 {
-	gint fd;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int fd, proto;
+	DEBUG(4, "\n");
 
-	fd = socket(domain, SOCK_STREAM, 0);
+	proto = 0;
+
+#ifdef HAVE_BLUETOOTH
+	if (domain == AF_BLUETOOTH)
+		proto = BTPROTO_RFCOMM;
+#endif /*HAVE_BLUETOOTH*/
+
+	fd = socket(domain, SOCK_STREAM, proto);
 	return fd;
 }
 
@@ -71,11 +92,11 @@ gint obex_create_socket(obex_t *self, gint domain)
  *    Close socket if opened.
  *
  */
-gint obex_delete_socket(obex_t *self, gint fd)
+int obex_delete_socket(obex_t *self, int fd)
 {
-	gint ret;
+	int ret;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 
 	if(fd < 0)
 		return fd;
@@ -90,74 +111,51 @@ gint obex_delete_socket(obex_t *self, gint fd)
 
 
 /*
- * Function obex_get_last_response_message (self)
+ * Function obex_response_to_string(rsp)
  *
- *    Return a GSting of an OBEX-response
+ *    Return a string of an OBEX-response
  *
  */
-GString *obex_get_response_message(obex_t *self, gint rsp)
+char *obex_response_to_string(int rsp)
 {
-	GString *string;
-
-	g_return_val_if_fail(self != NULL, NULL);
-
 	switch (rsp) {
 	case OBEX_RSP_CONTINUE:
-		string = g_string_new("Continue");
-		break;
+		return "Continue";
 	case OBEX_RSP_SWITCH_PRO:
-		string = g_string_new("Switching protocols");
-		break;
+		return "Switching protocols";
 	case OBEX_RSP_SUCCESS:
-		string = g_string_new("OK, Success");
-		break;
+		return "OK, Success";
 	case OBEX_RSP_CREATED:
-		string = g_string_new("Created");
-		break;
+		return "Created";
 	case OBEX_RSP_ACCEPTED:
-		string = g_string_new("Accepted");
-		break;	
+		return "Accepted";
 	case OBEX_RSP_NO_CONTENT:
-		string = g_string_new("No Content");
-		break;
+		return "No Content";
 	case OBEX_RSP_BAD_REQUEST:
-		string = g_string_new("Bad Request");
-		break;
+		return "Bad Request";
 	case OBEX_RSP_UNAUTHORIZED:
-		string = g_string_new("Unautorized");
-		break;
+		return "Unautorized";
 	case OBEX_RSP_PAYMENT_REQUIRED:
-		string = g_string_new("Payment required");
-		break;
+		return "Payment required";
 	case OBEX_RSP_FORBIDDEN:
-		string = g_string_new("Forbidden");
-		break;
+		return "Forbidden";
 	case OBEX_RSP_NOT_FOUND:
-		string = g_string_new("Not found");
-		break;
+		return "Not found";
 	case OBEX_RSP_METHOD_NOT_ALLOWED:
-		string = g_string_new("Method not allowed");
-		break;
+		return "Method not allowed";
 	case OBEX_RSP_CONFLICT:
-		string = g_string_new("Conflict");
-		break;
+		return "Conflict";
 	case OBEX_RSP_INTERNAL_SERVER_ERROR:
-		string = g_string_new("Internal server error");
-		break;
+		return "Internal server error";
 	case OBEX_RSP_NOT_IMPLEMENTED:
-		string = g_string_new("Not implemented!");
-		break;
+		return "Not implemented!";
 	case OBEX_RSP_DATABASE_FULL:
-		string = g_string_new("Database full");
-		break;
+		return "Database full";
 	case OBEX_RSP_DATABASE_LOCKED:
-		string = g_string_new("Database locked");
-		break;
+		return "Database locked";
 	default:
-		string = g_string_new("Unknown response");
-		break;
+		return "Unknown response";
 	}
-	return string;
 }
 
 /*
@@ -166,7 +164,7 @@ GString *obex_get_response_message(obex_t *self, gint rsp)
  *    Deliver an event to app.
  *
  */
-void obex_deliver_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean del)
+void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del)
 {
 	if(self->state & MODE_SRV)
 		self->eventcb(self, self->object, OBEX_SERVER, event, cmd, rsp);
@@ -185,11 +183,11 @@ void obex_deliver_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean d
  *    Send a response to peer device
  *
  */
-void obex_response_request(obex_t *self, guint8 opcode)
+void obex_response_request(obex_t *self, uint8_t opcode)
 {
 	GNetBuf *msg;
 
-	g_return_if_fail(self != NULL);
+	obex_return_if_fail(self != NULL);
 
 	msg = g_netbuf_recycle(self->tx_msg);
 	g_netbuf_reserve(msg, sizeof(obex_common_hdr_t));
@@ -203,24 +201,22 @@ void obex_response_request(obex_t *self, guint8 opcode)
  *    Send response or command code along with optional headers/data.
  *
  */
-gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
+int obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
 {
 	obex_common_hdr_t *hdr;
 	int actual = 0;
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(msg != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(msg != NULL, -1);
 
 	/* Insert common header */
 	hdr = (obex_common_hdr_t *) g_netbuf_push(msg, sizeof(obex_common_hdr_t));
 
 	hdr->opcode = opcode;
-	hdr->len = htons((guint16)msg->len);
+	hdr->len = htons((uint16_t)msg->len);
 
-#if DEBUG_DUMPBUFFERS & 1
-	g_netbuf_print(msg);
-#endif
-	DEBUG(1, G_GNUC_FUNCTION "(), len = %d bytes\n", msg->len);
+	DUMPBUFFER(1, "Tx", msg);
+	DEBUG(1, "len = %d bytes\n", msg->len);
 
 	actual = obex_transport_write(self, msg);
 	return actual;
@@ -232,17 +228,18 @@ gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
  *    Read/Feed some input from device and find out which packet it is
  *
  */
-gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
+int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 {
 	obex_common_hdr_t *hdr;
 	GNetBuf *msg;
-	gint final;
-	gint actual = 0;
-	guint size;
+	int final;
+	int actual = 0;
+	unsigned int size;
+	int ret;
 	
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 
 	msg = self->rx_msg;
 	
@@ -250,7 +247,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	if(msg->len < 3)  {
 		actual = obex_transport_read(self, 3 - (msg->len), buf, buflen);
 		
-		DEBUG(4, G_GNUC_FUNCTION "() Got %d bytes\n", actual);
+		DEBUG(4, "Got %d bytes\n", actual);
 
 		/* Check if we are still connected */
 		if (actual <= 0)	{
@@ -268,7 +265,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 		size = ntohs(hdr->len);
 
 		actual = 0;
-		if(msg->len != (gint) ntohs(hdr->len)) {
+		if(msg->len != (int) ntohs(hdr->len)) {
 
 			actual = obex_transport_read(self, size - msg->len, buf,
 				buflen);
@@ -282,14 +279,14 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	}
         else {
 		/* Wait until we have at least 3 bytes data */
-		DEBUG(3, G_GNUC_FUNCTION "() Need at least 3 bytes got only %d!\n", msg->len);
+		DEBUG(3, "Need at least 3 bytes got only %d!\n", msg->len);
 		return actual;
         }
 
 
 	/* New data has been inserted at the end of message */
 	g_netbuf_put(msg, actual);
-	DEBUG(1, G_GNUC_FUNCTION "() Got %d bytes msg len=%d\n", actual, msg->len);
+	DEBUG(1, "Got %d bytes msg len=%d\n", actual, msg->len);
 
 	/*
 	 * Make sure that the buffer we have, actually has the specified
@@ -299,31 +296,31 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 
 	/* Make sure we have a whole packet */
 	if (size > msg->len) {
-		DEBUG(3, G_GNUC_FUNCTION "() Need more data, size=%d, len=%d!\n",
+		DEBUG(3, "Need more data, size=%d, len=%d!\n",
 		      size, msg->len);
 
 		/* I'll be back! */
 		return msg->len;
 	}
 
-#if DEBUG_DUMPBUFFERS & 2
-	g_netbuf_print(msg);
-#endif
+	DUMPBUFFER(2, "Rx", msg);
 
 	actual = msg->len;
 	final = hdr->opcode & OBEX_FINAL; /* Extract final bit */
 
 	/* Dispatch to the mode we are in */
 	if(self->state & MODE_SRV) {
-		obex_server(self, msg, final);
+		ret = obex_server(self, msg, final);
 		g_netbuf_recycle(msg);
 		
 	}
 	else	{
-		obex_client(self, msg, final);
+		ret = obex_client(self, msg, final);
 		g_netbuf_recycle(msg);
 	}
-
+	/* Check parse errors */
+	if(ret < 0)
+		actual = ret;
 	return actual;
 }
 
@@ -333,7 +330,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
  *    Cancel an ongoing request
  *
  */
-gint obex_cancelrequest(obex_t *self, gboolean nice)
+int obex_cancelrequest(obex_t *self, int nice)
 {
 	/* If we have no ongoing request do nothing */
 	if(self->object == NULL)
@@ -353,7 +350,7 @@ gint obex_cancelrequest(obex_t *self, gboolean nice)
 	}
 	
 	/* Do a "nice" abort */
-	g_message("Nice abort not implemented yet!!\n");
+	DEBUG(4, "Nice abort not implemented yet!!\n");
 	self->object->abort = TRUE;
 	return 0;
 }

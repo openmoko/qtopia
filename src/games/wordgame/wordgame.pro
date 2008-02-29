@@ -1,16 +1,19 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-#singleprocess:TEMPLATE	= lib
-#singleprocess:DESTDIR   = $(QPEDIR)/lib
-
-CONFIG		+= qtopia warn_on release
+CONFIG		+= qtopiaapp
 
 HEADERS		= wordgame.h
-SOURCES		= wordgame.cpp
+SOURCES		= wordgame.cpp main.cpp
 INTERFACES	= newgamebase.ui rulesbase.ui
 
-multiprocess:SOURCES+=main.cpp
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
 
 TARGET		= wordgame
 
-TRANSLATIONS = wordgame-en_GB.ts wordgame-de.ts wordgame-ja.ts wordgame-no.ts
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/wordgame.html
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/wordgame.desktop
+desktop.path=/apps/Games
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/wordgame/*
+pics.path=/pics/wordgame
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics

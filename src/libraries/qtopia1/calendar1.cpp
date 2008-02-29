@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -27,6 +42,8 @@
   The list starts on the Monday on or before the 1st of the month if 
   \a startWithMonday is TRUE, otherwise the list starts on the Sunday on 
   or before the 1st of the month.
+
+  First availability: Qtopia 1.6
 */
 QValueList<QDate> Calendar::datesOfMonth( int year, int month,
 						 bool startWithMonday )
@@ -62,6 +79,8 @@ QValueList<QDate> Calendar::datesOfMonth( int year, int month,
   The page starts on the Monday on or before the 1st of the month if 
   \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
   or before the 1st of the month.
+
+  First availability: Qtopia 1.6
 */
 QDate Calendar::dateAtCoord( int year, int month, 
 	int row, int col, bool startWithMonday)
@@ -77,6 +96,8 @@ QDate Calendar::dateAtCoord( int year, int month,
   The page starts on the Monday on or before the 1st of the month if 
   \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
   or before the 1st of the month.
+
+  First availability: Qtopia 1.6
 */
 QDate Calendar::dateAtIndex( int year, int month, int index,
 	bool startWithMonday)
@@ -106,6 +127,8 @@ QDate Calendar::dateAtIndex( int year, int month, int index,
   The page starts on the Monday on or before the 1st of the month if 
   \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
   or before the 1st of the month.
+
+  First availability: Qtopia 1.6
 */
 int Calendar::indexForDate( int year, int month, const QDate &date, 
 	bool startWithMonday)
@@ -138,6 +161,8 @@ int Calendar::indexForDate( int year, int month, const QDate &date,
   The page starts on the Monday on or before the 1st of the month if 
   \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
   or before the 1st of the month.
+
+  First availability: Qtopia 1.6
 */
 void Calendar::coordForDate( int year, int month,
 	const QDate &date, int &row, int &col,
@@ -157,6 +182,8 @@ void Calendar::coordForDate( int year, int month,
   Returns the week number the date \a dt is in the month for that date.
   For instance the first Wednesday of the month is in the first week the second
   Wednesday in the month is in the second week and so on.
+
+  First availability: Qtopia 1.6
 */
 int Calendar::weekInMonth(const QDate &dt)
 {
@@ -170,6 +197,8 @@ int Calendar::weekInMonth(const QDate &dt)
 
   Rounds to the last day of month if the day of the calculated date would be
   invalid.
+
+  First availability: Qtopia 1.6
 */
 QDate Calendar::addMonths(int nmonths, const QDate &orig)
 {
@@ -216,6 +245,8 @@ QDate Calendar::addMonths(int nmonths, const QDate &orig)
 
 /*!
   Returns a date \a nyears later than the date \a orig (or earlier if \a nyears is negative).
+
+  First availability: Qtopia 1.6
 */
 QDate Calendar::addYears( int nyears , const QDate &orig)
 {

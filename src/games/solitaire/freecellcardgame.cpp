@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -21,67 +36,74 @@
 #include "cardmetrics.h"
 
 
-extern int highestZ;
 int numberOfFreeCells = 4;
 
 
-FreecellCardGame::FreecellCardGame(QCanvas *c, bool snap, QWidget *parent) : CanvasCardGame(*c, snap, parent)
+FreecellCardGame::FreecellCardGame(QCanvas *c, QCanvasView *view, bool snap, bool casinoRules) :
+    CanvasCardGame(c, view, snap, casinoRules)
 {
     numberOfFreeCells = 4;
-    highestZ = 0;
 
     int spaceBetweenPiles = CardMetrics::interCardGap() + CardMetrics::width(); // 21 + 7 * cardSizes;
-    int xOrigin = CardMetrics::xOffset() - spaceBetweenPiles / 2;
+    int xOrigin = CardMetrics::xOffset() - spaceBetweenPiles / 2 + 1;
     int spacing = 0;
     spaceBetweenPiles--;
 
     int i;
+    QString pile;
     for ( i = 0; i < 4; i++) {
-	freecellPiles[i] = new FreecellFreecellPile( xOrigin + i * spaceBetweenPiles, 10, canvas() );
-	addCardPile(freecellPiles[i]);
+	QPoint p(xOrigin + i * spaceBetweenPiles, 10);
+	pile.sprintf("FreeCellPile%i", i);
+	freecellPiles[i] = new FreecellFreecellPile(p, pile, canvas());
+	append(freecellPiles[i]);
     }
     for ( i = 0; i < 4; i++) {
-	discardPiles[i] = new FreecellDiscardPile( xOrigin + spacing + 6 + (i + 4) * spaceBetweenPiles, 10, canvas() );
-	addCardPile(discardPiles[i]);
+	QPoint p(xOrigin + spacing + 6 + (i + 4) * spaceBetweenPiles, 10);
+	pile.sprintf("DiscardPile%i", i);
+	discardPiles[i] = new FreecellDiscardPile(p, pile, canvas());
+	append(discardPiles[i]);
     }
     for ( i = 0; i < 8; i++) {
-	workingPiles[i] = new FreecellWorkingPile( xOrigin + spacing + 2 + i * spaceBetweenPiles, 15 + CardMetrics::height(), canvas() );
-	addCardPile(workingPiles[i]);
+	QPoint p(xOrigin + spacing + 3 + i * spaceBetweenPiles, 15 + CardMetrics::height());
+	pile.sprintf("WorkingPile%i", i);
+	workingPiles[i] = new FreecellWorkingPile(p, pile, canvas());
+	append(workingPiles[i]);
     }
 }
 
 
 void FreecellCardGame::deal(void)
 {
-    highestZ = 1;
-    
-    beginDealing();
-    
     for (int i = 0; i < 52; i++) {
-	Card *card = cards[i];
-	card->setFace( TRUE );
-	((CanvasCard*)card)->setPos( 0, 0, highestZ );
-	card->setCardPile( workingPiles[i%8] );
+	Card *card = undealtPile->at(i);//cards[i];
+	card->setFacing(true);
 	workingPiles[i%8]->addCardToTop( card );
-	((CanvasCard*)card)->move( workingPiles[i%8]->getCardPos( card ) );
-	((CanvasCard*)card)->showCard();
-	highestZ++;
+	card->setVisible(true);
     }
-
-    endDealing();
 }
 
 
-bool FreecellCardGame::mousePressCard( Card *c, QPoint p )
+bool FreecellCardGame::cardSelected(Card *c)
 {
-    Q_UNUSED(p);
-    
-    if ( !c->getCardPile()->isAllowedToBeMoved(c) ) {
-	moving = NULL;
-	return TRUE;
-    }
+    return !c->canBeMoved();
+}
 
-    return FALSE;
+
+int FreecellCardGame::pileForKey(int curPile, int key)
+{
+    if ( curPile >= 0 && curPile < 16 && key >= 0 && key < 8 ) {
+	switch (key) {
+	    case 0: case 4: // left
+		return (curPile == 0) ? 15 : curPile-1;
+	    case 1: case 5: // right
+		return (curPile == 15) ? 0 : curPile+1;
+	    case 2: case 6: // up
+		return (curPile < 8) ? ((curPile == 7) ? 8 : curPile+9) : curPile-8;
+	    case 3: case 7: // down
+		return (curPile > 7) ? ((curPile == 8) ? 7 : curPile-9) : curPile+8;
+	}
+    }
+    return 0;
 }
 
 
@@ -92,34 +114,13 @@ void FreecellCardGame::readConfig( Config& cfg )
 	newGame();
 	return;
     }
+
     // Create Cards, but don't shuffle or deal them yet
-    createDeck();
+    createCards();
 
     // Move the cards to their piles (deal them to their previous places)
     beginDealing();
-
-    highestZ = 1;
-    int k;
-    for ( k = 0; k < 4; k++) {
-	QString pile;
-	pile.sprintf( "FreeCellPile%i", k );
-	readPile( cfg, freecellPiles[k], pile, highestZ );
-    }
-
-    for ( k = 0; k < 4; k++) {
-	QString pile;
-	pile.sprintf( "DiscardPile%i", k );
-	readPile( cfg, discardPiles[k], pile, highestZ );
-    }
-
-    for ( k = 0; k < 8; k++) {
-	QString pile;
-	pile.sprintf( "WorkingPile%i", k );
-	readPile( cfg, workingPiles[k], pile, highestZ );
-    }
-
-    highestZ++;
-
+    readPiles(cfg);
     endDealing();
 }
 
@@ -128,22 +129,7 @@ void FreecellCardGame::writeConfig( Config& cfg )
 {
     cfg.setGroup("GameState");
     cfg.writeEntry("Won", haveWeWon() );
-    int i;
-    for ( i = 0; i < 4; i++ ) {
-	QString pile;
-	pile.sprintf( "FreeCellPile%i", i );
-	freecellPiles[i]->writeConfig( cfg, pile );
-    }
-    for ( i = 0; i < 4; i++ ) {
-	QString pile;
-	pile.sprintf( "DiscardPile%i", i );
-	discardPiles[i]->writeConfig( cfg, pile );
-    }
-    for ( i = 0; i < 8; i++ ) {
-	QString pile;
-	pile.sprintf( "WorkingPile%i", i );
-	workingPiles[i]->writeConfig( cfg, pile );
-    }
+    writePiles(cfg);
 }
 
 

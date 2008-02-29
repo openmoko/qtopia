@@ -1,5 +1,6 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -12,6 +13,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -26,67 +28,23 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sched.h>
 
 extern "C" {
 #include "avcodec.h"
 #include "avformat.h"
 };
 
-#include "yuv2rgb.h"
-
 #include <qlist.h>
 #include <qstring.h>
 #include <qapplication.h>
-
 #include <qtopia/mediaplayerplugininterface.h>
 
-
-class MediaPacket {
-    public:
-	int len;
-	unsigned char *ptr;
-	int frameInPacket;
-	AVPacket pkt;
-};
-
-
-class Mutex {
-public:
-    Mutex() {
-	pthread_mutexattr_t attr;
-	pthread_mutexattr_init( &attr );
-	pthread_mutex_init( &mutex, &attr );
-	pthread_mutexattr_destroy( &attr );
-    }
-
-    ~Mutex() {
-	pthread_mutex_destroy( &mutex );
-    }
-
-    void lock() {
-	pthread_mutex_lock( &mutex );
-    }
-
-    void unlock() {
-	pthread_mutex_unlock( &mutex );
-    }
-
-private:
-    pthread_mutex_t mutex;
-};
-
-
-class AutoLockUnlockMutex {
-public:
-    AutoLockUnlockMutex( Mutex *m ) : mutex( m ) {
-	mutex->lock();
-    }
-    ~AutoLockUnlockMutex() {
-	mutex->unlock();
-    }
-private:
-    Mutex *mutex;
-};
+#include "ffmutex.h"
+#include "mediapacket.h"
+#include "mediapacketbuffer.h"
+#include "videocodeccontext.h"
+#include "audiocodeccontext.h"
 
 
 class LibFFMpegPlugin : public MediaPlayerDecoder_1_6 {
@@ -98,12 +56,8 @@ public:
     const char *pluginComment();
     double pluginVersion();
 
-    void fileInit();
-    void pluginInit();
-
     bool isFileSupported( const QString& fileName );
     bool open( const QString& fileName );
-
     bool close();
     bool isOpen();
     const QString &fileInfo();
@@ -172,61 +126,25 @@ public:
     long currentTime(); // in milliseconds
 
 private:
-    bool openFlag;
+    FFMutex pluginMutex;
+    QString strInfo;
     bool streamingFlag;
-    int frame;
-
-    Mutex pluginMutex;
-    Mutex audioMutex;
-    Mutex videoMutex;
-
-    int skipNext; // Number of frames to skip
-
-    int totalFrames;
-
-    int msecPerFrame;
-    int droppedFrames;
     int fileLength;
     int lengthScaleFactor;
-    long currentPacketTimeStamp;
-    long currentAudioTimeStamp;
-    long currentVideoTimeStamp;
     bool haveTotalTimeCache;
     long totalTimeCache;
     bool needPluginInit;
-    int framesInLastPacket;
+    long totalBitRate;
+    bool haveTotalBitRate;
+    ThreadSafeInteger savedSeekPos;
 
-    int scaleContextDepth;
-    int scaleContextInputWidth;
-    int scaleContextInputHeight;
-    int scaleContextPicture1Width;
-    int scaleContextPicture2Width;
-    int scaleContextOutputWidth;
-    int scaleContextOutputHeight;
-    int scaleContextLineStride;
-    int scaleContextFormat;
+    MediaPacketBuffer	packetBuffer;
+    VideoCodecContext	videoContext;
+    AudioCodecContext	audioContext;
 
-    AVPicture picture;
-    MediaPacket *getAnotherPacket( int stream );
-    QList<MediaPacket> waitingVideoPackets;
-    QList<MediaPacket> waitingAudioPackets;
-    void removeCurrentVideoPacket();
-    void flushVideoPackets();
-    void flushAudioPackets();
-
-    AVCodec *audioCodec;
-    AVCodec *videoCodec;
-
-    int videoStream;
-    int audioStream;
-
-    QString strInfo;
-
-    AVFormatContext	*streamContext;
-    AVCodecContext	*audioCodecContext;
-    AVCodecContext	*videoCodecContext;
-    ReSampleContext	*audioScaleContext;
-    yuv2rgb_factory_t	*videoScaleContext;
+    bool init(const QString& fileName);
+    bool realSeek();
+    void flushBuffers();
 };
 
 

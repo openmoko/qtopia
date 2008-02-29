@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,6 +37,7 @@
 #define QTOPIA_INTERNAL_LANGLIST
 #include <qtopia/qpeapplication.h>
 #include <qtopia/global.h>
+#include <qtopia/pluginloader.h>
 #include <qdir.h>
 
 
@@ -36,26 +52,23 @@
 MediaRecorderPluginList::MediaRecorderPluginList()
 {
 #ifndef QT_NO_COMPONENT
-    // Load the plugin list from the "/plugins/codecs" directory.
-    QString path = QPEApplication::qpeDir() + "plugins/codecs";
-    QDir dir( path, "lib*.so" );
-    QStringList list = dir.entryList();
+    loader = new PluginLoader( "codecs" );
+    QStringList list = loader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	MediaRecorderPluginInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
-
-	qDebug( "querying: %s", (path + "/" + *it).latin1() );
-	if ( lib->queryInterface( IID_MediaRecorderPlugin, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
-
-	    addFormats( lib, iface );
-
-	} else {
-	    delete lib;
+	qDebug( "querying: %s", (*it).latin1() );
+	if ( loader->queryInterface( *it, IID_MediaRecorderPlugin, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+	    addFormats( iface );
 	}
     }
+    if ( pluginList.count() ) 
+	qDebug( "%i encoders found", pluginList.count() );
+    else
+	qDebug( "No encoders found" );
 #else
     // No component support - load the compiled-in encoders.
+    loader = 0;
     MediaRecorderPluginInterface *iface = new WavRecorderPluginImpl();
     addFormats( iface );
 #endif
@@ -68,14 +81,17 @@ MediaRecorderPluginList::~MediaRecorderPluginList()
     for ( mit = pluginList.begin(); mit != pluginList.end(); ++mit ) {
 	if ((*mit).iface) {
 	    delete (*mit).encoder;
-	    (*mit).iface->release();
 #ifndef QT_NO_COMPONENT
-	    (*mit).library->unload();
-	    delete (*mit).library;
+	    loader->releaseInterface( (*mit).iface );
+#else
+	    (*mit).iface->release();
 #endif
 	}
     }
     pluginList.clear();
+#ifndef QT_NO_COMPONENT
+    delete loader;
+#endif
 }
 
 
@@ -121,11 +137,7 @@ int MediaRecorderPluginList::indexFromType( const QString& type, const QString& 
 }
 
 
-#ifndef QT_NO_COMPONENT
-void MediaRecorderPluginList::addFormats( QLibrary *library, MediaRecorderPluginInterface *iface )
-#else
 void MediaRecorderPluginList::addFormats( MediaRecorderPluginInterface *iface )
-#endif
 {
     MediaRecorderPlugin plugin;
     MediaRecorderEncoder *encoder;
@@ -136,9 +148,6 @@ void MediaRecorderPluginList::addFormats( MediaRecorderPluginInterface *iface )
 
     for ( format = 0; format < nformats; ++format ) {
 
-    #ifndef QT_NO_COMPONENT
-	plugin.library = library;
-    #endif
 	plugin.iface = iface;
 	plugin.encoder = encoder;
 	plugin.format = encoder->pluginFormatTag( format );
@@ -149,7 +158,6 @@ void MediaRecorderPluginList::addFormats( MediaRecorderPluginInterface *iface )
 	        plugin.encoder->pluginMimeType().latin1(),
 		plugin.format.latin1());
 
-	library = 0;
 	iface = 0;
     }
 }
@@ -157,6 +165,7 @@ void MediaRecorderPluginList::addFormats( MediaRecorderPluginInterface *iface )
 
 MediaPlayerPluginList::MediaPlayerPluginList()
 {
+    loader = NULL;
     curDecoder = NULL;
     curDecoderVersion = Decoder_Unknown;
     loadPlugins();
@@ -168,10 +177,9 @@ MediaPlayerPluginList::~MediaPlayerPluginList()
 #ifndef QT_NO_COMPONENT
     QValueList<MediaPlayerPlugin>::Iterator mit;
     for ( mit = pluginList.begin(); mit != pluginList.end(); ++mit ) {
-	(*mit).iface->release();
-	(*mit).library->unload();
-	delete (*mit).library;
+	loader->releaseInterface( (*mit).iface );
     }
+    delete loader;
 #endif
 }
 
@@ -194,36 +202,32 @@ MediaPlayerDecoder *MediaPlayerPluginList::fromFile( const QString& file )
 void MediaPlayerPluginList::loadPlugins()
 {
 #ifndef QT_NO_COMPONENT
+    if ( !loader )
+	loader = new PluginLoader( "codecs" );
+
     QValueList<MediaPlayerPlugin>::Iterator mit;
     for ( mit = pluginList.begin(); mit != pluginList.end(); ++mit ) {
-	(*mit).iface->release();
-	(*mit).library->unload();
-	delete (*mit).library;
+	loader->releaseInterface( (*mit).iface );
     }
     pluginList.clear();
 
-    QString path = QPEApplication::qpeDir() + "/plugins/codecs";
-    QDir dir( path, "lib*.so" );
-    QStringList list = dir.entryList();
+    QStringList list = loader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	MediaPlayerPluginInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
 
-	qDebug( "querying: %s", QString( path + "/" + *it ).latin1() );
+	qDebug( "querying: %s", (*it).latin1() );
 
 	DecoderVersion ver = Decoder_Unknown;
-	if ( lib->queryInterface( IID_MediaPlayerPlugin_1_6, (QUnknownInterface**)&iface ) == QS_OK && iface != 0 ) 
+	if ( loader->queryInterface( *it, IID_MediaPlayerPlugin_1_6, (QUnknownInterface**)&iface ) == QS_OK && iface != 0 ) 
 	    ver = Decoder_1_6;
-	else if ( lib->queryInterface( IID_MediaPlayerPlugin, (QUnknownInterface**)&iface ) == QS_OK && iface != 0 )
+	else if ( loader->queryInterface( *it, IID_MediaPlayerPlugin, (QUnknownInterface**)&iface ) == QS_OK && iface != 0 )
 	    ver = Decoder_1_5;
 
 	if ( ver != Decoder_Unknown ) {
-	    qDebug( "loading: %s", QString( path + "/" + *it ).latin1() );
 
 	    MediaPlayerPlugin plugin;
 	    plugin.version = ver;
-	    plugin.library = lib;
 	    plugin.iface = iface;
 	    plugin.decoder = plugin.iface->decoder();
 	    pluginList.append( plugin );
@@ -240,8 +244,6 @@ void MediaPlayerPluginList::loadPlugins()
 		    delete trans;
 	    }
 
-	} else {
-	    delete lib;
 	}
     }
 #else

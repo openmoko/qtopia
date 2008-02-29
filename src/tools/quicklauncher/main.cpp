@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2003 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,6 +37,7 @@
 #include <qstrlist.h>
 #include <qtimer.h>
 #include <qguardedptr.h>
+#include <qwidgetlist.h>
 #include <qcopchannel_qws.h>
 #define QTOPIA_INTERNAL_INITAPP
 #include <qtopia/timezone.h>
@@ -38,6 +54,7 @@ static QPEApplication *app = 0;
 static PluginLoader *loader = 0;
 static ApplicationInterface *appIface = 0;
 static QGuardedPtr<QWidget> mainWindow;
+static bool validExitLoop = FALSE;
 
 #ifdef _OS_LINUX_
 static char **argv0 = 0;
@@ -71,7 +88,6 @@ void setproctitle (const char *fmt,...) {
 }
 #endif
 
-
 class QuickLauncher : public QObject
 {
     Q_OBJECT
@@ -81,8 +97,8 @@ public:
 	QCString ch("QPE/QuickLauncher-");
 	ch += QString::number(getpid());
 	qlChannel = new QCopChannel( ch, this);
-	connect( qlChannel, SIGNAL(received(const QCString&, const QByteArray&)),
-		 this, SLOT(message(const QCString&, const QByteArray&)) );
+	connect( qlChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+		 this, SLOT(message(const QCString&,const QByteArray&)) );
     }
 
     static void exec( int /*argc*/, char **argv )
@@ -97,7 +113,7 @@ public:
 	    mainWindow = appIface->createMainWindow( appName );
 	}
 	if ( mainWindow ) {
-	    if ( mainWindow->metaObject()->slotNames().contains("setDocument(const QString&)") ) {
+	    if ( mainWindow->metaObject()->slotNames(true).contains("setDocument(const QString&)") ) {
 		app->showMainDocumentWidget( mainWindow );
 	    } else {
 		app->showMainWidget( mainWindow );
@@ -150,6 +166,7 @@ private:
 #endif
 
 	connect(app, SIGNAL(lastWindowClosed()), app, SLOT(hideOrQuit()));
+	validExitLoop = TRUE;
 	app->exit_loop();
 	app->initApp( myargc, myargv );
 	exec( myargc, myargv );
@@ -210,7 +227,7 @@ int main( int argc, char** argv )
 	// Each of the following force internal structures/internal
 	// initialization to be performed.  This may mean allocating
 	// memory that is not needed by all applications.
-	TimeZone::current().isValid(); // popuplate timezone cache
+	TimeZone::current().isValid(); // populate timezone cache
 	TimeString::currentDateFormat(); // create internal structures
 	TimeString::currentAMPM();
 	Resource::loadIconSet("new"); // do internal init
@@ -222,17 +239,20 @@ int main( int argc, char** argv )
 	w->show();
 	QTimer::singleShot( 0, w, SLOT(close()) );
 
-	app->enter_loop();
+	while (!validExitLoop)
+	    app->enter_loop();
     }
 
     int rv = app->exec();
 
     if ( mainWindow )
 	delete (QWidget*)mainWindow;
+
+/* Causes problems with undeleted TLWs
     if ( appIface )
 	loader->releaseInterface( appIface );
     delete loader;
-
+*/
     delete app;
 
     return rv;

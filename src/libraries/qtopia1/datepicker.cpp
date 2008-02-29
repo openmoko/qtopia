@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -22,11 +37,13 @@
 #include <qtopia/resource.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/timestring.h>
+#include <qtopia/global.h>
 
 #include <qtoolbutton.h>
 #include <qdatetime.h>
 #include <qspinbox.h>
 #include <qcombobox.h>
+#include <qlabel.h>
 #include <qpainter.h>
 #include <qpopupmenu.h>
 #include <qwhatsthis.h>
@@ -35,6 +52,10 @@
 
 #include "datepicker.h"
 #include <qtopia/calendar.h>
+
+#ifdef QTOPIA_PHONE
+extern bool mousePreferred; // can't call Global::mousePreferred in libqtopia2 from libqtopia1
+#endif
 
 class DatePickerHeader : public QHBox
 {
@@ -61,9 +82,12 @@ private slots:
     void monthForward();
 
 private:
+#ifndef QTOPIA_PHONE
     QToolButton *begin, *back, *next, *end;
+#endif
     QComboBox *month;
     QSpinBox *year;
+    QLabel *currentMonth;
     int focus;
 };
 
@@ -83,11 +107,10 @@ public:
 
     void paintCell(QPainter * p, int row, int col,
 	    const QRect & cr, bool selected);
-    //virtual void paintFocus ( QPainter * p, const QRect & cr );
 
-    // 3.0 sig.
-    //void paintCell(QPainter * p, int row, int col,
-	    //const QRect & cr, bool selected, const QColorGroup & cg);
+#ifdef QTOPIA_PHONE
+    void paintFocus(QPainter *p, const QRect &r);
+#endif
 
     void updateContents()
     {
@@ -139,7 +162,13 @@ DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
     : QHBox( parent, name )
 {
     setBackgroundMode( PaletteButton );
-
+#ifdef QTOPIA_PHONE
+    if (!mousePreferred) {
+	currentMonth = new QLabel(this);
+	currentMonth->setAlignment(AlignHCenter);
+    } else {
+#endif
+#ifndef QTOPIA_PHONE
     begin = new QToolButton( this );
     begin->setIconSet( Resource::loadIconSet( "start" ) );
     begin->setAutoRaise( TRUE );
@@ -151,7 +180,7 @@ DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
     back->setAutoRaise( TRUE );
     back->setFixedSize( back->sizeHint() );
     QWhatsThis::add( back, tr("Show the previous month") );
-
+#endif
     month = new QComboBox( FALSE, this );
     for ( int i = 0; i < 12; ++i )
 	month->insertItem( Calendar::nameOfMonth( i + 1 ) );
@@ -159,7 +188,7 @@ DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
     // this is almost certainly wrong on the other end.
     // date is a uint + 1752 some day.  Thats a lot of days, 11 M years or so.
     year = new QSpinBox( 1753, 3000, 1, this );
-
+#ifndef QTOPIA_PHONE
     next = new QToolButton( this );
     next->setIconSet( Resource::loadIconSet( "forward" ) );
     next->setAutoRaise( TRUE );
@@ -171,11 +200,13 @@ DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
     end->setAutoRaise( TRUE );
     end->setFixedSize( end->sizeHint() );
     QWhatsThis::add( end, tr("Show December in the selected year") );
+#endif
 
-    connect( month, SIGNAL( activated( int ) ),
+    connect( month, SIGNAL( activated(int) ),
 	     this, SLOT( updateDate() ) );
-    connect( year, SIGNAL( valueChanged( int ) ),
+    connect( year, SIGNAL( valueChanged(int) ),
 	     this, SLOT( updateDate() ) );
+#ifndef QTOPIA_PHONE
     connect( begin, SIGNAL( clicked() ),
 	     this, SLOT( firstMonth() ) );
     connect( end, SIGNAL( clicked() ),
@@ -186,6 +217,10 @@ DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
 	     this, SLOT( monthForward() ) );
     back->setAutoRepeat( TRUE );
     next->setAutoRepeat( TRUE );
+#endif
+#ifdef QTOPIA_PHONE
+    }
+#endif
 }
 
 
@@ -196,45 +231,76 @@ DatePickerHeader::~DatePickerHeader()
 
 void DatePickerHeader::updateDate()
 {
+#ifdef QTOPIA_PHONE
+    if (mousePreferred)
+#endif
     emit dateChanged( year->value(), month->currentItem() + 1 );
 }
 
 void DatePickerHeader::firstMonth()
 {
-    emit dateChanged( year->value(), 1 );
+#ifdef QTOPIA_PHONE
+    if (mousePreferred)
+#endif
+	emit dateChanged( year->value(), 1 );
 }
 
 void DatePickerHeader::lastMonth()
 {
-    emit dateChanged( year->value(), 12 );
+#ifdef QTOPIA_PHONE
+    if (mousePreferred)
+#endif
+	emit dateChanged( year->value(), 12 );
 }
 
 
 // don't set values.. this will be done on the return hit from monthview.
 void DatePickerHeader::monthBack()
 {
-    if ( month->currentItem() > 0 ) {
-	emit dateChanged( year->value(), month->currentItem() );
-    } else {
-	emit dateChanged( year->value() - 1, 12 );
+#ifdef QTOPIA_PHONE
+    if (mousePreferred) {
+#endif
+	if ( month->currentItem() > 0 ) {
+	    emit dateChanged( year->value(), month->currentItem() );
+	} else {
+	    emit dateChanged( year->value() - 1, 12 );
+	}
+#ifdef QTOPIA_PHONE
     }
+#endif
 }
 
 void DatePickerHeader::monthForward()
 {
-    if ( month->currentItem() < 11 ) {
-	emit dateChanged( year->value(), month->currentItem() + 2 );
-    } else {
-	emit dateChanged( year->value() + 1, 1);
+#ifdef QTOPIA_PHONE
+    if (mousePreferred) {
+#endif
+	if ( month->currentItem() < 11 ) {
+	    emit dateChanged( year->value(), month->currentItem() + 2 );
+	} else {
+	    emit dateChanged( year->value() + 1, 1);
+	}
+#ifdef QTOPIA_PHONE
     }
+#endif
 }
 
 void DatePickerHeader::setDate( int y, int m )
 {
+#ifdef QTOPIA_PHONE
+    if (!mousePreferred) {
+	currentMonth->setText(
+		tr( QString("%1 %2").arg(Calendar::nameOfMonth( m )).arg(y),
+		    "Header for monthview in phone, 1=month name (full), 2=year" ));
+    } else {
+#endif
     blockSignals(TRUE);
     year->setValue( y );
     month->setCurrentItem( m - 1 );
     blockSignals(FALSE);
+#ifdef QTOPIA_PHONE
+    }
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -251,6 +317,8 @@ DatePickerTable::DatePickerTable( QWidget *parent, const char *name)
     // we have to do this here... or suffer the consequences later...
     int i;
     for ( i = 0; i < 7; i++ ){
+	// 30 should be replaced with something dependent
+	// on size needed to show label text.
 	horizontalHeader()->resizeSection( i, 30 );
 	setColumnStretchable( i, TRUE );
     }
@@ -274,7 +342,7 @@ DatePickerTable::~DatePickerTable()
 
 QSize DatePickerTable::sizeHint() const
 {
-    return QSize( 7*30+4, 6*25 );
+    return QSize( columnWidth(0) * 7 + 4, rowHeight(0)*6 + horizontalHeader()->sizeHint().height());
 }
 
 void DatePickerTable::setWeekStartsMonday( bool monday )
@@ -283,25 +351,15 @@ void DatePickerTable::setWeekStartsMonday( bool monday )
     setupLabels();
 }
 
-//void DatePickerTable::paintFocus ( QPainter * p, const QRect & cr )
-//{
-    //qDebug("DatePickerTable::paintFocus at x=%d y=%d", p->pos().x(), p->pos().y());
-    //QTable::paintFocus( p, cr );
-//}
-
 void DatePickerTable::paintCell(QPainter * p, int row, int col,
 	const QRect & cr, bool selected)
 {
-    //QDate cDay = Calendar::dayOnCalendar( year, month, onMonday, row, col);
-
 #if defined(Q_WS_WIN)
     const QColorGroup &cg = ( style().styleHint( QStyle::SH_ItemView_ChangeHighlightOnFocus ) ? palette().inactive() : colorGroup() );
 #else
     const QColorGroup &cg = colorGroup();
 #endif
 
-    //qDebug("DatePickerTable::paintCell [%d,%d] cur [%d,%d]", row, col,
-    //   currentRow(), currentColumn());
     ((QPEDatePicker *)parentWidget())->paintCell(row, col, p, cr, selected, cg);
 #ifdef QTOPIA_DESKTOP
     if ( currentRow() == row && currentColumn() == col ) {
@@ -310,30 +368,38 @@ void DatePickerTable::paintCell(QPainter * p, int row, int col,
 #endif
 }
 
+#ifdef QTOPIA_PHONE
+void DatePickerTable::paintFocus(QPainter *p, const QRect &cr)
+{
+    QRect focusRect( 0, 0, cr.width(), cr.height() );
+    if ( !mousePreferred && parentWidget() && parentWidget()->isModalEditing()) {
+	p->setPen( QPen( palette().color(QPalette::Active, QColorGroup::Highlight), 1 ) );
+    } else {
+	p->setPen( QPen( black, 1) );
+    }
+    p->setBrush( NoBrush );
+    p->drawRect( focusRect.x(), focusRect.y(), focusRect.width(), focusRect.height() );
+    p->drawRect( focusRect.x() + 1, focusRect.y() + 1, focusRect.width() - 2, focusRect.height() - 2 );
+}
+#endif
+
 void DatePickerTable::keyPressEvent( QKeyEvent *e )
 {
-#ifdef QTOPIA_DESKTOP
     e->ignore();
-#else
-    // ### after 1.6.1 remove this else; just too dangerous a change before
-    // the release
-    QTable::keyPressEvent( e );
-#endif
 }
 
 void DatePickerTable::setupLabels()
 {
-    for ( int i = 0; i < 7; ++i ) {
-// 	horizontalHeader()->resizeSection( i, 30 );
-// 	setColumnStretchable( i, TRUE );
+    TimeString::Length len = TimeString::Short;
+    int approxSize = QFontMetrics(QFont()).width(" Wed ") * 7;
+    if ( QApplication::desktop()->width() > approxSize )
+	len = TimeString::Medium;
+
+    for ( int i = 0; i < 7; i++ ) {
 	if ( onMonday )
-	    horizontalHeader()->setLabel( i, Calendar::nameOfDay( i + 1 ) );
-	else {
-	    if ( i == 0 )
-		horizontalHeader()->setLabel( i, Calendar::nameOfDay( 7 ) );
-	    else
-		horizontalHeader()->setLabel( i, Calendar::nameOfDay( i ) );
-	}
+	    horizontalHeader()->setLabel( i, TimeString::localDayOfWeek(i + 1, len) );
+	else
+	    horizontalHeader()->setLabel( i, TimeString::localDayOfWeek(((i + 6) % 7) + 1, len) );
     }
 }
 
@@ -348,6 +414,8 @@ void DatePickerTable::setupLabels()
   QPEDatePicker comprises a header to select month and year and a
   calendar view to select the date.
 
+  First availability: Qtopia 1.6
+
   \ingroup qtopiaemb
 */
 
@@ -360,6 +428,7 @@ void DatePickerTable::setupLabels()
 
 /*!
   Constructs a QPEDatePicker.
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 QPEDatePicker::QPEDatePicker( QWidget *parent, const char *name)
     : QVBox( parent, name )
@@ -367,24 +436,30 @@ QPEDatePicker::QPEDatePicker( QWidget *parent, const char *name)
     year = 1970;		// Default to epoch.
     month = 1;
 
+#ifdef QTOPIA_PHONE
+    setMargin(2);
+#endif
+
     header = new DatePickerHeader( this, "DatePickerHeader" );
     table = new DatePickerTable( this, "DatePickerTable" );
     table->setFrameStyle( QFrame::NoFrame );
     header->setDate( year, month );
 
     table->updateContents();
-    connect( header, SIGNAL( dateChanged( int, int ) ),
-	     this, SLOT( setDate( int, int ) ) );
-    connect( table, SIGNAL( clickedPos( int, int ) ),
-	     this, SLOT( calendarClicked(int, int) ) );
-    connect( table, SIGNAL( currentChanged( int, int ) ),
-	     this, SLOT( calendarChanged(int, int) ) );
+    connect( header, SIGNAL( dateChanged(int,int) ),
+	     this, SLOT( setDate(int,int) ) );
+    connect( table, SIGNAL( clickedPos(int,int) ),
+	     this, SLOT( calendarClicked(int,int) ) );
+    connect( table, SIGNAL( currentChanged(int,int) ),
+	     this, SLOT( calendarChanged(int,int) ) );
     connect( qApp, SIGNAL(weekChanged(bool)), this,
 	     SLOT(setWeekStartsMonday(bool)) );
     TimeString::connectChange(table, SLOT(timeStringChanged()));
     setDate(QDate::currentDate());
     setFocusPolicy(StrongFocus);
     setFocus();
+    table->setFocusPolicy(NoFocus);
+    header->setFocusPolicy(NoFocus);
 }
 
 /*!
@@ -405,8 +480,9 @@ void QPEDatePicker::paintCell(int row, int col, QPainter * p,
 }
 
 /*!
-  Paints a single day \a cDay in the calendar using \a p.  The cell
-  geometry is \a cr.
+  Paints a single day \a cDay in the calendar using
+  painter \a p and color group \a cg.
+  The cell geometry is \a cr.
 
   The default implementation draws the day of the month in the top left
   corner of the cell.
@@ -447,12 +523,13 @@ void QPEDatePicker::paintDay(const QDate &cDay, QPainter *p, const QRect &cr,
 	p->fillRect(1, 1, fm.width(QString::number( cDay.day() )) + 1,
 		fm.height(), QColor(0,0,0));
     }
-    p->drawText( 1, 1 + fm.ascent(), QString::number( cDay.day() ) );
+    p->drawText( 2, 1 + fm.ascent(), QString::number( cDay.day() ) );
     p->restore();
 }
 
 /*!
-  Paints the background of a single day in the calendar using \a p.
+  Paints the background of a single day in the calendar using
+  painter \a p and color group \a cg.
   The cell geometry is \a cr.
 
   The default implementation fills with the base color.
@@ -512,6 +589,11 @@ void QPEDatePicker::calendarClicked(int r, int c)
 {
     calendarChanged(r, c);
 
+#ifdef QTOPIA_PHONE
+    if( !mousePreferred )
+	setModalEditing(FALSE);
+    table->updateCell(table->currentRow(), table->currentColumn());
+#endif
     emit dateClicked(QDate(year, month, day));
 }
 
@@ -536,7 +618,6 @@ void QPEDatePicker::setDate( const QDate &d )
     day = d.day();
     int r, c;
     Calendar::coordForDate(d.year(), d.month(), d, r, c, table->weekStartsMonday());
-    //qDebug("QPEDatePicker::setCurrentCell [%d, %d] = %s", r, c, d.toString().latin1() );
     table->setCurrentCell(r,c);
 }
 
@@ -559,6 +640,9 @@ QDate  QPEDatePicker::selectedDate() const
 void QPEDatePicker::setWeekStartsMonday( bool startMonday )
 {
     table->setWeekStartsMonday( startMonday );
+    int r, c;
+    Calendar::coordForDate(year, month, QDate(year, month, day), r, c, table->weekStartsMonday());
+    table->setCurrentCell(r,c);
 }
 
 /*!
@@ -566,6 +650,19 @@ void QPEDatePicker::setWeekStartsMonday( bool startMonday )
 */
 void QPEDatePicker::keyPressEvent( QKeyEvent *e )
 {
+#ifdef QTOPIA_PHONE
+    if( !mousePreferred ) {
+	if (!isModalEditing()) {
+	    if (e->key() == Key_Select) {
+		setModalEditing(TRUE);
+		table->updateCell(table->currentRow(), table->currentColumn());
+	    } else {
+		e->ignore();
+	    }
+	    return;
+	}
+    }
+#endif
     switch(e->key()) {
 	case Key_Up:
 	    setDate(QDate(year, month, day).addDays(-7));
@@ -579,12 +676,53 @@ void QPEDatePicker::keyPressEvent( QKeyEvent *e )
 	case Key_Right:
 	    setDate(QDate(year, month, day).addDays(1));
 	    break;
-#ifdef QTOPIA_DESKTOP
-	    // ### enable this for all versions after 1.6.1
+#ifdef QTOPIA_PHONE
+	case Key_1:
+	    setDate(QDate(year, month, day).addDays(-7));
+	    break;
+	case Key_3:
+	    setDate(QDate(year, month, day).addDays(7));
+	    break;
+	case Key_4:
+	    if (month == 1)
+		setDate(year-1, 12);
+	    else
+		setDate(year, month-1);
+	    break;
+	case Key_6:
+	    if (month == 12)
+		setDate(year+1, 1);
+	    else
+		setDate(year, month+1);
+	    break;
+	case Key_7:
+	    setDate(year-1, month);
+	    break;
+	case Key_9:
+	    setDate(year+1, month);
+	    break;
+	case Key_5:
+	    setDate(QDate::currentDate());
+	    break;
+	case Key_Back:
+	case Key_No:
+	    if( !mousePreferred ) {
+		setModalEditing(FALSE);
+		table->updateCell(table->currentRow(), table->currentColumn());
+	    }
+	    e->ignore(); // let the parent get this too
+	    break;
+#endif
         case Key_Enter:
         case Key_Return:
-#endif
 	case Key_Space:
+#ifdef QTOPIA_PHONE
+	case Key_Select:
+	    if( !mousePreferred ) {
+		setModalEditing(FALSE);
+		table->updateCell(table->currentRow(), table->currentColumn());
+	    }
+#endif
 	    emit dateClicked(QDate(year, month, day));
 	    break;
 	default:

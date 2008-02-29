@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -24,7 +39,6 @@
 #include <qtopia/qpeapplication.h>
 #include <qtopia/config.h>
 #include <qtopia/private/event.h>
-#include <qtopia/datebookdb.h>
 #include <qtopia/datetimeedit.h>
 #include <qtopia/global.h>
 #include <qtopia/resource.h>
@@ -35,7 +49,9 @@
 #if ( defined Q_WS_QWS || defined(_WS_QWS_) ) && !defined(QT_NO_COP)
 #include <qtopia/qcopenvelope_qws.h>
 #endif
-
+#ifdef QTOPIA_PHONE
+#include <qtabwidget.h>
+#endif
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qlabel.h>
@@ -55,49 +71,73 @@
 
 
 SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags f )
-    : QDialog( parent, name, modal, f )
+    : QDialog( parent, name, modal, f ), tzEditable(TRUE), tzLabel(0)
 {
     setCaption( tr("Date/Time") );
 
-    QVBoxLayout *vb = new QVBoxLayout( this, 5 );
+    QVBoxLayout *vb = new QVBoxLayout( this, 4 );
+#ifdef QTOPIA_PHONE
+    QTabWidget *tb = new QTabWidget(this);
+    vb->addWidget(tb);
 
-    QHBoxLayout *hb = new QHBoxLayout( vb, -1 );
+    QWidget *timePage = new QWidget(tb);
+    QVBoxLayout *timeLayout = new QVBoxLayout( timePage, 4 );
+    tb->addTab(timePage, tr("Time"));
 
-    QLabel *lblZone = new QLabel( tr( "Time Zone" ), this );
+    QWidget *formatPage = new QWidget(tb);
+    QVBoxLayout *formatLayout = new QVBoxLayout( formatPage, 4 );
+    tb->addTab(formatPage, tr("Format"));
+#else
+    QWidget *timePage = this;
+    QWidget *formatPage = this;
+    QVBoxLayout *timeLayout = vb;
+    QVBoxLayout *formatLayout = vb;
+#endif
+
+    tzLayout = new QHBoxLayout( timeLayout, -1 );
+
+#ifdef QTOPIA_PHONE
+    QLabel *lblZone = new QLabel( tr( "T.Z." ), timePage );
+#else
+    QLabel *lblZone = new QLabel( tr( "Time Zone" ), timePage );
+#endif
     lblZone->setMaximumSize( lblZone->sizeHint() );
-    hb->addWidget( lblZone );
+    tzLayout->addWidget( lblZone );
 
-    tz = new TimeZoneSelector( this );
+    tz = new TimeZoneSelector( timePage );
     tz->setMinimumSize( tz->sizeHint() );
-    hb->addWidget( tz );
+    tzLayout->addWidget( tz );
 
-    time = new SetTime( this );
-    vb->addWidget( time );
+    time = new SetTime( timePage );
+    timeLayout->addWidget( time );
 
-    QHBoxLayout *db = new QHBoxLayout( vb );
-    QLabel *dateLabel = new QLabel( tr("Date"), this );
+    QHBoxLayout *db = new QHBoxLayout( timeLayout );
+    QLabel *dateLabel = new QLabel( tr("Date"), timePage );
     db->addWidget( dateLabel, 1 );
-    date = new QPEDateEdit( this, 0, TRUE );
+    date = new QPEDateEdit( QDate::currentDate(), timePage, 0, qApp->desktop()->width() > 200, FALSE );
     connect(date, SIGNAL(valueChanged(const QDate&)),
 	    this, SLOT(dateChange(const QDate&)) );
     db->addWidget( date, 2 );
 
-
-    QFrame *hline = new QFrame( this );
-    hline->setFrameStyle( QFrame::HLine | QFrame::Sunken );
-    vb->addWidget( hline );
+#ifndef QTOPIA_PHONE
+    if (qApp->desktop()->height() >= 220) {
+	QFrame *hline = new QFrame( timePage );
+	hline->setFrameStyle( QFrame::HLine | QFrame::Sunken );
+	timeLayout->addWidget( hline );
+    }
+#endif
 
     Config config("qpe");
     config.setGroup( "Time" );
 
-    QHBoxLayout *hb1 = new QHBoxLayout( vb );
+    QHBoxLayout *hb1 = new QHBoxLayout( formatLayout );
 
-    QLabel *l = new QLabel( tr("Time format"), this );
+    QLabel *l = new QLabel( tr("Time format"), formatPage );
     //    l->setAlignment( AlignRight | AlignVCenter );
     hb1->addWidget( l, 1 );
 
 
-    ampmCombo = new QComboBox( this );
+    ampmCombo = new QComboBox( formatPage );
     ampmCombo->insertItem( tr("24 hour"), 0 );
     ampmCombo->insertItem( tr("12 hour"), 1 );
     hb1->addWidget( ampmCombo, 2 );
@@ -109,12 +149,12 @@ SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags 
     connect(ampmCombo, SIGNAL(activated(int)),
 	    time, SLOT(show12hourTime(int)));
 
-    QHBoxLayout *hb2 = new QHBoxLayout( vb );
-    l = new QLabel( tr("Weeks start on" ), this );
+    QHBoxLayout *hb2 = new QHBoxLayout( formatLayout );
+    l = new QLabel( tr("Week starts" ), formatPage );
     //l->setAlignment( AlignRight | AlignVCenter );
     hb2->addWidget( l, 1 );
 
-    weekStartCombo = new QComboBox( this );
+    weekStartCombo = new QComboBox( formatPage );
     weekStartCombo->insertItem( tr("Sunday"), 0 );
     weekStartCombo->insertItem( tr("Monday"), 1 );
 
@@ -127,10 +167,10 @@ SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags 
 	     this, SLOT(weekStartChanged(int)));
 
 
-    QHBoxLayout *hb3 = new QHBoxLayout( vb );
-    l = new QLabel( tr("Date format" ), this );
+    QHBoxLayout *hb3 = new QHBoxLayout( formatLayout );
+    l = new QLabel( tr("Date format" ), formatPage );
     hb3->addWidget( l, 1 );
-    dateFormatCombo = new QComboBox( this );
+    dateFormatCombo = new QComboBox( formatPage );
     hb3->addWidget( dateFormatCombo, 2 );
 
     DateFormat df = TimeString::currentDateFormat();
@@ -154,17 +194,73 @@ SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags 
     connect( dateFormatCombo, SIGNAL( activated(int)),
 	     this, SLOT(formatChanged(int)));
 
-
+#ifdef QTOPIA_PHONE
+    timeLayout->addStretch( 0 );
+    formatLayout->addStretch( 0 );
+#else
     vb->addStretch( 0 );
+#endif
 
-    QObject::connect( tz, SIGNAL( signalNewTz( const QString& ) ),
-                      time, SLOT( slotTzChange( const QString& ) ) );
-    QObject::connect( tz, SIGNAL( signalNewTz( const QString& ) ),
-                      this, SLOT( tzChange( const QString& ) ) );
+    QObject::connect( tz, SIGNAL( signalNewTz(const QString&) ),
+                      time, SLOT( slotTzChange(const QString&) ) );
+    QObject::connect( tz, SIGNAL( signalNewTz(const QString&) ),
+                      this, SLOT( tzChange(const QString&) ) );
 
     dl = new QPEDialogListener(this);
     dateChanged = FALSE;
     tzChanged = FALSE;
+
+    //
+    // Purge daily timer.  Avoids race between server triggering
+    // daily alarm and the daily alarm getting removed then added
+    // by the clock on receipt of timeChange().
+    //
+    AlarmServer::deleteAlarm(QDateTime(), "QPE/Application/clock",
+	"alarm(QDateTime,int)", -1);
+
+#ifdef QTOPIA_PHONE
+    contextMenu = new ContextMenu( this );
+#endif        
+    connect( qApp, SIGNAL(appMessage(const QCString&, const QByteArray&)),
+	    this, SLOT(appMessage(const QCString&, const QByteArray&)) );
+}
+
+void SetDateTime::setTimezoneEditable(bool tze)
+{
+    if (tze == tzEditable)
+	return;
+    if (tze) {
+	tz->show();
+	delete tzLabel;
+	tzLabel = 0;
+    } else {
+	tz->hide();
+        QStringList tzNameParts = QStringList::split('/', tz->currentZone());
+        QString translatedTzName;
+        for (QStringList::Iterator it = tzNameParts.begin(); it != tzNameParts.end(); ++it) {
+            translatedTzName += qApp->translate("TimeZone", *it); //no tr
+            translatedTzName += '/'; 
+        }
+        if (!translatedTzName.isEmpty())
+            translatedTzName = translatedTzName.left(translatedTzName.length()-1);
+	tzLabel = new QLabel(translatedTzName, this);
+	tzLayout->addWidget(tzLabel);
+    }
+    tze = tzEditable;
+}
+
+void SetDateTime::appMessage( const QCString &msg, const QByteArray &)
+{
+    if( msg == "editTime()" ) {
+	QPEApplication::setKeepRunning();
+	time->setFocus();
+    } else if( msg == "editDate()" ) {
+	QPEApplication::setKeepRunning();
+	date->setFocus();
+    } else if( msg == "editAlarm()" ) {
+	//TODO
+	qDebug("SetDateTime::editAlarm() - Not yet implemented!");
+    }
 }
 
 void SetDateTime::accept()
@@ -222,10 +318,9 @@ void SetDateTime::accept()
 	    if ( myTv.tv_sec != -1 )
 		::settimeofday( &myTv, 0 );
 	    Global::writeHWClock();
-	    // since time has changed quickly load in the datebookdb
-	    // to allow the alarm server to get a better grip on itself
-	    // (example re-trigger alarms for when we travel back in time)
-	    DateBookDB db;
+	    // Should leave updating alarms to datebook, rather than screw it up
+	    // via duplicated functionality.
+	    // DateBookDB is flawed, it should not be used anywhere.
 	} else {
 	    qWarning( "Invalid date/time" );
 	}
@@ -252,7 +347,7 @@ void SetDateTime::accept()
     }
 #endif
 
-    // Notify everyone what date format  to use
+    // Notify everyone what date format to use
 #ifndef QT_NO_COP
     QCopEnvelope setDateFormat( "QPE/System", "setDateFormat(DateFormat)" );
     setDateFormat << date_formats[dateFormatCombo->currentItem()];
@@ -275,7 +370,7 @@ void SetDateTime::done(int r)
 
 void SetDateTime::tzChange( const QString &tz )
 {
-    // set the TZ get the time and leave gracefully...
+    // set the TZ, get the time and leave gracefully...
     QString strSave;
     strSave = getenv( "TZ" );
     setenv( "TZ", tz, 1 );
@@ -323,7 +418,7 @@ SetTime::SetTime( QWidget *parent, const char *name )
     QHBoxLayout *hb2 = new QHBoxLayout( this );
     hb2->setSpacing( 3 );
 
-    QLabel *l = new QLabel( tr("Hour"), this );
+    QLabel *l = new QLabel( tr("Time"), this );
     //    l->setAlignment( AlignRight | AlignVCenter );
     hb2->addWidget( l );
 
@@ -350,7 +445,7 @@ SetTime::SetTime( QWidget *parent, const char *name )
 
     hb2->addStretch( 1 );
 
-    l = new QLabel( tr("Minute"), this );
+    l = new QLabel( tr(":"), this );
     //l->setAlignment( AlignRight | AlignVCenter );
     hb2->addWidget( l );
 
@@ -380,6 +475,18 @@ SetTime::SetTime( QWidget *parent, const char *name )
 QTime SetTime::time() const
 {
     return QTime( hour, minute, 0 );
+}
+
+void SetTime::focusInEvent( QFocusEvent *e )
+{
+    QWidget::focusInEvent( e );
+    sbHour->setFocus();
+#ifdef QTOPIA_PHONE
+    if( !Global::mousePreferred() ) {
+	if( sbHour->isModalEditing() )
+	    sbHour->setModalEditing( TRUE );
+    }
+#endif
 }
 
 void SetTime::hourChanged( int value )
@@ -450,7 +557,7 @@ void SetTime::checkedPM( int c )
 
 void SetTime::slotTzChange( const QString &tz )
 {
-    // set the TZ get the time and leave gracefully...
+    // set the TZ, get the time and leave gracefully...
     QString strSave;
     strSave = getenv( "TZ" );
     setenv( "TZ", tz, 1 );
@@ -461,7 +568,7 @@ void SetTime::slotTzChange( const QString &tz )
 	setenv( "TZ", strSave, 1 );
     }
 
-    // just set the spinboxes and let it propage through
+    // just set the spinboxes and let it propagate through
     if(use12hourTime) {
 	int show_hour = t.hour();
 	if (t.hour() >= 12) {

@@ -1,7 +1,7 @@
 <!DOCTYPE UI><UI>
 <class>LightSettingsBase</class>
 <widget>
-    <class>QDialog</class>
+    <class>QWidget</class>
     <property stdset="1">
         <name>name</name>
         <cstring>LightSettingsBase</cstring>
@@ -11,13 +11,13 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>242</width>
-            <height>362</height>
+            <width>239</width>
+            <height>428</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Light and Power</string>
+        <string>Power Management</string>
     </property>
     <property>
         <name>layoutMargin</name>
@@ -147,6 +147,27 @@
                     <name>spacing</name>
                     <number>6</number>
                 </property>
+                <spacer row="0"  column="0" >
+                    <property>
+                        <name>name</name>
+                        <cstring>Spacer6</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>orientation</name>
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>sizeType</name>
+                        <enum>Expanding</enum>
+                    </property>
+                    <property>
+                        <name>sizeHint</name>
+                        <size>
+                            <width>20</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
                 <widget row="0"  column="0" >
                     <class>QCheckBox</class>
                     <property stdset="1">
@@ -162,33 +183,14 @@
                     </property>
                     <property stdset="1">
                         <name>text</name>
-                        <string>Dim light after</string>
+                        <string>Dim light</string>
                     </property>
                     <property stdset="1">
                         <name>checked</name>
                         <bool>true</bool>
                     </property>
                 </widget>
-                <widget row="2"  column="0" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>screensaver_suspend</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>enabled</name>
-                        <bool>false</bool>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Suspend after</string>
-                    </property>
-                    <property stdset="1">
-                        <name>checked</name>
-                        <bool>true</bool>
-                    </property>
-                </widget>
-                <widget row="3"  column="0"  rowspan="1"  colspan="4" >
+                <widget row="4"  column="0"  rowspan="1"  colspan="3" >
                     <class>QCheckBox</class>
                     <property stdset="1">
                         <name>name</name>
@@ -214,7 +216,7 @@
                     </property>
                     <property stdset="1">
                         <name>text</name>
-                        <string>Light off after</string>
+                        <string>Light off</string>
                     </property>
                     <property stdset="1">
                         <name>checked</name>
@@ -222,36 +224,6 @@
                     </property>
                 </widget>
                 <widget row="1"  column="2" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_lightoff</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>PlusMinus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
-                <widget row="1"  column="3" >
                     <class>QLabel</class>
                     <property stdset="1">
                         <name>name</name>
@@ -262,7 +234,7 @@
                         <string>seconds</string>
                     </property>
                 </widget>
-                <widget row="0"  column="3" >
+                <widget row="0"  column="2" >
                     <class>QLabel</class>
                     <property stdset="1">
                         <name>name</name>
@@ -273,7 +245,7 @@
                         <string>seconds</string>
                     </property>
                 </widget>
-                <widget row="2"  column="3" >
+                <widget row="2"  column="2" >
                     <class>QLabel</class>
                     <property stdset="1">
                         <name>name</name>
@@ -284,37 +256,7 @@
                         <string>seconds</string>
                     </property>
                 </widget>
-                <widget row="0"  column="2" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_dim</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>PlusMinus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
-                <widget row="2"  column="2" >
+                <widget row="2"  column="1" >
                     <class>QSpinBox</class>
                     <property stdset="1">
                         <name>name</name>
@@ -329,7 +271,7 @@
                     </property>
                     <property stdset="1">
                         <name>buttonSymbols</name>
-                        <enum>PlusMinus</enum>
+                        <enum>UpDownArrows</enum>
                     </property>
                     <property stdset="1">
                         <name>maxValue</name>
@@ -344,27 +286,85 @@
                         <number>15</number>
                     </property>
                 </widget>
-                <spacer row="1"  column="1" >
-                    <property>
+                <widget row="1"  column="1" >
+                    <class>QSpinBox</class>
+                    <property stdset="1">
                         <name>name</name>
-                        <cstring>Spacer3_2</cstring>
+                        <cstring>interval_lightoff</cstring>
                     </property>
                     <property stdset="1">
-                        <name>orientation</name>
-                        <enum>Horizontal</enum>
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>0</vsizetype>
+                        </sizepolicy>
                     </property>
                     <property stdset="1">
-                        <name>sizeType</name>
-                        <enum>Expanding</enum>
+                        <name>buttonSymbols</name>
+                        <enum>UpDownArrows</enum>
                     </property>
-                    <property>
-                        <name>sizeHint</name>
-                        <size>
-                            <width>20</width>
-                            <height>20</height>
-                        </size>
+                    <property stdset="1">
+                        <name>maxValue</name>
+                        <number>3600</number>
                     </property>
-                </spacer>
+                    <property stdset="1">
+                        <name>minValue</name>
+                        <number>10</number>
+                    </property>
+                    <property stdset="1">
+                        <name>lineStep</name>
+                        <number>15</number>
+                    </property>
+                </widget>
+                <widget row="0"  column="1" >
+                    <class>QSpinBox</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>interval_dim</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>0</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>buttonSymbols</name>
+                        <enum>UpDownArrows</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>maxValue</name>
+                        <number>3600</number>
+                    </property>
+                    <property stdset="1">
+                        <name>minValue</name>
+                        <number>10</number>
+                    </property>
+                    <property stdset="1">
+                        <name>lineStep</name>
+                        <number>15</number>
+                    </property>
+                </widget>
+                <widget row="2"  column="0" >
+                    <class>QCheckBox</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>screensaver_suspend</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>enabled</name>
+                        <bool>false</bool>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Suspend</string>
+                    </property>
+                    <property stdset="1">
+                        <name>checked</name>
+                        <bool>true</bool>
+                    </property>
+                </widget>
             </grid>
         </widget>
         <widget>

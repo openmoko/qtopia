@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*
  * DSP utils : average functions are compiled twice for 3dnow/mmx2
  * Copyright (c) 2000, 2001 Fabrice Bellard.
@@ -25,7 +46,7 @@
 /* XXX: we use explicit registers to avoid a gcc 2.95.2 register asm
    clobber bug - now it will work with 2.95.2 and also with -fPIC
  */
-static void DEF(put_pixels8_x2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(put_pixels8_x2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     __asm __volatile(
 	"lea (%3, %3), %%eax		\n\t"
@@ -53,7 +74,39 @@ static void DEF(put_pixels8_x2)(UINT8 *block, const UINT8 *pixels, int line_size
 	:"%eax", "memory");
 }
 
-static void DEF(put_pixels16_x2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(put_pixels8_l2)(uint8_t *dst, uint8_t *src1, uint8_t *src2, int dstStride, int src1Stride, int h)
+{
+    __asm __volatile(
+	"1:				\n\t"
+	"movq	(%1), %%mm0		\n\t"
+	"addl	%4, %1			\n\t"
+	"movq	(%1), %%mm1		\n\t"
+	"addl	%4, %1			\n\t"
+	PAVGB" (%2), %%mm0		\n\t"
+	PAVGB" 8(%2), %%mm1		\n\t"
+	"movq	%%mm0, (%3)		\n\t"
+	"addl	%5, %3			\n\t"
+	"movq	%%mm1, (%3)		\n\t"
+	"addl	%5, %3			\n\t"
+	"movq	(%1), %%mm0		\n\t"
+	"addl	%4, %1			\n\t"
+	"movq	(%1), %%mm1		\n\t"
+	"addl	%4, %1			\n\t"
+	PAVGB" 16(%2), %%mm0		\n\t"
+	PAVGB" 24(%2), %%mm1		\n\t"
+	"movq	%%mm0, (%3)		\n\t"
+	"addl	%5, %3			\n\t"
+	"movq	%%mm1, (%3)		\n\t"
+	"addl	%5, %3			\n\t"
+        "addl	$32, %2			\n\t"
+	"subl	$4, %0			\n\t"
+	"jnz	1b			\n\t"
+	:"+g"(h), "+r"(src1), "+r"(src2), "+r"(dst)
+	:"r"(src1Stride), "r"(dstStride)
+	:"memory");
+}
+
+static void DEF(put_pixels16_x2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     __asm __volatile(
 	"lea (%3, %3), %%eax		\n\t"
@@ -91,10 +144,38 @@ static void DEF(put_pixels16_x2)(UINT8 *block, const UINT8 *pixels, int line_siz
 	:"+g"(h), "+S"(pixels), "+D"(block)
 	:"r" (line_size)
 	:"%eax", "memory");
+}
+
+static void DEF(put_pixels16_l2)(uint8_t *dst, uint8_t *src1, uint8_t *src2, int dstStride, int src1Stride, int h)
+{
+    __asm __volatile(
+	"1:				\n\t"
+	"movq	(%1), %%mm0		\n\t"
+	"movq	8(%1), %%mm1		\n\t"
+	"addl	%4, %1			\n\t"
+	PAVGB" (%2), %%mm0		\n\t"
+	PAVGB" 8(%2), %%mm1		\n\t"
+	"movq	%%mm0, (%3)		\n\t"
+	"movq	%%mm1, 8(%3)		\n\t"
+	"addl	%5, %3			\n\t"
+	"movq	(%1), %%mm0		\n\t"
+	"movq	8(%1), %%mm1		\n\t"
+	"addl	%4, %1			\n\t"
+	PAVGB" 16(%2), %%mm0		\n\t"
+	PAVGB" 24(%2), %%mm1		\n\t"
+	"movq	%%mm0, (%3)		\n\t"
+	"movq	%%mm1, 8(%3)		\n\t"
+	"addl	%5, %3			\n\t"
+        "addl	$32, %2			\n\t"
+	"subl	$2, %0			\n\t"
+	"jnz	1b			\n\t"
+	:"+g"(h), "+r"(src1), "+r"(src2), "+r"(dst)
+	:"r"(src1Stride), "r"(dstStride)
+	:"memory");
 }
  
 /* GL: this function does incorrect rounding if overflow */
-static void DEF(put_no_rnd_pixels8_x2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(put_no_rnd_pixels8_x2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     MOVQ_BONE(mm6);
     __asm __volatile(
@@ -131,7 +212,7 @@ static void DEF(put_no_rnd_pixels8_x2)(UINT8 *block, const UINT8 *pixels, int li
 	:"%eax", "memory");
 }
 
-static void DEF(put_pixels8_y2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(put_pixels8_y2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     __asm __volatile(
 	"lea (%3, %3), %%eax		\n\t"
@@ -162,7 +243,7 @@ static void DEF(put_pixels8_y2)(UINT8 *block, const UINT8 *pixels, int line_size
 }
 
 /* GL: this function does incorrect rounding if overflow */
-static void DEF(put_no_rnd_pixels8_y2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(put_no_rnd_pixels8_y2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     MOVQ_BONE(mm6);
     __asm __volatile(
@@ -195,7 +276,7 @@ static void DEF(put_no_rnd_pixels8_y2)(UINT8 *block, const UINT8 *pixels, int li
 	:"%eax", "memory");
 }
 
-static void DEF(avg_pixels8)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(avg_pixels8)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     __asm __volatile(
 	"lea (%3, %3), %%eax		\n\t"
@@ -223,7 +304,7 @@ static void DEF(avg_pixels8)(UINT8 *block, const UINT8 *pixels, int line_size, i
 	:"%eax", "memory");
 }
 
-static void DEF(avg_pixels8_x2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(avg_pixels8_x2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     __asm __volatile(
 	"lea (%3, %3), %%eax		\n\t"
@@ -255,7 +336,7 @@ static void DEF(avg_pixels8_x2)(UINT8 *block, const UINT8 *pixels, int line_size
 	:"%eax", "memory");
 }
 
-static void DEF(avg_pixels8_y2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(avg_pixels8_y2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     __asm __volatile(
 	"lea (%3, %3), %%eax		\n\t"
@@ -294,7 +375,7 @@ static void DEF(avg_pixels8_y2)(UINT8 *block, const UINT8 *pixels, int line_size
 }
 
 // Note this is not correctly rounded, but this function is only used for b frames so it doesnt matter 
-static void DEF(avg_pixels8_xy2)(UINT8 *block, const UINT8 *pixels, int line_size, int h)
+static void DEF(avg_pixels8_xy2)(uint8_t *block, const uint8_t *pixels, int line_size, int h)
 {
     MOVQ_BONE(mm6);
     __asm __volatile(
@@ -336,31 +417,31 @@ static void DEF(avg_pixels8_xy2)(UINT8 *block, const UINT8 *pixels, int line_siz
 }
 
 //FIXME the following could be optimized too ...
-static void DEF(put_no_rnd_pixels16_x2)(UINT8 *block, const UINT8 *pixels, int line_size, int h){
+static void DEF(put_no_rnd_pixels16_x2)(uint8_t *block, const uint8_t *pixels, int line_size, int h){
     DEF(put_no_rnd_pixels8_x2)(block  , pixels  , line_size, h);
     DEF(put_no_rnd_pixels8_x2)(block+8, pixels+8, line_size, h);
 }
-static void DEF(put_pixels16_y2)(UINT8 *block, const UINT8 *pixels, int line_size, int h){
+static void DEF(put_pixels16_y2)(uint8_t *block, const uint8_t *pixels, int line_size, int h){
     DEF(put_pixels8_y2)(block  , pixels  , line_size, h);
     DEF(put_pixels8_y2)(block+8, pixels+8, line_size, h);
 }
-static void DEF(put_no_rnd_pixels16_y2)(UINT8 *block, const UINT8 *pixels, int line_size, int h){
+static void DEF(put_no_rnd_pixels16_y2)(uint8_t *block, const uint8_t *pixels, int line_size, int h){
     DEF(put_no_rnd_pixels8_y2)(block  , pixels  , line_size, h);
     DEF(put_no_rnd_pixels8_y2)(block+8, pixels+8, line_size, h);
 }
-static void DEF(avg_pixels16)(UINT8 *block, const UINT8 *pixels, int line_size, int h){
+static void DEF(avg_pixels16)(uint8_t *block, const uint8_t *pixels, int line_size, int h){
     DEF(avg_pixels8)(block  , pixels  , line_size, h);
     DEF(avg_pixels8)(block+8, pixels+8, line_size, h);
 }
-static void DEF(avg_pixels16_x2)(UINT8 *block, const UINT8 *pixels, int line_size, int h){
+static void DEF(avg_pixels16_x2)(uint8_t *block, const uint8_t *pixels, int line_size, int h){
     DEF(avg_pixels8_x2)(block  , pixels  , line_size, h);
     DEF(avg_pixels8_x2)(block+8, pixels+8, line_size, h);
 }
-static void DEF(avg_pixels16_y2)(UINT8 *block, const UINT8 *pixels, int line_size, int h){
+static void DEF(avg_pixels16_y2)(uint8_t *block, const uint8_t *pixels, int line_size, int h){
     DEF(avg_pixels8_y2)(block  , pixels  , line_size, h);
     DEF(avg_pixels8_y2)(block+8, pixels+8, line_size, h);
 }
-static void DEF(avg_pixels16_xy2)(UINT8 *block, const UINT8 *pixels, int line_size, int h){
+static void DEF(avg_pixels16_xy2)(uint8_t *block, const uint8_t *pixels, int line_size, int h){
     DEF(avg_pixels8_xy2)(block  , pixels  , line_size, h);
     DEF(avg_pixels8_xy2)(block+8, pixels+8, line_size, h);
 }

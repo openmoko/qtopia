@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia/fontdatabase.cpp:75 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia/fontdatabase.cpp:75 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,18 +14,25 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>FontDatabase Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>FontDatabase Class Reference</h1>
 
 <p>The FontDatabase class provides information about available fonts.
 <a href="#details">More...</a>
 <p><tt>#include &lt;<a href="fontdatabase-h.html">qtopia/fontdatabase.h</a>&gt;</tt>
-<p>Inherits <a href="qfontdatabase.html">QFontDatabase</a>.
 <p><a href="fontdatabase-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
@@ -42,14 +49,14 @@ body { background: #ffffff; color: black; }
 The FontDatabase class provides information about available fonts.
 <p> Most often you will simply want to query the database for the
 available font <a href="#families">families</a>().
-<p> Use FontDatabase rather than <a href="qfontdatabase.html">QFontDatabase</a> when you may need access
+<p> Use FontDatabase rather than QFontDatabase when you may need access
 to fonts that are not normally available. For example, if the
 freetype library and the Qtopia freetype plugin are installed,
 TrueType fonts will be available to your application. Font renderer
 plugins have greater resource requirements than system fonts so they
 should be used only when necessary. You can force the loading of
 font renderer plugins with <a href="#loadRenderers">loadRenderers</a>().
-<p> Note that on the SHARP SL5500, some fonts return <a href="qfontdatabase.html#pointSizes">pointSizes</a>() that
+<p> Note that on the SHARP SL5500, some fonts return pointSizes() that
 are 10 times too large. A heuristic for detecting this case is that
 the first size in the list is more than 70.
 <p> 
@@ -60,7 +67,7 @@ the first size in the list is more than 70.
 </h3>
 Constructs a FontDatabase object.
 
-<h3 class=fn><a href="qstringlist.html">QStringList</a> <a name="families"></a>FontDatabase::families () const
+<h3 class=fn>QStringList <a name="families"></a>FontDatabase::families () const
 </h3>
 Returns a list of names of all the available font families.
 
@@ -71,11 +78,13 @@ that the plugins can read available.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

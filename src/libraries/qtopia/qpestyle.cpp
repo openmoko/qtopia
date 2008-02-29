@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -23,6 +38,7 @@
 #include <qpushbutton.h>
 
 #include <qpainter.h>
+#include <qimage.h>
 
 #define QCOORDARRLEN(x) sizeof(x)/(sizeof(QCOORD)*2)
 
@@ -39,14 +55,19 @@
   \ingroup qtopiaemb
 */
 
+// QDOC_SKIP_BEGIN
+
+/*! */
 QPEStyle::QPEStyle()
 {
 }
 
+/*! */
 QPEStyle::~QPEStyle()
 {
 }
 
+/*! \a pe \a p \a r \a cg \a flags \a data */
 void QPEStyle::drawPrimitive( PrimitiveElement pe, QPainter *p, const QRect &r,
 			      const QColorGroup &cg, SFlags flags, const QStyleOption &data) const
 {
@@ -168,6 +189,7 @@ void QPEStyle::drawPrimitive( PrimitiveElement pe, QPainter *p, const QRect &r,
     }
 }
 
+/*! \a ce \a p \a widget \a r \a cg \a how \a data */
 void QPEStyle::drawControl( ControlElement ce, QPainter *p,
 			    const QWidget *widget, const QRect &r,
 			    const QColorGroup &cg, SFlags how, const QStyleOption &data) const
@@ -298,6 +320,7 @@ void QPEStyle::drawControl( ControlElement ce, QPainter *p,
     }
 }
 
+/*! \a control \a p \a widget \a r \a cg \a how \a sub \a subActive \a data */
 void QPEStyle::drawComplexControl( ComplexControl control, QPainter *p,
 				   const QWidget *widget, const QRect &r,
 				   const QColorGroup &cg, SFlags how,
@@ -362,6 +385,7 @@ void QPEStyle::drawComplexControl( ComplexControl control, QPainter *p,
     }
 }
 
+/*! \a metric \a widget */
 int QPEStyle::pixelMetric( PixelMetric metric, const QWidget *widget ) const
 {
     int ret;
@@ -402,6 +426,7 @@ int QPEStyle::pixelMetric( PixelMetric metric, const QWidget *widget ) const
     return ret;
 }
 
+/*! \a contents \a widget \a contentsSize \a data */
 QSize QPEStyle::sizeFromContents( ContentsType contents, const QWidget *widget,
 				const QSize &contentsSize, const QStyleOption &data) const
 {
@@ -438,6 +463,7 @@ QSize QPEStyle::sizeFromContents( ContentsType contents, const QWidget *widget,
 #include <qmenudata.h>
 #include <qpopupmenu.h>
 
+/*! */
 QPEStyle::QPEStyle()
 {
 #if QT_VERSION < 0x030000
@@ -446,24 +472,39 @@ QPEStyle::QPEStyle()
 #endif
 }
 
+/*! */
 QPEStyle::~QPEStyle()
 {
 }
 
+/*! */
 int QPEStyle::buttonMargin() const
 {
     return 2;
 }
 
+/*! */
 QSize QPEStyle::scrollBarExtent() const
 {
     return QSize(13,13);
 }
 
+/*! */
 void QPEStyle::polish ( QPalette & )
 {
 }
 
+class QStyleHackWidget : public QWidget {
+public:
+    static void setGlobalBrushOrigin(QWidget *w) {
+	((QStyleHackWidget*)w)->setWState(WState_GlobalBrushOrigin);
+    }
+    static void clearGlobalBrushOrigin(QWidget *w) {
+	((QStyleHackWidget*)w)->clearWState(WState_GlobalBrushOrigin);
+    }
+};
+
+/*! */
 void QPEStyle::polish( QWidget *w )
 {
     if ( w->inherits( "QListBox" ) ||
@@ -474,8 +515,15 @@ void QPEStyle::polish( QWidget *w )
 	f->setFrameShape( QFrame::StyledPanel );
 	f->setLineWidth( 1 );
     }
+    if (w->backgroundMode() == QWidget::PaletteBackground) {
+	QWidget *p = w->parentWidget();
+	if (!p || strcmp(p->name(), "qt_viewport"))
+	    w->setBackgroundOrigin(QWidget::AncestorOrigin);
+    }
+    QStyleHackWidget::setGlobalBrushOrigin(w);
 }
 
+/*! */
 void QPEStyle::unPolish( QWidget *w )
 {
     if ( w->inherits( "QListBox" ) ||
@@ -486,19 +534,24 @@ void QPEStyle::unPolish( QWidget *w )
 	f->setFrameShape( QFrame::StyledPanel );
 	f->setLineWidth( 2 );
     }
+    w->setBackgroundOrigin(QWidget::WidgetOrigin);
+    QStyleHackWidget::clearGlobalBrushOrigin(w);
 }
 
+/*! */
 int QPEStyle::defaultFrameWidth() const
 {
     return 1;
 }
 
+/*! */
 void QPEStyle::drawPanel ( QPainter * p, int x, int y, int w, int h,
 			    const QColorGroup &g, bool sunken, int lineWidth, const QBrush * fill )
 {
     qDrawShadePanel( p, QRect(x, y, w, h), g, sunken, lineWidth, fill );
 }
 
+/*! */
 void QPEStyle::drawButton( QPainter *p, int x, int y, int w, int h,
                                 const QColorGroup &g, bool sunken, const QBrush* fill )
 {
@@ -526,28 +579,33 @@ void QPEStyle::drawButton( QPainter *p, int x, int y, int w, int h,
     p->fillRect( x+1, y+1, w-2, h-2, fill?(*fill):g.brush(QColorGroup::Button) );
 }
 
+/*! */
 void QPEStyle::drawButtonMask ( QPainter * p, int x, int y, int w, int h )
 {
     p->fillRect( x, y, w, h, color1 );
 }
 
+/*! */
 void QPEStyle::drawBevelButton( QPainter *p, int x, int y, int w, int h,
                                 const QColorGroup &g, bool sunken, const QBrush* fill )
 {
     drawButton( p, x, y, w, h, g, sunken, fill );
 }
 
+/*! */
 QRect QPEStyle::comboButtonRect( int x, int y, int w, int h)
 {
     return QRect(x+1, y+1, w-2-14, h-2);
 }
       
        
+/*! */
 QRect QPEStyle::comboButtonFocusRect( int x, int y, int w, int h)
 {
     return QRect(x+2, y+2, w-4-14, h-4);
 }
 
+/*! */
 void QPEStyle::drawComboButton( QPainter *p, int x, int y, int w, int h,
 				     const QColorGroup &g, bool sunken,
 				     bool /*editable*/,
@@ -563,6 +621,7 @@ void QPEStyle::drawComboButton( QPainter *p, int x, int y, int w, int h,
 }
 
 
+/*! */
 void QPEStyle::drawExclusiveIndicator ( QPainter * p, int x, int y, int w,
 	int h, const QColorGroup & g, bool on, bool down, bool enabled )
 {
@@ -597,6 +656,7 @@ void QPEStyle::drawExclusiveIndicator ( QPainter * p, int x, int y, int w,
     }
 }
 
+/*! */
 void QPEStyle::drawIndicator ( QPainter * p, int x, int y, int w, int h,
 	const QColorGroup & g, int state, bool down, bool enabled )
 {
@@ -791,13 +851,14 @@ void QPEStyle::drawScrollBarControls( QPainter* p, const QScrollBar* sb, int sli
 		     addPageR.height(), g.brush( QColorGroup::Mid ));
     if ( controls & Slider ) {
 	QPoint bo = p->brushOrigin();
-	p->setBrushOrigin(sliderR.topLeft());
-	drawBevelButton( p, sliderR.x(), sliderR.y(),
-			 sliderR.width(), sliderR.height(), g,
-			 FALSE, &g.brush( QColorGroup::Button ) );
+	if ( !sb->testWState(WState_GlobalBrushOrigin) )
+	    p->setBrushOrigin(sliderR.topLeft());
+        drawBevelButton( p, sliderR.x(), sliderR.y(),
+                         sliderR.width(), sliderR.height(), g,
+                         FALSE, &g.brush( QColorGroup::Button ) );
 	p->setBrushOrigin(bo);
-	drawRiffles( p, sliderR.x(), sliderR.y(),
-		     sliderR.width(), sliderR.height(), g, HORIZONTAL );
+        drawRiffles( p, sliderR.x(), sliderR.y(),
+                     sliderR.width(), sliderR.height(), g, HORIZONTAL );
     }
 
     // ### perhaps this should not be able to accept focus if maxedOut?
@@ -808,6 +869,7 @@ void QPEStyle::drawScrollBarControls( QPainter* p, const QScrollBar* sb, int sli
 
 }
 
+/*! */
 void QPEStyle::drawRiffles( QPainter* p,  int x, int y, int w, int h,
                       const QColorGroup &g, bool horizontal )
 {
@@ -853,11 +915,13 @@ void QPEStyle::drawRiffles( QPainter* p,  int x, int y, int w, int h,
     }
 }
 
+/*! */
 int QPEStyle::sliderLength() const
 {
     return 12;
 }
 
+/*! */
 void QPEStyle::drawSlider( QPainter *p, int x, int y, int w, int h,
 	const QColorGroup &g, Orientation o, bool tickAbove, bool tickBelow )
 {
@@ -875,6 +939,7 @@ void QPEStyle::drawSlider( QPainter *p, int x, int y, int w, int h,
     }
 }
 
+/*! */
 void QPEStyle::drawSliderMask ( QPainter * p, int x, int y, int w, int h,
 	Orientation o, bool tickAbove, bool tickBelow )
 {
@@ -899,6 +964,7 @@ void QPEStyle::drawSliderGrooveMask( QPainter *p,
 	p->fillRect( x + c - 2, y, 4, h, color1 );
 }
 
+/*! */
 void QPEStyle::drawTab( QPainter *p, const QTabBar *tb, QTab *t, bool selected )
 {
     QRect r( t->rect() );
@@ -925,6 +991,23 @@ void QPEStyle::drawTab( QPainter *p, const QTabBar *tb, QTab *t, bool selected )
 	    p->fillRect( QRect( r.left()+1, r.top()+2, r.width()-2, r.height()-3),
 			 tb->colorGroup().brush( QColorGroup::Button ));
 
+#if defined(_WS_QWS_)
+	    QPixmap pm;
+	    QColor bg = tb->colorGroup().button();
+	    int n = (r.height() / 2) - 1;
+	    QImage img( 1, n, 32 );
+	    for ( int j = 0; j < n; j++ )
+		*(unsigned int *)img.scanLine(j) = (j*15) << 24;
+	    img.setAlphaBuffer(true);
+	    pm.convertFromImage(img);
+	    int x1 = r.left()+1;
+	    int x2 = r.right()-1;
+	    int y = r.bottom()-n+1;
+	    QPoint po = p->brushOrigin();
+	    p->setBrushOrigin( x1, y );
+	    p->fillRect( x1, y, x2-x1, n-1, QBrush(Qt::white, pm) );
+	    p->setBrushOrigin( po );
+#else
 	    //do shading; will not work for pixmap brushes
 	    QColor bg = tb->colorGroup().button(); 
 	    //	    int h,s,v;
@@ -939,6 +1022,7 @@ void QPEStyle::drawTab( QPainter *p, const QTabBar *tb, QTab *t, bool selected )
 		int x2 = r.right()-1;
 		p->drawLine( x1, y, x2, y );
 	    }
+#endif
 	}
 
 	p->setPen( tb->colorGroup().light() );
@@ -997,6 +1081,7 @@ static const int motifCheckMarkHMargin	= 1;	// horiz. margins of check mark
 static const int windowsRightBorder	= 8;    // right border on windows
 static const int windowsCheckMarkWidth  = 2;    // checkmarks width on windows
 
+/*! */
 void QPEStyle::polishPopupMenu ( QPopupMenu *m )
 {
     QWindowsStyle::polishPopupMenu( m );
@@ -1060,6 +1145,7 @@ int QPEStyle::popupMenuItemHeight( bool /*checkable*/, QMenuItem* mi, const QFon
 #endif
 }
 
+/*! */
 void QPEStyle::drawPopupMenuItem( QPainter* p, bool checkable, int maxpmw, int tab, QMenuItem* mi,
 				       const QPalette& pal,
 				       bool act, bool enabled, int x, int y, int w, int h)
@@ -1204,5 +1290,7 @@ void QPEStyle::drawPopupMenuItem( QPainter* p, bool checkable, int maxpmw, int t
     }
 #endif
 }
+
+// QDOC_SKIP_END
 
 #endif

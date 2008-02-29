@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/qtopiadesktop-plugins.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Desktop Plugins</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Desktop Plugins</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Architecture and Plugins
+</a>
+<li><a href="#2"> Implementing a Plugin
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Architecture and Plugins
+</h2>
+<a name="1"></a><p> Qtopia Desktop has modular and flexible design allowing end-users to easily
+install plugins to integrate Qtopia into their daily work environment.
+<p> Developers can access this architecture by writing a <em>plugin</em>
+for Qtopia Desktop. A plugin is written by implementing interfaces
+defined by Qtopia Desktop.
+<p> The available interfaces allow the developer to:
+<ul>
+<li> write their own visual plugin for entering information or
+transfering documents -  PluginInterface
+<li> synchronize their data and files - SyncAppInterface and MergeInterface
+<li> import external data to Qtopia - ImportInterface
+<li> export Qtopia's data - ExportInterface <i>not yet supported</i>
+</ul>
+<p> Qtopia Desktop provides each plugin with access to the CenterInterface.
+The CenterInterface class allows each plugin to use the functionality
+provided by Qtopia Desktop.
+<p> When Qtopia Desktop starts up it scans for plugins and registers any
+plugins that support the interfaces. Qtopia Desktop will look in the
+subdirectory under the installed directory called lib. Plugin
+installations should place their shared object libraries in the
+<installed directory>/lib
+<p> <h2> Implementing a Plugin
+</h2>
+<a name="2"></a><p> Each plugin implementation needs to define some pure virtual methods defined
+in the plugin hierarchy. Each plugin must define the following methods:
+<pre>
+    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
+    Q_REFCOUNT
+
+    QString name() const;
+    QString description() const;
+    QString version() const;
+    QString author() const;
+</pre>
+ 
+<p> The name() method and queryInterface() are the most important. The
+description(), version() and author() methods are all purely
+informational and not currently displayed by Qtopia Desktop but maybe
+in the future.
+<p> The PluginInterface::name() method defines the display name shown in
+the plugin selection area on the left hand side of the screen. The
+name() method is purely descriptive for all other interfaces.
+<p> The implementation of queryInterface() allows Qtopia
+Desktop determine what type of interface your plugin implements when
+it registers your plugin at startup.
+<p> In the the interfaces .cpp file, the following code must be present
+<pre>
+Q_EXPORT_INTERFACE()
+{
+    Q_CREATE_INSTANCE( AddressBook )
+}
+
+  QRESULT AddressBook::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid,
+    QUnknownInterface** iface )
+{
+    *iface = 0;
+    if ( uuid == IID_QUnknown )
+        *iface = (QUnknownInterface*) (PluginInterface*) this;
+    else if ( uuid == IID_QComponentInformation )
+        *iface = (QComponentInformationInterface*)(PluginInterface *) this;
+    else if ( uuid == IID_PalmtopCenterPlugin )
+        *iface = (PluginInterface*)this;
+    else if ( uuid == IID_SyncAppInterface )
+        *iface = (SyncAppInterface*)this;
+    else if ( uuid == IID_MergeInterface )
+        *iface = (MergeInterface*)this;
+    else
+        return QE_NOINTERFACE;
+
+    (*iface)-&gt;addRef();
+    return QS_OK;
+}
+</pre>
+ 
+<p> The exact implementation of the queryInterface() method depends on
+which interfaces your plugin is implementing. Each plugin should
+only have one implementation of queryInterface. Each plugin can
+implement more than one interface as shown above. (And multiple
+interfaces can be implemented by the same class as shown
+above). Every interface other than SyncAppInterface implements both
+QUnknownInterface and QComponentInformationInterface and should
+return as such as shown above.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

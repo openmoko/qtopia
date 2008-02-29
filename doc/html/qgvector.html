@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -105,7 +107,7 @@ functions call compareItems().
 <p>Reimplemented from <a href="qcollection.html#2213fa">QCollection.</a>
 <h3 class="fn"><a href="qcollection.html#Item">Item</a> * <a name="9b9dbe"></a>QGVector::data () const <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn"><a href="qdatastream.html">QDataStream</a> &amp; <a name="9eae85"></a>QGVector::read ( <a href="qdatastream.html">QDataStream</a> &amp; s, <a href="qcollection.html#Item">Item</a> &amp; <a href="d.html">d</a> ) <code>[virtual protected]</code></h3>
+<h3 class="fn"><a href="qdatastream.html">QDataStream</a> &amp; <a name="9eae85"></a>QGVector::read ( <a href="qdatastream.html">QDataStream</a> &amp; s, <a href="qcollection.html#Item">Item</a> &amp; d ) <code>[virtual protected]</code></h3>
 <p>Reads a collection/vector item from the stream <em>s</em> and returns a reference
 to the stream.
 <p>The default implementation sets <em>item</em> to 0.
@@ -125,24 +127,24 @@ to the stream.
 <p>For internal use only.
 <h3 class="fn"><a name="d44d7c"></a>QGVector::~QGVector () <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">int <a name="9564c3"></a>QGVector::bsearch ( <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a> ) const <code>[protected]</code></h3>
+<h3 class="fn">int <a name="9564c3"></a>QGVector::bsearch ( <a href="qcollection.html#Item">Item</a> d ) const <code>[protected]</code></h3>
 <p>For internal use only.
 <h3 class="fn">void <a name="a696d2"></a>QGVector::clear () <code>[virtual protected]</code></h3>
 <p>For internal use only.
 <p>Reimplemented from <a href="qcollection.html#e9c603">QCollection.</a>
-<h3 class="fn">uint <a name="d8b62d"></a>QGVector::contains ( <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a> ) const <code>[protected]</code></h3>
+<h3 class="fn">uint <a name="d8b62d"></a>QGVector::contains ( <a href="qcollection.html#Item">Item</a> d ) const <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">uint <a name="707cec"></a>QGVector::containsRef ( <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a> ) const <code>[protected]</code></h3>
+<h3 class="fn">uint <a name="707cec"></a>QGVector::containsRef ( <a href="qcollection.html#Item">Item</a> d ) const <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">bool <a name="201f17"></a>QGVector::fill ( <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a>, int flen ) <code>[protected]</code></h3>
+<h3 class="fn">bool <a name="201f17"></a>QGVector::fill ( <a href="qcollection.html#Item">Item</a> d, int flen ) <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">int <a name="c00c68"></a>QGVector::find ( <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a>, uint index ) const <code>[protected]</code></h3>
+<h3 class="fn">int <a name="c00c68"></a>QGVector::find ( <a href="qcollection.html#Item">Item</a> d, uint index ) const <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">int <a name="8559a6"></a>QGVector::findRef ( <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a>, uint index ) const <code>[protected]</code></h3>
+<h3 class="fn">int <a name="8559a6"></a>QGVector::findRef ( <a href="qcollection.html#Item">Item</a> d, uint index ) const <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">bool <a name="171f85"></a>QGVector::insert ( uint index, <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a> ) <code>[protected]</code></h3>
+<h3 class="fn">bool <a name="171f85"></a>QGVector::insert ( uint index, <a href="qcollection.html#Item">Item</a> d ) <code>[protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">bool <a name="01c7c1"></a>QGVector::insertExpand ( uint index, <a href="qcollection.html#Item">Item</a> <a href="d.html">d</a> ) <code>[protected]</code></h3>
+<h3 class="fn">bool <a name="01c7c1"></a>QGVector::insertExpand ( uint index, <a href="qcollection.html#Item">Item</a> d ) <code>[protected]</code></h3>
 <p>For internal use only.
 <h3 class="fn">QGVector&amp; <a name="1175f9"></a>QGVector::operator= ( const QGVector &amp; v ) <code>[protected]</code></h3>
 <p>For internal use only.
@@ -162,7 +164,7 @@ to the stream.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -170,5 +172,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

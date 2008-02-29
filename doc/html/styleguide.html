@@ -1,0 +1,499 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/styleguide.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Phone Style Guide</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Phone Style Guide</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Application design
+</a>
+<ul>
+<li><a href="#2-1"> Document based applications
+</a>
+<ul>
+<li><a href="#2-1-1"> List of lists
+</a>
+<li><a href="#2-1-2"> List of items
+</a>
+<li><a href="#2-1-3"> Viewing a single item
+</a>
+<li><a href="#2-1-4"> Editing a single item
+</a>
+<li><a href="#2-1-5"> Deleting a single item
+</a>
+<li><a href="#2-1-6"> Navigational flow
+</a>
+<li><a href="#2-1-7"> Form layout
+</a>
+</ul>
+<li><a href="#2-2"> Task based applications
+</a>
+</ul>
+<li><a href="#3"> Standard widgets
+</a>
+<ul>
+<li><a href="#3-1"> Labels 
+</a>
+<li><a href="#3-2"> Buttons
+</a>
+<li><a href="#3-3"> Input fields
+</a>
+<ul>
+<li><a href="#3-3-1"> Text fields
+</a>
+<li><a href="#3-3-2"> Number fields
+</a>
+</ul>
+<li><a href="#3-4"> Tabs
+</a>
+<li><a href="#3-5"> Lists
+</a>
+<li><a href="#3-6"> Menus
+</a>
+<ul>
+<li><a href="#3-6-1"> Menu names
+</a>
+<li><a href="#3-6-2"> Menu-like dialogs
+</a>
+</ul>
+<li><a href="#3-7"> Dialogs
+</a>
+<li><a href="#3-8"> Custom widgets
+</a>
+</ul>
+<li><a href="#4"> Interprocess actions
+</a>
+<li><a href="#5"> Application naming
+</a>
+<li><a href="#6"> Naming conventions
+</a>
+<ul>
+<li><a href="#6-1"> Abbreviations
+</a>
+<li><a href="#6-2"> Acronyms
+</a>
+<li><a href="#6-3"> Using the "..." label
+</a>
+<ul>
+<li><a href="#6-3-1"> Examples of when to use "..."
+</a>
+<li><a href="#6-3-2"> Examples of when not to use "..."
+</a>
+</ul>
+<li><a href="#6-4"> Currently used label names 
+</a>
+</ul>
+<li><a href="#7"> Qtopia Phone Keys
+</a>
+<li><a href="#8"> Standard Icons and Usage
+</a>
+<li><a href="#9"> Qtopia Desktop
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the rules to be followed when designing an application for the Qtopia Phone Edition. The focus is on consistency, think very carefully before departing from the preferred style.
+<p> <h2> Application design
+</h2>
+<a name="2"></a><p> There are two basic styles of application:
+<ul>
+<li> Document based - 
+Document based applications are used to view and possibly edit a specific document type. Applications such as the "Contacts" or "Tasks" are considered to be document based applications.
+<p> <li> Task based - 
+A task based application allows a specific task to be performed such as view the time in the case of the <em>Clock</em> application.
+</ul>
+<p> <h3> Document based applications
+</h3>
+<a name="2-1"></a><p> The main window of a document based application will present a list of items, or in some cases a list of sub-lists.
+<p> Note: The <em>documents</em> are not necessarily individual files. The entries in an address book for instance may be considered documents.
+<p> Document based applications should follow a standard navigational flow:
+<ul>
+<li> List of Lists (if necessary).
+<li> List of Items.
+<li> View of a Single Item.
+<li> Edit Single Item.
+<li> Deleting a Single Item.
+</ul>
+<p> <h4> List of lists
+</h4>
+<a name="2-1-1"></a><p> This is rarely needed. It is used when there are a number of lists that behave differently or have some incompatible properties. An example application is the Qtopia Messaging application. This application shows folders that have specific functions. The Outbox, Trash, Inbox, etc. all have particular properties that preclude grouping their items into one list.
+<p> The context menu must contain entries that act on all of the lists, and optionally a <em>New</em> entry.
+<p> Highlighting a list and pressing <em>Select</em> displays the List of Items. Pressing <em>Back</em> or <em>Done</em> must close the application.
+<p> <h4> List of items
+</h4>
+<a name="2-1-2"></a><p> This is the screen most applications will display when started via the launcher. It lists the documents that the application may view and/or edit. It is recommended that the menu contains a <em>View Category...</em> option to display only the items in the selected category.
+<p> The context menu should contain entries that act on all of the items, and optionally a <em>New</em> entry.
+<p> Highlighting an item and pressing <em>Select</em> should display a more detailed view of the highlighted item. Pressing <em>Back</em> or <em>Done</em> must return to the previous list of items or lists (if present), otherwise close the application.
+<p> When an item in the list is used to group or store information; selecting that list item should present the information about that item.
+<p> <h4> Viewing a single item
+</h4>
+<a name="2-1-3"></a><p> This screen displays a single item, and may allow navigation and activation of data within the view.
+<p> The context menu must contain entries that act only on the viewed item. If the application can edit the document, it should contain an <em>Edit</em> menu entry.
+<p> If the view contains elements that can be activated, then the <em>Select</em> key must activate the highlighted element. Pressing <em>Back</em> or <em>Done</em> must return to the list of items.
+<p> <h4> Editing a single item
+</h4>
+<a name="2-1-4"></a><p> This screen allows a single item to be modified. Edit screens must be able to be canceled via the <em>Cancel</em> option found in the context menu.
+<p> Note: When a user selects the <em>Done</em> or <em>Back</em> option and nothing has been altered the button acts as the <em>Cancel</em> option otherwise the item will be stored. More information on this can be found in the ... section.
+<p> When creating or editing an item, the first tab must be displayed with the first input widget focused.
+<p> The context menu must be limited to those entries that act on the item being edited. Phones that do not offer a <em>No</em> button may automatically have a <em>Cancel</em> entry added to the end of the menu.
+<p> Pressing <em>Back</em> or <em>Done</em> must accept the changes and return to the view. Pressing <em>Cancel</em> must discard the changes and return to the view.
+<p> <h4> Deleting a single item
+</h4>
+<a name="2-1-5"></a><p> An application that can create or edit an item should provide the ability to remove an item of the same type.
+<p> Items are only able to be deleted when viewing there details hence only one at a time.
+<p> <h4> Navigational flow
+</h4>
+<a name="2-1-6"></a><p> In order to maintain a consistent navigational flow, the following rules must be adhered to:
+<ul>
+<li> When moving <em>forward</em> (e.g. by pressing <em>Select</em> or selecting <em>Edit</em> from the menu), the displayed screen must be in its <em>initial state</em>. For example, in a list of items the top-most item must be highlighted.
+<li> When moving <em>back</em> (e.g. by pressing <em>Back</em> or <em>Done</em>), the previously viewed screen must be displayed in the same state that it was in when left. For example, if item <em>D</em> was highlighted then viewed, pressing <em>Back</em> in the view must return to the list with item <em>D</em> still highlighted.
+<li> The <em>left</em> and <em>right</em> buttons are used for moving between tabs in a tabbed dialog although in some cases they may be used to select widgets that are horizontally aligned.
+<li> The <em>up</em> and <em>down</em> buttons are used for moving between fields in a dialog.
+<li> To edit a field you first have to focus it using the <em>up/down</em> buttons then select it by pressing <em>select</em>.
+<li> The <em>select</em> button is also used to move through tabs when the tab has focus.
+</ul>
+<p> Note: In case there is no tabbed dialog it is very tempting to give the <em>left</em> and <em>right</em> buttons the same functionality as <em>up</em> and <em>down</em>. We have explicitly chosen NOT to do so in order to keep the user interface as consistent as possible, i.e. maintaining one way of doing things.
+<p> <h4> Form layout
+</h4>
+<a name="2-1-7"></a><p> An input form should provide a simple and familiar way for the user to input data. The basic layout of an input form is a 2 columned table: the first column provides a label for the field found in the same row; the second is the input field.
+<p> The basic layout of an input form should remain consistent between all applications. It is also recommended that the same input form is used when creating and editing an item.
+<p> 
+<p> <h3> Task based applications
+</h3>
+<a name="2-2"></a><p> These applications allow a specific task to be performed. They do not operate on documents, though they may generate documents.
+Examples of task based applications are <em>Clock</em> and <em>Calculator</em>.
+<p> <h2> Standard widgets
+</h2>
+<a name="3"></a><p> <!-- index Labels --><a name="Labels"></a><h3> Labels 
+</h3>
+<a name="3-1"></a><p> The rules listed below should be followed when creating a label:
+<p> <ul>
+<li> No labels should have ":" appended.
+<li> There should never be a blank label listed in or for any widget.
+<li> All labels should conform to the <a href="#naming-conventions">Naming conventions</a>.
+<li> Text labels should be left aligned (non-semitic languages).
+</ul>
+<p> Please utilize the <a href="#label-names">Currently used label names</a> table to keep labels consistent across applications.
+<p> <h3> Buttons
+</h3>
+<a name="3-2"></a><p> Button labels should follow the same labeling scheme described in the <a href="styleguide.html#Labels">Labels</a> section.
+<p> For some applications it is desirable to associate keypad keys to buttons displayed in the applications (as is done in the the stopwatch/clock application) this is not recommended but if it must be done the label should include the associated keys label.
+<p> <h3> Input fields
+</h3>
+<a name="3-3"></a><p> The <em>Copy</em> and <em>Paste</em> options should be available in all text input fields unless there is sufficient reason not to have these options listed.
+<p> When the using the <em>multitap</em> input method pressing the 1 button should display a number of extended characters that are specific to the currently selected dialog.
+<p> Note: When using the <em>singletap</em> input method and the field should always start with a capital letter, the first character should automatically be capitalized.
+<p> <h4> Text fields
+</h4>
+<a name="3-3-1"></a><p> Input fields should only remember the input type for that specific field (not all widgets of that type).
+<p> By default <em>singletap</em> should be enabled in any text input field.
+<p> <h4> Number fields
+</h4>
+<a name="3-3-2"></a><p> No characters other than numbers should be allowed in this field. Letters should be appended as labels or combo-boxes where appropriate. For example, "10 mins" should only display "10" and have mins appended as a label.
+<p> <h3> Tabs
+</h3>
+<a name="3-4"></a><p> Tab widgets should be able to gain focus from the user pressing either of the <em>up</em> or <em>down</em> directional pad buttons. When a user has the tab selected pressing the <em>select</em> button should allow the them to proceed to the next available tab.
+Pressing the <em>up</em> or <em>down</em> directional pad buttons again will return the focus to the dialog, selecting the first or last element in the dialog.
+<p> If the user presses either of the <em>left</em> or <em>right</em> directional pad buttons while in a tabbed dialog, the user should be able to change the tab with the focus shifting to the tab's label/icon.
+<p> <h3> Lists
+</h3>
+<a name="3-5"></a><p> A list may be displayed as an icon while it is not selected but when the list is opened the icon and label should be displayed with the icon displayed.
+<p> The default focus when opening a list should be on the item that the list was set to prior to opening.
+<p> If the list allows the user to select a blank item then the blank item should be listed as blank ie. not use a label such as "blank" or <none>. List items that display additional dialogs when they are selected should simple list a "..." option.
+<p> <h3> Menus
+</h3>
+<a name="3-6"></a><p> The ordering of items in a menu must be based of the following ordering:
+<p> <ul>
+<li> New
+<li> Edit
+<li> Modify commands, e.g. <em>Crop</em>
+<li> Delete
+<li> Action commands, e.g. <em>Beam</em>, <em>Duplicate</em>, <em>Copy</em>, <em>Paste</em>
+<li> View commands, e.g. <em>Today</em>, <em>View</em> Category...
+<li> Options commands, e.g. <em>Settings</em>
+<li> (separator)
+<li> Help (added by system)
+<li> Cancel
+</ul>
+<p> When the selection of a menu item leads to a new dialog, the menu item label should only be suffixed with  "..." if the command is being further refined. In other words, the "..." extension should only be placed on the end of menu names when a selection of items is going to be offered or additional commands have to be specified. No space should be left between the first '.' and the last character of the menu name. Please refer to <a href="#using_dot_label">Using the "..." label</a> for a full explanation.
+<p> Note: Application menu labels should not be appended with the type of item on which they are performing the action. For example, only "Edit" is required on the menu label, not "Edit Event".
+<p> <ul>
+<li> Menu options should be hidden when unavailable.
+<li> A menu should have the top-most item selected by default.
+<li> A menu separator should be used to group options that perform <em>associated</em> functionality such as New, Edit and Delete.
+<li> Menus with predefined names such as <em>Cancel</em> should use the appropriate icon.
+</ul>
+<p> Where an application is structured as a <em>list of items</em> and selecting an item shows its details, the menu for the list should <em>not</em> include any actions that are directly related to a single item. Actions that are applied to an individual item (and never to a list) should be placed in the menu that becomes available when the details of an item are shown. (Menu, Down-past-New, Select-Edit is just as many steps as Select-Item, Menu, Select-Edit).
+<p> When particular widgets are selected the context menu may change its option list. Promoting this functionality is not recommended.
+<p> <h4> Menu names
+</h4>
+<a name="3-6-1"></a><p> Menu names should follow all conventions found in the <a href="#naming-conventions">Naming conventions</a>.
+<p> An acronym or abbreviation for a menu item should only be used if the label doesn't fit on the screen OR if an acronym or abbreviation already exists for the current label (promotes consistency in the use of text labels).
+<p> <h4> Menu-like dialogs
+</h4>
+<a name="3-6-2"></a><p> Some dialogs consist of a list of items, only one of which the user needs to select in order to complete an operation. In a small number of cases the user may wish to do more with the item, such as edit it via the menu.
+<p> Such list dialogs are <em>Menu-like Dialogs</em>, and should behave like menus:
+<p> <ul>
+<li> Highlighting an item should have no long-term effect.
+<li> Selecting an item should close the window and return to the
+previous view (even if that means closing the application).
+<li> The <a href="contextbar.html">ContextBar</a> icon for Key_Back should be Cancel, not the usual Back.
+</ul>
+<p> To assist in creating Menu-like dialogs you can call the function
+<p> <a href="qpeapplication.html#setMenuLike">QPEApplication::setMenuLike</a>();
+<p> which will map the context bar and menu correctly for the dialog.
+<p> If the dialog has a menu, consider having 'Activate', or 'Select' in the menu,
+but make sure that this command does <em>not</em> close the dialog.
+<p> Examples: Profile selection, Speed dial action selection.
+<p> <h3> Dialogs
+</h3>
+<a name="3-7"></a><p> A Dialogs title should describe the process that is currently taking place in the dialog. For example, "Editing event", "Creating event". A dialog title should not have its text appended with "...".
+<p> Message dialogs that allow a positive or negative response should be phrased such that the user can answer "Yes" or "No", rather than "OK" or "Cancel".
+<p> Informative Message dialogs should only allow the <em>Back/</em> <em>Done</em> context bar option.
+<p> <h3> Custom widgets
+</h3>
+<a name="3-8"></a><p> Well defined widgets (ie. those defined in qt) should always be used where possible. If a custom widget must be used, make sure that such a widget doesn't already exist.
+Ie. Time input widgets.
+<p> <h2> Interprocess actions
+</h2>
+<a name="4"></a><p> When an application is activated via a QCop message in order to view a document, pressing <em>Back</em> or <em>Done</em> must close the application. For example viewing a picture from the Documents launcher will open the picture in the Pictures application, Closing the image viewed in the application will close the application and return to the Documents launcher.
+<p> <h2> Application naming
+</h2>
+<a name="5"></a><p> Application names should be based on established application names used in the current phone market. They should be nouns and obvious to a user from any background.
+<p> Note: An application's title should be the same as its launcher name.
+<p> <!-- index naming-conventions --><a name="naming-conventions"></a><h2> Naming conventions
+</h2>
+<a name="6"></a><p> All words should start with a capital letter with the exception of words that
+are usually excluded from acronyms such as "of", "and", or "to". These extremely common words are referred to as stop words.
+<p> Once a certain name is used for a specific item it should be re-used in each
+and every application. For example: if Contacts and <a href="calendar.html">Calendar</a> both have a
+"company" info field they should use the same label. This means both applications use either "Company", "Cmpny", or "Comp.". Please see the <a href="#label-names">used label names</a> table for reference.
+<p> <h3> Abbreviations
+</h3>
+<a name="6-1"></a><p> The rules listed below should be followed when using abbreviations:
+<ul>
+<li> Abbreviations are meant to be self explanatory.
+<li> An abbreviation point should occur at the end of a word.
+For example: etc.
+<li> Abbreviations consisting of initial letters are written as un-spaced and undivided sequences with abbreviation points after each letter. For example: e.g.
+<li> Abbreviations should not consist of any characters except a-z A-Z.
+</ul>
+<!-- http://www.education.bham.ac.uk/onlinelearning/braille/rulebook/part2/section4.htm -->
+<p> <em>NOTE</em>: No abbreviation point is required if the last letter of the word is displayed such as "cmpny".
+<p> <h3> Acronyms
+</h3>
+<a name="6-2"></a><p> Acronyms basically follow the same set of rules as those found in the abbreviations section. Always check existing acronyms before creating a new one.
+<p> <!-- index using_dot_label --><a name="using_dot_label"></a><h3> Using the "..." label
+</h3>
+<a name="6-3"></a><p> The following rules define the use of the ... in association with menu items.
+<p> <ul>
+<li> if the command has to be refined before a user can initiate an action then yes, use ...
+<li> if the command does not need to be refined before a user can initiate an action then do not use ...
+<li> if in doubt, do not apply ... to the menu
+</ul>
+<p> <h4> Examples of when to use "..."
+</h4>
+<a name="6-3-1"></a><p> Use ... only when the menu is followed by another dialog that is a direct and integral continuation of the command.
+<p> <ul>
+<li> Send All...
+is appropriate since the next dialog requires the user to select one of Email/Infrared/SMS before anything is sent.
+<li> View Category...
+is appropriate since the next dialog requires the user to select which category they want to view.
+</ul>
+<p> <h4> Examples of when not to use "..."
+</h4>
+<a name="6-3-2"></a><p> Do not use "..." when the menu is followed by another dialog that is related to but not a continuation of the command.
+<ul>
+<li> Edit (without ...)
+is appropriate if the user is immediately shown the entire record and is free to edit any aspect of it.
+<li> Delete (without ...)
+is appropriate since the user does not have to refine the delete command in order for it to work. A please confirm dialog does not specify additional parameters; it is associated with the command but does not refine its functionality.
+<li> Settings (without ...)
+should be used when a user is immediately given access to all the features that can be set, such as in the <a href="calendar.html">Calendar</a> application.
+</ul>
+<!-- index label-names --><a name="label-names"></a><h3> Currently used label names 
+</h3>
+<a name="6-4"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">PDA Label <th valign="top">Phone Label
+<tr bgcolor="#f0f0f0"> <td valign="top">Categories <td valign="top">Category
+<tr bgcolor="#d0d0d0"> <td valign="top">Time zone <td valign="top">T.Z.
+<tr bgcolor="#f0f0f0"> <td valign="top">Anniversary <td valign="top">Anniv.
+</table></center>
+<p> <h2> Qtopia Phone Keys
+</h2>
+<a name="7"></a><p> Qtopia requires the following keys:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Name
+<th valign="top">Alternative representations
+<th valign="top">Usual binding
+<tr bgcolor="#d0d0d0"> <td valign="top">Previous
+<td valign="top">Left, Up, or Down Arrow*
+<td valign="top">Previous item or value.
+<tr bgcolor="#f0f0f0"> <td valign="top">Next
+<td valign="top">Right, Down, or Up Arrow*
+<td valign="top">Next item or value.
+<tr bgcolor="#d0d0d0"> <td valign="top">Select
+<td valign="top">Yes, OK
+<td valign="top">Activate item or confirm changes.
+<tr bgcolor="#f0f0f0"> <td valign="top">Back
+<td valign="top">No, Cancel
+<td valign="top">Delete text or close window.
+<tr bgcolor="#d0d0d0"> <td valign="top">1
+<td valign="top">
+<td valign="top">1 or space
+<tr bgcolor="#f0f0f0"> <td valign="top">2..9
+<td valign="top">
+<td valign="top">Digits with phone key lettering.
+<tr bgcolor="#d0d0d0"> <td valign="top">0
+<td valign="top">
+<td valign="top">0 or Function 1
+<tr bgcolor="#f0f0f0"> <td valign="top">*
+<td valign="top">
+<td valign="top">* or Function 2
+<tr bgcolor="#d0d0d0"> <td valign="top">#
+<td valign="top">
+<td valign="top"># or Function 3
+</table></center>
+<p> Qtopia supports the following additional keys:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Name
+<th valign="top">Alternative representations
+<th valign="top">Usual binding
+<tr bgcolor="#f0f0f0"> <td valign="top">Menu
+<td valign="top">
+<td valign="top">Invoke context menu.
+<tr bgcolor="#d0d0d0"> <td valign="top">Up
+<td valign="top">Up Arrow
+<td valign="top">Item physically above
+<tr bgcolor="#f0f0f0"> <td valign="top">Down
+<td valign="top">Down Arrow
+<td valign="top">Item physically below.
+<tr bgcolor="#d0d0d0"> <td valign="top">Left
+<td valign="top">Left Arrow
+<td valign="top">Item physically to the left.
+<tr bgcolor="#f0f0f0"> <td valign="top">Right
+<td valign="top">Right Arrow
+<td valign="top">Item physically to the right.
+<tr bgcolor="#d0d0d0"> <td valign="top">Delete
+<td valign="top">Cancel, Clear
+<td valign="top">Delete item.
+<tr bgcolor="#f0f0f0"> <td valign="top">Jog
+<td valign="top">Wheel up/down
+<td valign="top">Scroll view or values.
+<tr bgcolor="#d0d0d0"> <td valign="top">F\ex
+<td valign="top">Function keys
+<td valign="top">Invoke global operation.
+</table></center>
+<p> * on some phones, two keys represent both vertical and horizontal directions of suggested motion. Sometimes these are a Left/Up button and a Right/Down button, at other times they are a Left/Down button and a Right/Up button.
+<p> <h2> Standard Icons and Usage
+</h2>
+<a name="8"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Icon
+<th valign="top">Component
+<th valign="top">Filename
+<th valign="top">Description of Use
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../../pics/contextbar/back.png"></center> <td valign="top">Context Bar
+<td valign="top">back.png
+<td valign="top">Done: Finished using the current screen and wish to return to previous window.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../../pics/contextbar/backspace.png"></center> <td valign="top">Context Bar
+<td valign="top">backspace.png
+<td valign="top">Delete text: Deletes (backspace) 1 character.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../../pics/contextbar/cancel.png"></center> <td valign="top">Context Bar
+<td valign="top">cancel.png
+<td valign="top">Cancel: Removes all changes performed on the current item (transaction).
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../../pics/contextbar/ok.png"></center> <td valign="top">Context Bar
+<td valign="top">ok.png
+<td valign="top">Accept: Accepts and disengages the current information/data in the currently selected widget.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../../pics/contextbar/options.png"></center> <td valign="top">Context Bar
+<td valign="top">options.png
+<td valign="top">Open/Close Menu: Displays the current window's context menu.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../../pics/contextbar/select.png"></center> <td valign="top">Context Bar
+<td valign="top">select.png
+<td valign="top">Engage/Select: Selects the current item, widget or grouping.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../../pics/contextbar/view.png"></center> <td valign="top">Context Bar
+<td valign="top">view.png
+<td valign="top">More Information: Selects and displays information about the currently focused item.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../../pics/icons/14x14/beam.png"></center> <td valign="top">Context Menu
+<td valign="top">beam.png
+<td valign="top">Beam: Sends the currently viewed item via IR.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../../pics/contextbar/edit.png"></center> <td valign="top">Context Menu
+<td valign="top">edit.png
+<td valign="top">Edit: Edits the currently viewed item.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../../pics/icons/14x14/find.png"></center> <td valign="top">Context Menu
+<td valign="top">find.png
+<td valign="top">Find/Search: Locates an item.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../../pics/icons/16x16/help_icon.png"></center> <td valign="top">Context Menu
+<td valign="top">help_icon.png
+<td valign="top">Help: Displays the help documentation for the current window.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../../pics/icons/14x14/new.png"></center> <td valign="top">Context Menu
+<td valign="top">new.png
+<td valign="top">New: Creates a new item.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../../pics/icons/16x16/trash.png"></center> <td valign="top">Context Menu
+<td valign="top">trash.png
+<td valign="top">Delete item: Deletes the currently viewed item.
+</table></center>
+<p> <h2> Qtopia Desktop
+</h2>
+<a name="9"></a><p> Qtopia Desktop should follow the same standards adhered in Qtopia but should also follow close to the standards established by desktop user interfaces. 
+<p> <ul>
+<li> Labels can be expanded to use there full name instead of an acronym or abbreviation.
+</ul>
+<p> Note: Creation of events, tasks and contacts should follow the creation rules specified in Qtopia ie. if the user doesn't enter sufficient information the item is not created.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopiapim/pimrecord.cpp:48 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopiapim/pimrecord.cpp:49 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>PimRecord Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>PimRecord Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
 
 <p>The PimRecord class is the base class for PIM data recorded in the
 Qtopia database.
@@ -58,7 +66,7 @@ categories.
 category is represented by an integer. A PimRecord's categories are
 returned by <a href="#categories">categories</a>() and are set with <a href="#setCategories">setCategories</a>().
 <p> PimRecord comparisons are provided by <a href="#operator-eq-eq">operator==</a>() and <a href="#operator!-eq">operator!=</a>().
-<p>See also <a href="qpepim.html">QPEPIM Library</a>.
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
 
 <hr><h2>Member Function Documentation</h2>
 <h3 class=fn><a name="PimRecord"></a>PimRecord::PimRecord ()
@@ -79,7 +87,7 @@ Destroys the record.
 <p> Returns the set of categories the record belongs to.
 <p> <p>See also <a href="#setCategories">setCategories</a>().
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="customField"></a>PimRecord::customField ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;key ) const<tt> [virtual]</tt>
+<h3 class=fn>QString <a name="customField"></a>PimRecord::customField ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const<tt> [virtual]</tt>
 </h3>
 Returns the string stored for the custom field <em>key</em>.
 Returns a null string if the field does not exist.
@@ -99,7 +107,7 @@ Returns TRUE if the record has the same Uid as <em>other</em>;
 otherwise returns FALSE.
 <p> <p>See also <a href="#operator!-eq">operator!=</a>().
 
-<h3 class=fn>void <a name="removeCustomField"></a>PimRecord::removeCustomField ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;key )<tt> [virtual]</tt>
+<h3 class=fn>void <a name="removeCustomField"></a>PimRecord::removeCustomField ( const&nbsp;QString&nbsp;&amp;&nbsp;key )<tt> [virtual]</tt>
 </h3>
 Removes the custom field <em>key</em>.
 
@@ -116,7 +124,7 @@ This is an overloaded member function, provided for convenience. It behaves esse
 <p> Sets the record to belong only to the category specified by <em>id</em>.
 <p> <p>See also <a href="#categories">categories</a>().
 
-<h3 class=fn>void <a name="setCustomField"></a>PimRecord::setCustomField ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;key, const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;value )<tt> [virtual]</tt>
+<h3 class=fn>void <a name="setCustomField"></a>PimRecord::setCustomField ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )<tt> [virtual]</tt>
 </h3>
 Sets the string stored for the custom field <em>key</em> to <em>value</em>.
 
@@ -127,11 +135,13 @@ Sets the string stored for the custom field <em>key</em> to <em>value</em>.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

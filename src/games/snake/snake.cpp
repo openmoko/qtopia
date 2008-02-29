@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -19,14 +34,14 @@
 **********************************************************************/
 
 #include "snake.h"
+#include "sprites.h"
 #include "target.h"
 #include "codes.h"
 
 #include <qtopia/resource.h>
+#include <qimage.h>
 
 #include <qregexp.h>
-
-static int Piecekey[4][4] = { {6, 0, 4, 3 }, {0, 6, 2, 1 }, { 1, 3, 5, 0 }, {2, 4, 0, 5 } };
 
 Snake::Snake(QCanvas* c)
 {
@@ -42,31 +57,32 @@ Snake::Snake(QCanvas* c)
 
 void Snake::createSnake()
 {
-   snakeparts = new QCanvasPixmapArray();
-   QString s0 = Resource::findPixmap("snake/s0001");
-   s0.replace(QRegExp("0001"),"%1");
-   snakeparts->readPixmaps(s0, 15);
+   QCanvasPixmapArray* snakeparts = SpriteDB::spriteCache();
+   if (snakeparts == 0) {
+       qDebug("Couldn't not find sprite cache");
+       return;
+   }
  
    grow = 0;
    last = Key_Right;
  
    QCanvasSprite* head = new QCanvasSprite(snakeparts, canvas );
-   head->setFrame(7);
+   head->setFrame(SpriteDB::snakeHead(right));
    snakelist.insert(0, head);
    head->show();
-   head->move(32, 16);
+   head->move(2*SpriteDB::tileSize(), SpriteDB::tileSize());
  
    QCanvasSprite* body = new QCanvasSprite(snakeparts, canvas );
-   body->setFrame(6);
+   body->setFrame(SpriteDB::snakeBody(right, right));
    snakelist.append( body );
    body->show();
-   body->move(16, 16);
+   body->move(SpriteDB::tileSize(), SpriteDB::tileSize());
  
    QCanvasSprite* end = new QCanvasSprite(snakeparts, canvas );
-   end->setFrame(11);
+   end->setFrame(SpriteDB::snakeTail(right));
    snakelist.append( end );
    end->show();
-   end->move(0, 16);
+   end->move(0, SpriteDB::tileSize());
  
    currentdir = right; 
    speed = 250;
@@ -83,20 +99,75 @@ void Snake::increaseSpeed()
 
 void Snake::go(int newkey)
 {
-   // check key is a direction
-   if (!( (newkey == Key_Up) || (newkey == Key_Left) || 
-          (newkey == Key_Right) || (newkey == Key_Down) ))
-        return;
-   // check move is possible   
-   if ( ((currentdir == left) && ((newkey == Key_Right) || (newkey == Key_Left)) ) ||
-        ((currentdir == right) && ((newkey == Key_Left) || (newkey == Key_Right)) ) ||
-        ((currentdir == up) && ((newkey == Key_Down) || (newkey == Key_Up)) ) ||
-        ((currentdir == down) && ((newkey == Key_Up) || (newkey == Key_Down)) ) )
-       return;
-   else {
-       Snake::changeHead(newkey);
-       Snake::moveSnake();
-   }
+    int direction = newkey;
+    switch(newkey) {
+	default:
+	    return;
+#ifdef QTOPIA_PHONE
+	case Key_6:
+	    direction = Key_Right;
+	    // FALL THROUGH
+#endif
+	case Key_Right:
+	    if (currentdir == left) return;
+	    break;
+#ifdef QTOPIA_PHONE
+	case Key_4:
+	    direction = Key_Left;
+	    // FALL THROUGH
+#endif
+	case Key_Left:
+	    if (currentdir == right) return;
+	    break;
+#ifdef QTOPIA_PHONE
+	case Key_2:
+	    direction = Key_Up;
+	    // FALL THROUGH
+#endif
+	case Key_Up:
+	    if (currentdir == down) return;
+	    break;
+#ifdef QTOPIA_PHONE
+	case Key_8:
+	    direction = Key_Down;
+	    // FALL THROUGH
+#endif
+	case Key_Down:
+	    if (currentdir == up) return;
+	    break;
+#ifdef QTOPIA_PHONE
+	case Key_1:
+	    // Up or down, depending on direction.
+	    if (currentdir == left || currentdir == right)
+		direction = Key_Up;
+	    else
+		direction = Key_Left;
+	    break;
+	case Key_3:
+	    // Up or down, depending on direction.
+	    if (currentdir == left || currentdir == right)
+		direction = Key_Up;
+	    else
+		direction = Key_Right;
+	    break;
+	case Key_7:
+	    // Up or down, depending on direction.
+	    if (currentdir == left || currentdir == right)
+		direction = Key_Down;
+	    else
+		direction = Key_Left;
+	    break;
+	case Key_9:
+	    // Up or down, depending on direction.
+	    if (currentdir == left || currentdir == right)
+		direction = Key_Down;
+	    else
+		direction = Key_Right;
+	    break;
+#endif
+    }
+    Snake::changeHead(direction);
+    Snake::moveSnake();
 }   
 
 void Snake::move(Direction dir)
@@ -106,14 +177,13 @@ void Snake::move(Direction dir)
    int y = 0;
    newdir = dir;
    switch (dir) {
-      case right: x = 16; break;
-      case left: x = -16; break;
-      case down: y = 16; break;
-      case up: y = -16; break;
+       case right: x = SpriteDB::tileSize(); break;
+       case left: x = -SpriteDB::tileSize(); break;
+       case down: y = SpriteDB::tileSize(); break;
+       case up: y = -SpriteDB::tileSize(); break;
    }
-   int index = lookUpPiece(currentdir, newdir);
-   QCanvasSprite* sprite = new QCanvasSprite(snakeparts, canvas );
-   sprite->setFrame(index);
+   QCanvasSprite* sprite = new QCanvasSprite(SpriteDB::spriteCache(), canvas );
+   sprite->setFrame(SpriteDB::snakeBody(currentdir, newdir));
    snakelist.insert(1, sprite);
    sprite->move(snakelist.first()->x(), snakelist.first()->y() );
 
@@ -134,47 +204,45 @@ void Snake::changeTail()
  
    double lastx = snakelist.last()->x();
    double prevx = snakelist.prev()->x();
-   int index = 0;
- 
-     if ( prevx == lastx ) {  //vertical
-         if ( snakelist.prev()->y() > snakelist.last()->y() )
-              index = 13;
-         else
-              index = 14;
-     } else {  //horizontal
-         if (snakelist.prev()->x() > snakelist.last()->x() )
-              index = 11;
-         else
-              index = 12;
-     }
- 
-     snakelist.last()->setFrame(index);
+
+   Direction dir;
+   if ( prevx == lastx ) {  //vertical
+       if ( snakelist.prev()->y() > snakelist.last()->y() )
+	   dir = down;
+       else
+	   dir = up;
+   } else {  //horizontal
+       if (snakelist.prev()->x() > snakelist.last()->x() )
+	   dir = left;
+       else
+	   dir = right;
+   }
+
+     snakelist.last()->setFrame(SpriteDB::snakeTail(dir));
 }
  
 void Snake::changeHead(int lastkey)
 {
-   int index = 0;
    last = lastkey;
  
    switch (last)
    {
-      case Key_Up: index = 10; break;
-      case Key_Left: index = 8;  break;
-      case Key_Right: index = 7; break;
-      case Key_Down: index = 9;  break;
+       case Key_Up: 
+	   snakelist.first()->setFrame(SpriteDB::snakeHead(up));
+	   break;
+       case Key_Left:
+	   snakelist.first()->setFrame(SpriteDB::snakeHead(left));
+	   break;
+       case Key_Right:
+	   snakelist.first()->setFrame(SpriteDB::snakeHead(right));
+	   break;
+       case Key_Down: 
+	   snakelist.first()->setFrame(SpriteDB::snakeHead(down));
+	   break;
    }
  
-    if (index) {
-       snakelist.first()->setFrame(index);
-    }
 }
 
-// returns an integer corresponding to a particular type of snake piece
-int Snake::lookUpPiece(Direction currentdir, Direction newdir)
-{
-   return Piecekey[currentdir][newdir];
-}
- 
 void Snake::extendSnake()
 {
    grow++;

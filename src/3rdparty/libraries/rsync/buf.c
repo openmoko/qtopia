@@ -100,6 +100,8 @@ rs_result rs_infilebuf_fill(rs_job_t *job, rs_buffers_t *buf,
     rs_filebuf_t            *fb = (rs_filebuf_t *) opaque;
     FILE                    *f = fb->f;
         
+    job = job; //shutup compiler
+
     /* This is only allowed if either the buf has no input buffer
      * yet, or that buffer could possibly be BUF. */
     if (buf->next_in != NULL) {
@@ -150,6 +152,8 @@ rs_result rs_outfilebuf_drain(rs_job_t *job, rs_buffers_t *buf, void *opaque)
     int present;
     rs_filebuf_t *fb = (rs_filebuf_t *) opaque;
     FILE *f = fb->f;
+
+    job = job; // shutup compiler
 
     /* This is only allowed if either the buf has no output buffer
      * yet, or that buffer could possibly be BUF. */

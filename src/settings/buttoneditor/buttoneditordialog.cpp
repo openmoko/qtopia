@@ -1,18 +1,32 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
-**
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -25,18 +39,21 @@
 #include <qhbox.h>
 #include <qlabel.h>
 #include <qcombobox.h>
+#include <qpixmapcache.h>
 
 #include <qtopia/qpeapplication.h>
 #include <qtopia/applnk.h>
 #include <qtopia/config.h>
 #include <qtopia/resource.h>
 #include <qtopia/services.h>
+#include <qtopia/stringutil.h>
 
 #include <qtopia/devicebuttonmanager.h>
 #include "buttoneditordialog.h"
 
-ButtonEditorDialog::ButtonEditorDialog() 
-  : QDialog(0L, "ButtonEditorDialog", TRUE)
+ButtonEditorDialog::ButtonEditorDialog(QWidget *parent,
+	const char *name, WFlags fl)  
+  : QDialog(parent, name, fl)
 {
   setCaption(tr("Buttons"));
   initAppList();
@@ -102,6 +119,7 @@ ServiceRequest ButtonEditorDialog::actionFor(int cur) const
     return ServiceRequest(service, action);
 }
 
+// Also in phone speeddial
 static QStringList readActions(const QString& srv, Config& cfg)
 {
     QStringList actions = cfg.readListEntry("Actions",';');
@@ -131,6 +149,7 @@ void ButtonEditorDialog::initAppList()
             m_AppList.append(new AppLnk(*it.current())); 
 
     // Get the list of parameterless actions for all services
+    // Also in phone speeddial
     m_Actions.clear();
     QStringList s = Service::list();
     for (QStringList::ConstIterator itService = s.begin(); itService!=s.end(); ++itService) {
@@ -161,7 +180,7 @@ void ButtonEditorDialog::buildGUI()
     m_PressComboBoxes.setAutoDelete(FALSE);
     m_HoldComboBoxes.setAutoDelete(FALSE);
 
-    // Sanity check - is $QPEDIR/etc/defaultbuttons.conf missing?
+    // Sanity check - is Global::defaultButtonsFile() missing?
     if ( buttonList.count() == 0 )
 	new QLabel(tr("No buttons!"),this);
 
@@ -186,21 +205,33 @@ void ButtonEditorDialog::populate(QComboBox* comboBox, const ServiceRequest& cur
 
     // Add apps
     for (; appIter.current(); ++appIter)
-	comboBox->insertItem(appIter.current()->pixmap(),appIter.current()->name());
+	comboBox->insertItem(appIter.current()->pixmap(),Qtopia::dehyphenate(appIter.current()->name()));
 
     // Add actions
     for ( QStringList::ConstIterator sit = m_Actions.begin(); sit!=m_Actions.end(); ++sit) {
+	// XXX In phone speeddial, we use a special QListBoxItem.
+	// XXX It is much more efficient (lazy loading).
+	// XXX That could be done here too.
 	int c = (*sit).find(':');
 	Config srv(Service::config((*sit).left(c)),Config::File);
 	srv.setGroup((*sit).mid(c+1));
-	int s = AppLnk::smallIconSize();
-	QImage img = Resource::loadImage(srv.readEntry("Icon")).smoothScale(s,s);
-	QPixmap pm; pm.convertFromImage(img);
-	comboBox->insertItem(pm, srv.readEntry("Name"));
+	QString key = "Service::" + (*sit);
+	QPixmap pm;
+	if ( !QPixmapCache::find(key,pm) ) {
+	    QString icon = srv.readEntry("Icon");
+	    pm = Resource::loadIconSet(icon).pixmap(QIconSet::Small, QIconSet::Normal);
+	    if ( pm.isNull() ) {
+		int s = AppLnk::smallIconSize();
+		QImage img = Resource::loadImage(srv.readEntry("Icon")).smoothScale(s,s);
+		pm.convertFromImage(img);
+		QPixmapCache::insert(key,pm);
+	    }
+	} 
+	comboBox->insertItem(pm, srv.readEntry("Name")); 
     }
 
     // Since we don't have an applnk for QPE, we hardwire this one..
-    comboBox->insertItem(Resource::loadIconSet("home").pixmap(),tr("Home"));
+    comboBox->insertItem(Resource::loadIconSet("home").pixmap(QIconSet::Small, QIconSet::Normal),tr("Home"));
     comboBox->insertItem(tr("No action"));
 
     int i;

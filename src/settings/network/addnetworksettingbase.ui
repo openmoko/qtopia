@@ -1,7 +1,7 @@
 <!DOCTYPE UI><UI>
 <class>AddNetworkSettingBase</class>
 <widget>
-    <class>QDialog</class>
+    <class>QWidget</class>
     <property stdset="1">
         <name>name</name>
         <cstring>Form2</cstring>

@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -31,7 +33,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file of the mainwindow: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/addressbook/mainwindow.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/addressbook/mainwindow.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -85,7 +87,7 @@ protected:
   <hr>
 
   Implementation of the mainwindow: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/addressbook/mainwindow.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/addressbook/mainwindow.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -110,59 +112,59 @@ ABMainWindow::ABMainWindow()
     : <a href="qmainwindow.html">QMainWindow</a>( 0, "example addressbook application" ),
       filename( QString::null )
 {
-    <a href=#346>setupMenuBar</a>();
-    <a href=#347>setupFileTools</a>();
-    <a href=#348>setupStatusBar</a>();
-    <a href=#349>setupCentralWidget</a>();
+    <a href=#237>setupMenuBar</a>();
+    <a href=#238>setupFileTools</a>();
+    <a href=#239>setupStatusBar</a>();
+    <a href=#240>setupCentralWidget</a>();
 }
 
 ABMainWindow::~ABMainWindow()
 {
 }
 
-void <a name="346"></a>ABMainWindow::setupMenuBar()
+void <a name="237"></a>ABMainWindow::setupMenuBar()
 {
     <a href="qpopupmenu.html">QPopupMenu</a> *file = new <a href="qpopupmenu.html">QPopupMenu</a>( this );
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;insertItem( "&amp;File", file );
 
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "New", this, SLOT( <a href=#351>fileNew</a>() ), CTRL + Key_N );
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( <a href="qpixmap.html">QPixmap</a>( "fileopen.xpm" ), "Open", this, SLOT( <a href=#352>fileOpen</a>() ), CTRL + Key_O );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "New", this, SLOT( <a href=#242>fileNew</a>() ), CTRL + Key_N );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( <a href="qpixmap.html">QPixmap</a>( "fileopen.xpm" ), "Open", this, SLOT( <a href=#243>fileOpen</a>() ), CTRL + Key_O );
     file-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( <a href="qpixmap.html">QPixmap</a>( "filesave.xpm" ), "Save", this, SLOT( <a href=#353>fileSave</a>() ), CTRL + Key_S );
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Save As...", this, SLOT( <a href=#354>fileSaveAs</a>() ) );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( <a href="qpixmap.html">QPixmap</a>( "filesave.xpm" ), "Save", this, SLOT( <a href=#244>fileSave</a>() ), CTRL + Key_S );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Save As...", this, SLOT( <a href=#245>fileSaveAs</a>() ) );
     file-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( <a href="qpixmap.html">QPixmap</a>( "fileprint.xpm" ), "Print...", this, SLOT( <a href=#355>filePrint</a>() ), CTRL + Key_P );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( <a href="qpixmap.html">QPixmap</a>( "fileprint.xpm" ), "Print...", this, SLOT( <a href=#246>filePrint</a>() ), CTRL + Key_P );
     file-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Close", this, SLOT( <a href=#350>closeWindow</a>() ), CTRL + Key_W );
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Quit", qApp, SLOT( quit() ), CTRL + Key_Q );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Close", this, SLOT( <a href=#241>closeWindow</a>() ), CTRL + Key_W );
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Quit", qApp, SLOT( quit() ), CTRL + Key_Q );
 }
 
-void <a name="347"></a>ABMainWindow::setupFileTools()
+void <a name="238"></a>ABMainWindow::setupFileTools()
 {
     //fileTools = new <a href="qtoolbar.html">QToolBar</a>( this, "file operations" );
 }
 
-void <a name="348"></a>ABMainWindow::setupStatusBar()
+void <a name="239"></a>ABMainWindow::setupStatusBar()
 {
     //statusBar()-&gt;message( "Ready", 2000 );
 }
 
-void <a name="349"></a>ABMainWindow::setupCentralWidget()
+void <a name="240"></a>ABMainWindow::setupCentralWidget()
 {
     view = new ABCentralWidget( this );
     <a href="qmainwindow.html#fce9ba">setCentralWidget</a>( view );
 }
 
-void <a name="350"></a>ABMainWindow::closeWindow()
+void <a name="241"></a>ABMainWindow::closeWindow()
 {
     <a href="qwidget.html#3d9c87">close</a>();
 }
 
-void <a name="351"></a>ABMainWindow::fileNew()
+void <a name="242"></a>ABMainWindow::fileNew()
 {
 }
 
-void <a name="352"></a>ABMainWindow::fileOpen()
+void <a name="243"></a>ABMainWindow::fileOpen()
 {
     <a href="qstring.html">QString</a> fn = QFileDialog::getOpenFileName( QString::null, QString::null, this );
     if ( !fn.<a href="qstring.html#c62623">isEmpty</a>() ) {
@@ -171,26 +173,26 @@ void <a name="352"></a>ABMainWindow::fileOpen()
     }
 }
 
-void <a name="353"></a>ABMainWindow::fileSave()
+void <a name="244"></a>ABMainWindow::fileSave()
 {
     if ( filename.isEmpty() ) {
-        <a href=#354>fileSaveAs</a>();
+        <a href=#245>fileSaveAs</a>();
         return;
     }
 
     view-&gt;save( filename );
 }
 
-void <a name="354"></a>ABMainWindow::fileSaveAs()
+void <a name="245"></a>ABMainWindow::fileSaveAs()
 {
     <a href="qstring.html">QString</a> fn = QFileDialog::getSaveFileName( QString::null, QString::null, this );
     if ( !fn.<a href="qstring.html#c62623">isEmpty</a>() ) {
         filename = fn;
-        <a href=#353>fileSave</a>();
+        <a href=#244>fileSave</a>();
     }
 }
 
-void <a name="355"></a>ABMainWindow::filePrint()
+void <a name="246"></a>ABMainWindow::filePrint()
 {
 }
 </pre>
@@ -199,7 +201,7 @@ void <a name="355"></a>ABMainWindow::filePrint()
   <hr>
 
   Header file of the centralwidget: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/addressbook/centralwidget.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/addressbook/centralwidget.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -264,7 +266,7 @@ protected:
   <hr>
 
   Implementation of the centralwidget: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/addressbook/centralwidget.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/addressbook/centralwidget.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -292,14 +294,14 @@ ABCentralWidget::ABCentralWidget( <a href="qwidget.html">QWidget</a> *parent, co
 {
     mainGrid = new <a href="qgridlayout.html">QGridLayout</a>( this, 2, 1, 5, 5 );
 
-    <a href=#358>setupTabWidget</a>();
-    <a href=#359>setupListView</a>();
+    <a href=#249>setupTabWidget</a>();
+    <a href=#250>setupListView</a>();
 
     mainGrid-&gt;setRowStretch( 0, 0 );
     mainGrid-&gt;setRowStretch( 1, 1 );
 }
 
-void <a name="356"></a>ABCentralWidget::save( const QString &amp;filename )
+void <a name="247"></a>ABCentralWidget::save( const QString &amp;filename )
 {
     if ( !listView-&gt;firstChild() )
         return;
@@ -319,7 +321,7 @@ void <a name="356"></a>ABCentralWidget::save( const QString &amp;filename )
     f.<a href="qfile.html#64e640">close</a>();
 }
 
-void <a name="357"></a>ABCentralWidget::load( const QString &amp;filename )
+void <a name="248"></a>ABCentralWidget::load( const QString &amp;filename )
 {
     listView-&gt;clear();
 
@@ -338,7 +340,7 @@ void <a name="357"></a>ABCentralWidget::load( const QString &amp;filename )
     f.<a href="qfile.html#64e640">close</a>();
 }
 
-void <a name="358"></a>ABCentralWidget::setupTabWidget()
+void <a name="249"></a>ABCentralWidget::setupTabWidget()
 {
     tabWidget = new <a href="qtabwidget.html">QTabWidget</a>( this );
 
@@ -364,7 +366,7 @@ void <a name="358"></a>ABCentralWidget::setupTabWidget()
     add = new <a href="qpushbutton.html">QPushButton</a>( "&amp;Add", input );
     add-&gt;resize( add-&gt;sizeHint() );
     grid1-&gt;<a href="qgridlayout.html#dac29c">addWidget</a>( add, 0, 4 );
-    <a href="qobject.html#7f8e37">connect</a>( add, SIGNAL( clicked() ), this, SLOT( <a href=#360>addEntry</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( add, SIGNAL( clicked() ), this, SLOT( <a href=#251>addEntry</a>() ) );
 
     iFirstName = new <a href="qlineedit.html">QLineEdit</a>( input );
     iFirstName-&gt;resize( iFirstName-&gt;sizeHint() );
@@ -389,7 +391,7 @@ void <a name="358"></a>ABCentralWidget::setupTabWidget()
     change = new <a href="qpushbutton.html">QPushButton</a>( "&amp;Change", input );
     change-&gt;resize( change-&gt;sizeHint() );
     grid1-&gt;<a href="qgridlayout.html#dac29c">addWidget</a>( change, 1, 4 );
-    <a href="qobject.html#7f8e37">connect</a>( change, SIGNAL( clicked() ), this, SLOT( <a href=#361>changeEntry</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( change, SIGNAL( clicked() ), this, SLOT( <a href=#252>changeEntry</a>() ) );
 
     tabWidget-&gt;addTab( input, "&amp;Add/Change Entry" );
 
@@ -401,22 +403,22 @@ void <a name="358"></a>ABCentralWidget::setupTabWidget()
     cFirstName = new <a href="qcheckbox.html">QCheckBox</a>( "First &amp;Name", search );
     cFirstName-&gt;resize( cFirstName-&gt;sizeHint() );
     grid2-&gt;<a href="qgridlayout.html#dac29c">addWidget</a>( cFirstName, 0, 0 );
-    <a href="qobject.html#7f8e37">connect</a>( cFirstName, SIGNAL( clicked() ), this, SLOT( <a href=#364>toggleFirstName</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( cFirstName, SIGNAL( clicked() ), this, SLOT( <a href=#255>toggleFirstName</a>() ) );
 
     cLastName = new <a href="qcheckbox.html">QCheckBox</a>( "&amp;Last Name", search );
     cLastName-&gt;resize( cLastName-&gt;sizeHint() );
     grid2-&gt;<a href="qgridlayout.html#dac29c">addWidget</a>( cLastName, 0, 1 );
-    <a href="qobject.html#7f8e37">connect</a>( cLastName, SIGNAL( clicked() ), this, SLOT( <a href=#365>toggleLastName</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( cLastName, SIGNAL( clicked() ), this, SLOT( <a href=#256>toggleLastName</a>() ) );
 
     cAddress = new <a href="qcheckbox.html">QCheckBox</a>( "&amp;Address", search );
     cAddress-&gt;resize( cAddress-&gt;sizeHint() );
     grid2-&gt;<a href="qgridlayout.html#dac29c">addWidget</a>( cAddress, 0, 2 );
-    <a href="qobject.html#7f8e37">connect</a>( cAddress, SIGNAL( clicked() ), this, SLOT( <a href=#366>toggleAddress</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( cAddress, SIGNAL( clicked() ), this, SLOT( <a href=#257>toggleAddress</a>() ) );
 
     cEMail = new <a href="qcheckbox.html">QCheckBox</a>( "&amp;E-Mail", search );
     cEMail-&gt;resize( cEMail-&gt;sizeHint() );
     grid2-&gt;<a href="qgridlayout.html#dac29c">addWidget</a>( cEMail, 0, 3 );
-    <a href="qobject.html#7f8e37">connect</a>( cEMail, SIGNAL( clicked() ), this, SLOT( <a href=#367>toggleEMail</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( cEMail, SIGNAL( clicked() ), this, SLOT( <a href=#258>toggleEMail</a>() ) );
 
     sFirstName = new <a href="qlineedit.html">QLineEdit</a>( search );
     sFirstName-&gt;resize( sFirstName-&gt;sizeHint() );
@@ -437,7 +439,7 @@ void <a name="358"></a>ABCentralWidget::setupTabWidget()
     find = new <a href="qpushbutton.html">QPushButton</a>( "&amp;Find", search );
     find-&gt;resize( find-&gt;sizeHint() );
     grid2-&gt;<a href="qgridlayout.html#dac29c">addWidget</a>( find, 1, 4 );
-    <a href="qobject.html#7f8e37">connect</a>( find, SIGNAL( clicked() ), this, SLOT( <a href=#368>findEntries</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( find, SIGNAL( clicked() ), this, SLOT( <a href=#259>findEntries</a>() ) );
 
     cFirstName-&gt;setChecked( TRUE );
     sFirstName-&gt;setEnabled( TRUE );
@@ -450,7 +452,7 @@ void <a name="358"></a>ABCentralWidget::setupTabWidget()
     mainGrid-&gt;addWidget( tabWidget, 0, 0 );
 }
 
-void <a name="359"></a>ABCentralWidget::setupListView()
+void <a name="250"></a>ABCentralWidget::setupListView()
 {
     listView = new <a href="qlistview.html">QListView</a>( this );
     listView-&gt;addColumn( "First Name" );
@@ -460,13 +462,13 @@ void <a name="359"></a>ABCentralWidget::setupListView()
 
     listView-&gt;setSelectionMode( QListView::Extended );
 
-    <a href="qobject.html#7f8e37">connect</a>( listView, SIGNAL( clicked( <a href="qlistviewitem.html">QListViewItem</a>* ) ), this, SLOT( <a href=#363>itemSelected</a>( <a href="qlistviewitem.html">QListViewItem</a>* ) ) );
+    <a href="qobject.html#fbde73">connect</a>( listView, SIGNAL( clicked( <a href="qlistviewitem.html">QListViewItem</a>* ) ), this, SLOT( <a href=#254>itemSelected</a>( <a href="qlistviewitem.html">QListViewItem</a>* ) ) );
 
     mainGrid-&gt;addWidget( listView, 1, 0 );
     listView-&gt;setAllColumnsShowFocus( TRUE );
 }
 
-void <a name="360"></a>ABCentralWidget::addEntry()
+void <a name="251"></a>ABCentralWidget::addEntry()
 {
     if ( !iFirstName-&gt;text().isEmpty() || !iLastName-&gt;text().isEmpty() ||
          !iAddress-&gt;text().isEmpty() || !iEMail-&gt;text().isEmpty() ) {
@@ -483,7 +485,7 @@ void <a name="360"></a>ABCentralWidget::addEntry()
     iEMail-&gt;setText( "" );
 }
 
-void <a name="361"></a>ABCentralWidget::changeEntry()
+void <a name="252"></a>ABCentralWidget::changeEntry()
 {
     <a href="qlistviewitem.html">QListViewItem</a> *item = listView-&gt;currentItem();
 
@@ -497,7 +499,7 @@ void <a name="361"></a>ABCentralWidget::changeEntry()
     }
 }
 
-void <a name="362"></a>ABCentralWidget::selectionChanged()
+void <a name="253"></a>ABCentralWidget::selectionChanged()
 {
     iFirstName-&gt;setText( "" );
     iLastName-&gt;setText( "" );
@@ -505,7 +507,7 @@ void <a name="362"></a>ABCentralWidget::selectionChanged()
     iEMail-&gt;setText( "" );
 }
 
-void <a name="363"></a>ABCentralWidget::itemSelected( <a href="qlistviewitem.html">QListViewItem</a> *item )
+void <a name="254"></a>ABCentralWidget::itemSelected( <a href="qlistviewitem.html">QListViewItem</a> *item )
 {
     if ( !item )
         return;
@@ -518,7 +520,7 @@ void <a name="363"></a>ABCentralWidget::itemSelected( <a href="qlistviewitem.htm
     iEMail-&gt;setText( item-&gt;<a href="qlistviewitem.html#ca0608">text</a>( 3 ) );
 }
 
-void <a name="364"></a>ABCentralWidget::toggleFirstName()
+void <a name="255"></a>ABCentralWidget::toggleFirstName()
 {
     sFirstName-&gt;setText( "" );
 
@@ -530,7 +532,7 @@ void <a name="364"></a>ABCentralWidget::toggleFirstName()
         sFirstName-&gt;setEnabled( FALSE );
 }
 
-void <a name="365"></a>ABCentralWidget::toggleLastName()
+void <a name="256"></a>ABCentralWidget::toggleLastName()
 {
     sLastName-&gt;setText( "" );
 
@@ -542,7 +544,7 @@ void <a name="365"></a>ABCentralWidget::toggleLastName()
         sLastName-&gt;setEnabled( FALSE );
 }
 
-void <a name="366"></a>ABCentralWidget::toggleAddress()
+void <a name="257"></a>ABCentralWidget::toggleAddress()
 {
     sAddress-&gt;setText( "" );
 
@@ -554,7 +556,7 @@ void <a name="366"></a>ABCentralWidget::toggleAddress()
         sAddress-&gt;setEnabled( FALSE );
 }
 
-void <a name="367"></a>ABCentralWidget::toggleEMail()
+void <a name="258"></a>ABCentralWidget::toggleEMail()
 {
     sEMail-&gt;setText( "" );
 
@@ -566,7 +568,7 @@ void <a name="367"></a>ABCentralWidget::toggleEMail()
         sEMail-&gt;setEnabled( FALSE );
 }
 
-void <a name="368"></a>ABCentralWidget::findEntries()
+void <a name="259"></a>ABCentralWidget::findEntries()
 {
     if ( !cFirstName-&gt;isChecked() &amp;&amp;
          !cLastName-&gt;isChecked() &amp;&amp;
@@ -620,7 +622,7 @@ void <a name="368"></a>ABCentralWidget::findEntries()
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/addressbook/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/addressbook/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright ( C ) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -643,7 +645,7 @@ int main( int argc, char ** argv )
     a.<a name="setMainWidget"></a><a href="qapplication.html#7ad759">setMainWidget</a>( mw );
     mw-&gt;<a name="show"></a><a href="qmainwindow.html#eb53e3">show</a>();
 
-    a.<a name="connect"></a><a href="qobject.html#7f8e37">connect</a>( &amp;a, SIGNAL( lastWindowClosed() ), &amp;a, SLOT( quit() ) );
+    a.<a name="connect"></a><a href="qobject.html#fbde73">connect</a>( &amp;a, SIGNAL( lastWindowClosed() ), &amp;a, SLOT( quit() ) );
     int result = a.<a name="exec"></a><a href="qapplication.html#84c7bf">exec</a>();
     delete mw;
     return result;
@@ -652,5 +654,5 @@ int main( int argc, char ** argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

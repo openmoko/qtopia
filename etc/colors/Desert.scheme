@@ -1,7 +1,10 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
 [Global]
-Name = Desert
-Name[ja] = 砂漠
+Name[]=Desert
 [Colors]
-Background = #E5E1D5
-Button = #D6CDBB
-Highlight = #800000
+Background=#EBE8E1
+Button=#E9DFCC
+Highlight=#800000
+AlternateBase=#F1E4DA

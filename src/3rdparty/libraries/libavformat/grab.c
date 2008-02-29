@@ -17,12 +17,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "avformat.h"
-#include <linux/videodev.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#define _LINUX_TIME_H 1
+#include <linux/videodev.h>
 #include <time.h>
 
 typedef struct {
@@ -31,11 +32,12 @@ typedef struct {
     int use_mmap;
     int width, height;
     int frame_rate;
-    INT64 time_frame;
+    int frame_rate_base;
+    int64_t time_frame;
     int frame_size;
     struct video_capability video_cap;
     struct video_audio audio_saved;
-    UINT8 *video_buf;
+    uint8_t *video_buf;
     struct video_mbuf gb_buffers;
     struct video_mmap gb_buf;
     int gb_frame;
@@ -45,15 +47,13 @@ typedef struct {
     int aiw_enabled;
     int deint;
     int halfw;
-    UINT8 *src_mem;
-    UINT8 *lum_m4_mem;
+    uint8_t *src_mem;
+    uint8_t *lum_m4_mem;
 } VideoData;
 
 static int aiw_init(VideoData *s);
 static int aiw_read_picture(VideoData *s, uint8_t *data);
 static int aiw_close(VideoData *s);
-
-const char *v4l_device = "/dev/video";
 
 static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
 {
@@ -61,16 +61,19 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     AVStream *st;
     int width, height;
     int video_fd, frame_size;
-    int ret, frame_rate;
+    int ret, frame_rate, frame_rate_base;
     int desired_palette;
+    struct video_tuner tuner;
     struct video_audio audio;
+    const char *video_device;
 
     if (!ap || ap->width <= 0 || ap->height <= 0 || ap->frame_rate <= 0)
         return -1;
     
     width = ap->width;
     height = ap->height;
-    frame_rate = ap->frame_rate;
+    frame_rate      = ap->frame_rate;
+    frame_rate_base = ap->frame_rate_base;
 
     st = av_new_stream(s1, 0);
     if (!st)
@@ -78,11 +81,15 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
 
     s->width = width;
     s->height = height;
-    s->frame_rate = frame_rate;
+    s->frame_rate      = frame_rate;
+    s->frame_rate_base = frame_rate_base;
 
-    video_fd = open(v4l_device, O_RDWR);
+    video_device = ap->device;
+    if (!video_device)
+        video_device = "/dev/video";
+    video_fd = open(video_device, O_RDWR);
     if (video_fd < 0) {
-        perror(v4l_device);
+        perror(video_device);
         goto fail;
     }
     
@@ -104,6 +111,17 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     } else if (st->codec.pix_fmt == PIX_FMT_BGR24) {
         desired_palette = VIDEO_PALETTE_RGB24;
     }    
+
+    /* set tv standard */
+    if (ap->standard && !ioctl(video_fd, VIDIOCGTUNER, &tuner)) {
+	if (!strcasecmp(ap->standard, "pal"))
+	    tuner.mode = VIDEO_MODE_PAL;
+	else if (!strcasecmp(ap->standard, "secam"))
+	    tuner.mode = VIDEO_MODE_SECAM;
+	else
+	    tuner.mode = VIDEO_MODE_NTSC;
+	ioctl(video_fd, VIDIOCSTUNER, &tuner);
+    }
     
     /* unmute audio */
     audio.audio = 0;
@@ -238,7 +256,8 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     st->codec.codec_id = CODEC_ID_RAWVIDEO;
     st->codec.width = width;
     st->codec.height = height;
-    st->codec.frame_rate = frame_rate;
+    st->codec.frame_rate      = frame_rate;
+    st->codec.frame_rate_base = frame_rate_base;
     
     av_set_pts_info(s1, 48, 1, 1000000); /* 48 bits pts in us */
 
@@ -250,9 +269,9 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     return -EIO;
 }
 
-static int v4l_mm_read_picture(VideoData *s, UINT8 *buf)
+static int v4l_mm_read_picture(VideoData *s, uint8_t *buf)
 {
-    UINT8 *ptr;
+    uint8_t *ptr;
 
     /* Setup to capture the next frame */
     s->gb_buf.frame = (s->gb_frame + 1) % s->gb_buffers.frames;
@@ -279,9 +298,9 @@ static int v4l_mm_read_picture(VideoData *s, UINT8 *buf)
 static int grab_read_packet(AVFormatContext *s1, AVPacket *pkt)
 {
     VideoData *s = s1->priv_data;
-    INT64 curtime, delay;
+    int64_t curtime, delay;
     struct timespec ts;
-    INT64 per_frame = (INT64_C(1000000) * FRAME_RATE_BASE) / s->frame_rate;
+    int64_t per_frame = (int64_t_C(1000000) * s->frame_rate_base) / s->frame_rate;
 
     /* Calculate the time of the next frame */
     s->time_frame += per_frame;
@@ -339,7 +358,7 @@ static int grab_read_close(AVFormatContext *s1)
 }
 
 static AVInputFormat video_grab_device_format = {
-    "video_grab_device",
+    "video4linux",
     "video grab",
     sizeof(VideoData),
     NULL,
@@ -615,13 +634,13 @@ static int aiw_init(VideoData *s)
 /* Read two fields separately. */
 static int aiw_read_picture(VideoData *s, uint8_t *data)
 {
-    UINT8 *ptr, *lum, *cb, *cr;
+    uint8_t *ptr, *lum, *cb, *cr;
     int h;
 #ifndef HAVE_MMX
     int sum;
 #endif
-    UINT8* src = s->src_mem;
-    UINT8 *ptrend = &src[s->width*2];
+    uint8_t* src = s->src_mem;
+    uint8_t *ptrend = &src[s->width*2];
     lum=data;
     cb=&lum[s->width*s->height];
     cr=&cb[(s->width*s->height)/4];
@@ -713,7 +732,7 @@ static int aiw_read_picture(VideoData *s, uint8_t *data)
             read(s->fd,src,s->width*4);
         }
     } else {
-        UINT8 *lum_m1, *lum_m2, *lum_m3, *lum_m4;
+        uint8_t *lum_m1, *lum_m2, *lum_m3, *lum_m4;
 #ifdef HAVE_MMX
         mmx_t rounder;
         rounder.uw[0]=4;
@@ -723,7 +742,7 @@ static int aiw_read_picture(VideoData *s, uint8_t *data)
         movq_m2r(rounder,mm6);
         pxor_r2r(mm7,mm7);
 #else
-        UINT8 *cm = cropTbl + MAX_NEG_CROP;
+        uint8_t *cm = cropTbl + MAX_NEG_CROP;
 #endif
 
         /* read two fields and deinterlace them */

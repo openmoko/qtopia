@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -21,13 +36,22 @@
 #include "todoentryimpl.h"
 #include "nulldb.h"
 
+#include <qtopia/vscrollview.h>
+#include <qtopia/qpeapplication.h>
 #include <qtopia/categoryselect.h>
 #include <qtopia/datebookmonth.h>
 #include <qtopia/global.h>
-#include <qtopia/imageedit.h>
 #include <qtopia/pim/task.h>
 #include <qtopia/timestring.h>
 #include <qtopia/datepicker.h>
+#include <qtopia/qpestyle.h>
+#ifdef QTOPIA_DATA_LINKING
+#include <qtopia/qdl.h>
+#endif
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA_DATA_LINKING)
+#include <qtopia/pixmapdisplay.h>
+#include <qtopia/resource.h>
+#endif
 
 #include <qmessagebox.h>
 #include <qpopupmenu.h>
@@ -44,73 +68,10 @@
 #include <qscrollview.h>
 #include <qlayout.h>
 
-/* 
- *  Constructs a NewTaskDialogBase which is a child of 'parent', with the 
- *  name 'name' and widget flags set to 'f' 
- */
-NewTaskDialogBase::NewTaskDialogBase( QWidget* parent,  const char* name, WFlags fl )
-    : QWidget( parent, name, fl )
-{
-    if ( !name )
-	setName( "NewTaskDialogBase" );
-    resize( 273, 300 ); 
-    setCaption( tr( "New Task" ) );
-    NewTaskDialogBaseLayout = new QGridLayout( this ); 
-    NewTaskDialogBaseLayout->setSpacing( 3 );
-    NewTaskDialogBaseLayout->setMargin( 0 );
-
-    TabWidget = new QTabWidget( this, "TabWidget" );
-
-    tab = new QWidget( TabWidget, "tab" );
-    tabLayout = new QGridLayout( tab ); 
-    tabLayout->setSpacing( 3 );
-    tabLayout->setMargin( 3 );
-    TabWidget->insertTab( tab, tr( "Task" ) );
-
-    NewTaskDialogBaseLayout->addMultiCellWidget( TabWidget, 0, 0, 0, 2 );
-
-    //
-    // QtopiaDesktop uses cancel and ok buttons for this dialog.
-    //
-#ifdef QTOPIA_DESKTOP
-    buttonCancel = new QPushButton( this, "buttonCancel" );
-    buttonCancel->setText( tr( "Cancel" ) );
-
-    NewTaskDialogBaseLayout->addWidget( buttonCancel, 1, 2 );
-
-    buttonOk = new QPushButton( this, "buttonOk" );
-    buttonOk->setText( tr( "OK" ) );
-
-    NewTaskDialogBaseLayout->addWidget( buttonOk, 1, 1 );
-    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-    NewTaskDialogBaseLayout->addItem( spacer, 1, 0 );
-#endif // QTOPIA_DESKTOP
-
-    // signals and slots connections
-}
-
-/*  
- *  Destroys the object and frees any allocated resources
- */
-NewTaskDialogBase::~NewTaskDialogBase()
-{
-    // no need to delete child widgets, Qt does it all for us
-}
-
-void NewTaskDialogBase::dateChanged( const QString & )
-{
-    qWarning( "NewTaskDialogBase::dateChanged( const QString & ): Not implemented yet!" );
-}
-
-void NewTaskDialogBase::dateChanged( int, int, int )
-{
-    qWarning( "NewTaskDialogBase::dateChanged( int, int, int ): Not implemented yet!" );
-}
-
-NewTaskDialog::NewTaskDialog( const PimTask& task, QWidget *parent,
+TaskDialog::TaskDialog( const PimTask& task, QWidget *parent,
 			      const char *name, bool modal, WFlags fl )
     : QDialog( parent, name, modal, fl ),
-      todo( task )
+      todo( task ), sv(0)
 {
     init();
 
@@ -139,6 +100,9 @@ NewTaskDialog::NewTaskDialog( const PimTask& task, QWidget *parent,
 	taskdetail->buttonEnd->setDate( date );
 
     inputNotes->setText( task.notes() );
+#ifdef QTOPIA_DATA_LINKING
+    QDL::loadLinks( task.customField( QDL::DATA_KEY ), QDL::clients( inputNotes ) );
+#endif
 
     // set up enabled/disabled logic
     dueButtonToggled();
@@ -146,17 +110,17 @@ NewTaskDialog::NewTaskDialog( const PimTask& task, QWidget *parent,
 }
 
 /*
- *  Constructs a NewTaskDialog which is a child of 'parent', with the
+ *  Constructs a TaskDialog which is a child of 'parent', with the
  *  name 'name' and widget flags set to 'f'
  *
  *  The dialog will by default be modeless, unless you set 'modal' to
  *  TRUE to construct a modal dialog.
  */
-NewTaskDialog::NewTaskDialog( int id, QWidget* parent,  const char* name, bool modal,
+TaskDialog::TaskDialog( int id, QWidget* parent,  const char* name, bool modal,
 			      WFlags fl )
     : QDialog( parent, name, modal, fl )
 {
-    if ( id != -1 ) {
+    if ( id != -1 && id != -2 ) {
 	QArray<int> ids( 1 );
 	ids[0] = id;
 	todo.setCategories( ids );
@@ -169,31 +133,66 @@ NewTaskDialog::NewTaskDialog( int id, QWidget* parent,  const char* name, bool m
     statusChanged();
 }
 
-void NewTaskDialog::init()
+void TaskDialog::init()
 {
     buttonclose = FALSE;
 
-    s = new NewTaskDialogBase(this);
+    //resize( 273, 300 ); 
+    setCaption( tr( "New Task" ) );
+    QGridLayout *gl = new QGridLayout( this ); 
+    gl->setSpacing( 3 );
+    gl->setMargin( 0 );
 
-    s->TabWidget->setCurrentPage(s->TabWidget->currentPageIndex());
-    while (s->TabWidget->currentPage()) {
-	s->TabWidget->removePage(s->TabWidget->currentPage());
-    }
+    QTabWidget *tw = new QTabWidget( this, "TabWidget" );
+    gl->addMultiCellWidget(tw, 0, 0, 0, 2);
+    //
+    // QtopiaDesktop uses cancel and ok buttons for this dialog.
+    //
+#ifdef QTOPIA_DESKTOP
+    QPushButton *buttonCancel = new QPushButton( this, "buttonCancel" );
+    buttonCancel->setText( tr( "Cancel" ) );
 
-    taskdetail = new NewTaskDetail(this);
-    inputNotes = new QMultiLineEdit(this);
+    gl->addWidget( buttonCancel, 1, 2 );
 
-    QScrollView *sv = new QScrollView(this);
-    sv->setHScrollBarMode(QScrollView::AlwaysOff);
-    sv->setResizePolicy(QScrollView::AutoOneFit);
-    sv->setFrameStyle(QFrame::NoFrame);
+    QPushButton *buttonOk = new QPushButton( this, "buttonOk" );
+    buttonOk->setText( tr( "OK" ) );
+
+    gl->addWidget( buttonOk, 1, 1 );
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
+    gl->addItem( spacer, 1, 0 );
+#endif // QTOPIA_DESKTOP
+
+    QWidget *noteTab = new QWidget( this );
+    QGridLayout *noteLayout = new QGridLayout( noteTab );
+    inputNotes = new QMultiLineEdit( noteTab );
+    inputNotes->setWordWrap(QMultiLineEdit::WidgetWidth);
+    int rowCount = 0;
+#ifdef QTOPIA_DATA_LINKING
+    QDLWidgetClient *inputNotesWC = new QDLWidgetClient( inputNotes, "qdlNotes" );
+#ifdef QTOPIA_PHONE
+    inputNotesWC->setupStandardContextMenu();
+#else
+    PixmapDisplay *linkButton = new PixmapDisplay( noteTab );
+    linkButton->setPixmap( Resource::loadIconSet( "qdllink" )
+					    .pixmap( QIconSet::Small, TRUE ) );
+    connect( linkButton, SIGNAL(clicked()), inputNotesWC, SLOT(requestLink()) );
+    noteLayout->addWidget( linkButton, rowCount++, 0, Qt::AlignRight );
+    linkButton->setFocusPolicy( NoFocus );
+#endif
+#endif
+    noteLayout->addWidget( inputNotes, rowCount++, 0 );
+
+#ifndef QTOPIA_DESKTOP
+    sv = new VScrollView(this);
+    taskdetail = new NewTaskDetail(sv->viewport());
     sv->addChild(taskdetail);
 
-    s->TabWidget->addTab(sv, tr("Task"));
-    s->TabWidget->addTab(inputNotes, tr("Notes"));
-
-    QVBoxLayout *lay = new QVBoxLayout(this);
-    lay->addWidget(s);
+    tw->addTab(sv, tr("Task"));
+#else
+    taskdetail = new NewTaskDetail(tw);
+    tw->addTab( taskdetail, tr("Task") );
+#endif
+    tw->addTab( noteTab, tr("Notes"));
 
     setTabOrder(taskdetail->inputDescription, taskdetail->comboPriority);
     setTabOrder(taskdetail->comboPriority, taskdetail->comboStatus);
@@ -205,20 +204,20 @@ void NewTaskDialog::init()
     setTabOrder(taskdetail->buttonEnd, taskdetail->comboCategory);
 
 #ifdef QTOPIA_DESKTOP
-    setTabOrder(taskdetail->comboCategory, s->buttonOk);
-    setTabOrder(s->buttonOk, s->buttonCancel);
-    s->buttonOk->setDefault(TRUE);
+    setTabOrder(taskdetail->comboCategory, buttonOk);
+    setTabOrder(buttonOk, buttonCancel);
+    buttonOk->setDefault(TRUE);
 
-    connect( s->buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
-    connect( s->buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
+    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+    connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
 #endif // QTOPIA_DESKTOP
 
-    connect( taskdetail->buttonDue, SIGNAL( valueChanged( const QDate& ) ),
-             this, SLOT( dueDateChanged( const QDate& ) ) );
-    connect( taskdetail->buttonStart, SIGNAL( valueChanged( const QDate& ) ),
-             this, SLOT( startDateChanged( const QDate& ) ) );
-    connect( taskdetail->buttonEnd, SIGNAL( valueChanged( const QDate& ) ),
-             this, SLOT( endDateChanged( const QDate& ) ) );
+    connect( taskdetail->buttonDue, SIGNAL( valueChanged(const QDate&) ),
+             this, SLOT( dueDateChanged(const QDate&) ) );
+    connect( taskdetail->buttonStart, SIGNAL( valueChanged(const QDate&) ),
+             this, SLOT( startDateChanged(const QDate&) ) );
+    connect( taskdetail->buttonEnd, SIGNAL( valueChanged(const QDate&) ),
+             this, SLOT( endDateChanged(const QDate&) ) );
 
     QDate current = QDate::currentDate();
 
@@ -227,7 +226,7 @@ void NewTaskDialog::init()
     taskdetail->buttonEnd->setDate( current );
 
     taskdetail->comboCategory->setCategories( todo.categories(), "Todo List", // No tr
-	tr("Todo List") );
+	tr("Tasks") );
 
     connect( taskdetail->checkDue, SIGNAL( clicked() ), this, SLOT( dueButtonToggled() ) );
     connect( taskdetail->comboStatus, SIGNAL( activated(int) ), this, SLOT( statusChanged() ) );
@@ -236,12 +235,17 @@ void NewTaskDialog::init()
     resize( 300, 300 );
 }
 
-void NewTaskDialog::dueButtonToggled()
+//void TaskDialog::resizeEvent(QResizeEvent *e)
+//{
+    //taskdetail->setFixedSize(-2*style().defaultFrameWidth() + e->size().width() - style().scrollBarExtent().width(), taskdetail->sizeHint().height());
+//}
+
+void TaskDialog::dueButtonToggled()
 {
     taskdetail->buttonDue->setEnabled( taskdetail->checkDue->isChecked() );
 }
 
-void NewTaskDialog::statusChanged()
+void TaskDialog::statusChanged()
 {
     PimTask::TaskStatus t = (PimTask::TaskStatus)taskdetail->comboStatus->currentItem();
 
@@ -267,21 +271,21 @@ void NewTaskDialog::statusChanged()
 /*
  *  Destroys the object and frees any allocated resources
  */
-NewTaskDialog::~NewTaskDialog()
+TaskDialog::~TaskDialog()
 {
     // no need to delete child widgets, Qt does it all for us
 }
-void NewTaskDialog::dueDateChanged( const QDate& /* date */ )
+void TaskDialog::dueDateChanged( const QDate& /* date */ )
 {
 }
 
-void NewTaskDialog::startDateChanged( const QDate& date )
+void TaskDialog::startDateChanged( const QDate& date )
 {
     if ( date > taskdetail->buttonEnd->date() )
 	taskdetail->buttonEnd->setDate( date );
 }
 
-void NewTaskDialog::endDateChanged( const QDate& date )
+void TaskDialog::endDateChanged( const QDate& date )
 {
     if ( date < taskdetail->buttonStart->date() )
 	taskdetail->buttonStart->setDate( date );
@@ -290,12 +294,12 @@ void NewTaskDialog::endDateChanged( const QDate& date )
 /*!
 */
 
-void NewTaskDialog::setCurrentCategory(int i)
+void TaskDialog::setCurrentCategory(int i)
 {
     taskdetail->comboCategory->setCurrentCategory(i);
 }
 
-PimTask NewTaskDialog::todoEntry()
+PimTask TaskDialog::todoEntry()
 {
     todo.setDescription( taskdetail->inputDescription->text() );
     todo.setPriority( (PimTask::PriorityValue) (taskdetail->comboPriority->currentItem() + 1) );
@@ -324,11 +328,17 @@ PimTask NewTaskDialog::todoEntry()
     todo.setCategories( taskdetail->comboCategory->currentCategories() );
 
     todo.setNotes( inputNotes->text() );
+#ifdef QTOPIA_DATA_LINKING
+    // XXX should load links here
+    QString links;
+    QDL::saveLinks( links, QDL::clients( inputNotes ) );
+    todo.setCustomField( QDL::DATA_KEY, links );
+#endif
 
     return todo;
 }
 
-void NewTaskDialog::show()
+void TaskDialog::show()
 {
     buttonclose = FALSE;
     QDialog::show();
@@ -337,13 +347,13 @@ void NewTaskDialog::show()
 /*!
 
 */
-void NewTaskDialog::closeEvent(QCloseEvent *e)
+void TaskDialog::closeEvent(QCloseEvent *e)
 {
 #ifdef QTOPIA_DESKTOP
     PimTask old(todo);
     if ( !buttonclose && old.toRichText() != todoEntry().toRichText() ) {
 	QString message = tr("Discard changes?");
-	switch( QMessageBox::warning(this, tr("Todo List"), message,
+	switch( QMessageBox::warning(this, tr("Tasks"), message,
 		QMessageBox::Yes, QMessageBox::No) ) {
 
 	    case QMessageBox::Yes:
@@ -361,13 +371,13 @@ void NewTaskDialog::closeEvent(QCloseEvent *e)
 #endif
 }
 
-void NewTaskDialog::reject()
+void TaskDialog::reject()
 {
     buttonclose = TRUE;
     QDialog::reject();
 }
 
-void NewTaskDialog::accept()
+void TaskDialog::accept()
 {
     buttonclose = TRUE;
     QDialog::accept();
@@ -376,12 +386,12 @@ void NewTaskDialog::accept()
 
 #ifdef QTOPIA_DESKTOP
 
-CategorySelect *NewTaskDialog::categorySelect()
+CategorySelect *TaskDialog::categorySelect()
 {
     return taskdetail->comboCategory;
 }
 
-void NewTaskDialog::updateCategories()
+void TaskDialog::updateCategories()
 {
     if ( !taskdetail->comboCategory )
 	return;

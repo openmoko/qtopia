@@ -1,18 +1,19 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -34,7 +35,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-//#define QTOPIA_DEBUG_OBEX
+#define QTOPIA_DEBUG_OBEX
 
 extern "C" { 
 #include "openobex/obex.h"
@@ -50,6 +51,7 @@ public:
 signals:
     void error();
     void statusMsg(const QString &);
+    void aboutToDelete();
 
 public slots:
     void abort();
@@ -102,6 +104,7 @@ void QObexBase::deleteMeLater()
 
 void QObexBase::deleteThis()
 {
+    emit aboutToDelete();
     delete this;
 }
 
@@ -119,11 +122,11 @@ void QObexBase::processInput()
 
     if ( aborted )
 	deleteMeLater();
-    else if ( finished )
+    if ( finished )
 	doPending();
 }
 
-static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 
 class QObexSender : public QObexBase
 {
@@ -142,7 +145,7 @@ private slots:
     void tryConnecting(); 
 
 private:
-    friend void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+    friend void qobex_sender_callback(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 
     enum State { Init, Connecting, Streaming,   
 		 Disconnecting, Error };
@@ -177,10 +180,11 @@ private:
 
 class QObexReceiver;
 
-static void qobex_server_callback(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+static void qobex_server_callback(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp);
 
 class QObexServer : public QObexBase
 {
+  friend void qobex_server_callback(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rs);
   Q_OBJECT;
 public:
   QObexServer( QObject *parent = 0, const char *name = 0 );
@@ -189,13 +193,19 @@ public:
 protected:
     void doPending();
 
+
+private slots:
+    void slotReceiving(bool);	
+    void sessionEnded();
+    void finishedReceive();
+
 signals:
     void receiving(bool);
-    void receiving( int size, const QString & name );
-    void received( const QString & name );
 
 private:
-    friend void qobex_server_callback(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rs);
+    QTimer *m_timer;
+    QObexReceiver *m_receiver;
+    bool m_receiving;
 
     void spawnReceiver( obex_t *handle );
 
@@ -209,7 +219,7 @@ private:
 
 
 
-static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp);
 
 class QObexReceiver : public QObexBase
 {
@@ -218,6 +228,11 @@ public:
     QObexReceiver( obex_t *handle, QObject *parent = 0, const char *name = 0 );
     ~QObexReceiver();
 
+    //a link error finish is a successful finish of a beamed file
+    //but terminates with a LINKERR message. some phones do this
+    //and create an obex session for each file they want to send
+   //sending a link error after each 
+    bool linkErrFinish() const { return m_linkErrFinish; }
 protected:
     void doPending();
 
@@ -225,10 +240,14 @@ signals:
     void receiving(bool);
     void receiving( int size, const QString & name, const QString & mime );
     void progress( int size );
-    void received( const QString & name, const QString & mime );
+    void fileComplete();
+    //void received( const QString & name, const QString & mime );
+    //there is no easy way to emit this signal inbetween sends without
+    //screwing devices like the S45 which are tempremental over timing
+    //don't need it anyway
 
 private:
-    friend void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+    friend void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp);
 
     enum State { Init, Connecting, Receiving,   
 		 Disconnecting, Finished, Error, Aborted };
@@ -242,6 +261,7 @@ private:
     QString filename;
     QString mimetype;
     int reclen;
+    bool m_linkErrFinish;
 
     QFile outfile;
 };
@@ -378,24 +398,32 @@ static bool transmitDone = FALSE;
 
 void QObexSender::doPending()
 {
-    //qDebug( "QObexSender::doPending %d", state );
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug( "QObexSender::doPending %d", state );
+#endif
 
     if ( state == Connecting ) {
-	//qDebug( "state Connecting" );
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug( "state Connecting" );
+#endif
 	// finished connecting; time to send
 
 	putFile( file_to_send, mime_to_send );
 	file_to_send = QString::null;
 
     } else if ( state == Streaming ) {
-	//qDebug( "state Streaming" );
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug( "state Streaming" );
+#endif
 	//finished streaming
 
 	obex_object_t *object = OBEX_ObjectNew(self, OBEX_CMD_DISCONNECT);
 	process( object );
 	state = Disconnecting;
     } else if ( state == Disconnecting ) {
-	//qDebug( "state Disconnecting" );
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug( "state Disconnecting" );
+#endif
 
 	OBEX_TransportDisconnect(self);
 	state = Init;
@@ -406,15 +434,23 @@ void QObexSender::doPending()
 }
 
 
-static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /* mode */ , gint event, gint obex_cmd, gint /* obex_rsp */)
+static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp)
 {
     QObexSender *sender = (QObexSender*)OBEX_GetUserData( handle );
 
-//    qDebug( "qobex_sender_callback %p, %p, %p, %d, event %x, cmd %x, rsp %x",
-//       sender, handle, obj, mode, event, obex_cmd, obex_rsp );
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug( "qobex_sender_callback %p, %p, %p, %d, event %x, cmd %x, rsp %x",
+       sender, handle, obj, mode, event, obex_cmd, obex_rsp );
+#else
+    Q_UNUSED(mode);
+    Q_UNUSED(obex_rsp);
+#endif
 
     switch (event) {
     case OBEX_EV_REQDONE:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_REQDONE");
+#endif
 	sender->finished = TRUE;
 	if ( obex_cmd == OBEX_CMD_DISCONNECT ) {
 	    transmitDone = TRUE;
@@ -423,6 +459,9 @@ static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /* mo
 	break;
 
     case OBEX_EV_LINKERR:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_LINKRER");
+#endif
 	// sometime we get a link error after we believed the connection was done.  Ignore this
 	// as emitting an error after done does not make sense
 	if ( !transmitDone ) {
@@ -431,24 +470,34 @@ static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /* mo
 	    sender->state = QObexSender::Error;
 	} else {
 	    sender->abort();
+#ifdef QTOPIA_DEBUG_OBEX
 	    qDebug("QIrServer:: got link error after done signal, no external signals sent");
+#endif
 	}
 	
 	break;
 
     case OBEX_EV_PROGRESS:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_PROGRESS");
+#endif
 	// report progress?
 	sender->updateProgress( obj );
 	break;
 
 	
     case OBEX_EV_STREAMEMPTY:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_STREAMEMPTY");
+#endif
 	// when streaming: add more
 	sender->feedStream( obj );
 	break;
 	
     default:
+#ifdef QTOPIA_DEBUG_OBEX
 	qDebug("qobex_sender_callback:: did not recongnize event signal %d", event);
+#endif
 	break;
     }
 }
@@ -458,7 +507,7 @@ QObexSender::QObexSender( QObject *parent, const char *name )
   :QObexBase( parent, name )
 {
 
-  self = OBEX_Init( OBEX_TRANS_IRDA, qobex_sender_callback, 0 );
+  self = OBEX_Init( OBEX_TRANS_IRDA, qobex_sender_callback, OBEX_FL_KEEPSERVER );
   finished = FALSE;
   state = QObexSender::Init;
   OBEX_SetUserData( self, this );
@@ -488,26 +537,34 @@ void QObexSender::tryConnecting()
 {
     connectCount++;
 
-    if ( aborted ) {
-	deleteMeLater();
+    if ( aborted ) { deleteMeLater();
 	return;
     }
 	
     int retc = IrOBEX_TransportConnect(self, "OBEX");
-    
+
     if ( retc < 0 ) {
+	const int normalTry = 5;
 	const int maxTry = 20;
 	if ( connectCount > maxTry ) {
 	    abort();
 	    emit error();
 	    deleteMeLater();
 	} else {
-	    QString str = tr("Beam failed (%1/%2). Retrying...","eg. 1/3").arg(connectCount).arg(maxTry);
+	    QString str;
+	    if ( connectCount <= normalTry )
+		str = tr("Searching...");
+	    else
+		str = tr("Beam failed (%1/%2). Retrying...","eg. 1/3").arg(connectCount).arg(maxTry);
 	    emit statusMsg( str );
-	    QTimer::singleShot( 500, this, SLOT(tryConnecting()) );
+	    // Semi-random retry time to avoid re-collision
+	    QTimer::singleShot(200 + rand()%400, this, SLOT(tryConnecting()) );
 	}
 	return;
     }
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug("QObexSender::tryConnecting() - Success");
+#endif
 
     QString str = tr("Sending...");
     emit statusMsg( str );
@@ -543,12 +600,18 @@ QObexServer::QObexServer( QObject *parent, const char *name )
     state = Init;
     OBEX_SetUserData( self, this );
 
-    if(OBEX_ServerRegister(self, "OBEX") < 0) {
+    // XXX To support OBEX other than IrDA, register those services here.
+    // XXX (somehow)
+
+    if(IrOBEX_ServerRegister(self, "OBEX") < 0) {
 	qWarning( "could not register server" );
 	state = Error;
     } else {
       connectSocket();
     }
+    m_receiver = 0;
+    m_receiving = FALSE;
+    m_timer = 0;
 }
 
 
@@ -566,32 +629,94 @@ void QObexServer::doPending()
 void QObexServer::spawnReceiver( obex_t *handle )
 {
     ASSERT( handle == self );
-    
-    // we emit this here, as doing in in QObexReceiver could cause race conditions
-    emit receiving( TRUE );
-    
-    QObexReceiver *receiver = new QObexReceiver( handle, this );
-    connect( receiver, SIGNAL(receiving(int, const QString&, const QString&)),
-	     parent(), SIGNAL(receiving(int, const QString&, const QString&)) );
-    connect( receiver, SIGNAL(progress(int)),
-	     parent(), SIGNAL(progress(int)) );
-    connect( receiver, SIGNAL(received(const QString&, const QString&)),
-	     parent(), SIGNAL(received(const QString&, const QString&)) );
-    
-    connect( receiver, SIGNAL(receiving(bool)), parent(), SLOT(receiving(bool)) );
 
-    connect( parent(), SIGNAL(abort()), receiver, SLOT(abort()) );
-    connect(receiver, SIGNAL(error()),
-	    parent(), SLOT(mError()) );
+    // we emit this here, as doing in in QObexReceiver could cause race conditions
+    
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug("QObexServer::spawnReceiver()");
+#endif
+    if( m_timer && m_timer->isActive() )
+	m_timer->stop(); // spawning a new receiver, don't timeout
+
+    m_receiver = new QObexReceiver( handle, this );
+
+    connect( m_receiver, SIGNAL(fileComplete()), parent(), SIGNAL(fileComplete()) );
+    connect( m_receiver, SIGNAL(aboutToDelete()), this, SLOT(sessionEnded()) );
+    connect( m_receiver, SIGNAL(receiving(int,const QString&,const QString&)),
+	     parent(), SIGNAL(receiving(int,const QString&,const QString&)) );
+    connect( m_receiver, SIGNAL(progress(int)),
+	     parent(), SIGNAL(progressReceive(int)) );
+    /* don't enable unless you know what you're doing
+    connect( m_receiver, SIGNAL(received(const QString&,const QString&)),
+	     parent(), SIGNAL(received(const QString&,const QString&)) );
+     */
+    
+    connect( m_receiver, SIGNAL(receiving(bool)), this, SLOT(slotReceiving(bool)) );
+    slotReceiving( TRUE );
+
+    connect( parent(), SIGNAL(abortReceive()), m_receiver, SLOT(abort()) );
+    connect( m_receiver, SIGNAL(error()), parent(), SLOT(rError()) );
     
 }
 
+void QObexServer::sessionEnded()
+{
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug("Receive Session Ended");
+#endif
+    if( m_receiver->linkErrFinish() ) { // session finished with a linkerr
+	//work around for Siemens S45
+	//if another receive session is not started within 5 seconds,
+	//assume there are no more files because there is no definite
+	//way to tell
+	if( !m_timer ) {
+	    m_timer = new QTimer( this );
+	    connect( m_timer, SIGNAL(timeout()), this, SLOT(finishedReceive()) );
+	}
+	m_timer->start( 3000 );
+    }
+}
 
+void QObexServer::finishedReceive()
+{
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug("finishedReceive");
+#endif
+    if( m_timer )
+	m_timer->stop();
+    m_receiving = FALSE;
+    emit receiving( FALSE );
+}
 
-static void qobex_server_callback(obex_t *handle, obex_object_t * /*object*/, gint /*mode*/, gint event, gint /*obex_cmd*/, gint /*obex_rsp*/)
+void QObexServer::slotReceiving( bool r )
+{
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug("QObexServer::slotReceiving( %s )", r ?"TRUE" : "FALSE");
+#endif
+    if( !r && m_receiving && m_receiver->linkErrFinish() ) {
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("LINK ERROR FINISH");
+#endif
+	 //finished a file successfully due to link error, may not be totally finished
+	r = TRUE;
+    }
+    if( m_receiving != r ) {
+	m_receiving = r;
+	emit receiving( r );
+    }
+}
+
+static void qobex_server_callback(obex_t *handle, obex_object_t * object, int mode, int event, int obex_cmd, int obex_rsp)
 {
 
-    //    qDebug( "qobex_server_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug( "qobex_server_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
+#else
+    Q_UNUSED(object);
+    Q_UNUSED(obex_cmd);
+    Q_UNUSED(obex_rsp);
+#endif
+    Q_UNUSED(mode);
 
     QObexServer* server = 
 	(QObexServer*)OBEX_GetUserData( handle );
@@ -599,7 +724,9 @@ static void qobex_server_callback(obex_t *handle, obex_object_t * /*object*/, gi
     switch (event)        {
     case OBEX_EV_ACCEPTHINT:
 	{
-	    //qDebug( "#####------ OBEX_EV_ACCEPTHINT ------########" );
+#ifdef QTOPIA_DEBUG_OBEX
+	    qDebug( "#####------ OBEX_EV_ACCEPTHINT ------########" );
+#endif
 
 	    server->spawnReceiver( handle );
 	}
@@ -624,8 +751,8 @@ static void qobex_server_callback(obex_t *handle, obex_object_t * /*object*/, gi
 QObexReceiver::QObexReceiver( obex_t *handle, QObject *parent, const char *name )
   :QObexBase( parent, name )
 {
-
     state = Error; reclen = 0;
+    m_linkErrFinish = FALSE;
 
     state = Receiving;
     self = OBEX_ServerAccept( handle, qobex_receiver_callback,
@@ -660,7 +787,7 @@ void QObexReceiver::getHeaders( obex_object_t *object )
 {
     uchar hi;
     obex_headerdata_t hv;
-    guint32 hv_size;
+    unsigned int hv_size;
     while(OBEX_ObjectGetNextHeader(self, object, &hi, &hv, &hv_size))	{
 
 	switch ( hi ) {
@@ -715,9 +842,11 @@ void QObexReceiver::getHeaders( obex_object_t *object )
 
 void QObexReceiver::readData( obex_object_t *object )
 {
+    const uchar* buf;
+    int len = OBEX_ObjectReadStream( self, object, &buf );
+
     if ( filename.isEmpty() ) {
 	getHeaders( object );
-
 
 	int slash = filename.find( '/', -1 );
 	if ( slash > 0 ) {
@@ -725,39 +854,63 @@ void QObexReceiver::readData( obex_object_t *object )
 	}
 
 	if ( mimetype.isNull() ) {
-	    MimeType mt(filename);
-	    mimetype = mt.id();
-	}
+	    QString ext = filename.mid( filename.findRev( '.', -1 )+1 ).lower();
+	    if( ext == "vcs" ) {
+		mimetype = "text/x-vCalendar";
+	    } else if( ext == "vcf" ) {
+		mimetype = "text/x-vCard";
+	    } else {
+		MimeType mt(filename);
+		mimetype = mt.id();
+	    }
+	} 
 
-	emit receiving( reclen, filename, mimetype );
-
-	mkdir( "/tmp/obex", 0755 );
-	system( "rm -rf /tmp/obex/*" );
-	
 	if ( filename.isEmpty() )
 	    filename = "unnamed"; // No tr
-	filename = "/tmp/obex/" + filename;
+
+	
+	for( int i = 0 ; i < (int)filename.length() ; ++i)
+	    if( filename[i] != '.' && 
+			    (filename[i].isPunct() || filename[i].isSpace()) )
+		filename[i] = '_'; //ensure it's something valid
+
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("emit receiving( %d, %s, %s )", reclen, filename.latin1(), mimetype.latin1());
+#endif
+	emit receiving( reclen, filename, mimetype );
+
+	filename = "/tmp/obex/in/" + filename;
 	
 	outfile.setName( filename );
-	outfile.open( IO_WriteOnly );
+	if( !outfile.open( IO_WriteOnly ) )
+	    qWarning("Unable to open file %s for IR receive", filename.latin1());
 
-    }
-
-
-    const uchar* buf;
-    int len = OBEX_ObjectReadStream( self, object, &buf );
-
+    } 
     if ( len > 0 ) {
-	outfile.writeBlock( (const char*)buf, len );
+	if( outfile.isOpen() ) // if unable to open outfile don't write to it
+	    outfile.writeBlock( (const char*)buf, len );
     } else if ( len == 0 ) {
 	outfile.close();
-
-	emit received( outfile.name(), mimetype );
+	filename = QString::null;
+	emit fileComplete();
     } else {
 	qWarning( "ERROR reading stream" );
 	emit error();
+	filename = QString::null;
+	outfile.close();
     }
     finished = ( len <= 0 );
+}
+
+void QIrServer::clean()
+{
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug("QIrServer::clean");
+#endif
+    //just blow it all away and recreate the dir
+    system("rm -rf /tmp/obex/in/*");
+    mkdir( "/tmp/obex", 0755 );
+    mkdir( "/tmp/obex/in", 0755 );
 }
 
 void QObexReceiver::updateProgress( obex_object_t * /* obj */)
@@ -766,32 +919,53 @@ void QObexReceiver::updateProgress( obex_object_t * /* obj */)
 }
 
 
-static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint /*mode*/, gint event, gint obex_cmd, gint /*obex_rsp*/ )
+static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp )
 {
-//    qDebug( "qobex_receiver_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug( "qobex_receiver_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
+#else
+    Q_UNUSED(obex_rsp);
+#endif
+    Q_UNUSED(mode);
+
     QObexReceiver* receiver = 
 	(QObexReceiver*)OBEX_GetUserData( handle );
 
     switch (event)        {
 
     case OBEX_EV_STREAMAVAIL:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_STREAMAVAIL");
+#endif
 	receiver->readData( object );
 	break;
     case OBEX_EV_PROGRESS:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_PROGRESS");
+#endif
 	receiver->updateProgress( object );
 	// report progress
 	break;
 
     case OBEX_EV_REQ:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_REQ");
+#endif
 	/* An incoming request */
 	switch(obex_cmd) {
 	case OBEX_CMD_CONNECT:
 	case OBEX_CMD_DISCONNECT:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("\tOBEX_CMD_CONNECT|OBEX_CMD_DISCONNECT");
+#endif
 	    /* Dont need to do anything here.
 	       Response is already set to
 	       success by OBEX_EV_REQHINT event */
 	    break;
 	case OBEX_CMD_PUT:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("\tOBEX_CMD_PUT");
+#endif
 	    //We do it all in STREAMAVAIL 
 	    //receiver->handlePut(object);
 	    break;
@@ -800,17 +974,26 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint 
 
     case OBEX_EV_ACCEPTHINT:
 
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_ACCEPTHINT");
+#endif
 	//qFatal( " OBEX_EV_ACCEPTHINT in receiver" );
 	OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED,
 			  OBEX_RSP_NOT_IMPLEMENTED);
 	break;
 
     case OBEX_EV_REQHINT:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_REQHINT");
+#endif
 
 	/* A new request is coming in */
 	switch(obex_cmd) {
 	    /* Accept some commands! */
 	case OBEX_CMD_PUT:
+#ifdef QTOPIA_DEBUG_OBJEX
+	    qDebug("\tOBEX_CMD_PUT");
+#endif
 	    OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 	//turn on streaming...
 	    OBEX_ObjectReadStream(handle, object, NULL);
@@ -819,10 +1002,16 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint 
 
 	case OBEX_CMD_CONNECT:
 	case OBEX_CMD_DISCONNECT:
+#ifdef QTOPIA_DEBUG_OBJEX
+	    qDebug("\tOBEX_CMD_CONNECT|OBEX_CMD_DISCONNECT");
+#endif
 	    OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 	    break;
                 
 	default:
+#ifdef QTOPIA_DEBUG_OBJEX
+	    qDebug("OBEX_CMD_UNKNOWN");
+#endif
 	    /* Reject any other commands */                       
 	    OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED,
 			      OBEX_RSP_NOT_IMPLEMENTED);
@@ -832,6 +1021,9 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint 
 	break;
 
     case OBEX_EV_REQDONE:
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_REQDONE");
+#endif
 	if(obex_cmd == OBEX_CMD_DISCONNECT) {
 
 	    receiver->state = QObexReceiver::Finished;
@@ -842,12 +1034,21 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint 
 	break;
 
     case OBEX_EV_LINKERR:
-	// just treat is as finished. SOme mobile phones behave this way.
-	    receiver->state = QObexReceiver::Finished;
-	    receiver->finished = TRUE;
-	    // Disconnect transport:
-	    OBEX_TransportDisconnect( handle );
-	/* Not good */
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("OBEX_EV_LINKERR");
+#endif
+	if ( !receiver->reclen || receiver->reclen == (int)receiver->outfile.size() ) {
+	    // just treat is as finished. Some mobile phones behave this way.
+	    if( receiver->reclen ) {
+		receiver->m_linkErrFinish = TRUE;
+	    }
+	    receiver->state = QObexReceiver::Finished; 
+	} else {
+	    receiver->state = QObexReceiver::Error;
+	}
+	receiver->finished = TRUE;
+	// Disconnect transport:
+	OBEX_TransportDisconnect( handle );
 	break;
 
     default:
@@ -858,8 +1059,16 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint 
 
 void QObexReceiver::doPending()
 {
-    if ( state == Finished ) {
-	deleteMeLater();
+    if ( state == Finished || state == Error ) {
+	if ( !aborted ) {
+	    deleteMeLater();
+	    if ( state == Error ) {
+		emit error();
+	    }
+	}
+#ifdef QTOPIA_DEBUG_OBEX
+	qDebug("emitting receiving( FALSE ) from doPending");
+#endif
 	emit receiving(FALSE);
     }
 }
@@ -870,10 +1079,12 @@ void QObexReceiver::doPending()
 QIrServer::QIrServer( QObject *parent, const char *name )
     :QObject( parent, name )
 {
-    QObexServer *ob = new QObexServer( this );
-    connect(ob, SIGNAL(receiving(bool)), this, SLOT(receiving(bool)) );
+    QObexServer* server = new QObexServer( this );
+    connect(server, SIGNAL(receiving(bool)), this, SLOT(receiving(bool)) );
+    bip = rip = FALSE;
 
-    _state = Ready;
+    clean();
+    needClean = FALSE;
 }
 
 QIrServer::~QIrServer()
@@ -882,22 +1093,24 @@ QIrServer::~QIrServer()
 
 void QIrServer::beam( const QString& filename, const QString& mimetype )
 {
-    if ( _state != Ready ) {
+    if ( bip ) {
 	qDebug("QIrServer not ready, beaming disallowed");
 	emit beamError();
 	return;
     }
-//    qDebug("beaming %s", filename.data() );
-    _state = Beaming;
+#ifdef QTOPIA_DEBUG_OBEX
+    qDebug("beaming %s (type %s)", filename.data(), mimetype.latin1() );
+#endif
+    bip = TRUE;
     
     QObexSender *sender = new QObexSender( this );
 
-    connect( this, SIGNAL(abort()), sender, SLOT(abort()) );
+    connect( this, SIGNAL(abortBeam()), sender, SLOT(abort()) );
     
-    connect( sender, SIGNAL(done()), this, SLOT(mDone()) );
-    connect( sender, SIGNAL(error()), this, SLOT(mError()) );
-    connect( sender, SIGNAL(statusMsg(const QString &)), this, SIGNAL(statusMsg(const QString &)) );
-    connect( sender, SIGNAL(progress(int)), this, SIGNAL( progress(int) ) );
+    connect( sender, SIGNAL(done()), this, SLOT(bDone()) );
+    connect( sender, SIGNAL(error()), this, SLOT(bError()) );
+    connect( sender, SIGNAL(statusMsg(const QString&)), this, SIGNAL(statusMsg(const QString&)) );
+    connect( sender, SIGNAL(progress(int)), this, SIGNAL( progressSend(int) ) );
     
     sender->beam( filename, mimetype );
     
@@ -906,44 +1119,60 @@ void QIrServer::beam( const QString& filename, const QString& mimetype )
 
 void QIrServer::receiving(bool b)
 {
-    State old = _state;
-    
-    if ( b )
-	_state = Receiving;
-    else
-	_state = Ready;
-    
-    // no nice way of initializing the first receive call.  avoid sending more than one receiveInit call
-    if ( _state != old && _state == Receiving)
-	emit receiveInit();
+    if ( rip != b ) {
+	rip = b;
+
+	if ( rip ) {
+	    emit receiveInit();
+	} else {
+	    emit receiveDone();
+	}
+#ifdef QTOPIA_DEBUG_OBEX
+	    qDebug("QIrServer::receiving(%s)", b ? "TRUE" : "FALSE");
+#endif
+	if( b && needClean ) {
+	    clean();
+	    needClean = FALSE;
+	}
+	if( !b ) // after change to not receiving, need to clean next time receiving
+	    needClean = TRUE;
+    }
 }
 
-void QIrServer::mDone()
+void QIrServer::rError()
 {
-    _state = Ready;
+    rip = FALSE;
+    emit receiveError();
+}
+
+void QIrServer::bDone()
+{
+    bip = FALSE;
     emit beamDone();
 }
 
-void QIrServer::mError()
+void QIrServer::bError()
 {
-    State old = _state;
-    _state = Ready;
-    
-    if ( old == Beaming )
-        emit beamError();
-    else if ( old == Receiving )
-	emit receiveError();
-    else
-	qDebug("QIrServer::got error after we though connection was completed");
+    bip = FALSE;
+    emit beamError();
 }
 
-void QIrServer::cancel()
+void QIrServer::cancelBeam()
 {
     // internal signal
-    emit abort();
+    emit abortBeam();
     
     //external (this goes to qir)
-    mError();
+    bError();
+}
+
+void QIrServer::cancelReceive()
+{
+    // internal signal
+    emit abortReceive();
+    
+    //external (this goes to qir)
+    rError();
 }
 
 void QIrServer::setReceivingEnabled( bool )

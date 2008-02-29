@@ -6,7 +6,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:28:13 1999
- * CVS ID:        $Id: irobex.c,v 1.12 2000/12/01 13:13:07 pof Exp $
+ * CVS ID:        $Id: irobex.c,v 1.16 2002/11/22 19:06:09 holtmann Exp $
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
@@ -28,7 +28,9 @@
  *     
  ********************************************************************/
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifdef HAVE_IRDA
 
@@ -40,6 +42,7 @@
 #else /* _WIN32 */
 /* Linux case */
 
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>		/* perror */
@@ -60,6 +63,28 @@
 
 
 /*
+ * Function irobex_no_addr (addr)
+ *
+ *    Check if the address is not valid for connection
+ *
+ */
+static inline int irobex_no_addr(struct sockaddr_irda *addr)
+{
+#ifndef _WIN32
+	return((addr->sir_addr == 0x0) || (addr->sir_addr == 0xFFFFFFFF));
+#else
+	return( ((addr->irdaDeviceID[0] == 0x00) &&
+		 (addr->irdaDeviceID[1] == 0x00) &&
+		 (addr->irdaDeviceID[2] == 0x00) &&
+		 (addr->irdaDeviceID[3] == 0x00)) ||
+		((addr->irdaDeviceID[0] == 0xFF) &&
+		 (addr->irdaDeviceID[1] == 0xFF) &&
+		 (addr->irdaDeviceID[2] == 0xFF) &&
+		 (addr->irdaDeviceID[3] == 0xFF)) );
+#endif /* _WIN32 */
+}
+
+/*
  * Function irobex_prepare_connect (self, service)
  *
  *    Prepare for IR-connect
@@ -76,21 +101,13 @@ void irobex_prepare_connect(obex_t *self, const char *service)
 }
 
 /*
- * Function irobex_listen (self)
+ * Function irobex_prepare_listen (self, service)
  *
- *    Listen for incoming connections.
+ *    Prepare for IR-listen
  *
  */
-gint irobex_listen(obex_t *self, const char *service)
+void irobex_prepare_listen(obex_t *self, const char *service)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
-
-	self->serverfd = obex_create_socket(self, AF_IRDA);
-	if(self->serverfd < 0) {
-		DEBUG(0, G_GNUC_FUNCTION "() Error creating socket\n");
-		return -1;
-	}
-	
 	/* Bind local service */
 	self->trans.self.irda.sir_family = AF_IRDA;
 
@@ -103,11 +120,29 @@ gint irobex_listen(obex_t *self, const char *service)
 #ifndef _WIN32
 	self->trans.self.irda.sir_lsap_sel = LSAP_ANY;
 #endif /* _WIN32 */
+}
 
+/*
+ * Function irobex_listen (self)
+ *
+ *    Listen for incoming connections.
+ *
+ */
+int irobex_listen(obex_t *self)
+{
+	DEBUG(3, "\n");
+
+	self->serverfd = obex_create_socket(self, AF_IRDA);
+	DEBUG(4,"%p: created serverfd %d",self,self->serverfd);
+	if(self->serverfd < 0) {
+		DEBUG(0, "Error creating socket\n");
+		return -1;
+	}
+	
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.irda, 
 		 sizeof(struct sockaddr_irda)))
 	{
-		DEBUG(0, G_GNUC_FUNCTION "() Error doing bind\n");
+		DEBUG(0, "Error doing bind\n");
 		goto out_freesock;
 	}
 
@@ -134,15 +169,16 @@ gint irobex_listen(obex_t *self, const char *service)
 #endif /* _WIN32 */
 
 	if (listen(self->serverfd, 1)) {
-		DEBUG(0, G_GNUC_FUNCTION "() Error doing listen\n");
+		DEBUG(0, "Error doing listen\n");
 		goto out_freesock;
 	}
 
-	DEBUG(4, G_GNUC_FUNCTION "() We are now listening for connections\n");
+	DEBUG(4, "We are now listening for connections\n");
 	return 1;
 
 out_freesock:
 	obex_delete_socket(self, self->serverfd);
+	DEBUG(4,"%p: deleted serverfd %d",self,self->serverfd);
 	self->serverfd = -1;
 	return -1;
 }
@@ -155,19 +191,26 @@ out_freesock:
  * Note : don't close the server socket here, so apps may want to continue
  * using it...
  */
-gint irobex_accept(obex_t *self)
+int irobex_accept(obex_t *self)
 {
 	int addrlen = sizeof(struct sockaddr_irda);
 	int mtu;
 	int len = sizeof(int);
+	int flags;
 
 	// First accept the connection and get the new client socket.
 	self->fd = accept(self->serverfd, (struct sockaddr *) &self->trans.peer.irda,
  			  &addrlen);
+	DEBUG(4,"%p: accept fd=%d from serverfd=%d\n",self,self->fd,self->serverfd);
 
 	if (self->fd < 0) {
 		return -1;
 	}
+
+	// Needed to prevent receiver block when two devices
+	// sending and receiving simultaneously (fails).
+	flags = fcntl(self->fd, F_GETFL, 0);
+	fcntl(self->fd, F_SETFL, flags | O_NONBLOCK);
 
 #ifndef _WIN32
 	/* Check what the IrLAP data size is */
@@ -177,7 +220,7 @@ gint irobex_accept(obex_t *self)
 		return -1;
 	}
 	self->trans.mtu = mtu;
-	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
+	DEBUG(3, "transport mtu=%d\n", mtu);
 #else
 	self->trans.mtu = OBEX_DEFAULT_MTU;
 #endif /* _WIN32 */
@@ -198,7 +241,7 @@ gint irobex_accept(obex_t *self)
  * is done "the right way", so that it's safe and we don't leak memory...
  * Jean II
  */
-static gint irobex_discover_devices(obex_t *self)
+static int irobex_discover_devices(obex_t *self)
 {
 	struct irda_device_list *	list;
 	unsigned char		buf[DISC_BUF_LEN];
@@ -299,76 +342,9 @@ static gint irobex_discover_devices(obex_t *self)
 #endif /* _WIN32 */
 
 	if(ret <  0)
-		DEBUG(1, G_GNUC_FUNCTION "(), didn't find any OBEX devices!\n");
+		DEBUG(1, "didn't find any OBEX devices!\n");
 	return(ret);
 }
-
-#if 0
-/* Deprecated by the above function. */
-/*
- * Function irobex_discover_devices (fd)
- *
- *    Try to discover some remote device(s) that we can connect to
- *
- */
-static gint irobex_discover_devices(obex_t *self)
-{
-	struct irda_device_list *list;
-	unsigned char *buf;
-	int len;
-	int i, ret = -1;
-
-	len = sizeof(struct irda_device_list) -
-		sizeof(struct irda_device_info) +
-		sizeof(struct irda_device_info) * MAX_DEVICES;
-
-	buf = g_malloc(len);
-	if(buf == NULL)
-		return -1;
-
-	list = (struct irda_device_list *) buf;
-	
-	if (getsockopt(self->fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
-		g_free(buf);
-		return -1;
-	}
-
-
-#ifndef _WIN32
-	if (len > 0) {
-		DEBUG(1, "Discovered: (list len=%d)\n", list->len);
-
-		for (i=0;i<list->len;i++) {
-			DEBUG(1, "  name:  %s\n", list->dev[i].info);
-			DEBUG(1, "  daddr: %08x\n", list->dev[i].daddr);
-			DEBUG(1, "  saddr: %08x\n", list->dev[i].saddr);
-			DEBUG(1, "\n");
-			
-			self->trans.peer.irda.sir_addr = list->dev[i].daddr;
-			self->trans.self.irda.sir_addr = list->dev[i].saddr;
-			ret = 0;
-		}
-	}
-#else
-	if (len > 0) {
-		DEBUG(1, "Discovered: (list len=%d)\n", list->numDevice);
-
-		for (i=0; i<(int)list->numDevice; i++) {
-			DEBUG(1, "  name:  %s\n", list->Device[i].irdaDeviceName);
-			DEBUG(1, "  daddr: %08x\n", list->Device[i].irdaDeviceID);
-			memcpy(&self->trans.peer.irda.irdaDeviceID[0], &list->Device[i].irdaDeviceID[0], 4);
-			ret = 0;
-		}
-	}
-
-#endif /* _WIN32 */
-
-	if(ret <  0)
-		DEBUG(1, G_GNUC_FUNCTION "(), didn't find any OBEX devices!\n");
-	g_free(buf);
-	return ret;
-}
-#endif /* 0 */
 
 /*
  * Function irobex_irda_connect_request (self)
@@ -376,30 +352,36 @@ static gint irobex_discover_devices(obex_t *self)
  *    Open the TTP connection
  *
  */
-gint irobex_connect_request(obex_t *self)
+int irobex_connect_request(obex_t *self)
 {
 	int mtu = 0;
 	int len = sizeof(int);
 	int ret;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 
 	if(self->fd < 0)	{
 		self->fd = obex_create_socket(self, AF_IRDA);
+	DEBUG(4,"%p: created fd=%d\n",self,self->fd);
 		if(self->fd < 0)
 			return -1;
 	}
 
-	ret = irobex_discover_devices(self);
-	if (ret < 0)	{
-		DEBUG(1, G_GNUC_FUNCTION "() No devices in range\n");
-		goto out_freesock;
+	/* Check if the application did supply a valid address.
+	 * You need to use OBEX_TransportConnect() for that. Jean II */
+	if(irobex_no_addr(&self->trans.peer.irda)) {
+		/* Nope. Go find one... */
+		ret = irobex_discover_devices(self);
+		if (ret < 0)	{
+			DEBUG(1, "No devices in range\n");
+			goto out_freesock;
+		}
 	}
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.irda,
 		      sizeof(struct sockaddr_irda));
 	if (ret < 0) {
-		DEBUG(4, G_GNUC_FUNCTION "(), ret=%d\n", ret);
+		DEBUG(4, "ret=%d\n", ret);
 		goto out_freesock;
 	}
 
@@ -415,12 +397,13 @@ gint irobex_connect_request(obex_t *self)
 #endif
 	self->trans.mtu = mtu;
 
-	DEBUG(2, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
+	DEBUG(2, "transport mtu=%d\n", mtu);
 	
 	return 1;
 
 out_freesock:
 	obex_delete_socket(self, self->fd);
+	DEBUG(4,"%p: deleted fd=%d\n",self,self->fd);
 	self->fd = -1;
 	return ret;	
 }
@@ -431,11 +414,12 @@ out_freesock:
  *    Shutdown the IrTTP link
  *
  */
-gint irobex_disconnect_request(obex_t *self)
+int irobex_disconnect_request(obex_t *self)
 {
-	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int ret;
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->fd);
+	DEBUG(4,"%p: deleted fd=%d\n",self,self->fd);
 	if(ret < 0)
 		return ret;
 	self->fd = -1;
@@ -450,11 +434,12 @@ gint irobex_disconnect_request(obex_t *self)
  * Used when we start handling a incomming request, or when the
  * client just want to quit...
  */
-gint irobex_disconnect_server(obex_t *self)
+int irobex_disconnect_server(obex_t *self)
 {
-	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int ret;
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
+	DEBUG(4,"%p: deleted serverfd=%d\n",self,self->serverfd);
 	self->serverfd = -1;
 	return ret;	
 }

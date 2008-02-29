@@ -28,8 +28,6 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
-const char *audio_device = "/dev/dsp";
-
 #define AUDIO_BLOCK_SIZE 4096
 
 typedef struct {
@@ -39,17 +37,20 @@ typedef struct {
     int frame_size; /* in bytes ! */
     int codec_id;
     int flip_left : 1;
-    UINT8 buffer[AUDIO_BLOCK_SIZE];
+    uint8_t buffer[AUDIO_BLOCK_SIZE];
     int buffer_ptr;
 } AudioData;
 
-static int audio_open(AudioData *s, int is_output)
+static int audio_open(AudioData *s, int is_output, const char *audio_device)
 {
     int audio_fd;
     int tmp, err;
     char *flip = getenv("AUDIO_FLIP_LEFT");
 
     /* open linux audio device */
+    if (!audio_device)
+        audio_device = "/dev/dsp";
+
     if (is_output)
         audio_fd = open(audio_device, O_WRONLY);
     else
@@ -155,7 +156,7 @@ static int audio_write_header(AVFormatContext *s1)
     st = s1->streams[0];
     s->sample_rate = st->codec.sample_rate;
     s->channels = st->codec.channels;
-    ret = audio_open(s, 1);
+    ret = audio_open(s, 1, NULL);
     if (ret < 0) {
         return -EIO;
     } else {
@@ -164,7 +165,7 @@ static int audio_write_header(AVFormatContext *s1)
 }
 
 static int audio_write_packet(AVFormatContext *s1, int stream_index,
-                              UINT8 *buf, int size, int force_pts)
+                              const uint8_t *buf, int size, int64_t pts)
 {
     AudioData *s = s1->priv_data;
     int len, ret;
@@ -217,7 +218,7 @@ static int audio_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     s->sample_rate = ap->sample_rate;
     s->channels = ap->channels;
 
-    ret = audio_open(s, 0);
+    ret = audio_open(s, 0, ap->device);
     if (ret < 0) {
         av_free(st);
         return -EIO;
@@ -243,6 +244,18 @@ static int audio_read_packet(AVFormatContext *s1, AVPacket *pkt)
     if (av_new_packet(pkt, s->frame_size) < 0)
         return -EIO;
     for(;;) {
+        struct timeval tv;
+        fd_set fds;
+
+        tv.tv_sec = 0;
+        tv.tv_usec = 30 * 1000; /* 30 msecs -- a bit shorter than 1 frame at 30fps */
+
+        FD_ZERO(&fds);
+        FD_SET(s->fd, &fds);
+
+        /* This will block until data is available or we get a timeout */
+        (void) select(s->fd + 1, &fds, 0, 0, &tv);
+
         ret = read(s->fd, pkt->data, pkt->size);
         if (ret > 0)
             break;

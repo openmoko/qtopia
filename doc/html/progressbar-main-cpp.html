@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -30,7 +32,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/progressbar/progressbar.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/progressbar/progressbar.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -76,7 +78,7 @@ protected slots:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/progressbar/progressbar.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/progressbar/progressbar.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -132,11 +134,11 @@ ProgressBar::ProgressBar( <a href="qwidget.html">QWidget</a> *parent, const char
     toplayout-&gt;<a href="qgridlayout.html#92faca">addMultiCellWidget</a>( progress, 1, 1, 0, 1 );
 
     // connect the clicked() SIGNALs of the pushbuttons to SLOTs
-    <a href="qobject.html#7f8e37">connect</a>( start, SIGNAL( <a href="qbuttongroup.html#c8e107">clicked</a>() ), this, SLOT( <a href=#307>slotStart</a>() ) );
-    <a href="qobject.html#7f8e37">connect</a>( reset, SIGNAL( <a href="qbuttongroup.html#c8e107">clicked</a>() ), this, SLOT( <a href=#308>slotReset</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( start, SIGNAL( <a href="qbuttongroup.html#c8e107">clicked</a>() ), this, SLOT( <a href=#128>slotStart</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( reset, SIGNAL( <a href="qbuttongroup.html#c8e107">clicked</a>() ), this, SLOT( <a href=#129>slotReset</a>() ) );
 
     // connect the timeout() SIGNAL of the progress-timer to a SLOT
-    <a href="qobject.html#7f8e37">connect</a>( &amp;timer, SIGNAL( timeout() ), this, SLOT( <a href=#309>slotTimeout</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( &amp;timer, SIGNAL( timeout() ), this, SLOT( <a href=#130>slotTimeout</a>() ) );
 
     // Let's start with normal speed...
     normal-&gt;setChecked( TRUE );
@@ -153,7 +155,7 @@ ProgressBar::ProgressBar( <a href="qwidget.html">QWidget</a> *parent, const char
  * button
  */
 
-void <a name="307"></a>ProgressBar::slotStart()
+void <a name="128"></a>ProgressBar::slotStart()
 {
     // If the progress bar is at the beginning...
     if ( progress-&gt;progress() == -1 ) {
@@ -192,7 +194,7 @@ void <a name="307"></a>ProgressBar::slotStart()
  * This SLOT is called when the user clicks the reset button
  */
 
-void <a name="308"></a>ProgressBar::slotReset()
+void <a name="129"></a>ProgressBar::slotReset()
 {
     // stop the timer and progress
     timer.stop();
@@ -218,7 +220,7 @@ void <a name="308"></a>ProgressBar::slotReset()
  * active (== progress is running)
  */
 
-void <a name="309"></a>ProgressBar::slotTimeout()
+void <a name="130"></a>ProgressBar::slotTimeout()
 {
     int p = progress-&gt;progress();
 
@@ -242,7 +244,7 @@ void <a name="309"></a>ProgressBar::slotTimeout()
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/progressbar/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/progressbar/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -269,5 +271,5 @@ int main(int argc,char **argv)
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

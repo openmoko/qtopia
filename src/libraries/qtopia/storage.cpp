@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -19,9 +34,8 @@
 **********************************************************************/
 
 #include <qtopia/storage.h>
-#ifdef QT_QWS_CUSTOM
+#include <qtopia/config.h>
 #include <qtopia/custom.h>
-#endif
 
 #include <qtimer.h>
 #include <qfile.h>
@@ -38,9 +52,9 @@
 #include <unistd.h>
 #include <sys/vfs.h>
 #include <mntent.h>
-#else
-#include <qdir.h>
 #endif
+
+#include <qdir.h>
 
 #include <qstringlist.h>
 
@@ -91,8 +105,8 @@ StorageInfo::StorageInfo( QObject *parent )
     mFileSystems.setAutoDelete( TRUE );
 #ifndef QT_NO_COP
     channel = new QCopChannel( "QPE/Card", this );
-    connect( channel, SIGNAL(received(const QCString &, const QByteArray &)),
-	     this, SLOT(cardMessage( const QCString &, const QByteArray &)) );
+    connect( channel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(cardMessage(const QCString&,const QByteArray&)) );
 #endif
     update();
 }
@@ -167,6 +181,8 @@ void StorageInfo::update()
     struct mntent *me;
     FILE *mntfp = setmntent( "/etc/mtab", "r" );
 
+    Config cfg("Storage");
+
     QStringList curdisks;
     QStringList curopts;
     QStringList curfs;
@@ -175,15 +191,26 @@ void StorageInfo::update()
     if ( mntfp ) {
 	while ( (me = getmntent( mntfp )) != 0 ) {
 	    QString fs = me->mnt_fsname;
-	    if ( fs.left(7)=="/dev/hd" || fs.left(7)=="/dev/sd"
+	    bool relevant = FALSE;
+	    if ( cfg.isValid() ) {
+		cfg.setGroup(fs);
+		relevant = !cfg.readEntry("Name").isEmpty();
+	    } else {
+		relevant = fs.left(7)=="/dev/hd" || fs.left(7)=="/dev/sd"
 		    || fs.left(8) == "/dev/ram"
 		    || fs.left(8) == "/dev/mtd"
 		    || fs.left(9) == "/dev/mmcd"
+		    || fs.left(14) == "/dev/mmc/part1"
+		    || fs.left(9) == "/dev/root"
+		    // deliberately leaving of tmpfs, as it isn't an install location or file location, rather a mapping for /tmp.
+		    // may change later.
+		    // || fs.left(5)=="tmpfs"
 			    // "which-qtopia" may be running off the SD card
 			    && (QString(me->mnt_dir)!="/home/QtPalmtop"
-			        && QString(me->mnt_dir)!="/opt/Qtopia")
-		)
-	    {
+			        && QString(me->mnt_dir)!="/opt/Qtopia");
+	    }
+
+	    if ( relevant ) {
 		n++;
 		curdisks.append(fs);
 		curopts.append( me->mnt_opts );
@@ -202,7 +229,7 @@ void StorageInfo::update()
 	}
 	endmntent( mntfp );
     }
-    if ( rebuild || n != (int)mFileSystems.count() ) {
+    if ( rebuild || n == 0 || n != (int)mFileSystems.count() ) {
 	mFileSystems.clear();
 	QStringList::ConstIterator it=curdisks.begin();
 	QStringList::ConstIterator fsit=curfs.begin();
@@ -212,7 +239,11 @@ void StorageInfo::update()
 
 	    QString humanname=*it;
 	    bool removable = FALSE;
-	    if ( isCF(humanname) ) {
+	    if ( cfg.isValid() ) {
+		cfg.setGroup(*it);
+		humanname = cfg.readEntry("Name",humanname);
+		removable = cfg.readBoolEntry("Removable",FALSE);
+	    } else if ( isCF(humanname) ) {
 		humanname = tr("CF Card");
 		removable = TRUE;
 	    } else if ( humanname == "/dev/hda1" ) {
@@ -230,22 +261,26 @@ void StorageInfo::update()
 		humanname = tr("Internal Storage") + " " + humanname.mid(14);
 	    else if ( humanname.left(13) == "/dev/mtdblock" )
 		humanname = tr("Internal Storage") + " " + humanname.mid(13);
+	    else if ( humanname.left(9) == "/dev/root" )
+		humanname = tr("Internal Storage") + " " + humanname.mid(9);
 	    else if ( humanname.left(8) == "/dev/ram" )
 		humanname = tr("RAM disk") + " " + humanname.mid(8);
 	    FileSystem *fs = new FileSystem( *it, *fsit, humanname, removable, opts );
 	    mFileSystems.append( fs );
 	}
+#endif
+	// Sanity check (but better to just supply Storage.conf)
+	if (mFileSystems.count() == 0) {
+	    FileSystem *fs = new FileSystem( "/dev/hda1",
+		QDir::homeDirPath(), tr("Internal Storage"), FALSE, "");
+	    mFileSystems.append( fs );    
+	}
 	emit disksChanged();
+#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
     } else {
 	// just update them
 	for (QListIterator<FileSystem> i(mFileSystems); i.current(); ++i)
 	    i.current()->update();
-    }
-#elif defined (Q_OS_WIN32)
-    if (mFileSystems.count() == 0){
-	FileSystem *fs = new FileSystem( "/dev/hda1", QDir::homeDirPath(), tr("Hard Disk"), FALSE, "");
-	mFileSystems.append( fs );    
-	emit disksChanged();
     }
 #endif
 }

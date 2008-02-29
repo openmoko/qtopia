@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -477,7 +479,7 @@ coordinates, or a null pointer if there is no item at <em>p.</em>
 <p>If <em>index</em> is too large, this function returns 0.
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="97bba3"></a>QListBox::itemRect ( <a href="qlistboxitem.html">QListBoxItem</a> * item ) const</h3>
 <p>Returns the rectangle on the screen <em>item</em> occupies in
-<a href="qscrollview.html#26f2bf">viewport</a>()'s coordinates, or an invalid rectangle if <em>i</em> is a null
+<a href="qscrollview.html#26f2bf">viewport</a>()'s coordinates, or an invalid rectangle if <em>item</em> is a null
 pointer or is not currently visible.
 <h3 class="fn">bool <a name="1e4835"></a>QListBox::itemVisible ( const <a href="qlistboxitem.html">QListBoxItem</a> * item )</h3>
 <p>Returns TRUE if <em>item</em> is at least partly visible, or else FALSE.
@@ -668,7 +670,7 @@ is FALSE, and repaints the item appropriately.
 <p>If the listbox is a single-selection listbox and and <em>select</em> is TRUE,
 <a href="#ea0ee6">setCurrentItem</a>() is called.
 <p>If the listbox is a single-selection listbox and and <em>select</em> is
-FALSE, <a href="#0c5d7d">clearSelection</a>() is called if <em>index</em> is the currently
+FALSE, <a href="#0c5d7d">clearSelection</a>() is called if <em>item</em> is the currently
 selected item.
 <p>Note that for this function, no-selection means multi-selection.
 The user cannot select items in a no-selection list box, but the
@@ -774,7 +776,7 @@ FALSE if all the columns have the same width.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -782,5 +784,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

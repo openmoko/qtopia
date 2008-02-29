@@ -1,0 +1,356 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/services.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Application Services</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Application Services</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Requesting Services
+</a>
+<li><a href="#3"> Responding to Service Requests
+</a>
+<li><a href="#4"> Adding a New Service
+</a>
+<li><a href="#5"> Pre-Defined Services
+</a>
+<ul>
+<li><a href="#5-1"> Document Oriented services
+</a>
+<li><a href="#5-2"> EMail services
+</a>
+<li><a href="#5-3">  WebAccess services
+</a>
+<li><a href="#5-4"> PlayMedia services
+</a>
+<li><a href="#5-5"> Contacts services
+</a>
+<li><a href="#5-6"> Calendar services
+</a>
+<li><a href="#5-7"> Tasks services
+</a>
+<li><a href="#5-8"> TimeMonitor services
+</a>
+<li><a href="#5-9"> CleanupWizard services
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Application Services are standardized APIs to functionality supplied by applications. The purpose is to allow applications to invoke the services of other applications, yet allow the end-user to decide which application provides each service.
+<p> <h2> Requesting Services
+</h2>
+<a name="2"></a><p> To request a service, the calling application executes:
+<p> <pre>
+    <a href="servicerequest.html">ServiceRequest</a> srv(servicename, action);
+    srv &lt;&lt; parameters;
+    srv.<a href="servicerequest.html#send">send</a>();
+</pre>
+ 
+<p> For example:
+<p> <pre>
+    <a href="servicerequest.html">ServiceRequest</a> srv("Email", "writeMail(QString,QString)");
+    srv &lt;&lt; QString("Johan R. User") &lt;&lt; QString("random@trolltech.com");
+    srv.<a href="servicerequest.html#send">send</a>();
+</pre>
+ 
+<p> <a href="servicerequest.html#send">ServiceRequest::send</a>() returns a bool value indicating whether the
+service is available.
+<p> <h2> Responding to <a href="service.html">Service</a> Requests
+</h2>
+<a name="3"></a><p> To respond to a service request, an application should connect to the
+<a href="qpeapplication.html#appMessage">QPEApplication::appMessage</a>() signal.
+<p> Applications register as providing a service by supplying a
+$QPEDIR/services/<i>servicename</i>/<i>appname</i> file, where
+<i>servicename</i> is both the directory name and the name of the service and
+<i>appname</i> is the application's executable filename.
+This file is a standard Qtopia <a href="config.html">Config</a> file. The keys in this file are:
+<p> <ul>
+<li> <tt>[Standard]</tt>
+<ul>
+<li> <tt>Version</tt>
+<p>
+An integer. "100" should be interpretted as Version 1.00.
+Later versions of a service may support additional actions.
+</ul>
+<li> <tt>[Extensions]</tt>
+<ul>
+<li> <tt>Actions</tt>
+<p>
+Additional actions to those defined by the basic (standard) service.
+</ul>
+<li> <tt>[</tt><i>action</i><tt>]</tt>
+<p>
+For each entry in the Actions list above, there is
+a group defining properties of the action.
+<ul>
+<li> <tt>Name</tt>
+<li> <tt>Icon</tt>
+</ul>
+</ul>
+<p> <h2> Adding a New <a href="service.html">Service</a>
+</h2>
+<a name="4"></a><p> Each service must be very carefully specified since it provides a system
+wide API that can be invoked by other applications and the user.  A
+service should only be added if it:
+<ul>
+<li> provides new functionality not already provided by a
+<a href="servicesapi.html">pre-defined service</a>.
+<li> is useful to other applications.
+<li> is well-defined within the scope of the application type, e.g.
+<b>openURL(QString <i>url</i>)</b> for a web browser.
+<li> avoids adding unnecessary functionality which could complicate the
+user interface.
+</ul>
+<p> To add a new service provide a $QPEDIR/services/<i>servicename</i>.service
+file, which is a standard Qtopia <a href="config.html">Config</a> file. The keys in this file are:
+<p> <ul>
+<li> <tt>[Service]</tt>
+<ul>
+<li> <tt>Name</tt>
+<li> <tt>Icon</tt>
+<li> <tt>Actions</tt>
+<p>
+This is a list of actions separated by semicolon (;). The actions
+include any formal parameters in parantheses, including the case
+of no parameters.
+</ul>
+<li> <tt>[</tt><i>action</i><tt>]</tt>
+<p>
+For each entry in the Actions list above, there is
+a group defining properties of the action.
+<p> An action with no parameters will appear in the list of available actions
+in the button settings.  There is no need to add this section if
+the action will not be shown to the user, i.e. has parameters.
+<ul>
+<li> <tt>Name</tt>
+<li> <tt>Icon</tt>
+</ul>
+</ul>
+<p> Example:
+<p> <pre>
+[Translation]
+File=QtopiaServices
+Context=Calendar
+[Service]
+Actions = raiseToday();newEvent()
+Icon = datebook_icon
+Name[]=Calendar
+[newEvent()]
+Icon = datebook_icon
+Name[]=New event
+[raiseToday()]
+Icon=today
+Name[]=Today's calendar
+</pre><p> Usually, only one application responds to a given service. The user selects
+which application handles the service using the Application
+Services settings. If however, the service can be provided by multiple
+applications, the service file will contain:
+<p> <pre>
+Multiple = 1
+</pre><p> in the <tt>[Service]</tt> section.
+<p> <h2> Pre-Defined Services
+</h2>
+<a name="5"></a><p> The services below are defined by Trolltech as basic services
+that may be available on a Qtopia device, and the messages which
+such services handle.
+<p> All services respond to the following messages:
+<ul>
+<li> raise()
+Bring a user interface for the service to the top of the window stack.
+<li> quit()
+Remove any user interface for the service. Note that sending this message
+when the service is not started will start the service (and immediately
+terminate it).
+</ul>
+<p> <h3> Document Oriented services
+</h3>
+<a name="5-1"></a><p> The following actions are defined for <a href="docwidget.html">document
+oriented</a> services:
+<ul>
+<li> Open/<i>mimetype</i>
+<ul>
+<li> setDocument(QString <i>document</i>)
+<li> openFile(QString <i>filepath</i>) <i>Version 1.01 only</i>
+</ul>
+<li> View/<i>mimetype</i>
+<ul>
+<li> setDocument(QString <i>document</i>)
+<li> viewFile(QString <i>filepath</i>) <i>Version 1.01 only</i>
+</ul>
+<li> Receive/<i>mimetype</i>
+<ul>
+<li> receiveData(QString <i>filename</i>, QString <i>type</i>)
+<ul>
+<li> <i>filename</i> = name of file containing data
+<li> <i>type</i> = MIME type of the data
+</ul>
+<p>The service should delete the file after reading it.
+</ul>
+</ul>
+<p> <h3> EMail services
+</h3>
+<a name="5-2"></a><p> <ul>
+<li> writeMail()
+In response to this message, the Email service interacts with the
+user to complete the email message, and then, if confirmed by the
+user, send the email message.
+<li> writeMail(QMap(QString,QString) <i>values</i>)
+<ul>
+<li> <i>values</i> = set of header names -&gt; value mappings (eg. names are "To", "Subject"),
+plus optionally a "BODY" -&gt; value mapping giving the body content, plus optionally
+a "ATTACHMENT&lt;n&gt;" -> value mapping. The attachments value is ...
+</ul>
+In response to this message, the Email service interacts with the
+user to complete the email message, and then, if confirmed by the
+user, send the email message.
+<li> writeMail(QString <i>name</i>,QString <i>email</i>)
+<ul>
+<li> <i>name</i> = the name of the recipient, or the empty string.
+<li> <i>email</i> = the email address of the recipient.
+</ul>
+In response to this message, the Email service interacts with the
+user to complete the email message, and then, if confirmed by the
+user, send the email message.
+<li> cleanupMessages(QDate <i>date</i>, int <i>size</i>)
+<ul>
+<li> <i>date</i> = only include messages that are older than <i>date</i>
+<li> <i>size</i> = the minimal mail size
+</ul>
+In response to this message, the Email service will purge all messages which 
+are older than the given date and exceed the minimal mail size. 
+</ul>
+<p> <h3>  WebAccess services
+</h3>
+<a name="5-3"></a><p> <ul>
+<li> openURL(QString <i>url</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+</ul>
+In response to this message, the WebAccess service retrieves the
+resource specified by the URL and either displays it to the user,
+invokes further services to display the resource, or notifies the
+user that no facility exists for displaying the resource.
+If the resource cannot be retrieved, the WebAccess notifies the user.
+<li> retrieveURL(QString <i>url</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+</ul>
+In response to this message, the WebAccess service retrieves the
+resource specified by the URL, creates a document containing the
+resource. Then, if services exist to display the document, the
+WebAccess service gives the user the option to display the document.
+If the resource cannot be retrieved, the WebAccess notifies the user.
+<li> getURL(QString <i>url</i>, QString <i>doclnk</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+<li> <i>doclnk</i> = the filename of a .desktop file
+</ul>
+In response to this message, the WebAccess service retrieves the
+resource specified by the URL, creates a document containing the
+resource using the given doclnk as the document link file. The
+document is created even if the resource could not be retrieved.
+As a result of creating the document, Qtopia will send the
+QPE/System linkChanged(QString) message, with the doclnk as the
+argument.
+</ul>
+<p> <h3> PlayMedia services
+</h3>
+<a name="5-4"></a><p> <ul>
+<li> openURL(QString <i>url</i>, QString <i>mimetype</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+<li> <i>mimetype</i> = the mimetype of the media file.
+</ul>
+</ul>
+<p> <h3> Contacts services
+</h3>
+<a name="5-5"></a><p> <ul>
+<li> addContact(<a href="pimcontact.html">PimContact</a>)
+<li> addAndEditContact(PimContact)
+<li> removeContact(PimContact)
+<li> updateContact(PimContact)
+<li> showContact(PimContact)
+<li> beamBusinessCard()
+</ul>
+<p> <h3> <a href="calendar.html">Calendar</a> services
+</h3>
+<a name="5-6"></a><p> <ul>
+<li> raiseToday()
+<li> newEvent()
+<li> newEvent(QDataTime,QDataTime,QString,QString)
+<li> showEvent(<a href="quuid.html">QUuid</a>)
+<li> showEvent(QUuid,QDate)
+<li> newEvent(QDateTime <i>start</i>, QDateTime <i>end</i>, QString <i>description</i>, QString <i>notes</i>)
+<ul>
+<li> <i>start</i> = start time for the event (invalid = use default)
+<li> <i>end</i> = start time for the event (invalid = use default)
+<li> <i>description</i> = one-line description of the event
+<li> <i>notes</i> = detailed notes for the event
+</ul>
+</ul>
+<p> <h3> Tasks services
+</h3>
+<a name="5-7"></a><p> <ul>
+<li> newTask()
+<li> addTask(<a href="pimtask.html">PimTask</a>)
+<li> removeTask(PimTask)
+<li> updateTask(PimTask)
+<li> showTask(QUuid)
+</ul>
+<p> <h3> TimeMonitor services
+</h3>
+<a name="5-8"></a><p> <ul>
+<li> timeChange(QString <i>timezone_id</i>)
+<ul>
+<li> <i>timezone_id</i> = the new TimeZone id.
+</ul>
+</ul>
+<p> <h3> CleanupWizard services
+</h3>
+<a name="5-9"></a><p> <ul>
+<li> showCleanupWizard()
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

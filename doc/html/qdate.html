@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -110,8 +112,8 @@ to be obsolete.
 <h3 class="fn"><a name="af2e5f"></a>QDate::QDate ()</h3>
 <p>Constructs a null date. Null dates are invalid.
 <p>See also  <a href="#220389">isNull</a>() and <a href="#58f77a">isValid</a>().
-<h3 class="fn"><a name="22e5a6"></a>QDate::QDate ( int y, int m, int <a href="d.html">d</a> )</h3>
-<p>Constructs a date with the year <em>y,</em> month <em>m</em> and day <em><a href="d.html">d</a>.</em>
+<h3 class="fn"><a name="22e5a6"></a>QDate::QDate ( int y, int m, int d )</h3>
+<p>Constructs a date with the year <em>y,</em> month <em>m</em> and day <em>d.</em>
 <p><em>y</em> must be in the range 1752-ca. 8000, <em>m</em> must be in the range
 1-12, and <em>d</em> must be in the range 1-31. Exception: if <em>y</em> is in
 the range 0-99, it is interpreted as 1900-1999.
@@ -142,8 +144,8 @@ date of this object (or earlier if <em>ndays</em> is negative).
 <h3 class="fn">int <a name="0d58c1"></a>QDate::daysInYear () const</h3>
 <p>Returns the number of days in the year (365 or 366) for this date.
 <p>See also  <a href="#ff0275">day</a>() and <a href="#10887a">daysInMonth</a>().
-<h3 class="fn">int <a name="0ccc6a"></a>QDate::daysTo ( const QDate &amp; <a href="d.html">d</a> ) const</h3>
-<p>Returns the number of days from this date to <em><a href="d.html">d</a></em> (which is negative
+<h3 class="fn">int <a name="0ccc6a"></a>QDate::daysTo ( const QDate &amp; d ) const</h3>
+<p>Returns the number of days from this date to <em>d</em> (which is negative
 if <em>d</em> is earlier than this date).
 <p>Example:
 <pre>    <a href="qdate.html">QDate</a> d1( 1995, 5, 17 );            // May 17th 1995
@@ -158,8 +160,8 @@ if <em>d</em> is earlier than this date).
 <h3 class="fn">bool <a name="58f77a"></a>QDate::isValid () const</h3>
 <p>Returns TRUE if this date is valid.
 <p>See also  <a href="#220389">isNull</a>().
-<h3 class="fn">bool <a name="6d947d"></a>QDate::isValid ( int y, int m, int <a href="d.html">d</a> ) <code>[static]</code></h3>
-<p>Returns TRUE if the specified date (year <em>y,</em> month <em>m</em> and day <em><a href="d.html">d</a>)</em> is valid.
+<h3 class="fn">bool <a name="6d947d"></a>QDate::isValid ( int y, int m, int d ) <code>[static]</code></h3>
+<p>Returns TRUE if the specified date (year <em>y,</em> month <em>m</em> and day <em>d)</em> is valid.
 <p>Example:
 <pre>    <a href="#58f77a">QDate::isValid</a>( 2002, 5, 17 );      // TRUE;  May 17th 2002 is OK.
     <a href="#58f77a">QDate::isValid</a>( 2002, 2, 30 );      // FALSE; Feb 30th does not exist
@@ -178,22 +180,22 @@ if <em>d</em> is earlier than this date).
 <p>Returns the name of the <em>month.</em>
 <p>Month 1 == "Jan", month 2 == "Feb" etc.
 <p>See also  <a href="#91f47c">toString</a>() and <a href="#70af34">dayName</a>().
-<h3 class="fn">bool <a name="6be475"></a>QDate::operator!= ( const QDate &amp; <a href="d.html">d</a> ) const</h3>
-<p>Returns TRUE if this date is different from <em><a href="d.html">d</a>,</em> or FALSE if
+<h3 class="fn">bool <a name="6be475"></a>QDate::operator!= ( const QDate &amp; d ) const</h3>
+<p>Returns TRUE if this date is different from <em>d,</em> or FALSE if
 they are equal.
-<h3 class="fn">bool <a name="999556"></a>QDate::operator&lt; ( const QDate &amp; <a href="d.html">d</a> ) const</h3>
-<p>Returns TRUE if this date is earlier than <em><a href="d.html">d</a>,</em> otherwise FALSE.
-<h3 class="fn">bool <a name="df0eb1"></a>QDate::operator&lt;= ( const QDate &amp; <a href="d.html">d</a> ) const</h3>
-<p>Returns TRUE if this date is earlier than or equal to <em><a href="d.html">d</a>,</em> otherwise FALSE.
-<h3 class="fn">bool <a name="409627"></a>QDate::operator== ( const QDate &amp; <a href="d.html">d</a> ) const</h3>
-<p>Returns TRUE if this date is equal to <em><a href="d.html">d</a>,</em> or FALSE if
+<h3 class="fn">bool <a name="999556"></a>QDate::operator&lt; ( const QDate &amp; d ) const</h3>
+<p>Returns TRUE if this date is earlier than <em>d,</em> otherwise FALSE.
+<h3 class="fn">bool <a name="df0eb1"></a>QDate::operator&lt;= ( const QDate &amp; d ) const</h3>
+<p>Returns TRUE if this date is earlier than or equal to <em>d,</em> otherwise FALSE.
+<h3 class="fn">bool <a name="409627"></a>QDate::operator== ( const QDate &amp; d ) const</h3>
+<p>Returns TRUE if this date is equal to <em>d,</em> or FALSE if
 they are different.
-<h3 class="fn">bool <a name="118a54"></a>QDate::operator&gt; ( const QDate &amp; <a href="d.html">d</a> ) const</h3>
-<p>Returns TRUE if this date is later than <em><a href="d.html">d</a>,</em> otherwise FALSE.
-<h3 class="fn">bool <a name="9742d2"></a>QDate::operator&gt;= ( const QDate &amp; <a href="d.html">d</a> ) const</h3>
-<p>Returns TRUE if this date is later than or equal to <em><a href="d.html">d</a>,</em> otherwise FALSE.
-<h3 class="fn">bool <a name="8ef42d"></a>QDate::setYMD ( int y, int m, int <a href="d.html">d</a> )</h3>
-<p>Sets the year <em>y,</em> month <em>m</em> and day <em><a href="d.html">d</a>.</em>
+<h3 class="fn">bool <a name="118a54"></a>QDate::operator&gt; ( const QDate &amp; d ) const</h3>
+<p>Returns TRUE if this date is later than <em>d,</em> otherwise FALSE.
+<h3 class="fn">bool <a name="9742d2"></a>QDate::operator&gt;= ( const QDate &amp; d ) const</h3>
+<p>Returns TRUE if this date is later than or equal to <em>d,</em> otherwise FALSE.
+<h3 class="fn">bool <a name="8ef42d"></a>QDate::setYMD ( int y, int m, int d )</h3>
+<p>Sets the year <em>y,</em> month <em>m</em> and day <em>d.</em>
 <p><em>y</em> must be in the range 1752-ca. 8000, <em>m</em> must be in the range
 1-12, and <em>d</em> must be in the range 1-31. Exception: if <em>y</em> is in
 the range 0-99, it is interpreted as 1900-1999.
@@ -206,16 +208,16 @@ the range 0-99, it is interpreted as 1900-1999.
 <h3 class="fn">int <a name="512725"></a>QDate::year () const</h3>
 <p>Returns the year (>= 1752) of this date.
 <p>See also  <a href="#73a46c">month</a>() and <a href="#ff0275">day</a>().
-<h3 class="fn">uint <a name="d16783"></a>QDate::greg2jul ( int y, int m, int <a href="d.html">d</a> ) <code>[static protected]</code></h3>
+<h3 class="fn">uint <a name="d16783"></a>QDate::greg2jul ( int y, int m, int d ) <code>[static protected]</code></h3>
 <p>For internal use only.
-<h3 class="fn">void <a name="ce4bfd"></a>QDate::jul2greg ( uint jd, int &amp; y, int &amp; m, int &amp; <a href="d.html">d</a> ) <code>[static protected]</code></h3>
+<h3 class="fn">void <a name="ce4bfd"></a>QDate::jul2greg ( uint jd, int &amp; y, int &amp; m, int &amp; d ) <code>[static protected]</code></h3>
 <p>For internal use only.
 <hr><h2>Related Functions</h2>
-<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="2083cf"></a>operator&lt;&lt; (<a href="qdatastream.html">QDataStream</a> &amp; s, const QDate &amp; <a href="d.html">d</a>)</h3>
+<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="2083cf"></a>operator&lt;&lt; (<a href="qdatastream.html">QDataStream</a> &amp; s, const QDate &amp; d)</h3>
 <p>Writes the date to the stream.
 <p>See also  <a href="datastreamformat.html">Format of the QDataStream operators</a>
 
-<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="2c2644"></a>operator&gt;&gt; (<a href="qdatastream.html">QDataStream</a> &amp; s, QDate &amp; <a href="d.html">d</a>)</h3>
+<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="2c2644"></a>operator&gt;&gt; (<a href="qdatastream.html">QDataStream</a> &amp; s, QDate &amp; d)</h3>
 <p>Reads a date from the stream.
 <p>See also  <a href="datastreamformat.html">Format of the QDataStream operators</a>
 
@@ -223,7 +225,7 @@ the range 0-99, it is interpreted as 1900-1999.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -231,5 +233,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

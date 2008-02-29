@@ -21,6 +21,7 @@
 //
 
 #include "swf.h"
+#include <math.h>
 
 #ifdef RCSID
 static char *rcsid = "$Id: shape.cc,v 1.1 2001/10/30 05:59:18 jryland Exp $";

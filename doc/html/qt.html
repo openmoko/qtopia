@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -34,7 +36,7 @@ The Qt class is a namespace for miscellaneous identifiers that need to be global
 <li><div class="fn">enum <a href="#ButtonState"><b>ButtonState</b></a> { NoButton = 0x0000, LeftButton = 0x0001, RightButton = 0x0002, MidButton = 0x0004, MouseButtonMask = 0x0007, ShiftButton = 0x0008, ControlButton = 0x0010, AltButton = 0x0020, KeyButtonMask = 0x0038, Keypad = 0x4000 }</div>
 <li><div class="fn">enum <a href="#Orientation"><b>Orientation</b></a> { Horizontal, Vertical }</div>
 <li><div class="fn">enum <a href="#AlignmentFlags"><b>AlignmentFlags</b></a> { AlignLeft = 0x0001, AlignRight = 0x0002, AlignHCenter = 0x0004, AlignTop = 0x0008, AlignBottom = 0x0010, AlignVCenter = 0x0020, AlignCenter = AlignVCenter | AlignHCenter, SingleLine = 0x0040, DontClip = 0x0080, ExpandTabs = 0x0100, ShowPrefix = 0x0200, WordBreak = 0x0400, DontPrint = 0x1000 }</div>
-<li><div class="fn">enum <b>WidgetState</b> { WState_Created = 0x00000001, WState_Disabled = 0x00000002, WState_Visible = 0x00000004, WState_ForceHide = 0x00000008, WState_OwnCursor = 0x00000010, WState_MouseTracking = 0x00000020, WState_CompressKeys = 0x00000040, WState_BlockUpdates = 0x00000080, WState_InPaintEvent = 0x00000100, WState_Reparented = 0x00000200, WState_ConfigPending = 0x00000400, WState_Resized = 0x00000800, WState_AutoMask = 0x00001000, WState_Polished = 0x00002000, WState_DND = 0x00004000, WState_Modal = 0x00008000, WState_Reserved1 = 0x00010000, WState_Reserved2 = 0x00020000, WState_Reserved3 = 0x00040000, WState_Maximized = 0x00080000, WState_TranslateBackground = 0x00100000, WState_ForceDisabled = 0x00200000, WState_Exposed = 0x00400000 }</div>
+<li><div class="fn">enum <b>WidgetState</b> { WState_Created = 0x00000001, WState_Disabled = 0x00000002, WState_Visible = 0x00000004, WState_ForceHide = 0x00000008, WState_OwnCursor = 0x00000010, WState_MouseTracking = 0x00000020, WState_CompressKeys = 0x00000040, WState_BlockUpdates = 0x00000080, WState_InPaintEvent = 0x00000100, WState_Reparented = 0x00000200, WState_ConfigPending = 0x00000400, WState_Resized = 0x00000800, WState_AutoMask = 0x00001000, WState_Polished = 0x00002000, WState_DND = 0x00004000, WState_Modal = 0x00008000, WState_Reserved1 = 0x00010000, WState_Reserved2 = 0x00020000, WState_Reserved3 = 0x00040000, WState_Maximized = 0x00080000, WState_TranslateBackground = 0x00100000, WState_ForceDisabled = 0x00200000, WState_Exposed = 0x00400000, WState_TranslateBackground1 = 0x00800000, WState_GlobalBrushOrigin = 0x01000000 }</div>
 <li><div class="fn">enum <a href="#WidgetFlags"><b>WidgetFlags</b></a> { WType_TopLevel = 0x00000001, WType_Modal = 0x00000002, WType_Popup = 0x00000004, WType_Desktop = 0x00000008, WType_Mask = 0x0000000f, WStyle_Customize = 0x00000010, WStyle_NormalBorder = 0x00000020, WStyle_DialogBorder = 0x00000040, WStyle_NoBorder = 0x00000000, WStyle_Title = 0x00000080, WStyle_SysMenu = 0x00000100, WStyle_Minimize = 0x00000200, WStyle_Maximize = 0x00000400, WStyle_MinMax = WStyle_Minimize | WStyle_Maximize, WStyle_Tool = 0x00000800, WStyle_StaysOnTop = 0x00001000, WStyle_Dialog = 0x00002000, WStyle_ContextHelp = 0x00004000, WStyle_NoBorderEx = 0x00008000, WStyle_Mask = 0x0000fff0, WDestructiveClose = 0x00010000, WPaintDesktop = 0x00020000, WPaintUnclipped = 0x00040000, WPaintClever = 0x00080000, WResizeNoErase = 0x00100000, WMouseNoMask = 0x00200000, WNorthWestGravity = 0x00400000, WRepaintNoErase = 0x00800000, WX11BypassWM = 0x01000000, WGroupLeader = 0x02000000 }</div>
 <li><div class="fn">enum <b>ImageConversionFlags</b> { ColorMode_Mask = 0x00000003, AutoColor = 0x00000000, ColorOnly = 0x00000003, MonoOnly = 0x00000002, AlphaDither_Mask = 0x0000000c, ThresholdAlphaDither = 0x00000000, OrderedAlphaDither = 0x00000004, DiffuseAlphaDither = 0x00000008, NoAlpha = 0x0000000c, Dither_Mask = 0x00000030, DiffuseDither = 0x00000000, OrderedDither = 0x00000010, ThresholdDither = 0x00000020, DitherMode_Mask = 0x000000c0, AutoDither = 0x00000000, PreferDither = 0x00000040, AvoidDither = 0x00000080 }</div>
 <li><div class="fn">enum <b>BGMode</b> { TransparentMode, OpaqueMode }</div>
@@ -89,7 +91,7 @@ one line.
 bounds, print outside.
 <li> <code>ExpandTabs</code> - Make the U+0009 (ascii tab) character move to
 the next tab stop.
-<li> <code>ShowPrefix</code> - Display the string "&amp;P" as an underlined P
+<li> <code>ShowPrefix</code> - Display the string "&amp;<a href="P.html">P</a>" as an underlined P
 (see <a href="qbutton.html">QButton</a> for an example).  To get an ampersand, use "&amp;&amp;".
 <li> <code>WordBreak</code> - Do line breaking at at appropriate points.
 <p></ul>
@@ -281,7 +283,7 @@ same group.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -289,5 +291,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

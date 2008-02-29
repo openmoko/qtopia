@@ -1,11 +1,16 @@
-<html>
-<head>
-<title>Repeating Monthly Events</title>
-</head>
-<body>
-<p><b>Repeating Monthly Events</b>
-<p> Tap the up/down arrows beside the <b>Every</b> no. months box to set the interval between each repeat.</p>
-<p>From the <b>Repeat On</b> box select the day or date each month that the event should repeat on. 
-<p>Tap <img src= OKButton.png alt= OK > to confirm the repeat or <img src= CloseButton.png alt= X > to cancel.</p>
-</body>
-</html>
+%%PDA%%
+{Tap}={Tap}
+{OkButton}={qpe/pda/OKButton.png}
+{CancelButton}={qpe/pda/CloseButton.png}
+@@PDA@@
+%%PHONE%%
+{Tap}={Press}
+{OkButton}={contextbar/ok.png}
+{CancelButton}={contextbar/cancel.png}
+@@PHONE@@
+<qt title="Repeating Monthly Events">
+<h3>Repeating Monthly Events</h3>
+<p>Use the up/down arrows beside the <b>Every</b> no. months box to set the interval between each repeat.</p>
+<p>From the <b>Repeat On</b> box select the day or date each month that the event should repeat on.
+<p>$${Tap} <img src="$${OkButton}" alt="OK"> to confirm the repeat or <img src="$${CancelButton}" alt="X"> to cancel.</p>
+</qt>

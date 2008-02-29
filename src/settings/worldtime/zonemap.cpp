@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -25,6 +40,10 @@
 #include <qtopia/timestring.h>
 #include <qtopia/timezone.h>
 #include <qtopia/qpeapplication.h>
+#ifdef QTOPIA_PHONE
+# include <qtopia/contextbar.h>
+#include <qtopia/global.h>
+#endif
 
 #include <qdatetime.h>
 #include <qfile.h>
@@ -48,11 +67,7 @@ static const char strZONEINFO[] = "/usr/share/zoneinfo/zone.tab";
 #else
 static const char strZONEINFO[] = "./etc/zoneinfo/zone.tab";
 #endif
-static const char strMAP[] = "simple_grid_400";
-
-// the maximum distance we'll allow the pointer to be away from a city
-// and still show the city's time
-static const int iTHRESHOLD = 50000;
+static const char strMAP[] = "worldtime/simple_grid_400";
 
 // The label offset (how far away from pointer)
 static const int iLABELOFFSET = 8;
@@ -69,19 +84,35 @@ ZoneMap::ZoneMap( QWidget *parent, const char* name )
     : QScrollView( parent, name ),
       ox( 0 ),
       oy( 0 ),
+      minMovement( 1 ),
+      maxMovement( 360 ),
+      minLonSecs(-648000),
+      minLatSecs(-324000),
+      maxLonSecs(648000),
+      maxLatSecs(324000),
       drawableW( -1 ),
       drawableH( -1 ),
       bZoom( FALSE ),
       bIllum( TRUE ),
-      citiesInit( FALSE )
+      m_cursor_x( -1 ),
+      m_cursor_y( -1 ),
+      citiesInit( FALSE ),
+      accelHori(0),
+      accelVert(0)
 {
-    viewport()->setFocusPolicy( StrongFocus );
+#ifdef QTOPIA_PHONE
+    setMargin(2);
+#endif
+    setFocusPolicy( StrongFocus );
+
+    cursorTimer = new QTimer(this);
+    connect(cursorTimer, SIGNAL(timeout()), this, SLOT(cursorTimeout()));
 
     // get the map loaded
     // just set the current image to point
     pixCurr = new QPixmap();
 
-    QPixmap pixZoom = Resource::loadPixmap( "mag" );
+    QPixmap pixZoom = Resource::loadPixmap( "worldtime/mag" );
 
     cmdZoom = new QToolButton( this );
     cmdZoom->setPixmap( pixZoom );
@@ -113,15 +144,19 @@ ZoneMap::ZoneMap( QWidget *parent, const char* name )
                       this, SLOT( slotUpdate() ) );
     QObject::connect( qApp, SIGNAL( timeChanged() ),
                       this, SLOT( slotUpdate() ) );
-    QObject::connect( cmdZoom, SIGNAL( toggled( bool ) ),
-                      this, SLOT( slotZoom( bool ) ) );
-    QObject::connect( &norm, SIGNAL( signalNewPoint( const QPoint& ) ),
-                      this, SLOT( slotFindCity( const QPoint& ) ) );
+    QObject::connect( cmdZoom, SIGNAL( toggled(bool) ),
+                      this, SLOT( slotZoom(bool) ) );
+    QObject::connect( &norm, SIGNAL( signalNewPoint(const QPoint&) ),
+                      this, SLOT( slotFindCity(const QPoint&) ) );
     // update the sun's movement every 5 minutes
     tUpdate->start( 5 * 60 * 1000 );
     // May as well read in the timezone information too...
 
     cities.setAutoDelete(TRUE);
+
+#ifdef QTOPIA_PHONE
+    ContextBar::setLabel(this, Key_Select, ContextBar::Select);
+#endif
 
     QTimer::singleShot( 0, this, SLOT(initCities()) );
 }
@@ -160,38 +195,329 @@ void ZoneMap::viewportMouseReleaseEvent( QMouseEvent* )
     tHide->start( 2000, true );
 }
 
+void ZoneMap::beginEditing()
+{
+#ifdef QTOPIA_PHONE
+    if ( Global::mousePreferred() || !isModalEditing() ) {
+	if( !Global::mousePreferred() )
+	    setModalEditing( TRUE );
+#endif
+	tHide->stop();
+	if (m_cursor.isValid())
+	    showCity(m_cursor);
+	else 
+	    slotFindCity( QPoint( contentsWidth(), contentsHeight() ) / 2 );
+#ifdef QTOPIA_PHONE
+    }
+#endif
+}
+
+int ZoneMap::heightForWidth(int w) const
+{
+    float scale = .5;
+    return int(float(w) * scale);
+}
+
 void ZoneMap::keyPressEvent( QKeyEvent *ke )
 {
+#ifdef QTOPIA_PHONE
+    if ( /* style().guiStyle() == KeyPadStyle */ TRUE )  {
+	switch( ke->key() ) {
+	    case Key_Select:
+		if( !Global::mousePreferred() ) {
+		    if ( !isModalEditing() ) {
+			beginEditing();
+			return;
+		    }
+		}
+		break;
+	    case Key_No:
+	    case Key_Back:
+		if ( !Global::mousePreferred() && isModalEditing() ) {
+		    setModalEditing( FALSE );
+		    tHide->start( 0, true );
+		} else {
+		    ke->ignore();
+		}
+		return;
+		break;
+	    default:
+		if( !Global::mousePreferred() ) {
+		    if ( !isModalEditing() ) {
+			ke->ignore();
+			return;
+		    }
+		}
+	}
+    }
+#endif
     switch ( ke->key() ) {
 	case Key_Left:
-	case Key_Right:
-	case Key_Up:
-	case Key_Down: {
-		tHide->stop();
-		if ( !m_cursor.isValid() )
-		    slotFindCity( QPoint( contentsWidth(), contentsHeight() ) / 2 );
-		TimeZone city = findCityNear( m_cursor, ke->key() );
-		if ( city.isValid() ) {
-		    m_cursor = city;
-		    int tmpx, tmpy;
-		    zoneToWin( m_cursor.lon(), m_cursor.lat(), tmpx, tmpy );
-		    ensureVisible( tmpx, tmpy );
-		    showCity( m_cursor );
-		    tHide->start( 3000, true );
-		}
+	    if (!ke->isAutoRepeat() && accelHori == 0) {
+		accelHori = -1;
+		cursorTimer->changeInterval(500);
+		updateCursor();
 	    }
 	    break;
-
+	case Key_Right:
+	    if (!ke->isAutoRepeat() && accelHori == 0) {
+		accelHori = 1;
+		cursorTimer->changeInterval(500);
+		updateCursor();
+	    }
+	    break;
+	case Key_Up:
+	    if (!ke->isAutoRepeat() && accelVert == 0) {
+		accelVert = 1;
+		cursorTimer->changeInterval(500);
+		updateCursor();
+	    }
+	    break;
+	case Key_Down:
+	    if (!ke->isAutoRepeat() && accelVert == 0) {
+		accelVert = -1;
+		cursorTimer->changeInterval(500);
+		updateCursor();
+	    }
+	    break;
 	case Key_Space:
 	case Key_Enter:
 	case Key_Return:
+#ifdef QTOPIA_PHONE
+	case Key_Select:
+#endif
+
+#ifdef QTOPIA_PHONE
+	    if( !Global::mousePreferred() )
+#endif
 	    if ( m_cursor.isValid() ) {
 		emit signalTz( m_cursor.id());
 		tHide->start( 0, true );
+#ifdef QTOPIA_PHONE
+		setModalEditing( FALSE );
+#endif
 	    }
 	    break;
+	default:
+	    QScrollView::keyPressEvent(ke);
     }
 }
+
+void ZoneMap::keyReleaseEvent( QKeyEvent *ke )
+{
+    switch(ke->key()) {
+	case Key_Up:
+	case Key_Down:
+	    if (!ke->isAutoRepeat() && accelVert != 0) {
+		accelVert = 0;
+		if (accelHori == 0)
+		    cursorTimer->stop();
+	    }
+	    break;
+	case Key_Left:
+	case Key_Right:
+	    if (!ke->isAutoRepeat() && accelHori != 0) {
+		accelHori = 0;
+		if (accelVert == 0)
+		    cursorTimer->stop();
+	    }
+	    break;
+	default:
+	    QScrollView::keyReleaseEvent(ke);
+    }
+}
+
+/* accelerating cursor movement */
+void ZoneMap::cursorTimeout() {
+    if (accelHori < 0 && accelHori > -25)
+	accelHori = -25;
+    else if (accelHori > 0 && accelHori < 25)
+	accelHori = 25;
+    if (accelVert < 0 && accelVert > -25)
+	accelVert = -25;
+    else if (accelVert > 0 && accelVert < 25)
+	accelVert = 25;
+    updateCursor();
+    cursorTimer->changeInterval(100);
+}
+
+// how many multiples of 100 ms to hold down before movement rate changes
+static const char accel_rate = 5;
+void ZoneMap::updateCursor()
+{
+    // accellerate timer after first one..
+    uint mx, my;
+    uint habs = QABS(accelHori);
+    uint vabs = QABS(accelVert);
+    mx = minMovement << (habs / accel_rate); // min movement doubles.
+    my = minMovement << (vabs / accel_rate);
+    if (mx < maxMovement) {
+	if (accelHori < 0)
+	    accelHori--;
+	else if (accelHori > 0)
+	    accelHori++;
+    } else {
+	mx = maxMovement;
+    }
+    if (my < maxMovement) {
+	if (accelVert < 0)
+	    accelVert--;
+	else if (accelVert > 0)
+	    accelVert++;
+    } else {
+	my = maxMovement;
+    }
+
+    if (m_cursor_x != -1 && m_cursor_y != -1) {
+	int nx = m_cursor_x;
+	int ny = m_cursor_y;
+
+	// horizontal movement
+	if (accelHori < 0) {
+	    nx -= mx;
+	    if (nx < minLonSecs)
+		nx = minLonSecs;
+	} else if (accelHori > 0) {
+	    nx += mx;
+	    if (nx > maxLonSecs)
+		nx = maxLonSecs;
+	}
+	// vertical movement
+	if (accelVert < 0) {
+	    ny -= my;
+	    if (ny < maxLatSecs) 
+		ny = maxLatSecs;
+	} else if (accelVert > 0) {
+	    ny += my;
+	    if (ny > minLatSecs)
+		ny = minLatSecs; 
+	}
+
+	int cx, cy;
+	setCursorPoint(nx, ny);
+	zoneToWin(m_cursor_x, m_cursor_y, cx, cy);
+	ensureVisible( cx, cy );
+    }
+}
+
+QRect expandTo(const QRect &in, const QPoint &p) {
+    if (in.isValid()) {
+	QRect r(in);
+	if (p.x() < r.left())
+	    r.setLeft(p.x());
+	else if (p.x() > r.right())
+	    r.setRight(p.x());
+	if (p.y() < r.top())
+	    r.setTop(p.y());
+	else if (p.y() > r.bottom())
+	    r.setBottom(p.y());
+	return r;
+    } else {
+	return QRect(p.x(), p.y(), 1, 1);
+    }
+}
+
+void ZoneMap::setCursorPoint(int ox, int oy)
+{
+    if (ox != m_cursor_x || oy != m_cursor_y) {
+	// Old Cursor Window Coords
+	int ocwx, ocwy;
+	zoneToWin(m_cursor_x, m_cursor_y, ocwx, ocwy);
+	// New Cursor Window Coords
+	int ncwx, ncwy;
+	zoneToWin(ox, oy, ncwx, ncwy);
+	// Old Location Window Coords
+	int olwx, olwy;
+	zoneToWin( m_cursor.lon(), m_cursor.lat(), olwx, olwy);
+	// New Location Window Coords
+	int nlwx, nlwy;
+
+	QRect bounds(ocwx, ocwy, 1,1);
+	bounds = expandTo(bounds, QPoint(ncwx, ncwy));
+	bounds = expandTo(bounds, QPoint(olwx, olwy));
+
+	m_cursor_x = ox;
+	m_cursor_y = oy;
+
+	long lDistance;
+	long lClosest = LONG_MAX;
+	TimeZone closestZone;
+	QPoint lPoint;
+	for ( unsigned i = 0; i < cities.count(); i++ ) {
+	    CityPos *cp = cities[i];
+	    // use the manhattenLength, a good enough of an appoximation here
+	    lDistance = QABS(m_cursor_y - cp->lat) + QABS(m_cursor_x - cp->lon);
+	    // first to zero wins!
+	    if ( lDistance < lClosest ) {
+		lClosest = lDistance;	    
+		lPoint = QPoint(cp->lat, cp->lon);
+		closestZone = TimeZone(cp->id);
+	    }
+	}
+
+
+	if (m_cursor != closestZone) {
+	    m_cursor = closestZone;
+	    zoneToWin( m_cursor.lon(), m_cursor.lat(), nlwx, nlwy);
+	    bounds = expandTo(bounds, QPoint(nlwx, nlwy));
+	} else {
+	    nlwx = olwx;
+	    nlwy = olwy;
+	}
+
+	// m_curosr
+	m_last = m_cursor;
+	QDateTime cityTime = m_cursor.fromUtc(TimeZone::utcDateTime());
+
+        QString name = m_cursor.city().replace( QRegExp("_"), " " );
+        
+	lblCity->setText( qApp->translate("DefaultCityNames", name) + "\n" +
+		TimeString::localHM( cityTime.time()));
+	lblCity->setMinimumSize( lblCity->sizeHint() );
+	lblCity->resize( QMAX(lblCity->sizeHint().width(),80), QMAX(lblCity->sizeHint().height(),40) );
+
+	// Now decide where to move the label, x & y can be reused
+	int x, y;
+	contentsToViewport(nlwx, nlwy, x, y);
+
+	//
+	// Put default position for the city label in the "above left"
+	// area.  This avoids obscuring the popup for quite a bit of
+	// the map.  Use the "below right" position for the border cases.
+	//
+	x -= iLABELOFFSET + lblCity->width();
+	if (x < 0) {
+	    // right
+	    x += 2*iLABELOFFSET + lblCity->width();
+	    // still keep on screen, over red dot if need be.
+	    if ((x+lblCity->width() > width()))
+		x -= x+lblCity->width() - width();
+	}
+	y -= iLABELOFFSET + lblCity->height();
+	if (y < 0) {
+	    // below
+	    y += 2*iLABELOFFSET + lblCity->height();
+	    // still keep on screen, over red dot if need be.
+	    if ((y+lblCity->height() > height()))
+		y -= y+lblCity->height() - height();
+	}
+
+	// draw in the city and the label
+	if ( m_repaint.isValid()) {
+	    int repx, repy;
+	    zoneToWin( m_repaint.lon(), m_repaint.lat(), repx, repy );
+	    bounds = expandTo(bounds, QPoint(repx, repy));
+	}
+	m_repaint = m_last;
+
+	lblCity->move( x, y );
+	lblCity->show();
+
+	// m_curosr
+	repaintContents( bounds.x()-(1+iCITYOFFSET), bounds.y()-(1+iCITYOFFSET), bounds.width()+2+iCITYSIZE, bounds.height()+2+iCITYSIZE);
+    }
+}
+
 
 const TimeZone ZoneMap::findCityNear( const TimeZone &city, int key )
 {
@@ -240,87 +566,18 @@ void ZoneMap::slotFindCity( const QPoint &pos )
 {
     initCities();
 
-    // given coordinates on the screen find the closest city and display the
-    // label close to it
-    int tmpx, tmpy, x, y;
-
-    if ( tHide->isActive() )
-        tHide->stop();
-
+    int tmpx, tmpy;
     viewportToContents(pos.x(), pos.y(), tmpx, tmpy);
-    winToZone( tmpx, tmpy, x, y );
+    int mx, my;
 
-    // Find city alogorithim: start out at an (near) infinite distance away and
-    // then find the closest city, (similar to the Z-buffer technique, I guess)
-    // the only problem is that this is all done with doubles, but I don't know
-    // another way to do it at the moment.  Another problem is a linked list is
-    // used obviously something indexed would help
-    long lDistance;
-    long lClosest = LONG_MAX;
-    QCString closestZone;
-    for ( unsigned i = 0; i < cities.count(); i++ ) {
-	CityPos *cp = cities[i];
-	// use the manhattenLength, a good enough of an appoximation here
-	lDistance = QABS(y - cp->lat) + QABS(x - cp->lon);
-	// first to zero wins!
-	if ( lDistance < lClosest ) {
-	    lClosest = lDistance;	    
-	    closestZone = cp->id;
-	}
-    }
-
-    // Okay, we found the closest city, but it might still be too far away.
-    if ( lClosest <= iTHRESHOLD ) {
-	m_cursor = TimeZone(closestZone);
-	showCity( m_cursor );
-    }
+    winToZone(tmpx, tmpy, mx, my);
+    setCursorPoint(mx, my);
 }
 
 void ZoneMap::showCity( const TimeZone &city )
 {
-    if ( m_last == city )
-	return;
-    m_last = city;
-    QDateTime cityTime = city.fromUtc(TimeZone::utcDateTime());
-
-    lblCity->setText( city.city().replace( QRegExp("_"), " ") + "\n" +
-		      TimeString::localHM( cityTime.time()));
-    lblCity->setMinimumSize( lblCity->sizeHint() );
-    lblCity->resize( QMAX(lblCity->sizeHint().width(),80), QMAX(lblCity->sizeHint().height(),40) );
-
-    // Now decide where to move the label, x & y can be reused
-    int tmpx, tmpy, x, y;
-    zoneToWin( m_last.lon(), m_last.lat(), tmpx, tmpy );
-    contentsToViewport(tmpx, tmpy, x, y);
-
-    //
-    // Put default position for the city label in the "above left"
-    // area.  This avoids obscuring the popup for quite a bit of
-    // the map.  Use the "below right" position for the border cases.
-    //
-    x -= iLABELOFFSET + lblCity->width();
-    if (x < 0) {
-	x += 2*iLABELOFFSET + lblCity->width();
-    }
-    y -= iLABELOFFSET + lblCity->height();
-    if (y < 0) {
-	y += 2*iLABELOFFSET + lblCity->height();
-    }
-
-    // draw in the city and the label
-    if ( m_repaint.isValid()) {
-	int repx,
-	    repy;
-	zoneToWin( m_repaint.lon(), m_repaint.lat(), repx, repy );
-	updateContents( repx - iCITYOFFSET, repy - iCITYOFFSET,
-			iCITYSIZE, iCITYSIZE );
-    }
-    updateContents( tmpx - iCITYOFFSET, tmpy - iCITYOFFSET, iCITYSIZE,
-		    iCITYSIZE );
-    m_repaint = m_last;
-
-    lblCity->move( x, y );
-    lblCity->show();
+    // use set cursor point to erase old point if need be.
+    setCursorPoint(city.lon(), city.lat());
 }
 
 void ZoneMap::resizeEvent( QResizeEvent *e )
@@ -369,7 +626,7 @@ void ZoneMap::drawCities( QPainter *p )
 
 static void dayNight(QImage *pImage)
 {
-    // create a mask the functions from sun.h
+    // create a mask that functions from sun.h
     double dJulian,
            dSunRad,
            dSunDecl,
@@ -386,7 +643,7 @@ static void dayNight(QImage *pImage)
     time_t tCurrent;
     struct tm *pTm;
 
-    // get the position of the sun bassed on our current time...
+    // get the position of the sun based on our current time...
     tCurrent = time( NULL );
     pTm = gmtime( &tCurrent );
     dJulian = jtime( pTm );
@@ -424,7 +681,7 @@ static inline void darken( QImage *pImage, int start, int stop, int row )
     if ( stop >= pImage->width() )
 	stop =  pImage->width() - 1;
 
-    // Assume that the image is 32bpp as we should have converted previously to that...
+    // Assume that the image is 32bpp as we should have converted to that previously...
     QRgb *p = (QRgb *)pImage->scanLine( row );
     for ( int j = start; j <= stop; j++ ) {
 	QRgb rgb = p[j];
@@ -458,16 +715,26 @@ void ZoneMap::makeMap( int w, int h )
     oy = hImg / 2;
     pixCurr->convertFromImage( imgOrig.smoothScale(w, h),
                                QPixmap::ThresholdDither );
+
+    winToZone(0, 0, minLonSecs, minLatSecs);
+    winToZone(wImg, hImg, maxLonSecs, maxLatSecs);
+    // should also work out max accell, or accell rates for this zoom.
+    maxMovement=wImg*90;
 }
 
 void ZoneMap::drawCity( QPainter *p, const TimeZone &city )
 {
-    int x,
-        y;
+    int x, y;
+    int cx, cy;
 
     p->setPen( red );
     zoneToWin( city.lon(), city.lat(), x, y );
-    p->drawRect( x - iCITYOFFSET, y - iCITYOFFSET, iCITYSIZE, iCITYSIZE );
+    zoneToWin( m_cursor_x, m_cursor_y, cx, cy );
+    if (m_cursor_x != -1 && m_cursor_y != -1) {
+	p->drawLine( cx, cy, x, y);
+
+    }
+    p->drawRect( cx - iCITYOFFSET, cy - iCITYOFFSET, iCITYSIZE, iCITYSIZE );
 }
 
 void ZoneMap::drawContents( QPainter *p, int cx, int cy, int cw, int ch )
@@ -506,6 +773,9 @@ void ZoneMap::drawContents( QPainter *p, int cx, int cy, int cw, int ch )
 
 void ZoneMap::slotZoom( bool setZoom )
 {
+    if (setZoom == bZoom)
+	return;
+
     bZoom = setZoom;
     if ( bZoom ) {
 	makeMap( 2 * wImg , 2 * hImg );
@@ -514,6 +784,16 @@ void ZoneMap::slotZoom( bool setZoom )
 	makeMap( drawableW, drawableH );
 	resizeContents( drawableW, drawableH );
     }
+
+    // scale cursor accordingly
+    int cx, cy;
+    zoneToWin(m_cursor_x, m_cursor_y, cx, cy);
+
+    ensureVisible(cx, cy);
+    int lx, ly;
+    zoneToWin( m_cursor.lon(), m_cursor.lat(), lx, ly );
+    updateContents( QRect(QMIN(lx, cx)-(1+iCITYOFFSET), QMIN(ly, cy)-(1+iCITYOFFSET),
+		QABS(lx - cx)+2+iCITYSIZE, QABS(ly - cy)+2+iCITYSIZE));
 }
 
 void ZoneMap::slotIllum( bool setIllum )
@@ -527,7 +807,7 @@ void ZoneMap::slotIllum( bool setIllum )
 void ZoneMap::slotUpdate( void )
 {
     // recalculate the light, most people will never see this,
-    // but it is good to be complete
+    // but it is good to be thorough
     makeMap ( pixCurr->width(), pixCurr->height() );
     updateContents( contentsX(), contentsY(), drawableW, drawableH );
 }
@@ -573,4 +853,35 @@ void ZoneMap::initCities()
 
     cities.resize(count);
     citiesInit = TRUE;
+
+    /* should also set 
+       min lat
+       max lat
+       min long
+       max long
+       and go through zone file for
+       min distance between two cities, (halv it for default min movement)
+    */
+    ulong lDistance;
+    ulong lClosest = ULONG_MAX;
+    for ( uint i = 0; i < cities.count(); i++ ) {
+	long latfrom = cities[i]->lat;
+	long lonfrom = cities[i]->lon;
+	for ( uint j = 0; j < cities.count(); j++ ) {
+	    if (i != j) {
+		long latto = cities[j]->lat;
+		long lonto = cities[j]->lon;
+		// use the manhattenLength, a good enough of an appoximation here
+		lDistance = QABS(latfrom - latto) + QABS(lonfrom - lonto);
+		// first to zero wins!
+		if ( lDistance < lClosest ) {
+		    lClosest = lDistance;	    
+		}
+	    }
+	}
+    }
+    if (lClosest < UINT_MAX && lClosest > 2)
+	minMovement = (lClosest >> 1);
+    else 
+	minMovement = 1;
 }

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -82,6 +97,7 @@ private:
     {
 	if ( apps.count() ) {
 	    QString icon;
+	    QString exe;
 	    for (AppLnk* lnk = apps.first(); icon.isNull() && lnk; lnk=apps.next()) {
 		QStringList icons = lnk->mimeTypeIcons();
 		if ( icons.count() ) {
@@ -89,6 +105,7 @@ private:
 		    for (QStringList::ConstIterator t=types.begin(),i=icons.begin(); t!=types.end() && i!=icons.end(); ++i,++t) {
 			if ( *t == id ) {
 			    icon = *i;
+			    exe = lnk->exec();
 			    break;
 			}
 		    }
@@ -104,7 +121,7 @@ private:
 		if ( !QPixmapCache::find( icon, regicon ) ||
 		     !QPixmapCache::find( icon + "_big", bigicon ) ) {
 #endif
-		    QImage unscaledIcon = Resource::loadImage( icon );
+		    QImage unscaledIcon = Resource::loadImage( exe + '/' + icon );
 		    regicon.convertFromImage( unscaledIcon.smoothScale( AppLnk::smallIconSize(), AppLnk::smallIconSize() ) );
 		    bigicon.convertFromImage( unscaledIcon.smoothScale( AppLnk::bigIconSize(), AppLnk::bigIconSize() ) );
 
@@ -368,7 +385,11 @@ void MimeType::loadExtensions(const QString& filename)
 
 void MimeType::init( const QString& ext_or_id )
 {
-    if ( ext_or_id[0] != '/' && ext_or_id.contains('/') ) {
+    if ( ext_or_id[0] != '/' &&
+#ifdef Q_OS_WIN32
+         ext_or_id[1] != ':' &&
+#endif
+         ext_or_id.contains('/') ) {
 	i = ext_or_id.lower();
     } else {
 	loadExtensions();

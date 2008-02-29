@@ -1,22 +1,38 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************//*
+**********************************************************************/
+/*
  * KAsteroids - Copyright (c) Martin R. Jones 1997
  *
  * Part of the KDE project
@@ -25,12 +41,17 @@
 #ifndef __KAST_TOPLEVEL_H__
 #define __KAST_TOPLEVEL_H__
 
+#include <qtopia/sound.h>
+
 #include <qmainwindow.h>
 #include <qdict.h>
 #include <qmap.h>
 
 #include "view.h"
 
+#ifdef QTOPIA_PHONE
+# include <qtopia/contextmenu.h>
+#endif
 
 class KALedMeter;
 class QLCDNumber;
@@ -46,6 +67,9 @@ private:
     void playSound( const char *snd );
     void readSoundMapping();
     void doStats();
+#ifdef QTOPIA_PHONE
+    void updateContext1();
+#endif
 
 protected:
     virtual void showEvent( QShowEvent * );
@@ -58,6 +82,7 @@ protected:
 private slots:
     void slotNewGame();
 
+    void slotMissileFired();
     void slotShipKilled();
     void slotRockHit( int size );
     void slotRocksRemoved();
@@ -77,23 +102,30 @@ private:
     QLCDNumber *shootLCD;
     KALedMeter *powerMeter;
 
-    bool   sound;
-    QDict<QString> soundDict;
+    Sound shipDestroyed;
+    Sound rockDestroyed;
+    Sound missileFired;
 
     // waiting for user to press Enter to launch a ship
     bool waitShip;
     bool isPaused;
+    bool havePress;
 
     int shipsRemain;
     int score;
     int level;
     bool showHiscores;
 
+
     enum Action { Launch, Thrust, RotateLeft, RotateRight, Shoot, Teleport,
                     Brake, Shield, Pause, NewGame  };
 
     QMap<int,Action> actions;
     QString launchButtonText;
+
+#ifdef QTOPIA_PHONE
+    ContextMenu *contextMenu;
+#endif
 };
 
 #endif

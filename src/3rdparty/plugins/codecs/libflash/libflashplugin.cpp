@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -19,7 +34,7 @@
 **********************************************************************/
 #include "libflashplugin.h"
 
-/*!
+/*
   \class LibFlashPlugin libflashplugin.h
   \brief The LibFlashPlugin class is a wrapper for the libflash library.
 
@@ -27,161 +42,156 @@
   Libflash renders Flash movies for the MediaPlayer.
 
   The libflash library is distributed under the terms of the GNU General Public License.
-  The primary copyright holders are
-    Olivier Debon &lt;odebon@club-internet.fr&gt; and
-    Fabrice Bellard &lt;fabrice.bellard@netgem.com&gt;.
-  More information about the Flash library can be found at http://www.swift-tools.com/Flash
+  The primary copyright holders are <a href="mailto:odebon@club-internet.fr">
+    Olivier Debon</a> and <a href="mailto:fabrice.bellard@netgem.com">
+    Fabrice Bellard</a>. More information about the Flash library can be found at <a href="http://www.swift-tools.com/Flash">http://www.swift-tools.com/Flash</a>.
 */
-/*!
+/*
     \fn virtual LibFlashPlugin::LibFlashPlugin()
     Constructs a libflash plugin decoder object.
 */
-/*!
+/*
     \fn virtual LibFlashPlugin::~LibFlashPlugin()
     \reimp
 */
-/*!
+/*
     \fn virtual const char *LibFlashPlugin::pluginName()
     \reimp
 */
-/*!
+/*
     \fn virtual const char *LibFlashPlugin::pluginComment()
     \reimp
 */
-/*!
+/*
     \fn virtual double LibFlashPlugin::pluginVersion()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::isFileSupported( const QString& file )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::open( const QString& file )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::close()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::isOpen()
     \reimp
 */
-/*!
+/*
     \fn virtual const QString &LibFlashPlugin::fileInfo()
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::audioStreams()
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::audioChannels( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::audioFrequency( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::audioSamples( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::audioSetSample( long sample, int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual long LibFlashPlugin::audioGetSample( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::audioReadSamples( short *samples, int channels, long sampleCount, long& samplesRead, int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::videoStreams()
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::videoWidth( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::videoHeight( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual double LibFlashPlugin::videoFrameRate( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual int LibFlashPlugin::videoFrames( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::videoSetFrame( long frame, int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual long LibFlashPlugin::videoGetFrame( int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::videoReadFrame( unsigned char **, int, int, int, int, ColorFormat, int )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::videoReadYUVFrame( char *, char *, char *, int, int, int, int, int )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::videoReadScaledFrame( unsigned char **output_rows, int in_x, int in_y, int in_w, int in_h, int out_w, int out_h, ColorFormat color_model, int stream )
     \reimp
 */
-/*!
+/*
     \fn virtual double LibFlashPlugin::getTime()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::setSMP( int CPUs )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::setMMX( bool useMMX )
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::supportsAudio()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::supportsVideo()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::supportsYUV()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::supportsSMP()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::supportsMMX()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::supportsStereo()
     \reimp
 */
-/*!
+/*
     \fn virtual bool LibFlashPlugin::supportsScaling()
-    \reimp
-*/
-/*!
-    \fn virtual long LibFlashPlugin::getPlayTime()
     \reimp
 */
 
@@ -343,7 +353,7 @@ int LibFlashPlugin::videoFrames( int stream ) { return 1000000; }
 bool LibFlashPlugin::videoSetFrame( long frame, int stream ) { return TRUE; }
 long LibFlashPlugin::videoGetFrame( int stream ) { return 0; }
 bool LibFlashPlugin::videoReadFrame( unsigned char **output_rows, int in_x, int in_y, int in_w, int in_h, ColorFormat color_model, int stream ) { return TRUE; }
-#include <time.h>
+#include <sys/time.h>
 bool LibFlashPlugin::videoReadScaledFrame( unsigned char **output_rows, int in_x, int in_y, int in_w, int in_h, int out_w, int out_h, ColorFormat color_model, int stream ) {
         struct timeval wd;
         FlashEvent fe;

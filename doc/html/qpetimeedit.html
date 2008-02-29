@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia1/datetimeedit.cpp:125 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia1/datetimeedit.cpp:232 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,18 +14,25 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QPETimeEdit Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QPETimeEdit Class Reference</h1>
 
 <p>The QPETimeEdit class provides a compact widget for selecting a time.
 <a href="#details">More...</a>
 <p><tt>#include &lt;<a href="datetimeedit-h.html">qtopia/datetimeedit.h</a>&gt;</tt>
-<p>Inherits <a href="qspinbox.html">QSpinBox</a>.
 <p><a href="qpetimeedit-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
@@ -37,82 +44,70 @@ body { background: #ffffff; color: black; }
 <h2>Public Slots</h2>
 <ul>
 <li><div class=fn>virtual void <a href="#setTime"><b>setTime</b></a> ( const&nbsp;QTime&nbsp;&amp;&nbsp;tm )</div></li>
-<li><div class=fn>virtual void <a href="#stepDown"><b>stepDown</b></a> ()</div></li>
-<li><div class=fn>virtual void <a href="#stepUp"><b>stepUp</b></a> ()</div></li>
+<li><div class=fn>void <a href="#stepDown"><b>stepDown</b></a> ()</div></li>
+<li><div class=fn>void <a href="#stepUp"><b>stepUp</b></a> ()</div></li>
 </ul>
 <h2>Signals</h2>
 <ul>
 <li><div class=fn>void <a href="#valueChanged"><b>valueChanged</b></a> ( const&nbsp;QTime&nbsp;&amp;&nbsp;t )</div></li>
 </ul>
-<h2>Protected Members</h2>
-<ul>
-<li><div class=fn>virtual QString <a href="#mapValueToText"><b>mapValueToText</b></a> ( int&nbsp;v )</div></li>
-<li><div class=fn>virtual int <a href="#mapTextToValue"><b>mapTextToValue</b></a> ( bool&nbsp;*&nbsp;ok )</div></li>
-</ul>
 <hr><a name="details"></a><h2>Detailed Description</h2>
 
 
 The QPETimeEdit class provides a compact widget for selecting a time.
-<p> QPETimeEdit extends <a href="qspinbox.html">QSpinBox</a> to validate times as they are entered.
+<p> QPETimeEdit extends QSpinBox to validate times as they are entered.
 It handles 12 hour and 24 hour time formats.
+<p> First availability: Qtopia 1.6
 <p> 
 <p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
 
 <hr><h2>Member Function Documentation</h2>
-<h3 class=fn><a name="QPETimeEdit"></a>QPETimeEdit::QPETimeEdit ( <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+<h3 class=fn><a name="QPETimeEdit"></a>QPETimeEdit::QPETimeEdit ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
 </h3>
 Constructs a QPETimeEdit with the time set to 00:00.
+The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
 
-<h3 class=fn><a name="QPETimeEdit-2"></a>QPETimeEdit::QPETimeEdit ( const&nbsp;<a href="qtime.html">QTime</a>&nbsp;&amp;&nbsp;dt, <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+<h3 class=fn><a name="QPETimeEdit-2"></a>QPETimeEdit::QPETimeEdit ( const&nbsp;QTime&nbsp;&amp;&nbsp;dt, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
 </h3>
 Constructs a QPETimeEdit with the time set to <em>dt</em>.
+The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
 
 <h3 class=fn><a name="~QPETimeEdit"></a>QPETimeEdit::~QPETimeEdit ()
 </h3>
 Destructs QPETimeEdit.
 
-<h3 class=fn>int <a name="mapTextToValue"></a>QPETimeEdit::mapTextToValue ( bool&nbsp;*&nbsp;ok )<tt> [virtual protected]</tt>
-</h3>
-Reimplemented to validate the time entered.
-
-<p>Reimplemented from <a href="qspinbox.html#mapTextToValue">QSpinBox</a>.
-<h3 class=fn><a href="qstring.html">QString</a> <a name="mapValueToText"></a>QPETimeEdit::mapValueToText ( int&nbsp;v )<tt> [virtual protected]</tt>
-</h3>
-Reimplemented to validate the time entered.
-
-<p>Reimplemented from <a href="qspinbox.html#mapValueToText">QSpinBox</a>.
-<h3 class=fn>void <a name="setTime"></a>QPETimeEdit::setTime ( const&nbsp;<a href="qtime.html">QTime</a>&nbsp;&amp;&nbsp;tm )<tt> [virtual slot]</tt>
+<h3 class=fn>void <a name="setTime"></a>QPETimeEdit::setTime ( const&nbsp;QTime&nbsp;&amp;&nbsp;tm )<tt> [virtual slot]</tt>
 </h3>
 Sets displayed time to <em>tm</em>.
 <p> <p>See also <a href="#time">time</a>().
 
-<h3 class=fn>void <a name="stepDown"></a>QPETimeEdit::stepDown ()<tt> [virtual slot]</tt>
+<h3 class=fn>void <a name="stepDown"></a>QPETimeEdit::stepDown ()<tt> [slot]</tt>
 </h3>
 Decreases the time by 15 minutes.
 
-<p>Reimplemented from <a href="qspinbox.html#stepDown">QSpinBox</a>.
-<h3 class=fn>void <a name="stepUp"></a>QPETimeEdit::stepUp ()<tt> [virtual slot]</tt>
+<h3 class=fn>void <a name="stepUp"></a>QPETimeEdit::stepUp ()<tt> [slot]</tt>
 </h3>
 Increases the time by 15 minutes.
 
-<p>Reimplemented from <a href="qspinbox.html#stepUp">QSpinBox</a>.
-<h3 class=fn><a href="qtime.html">QTime</a> <a name="time"></a>QPETimeEdit::time () const
+<h3 class=fn>QTime <a name="time"></a>QPETimeEdit::time () const
 </h3>
 Returns the time selected.
 <p> <p>See also <a href="#setTime">setTime</a>().
 
-<h3 class=fn>void <a name="valueChanged"></a>QPETimeEdit::valueChanged ( const&nbsp;<a href="qtime.html">QTime</a>&nbsp;&amp;&nbsp;t )<tt> [signal]</tt>
+<h3 class=fn>void <a name="valueChanged"></a>QPETimeEdit::valueChanged ( const&nbsp;QTime&nbsp;&amp;&nbsp;t )<tt> [signal]</tt>
 </h3>
 
-<p> This signal is emitted when the time is changed.
+<p> This signal is emitted when the time is changed to <em>t</em>.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

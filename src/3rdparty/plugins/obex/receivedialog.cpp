@@ -1,18 +1,19 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -36,6 +37,10 @@
 #include <qlabel.h>
 #include <qfile.h>
 #include <qprogressbar.h>
+#include <qfile.h>
+#include <qtextstream.h>
+
+//#include <qmessagebox.h>
 
 ReceiveDialog::ReceiveDialog( QIrServer* irserver, QWidget *parent, const char *name )
     : QMainWindow( parent, name, FALSE )//, WStyle_StaysOnTop )
@@ -46,10 +51,16 @@ ReceiveDialog::ReceiveDialog( QIrServer* irserver, QWidget *parent, const char *
     setCentralWidget(w);
     
     server = irserver;
-    connect( server, SIGNAL(received(const QString&, const QString&) ), 
+    connect( server, SIGNAL(fileComplete()), this, SLOT(fileComplete()) );
+    connect( server, SIGNAL( statusMsg(const QString&) ), this, SLOT( statusMsg(const QString&) ) );
+    connect( server, SIGNAL( progressReceive(int) ), this, SLOT( progress(int) ) );
+    /*
+    connect( server, SIGNAL(received(const QString&,const QString&) ), 
 	     this, SLOT( received() ) );
-    connect( server, SIGNAL(receiving(int, const QString&, const QString&) ), 
-	     this, SLOT( receiving(int, const QString&, const QString&) ) );
+	     */
+    connect( server, SIGNAL(receiving(int,const QString&,const QString&) ), 
+	     this, SLOT( receiving(int,const QString&,const QString&) ) );
+    connect( server, SIGNAL(receiveDone()), this, SLOT(done()) );
 
     
     connect( w->cancelButton, SIGNAL( clicked() ), this, SLOT( cancelPressed() ) );
@@ -57,11 +68,16 @@ ReceiveDialog::ReceiveDialog( QIrServer* irserver, QWidget *parent, const char *
     connect( w->saveButton, SIGNAL( clicked() ), this, SLOT( savePressed() ) );
     connect( w->openButton, SIGNAL( clicked() ), this, SLOT( openPressed() ) );
     
-    w->applyFrame->hide();
+    reset();
 }
 
 ReceiveDialog::~ReceiveDialog()
 {
+}
+
+void ReceiveDialog::fileComplete()
+{
+    progress( totalSize );
 }
 
 void ReceiveDialog::statusMsg(const QString &str)
@@ -73,23 +89,29 @@ void ReceiveDialog::statusMsg(const QString &str)
 
 void ReceiveDialog::receiving( int size, const QString &filename, const QString &mimetype )
 {
-    connect( server, SIGNAL( statusMsg(const QString &) ), this, SLOT( statusMsg(const QString &) ) );
-    connect( server, SIGNAL( progress(int) ), this, SLOT( progress(int) ) );
+    /*
+    connect( server, SIGNAL( statusMsg(const QString&) ), this, SLOT( statusMsg(const QString&) ) );
+    connect( server, SIGNAL( progressReceive(int) ), this, SLOT( progress(int) ) );
 
+    */
+    //reset();
+
+    setInfo(size, filename, mimetype);
+    if( !receivedFiles.contains( filename ) )
+	receivedFiles += filename;
+}
+
+void ReceiveDialog::reset()
+{
     // reset widget states
     w->cancelButton->setEnabled(TRUE);
     w->openButton->setEnabled(TRUE);
-    w->progressFrame->show();
-    w->applyFrame->hide();
+    w->saveButton->setEnabled(TRUE);
     w->detailsLabel->setText("");
-
-    setInfo(size, filename, mimetype);
-}
-
-void ReceiveDialog::finished()
-{
-    disconnect( server, SIGNAL( statusMsg(const QString &) ), this, SLOT( statusMsg(const QString &) ) );
-    disconnect( server, SIGNAL( progress(int) ), this, SLOT( progress(int) ) );
+    if( isVisible() ) {
+	w->progressFrame->show();
+	w->applyFrame->hide();
+    }
 }
 
 void ReceiveDialog::setInfo( int s, const QString &fn, const QString &t )
@@ -107,34 +129,31 @@ void ReceiveDialog::setInfo( int s, const QString &fn, const QString &t )
 	w->progressBar->hide();
     }
     totalSize = s;
-
 }
 
 void ReceiveDialog::progress( int s )
 {
-    QString progressStr;
-    if ( totalSize && s != totalSize ) {
-	w->progressBar->setProgress( s );
-	progressStr = QString("%1/%1").arg(s).arg(totalSize);
-    } else {
-	progressStr = QString::number(s);
-    }
-    w->size->setText(progressStr);
-
     if ( !isVisible() ) {
-	int percent;
-	if ( totalSize )
-	    percent = ( s  * 100 / totalSize );
-	else
-	    percent = 100;
 	
 	QString str = w->filename->text();
 	if ( str.length() > 20 ) {
 	    str.truncate(17);
 	    str + "...";
 	}
-	str += QString(" (%1\%)").arg(percent);
+	if( totalSize > 0 && s <= totalSize ) {
+	    int percent = ( s  * 100 / totalSize );
+	    str += QString(" (%1\%)").arg(percent);
+	}
 	Global::statusMessage(str);
+    } else {
+	QString progressStr;
+	if ( totalSize && s != totalSize ) {
+	    w->progressBar->setProgress( s );
+	    progressStr = QString("%1/%1").arg(s).arg(totalSize);
+	} else {
+	    progressStr = QString::number(s);
+	}
+	w->size->setText(progressStr);
     }
 }
 
@@ -178,84 +197,137 @@ static QString vcalInfo( const QString &filename, bool *todo, bool *cal )
     return desc;    
 }
 
-void ReceiveDialog::received()
+void ReceiveDialog::done()
 {
-    progress( totalSize );
+    //finished receiving.
 
-    MimeType mt( w->filename->text() );
-    QString service = "Receive/"+mt.id();
-    QCString receiveChannel = Service::channel(service);
-    application = QString::null;
-    if ( receiveChannel.isEmpty() ) {
-	// Special cases...
-	// ##### should split file, or some other full fix
-	if ( mt.id() == "text/x-vCalendar" ) {
-	    bool calendar, todo;
-	    QString desc = vcalInfo( "/tmp/obex/" + w->filename->text(), &todo, &calendar );
-	    if ( calendar ) {
-		receiveChannel = Service::channel(service+"-Events");
-		application = "datebook";
-		w->detailsLabel->setText( desc );
-	    } else if ( todo ) {
-		receiveChannel = Service::channel(service+"-Tasks");
-		application = "todolist";
-		w->detailsLabel->setText( desc );
-	    }
-	}
-	if ( receiveChannel.isEmpty() ) {
-	    QCString openchannel = Service::channel("Open/"+mt.id());
-	    if ( openchannel.isEmpty() )
-		w->openButton->setEnabled(FALSE);
-	}
-    } else {
-	AppLnk app = Service::appLnk(service);
-	if ( app.isValid() )
-	    w->detailsLabel->setText( app.name() );
-    }
-    
+    // combine multiple vcards into a single file
+    receivedFiles = catFilesForType( receivedFiles, "text/x-vCard", "vcardset.vcf" );
+    receivedFiles = catFilesForType( receivedFiles, "text/x-vCalendar", "vcalset.vcs" );
+
     w->progressFrame->hide();
     w->applyFrame->show();
 
-    if ( !receiveChannel.isEmpty() ) {
-	// Send immediately
-	AppLnk lnk(Service::appLnk(service));
-	QCopEnvelope e( receiveChannel, "receiveData(QString,QString)");
-	e << QString( "/tmp/obex/" + w->filename->text() ) << mt.id();
-	close();
+    for( QStringList::ConstIterator it = receivedFiles.begin() ; it != receivedFiles.end() ; ++it ) {
+	MimeType mt( "/tmp/obex/in/" + *it );
+	QString service = "Receive/"+mt.id();
+	QCString receiveChannel = Service::channel(service);
+	application = QString::null;
+	if ( receiveChannel.isEmpty() ) {
+	    // Special cases...
+	    // ##### should split file, or some other full fix
+	    if ( mt.id() == "text/x-vCalendar" ) {
+		bool calendar, todo;
+		QString desc = vcalInfo( "/tmp/obex/in/" + *it, &todo, &calendar );
+		if ( calendar ) {
+		    receiveChannel = Service::channel(service+"-Events");
+		    application = "datebook";
+		    w->detailsLabel->setText( desc );
+		} else if ( todo ) {
+		    receiveChannel = Service::channel(service+"-Tasks");
+		    application = "todolist";
+		    w->detailsLabel->setText( desc );
+		}
+	    }
+	    if ( receiveChannel.isEmpty() ) {
+		QCString openchannel = Service::channel("Open/"+mt.id());
+		if ( openchannel.isEmpty() )
+		    w->openButton->setEnabled(FALSE);
+	    }
+	} else {
+	    AppLnk app = Service::appLnk(service);
+	    if ( app.isValid() )
+		w->detailsLabel->setText( app.name() );
+	}
+
+	if ( !receiveChannel.isEmpty() ) {
+	    // Send immediately
+	    AppLnk lnk(Service::appLnk(service));
+	    QCopEnvelope e( receiveChannel, "receiveData(QString,QString)");
+	    e << QString( "/tmp/obex/in/" + *it ) << mt.id();
+	    close();
+	    reset();
+	}
     }
-    
-    finished();
+    receivedFiles.clear();
+}
+
+//concatenate inputFiles of a certain mimeType into a single outFile. returns the new list of filenames
+QStringList ReceiveDialog::catFilesForType( const QStringList &inputFiles, const QString &mimeType, const QString &outFile )
+{
+    QStringList newFiles = inputFiles;
+    QStringList typeFiles;
+    for( QStringList::ConstIterator it = inputFiles.begin() ; it != inputFiles.end() ; ++it ) {
+	MimeType mt( *it );
+	const QString mtl = mimeType.lower();
+	if( mt.id().lower() == mtl )
+	    typeFiles += *it;
+    }
+    if( typeFiles.count() <= 1 )
+	return inputFiles; //only one file matching mimeType, no need to concat
+
+    QFile of( "/tmp/obex/in/" + outFile );
+    if( !of.open( IO_WriteOnly ) )
+	return inputFiles;
+    QTextStream ostream( &of );
+
+    for( QStringList::ConstIterator it = typeFiles.begin(); it != typeFiles.end() ; ++it ) {
+	QFile inf( "/tmp/obex/in/" + *it );
+	if( inf.open( IO_ReadOnly ) ) {
+	    QTextStream istream( &inf );
+	    QString c = istream.read();
+	    if( !c.isNull() )
+		ostream << c;
+	    inf.close();
+	}
+	inf.remove();
+	newFiles.remove( *it );
+    }
+    of.close();
+    newFiles += outFile;
+    return newFiles;
 }
 
 void ReceiveDialog::failed()
 {
-    w->cancelButton->setEnabled( FALSE );
-    w->detailsLabel->setText( tr("Failed") );
-    finished();
+    if( isVisible() ) {
+	w->detailsLabel->setText( tr("Receive Failed") );
+	w->progressFrame->hide();
+	w->cancelButton->setEnabled( FALSE );
+	w->saveButton->setEnabled(FALSE);
+	w->openButton->setEnabled(FALSE);
+	w->applyFrame->show();
+    } else {
+	Global::statusMessage( tr("Receive Failed") );
+    }
 }
 
 void ReceiveDialog::cancelPressed()
 {
-    server->cancel();
+    server->cancelReceive();
     failed();
     close();
+    reset();
 }
 
 void ReceiveDialog::discardPressed()
 {
     close();
+    reset();
 }
 
 void ReceiveDialog::savePressed()
 {
     save(FALSE);
     close();
+    reset();
 }
 
 void ReceiveDialog::openPressed()
 {
     save(TRUE);
     close();
+    reset();
 }
 
 void ReceiveDialog::save(bool open)
@@ -267,12 +339,12 @@ void ReceiveDialog::save(bool open)
     if ( !application.isEmpty() ) {
 	QCString channel = QString("QPE/Application/"+application).data();
 	QCopEnvelope e( channel, "setDocument(QString)");
-	e << QString( "/tmp/obex/" + fn );
+	e << QString( "/tmp/obex/in/" + fn );
     } else {
 	int pos = fn.findRev( "/" );
 	if ( pos != -1 )
 	    fn = fn.mid( pos );
-	QFile f("/tmp/obex/" + fn);
+	QFile f("/tmp/obex/in/" + fn);
 	if ( f.open(IO_ReadOnly) ) {
 	    DocLnk doc;
 	    doc.setType( MimeType( fn ).id() );
@@ -291,5 +363,3 @@ void ReceiveDialog::save(bool open)
 	}
     }
 }
-
-

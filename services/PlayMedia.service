@@ -1,9 +1,10 @@
+[Translation]
+File=QtopiaServices
+Context=Play Media
 [Service]
 Actions = openURL(QString,QString)
-Icon = MediaPlayer
-Name = Play Media
-Name[ja] = メディアの再生
+Icon = multimedia
+Name[]=Play Media
 [openURL(QString,QString)]
-Icon = MediaPlayer
-Name = Open Media File
-Name[ja] = メディアファイルを開く
+Icon = multimedia
+Name[]=Open Media File

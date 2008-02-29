@@ -37,11 +37,16 @@ static int RENAME(dct_quantize)(MpegEncContext *s,
                             int qscale, int *overflow)
 {
     int level=0, last_non_zero_p1, q; //=0 is cuz gcc says uninitalized ...
-    const UINT16 *qmat, *bias;
-    static __align8 INT16 temp_block[64];
+    const uint16_t *qmat, *bias;
+    __align8 int16_t temp_block[64];
+    
+    assert((7&(int)(&temp_block[0])) == 0); //did gcc align it correctly?
 
     //s->fdct (block);
-    ff_fdct_mmx (block); //cant be anything else ...
+    RENAMEl(ff_fdct) (block); //cant be anything else ...
+
+    if(s->dct_error_sum)
+        ff_denoise_dct(s, block);
 
     if (s->mb_intra) {
         int dummy;
@@ -53,8 +58,7 @@ static int RENAME(dct_quantize)(MpegEncContext *s,
         if (!s->h263_aic) {
 #if 1
         asm volatile (
-        	"xorl %%edx, %%edx	\n\t"
-        	"mul %%ecx		\n\t"
+        	"imul %%ecx		\n\t"
         	: "=d" (level), "=a"(dummy)
         	: "a" ((block[0]>>2) + q), "c" (inverse[q<<1])
         );
@@ -75,12 +79,12 @@ static int RENAME(dct_quantize)(MpegEncContext *s,
         block[0]=0; //avoid fake overflow
 //        temp_block[0] = (block[0] + (q >> 1)) / q;
         last_non_zero_p1 = 1;
-        bias = s->q_intra_matrix16_bias[qscale];
-        qmat = s->q_intra_matrix16[qscale];
+        bias = s->q_intra_matrix16[qscale][1];
+        qmat = s->q_intra_matrix16[qscale][0];
     } else {
         last_non_zero_p1 = 0;
-        bias = s->q_inter_matrix16_bias[qscale];
-        qmat = s->q_inter_matrix16[qscale];
+        bias = s->q_inter_matrix16[qscale][1];
+        qmat = s->q_inter_matrix16[qscale][0];
     }
 
     if(s->out_format == FMT_H263 && s->mpeg_quant==0){
@@ -192,7 +196,7 @@ static int RENAME(dct_quantize)(MpegEncContext *s,
     if(s->mb_intra) block[0]= level;
     else            block[0]= temp_block[0];
 
-    if(s->idct_permutation[1]==8){
+    if(s->dsp.idct_permutation_type == FF_SIMPLE_IDCT_PERM){
         if(last_non_zero_p1 <= 1) goto end;
         block[0x08] = temp_block[0x01]; block[0x10] = temp_block[0x08]; 
         block[0x20] = temp_block[0x10]; 
@@ -236,7 +240,7 @@ static int RENAME(dct_quantize)(MpegEncContext *s,
         block[0x3E] = temp_block[0x3D]; block[0x27] = temp_block[0x36]; 
         block[0x3D] = temp_block[0x2F]; block[0x2F] = temp_block[0x37]; 
         block[0x37] = temp_block[0x3E]; block[0x3F] = temp_block[0x3F];
-    }else if(s->idct_permutation[1]==4){
+    }else if(s->dsp.idct_permutation_type == FF_LIBMPEG2_IDCT_PERM){
         if(last_non_zero_p1 <= 1) goto end;
         block[0x04] = temp_block[0x01]; 
         block[0x08] = temp_block[0x08]; block[0x10] = temp_block[0x10]; 

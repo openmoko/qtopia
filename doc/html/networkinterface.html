@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia/networkinterface.cpp:26 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia/networkinterface.cpp:26 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>NetworkInterface Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>NetworkInterface Class Reference</h1>
 
 <p>The NetworkInterface class allows plugin network services.
 <a href="#details">More...</a>
@@ -83,14 +91,14 @@ services, you can define your own network service Type,
 by creating a NetworkInterface plugin.
 
 <hr><h2>Member Function Documentation</h2>
-<h3 class=fn><a href="qwidget.html">QWidget</a>&nbsp;* <a name="addStateWidget"></a>NetworkInterface::addStateWidget ( <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent, <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+<h3 class=fn>QWidget * <a name="addStateWidget"></a>NetworkInterface::addStateWidget ( QWidget&nbsp;*&nbsp;parent, <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
 </h3>
 
 Returns a widget, with <em>parent</em> as its parent, that shows
 the state of the network service defined by <em>cfg</em>.
 <p> By default, 0 is returned (no state widget).
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="cardType"></a>NetworkInterface::cardType ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+<h3 class=fn>QString <a name="cardType"></a>NetworkInterface::cardType ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
 </h3>
 Returns the pcmcia card type associated with this service.
 <p> By default, the Properties.CardType value in <em>cfg</em> is returned.
@@ -103,12 +111,12 @@ the network service defined by <em>cfg</em>. This is
 called only when the service is first added by
 the user.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="device"></a>NetworkInterface::device ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+<h3 class=fn>QString <a name="device"></a>NetworkInterface::device ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
 </h3>
 Returns the network device which is used for the connection.
 <p> By default, the Properties.Device value in <em>cfg</em> is returned.
 
-<h3 class=fn>bool <a name="doProperties"></a>NetworkInterface::doProperties ( <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent, <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg )<tt> [pure virtual]</tt>
+<h3 class=fn>bool <a name="doProperties"></a>NetworkInterface::doProperties ( QWidget&nbsp;*&nbsp;parent, <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg )<tt> [pure virtual]</tt>
 </h3>
 
 <p> Prompts the user to manipulate the properties of the
@@ -146,7 +154,7 @@ a password.
 returning TRUE on success.
 <p> There is no default implementation.
 
-<h3 class=fn>bool <a name="start-2"></a>NetworkInterface::start ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg, const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;password )<tt> [virtual]</tt>
+<h3 class=fn>bool <a name="start-2"></a>NetworkInterface::start ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg, const&nbsp;QString&nbsp;&amp;&nbsp;password )<tt> [virtual]</tt>
 </h3>
 
 <p> Starts the network service defined by <em>cfg</em>, using the given
@@ -162,11 +170,13 @@ returning TRUE on success.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

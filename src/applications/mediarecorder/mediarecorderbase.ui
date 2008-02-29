@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>276</width>
-            <height>210</height>
+            <width>319</width>
+            <height>280</height>
         </rect>
     </property>
     <property stdset="1">
@@ -25,145 +25,28 @@
     <property>
         <name>layoutSpacing</name>
     </property>
-    <grid>
+    <vbox>
         <property stdset="1">
             <name>margin</name>
-            <number>4</number>
+            <number>2</number>
         </property>
         <property stdset="1">
             <name>spacing</name>
-            <number>4</number>
+            <number>2</number>
         </property>
-        <widget row="2"  column="0"  rowspan="1"  colspan="2" >
-            <class>TimeProgressBar</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>progress</cstring>
-            </property>
-            <property stdset="1">
-                <name>sizePolicy</name>
-                <sizepolicy>
-                    <hsizetype>5</hsizetype>
-                    <vsizetype>0</vsizetype>
-                </sizepolicy>
-            </property>
-            <property stdset="1">
-                <name>minimumSize</name>
-                <size>
-                    <width>0</width>
-                    <height>30</height>
-                </size>
-            </property>
-        </widget>
-        <widget row="3"  column="0"  rowspan="1"  colspan="2" >
-            <class>QLayoutWidget</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>Layout5</cstring>
-            </property>
-            <hbox>
-                <property stdset="1">
-                    <name>margin</name>
-                    <number>0</number>
-                </property>
-                <property stdset="1">
-                    <name>spacing</name>
-                    <number>6</number>
-                </property>
-                <widget>
-                    <class>QPushButton</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>recordButton</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>3</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>focusPolicy</name>
-                        <enum>StrongFocus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Record</string>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QPushButton</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>replayButton</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>3</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>focusPolicy</name>
-                        <enum>StrongFocus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Play</string>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QPushButton</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>deleteButton</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>3</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>focusPolicy</name>
-                        <enum>StrongFocus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Delete</string>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-        <widget row="1"  column="0"  rowspan="1"  colspan="2" >
-            <class>Waveform</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>waveform</cstring>
-            </property>
-            <property stdset="1">
-                <name>sizePolicy</name>
-                <sizepolicy>
-                    <hsizetype>5</hsizetype>
-                    <vsizetype>3</vsizetype>
-                </sizepolicy>
-            </property>
-            <property stdset="1">
-                <name>minimumSize</name>
-                <size>
-                    <width>0</width>
-                    <height>30</height>
-                </size>
-            </property>
-        </widget>
-        <widget row="0"  column="1" >
+        <widget>
             <class>QGroupBox</class>
             <property stdset="1">
                 <name>name</name>
                 <cstring>GroupBox2</cstring>
+            </property>
+            <property stdset="1">
+                <name>frameShape</name>
+                <enum>Box</enum>
+            </property>
+            <property stdset="1">
+                <name>frameShadow</name>
+                <enum>Sunken</enum>
             </property>
             <property stdset="1">
                 <name>title</name>
@@ -253,7 +136,7 @@
                 </widget>
             </grid>
         </widget>
-        <widget row="0"  column="0" >
+        <widget>
             <class>QGroupBox</class>
             <property stdset="1">
                 <name>name</name>
@@ -339,7 +222,114 @@
                 </widget>
             </grid>
         </widget>
-    </grid>
+        <widget>
+            <class>Waveform</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>waveform</cstring>
+            </property>
+            <property stdset="1">
+                <name>sizePolicy</name>
+                <sizepolicy>
+                    <hsizetype>3</hsizetype>
+                    <vsizetype>3</vsizetype>
+                </sizepolicy>
+            </property>
+            <property stdset="1">
+                <name>minimumSize</name>
+                <size>
+                    <width>0</width>
+                    <height>30</height>
+                </size>
+            </property>
+        </widget>
+        <widget>
+            <class>TimeProgressBar</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>progress</cstring>
+            </property>
+            <property stdset="1">
+                <name>sizePolicy</name>
+                <sizepolicy>
+                    <hsizetype>3</hsizetype>
+                    <vsizetype>0</vsizetype>
+                </sizepolicy>
+            </property>
+            <property stdset="1">
+                <name>minimumSize</name>
+                <size>
+                    <width>0</width>
+                    <height>30</height>
+                </size>
+            </property>
+        </widget>
+        <widget>
+            <class>QLayoutWidget</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>Layout3</cstring>
+            </property>
+            <property>
+                <name>layoutSpacing</name>
+            </property>
+            <hbox>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>0</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>2</number>
+                </property>
+                <widget>
+                    <class>QPushButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>recordButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>focusPolicy</name>
+                        <enum>StrongFocus</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Record</string>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QPushButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>replayButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>focusPolicy</name>
+                        <enum>StrongFocus</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Play</string>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QPushButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>deleteButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>focusPolicy</name>
+                        <enum>StrongFocus</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Delete</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+    </vbox>
 </widget>
 <customwidgets>
     <customwidget>

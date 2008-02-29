@@ -7,13 +7,15 @@ Qt Tutorial - Chapter 7: One Thing Leads to Another
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 <p>
@@ -110,9 +112,9 @@ signal you'll see called <i>something</i>Changed().
 <p>
 This file is mainly lifted from <a href="t6.html#main">t6/main.cpp</a> and
 only the changes are noted here.  <pre>
-        <a href="qobject.html#7f8e37">connect</a>( slider, SIGNAL(valueChanged(int)),
+        <a href="qobject.html#fbde73">connect</a>( slider, SIGNAL(valueChanged(int)),
                  lcd, SLOT(display(int)) );
-        <a href="qobject.html#7f8e37">connect</a>( slider, SIGNAL(valueChanged(int)),
+        <a href="qobject.html#fbde73">connect</a>( slider, SIGNAL(valueChanged(int)),
                  SIGNAL(valueChanged(int)) );
 </pre>
 <p>
@@ -164,7 +166,7 @@ outside its legal range.
             for( int c = 0 ; c &lt; 4 ; c++ ) {
                 LCDRange* lr = new LCDRange( grid );
                 if ( previous )
-                    <a href="qobject.html#7f8e37">connect</a>( lr, SIGNAL(valueChanged(int)),
+                    <a href="qobject.html#fbde73">connect</a>( lr, SIGNAL(valueChanged(int)),
                              previous, SLOT(setValue(int)) );
                 previous = lr;
             }
@@ -202,5 +204,5 @@ You may now go on to <a href="t8.html">chapter eight.</a>
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopiapim/contact.cpp:50 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopiapim/contact.cpp:58 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>PimContact Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>PimContact Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
 
 <p>The PimContact class holds the data of an address book entry.
 <a href="#details">More...</a>
@@ -145,7 +153,7 @@ body { background: #ffffff; color: black; }
 The PimContact class holds the data of an address book entry.
 <p> This data includes information the name of the person, contact
 information, and business information such as deparment and job title.
-<p> <p>See also <a href="qpepim.html">QPEPIM Library</a>.
+<p> <p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
 
 <hr><h2>Member Type Documentation</h2>
 <h3 class=fn><a name="GenderType-enum"></a>PimContact::GenderType</h3> 
@@ -164,66 +172,66 @@ Constructs a new PimContact.
 </h3>
 Destroys the contact.
 
-<h3 class=fn><a href="qdate.html">QDate</a> <a name="anniversary"></a>PimContact::anniversary () const
+<h3 class=fn>QDate <a name="anniversary"></a>PimContact::anniversary () const
 </h3>
-Return the person's anniversary date.  <a href="qdate.html">QDate</a> will be null if there
+Return the person's anniversary date.  QDate will be null if there
 is  anniversary has not been set.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="assistant"></a>PimContact::assistant () const
+<h3 class=fn>QString <a name="assistant"></a>PimContact::assistant () const
 </h3> 
 Returns the assistant of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="bestLabel"></a>PimContact::bestLabel () const
+<h3 class=fn>QString <a name="bestLabel"></a>PimContact::bestLabel () const
 </h3>
 Returns a suitable display string for the contact.
 <p> <p>See also <a href="#fileAs">fileAs</a>() and <a href="#fullName">fullName</a>().
 
-<h3 class=fn><a href="qdate.html">QDate</a> <a name="birthday"></a>PimContact::birthday () const
+<h3 class=fn>QDate <a name="birthday"></a>PimContact::birthday () const
 </h3>
-Return the person's birthday. <a href="qdate.html">QDate</a> will be null if there
+Return the person's birthday. QDate will be null if there
 is birthday has not been set.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessCity"></a>PimContact::businessCity () const
+<h3 class=fn>QString <a name="businessCity"></a>PimContact::businessCity () const
 </h3> 
 Returns the business city of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessCountry"></a>PimContact::businessCountry () const
+<h3 class=fn>QString <a name="businessCountry"></a>PimContact::businessCountry () const
 </h3> 
 Returns the business country of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessFax"></a>PimContact::businessFax () const
+<h3 class=fn>QString <a name="businessFax"></a>PimContact::businessFax () const
 </h3> 
 Returns the business fax number of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessMobile"></a>PimContact::businessMobile () const
+<h3 class=fn>QString <a name="businessMobile"></a>PimContact::businessMobile () const
 </h3> 
 Returns the business mobile number of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessPager"></a>PimContact::businessPager () const
+<h3 class=fn>QString <a name="businessPager"></a>PimContact::businessPager () const
 </h3> 
 Returns the business pager number of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessPhone"></a>PimContact::businessPhone () const
+<h3 class=fn>QString <a name="businessPhone"></a>PimContact::businessPhone () const
 </h3> 
 Returns the business phone number of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessState"></a>PimContact::businessState () const
+<h3 class=fn>QString <a name="businessState"></a>PimContact::businessState () const
 </h3> 
 Returns the business state of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessStreet"></a>PimContact::businessStreet () const
+<h3 class=fn>QString <a name="businessStreet"></a>PimContact::businessStreet () const
 </h3> 
 Returns the business street address of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessWebpage"></a>PimContact::businessWebpage () const
+<h3 class=fn>QString <a name="businessWebpage"></a>PimContact::businessWebpage () const
 </h3> 
 Returns the business webpage of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="businessZip"></a>PimContact::businessZip () const
+<h3 class=fn>QString <a name="businessZip"></a>PimContact::businessZip () const
 </h3> 
 Returns the business zip of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="children"></a>PimContact::children () const
+<h3 class=fn>QString <a name="children"></a>PimContact::children () const
 </h3> 
 Returns the children of the contact.
 
@@ -232,247 +240,248 @@ Returns the children of the contact.
 Clear the email list for the contact, including
 the default email.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="company"></a>PimContact::company () const
+<h3 class=fn>QString <a name="company"></a>PimContact::company () const
 </h3> 
 Returns the company for the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="companyPronunciation"></a>PimContact::companyPronunciation () const
+<h3 class=fn>QString <a name="companyPronunciation"></a>PimContact::companyPronunciation () const
 </h3>
 
 Returns the pronunciation of the contacts company name.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="defaultEmail"></a>PimContact::defaultEmail () const
+<h3 class=fn>QString <a name="defaultEmail"></a>PimContact::defaultEmail () const
 </h3> 
 Returns the default email address of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="department"></a>PimContact::department () const
+<h3 class=fn>QString <a name="department"></a>PimContact::department () const
 </h3> 
 Returns the department for the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="displayBusinessAddress"></a>PimContact::displayBusinessAddress () const
+<h3 class=fn>QString <a name="displayBusinessAddress"></a>PimContact::displayBusinessAddress () const
 </h3>
 Returns the formated business address of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="displayHomeAddress"></a>PimContact::displayHomeAddress () const
+<h3 class=fn>QString <a name="displayHomeAddress"></a>PimContact::displayHomeAddress () const
 </h3>
 Returns the formated home address of the contact.
 
-<h3 class=fn><a href="qstringlist.html">QStringList</a> <a name="emailList"></a>PimContact::emailList () const
+<h3 class=fn>QStringList <a name="emailList"></a>PimContact::emailList () const
 </h3>
 Returns a list of email addresses belonging to the contact, including
 the default email address.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="fileAs"></a>PimContact::fileAs () const
+<h3 class=fn>QString <a name="fileAs"></a>PimContact::fileAs () const
 </h3> 
 Returns the string the contact is filed as.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="firstName"></a>PimContact::firstName () const
+<h3 class=fn>QString <a name="firstName"></a>PimContact::firstName () const
 </h3> 
 Returns the first name of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="firstNamePronunciation"></a>PimContact::firstNamePronunciation () const
+<h3 class=fn>QString <a name="firstNamePronunciation"></a>PimContact::firstNamePronunciation () const
 </h3>
 
 Returns the pronunciation of the contacts first name.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="fullName"></a>PimContact::fullName () const
+<h3 class=fn>QString <a name="fullName"></a>PimContact::fullName () const
 </h3>
 Returns the full name of the contact, generated from the
-title, suffix, first, middle and last name of the contact.
+current user preferences. <a href="#fileAs">fileAs</a>() in general will be a cached
+vopy of this.
+<p> <p>See also <a href="#setFileAs">setFileAs</a>().
 
 <h3 class=fn><a href="pimcontact.html#GenderType-enum">GenderType</a> <a name="gender"></a>PimContact::gender () const
 </h3>
 Returns the gender of the contact as type GenderType.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeCity"></a>PimContact::homeCity () const
+<h3 class=fn>QString <a name="homeCity"></a>PimContact::homeCity () const
 </h3> 
 Returns the home city of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeCountry"></a>PimContact::homeCountry () const
+<h3 class=fn>QString <a name="homeCountry"></a>PimContact::homeCountry () const
 </h3> 
 Returns the home country of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeFax"></a>PimContact::homeFax () const
+<h3 class=fn>QString <a name="homeFax"></a>PimContact::homeFax () const
 </h3> 
 Returns the home fax number of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeMobile"></a>PimContact::homeMobile () const
+<h3 class=fn>QString <a name="homeMobile"></a>PimContact::homeMobile () const
 </h3> 
 Returns the home mobile number of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homePhone"></a>PimContact::homePhone () const
+<h3 class=fn>QString <a name="homePhone"></a>PimContact::homePhone () const
 </h3> 
 Returns the home phone number of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeState"></a>PimContact::homeState () const
+<h3 class=fn>QString <a name="homeState"></a>PimContact::homeState () const
 </h3> 
 Returns the home state of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeStreet"></a>PimContact::homeStreet () const
+<h3 class=fn>QString <a name="homeStreet"></a>PimContact::homeStreet () const
 </h3> 
 Returns the home street address of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeWebpage"></a>PimContact::homeWebpage () const
+<h3 class=fn>QString <a name="homeWebpage"></a>PimContact::homeWebpage () const
 </h3> 
 Returns the home webpage of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="homeZip"></a>PimContact::homeZip () const
+<h3 class=fn>QString <a name="homeZip"></a>PimContact::homeZip () const
 </h3> 
 Returns the home zip of the contact.
 
-<h3 class=fn>void <a name="insertEmail"></a>PimContact::insertEmail ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;email )
+<h3 class=fn>void <a name="insertEmail"></a>PimContact::insertEmail ( const&nbsp;QString&nbsp;&amp;&nbsp;email )
 </h3>
 Adds <em>email</em> to the list of email address for the contact.
 If no default email is set, the default email will
 be set to <em>email</em>.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="jobTitle"></a>PimContact::jobTitle () const
+<h3 class=fn>QString <a name="jobTitle"></a>PimContact::jobTitle () const
 </h3> 
 Returns the job title of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="lastName"></a>PimContact::lastName () const
+<h3 class=fn>QString <a name="lastName"></a>PimContact::lastName () const
 </h3> 
 Returns the last name of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="lastNamePronunciation"></a>PimContact::lastNamePronunciation () const
+<h3 class=fn>QString <a name="lastNamePronunciation"></a>PimContact::lastNamePronunciation () const
 </h3>
 
 Returns the pronunciation of the contacts last name.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="manager"></a>PimContact::manager () const
+<h3 class=fn>QString <a name="manager"></a>PimContact::manager () const
 </h3> 
 Returns the manager of the contact.
 
-<h3 class=fn>bool <a name="match"></a>PimContact::match ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;regexp ) const
+<h3 class=fn>bool <a name="match"></a>PimContact::match ( const&nbsp;QString&nbsp;&amp;&nbsp;regexp ) const
 </h3>
 Returns TRUE if the part of contact matches <em>regexp</em>. Otherwise returns FALSE.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="middleName"></a>PimContact::middleName () const
+<h3 class=fn>QString <a name="middleName"></a>PimContact::middleName () const
 </h3> 
 Returns the middle name of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="nameTitle"></a>PimContact::nameTitle () const
+<h3 class=fn>QString <a name="nameTitle"></a>PimContact::nameTitle () const
 </h3> 
 Returns the title of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="nickname"></a>PimContact::nickname () const
+<h3 class=fn>QString <a name="nickname"></a>PimContact::nickname () const
 </h3> 
 Returns the nickname of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="notes"></a>PimContact::notes () const
+<h3 class=fn>QString <a name="notes"></a>PimContact::notes () const
 </h3> 
 Returns the notes relating to the the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="office"></a>PimContact::office () const
+<h3 class=fn>QString <a name="office"></a>PimContact::office () const
 </h3> 
 Returns the office for the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="profession"></a>PimContact::profession () const
+<h3 class=fn>QString <a name="profession"></a>PimContact::profession () const
 </h3> 
 Returns the profession of the contact.
 
-<h3 class=fn>QValueList&lt;PimContact&gt; <a name="readVCard"></a>PimContact::readVCard ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;filename )<tt> [static]</tt>
+<h3 class=fn>QValueList&lt;PimContact&gt; <a name="readVCard"></a>PimContact::readVCard ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )<tt> [static]</tt>
 </h3>
 Reads the file specified by <em>filename</em> as a list of vCards objects
 and returns the list of near equivalent contacts.
 <p> <p>See also <a href="#writeVCard">writeVCard</a>().
 
-<h3 class=fn>void <a name="removeEmail"></a>PimContact::removeEmail ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;email )
+<h3 class=fn>void <a name="removeEmail"></a>PimContact::removeEmail ( const&nbsp;QString&nbsp;&amp;&nbsp;email )
 </h3>
 Removes <em>email</em> from the list of email address for the contact.
 If the email is the default email, the default email will
 be set to the first one in the list.
 
-<h3 class=fn>void <a name="setAnniversary"></a>PimContact::setAnniversary ( const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;&nbsp;d )
+<h3 class=fn>void <a name="setAnniversary"></a>PimContact::setAnniversary ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )
 </h3>
 Sets the person's anniversary to <em>d</em>.
 
-<h3 class=fn>void <a name="setAssistant"></a>PimContact::setAssistant ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setAssistant"></a>PimContact::setAssistant ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the assistant of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBirthday"></a>PimContact::setBirthday ( const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;&nbsp;d )
+<h3 class=fn>void <a name="setBirthday"></a>PimContact::setBirthday ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )
 </h3>
 Sets the person's birthday to <em>d</em>.
 
-<h3 class=fn>void <a name="setBusinessCity"></a>PimContact::setBusinessCity ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessCity"></a>PimContact::setBusinessCity ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business city of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessCountry"></a>PimContact::setBusinessCountry ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessCountry"></a>PimContact::setBusinessCountry ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business country of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessFax"></a>PimContact::setBusinessFax ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessFax"></a>PimContact::setBusinessFax ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business fax number of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessMobile"></a>PimContact::setBusinessMobile ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessMobile"></a>PimContact::setBusinessMobile ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business mobile phone number of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessPager"></a>PimContact::setBusinessPager ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessPager"></a>PimContact::setBusinessPager ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business pager number of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessPhone"></a>PimContact::setBusinessPhone ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessPhone"></a>PimContact::setBusinessPhone ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business phone number of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessState"></a>PimContact::setBusinessState ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessState"></a>PimContact::setBusinessState ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business state of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessStreet"></a>PimContact::setBusinessStreet ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessStreet"></a>PimContact::setBusinessStreet ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business street address of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessWebpage"></a>PimContact::setBusinessWebpage ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessWebpage"></a>PimContact::setBusinessWebpage ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business webpage of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setBusinessZip"></a>PimContact::setBusinessZip ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setBusinessZip"></a>PimContact::setBusinessZip ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the business zip code of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setChildren"></a>PimContact::setChildren ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;children )
+<h3 class=fn>void <a name="setChildren"></a>PimContact::setChildren ( const&nbsp;QString&nbsp;&amp;&nbsp;children )
 </h3>
 Sets the children of the contact to <em>children</em>.
 
-<h3 class=fn>void <a name="setCompany"></a>PimContact::setCompany ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setCompany"></a>PimContact::setCompany ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the company for contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setCompanyPronunciation"></a>PimContact::setCompanyPronunciation ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setCompanyPronunciation"></a>PimContact::setCompanyPronunciation ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the pronunciation of the contacts company name to <em>str</em>.
 
-<h3 class=fn>void <a name="setDefaultEmail"></a>PimContact::setDefaultEmail ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;v )
+<h3 class=fn>void <a name="setDefaultEmail"></a>PimContact::setDefaultEmail ( const&nbsp;QString&nbsp;&amp;&nbsp;v )
 </h3>
 Sets the default email to <em>v</em> and adds it to the list.
 
-<h3 class=fn>void <a name="setDepartment"></a>PimContact::setDepartment ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setDepartment"></a>PimContact::setDepartment ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the department for contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setEmailList"></a>PimContact::setEmailList ( const&nbsp;<a href="qstringlist.html">QStringList</a>&nbsp;&amp;&nbsp;emails )
+<h3 class=fn>void <a name="setEmailList"></a>PimContact::setEmailList ( const&nbsp;QStringList&nbsp;&amp;&nbsp;emails )
 </h3>
 Sets the email list to <em>emails</em>
 
-<h3 class=fn>void <a name="setFileAs"></a>PimContact::setFileAs ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setFileAs"></a>PimContact::setFileAs ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the contact to filed as <em>str</em>.
 
 <h3 class=fn>void <a name="setFileAs-2"></a>PimContact::setFileAs ()
 </h3>
-Set the contact to be filed as a string constructed from the contact's
-name fields.
+Set the contact to be filed by the <a href="#fullName">fullName</a>().
 
-<h3 class=fn>void <a name="setFirstName"></a>PimContact::setFirstName ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setFirstName"></a>PimContact::setFirstName ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the first name of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setFirstNamePronunciation"></a>PimContact::setFirstNamePronunciation ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setFirstNamePronunciation"></a>PimContact::setFirstNamePronunciation ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the pronunciation of the contacts first name to <em>str</em>.
 
@@ -480,109 +489,109 @@ Sets the pronunciation of the contacts first name to <em>str</em>.
 </h3>
 Sets the persons gender to the enum value specified in <em>g</em>.
 
-<h3 class=fn>void <a name="setHomeCity"></a>PimContact::setHomeCity ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeCity"></a>PimContact::setHomeCity ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home city of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomeCountry"></a>PimContact::setHomeCountry ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeCountry"></a>PimContact::setHomeCountry ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home country of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomeFax"></a>PimContact::setHomeFax ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeFax"></a>PimContact::setHomeFax ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home fax number of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomeMobile"></a>PimContact::setHomeMobile ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeMobile"></a>PimContact::setHomeMobile ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home mobile phone number of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomePhone"></a>PimContact::setHomePhone ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomePhone"></a>PimContact::setHomePhone ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home phone number of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomeState"></a>PimContact::setHomeState ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeState"></a>PimContact::setHomeState ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home state of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomeStreet"></a>PimContact::setHomeStreet ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeStreet"></a>PimContact::setHomeStreet ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home street address of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomeWebpage"></a>PimContact::setHomeWebpage ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeWebpage"></a>PimContact::setHomeWebpage ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home webpage of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setHomeZip"></a>PimContact::setHomeZip ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setHomeZip"></a>PimContact::setHomeZip ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the home zip code of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setJobTitle"></a>PimContact::setJobTitle ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setJobTitle"></a>PimContact::setJobTitle ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the job title of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setLastName"></a>PimContact::setLastName ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setLastName"></a>PimContact::setLastName ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the last name of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setLastNamePronunciation"></a>PimContact::setLastNamePronunciation ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setLastNamePronunciation"></a>PimContact::setLastNamePronunciation ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the pronunciation of the contacts last name to <em>str</em>.
 
-<h3 class=fn>void <a name="setManager"></a>PimContact::setManager ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setManager"></a>PimContact::setManager ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the manager of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setMiddleName"></a>PimContact::setMiddleName ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setMiddleName"></a>PimContact::setMiddleName ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the middle name of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setNameTitle"></a>PimContact::setNameTitle ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setNameTitle"></a>PimContact::setNameTitle ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the title of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setNickname"></a>PimContact::setNickname ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setNickname"></a>PimContact::setNickname ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the nickname of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setNotes"></a>PimContact::setNotes ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setNotes"></a>PimContact::setNotes ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the notes about the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setOffice"></a>PimContact::setOffice ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setOffice"></a>PimContact::setOffice ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the office for contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setProfession"></a>PimContact::setProfession ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setProfession"></a>PimContact::setProfession ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the profession of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setSpouse"></a>PimContact::setSpouse ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setSpouse"></a>PimContact::setSpouse ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the spouse of the contact to <em>str</em>.
 
-<h3 class=fn>void <a name="setSuffix"></a>PimContact::setSuffix ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;str )
+<h3 class=fn>void <a name="setSuffix"></a>PimContact::setSuffix ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
 Sets the suffix of the contact to <em>str</em>.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="spouse"></a>PimContact::spouse () const
+<h3 class=fn>QString <a name="spouse"></a>PimContact::spouse () const
 </h3> 
 Returns the spouse of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="suffix"></a>PimContact::suffix () const
+<h3 class=fn>QString <a name="suffix"></a>PimContact::suffix () const
 </h3> 
 Returns the suffix of the contact.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="toRichText"></a>PimContact::toRichText () const
+<h3 class=fn>QString <a name="toRichText"></a>PimContact::toRichText () const
 </h3>
-Returns a rich text formatted <a href="qstring.html">QString</a> of the PimContact.
+Returns a rich text formatted QString of the PimContact.
 
-<h3 class=fn>void <a name="writeVCard"></a>PimContact::writeVCard ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;filename, const&nbsp;QValueList&lt;PimContact&gt;&nbsp;&amp;&nbsp;contacts )<tt> [static]</tt>
+<h3 class=fn>void <a name="writeVCard"></a>PimContact::writeVCard ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, const&nbsp;QValueList&lt;PimContact&gt;&nbsp;&amp;&nbsp;contacts )<tt> [static]</tt>
 </h3>
 Write the list of <em>contacts</em> as vCard objects to the file
 specified by <em>filename</em>.
 <p> <p>See also <a href="#readVCard">readVCard</a>().
 
-<h3 class=fn>void <a name="writeVCard-2"></a>PimContact::writeVCard ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;filename, const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )<tt> [static]</tt>
+<h3 class=fn>void <a name="writeVCard-2"></a>PimContact::writeVCard ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )<tt> [static]</tt>
 </h3>
 Write the <em>contact</em> as a vCard object to the file
 specified by <em>filename</em>.
@@ -590,11 +599,13 @@ specified by <em>filename</em>.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

@@ -1,25 +1,24 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE    = lib
-quicklaunch:DESTDIR     = $(QPEDIR)/plugins/application
+HEADERS+=mainwindow.h
+SOURCES+=mainwindow.cpp main.cpp
 
-CONFIG		+= qtopia warn_on release
-HEADERS		= mainwindow.h \
-		  todotable.h \
-		  todoentryimpl.h
-SOURCES		= mainwindow.cpp \
-		  todotable.cpp \
-		  todoentryimpl.cpp
+include (todo.pri)
 
-multiprocess:SOURCES+=main.cpp
+CONFIG+=pimlib
 
-INTERFACES	= taskdetail.ui
 
-TARGET		= todolist
+service.files=$${QTOPIA_DEPOT_PATH}/services/Tasks/todolist
+service.path=/services/Tasks
+qdlservice.files=$${QTOPIA_DEPOT_PATH}/services/qdl/todolist
+qdlservice.path=/services/qdl
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/todolist.desktop
+desktop.path=/apps/Applications
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/todo*
+help.path=/help/html
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/todolist/*
+pics.path=/pics/todolist
+INSTALLS+=service qdlservice desktop help
+PICS_INSTALLS+=pics
 
-unix:LIBS       += -lqpepim
-win32:LIBS      += $(QPEDIR)/lib/qpepim.lib
-
-TRANSLATIONS = todolist-en_GB.ts todolist-de.ts todolist-ja.ts todolist-no.ts
+PACKAGE_NAME=qpe-todo
+PACKAGE_DESCRIPTION=Todo helps you manage your list of tasks.
+PACKAGE_DEPENDS+=qpe-libqtopiapim1

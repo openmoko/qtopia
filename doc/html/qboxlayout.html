@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -117,8 +119,8 @@ constructors.
 <p>See also the <a href="layout.html">Layout overview documentation</a>
 <p>Examples:
  <a href="layout-layout-cpp.html#QBoxLayout">layout/layout.cpp</a>
- <a href="popup-popup-cpp.html#QBoxLayout">popup/popup.cpp</a>
  <a href="customlayout-main-cpp.html#QBoxLayout">customlayout/main.cpp</a>
+ <a href="popup-popup-cpp.html#QBoxLayout">popup/popup.cpp</a>
 
 <hr><h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Direction">QBoxLayout::Direction</a></h3>
@@ -133,17 +135,17 @@ a box layout. The possible values are:
 <li><code>Up</code> - An alias for <code>BottomToTop</code>
 </ul>
 <hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="5b6ca2"></a>QBoxLayout::QBoxLayout ( <a href="qboxlayout.html#Direction">Direction</a> <a href="d.html">d</a>, int space = -1, const char * name=0 )</h3>
+<h3 class="fn"><a name="5b6ca2"></a>QBoxLayout::QBoxLayout ( <a href="qboxlayout.html#Direction">Direction</a> d, int space = -1, const char * name=0 )</h3>
 <p>If <em>space</em> is -1, this QBoxLayout will inherit its parent's
 <a href="qlayout.html#372777">spacing</a>(), otherwise <em>space</em> is used.
 <p>You have to insert this box into another layout.
 <p>Examples:
  <a href="layout-layout-cpp.html#QBoxLayout">layout/layout.cpp</a>
-<h3 class="fn"><a name="744519"></a>QBoxLayout::QBoxLayout ( <a href="qlayout.html">QLayout</a> * parentLayout, <a href="qboxlayout.html#Direction">Direction</a> <a href="d.html">d</a>, int space = -1, const char * name=0 )</h3>
-<p>Constructs a new QBoxLayout with direction <em><a href="d.html">d</a></em> and inserts it into
+<h3 class="fn"><a name="744519"></a>QBoxLayout::QBoxLayout ( <a href="qlayout.html">QLayout</a> * parentLayout, <a href="qboxlayout.html#Direction">Direction</a> d, int space = -1, const char * name=0 )</h3>
+<p>Constructs a new QBoxLayout with direction <em>d</em> and inserts it into
 <em>parentLayout.</em>
-<h3 class="fn"><a name="de1308"></a>QBoxLayout::QBoxLayout ( <a href="qwidget.html">QWidget</a> * parent, <a href="qboxlayout.html#Direction">Direction</a> <a href="d.html">d</a>, int border=0, int space = -1, const char * name=0 )</h3>
-<p>Constructs a new QBoxLayout with direction <em><a href="d.html">d</a></em> and main widget <em>parent. parent</em> may not be 0.
+<h3 class="fn"><a name="de1308"></a>QBoxLayout::QBoxLayout ( <a href="qwidget.html">QWidget</a> * parent, <a href="qboxlayout.html#Direction">Direction</a> d, int border=0, int space = -1, const char * name=0 )</h3>
+<p>Constructs a new QBoxLayout with direction <em>d</em> and main widget <em>parent. parent</em> may not be 0.
 <p><em>border</em> is the number of pixels between the edge of the widget and
 the managed children.  <em>space</em> is the default number of pixels
 between neighbouring children.  If <em>space</em> is -1 the value
@@ -190,10 +192,10 @@ indicates that the widget should not grow to fill the available
 space, but should be sized according to <a href="#b239cc">sizeHint</a>().
 <p>See also  <a href="#5f12fa">insertWidget</a>(), <a href="qlayout.html#a83e73">setAutoAdd</a>(), <a href="#6ff301">addLayout</a>() and <a href="#fc3fb6">addSpacing</a>().
 <p>Examples:
- <a href="layout-layout-cpp.html#addWidget">layout/layout.cpp</a>
- <a href="popup-popup-cpp.html#addWidget">popup/popup.cpp</a>
  <a href="scrollview-scrollview-cpp.html#addWidget">scrollview/scrollview.cpp</a>
+ <a href="layout-layout-cpp.html#addWidget">layout/layout.cpp</a>
  <a href="customlayout-main-cpp.html#addWidget">customlayout/main.cpp</a>
+ <a href="popup-popup-cpp.html#addWidget">popup/popup.cpp</a>
 <h3 class="fn">QBoxLayout::Direction <a name="8d15c9"></a>QBoxLayout::direction() const</h3>
 <p>Returns the (serial) direction of the box. <a href="#ebba99">addWidget</a>() and <a href="#fc3fb6">addSpacing</a>()
 work in this direction; the stretch stretches in this direction.
@@ -285,7 +287,7 @@ TRUE, if <em>w</em> is found in this layout (not including child layouts).
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -293,5 +295,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

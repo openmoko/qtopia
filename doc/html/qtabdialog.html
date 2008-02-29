@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -34,7 +36,7 @@ Inherits <a href="qdialog.html">QDialog</a>.
 <ul>
 <li><div class="fn"><a href="#33f89e"><b>QTabDialog</b></a> ( QWidget * parent=0, const char * name=0, bool modal=FALSE, WFlags f=0 ) </div>
 <li><div class="fn"><a href="#026f5d"><b>~QTabDialog</b></a> () </div>
-<li><div class="fn">virtual void <a href="#632ea3"><b>setFont</b></a> ( const QFont &amp; font ) </div>
+<li><div class="fn">void <a href="#632ea3"><b>setFont</b></a> ( const QFont &amp; font ) </div>
 <li><div class="fn">void <a href="#74f2ce"><b>addTab</b></a> ( QWidget *, const QString &amp; ) </div>
 <li><div class="fn">void <a href="#193b2b"><b>addTab</b></a> ( QWidget * child, const QIconSet &amp; iconset, const QString &amp; label ) </div>
 <li><div class="fn">void <a href="#7430da"><b>addTab</b></a> ( QWidget *, QTab * ) </div>
@@ -211,7 +213,7 @@ page.  Note the difference between the widget name (which you supply
 to widget constructors and to e.g. <a href="#2eb676">setTabEnabled</a>()) and the tab
 label: The name is internal to the program and invariant, while the
 label is shown on screen and may vary according to e.g. language.
-<p><em>label</em> is written in the <a href="qbutton.html">QButton</a> style, where &P makes Qt create
+<p><em>label</em> is written in the <a href="qbutton.html">QButton</a> style, where &<a href="P.html">P</a> makes Qt create
 an accelerator key on Alt-P for this page.  For example:
 <p><pre>    td-&gt;addTab( graphicsPane, "&amp;Graphics" );
     td-&gt;addTab( soundPane, "&amp;Sound" );
@@ -285,7 +287,7 @@ page.  Note the difference between the widget name (which you supply
 to widget constructors and to e.g. <a href="#2eb676">setTabEnabled</a>()) and the tab
 label: The name is internal to the program and invariant, while the
 label is shown on screen and may vary according to e.g. language.
-<p><em>label</em> is written in the <a href="qbutton.html">QButton</a> style, where &P makes Qt create
+<p><em>label</em> is written in the <a href="qbutton.html">QButton</a> style, where &<a href="P.html">P</a> makes Qt create
 an accelerator key on Alt-P for this page.  For example:
 <p><pre>    td-&gt;insertTab( graphicsPane, "&amp;Graphics" );
     td-&gt;insertTab( soundPane, "&amp;Sound" );
@@ -357,12 +359,11 @@ back to the application defaults.
 <a href="qstring.html#e21796">null string</a>,
 no button is shown.
 <p>See also  <a href="#6295a7">setApplyButton</a>(), <a href="#3ca594">setCancelButton</a>() and <a href="#ff00e5">defaultButtonPressed</a>().
-<h3 class="fn">void <a name="632ea3"></a>QTabDialog::setFont ( const <a href="qfont.html">QFont</a> &amp; font ) <code>[virtual]</code></h3>
+<h3 class="fn">void <a name="632ea3"></a>QTabDialog::setFont ( const <a href="qfont.html">QFont</a> &amp; font )</h3>
 <p>Sets the font for the tabs to <em>font.</em>
 <p>If the widget is visible, the display is updated with the new font
 immediately.  There may be some geometry changes, depending on the
 size of the old and new fonts.
-<p>Reimplemented from <a href="qwidget.html#c52788">QWidget.</a>
 <h3 class="fn">void <a name="164267"></a>QTabDialog::setHelpButton ()</h3>
 <p>Adds a Help button to the dialog.  The button's text is set to
 a localizable "Help".
@@ -433,7 +434,7 @@ confuse the user.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -441,5 +442,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

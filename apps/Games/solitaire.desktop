@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaGames
+Context=Patience
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Comment[]=A Game of Patience
+Exec=solitaire
+Icon=Solitaire
+Type=Application
+Name[]=Pa­tience

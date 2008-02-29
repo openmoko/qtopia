@@ -1,4 +1,5 @@
-/jrevdct_arm.S/1.1/Mon Aug 13 21:38:25 2001//
-/dsputil_arm.c/1.4/Wed Nov 20 05:25:11 2002//
-/mpegvideo_arm.c/1.5/Thu Nov 21 03:19:18 2002//
+/dsputil_arm.c/1.7/Mon Jul  7 11:19:18 2003//D2003.11.10.14.00.00
+/jrevdct_arm.S/1.1/Mon Aug 13 21:38:25 2001//D2003.11.10.14.00.00
+/mpegvideo_arm.c/1.7/Mon Mar  3 14:54:00 2003//D2003.11.10.14.00.00
+/simple_idct_arm.S/1.1/Mon Jul  7 11:19:18 2003//D2003.11.10.14.00.00
 D

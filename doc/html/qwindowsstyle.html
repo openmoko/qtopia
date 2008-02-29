@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -37,7 +39,10 @@ Inherits <a href="qcommonstyle.html">QCommonStyle</a>.
 <li><div class="fn">virtual <a href="#36557b"><b>~QWindowsStyle</b></a> () </div>
 <li><div class="fn">virtual void <a href="#1b2d1d"><b>drawButton</b></a> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, bool sunken = FALSE, const QBrush * fill = 0 ) </div>
 <li><div class="fn">virtual void <a href="#fe5aaa"><b>drawExclusiveIndicatorMask</b></a> ( QPainter * p, int x, int y, int w, int h, bool on ) </div>
-<li><div class="fn">virtual void <a href="#6ff546"><b>drawSliderMask</b></a> ( QPainter * p, int x, int y, int w, int h, Orientation, bool tickAbove, bool tickBelow ) </div>
+<li><div class="fn">virtual void <b>drawSlider</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, Orientation, bool tickAbove, bool tickBelow ) </div>
+<li><div class="fn">void <b>drawSliderMask</b> ( QPainter * p, int x, int y, int w, int h, Orientation, bool tickAbove, bool tickBelow ) </div>
+<li><div class="fn">virtual void <b>drawSliderGroove</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, QCOORD c, Orientation ) </div>
+<li><div class="fn">virtual void <b>drawSplitter</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, Orientation ) </div>
 </ul>
 <h2>Protected Members</h2>
 <ul>
@@ -101,18 +106,6 @@ platform. Naturally it is also Qt's default GUI style on Windows.
 <h3 class="fn">void <a name="671aef"></a>QWindowsStyle::drawScrollBarControls ( <a href="qpainter.html">QPainter</a> * p, const <a href="qscrollbar.html">QScrollBar</a> * sb, int sliderStart, uint controls, uint activeControl ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qstyle.html#e3d23d">QStyle.</a>
-<h3 class="fn">void <a name="79d326"></a>QWindowsStyle::drawSlider ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a> orient, bool tickAbove, bool tickBelow ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qstyle.html#11145c">QStyle.</a>
-<h3 class="fn">void <a name="9884f4"></a>QWindowsStyle::drawSliderGroove ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, QCOORD c, <a href="qt.html#Orientation">Orientation</a> orient ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qstyle.html#c3fcb9">QStyle.</a>
-<h3 class="fn">void <a name="6ff546"></a>QWindowsStyle::drawSliderMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, <a href="qt.html#Orientation">Orientation</a> orient, bool tickAbove, bool tickBelow ) <code>[virtual]</code></h3>
-<p>Draws the mask of a slider.
-<p>Reimplemented from <a href="qstyle.html#ee7ad4">QStyle.</a>
-<h3 class="fn">void <a name="6d7c47"></a>QWindowsStyle::drawSplitter ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a> ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qstyle.html#acbd66">QStyle.</a>
 <h3 class="fn">void <a name="205098"></a>QWindowsStyle::drawTab ( <a href="qpainter.html">QPainter</a> * p, const <a href="qtabbar.html">QTabBar</a> * tb, <a href="qtab.html">QTab</a> * t, bool selected )</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <h3 class="fn">void <a name="49ff37"></a>QWindowsStyle::drawTabMask ( <a href="qpainter.html">QPainter</a> * p, const <a href="qtabbar.html">QTabBar</a> * tb, <a href="qtab.html">QTab</a> * t, bool selected )</h3>
@@ -163,7 +156,7 @@ It is called from <a href="qpainter.html#e5134d">qDrawWinButton</a>() and <a hre
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -171,5 +164,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

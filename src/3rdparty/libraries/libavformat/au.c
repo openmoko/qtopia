@@ -29,7 +29,7 @@
 #include "avi.h"
 
 /* if we don't know the size in advance */
-#define AU_UNKOWN_SIZE ((UINT32)(~0))
+#define AU_UNKOWN_SIZE ((uint32_t)(~0))
 
 /* The ffmpeg codecs we support, and the IDs they have in the file */
 static const CodecTag codec_au_tags[] = {
@@ -39,20 +39,20 @@ static const CodecTag codec_au_tags[] = {
     { 0, 0 },
 };
 
+#ifdef CONFIG_ENCODERS
 /* AUDIO_FILE header */
 static int put_au_header(ByteIOContext *pb, AVCodecContext *enc)
 {
-    int tag;
-
-    tag = codec_get_tag(codec_au_tags, enc->codec_id);
-    if (tag == 0)
+    if(!enc->codec_tag)
+       enc->codec_tag = codec_get_tag(codec_au_tags, enc->codec_id);
+    if(!enc->codec_tag)
         return -1;
     put_tag(pb, ".snd");       /* magic number */
     put_be32(pb, 24);           /* header size */
     put_be32(pb, AU_UNKOWN_SIZE); /* data size */
-    put_be32(pb, (UINT32)tag);     /* codec ID */
+    put_be32(pb, (uint32_t)enc->codec_tag);     /* codec ID */
     put_be32(pb, enc->sample_rate);
-    put_be32(pb, (UINT32)enc->channels);
+    put_be32(pb, (uint32_t)enc->channels);
     return 0;
 }
 
@@ -73,7 +73,7 @@ static int au_write_header(AVFormatContext *s)
 }
 
 static int au_write_packet(AVFormatContext *s, int stream_index_ptr,
-                           UINT8 *buf, int size, int force_pts)
+                           const uint8_t *buf, int size, int64_t pts)
 {
     ByteIOContext *pb = &s->pb;
     put_buffer(pb, buf, size);
@@ -90,7 +90,7 @@ static int au_write_trailer(AVFormatContext *s)
         /* update file size */
         file_size = url_ftell(pb);
         url_fseek(pb, 8, SEEK_SET);
-        put_be32(pb, (UINT32)(file_size - 24));
+        put_be32(pb, (uint32_t)(file_size - 24));
         url_fseek(pb, file_size, SEEK_SET);
 
         put_flush_packet(pb);
@@ -98,6 +98,7 @@ static int au_write_trailer(AVFormatContext *s)
 
     return 0;
 }
+#endif //CONFIG_ENCODERS
 
 static int au_probe(AVProbeData *p)
 {
@@ -140,14 +141,9 @@ static int au_read_header(AVFormatContext *s,
     }
 
     /* now we are ready: build format streams */
-    st = av_malloc(sizeof(AVStream));
+    st = av_new_stream(s, 0);
     if (!st)
         return -1;
-    s->nb_streams = 1;
-    s->streams[0] = st;
-
-    st->id = 0;
-    
     st->codec.codec_type = CODEC_TYPE_AUDIO;
     st->codec.codec_tag = id;
     st->codec.codec_id = codec;
@@ -193,6 +189,7 @@ static AVInputFormat au_iformat = {
     au_read_close,
 };
 
+#ifdef CONFIG_ENCODERS
 static AVOutputFormat au_oformat = {
     "au",
     "SUN AU Format",
@@ -205,10 +202,13 @@ static AVOutputFormat au_oformat = {
     au_write_packet,
     au_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
 int au_init(void)
 {
     av_register_input_format(&au_iformat);
+#ifdef CONFIG_ENCODERS
     av_register_output_format(&au_oformat);
+#endif //CONFIG_ENCODERS
     return 0;
 }

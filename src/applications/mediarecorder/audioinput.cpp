@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -554,12 +569,25 @@ void AudioInputPrivate::open( AudioInput *input, bool trialOpen )
 	}
     }
 
+#ifdef QSSAUDIO
+    // if we are using qss, we need to set the values
+    // to the same thing qss will want to set the values
+    // to.  ideally would use qss for recording as well.
+    int preffmt = AFMT_S16_LE;
+    int prefchan = 2;
+    int preffreq = 44100;
+#else
+    int preffmt = format;
+    int prefchan = channels;
+    int preffreq = frequency;
+#endif
+
     // Configure the device with the recommended values,
     // and read back what the device is really capable of.
-    int value = (int)format;
+    int value = (int)preffmt;
     ioctl( fd, SNDCTL_DSP_SETFMT, &value );
     format = (unsigned int)value;
-    value = (int)channels;
+    value = (int)prefchan;
     ioctl( fd, SNDCTL_DSP_CHANNELS, &value );
     devChannels = (unsigned int)value;
 #ifdef QT_QWS_SL5XXX
@@ -567,16 +595,16 @@ void AudioInputPrivate::open( AudioInput *input, bool trialOpen )
     // to halve the specified frequency when set to stereo, so we
     // have to double the value before setting.
     if ( channels == 2 ) {
-	value = (int)(frequency * 2);
+	value = (int)(preffreq * 2);
 	ioctl( fd, SNDCTL_DSP_SPEED, &value );
-	devFrequency = frequency;
+	devFrequency = preffreq;
     } else {
-	value = (int)frequency;
+	value = (int)preffreq;
 	ioctl( fd, SNDCTL_DSP_SPEED, &value );
 	devFrequency = (unsigned int)value;
     }
 #else
-    value = (int)frequency;
+    value = (int)preffreq;
     ioctl( fd, SNDCTL_DSP_SPEED, &value );
     devFrequency = (unsigned int)value;
 #endif

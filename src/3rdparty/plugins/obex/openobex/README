@@ -1,3 +1,7 @@
+This is based on the src/ directory from the Open OBEX 1.0.0 distribution.
+
+-- Original README --
+
 This is the Open OBEX c-library. I have compiled it on Linux, Solaris
 (no IrDA) and Win2K. Maybe it compiles on other platforms to.
 

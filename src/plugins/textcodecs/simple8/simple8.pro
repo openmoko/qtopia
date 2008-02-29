@@ -1,11 +1,10 @@
-singleprocess:singleprocess=true
+CONFIG		+= qtopiaplugin
 
-TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+TARGET		= simple8
+
 HEADERS		= simple8impl.h
 SOURCES		= simple8impl.cpp
-TARGET		= simple8
-DESTDIR		= $(QPEDIR)/plugins/textcodecs
-VERSION		= 1.0.0
+
+PACKAGE_NAME	= qpe-simple8-textcodec
+
+TRANSLATABLES = $${HEADERS} $${SOURCES}

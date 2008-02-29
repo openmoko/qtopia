@@ -1,13 +1,22 @@
-<html>
-<head>
-<title>Alarm Settings</title>
-</head>
-<body>
-<p><b>Alarm Settings</b>
-<p>Alarm settings are used to specify whether an alarm should be preset for newly created events a specified number of minutes prior to an events starting time.</p>
-<p><b>To activate Preset Alarms:<br></b>
-- Tap the <b>Preset</b> checkbox to place a tick in it.<br>
-- Specify the number of minutes by tapping the up and down arrows beside the minutes box.<br>
-- Tap <img src= OKButton.png alt= OK > to save your changes or <img src= CloseButton.png alt= X > to cancel.</p>
-</body>
-</html>
+%%PDA%%
+{SetMinutes}={using the up and down arrows beside the minutes box}
+{Tap}={Tap}
+{OkButton}={qpe/pda/OKButton.png}
+{CancelButton}={qpe/pda/CloseButton.png}
+@@PDA@@
+%%PHONE%%
+{SetMinutes}={highlighting the field and using the keypad to enter the number}
+{Tap}={Press}
+{OkButton}={contextbar/ok.png}
+{CancelButton}={contextbar/cancel.png}
+@@PHONE@@
+<qt title="Alarm Settings">
+<h3>Alarm Settings</h3>
+<p>Alarm settings are used to specify if an alarm should be preset for newly created events and if yes, then how many minutes prior to an event's starting time should the alarm go off.</p>
+<p><b>To activate Preset Alarms:</b></p>
+<ul>
+<li>Select the <b>Preset</b> checkbox to place a tick in it.</li>
+<li>Specify the number of minutes by $${SetMinutes}.</li>
+<li>$${Tap} <img src="$${OkButton}" alt="OK"> to save your changes or <img src="$${CancelButton}" alt="X"> to cancel.</li>
+</ul>
+</qt>

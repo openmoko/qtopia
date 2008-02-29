@@ -1,0 +1,11 @@
+[Desktop Entry]
+Comment[]=Video Player
+Exec=videos
+Icon=MPEGPlayer
+Type=Application
+MimeType=video/*
+Name[]=Vi­deos
+[Translation]
+File=QtopiaApplications
+Context=Videos
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation

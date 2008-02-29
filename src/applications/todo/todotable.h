@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -29,31 +44,38 @@
 #include <qtopia/pim/private/todoxmlio_p.h>
 
 class QTimer;
+class PriorityEdit;
+class PrTask;
 
 class TablePrivate;
-
-#if defined(QTOPIA_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-template class QTOPIAPIM_EXPORT SortedRecords<PimTask>;
-// MOC_SKIP_END
-#endif
 
 class TodoTable : public QTable
 {
     Q_OBJECT
 
 public:
-    TodoTable( TodoXmlIO *tasks, QWidget *parent = 0, const char * name = 0, const char *appPath=0 );
+    TodoTable( QWidget *parent = 0, const char * name = 0, const char *appPath=0, bool readonly = FALSE );
     ~TodoTable();
-
-    void clearFindRow() { currFindRow = -2; }
 
     bool hasCurrentEntry();
     PimTask currentEntry();
-    void setCurrentEntry(const QUuid &);
+#ifdef QTOPIA_PHONE
+    void setCurrentCell(int, int);
+#endif
+    void setCurrentEntry(const QUuid &u );
+    void clearFindRow() {
+	searchResults.clear();
+	currFind = searchResults.end();
+    }
 
+    bool categoriesChanged(const QArray<int> &);
     QString categoryLabel( int id );
 
+    void setCompletedFilter(bool);
+    bool completedFilter() const;
+
+    void setFilter(int);
+    int filter() const;
     virtual void sortColumn( int col, bool , bool);
 
     void paintFocus(QPainter *p, const QRect &r);
@@ -74,7 +96,7 @@ public:
     
     void setSelectionMode(SelectionMode m);
     SelectionMode selectionMode() { return mSel; }
-    QValueList<QUuid> selectedTasks();
+    QValueList<int> selectedTasks();
     QValueList<PimTask> selected();
     void selectAll();
  
@@ -83,9 +105,23 @@ public:
     
     static QString statusToText(PimTask::TaskStatus s);
 
+    void removeList(const QValueList<int> &t);
+    QSize sizeHint() const { return QSize(QTable::sizeHint().width(), rowHeight(0)*10);}
+
+    const QList<PrTask>& tasks() { return mTasks->tasks(); }
+
 public slots:
-    void slotDoFind( const QString &findString, int category );
+    void addEntry(const PimTask &todo, bool = TRUE);
+    void removeEntry(const PimTask &todo);
+    void updateEntry(const PimTask &todo);
+
+    // finds from current row
+    void find( const QString &findString );
+    // finds from current result, previous search string.
+    void findNext();
     void reload();
+    void loadData();
+    void saveData(bool force = FALSE);
     void fitHeadersToWidth();
 
 signals:
@@ -101,6 +137,7 @@ signals:
     void findFound();
 
 protected:
+    QWidget* priorityEdit(int, int);
     void setFields(QValueList<int> f, QStringList sizes);
     void calcFieldSizes(int oldSize, int);
     int defaultFieldSize(PimTask::TaskFields f);
@@ -113,9 +150,9 @@ protected:
     void resizeEvent( QResizeEvent *e );
     void showEvent( QShowEvent *e);
 
-    int rowHeight( int ) const;
     int rowPos( int row ) const;
     int rowAt( int pos ) const;
+    int rowHeight( int ) const;
 
     void fontChange( const QFont & );
 
@@ -125,41 +162,54 @@ protected:
 private slots:
     void cornerButtonClicked();
     void refresh();
+    void delaySetCellContentFromEditor();
     void setCellContentFromEditor();
-    void slotClicked( int row, int col, int button, const QPoint &pos );
-    void slotPressed( int row, int col, int button, const QPoint &pos );
-    void slotDoubleClicked(int, int, int, const QPoint &);
-    void slotCurrentChanged(int row, int col );
+    void delayCancelEdit();
+    void cancelEdit();
+    void activateCell( int row, int col, int button, const QPoint &pos );
+    void startMenuTimer( int row, int col, int button, const QPoint &pos );
+    void refreshCell(int row, int col );
     void rowHeightChanged( int row );
+
     void priorityChanged(int);
 
     void headerClicked(int);
     void readSettings();
 
 private:
+    void toggleTaskCompletion(int row);
     void saveSettings();
 
     void setSelection(int fromRow, int toRow);
-    void setSelection(int row);
-    int pos(const QUuid &);
+    int pos(const int);
 
+    void refreshRows(int start, int end);
+
+    int filteredAt(int) const;
 
 private:
     Categories mCat;
-    int currFindRow;
     
     TodoXmlIO *mTasks;
     QStringList categoryList;
     QTimer *menuTimer;
-    QString currFindString;
     SelectionMode mSel;
-    QValueList<QUuid> mSelected;
+    mutable QArray<int> mFiltered;
+    mutable QArray<bool> mFilteredLoaded;
+
+    int mLastRowShown;
+    PimTask mLastTaskShown;
     
     QValueList<int> headerKeyFields;
+    QValueList<int>::Iterator currFind;
+    QValueList<int> searchResults;
+
 
     TablePrivate *d;
     int mSortColumn;
     bool ascSort;
+    PriorityEdit *le;
+    bool ro;
 };
 
 #endif

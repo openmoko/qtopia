@@ -1,10 +1,10 @@
+[Translation]
+File=QtopiaApplications
+Context=System Info
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
-Name=System Info
-Name[ja]=システム情報
-Name[no]=Systeminfo
-Name[de]=System information
+Name[]=Sys­tem Info
 Exec=sysinfo
 Type=Application
-Comment=System Information
+Comment[]=System Information
 Icon=SystemInfo
-Name[hu]=Rendszerinfó

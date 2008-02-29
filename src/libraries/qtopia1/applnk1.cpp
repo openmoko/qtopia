@@ -1,17 +1,31 @@
-//depot/qtopia/1/src/libraries/qtopia1/applnk1.cpp#1 - branch change 77716 (text)
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -86,7 +100,9 @@ bool AppLnk::linkFileKnown() const
 
 QString AppLnk::icon() const
 {
-    return mIconFile;
+    if (mIconFile.isEmpty())
+	return mIconFile;
+    return mExec + '/' + mIconFile;
 }
 
 static bool prepareDirectories(const QString& lf)
@@ -113,6 +129,8 @@ static bool prepareDirectories(const QString& lf)
 
 /*!
   This function sets the location for an AppLnk to \a docPath.
+
+  First availability: Qtopia 1.6
 */
 
 bool AppLnk::setLocation( const QString& docPath )
@@ -142,18 +160,53 @@ bool AppLnk::setLocation( const QString& docPath )
 	    && baseName + ".desktop" == linkfileName )
 	    return TRUE;
 
-	int n = 1;
+	int n;
 	QString nn;
-	for(;;)
+	for(n = 1; n < 100; ++n)
+	{
+	    nn = baseName + "_" + QString::number(n);
+	    if ( !QFile::exists( nn + ext ) &&
+		    !QFile::exists( nn + ".desktop" ) ) {
+		baseName = nn;
+		break;
+	    }
+	}
+	/// the  n_99 thing didn't work. try simplifying basename
+	// to 5 alpha chars + num.
+	if ( QFile::exists( baseName + ext ) ||
+		QFile::exists( baseName + ".desktop" ) ) {
+	    QString simpleBaseName = fi.baseName();
+	    uint sindex = 0;
+
+	    // inefficent, but good enough.
+	    // basically only letters, 5 long, (since we add another possible 3 later.
+	    // and not going to turn into utf8.  basically for dumb file systems.
+	    while(sindex < simpleBaseName.length() && sindex < 6)
+		if (!(simpleBaseName[(int)sindex].isLetter() && simpleBaseName[(int)sindex].latin1()))
+		    simpleBaseName = simpleBaseName.left(sindex) + simpleBaseName.mid(sindex+1);
+		else 
+		    ++sindex;
+	    if (simpleBaseName.length() < 1)
+		simpleBaseName = "qfile"; // No tr
+	    if (simpleBaseName.length() >= 6)
+		simpleBaseName = simpleBaseName.left(5);
+
+	    baseName = docPath + "/" + type() + "/" + simpleBaseName;
+	    
+	    for(n = 1; n < 100; ++n)
 	    {
 		nn = baseName + "_" + QString::number(n);
 		if ( !QFile::exists( nn + ext ) &&
-		     !QFile::exists( nn + ".desktop" ) ) {
+			!QFile::exists( nn + ".desktop" ) ) {
 		    baseName = nn;
 		    break;
 		}
-		++n;
 	    }
+	}
+
+	if ( QFile::exists( baseName + ext ) ||
+		QFile::exists( baseName + ".desktop" ) )
+	    return FALSE;
     }
 
     // Set the file and link file within the document object.
@@ -174,6 +227,8 @@ bool AppLnk::setLocation( const QString& docPath )
 
 /*!
   Returns an AppLnk that is a deep copy of \a copy.
+
+  First availability: Qtopia 1.6
 */
 
 AppLnk& AppLnk::operator=(const AppLnk &copy)
@@ -203,6 +258,8 @@ AppLnk& AppLnk::operator=(const AppLnk &copy)
 
 /*!
   Returns a DocLnk that is a deep copy of \a other.
+
+  First availability: Qtopia 1.6
 */
 
 DocLnk & DocLnk::operator=(const DocLnk &other)
@@ -213,6 +270,8 @@ DocLnk & DocLnk::operator=(const DocLnk &other)
 
 /*!
   Returns TRUE if the AppLnk is a DocLnk.
+
+  First availability: Qtopia 1.6
 */
 
 bool AppLnk::isDocLnk() const

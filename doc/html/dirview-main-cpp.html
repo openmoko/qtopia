@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -33,7 +35,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/dirview/dirview.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/dirview/dirview.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -146,7 +148,7 @@ private:
   scans subdirectories only when it has to.  This allows the program
   to handle very large file systems efficiently.  The same technique
   can be used in any other trees. <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/dirview/dirview.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/dirview/dirview.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -318,31 +320,31 @@ Directory::Directory( <a href="qlistview.html">QListView</a> * parent, const QSt
     readable = QDir( fullName() ).isReadable();
 }
 
-void <a name="463"></a>Directory::setPixmap( <a href="qpixmap.html">QPixmap</a> *px )
+void <a name="462"></a>Directory::setPixmap( <a href="qpixmap.html">QPixmap</a> *px )
 {
     pix = px;
-    <a href=#466>setup</a>();
+    <a href=#465>setup</a>();
     <a href="qlistviewitem.html#9a4e7f">widthChanged</a>( 0 );
     <a href="qlistviewitem.html#88530f">invalidateHeight</a>();
     <a href="qlistviewitem.html#2463fa">repaint</a>();
 }
 
-const QPixmap *<a name="464"></a>Directory::pixmap( int i ) const
+const QPixmap *<a name="463"></a>Directory::pixmap( int i ) const
 {
     if ( i )
         return 0;
     return pix;
 }
 
-void <a name="465"></a>Directory::setOpen( bool o )
+void <a name="464"></a>Directory::setOpen( bool o )
 {
     if ( o )
-        <a href=#463>setPixmap</a>( folderOpen );
+        <a href=#462>setPixmap</a>( folderOpen );
     else
-        <a href=#463>setPixmap</a>( folderClosed );
+        <a href=#462>setPixmap</a>( folderClosed );
 
     if ( o &amp;&amp; !childCount() ) {
-        <a href="qstring.html">QString</a> s( <a href=#467>fullName</a>() );
+        <a href="qstring.html">QString</a> s( <a href=#466>fullName</a>() );
         <a href="qdir.html">QDir</a> thisDir( s );
         if ( !thisDir.<a href="qdir.html#6dc6f9">isReadable</a>() ) {
             readable = FALSE;
@@ -379,13 +381,13 @@ void <a name="465"></a>Directory::setOpen( bool o )
     <a href="qlistviewitem.html#1c5a28">QListViewItem::setOpen</a>( o );
 }
 
-void <a name="466"></a>Directory::setup()
+void <a name="465"></a>Directory::setup()
 {
     <a href="qlistviewitem.html#725aac">setExpandable</a>( TRUE );
     <a href="qlistviewitem.html#c97f42">QListViewItem::setup</a>();
 }
 
-<a href="qstring.html">QString</a> <a name="467"></a>Directory::fullName()
+<a href="qstring.html">QString</a> <a name="466"></a>Directory::fullName()
 {
     <a href="qstring.html">QString</a> s;
     if ( p ) {
@@ -398,7 +400,7 @@ void <a name="466"></a>Directory::setup()
     return s;
 }
 
-<a href="qstring.html">QString</a> <a name="468"></a>Directory::text( int column ) const
+<a href="qstring.html">QString</a> <a name="467"></a>Directory::text( int column ) const
 {
     if ( column == 0 )
         return f.name();
@@ -426,19 +428,19 @@ DirectoryView::DirectoryView( <a href="qwidget.html">QWidget</a> *parent, const 
         fileNormal = new <a href="qpixmap.html">QPixmap</a>( pix_file );
     }
 
-    <a href="qobject.html#7f8e37">connect</a>( this, SIGNAL( <a href="qlistview.html#653d82">doubleClicked</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ),
-             this, SLOT( <a href=#452>slotFolderSelected</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ) );
-    <a href="qobject.html#7f8e37">connect</a>( this, SIGNAL( <a href="qlistview.html#25ca1d">returnPressed</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ),
-             this, SLOT( <a href=#452>slotFolderSelected</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ) );
+    <a href="qobject.html#fbde73">connect</a>( this, SIGNAL( <a href="qlistview.html#653d82">doubleClicked</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ),
+             this, SLOT( <a href=#451>slotFolderSelected</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ) );
+    <a href="qobject.html#fbde73">connect</a>( this, SIGNAL( <a href="qlistview.html#25ca1d">returnPressed</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ),
+             this, SLOT( <a href=#451>slotFolderSelected</a>( <a href="qlistviewitem.html">QListViewItem</a> * ) ) );
 
     <a href="qwidget.html#8169cb">setAcceptDrops</a>( TRUE );
     <a href="qscrollview.html#26f2bf">viewport</a>()-&gt;setAcceptDrops( TRUE );
 
-    <a href="qobject.html#7f8e37">connect</a>( autoopen_timer, SIGNAL( timeout() ),
-             this, SLOT( <a href=#453>openFolder</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( autoopen_timer, SIGNAL( timeout() ),
+             this, SLOT( <a href=#452>openFolder</a>() ) );
 }
 
-void <a name="452"></a>DirectoryView::slotFolderSelected( <a href="qlistviewitem.html">QListViewItem</a> *i )
+void <a name="451"></a>DirectoryView::slotFolderSelected( <a href="qlistviewitem.html">QListViewItem</a> *i )
 {
     if ( !i || !showDirsOnly() )
         return;
@@ -447,7 +449,7 @@ void <a name="452"></a>DirectoryView::slotFolderSelected( <a href="qlistviewitem
     emit folderSelected( dir-&gt;fullName() );
 }
 
-void <a name="453"></a>DirectoryView::openFolder()
+void <a name="452"></a>DirectoryView::openFolder()
 {
     autoopen_timer-&gt;stop();
     if ( dropItem &amp;&amp; !dropItem-&gt;isOpen() ) {
@@ -458,7 +460,7 @@ void <a name="453"></a>DirectoryView::openFolder()
 
 static const int autoopenTime = 750;
 
-void <a name="454"></a>DirectoryView::contentsDragEnterEvent( <a href="qdragenterevent.html">QDragEnterEvent</a> *e )
+void <a name="453"></a>DirectoryView::contentsDragEnterEvent( <a href="qdragenterevent.html">QDragEnterEvent</a> *e )
 {
     if ( !QUriDrag::canDecode(e) ) {
         e-&gt;ignore();
@@ -474,7 +476,7 @@ void <a name="454"></a>DirectoryView::contentsDragEnterEvent( <a href="qdragente
     }
 }
 
-void <a name="455"></a>DirectoryView::contentsDragMoveEvent( <a href="qdragmoveevent.html">QDragMoveEvent</a> *e )
+void <a name="454"></a>DirectoryView::contentsDragMoveEvent( <a href="qdragmoveevent.html">QDragMoveEvent</a> *e )
 {
     if ( !QUriDrag::canDecode(e) ) {
         e-&gt;ignore();
@@ -510,7 +512,7 @@ void <a name="455"></a>DirectoryView::contentsDragMoveEvent( <a href="qdragmovee
     }
 }
 
-void <a name="456"></a>DirectoryView::contentsDragLeaveEvent( <a href="qdragleaveevent.html">QDragLeaveEvent</a> * )
+void <a name="455"></a>DirectoryView::contentsDragLeaveEvent( <a href="qdragleaveevent.html">QDragLeaveEvent</a> * )
 {
     autoopen_timer-&gt;stop();
     dropItem = 0;
@@ -519,7 +521,7 @@ void <a name="456"></a>DirectoryView::contentsDragLeaveEvent( <a href="qdragleav
     <a href="qlistview.html#8e2ad6">setSelected</a>( oldCurrent, TRUE );
 }
 
-void <a name="457"></a>DirectoryView::contentsDropEvent( <a href="qdropevent.html">QDropEvent</a> *e )
+void <a name="456"></a>DirectoryView::contentsDropEvent( <a href="qdropevent.html">QDropEvent</a> *e )
 {
     autoopen_timer-&gt;stop();
 
@@ -562,7 +564,7 @@ void <a name="457"></a>DirectoryView::contentsDropEvent( <a href="qdropevent.htm
             str += filename + "\n";
         }
         str += QString( "\nTo\n\n   %1" )
-               .arg( <a href=#458>fullPath</a>(item) );
+               .arg( <a href=#457>fullPath</a>(item) );
 
         <a href="qmessagebox.html#66b7c8">QMessageBox::information</a>( this, "Drop target", str, "Not implemented" );
     } else
@@ -570,7 +572,7 @@ void <a name="457"></a>DirectoryView::contentsDropEvent( <a href="qdropevent.htm
 
 }
 
-<a href="qstring.html">QString</a> <a name="458"></a>DirectoryView::fullPath(<a href="qlistviewitem.html">QListViewItem</a>* item)
+<a href="qstring.html">QString</a> <a name="457"></a>DirectoryView::fullPath(<a href="qlistviewitem.html">QListViewItem</a>* item)
 {
     <a href="qstring.html">QString</a> fullpath = item-&gt;<a href="qlistviewitem.html#ca0608">text</a>(0);
     while ( (item=item-&gt;<a href="qlistviewitem.html#201d81">parent</a>()) ) {
@@ -582,7 +584,7 @@ void <a name="457"></a>DirectoryView::contentsDropEvent( <a href="qdropevent.htm
     return fullpath;
 }
 
-void <a name="459"></a>DirectoryView::contentsMousePressEvent( <a href="qmouseevent.html">QMouseEvent</a>* e )
+void <a name="458"></a>DirectoryView::contentsMousePressEvent( <a href="qmouseevent.html">QMouseEvent</a>* e )
 {
     <a href="qlistview.html#bcd36c">QListView::contentsMousePressEvent</a>(e);
     <a href="qpoint.html">QPoint</a> p( <a href="qscrollview.html#daa8c7">contentsToViewport</a>( e-&gt;<a href="qmouseevent.html#ac6f25">pos</a>() ) );
@@ -598,7 +600,7 @@ void <a name="459"></a>DirectoryView::contentsMousePressEvent( <a href="qmouseev
     }
 }
 
-void <a name="460"></a>DirectoryView::contentsMouseMoveEvent( <a href="qmouseevent.html">QMouseEvent</a>* e )
+void <a name="459"></a>DirectoryView::contentsMouseMoveEvent( <a href="qmouseevent.html">QMouseEvent</a>* e )
 {
     if ( mousePressed &amp;&amp; ( presspos - e-&gt;<a href="qmouseevent.html#ac6f25">pos</a>() ).manhattanLength() &gt; <a href="qapplication.html#5a44a9">QApplication::startDragDistance</a>() ) {
         mousePressed = FALSE;
@@ -608,7 +610,7 @@ void <a name="460"></a>DirectoryView::contentsMouseMoveEvent( <a href="qmouseeve
             if ( <a href="qfile.html#900285">QFile::exists</a>(source) ) {
                 <a href="quridrag.html">QUriDrag</a>* ud = new <a href="quridrag.html">QUriDrag</a>(<a href="qscrollview.html#26f2bf">viewport</a>());
                 ud-&gt;<a href="quridrag.html#4cdc54">setUnicodeUris</a>( source );
-                if ( ud-&gt;<a href="qdragobject.html#61c2fe">drag</a>() )
+                if ( ud-&gt;<a href="qdragobject.html#bfe10b">drag</a>() )
                     <a href="qmessagebox.html#66b7c8">QMessageBox::information</a>( this, "Drag source",
                                               <a href="qstring.html">QString</a>("Delete ")+source, "Not implemented" );
             }
@@ -616,12 +618,12 @@ void <a name="460"></a>DirectoryView::contentsMouseMoveEvent( <a href="qmouseeve
     }
 }
 
-void <a name="461"></a>DirectoryView::contentsMouseReleaseEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
+void <a name="460"></a>DirectoryView::contentsMouseReleaseEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
 {
     mousePressed = FALSE;
 }
 
-void <a name="462"></a>DirectoryView::setDir( const QString &amp;s )
+void <a name="461"></a>DirectoryView::setDir( const QString &amp;s )
 {
     <a href="qlistviewitemiterator.html">QListViewItemIterator</a> it( this );
     ++it;
@@ -668,7 +670,7 @@ const QPixmap *FileItem::pixmap( int i ) const
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/dirview/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/dirview/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -714,5 +716,5 @@ int main( int argc, char ** argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

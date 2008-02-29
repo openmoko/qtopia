@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
-** This file is part of Qtopia Environment.
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -30,55 +45,80 @@
 #include <qtopia/qmath.h>
 #include <math.h>
 
-// Base class automatic type casting
-BaseDoubleInstructionDescription::BaseDoubleInstructionDescription()
-    :InstructionDescription() {
-    typeOne = typeTwo = type = "Double"; // No tr
+// Base class
+BaseDoubleInstruction::BaseDoubleInstruction() {
+    retType = type = "Double"; // No tr
 }
-Data *BaseDoubleInstruction::eval(Data *d) {
-    doubleNum = (DoubleData *)num;
-    Data *ret = doEval((DoubleData *)d);
-    return ret;
+
+BaseDoubleInstruction::~BaseDoubleInstruction(){};
+
+void BaseDoubleInstruction::eval() {
+    DoubleData *acc = (DoubleData *)systemEngine->getData();
+    if (argCount == 1)
+	doEvalI(acc);
+    else {
+	DoubleData *num = (DoubleData *)systemEngine->getData();
+	doEval(num,acc);
+	delete num;
+    }
+    delete acc;
+}
+void BaseDoubleInstruction::doEval(DoubleData *acc, DoubleData *num) {
+    systemEngine->putData(num);
+    systemEngine->putData(acc);
+}
+void BaseDoubleInstruction::doEvalI(DoubleData *acc) {
+    systemEngine->putData(acc);
 }
 
 // Factory
-Data * iDoubleFactory::eval(Data * /* d */) {
-    DoubleData *ret = new DoubleData();
-    ret->clear();
-    return ret;
+iDoubleFactory::iDoubleFactory():Instruction() {
+    retType = type = "Double"; // No tr
+    name = "Factory"; // No tr
 }
-DoubleFactory::DoubleFactory():BaseDoubleInstructionDescription() {
-    instructionName = "Factory"; // No tr
-};
+void iDoubleFactory::eval() {
+    DoubleData *newData = new DoubleData();
+    newData->clear();
+    systemEngine->putData(newData);
+}
 
 // Copy
-Data *iDoubleCopy::eval(Data *d) {
-    DoubleData *ret = new DoubleData();
-    ret->clear();
-    ret->set(((DoubleData *)d)->get());
-    return ret;
-};
-DoubleCopy::DoubleCopy():BaseDoubleInstructionDescription() {
-    instructionName = "Copy"; // No tr
+iDoubleCopy::iDoubleCopy():Instruction() {
+    name = "Copy"; // No tr
+    retType = type = "Double"; // No tr
+    argCount = 1;
+}
+void iDoubleCopy::eval() {
+    DoubleData *src = (DoubleData *)systemEngine->getData();
+    DoubleData *tgt = new DoubleData();
+    tgt->clear();
+    tgt->set(((DoubleData *)src)->get());
+    systemEngine->putData(src);
+    systemEngine->putData(tgt);
 };
 
 #ifdef ENABLE_INTEGER
-Data * iConvertIntDouble::eval(Data *d) {
+iConvertIntDouble::iConvertIntDouble():Instruction() {
+    name = "Convert"; // No tr
+    typeOne = "Int"; // No tr
+    typeTwo = "Double"; // No tr
+}
+void iConvertIntDouble::eval(Data *d) {
     DoubleData *ret = new DoubleData();;
     IntegerData *i = (IntegerData *)d;
     ret->set((double)i->get());
     return ret;
 }
-ConvertIntDouble::ConvertIntDouble():InstructionDescription() {
-    instructionName = "Convert"; // No tr
-    typeOne = "Int";
-    typeTwo = "Double"; // No tr
-}
 #endif
 #ifdef ENABLE_FRACTION
-Data * iConvertFractionDouble::eval(Data *d) {
+iConvertFractionDouble::iConvertFractionDouble():Instruction() {
+    name = "Convert"; // No tr
+    type = "Fraction"; // No tr
+    retType = "Double"; // No tr
+}
+void iConvertFractionDouble::eval() {
     DoubleData *ret = new DoubleData();
-    FractionData *f = (FractionData *)d;
+    FractionData *f = (FractionData *)systemEngine->getData();
     if (!f->getDenominator()) {
 	systemEngine->setError(eDivZero);
 	ret->set(0);
@@ -88,220 +128,376 @@ Data * iConvertFractionDouble::eval(Data *d) {
 	double val = num / den;
 	ret->set(val);
     }
-    return ret;
-}
-ConvertFractionDouble::ConvertFractionDouble():InstructionDescription() {
-    instructionName = "Convert"; // No tr
-    typeOne = "Fraction"; // No tr
-    typeTwo = "Double"; // No tr
+    delete f;
+    systemEngine->putData(ret);
 }
 #endif
 // Mathematical functions
-Data * iAddDoubleDouble::doEval(DoubleData *d) {
-//qDebug("%d + %d", doubleNum->get(),d->get());
-    d->set(doubleNum->get() + d->get());
-//qDebug("= %d",d->get());
-    return d;
+void iAddDoubleDouble::doEval(DoubleData *acc, DoubleData *num) {
+    DoubleData *result = new DoubleData();
+    result->set(acc->get() + num->get());
+    systemEngine->putData(result);
 }
-Data * iSubtractDoubleDouble::doEval(DoubleData *d) {
-    d->set(doubleNum->get() - d->get());
-    return d;
+void iSubtractDoubleDouble::doEval(DoubleData *acc, DoubleData *num) {
+    DoubleData *result = new DoubleData();
+    result->set(acc->get() - num->get());
+    systemEngine->putData(result);
 }
-Data * iMultiplyDoubleDouble::doEval(DoubleData *d) {
-    d->set( doubleNum->get() * d->get() );
-    return d;
+void iMultiplyDoubleDouble::doEval(DoubleData *acc, DoubleData *num) {
+    DoubleData *result = new DoubleData();
+    result->set(num->get() * acc->get());
+    systemEngine->putData(result);
 }
-Data * iDivideDoubleDouble::doEval(DoubleData *d) {
-    d->set( doubleNum->get() / d->get() );
-    return d;
+void iDivideDoubleDouble::doEval(DoubleData *acc, DoubleData *num) {
+    if (num->get() == 0) {
+	systemEngine->setError(eDivZero);
+	return;
+    }
+    DoubleData *result = new DoubleData();
+    result->set( acc->get() / num->get() );
+    systemEngine->putData(result);
 }
-Data * iDoublePow::doEval(DoubleData *d) {
-    d->set( pow(doubleNum->get(),d->get()) );
-    return d;
+void iDoublePow::doEval(DoubleData *acc, DoubleData *num) {
+    DoubleData *result = new DoubleData();
+    result->set( pow(acc->get(),num->get()) );
+    systemEngine->putData(result);
 }
-DoubleXRootY::DoubleXRootY():BaseDoubleInstructionDescription() {
-    instructionName = "X root y"; // No tr
-    precedence = 20;
+void iDoubleXRootY::doEval(DoubleData *acc,DoubleData *num) {
+    DoubleData *result = new DoubleData();
+    result->set( pow(acc->get(), 1 / num->get()) );
+    systemEngine->putData(result);
 }
-
 
 // Immediate
-Data * iDoubleSin::doEval(DoubleData *d) {
-    d->set( qSin(d->get()) );
-    return d;
+//trigonometric functions radians mode
+void iDoubleSinRad::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qSin(acc->get()) );
+    systemEngine->putData(result);
 }
-Data * iDoubleCos::doEval(DoubleData *d) {
-    d->set( qCos(d->get()) );
-    return d;
+void iDoubleCosRad::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qCos(acc->get()) );
+    systemEngine->putData(result);
 }
-Data * iDoubleTan::doEval(DoubleData *d) {
-    d->set( qTan(d->get()) );
-    return d;
+void iDoubleTanRad::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qTan(acc->get()) );
+    systemEngine->putData(result);
 }
-Data * iDoubleASin::doEval(DoubleData *d) {
-    d->set( asin(d->get()) );
-    return d;
+void iDoubleASinRad::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( asin(acc->get()) );
+    systemEngine->putData(result);
 }
-Data * iDoubleACos::doEval(DoubleData *d) {
-    d->set( acos(d->get()) );
-    return d;
+void iDoubleACosRad::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( acos(acc->get()) );
+    systemEngine->putData(result);
 }
-Data * iDoubleATan::doEval(DoubleData *d) {
-    d->set( atan(d->get()) );
-    return d;
+void iDoubleATanRad::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( atan(acc->get()) );
+    systemEngine->putData(result);
 }
-Data * iDoubleLog::doEval(DoubleData *d) {
-    d->set( log10(d->get()) );
-    return d;
+//trigonometric functions - degree mode
+void iDoubleSinDeg::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qSin(acc->get()*M_PI/180) );
+    systemEngine->putData(result);
 }
-Data * iDoubleLn::doEval(DoubleData *d) {
-    d->set( log(d->get()) );
-    return d;
+void iDoubleCosDeg::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qCos(acc->get()*M_PI/180) );
+    systemEngine->putData(result);
 }
-Data * iDoubleExp::doEval(DoubleData *d) {
-    d->set( exp(d->get()) );
-    return d;
+void iDoubleTanDeg::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qTan(acc->get()*M_PI/180) );
+    systemEngine->putData(result);
 }
-Data * iDoubleOneOverX::doEval(DoubleData *d) {
-    d->set( 1 / d->get() );
-    return d;
+void iDoubleASinDeg::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( asin(acc->get())*180/M_PI );
+    systemEngine->putData(result);
 }
-Data * iDoubleFactorial::doEval(DoubleData *d) {
-    if (d->get() < 0) {
+void iDoubleACosDeg::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( acos(acc->get())*180/M_PI );
+    systemEngine->putData(result);
+}
+void iDoubleATanDeg::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( atan(acc->get())*180/M_PI );
+    systemEngine->putData(result);
+}
+
+//trigonometric functions - gradians mode
+void iDoubleSinGra::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qSin(acc->get()*M_PI/200) );
+    systemEngine->putData(result);
+}
+void iDoubleCosGra::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qCos(acc->get()*M_PI/200) );
+    systemEngine->putData(result);
+}
+void iDoubleTanGra::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( qTan(acc->get()*M_PI/200) );
+    systemEngine->putData(result);
+}
+void iDoubleASinGra::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( asin(acc->get())*200/M_PI );
+    systemEngine->putData(result);
+}
+void iDoubleACosGra::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( acos(acc->get())*200/M_PI );
+    systemEngine->putData(result);
+}
+void iDoubleATanGra::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( atan(acc->get())*200/M_PI );
+    systemEngine->putData(result);
+}
+
+
+void iDoubleLog::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( log10(acc->get()) );
+    systemEngine->putData(result);
+}
+void iDoubleLn::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( log(acc->get()) );
+    systemEngine->putData(result);
+}
+void iDoubleExp::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( exp(acc->get()) );
+    systemEngine->putData(result);
+}
+void iDoubleOneOverX::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( 1 / acc->get() );
+    systemEngine->putData(result);
+}
+void iDoubleFactorial::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    if (acc->get() < 0) {
 	systemEngine->setError(eNonPositive);
-    } else if ( d->get() > 180 ) {
+    } else if ( acc->get() > 180 ) {
 	systemEngine->setError(eOutOfRange);
-    } else if ( d->get() != int(d->get()) ) {
+    } else if ( acc->get() != int(acc->get()) ) {
 	systemEngine->setError(eNonInteger);
     } else {
-	int count = (int)d->get();
-	d->set(1);
+	int count = int(acc->get());
+	result->set(1);
 	while (count) {
-	    d->set(d->get()*count);
+	    result->set(result->get()*count);
 	    count--;
 	}
     }
-    return d;
+    systemEngine->putData(result);
 }
-Data * iDoubleSquareRoot::doEval(DoubleData *d) {
-    d->set( sqrt(d->get()) );
-    return d;
+void iDoubleSquareRoot::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( sqrt(acc->get()) );
+    systemEngine->putData(result);
 }
-Data * iDoubleCubeRoot::doEval(DoubleData *d) {
+void iDoubleCubeRoot::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
 #ifndef Q_OS_WIN32
-    d->set( cbrt(d->get()) );
+    result->set( cbrt(acc->get()) );
 #else
-    qDebug("Cubic root not available for WIN32");
+    Engine->setError("Cubic root not available for WIN32"); // No tr
 #endif
-    return d;
+    systemEngine->putData(result);
 }
-Data * iDoubleXRootY::doEval(DoubleData *d) {
-    d->set( pow(doubleNum->get(), 1 / d->get()) );
-    return d;
-}
-
-Data * iDoubleSquare::doEval(DoubleData *d) {
-    d->set( d->get() * d->get() );
-    return d;
+void iDoubleSquare::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( acc->get() * acc->get() );
+    systemEngine->putData(result);
 }
 
-Data * iDoubleNegate::doEval(DoubleData *d) {
-    d->set( 0 - d->get() );
-    return d;
+void iDoubleNegate::doEvalI(DoubleData *acc) {
+    DoubleData *result = new DoubleData();
+    result->set( 0 - acc->get() );
+    systemEngine->putData(result);
 }
 
-AddDoubleDouble::AddDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Add"; // No tr
+// Normal instructions with full precedence
+iAddDoubleDouble::iAddDoubleDouble():BaseDoubleInstruction() {
+    name = "Add"; // No tr
     precedence = 10;
+    displayString = "+";
+    argCount = 2;
 }
-SubtractDoubleDouble::SubtractDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Subtract"; // No tr
+iSubtractDoubleDouble::iSubtractDoubleDouble():BaseDoubleInstruction() {
+    name = "Subtract"; // No tr
     precedence = 10;
+    displayString = "-";
+    argCount = 2;
 }
-MultiplyDoubleDouble::MultiplyDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Multiply"; // No tr
+iMultiplyDoubleDouble::iMultiplyDoubleDouble():BaseDoubleInstruction() {
+    name = "Multiply"; // No tr
     precedence = 15;
+    displayString = "x";
+    argCount = 2;
 }
-DivideDoubleDouble::DivideDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Divide"; // No tr
+iDivideDoubleDouble::iDivideDoubleDouble():BaseDoubleInstruction() {
+    name = "Divide"; // No tr
     precedence = 15;
+    displayString = "/";
+    argCount = 2;
 }
-DoublePow::DoublePow():BaseDoubleInstructionDescription() {
-    instructionName = "Pow";
+iDoublePow::iDoublePow():BaseDoubleInstruction() {
+    name = "Pow"; // No tr
     precedence = 20;
+    displayString = "^";
+    argCount = 2;
 }
-DoubleSin::DoubleSin():BaseDoubleInstructionDescription() {
+iDoubleSinRad::iDoubleSinRad():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Sin";
+    name = "SinRad"; // No tr
 }
-DoubleCos::DoubleCos():BaseDoubleInstructionDescription() {
+iDoubleCosRad::iDoubleCosRad():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Cos";
+    name = "CosRad"; // No tr
 }
-DoubleTan::DoubleTan():BaseDoubleInstructionDescription() {
+iDoubleTanRad::iDoubleTanRad():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Tan"; // No tr
+    name = "TanRad"; // No tr
 }
-DoubleASin::DoubleASin():BaseDoubleInstructionDescription() {
+iDoubleASinRad::iDoubleASinRad():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "aSin";
+    name = "aSinRad"; // No tr
 }
-DoubleACos::DoubleACos():BaseDoubleInstructionDescription() {
+iDoubleACosRad::iDoubleACosRad():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "aCos";
+    name = "aCosRad"; // No tr
 }
-DoubleATan::DoubleATan():BaseDoubleInstructionDescription() {
+iDoubleATanRad::iDoubleATanRad():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "aTan";
+    name = "aTanRad"; // No tr
 }
-DoubleLog::DoubleLog():BaseDoubleInstructionDescription() {
+iDoubleSinDeg::iDoubleSinDeg():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Log";
+    name = "SinDeg"; // No tr
 }
-DoubleLn::DoubleLn():BaseDoubleInstructionDescription() {
+iDoubleCosDeg::iDoubleCosDeg():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Ln";
+    name = "CosDeg"; // No tr
 }
-DoubleExp::DoubleExp():BaseDoubleInstructionDescription() {
+iDoubleTanDeg::iDoubleTanDeg():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Exp";
+    name = "TanDeg"; // No tr
 }
-DoubleOneOverX::DoubleOneOverX():BaseDoubleInstructionDescription() {
+iDoubleASinDeg::iDoubleASinDeg():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "One over x"; // No tr
+    name = "aSinDeg"; // No tr
 }
-DoubleFactorial::DoubleFactorial():BaseDoubleInstructionDescription() {
+iDoubleACosDeg::iDoubleACosDeg():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Factorial"; // No tr
+    name = "aCosDeg"; // No tr
 }
-DoubleSquareRoot::DoubleSquareRoot():BaseDoubleInstructionDescription() {
+iDoubleATanDeg::iDoubleATanDeg():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Square root"; // No tr
+    name = "aTanDeg"; // No tr
 }
-DoubleCubeRoot::DoubleCubeRoot():BaseDoubleInstructionDescription() {
+iDoubleSinGra::iDoubleSinGra():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Cube root"; // No tr
+    name = "SinGra"; // No tr
 }
-DoubleSquare::DoubleSquare():BaseDoubleInstructionDescription() {
+iDoubleCosGra::iDoubleCosGra():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Square"; // No tr
+    name = "CosGra"; // No tr
 }
-DoubleNegate::DoubleNegate():BaseDoubleInstructionDescription() {
+iDoubleTanGra::iDoubleTanGra():BaseDoubleInstruction() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Negate"; // No tr
+    name = "TanDeg"; // No tr
+}
+iDoubleASinGra::iDoubleASinGra():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "aSinGra"; // No tr
+}
+iDoubleACosGra::iDoubleACosGra():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "aCosGra"; // No tr
+}
+iDoubleATanGra::iDoubleATanGra():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "aTanGra"; // No tr
+}
+iDoubleLog::iDoubleLog():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Log"; // No tr
+}
+iDoubleLn::iDoubleLn():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Ln"; // No tr
+}
+iDoubleExp::iDoubleExp():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Exp"; // No tr
+}
+iDoubleOneOverX::iDoubleOneOverX():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "One over x"; // No tr
+}
+iDoubleFactorial::iDoubleFactorial():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Factorial"; // No tr
+}
+iDoubleSquareRoot::iDoubleSquareRoot():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Square root"; // No tr
+}
+iDoubleCubeRoot::iDoubleCubeRoot():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Cube root"; // No tr
+}
+iDoubleXRootY::iDoubleXRootY():BaseDoubleInstruction() {
+    name = "X root y"; // No tr
+    precedence = 20;
+    displayString = "to the root";
+    argCount = 2;
+}
+iDoubleSquare::iDoubleSquare():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Square"; // No tr
+}
+iDoubleNegate::iDoubleNegate():BaseDoubleInstruction() {
+    precedence = 0;
+    argCount = 1;
+    name = "Negate"; // No tr
 }

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -38,9 +53,14 @@
 #include "windowdecorationinterface.h"
 #include "pluginloader_p.h"
 #include <qfile.h>
+#include <qfileinfo.h>
 #include <qsignal.h>
 
 #include <stdlib.h>
+
+#ifdef QTOPIA_PHONE
+#include "phonedecoration_p.h"
+#endif
 
 extern Q_EXPORT QRect qt_maxWindowRect;
 
@@ -310,7 +330,7 @@ static QImage *okImage( int th )
     static QImage *i = 0;
     if ( !i || i->height() != th ) {
 	delete i;
-	i = new QImage(scaleButton(Resource::loadImage("OKButton"),th));
+	i = new QImage(scaleButton(Resource::loadImage("qpe/pda/OKButton"),th));
     }
     return i;
 }
@@ -320,7 +340,7 @@ static QImage *closeImage( int th )
     static QImage *i = 0;
     if ( !i || i->height() != th ) {
 	delete i;
-	i = new QImage(scaleButton(Resource::loadImage("CloseButton"),th));
+	i = new QImage(scaleButton(Resource::loadImage("qpe/pda/CloseButton"),th));
     }
     return i;
 }
@@ -330,7 +350,7 @@ static QImage *helpImage( int th )
     static QImage *i = 0;
     if ( !i || i->height() != th ) {
 	delete i;
-	i = new QImage(scaleButton(Resource::loadImage("HelpButton"),th));
+	i = new QImage(scaleButton(Resource::loadImage("qpe/pda/HelpButton"),th));
     }
     return i;
 }
@@ -340,7 +360,7 @@ static QImage *maximizeImage( int th )
     static QImage *i = 0;
     if ( !i || i->height() != th ) {
 	delete i;
-	i = new QImage(scaleButton(Resource::loadImage("MaximizeButton"),th));
+	i = new QImage(scaleButton(Resource::loadImage("qpe/pda/MaximizeButton"),th));
     }
     return i;
 }
@@ -491,7 +511,8 @@ bool QPEDecoration::helpExists() const
 {
     if ( helpFile.isNull() ) {
 	QStringList helpPath = Global::helpPath();
-	QString hf = QString(qApp->argv()[0]) + ".html";
+	QFileInfo fi( QString(qApp->argv()[0]) );
+	QString hf = fi.baseName() + ".html";
 	bool he = FALSE;
 	for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end() && !he; ++it)
 	    he = QFile::exists( *it + "/" + hf );
@@ -511,17 +532,24 @@ QPEDecoration::QPEDecoration()
     } else {
 	delete wdiface;
     }
+#ifdef QTOPIA_PHONE
+    wdiface = new PhoneDecoration;
+#else
     wdiface = new DefaultWindowDecoration;
+#endif
 
     helpexists = FALSE; // We don't know (flagged by helpFile being null)
     qpeManager = new QPEManager( this );
-    imageOk = Resource::loadImage( "OKButton" );
-    imageClose = Resource::loadImage( "CloseButton" );
-    imageHelp = Resource::loadImage( "HelpButton" );
+    imageOk = Resource::loadImage( "qpe/pda/OKButton" );
+    imageClose = Resource::loadImage( "qpe/pda/CloseButton" );
+    imageHelp = Resource::loadImage( "qpe/pda/HelpButton" );
 }
 
-QPEDecoration::QPEDecoration( const QString &plugin )
-    : QWSDefaultDecoration()
+QPEDecoration::QPEDecoration( const QString &
+#ifndef QTOPIA_PHONE
+        plugin
+#endif
+ )   : QWSDefaultDecoration()
 {
     if ( wdLoader ) {
 	delete wdLoader;
@@ -529,6 +557,9 @@ QPEDecoration::QPEDecoration( const QString &plugin )
     } else {
 	delete wdiface;
     }
+#ifdef QTOPIA_PHONE
+    wdiface = new PhoneDecoration;
+#else
     if ( plugin == "Qtopia" ) { // No tr
 	wdiface = new DefaultWindowDecoration;
     } else {
@@ -543,7 +574,7 @@ QPEDecoration::QPEDecoration( const QString &plugin )
 	    wdiface = new DefaultWindowDecoration;
 	}
     }
-
+#endif
     helpexists = FALSE; // We don't know (flagged by helpFile being null)
     qpeManager = new QPEManager( this );
 }
@@ -606,6 +637,14 @@ QRegion QPEDecoration::region(const QWidget *widget, const QRect &rect, QWSDecor
 
     switch ((int)type) {
 	case Menu:
+#ifdef QTOPIA_PHONE
+	    // This is how we stop the mouse from interacting with
+	    // windows in phone edition.  QWSManager first checks whether
+	    // the mouse is in Menu.  By ensuring the mouse is in
+	    // Menu we guarantee that no action is taken on mouse
+	    // events.
+//	    region = wdiface->mask(&wd);
+#endif
 	    break;
 	case Maximize:
 	    if ( !widget->inherits( "QDialog" ) && qApp->desktop()->width() > 350 ) {
@@ -618,7 +657,7 @@ QRegion QPEDecoration::region(const QWidget *widget, const QRect &rect, QWSDecor
 	    }
 	    break;
 	case Minimize:
-	    if ( ((DecorHackWidget *)widget)->needsOk() ) {
+	    if ( ((DecorHackWidget *)widget)->needsOk() && okWidth > 0) {
 		QRect r(rect.right() - okWidth,
 		    rect.top() - titleHeight, okWidth, titleHeight);
 		if (r.left() > rect.left() + titleHeight)
@@ -631,7 +670,8 @@ QRegion QPEDecoration::region(const QWidget *widget, const QRect &rect, QWSDecor
 		if ( ((DecorHackWidget *)widget)->needsOk() )
 		    left -= okWidth;
 		QRect r(left, rect.top() - titleHeight, closeWidth, titleHeight);
-		region = r;
+		if (r.width() > 0)
+		    region = r;
 	    }
 	    break;
     	case Title:
@@ -649,7 +689,8 @@ QRegion QPEDecoration::region(const QWidget *widget, const QRect &rect, QWSDecor
 	    if ( helpExists() || widget->testWFlags(Qt::WStyle_ContextHelp) ) {
 		QRect r(rect.left(), rect.top() - titleHeight,
 			  helpWidth, titleHeight);
-		region = r;
+		if (helpWidth > 0)
+		    region = r;
 	    }
 	    break;
 	case Top:
@@ -680,7 +721,7 @@ QRegion QPEDecoration::region(const QWidget *widget, const QRect &rect, QWSDecor
 	    }
 	    break; 
 	case Bottom:
-	    if ( !widget->isMaximized() ) {
+	    {
 		QRegion m = wdiface->mask(&wd);
 		QRect br = m.boundingRect();
 		int b = wdiface->metric(WindowDecorationInterface::BottomBorder,&wd);
@@ -725,10 +766,17 @@ QRegion QPEDecoration::region(const QWidget *widget, const QRect &rect, QWSDecor
 	    }
 	    break;
 	case All:
-	    if ( widget->isMaximized() )
-		region = QWSDefaultDecoration::region(widget, rect, type);
-	    else
-		region = wdiface->mask(&wd) - rect;
+#ifndef QTOPIA_PHONE
+	    if ( widget->isMaximized() ) {
+		QRect r(rect.left(), rect.top() - titleHeight,
+			rect.width(), rect.height() + titleHeight);
+		region = r;
+	    } else
+#endif
+	    {
+		region = wdiface->mask(&wd);
+	    }
+	    region -= rect;
 	    break;
 	default:
 	    region = QWSDefaultDecoration::region(widget, rect, type);
@@ -818,17 +866,19 @@ void QPEDecoration::paintButton(QPainter *painter, const QWidget *w,
     QRect tbr( rect.left(), rect.top() - titleHeight, rect.width(), titleHeight );
     QRect brect(region(w, w->rect(), type).boundingRect());
 
-    const QColorGroup &cg = w->palette().active();
-    if ( wd.flags & WindowDecorationInterface::WindowData::Active )
-	painter->setPen( cg.color(QColorGroup::HighlightedText) );
-    else
-	painter->setPen( cg.color(QColorGroup::Text) );
+    if (brect.width() > 0 && brect.height() > 0) {
+	const QColorGroup &cg = w->palette().active();
+	if ( wd.flags & WindowDecorationInterface::WindowData::Active )
+	    painter->setPen( cg.color(QColorGroup::HighlightedText) );
+	else
+	    painter->setPen( cg.color(QColorGroup::Text) );
 
-    QRegion oldClip = painter->clipRegion();
-    painter->setClipRegion( QRect(brect.x(), tbr.y(), brect.width(), tbr.height()) ); // reduce flicker
-    wdiface->drawArea( WindowDecorationInterface::Title, painter, &wd );
-    wdiface->drawButton( b, painter, &wd, brect.x(), brect.y(), brect.width(), brect.height(), (QWSButton::State)state );
-    painter->setClipRegion( oldClip );
+	QRegion oldClip = painter->clipRegion();
+	painter->setClipRegion( QRect(brect.x(), tbr.y(), brect.width(), tbr.height()) ); // reduce flicker
+	wdiface->drawArea( WindowDecorationInterface::Title, painter, &wd );
+	wdiface->drawButton( b, painter, &wd, brect.x(), brect.y(), brect.width(), brect.height(), (QWSButton::State)state );
+	painter->setClipRegion( oldClip );
+    }
 }
 
 //#define QPE_DONT_SHOW_TITLEBAR
@@ -840,20 +890,33 @@ void QPEDecoration::maximize( QWidget *widget )
 	widget->setGeometry( qt_maxWindowRect );
     } else 
 #endif	
-	{
+    {
+#ifndef QTOPIA_PHONE
 	QWSDecoration::maximize( widget );
+#else
+	// find out how much space the decoration needs
+	WindowDecorationInterface::WindowData wd;
+	windowData(widget, wd);
+
+	int th = wdiface->metric(WindowDecorationInterface::TitleHeight, &wd);
+
+	QRect nr = qt_maxWindowRect;
+	nr.setTop(nr.top()+th);
+	widget->setGeometry(nr);
+#endif
     }
 }
 
 QPopupMenu *QPEDecoration::menu( const QWidget *, const QPoint & )
 {
     QPopupMenu *m = new QPopupMenu();
-
+#ifndef QTOPIA_PHONE
     m->insertItem(QPEManager::tr("Restore"), (int)Normalize);
     m->insertItem(QPEManager::tr("Move"), (int)Title);
     m->insertItem(QPEManager::tr("Size"), (int)BottomRight);
     m->insertItem(QPEManager::tr("Maximize"), (int)Maximize);
     m->insertSeparator();
+#endif
     m->insertItem(QPEManager::tr("Close"), (int)Close);
 
     return m;
@@ -895,7 +958,8 @@ void QPEDecoration::help( QWidget *w )
 {
     if ( helpExists() ) {
 	QString hf = helpFile;
-	QString localHelpFile = QString(qApp->argv()[0]) + "-" + w->name() + ".html";
+	QFileInfo fi( QString(qApp->argv()[0]) );
+	QString localHelpFile = fi.baseName() + "-" + w->name() + ".html";
 	QStringList helpPath = Global::helpPath();
 	for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end(); ++it) {
 	    if ( QFile::exists( *it + "/" + localHelpFile ) ) {

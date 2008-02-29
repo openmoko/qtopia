@@ -1,0 +1,15 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name=Qtopia
+[Colors]
+Background=#eeeeee
+Button=#F0F0F0
+Highlight=#8BAC30
+HighlightedText=#FFFFFF
+AlternateBase=#EEF5D6
+Text_disabled=#BBBBBB
+Foreground_disabled=#BBBBBB
+Foreground=#222222
+

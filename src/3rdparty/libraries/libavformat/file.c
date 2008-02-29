@@ -35,12 +35,14 @@ static int file_open(URLContext *h, const char *filename, int flags)
     int access;
     int fd;
 
+    strstart(filename, "file:", &filename);
+
     if (flags & URL_WRONLY) {
         access = O_CREAT | O_TRUNC | O_WRONLY;
     } else {
         access = O_RDONLY;
     }
-#ifdef CONFIG_WIN32
+#if defined(CONFIG_WIN32) || defined(CONFIG_OS2)
     access |= O_BINARY;
 #endif
     fd = open(filename, access, 0666);

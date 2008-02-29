@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -203,7 +205,7 @@ converts the input with that.  Note that the default makeEncoder()
 implementation makes an encoder that simply calls
 this function, hence subclasses <em>must</em> reimplement one function or
 the other to avoid infinite recursion.
-<p>Reimplemented in <a href="qgbkcodec.html#f02112">QGbkCodec</a>, <a href="qeuckrcodec.html#a52c4f">QEucKrCodec</a>, <a href="qtsciicodec.html#13d64e">QTsciiCodec</a>, <a href="qjiscodec.html#970f49">QJisCodec</a>, <a href="qsjiscodec.html#6ff2cf">QSjisCodec</a> and <a href="qeucjpcodec.html#7e855d">QEucJpCodec</a>.
+<p>Reimplemented in <a href="qjiscodec.html#970f49">QJisCodec</a>, <a href="qeucjpcodec.html#7e855d">QEucJpCodec</a>, <a href="qsjiscodec.html#6ff2cf">QSjisCodec</a>, <a href="qeuckrcodec.html#a52c4f">QEucKrCodec</a>, <a href="qgbkcodec.html#f02112">QGbkCodec</a> and <a href="qtsciicodec.html#13d64e">QTsciiCodec</a>.
 <h3 class="fn"><a href="qcstring.html">QCString</a> <a name="d25b44"></a>QTextCodec::fromUnicode ( const <a href="qstring.html">QString</a> &amp; uc ) const</h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <h3 class="fn">int <a name="fc6ed5"></a>QTextCodec::heuristicContentMatch ( const char * chars, int len ) const <code>[virtual]</code></h3>
@@ -218,7 +220,7 @@ is no particular evidence.  The value should range up to <em>len.</em>  Thus,
 most decoders will return -1, 0, or -<em>len.</em>
 <p>The characters are not null terminated.
 <p>See also  <a href="#e714b9">codecForContent</a>().
-<p>Reimplemented in <a href="qeucjpcodec.html#40ebea">QEucJpCodec</a>, <a href="qtsciicodec.html#a74aef">QTsciiCodec</a>, <a href="qeuckrcodec.html#0b1e97">QEucKrCodec</a>, <a href="qgbkcodec.html#fa7353">QGbkCodec</a>, <a href="qjiscodec.html#678d8c">QJisCodec</a> and <a href="qsjiscodec.html#695cdc">QSjisCodec</a>.
+<p>Reimplemented in <a href="qeucjpcodec.html#40ebea">QEucJpCodec</a>, <a href="qeuckrcodec.html#0b1e97">QEucKrCodec</a>, <a href="qsjiscodec.html#695cdc">QSjisCodec</a>, <a href="qjiscodec.html#678d8c">QJisCodec</a>, <a href="qtsciicodec.html#a74aef">QTsciiCodec</a> and <a href="qgbkcodec.html#fa7353">QGbkCodec</a>.
 <h3 class="fn">int <a name="1fb71a"></a>QTextCodec::heuristicNameMatch ( const char * hint ) const <code>[virtual]</code></h3>
 <p>Returns a value indicating how likely this decoder is
 for decoding some format that has the given name.
@@ -226,7 +228,7 @@ for decoding some format that has the given name.
 the length of the string.  A bad match is negative.
 <p>The default implementation calls <a href="#67b8c9">simpleHeuristicNameMatch</a>()
 with the name of the codec.
-<p>Reimplemented in <a href="qgbkcodec.html#d81d90">QGbkCodec</a>, <a href="qjiscodec.html#251a11">QJisCodec</a>, <a href="qtsciicodec.html#fdf435">QTsciiCodec</a>, <a href="qeucjpcodec.html#9693b5">QEucJpCodec</a>, <a href="qsjiscodec.html#988e8c">QSjisCodec</a> and <a href="qeuckrcodec.html#2325e7">QEucKrCodec</a>.
+<p>Reimplemented in <a href="qeucjpcodec.html#9693b5">QEucJpCodec</a>, <a href="qgbkcodec.html#d81d90">QGbkCodec</a>, <a href="qsjiscodec.html#988e8c">QSjisCodec</a>, <a href="qeuckrcodec.html#2325e7">QEucKrCodec</a>, <a href="qjiscodec.html#251a11">QJisCodec</a> and <a href="qtsciicodec.html#fdf435">QTsciiCodec</a>.
 <h3 class="fn">QTextCodec* <a name="f4b1ee"></a>QTextCodec::loadCharmap ( <a href="qiodevice.html">QIODevice</a> * iod ) <code>[static]</code></h3>
 <p>Reads a POSIX2 charmap definition from <em>iod.</em>
 The parser recognizes the following lines:
@@ -259,7 +261,7 @@ of char* data to create chunks of Unicode data.  The default implementation
 creates a stateless decoder, which is sufficient for only the simplest
 encodings where each byte corresponds to exactly one Unicode character.
 <p>The caller is responsible for deleting the returned object.
-<p>Reimplemented in <a href="qeuckrcodec.html#b0a3bd">QEucKrCodec</a>, <a href="qjiscodec.html#55a1cc">QJisCodec</a>, <a href="qeucjpcodec.html#e597d8">QEucJpCodec</a>, <a href="qgbkcodec.html#47936f">QGbkCodec</a> and <a href="qsjiscodec.html#3635a0">QSjisCodec</a>.
+<p>Reimplemented in <a href="qeuckrcodec.html#b0a3bd">QEucKrCodec</a>, <a href="qjiscodec.html#55a1cc">QJisCodec</a>, <a href="qsjiscodec.html#3635a0">QSjisCodec</a>, <a href="qgbkcodec.html#47936f">QGbkCodec</a> and <a href="qeucjpcodec.html#e597d8">QEucJpCodec</a>.
 <h3 class="fn"><a href="qtextencoder.html">QTextEncoder</a>* <a name="545c5c"></a>QTextCodec::makeEncoder () const <code>[virtual]</code></h3>
 <p>Creates a <a href="qtextencoder.html">QTextEncoder</a> which stores enough state to encode chunks
 of Unicode data as char* data.  The default implementation
@@ -287,7 +289,7 @@ The default algorithm of heuristicNameMatch() uses name().
 <li>Some applications may use this function to present
 encodings to the end user.
 </ul>
-<p>Reimplemented in <a href="qsjiscodec.html#fa1a4b">QSjisCodec</a>, <a href="qgbkcodec.html#192e8d">QGbkCodec</a>, <a href="qtsciicodec.html#2378f8">QTsciiCodec</a>, <a href="qeucjpcodec.html#960100">QEucJpCodec</a>, <a href="qeuckrcodec.html#f42d67">QEucKrCodec</a> and <a href="qjiscodec.html#a9ae73">QJisCodec</a>.
+<p>Reimplemented in <a href="qjiscodec.html#a9ae73">QJisCodec</a>, <a href="qsjiscodec.html#fa1a4b">QSjisCodec</a>, <a href="qeucjpcodec.html#960100">QEucJpCodec</a>, <a href="qtsciicodec.html#2378f8">QTsciiCodec</a>, <a href="qeuckrcodec.html#f42d67">QEucKrCodec</a> and <a href="qgbkcodec.html#192e8d">QGbkCodec</a>.
 <h3 class="fn">int <a name="67b8c9"></a>QTextCodec::simpleHeuristicNameMatch ( const char * name, const char * hint ) <code>[static protected]</code></h3>
 <p>A simple utility function for <a href="#1fb71a">heuristicNameMatch</a>() - it
 does some very minor character-skipping
@@ -301,7 +303,7 @@ converts the input with that.  Note that the default makeDecoder()
 implementation makes a decoder that simply calls
 this function, hence subclasses <em>must</em> reimplement one function or
 the other to avoid infinite recursion.
-<p>Reimplemented in <a href="qtsciicodec.html#d9b381">QTsciiCodec</a>, <a href="qeuckrcodec.html#ffda71">QEucKrCodec</a>, <a href="qsjiscodec.html#1e94eb">QSjisCodec</a>, <a href="qgbkcodec.html#c1c238">QGbkCodec</a>, <a href="qjiscodec.html#1cb0c8">QJisCodec</a> and <a href="qeucjpcodec.html#b69ae5">QEucJpCodec</a>.
+<p>Reimplemented in <a href="qtsciicodec.html#d9b381">QTsciiCodec</a>, <a href="qeuckrcodec.html#ffda71">QEucKrCodec</a>, <a href="qeucjpcodec.html#b69ae5">QEucJpCodec</a>, <a href="qgbkcodec.html#c1c238">QGbkCodec</a>, <a href="qjiscodec.html#1cb0c8">QJisCodec</a> and <a href="qsjiscodec.html#1e94eb">QSjisCodec</a>.
 <h3 class="fn"><a href="qstring.html">QString</a> <a name="0cb396"></a>QTextCodec::toUnicode ( const <a href="qbytearray.html">QByteArray</a> &amp; a ) const</h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <h3 class="fn"><a href="qstring.html">QString</a> <a name="01113b"></a>QTextCodec::toUnicode ( const <a href="qbytearray.html">QByteArray</a> &amp; a, int len ) const</h3>
@@ -312,7 +314,7 @@ the other to avoid infinite recursion.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -320,5 +322,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

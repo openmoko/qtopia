@@ -1,0 +1,11 @@
+Files: plugins/applets/libmountmonapplet.so* pics/mountmon plugins/applets/mountmonapplet.desktop
+Priority: optional
+Section: qpe
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia
+Description: Mount Monitor applet
+ Mount Monitor applet for the Qtopia environment taskbar,
+ mainly useful for non-CF mounted cards (eg. SD).

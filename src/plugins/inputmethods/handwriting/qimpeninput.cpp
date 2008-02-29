@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -18,15 +33,15 @@
 **
 **********************************************************************/
 
-#include "qimpenwidget.h"
-#include "qimpensetup.h"
+#include "penwidget.h"
 #include "qimpeninput.h"
-#include "qimpencombining.h"
-#include "qimpenwordpick.h"
-#include "qimpenmatch.h"
-#include "qimpenhelp.h"
+#include <qtopia/mstroke/combining.h>
+#include "wordpick.h"
+#include <qtopia/mstroke/match.h>
+#include "help.h"
 
 #include <qtopia/qpeapplication.h>
+#include <qtopia/qcopenvelope_qws.h>
 #include <qtopia/qdawg.h>
 #include <qtopia/config.h>
 #include <qtopia/global.h>
@@ -148,10 +163,10 @@ QIMPenInput::QIMPenInput( QWidget *parent, const char *name, WFlags f )
     gl->setColStretch( 0, 1 );
 
     wordPicker = new QIMPenWordPick( this );
-    connect( wordPicker, SIGNAL(wordClicked(const QString &)),
-	     this, SLOT(wordPicked(const QString &)) );
-    connect( matcher, SIGNAL(matchedCharacters(const QIMPenCharMatchList &)),
-	     this, SLOT(matchedCharacters(const QIMPenCharMatchList &)) );
+    connect( wordPicker, SIGNAL(wordClicked(const QString&)),
+	     this, SLOT(wordPicked(const QString&)) );
+    connect( matcher, SIGNAL(matchedCharacters(const QIMPenCharMatchList&)),
+	     this, SLOT(matchedCharacters(const QIMPenCharMatchList&)) );
     connect( matcher, SIGNAL(matchedWords(const QIMPenMatch::MatchWordList&)),
 	     wordPicker, SLOT(setWords(const QIMPenMatch::MatchWordList&)) );
     QFont smoothFont("smallsmooth",9);
@@ -199,23 +214,25 @@ QIMPenInput::QIMPenInput( QWidget *parent, const char *name, WFlags f )
     connect( setupBtn, SIGNAL(clicked()), SLOT(setup()));
 
     connect( matcher, SIGNAL(removeStroke()), pw, SLOT(removeStroke()) );
-    connect( pw, SIGNAL(changeCharSet( QIMPenCharSet * )),
-             matcher, SLOT(setCharSet( QIMPenCharSet * )) );
-    connect( pw, SIGNAL(changeCharSet( int )),
-             this, SLOT(selectCharSet( int )) );
+    connect( pw, SIGNAL(changeCharSet(QIMPenCharSet*)),
+             matcher, SLOT(setCharSet(QIMPenCharSet*)) );
+    connect( pw, SIGNAL(changeCharSet(int)),
+             this, SLOT(selectCharSet(int)) );
     connect( pw, SIGNAL(beginStroke()),
 	     matcher, SLOT(beginStroke()) );
-    connect( pw, SIGNAL(stroke( QIMPenStroke * )),
-             this, SLOT(strokeEntered( QIMPenStroke * )) );
-    connect( pw, SIGNAL(stroke( QIMPenStroke * )),
-             matcher, SLOT(strokeEntered( QIMPenStroke * )) );
+    connect( pw, SIGNAL(stroke(QIMPenStroke*)),
+             this, SLOT(strokeEntered(QIMPenStroke*)) );
+    connect( pw, SIGNAL(stroke(QIMPenStroke*)),
+             matcher, SLOT(strokeEntered(QIMPenStroke*)) );
 
     shortcutCharSet = 0;
     currCharSet = 0;
-    setupDlg = 0;
     profile = 0;
     mode = Normal;
 
+    QCopChannel *ch = new QCopChannel( "QPE/Handwriting", this );
+    connect( ch, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(pluginMessage(const QCString&,const QByteArray&)) );
     loadProfiles();
 }
 
@@ -223,7 +240,6 @@ QIMPenInput::~QIMPenInput()
 {
     delete shortcutCharSet;
     delete (HandwritingHelp*) helpDlg;
-    delete setupDlg;
 }
 
 QSize QIMPenInput::sizeHint() const
@@ -231,6 +247,13 @@ QSize QIMPenInput::sizeHint() const
     int fw = frameWidth();
     int ps = wordPicker->isHidden() ? 0 : wordPicker->sizeHint().height();
     return pw->sizeHint() + QSize( fw*2, fw*2+ps );
+}
+
+void QIMPenInput::pluginMessage(const QCString &m, const QByteArray &)
+{
+    if (m == "settingsChanged()") {
+	loadProfiles();
+    }
 }
 
 void QIMPenInput::loadProfiles()
@@ -257,15 +280,15 @@ void QIMPenInput::loadProfiles()
 
     Config config( "handwriting" );
     config.setGroup( "Settings" );
-    QString prof = config.readEntry( "Profile", "Default" );
+    QString prof = config.readEntry( "Profile", "popup" );
     selectProfile( prof );
 }
 
-void QIMPenInput::selectProfile( const QString &name )
+void QIMPenInput::selectProfile( const QString &ident )
 {
     QListIterator<QIMPenProfile> it( profileList );
     for ( ; it.current(); ++it ) {
-	if ( it.current()->name() == name ) {
+	if ( it.current()->identifier() == ident ) {
 	    profile = it.current();
 	    break;
 	}
@@ -408,9 +431,6 @@ void QIMPenInput::matchedCharacters( const QIMPenCharMatchList &cl )
 		mode = Switch;
 	    }
 	    break;
-	case QIMPenChar::Extended:
-	    handleExtended( ch->data() );
-	    break;
     }
 }
 
@@ -481,20 +501,8 @@ void QIMPenInput::help()
 */
 void QIMPenInput::setup()
 {
-    if ( !setupDlg ) {
-	// We are working with our copy of the char sets here.
-	setupDlg = new QIMPenSetup( profile, 0, 0, TRUE );
-	if ( qApp->desktop()->width() < 640 )
-	    setupDlg->showMaximized();
-	Global::hideInputMethod();
-	setupDlg->exec();
-	loadProfiles();
-	delete setupDlg;
-	setupDlg = 0;
-	Global::showInputMethod();
-    } else {
-	setupDlg->raise();
-    }
+    QCopEnvelope e("QPE/Application/hwsettings", "raise()");
+    Global::hideInputMethod();
 }
 
 void QIMPenInput::backspace()

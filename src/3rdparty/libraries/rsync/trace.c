@@ -123,7 +123,7 @@ rs_log_va(int flags, char const *fn, char const *fmt, va_list va)
 
         vsnprintf(buf, sizeof buf - 1, fmt, va);
         //### revise 
-        printf("rs_log_va inconplete %s:%s", __FILE__, __LINE__);
+        printf("rs_log_va inconplete %s:%d", __FILE__, __LINE__);
         if (flags & RS_LOG_NONAME) { 
             snprintf(full_buf, sizeof full_buf - 1,
                      "%s: %s%s\n",

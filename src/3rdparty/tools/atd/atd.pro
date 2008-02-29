@@ -1,9 +1,20 @@
-TEMPLATE	= app
-CONFIG		= warn_on release
-DESTDIR		= $(QPEDIR)/bin
+requires(contains(QTOPIA_ARCH,sharp))
 
-HEADERS		= 
+TEMPLATE	= app
+CONFIG		= singleexec
+DESTDIR		= $$(QPEDIR)/bin
+
 SOURCES		= atd.cpp
-INTERFACES	= 
 
 TARGET		= atd
+
+target.path=/bin
+at.files=$$(QPEDIR)/bin/at
+at.path=/bin
+INSTALLS+=target at
+
+TRANSLATIONS=
+
+PACKAGE_NAME=atd
+PACKAGE_DESCRIPTION=atd daemon for Sharp
+

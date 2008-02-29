@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -19,9 +34,153 @@
 **********************************************************************/
 
 #include "datetimeedit.h"
+
+#include <qtopia/qpeapplication.h>
+#include <qtopia/timestring.h>
+#include <qtopia/config.h>
+#ifdef QTOPIA_PHONE
+#include <qtopia/contextbar.h>
+#include <qtopia/global.h>
+#endif
+
 #include <qvalidator.h>
 #include <qapplication.h>
 #include <qpopupmenu.h>
+#include <qlayout.h>
+
+#ifdef QTOPIA_PHONE
+extern bool mousePreferred; // can't call Global::mousePreferred in libqtopia2 from libqtopia
+#endif
+
+#ifdef Q_WS_QWS
+extern Q_EXPORT QRect qt_maxWindowRect;
+#endif
+
+class QPEDatePickerPopup : public QFrame
+{
+    Q_OBJECT
+
+public:
+    QPEDatePickerPopup( bool showNullButton, QWidget *parent, const char *name = 0, int wflags = 0);
+
+    QDate selectedDate() const;
+signals:
+    void dateClicked(const QDate &);
+
+public slots:
+    void setDate(const QDate &);
+    void setWeekStartsMonday(bool);
+    void popup(); // populates widget.
+    
+protected:
+    void closeEvent( QCloseEvent *e );
+    void keyPressEvent( QKeyEvent *e );
+
+private slots:
+    void passOnNullDate();
+
+private:
+    void populate();
+
+    bool mShowNull;
+    QPEDatePicker *monthView;
+    QPushButton *nullButton;
+
+    bool wsm;
+    QDate mdt;
+};
+
+class QPEDateEditPrivate
+{
+public:
+    QPEDateEditPrivate() : popup(0) {}
+
+    QPEDatePickerPopup *popup;
+};
+
+static bool fromString(const QString& input, QTime& result)
+{
+    int h,m,s;
+    h=m=s=0;
+    int i = 0;
+    int st = 0; // hour, minute, second, end.
+    int count = 0;
+    int acc = 0;
+    while (i < (int)input.length()) {
+	if (input[i].isSpace()) {
+	    i++;
+	    continue;
+	}
+	// expect digits,
+	if (input[i].isDigit()) {
+	    if (st > 2 || count > 1)
+		return FALSE;
+	    if (acc)
+		acc *= 10;
+	    acc += input[i].digitValue();
+	    count++;
+	    switch(st) {
+		case 0:
+		    if (acc > 23)
+			return FALSE;
+		    h = acc;
+		    break;
+		case 1:
+		    if (acc > 59)
+			return FALSE;
+		    m = acc;
+		    break;
+		case 2:
+		    if (acc > 59)
+			return FALSE;
+		    s = acc;
+		    break;
+	    }
+	} else if (input[i] == QChar(':')) {
+	    if (st > 1 || count == 0)
+		return FALSE;
+	    acc = 0;
+	    st++;
+	    count = 0;
+	} else if (input[i] == QChar('A')
+		|| input[i] == QChar('a')
+		|| input[i] == QChar('P')
+		|| input[i] == QChar('p')) {
+	    if (st == 0 && count == 0)
+		return FALSE;
+	    acc = 0;
+	    count = 0;
+	    st = 3;
+
+	    if (input[i] == QChar('p') || input[i] == QChar('P')) {
+		if (h == 12)
+		    ;
+		else if (h > 11)
+		    return FALSE;
+		else
+		    h += 12;
+	    } else {
+		if (h == 12)
+		    h = 0;
+		else if (h > 11)
+		    return FALSE;
+	    }
+	    if (i + 1 == (int)input.length())
+		break;
+	    if (i + 2 != (int)input.length())
+		return FALSE;
+	    if (input[i+1] == QChar('m')
+		    || input[i+1] == QChar('M'))
+		break;
+	    else
+		return FALSE;
+	} else
+	    return FALSE;
+	i++;
+    }
+    result.setHMS(h,m,s);
+    return TRUE;
+}
 
 class TimeValidator : public QValidator
 {
@@ -30,94 +189,57 @@ public:
     {
     }
 
-    State validate(QString &input, int &cpos) const {
-	QTime t;
-	return evaluate(input, cpos, t);
-    }
-
-    State evaluate(QString &input, int &, QTime &result) const
+    State validate(QString &input, int &curs) const
     {
-	// <00->23>:<00->59> [AM|PM]
-	QString working = input.stripWhiteSpace();
+	QTime t;
 
-	int i = 0;
-	int st = 0; // hour, minute, second, end.
-	int count = 0;
-	int acc = 0;
-	while (i < (int)working.length()) {
-	    if (working[i].isSpace()) {
-		i++;
-		continue;
+	// <00->23>:<00->59>[AM|PM]
+
+	QString k;
+	int digs=0;
+	int ncurs=0;
+	for (int i=0; i<(int)input.length(); i++) {
+	    char c=input[i].latin1();
+	    if ( c>='0' && c<='9' ) {
+		QString s; s+=c;
+		if ( i > 3 ) {
+#ifdef QTOPIA_PHONE
+		    if ( digs == 2 ) {
+			digs = 0;
+			if ( c == '2' )
+			    s = " AM";
+			else if ( c == '7' )
+			    s = " PM";
+			else
+			    s = QString::null;
+		    }
+#endif
+		} else if ( digs == 2 ) {
+		    digs = 0;
+		    k += ':';
+		    if ( i<curs ) ncurs++;
+		}
+		k += s;
+		digs+=s.length();
+		if ( i<curs ) ncurs+=s.length();
+	    } else if ( c == ' ' ) {
+		digs = 0;
+		k += c;
+		if ( i<curs ) ncurs++;
+	    } else if ( c == 'a' || c == 'A' || c == 'p' || c == 'P'
+		    || c == 'm' || c == 'M' ) {
+		digs = 0;
+		k += c;
+		if ( i<curs ) ncurs++;
+	    } else if ( c == ':' || digs==2 ) {
+		digs = 0;
+		k += ':';
+		if ( i<curs ) ncurs++;
 	    }
-	    // expect digits,
-	    if (working[i].isDigit()) {
-		if (st > 2 || count > 1)
-		    return Invalid;
-		if (acc)
-		    acc *= 10;
-		acc += working[i].digitValue();
-		count++;
-		switch(st) {
-		    case 0:
-			if (acc > 23)
-			    return Intermediate;
-			result.setHMS(acc, 0, 0);
-			break;
-		    case 1:
-			if (acc > 59)
-			    return Intermediate;
-			result.setHMS(result.hour(), acc, 0);
-			break;
-		    case 2:
-			if (acc > 59)
-			    return Intermediate;
-			result.setHMS(result.hour(), result.minute(), acc);
-			break;
-		}
-	    } else if (working[i] == QChar(':')) {
-		if (st > 1 || count == 0)
-		    return Intermediate;
-		acc = 0;
-		st++;
-		count = 0;
-	    } else if (working[i] == QChar('A')
-		    || working[i] == QChar('a')
-		    || working[i] == QChar('P')
-		    || working[i] == QChar('p')) {
-		if (st == 0 && count == 0)
-		    return Intermediate;
-		acc = 0;
-		count = 0;
-		st = 3;
-
-		if (working[i] == QChar('p') || working[i] == QChar('P')) {
-		    if (result.hour() == 12)
-			result.setHMS(12, result.minute(), result.second());
-		    else if (result.hour() > 11)
-			return Intermediate;
-		    else
-			result.setHMS(result.hour() + 12, result.minute(), result.second());
-		} else {
-		    if (result.hour() == 12)
-			result.setHMS(0, result.minute(), result.second());
-		    else if (result.hour() > 11)
-			return Intermediate;
-		}
-		if (i + 1 == (int)working.length())
-		    return Valid;
-		if (i + 2 != (int)working.length())
-		    return  Intermediate;
-		if (working[i+1] == QChar('m')
-			|| working[i+1] == QChar('M'))
-		    return Valid;
-		else
-		    return Invalid;
-	    } else
-		return Invalid;
-	    i++;
 	}
-	return Valid;
-
+	input = k;
+	curs = ncurs;
+	return Acceptable;
     }
 };
 
@@ -129,17 +251,20 @@ public:
   QPETimeEdit extends QSpinBox to validate times as they are entered.
   It handles 12 hour and 24 hour time formats.
 
+  First availability: Qtopia 1.6
+
   \ingroup qtopiaemb
 */
 
 /*!
   \fn QPETimeEdit::valueChanged( const QTime &t );
 
-  This signal is emitted when the time is changed.
+  This signal is emitted when the time is changed to \a t.
 */
 
 /*!
   Constructs a QPETimeEdit with the time set to 00:00.
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 QPETimeEdit::QPETimeEdit( QWidget *parent, const char *name)
     : QSpinBox(parent, name)
@@ -154,6 +279,7 @@ QPETimeEdit::QPETimeEdit( QWidget *parent, const char *name)
 	    this, SLOT(changeTimeUsingValue(int)));
 
     tv = new TimeValidator(this);
+    QPEApplication::setInputMethodHint(this,QPEApplication::Number);
 
     setValidator(tv);
 
@@ -162,6 +288,7 @@ QPETimeEdit::QPETimeEdit( QWidget *parent, const char *name)
 
 /*!
   Constructs a QPETimeEdit with the time set to \a dt.
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 QPETimeEdit::QPETimeEdit( const QTime &dt, QWidget *parent,
 	const char *name ) : QSpinBox(parent, name)
@@ -178,6 +305,7 @@ QPETimeEdit::QPETimeEdit( const QTime &dt, QWidget *parent,
 	    this, SLOT(changeTimeUsingValue(int)));
 
     tv = new TimeValidator(this);
+    QPEApplication::setInputMethodHint(this,QPEApplication::Number);
 
     setValidator(tv);
 }
@@ -198,6 +326,8 @@ QPETimeEdit::~QPETimeEdit()
 }
 
 /*!
+  \reimp
+
   Reimplemented to validate the time entered.
 */
 // minutes only;
@@ -212,14 +342,14 @@ QString QPETimeEdit::mapValueToText(int v)
 }
 
 /*!
+  \reimp
+
   Reimplemented to validate the time entered.
 */
 int QPETimeEdit::mapTextToValue(bool *ok)
 {
     QTime res;
-    QString working = text();
-    int cpos = 0;
-    bool test = (tv->evaluate(working, cpos, res) == QValidator::Valid);
+    bool test = fromString(text(),res);
 
     if (ok)
 	*ok = test;
@@ -336,9 +466,9 @@ void QPETimeEdit::stepDown()
 */
 
 /*!
-  \fn QPEDateEdit::valueChanged( const QDate &t );
+  \fn QPEDateEdit::valueChanged( const QDate &d );
 
-  This signal is emitted when the date is changed.
+  This signal is emitted when the date is changed to \a d.
 */
 
 /*!
@@ -356,15 +486,18 @@ void QPETimeEdit::stepDown()
   long format.
 
   If \a allowNullDate is TRUE it is possible to select no date.
+
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 QPEDateEdit::QPEDateEdit( QWidget *parent, const char * name, bool longDate,
 			      bool allowNullDate )
-    :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate)
+    :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate), d(0)
 {
     df = TimeString::currentDateFormat();
     noneButton = 0;
     init();
     setLongFormat(longDate);
+    connect( qApp, SIGNAL(weekChanged(bool)), this, SLOT(setWeekStartsMonday(bool)) );
 }
 
 
@@ -375,10 +508,12 @@ QPEDateEdit::QPEDateEdit( QWidget *parent, const char * name, bool longDate,
   long format.
 
   If \a allowNullDate is TRUE it is possible to select no date.
+
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 QPEDateEdit::QPEDateEdit( const QDate &dt, QWidget *parent, const char * name, bool longDate,
 			      bool allowNullDate )
-    :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate)
+    :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate), d(0)
 {
     currDate = dt;
     noneButton = 0;
@@ -406,54 +541,175 @@ void QPEDateEdit::setLongFormat( bool l )
     updateButtonText();
 }
 
+//
+// Ensure the date is changed when the popup is hidden.  This catches
+// changes of year in QPEDatePicker without altering it's behaviour
+// (ie. date displayed in the pushbutton only changes when the monthview
+// is hidden).
+//
+void QPEDateEdit::hidingMonthView(void)
+{
+    setDate(d->popup->selectedDate());
+}
+
+QPEDatePickerPopup::QPEDatePickerPopup( bool showNullButton, QWidget *parent,
+	const char *name, int wflags) : QFrame(parent, name, WType_Popup
+#ifdef QTOPIA_PHONE
+	| WStyle_NormalBorder
+#endif
+	| wflags),
+	mShowNull(showNullButton), monthView(0), nullButton(0), wsm(FALSE)
+{
+    setFocusPolicy(NoFocus);
+#ifdef QTOPIA_PHONE
+    setCaption(tr("Select Date"));
+    ContextBar::setLabel(this, Key_Back, ContextBar::Cancel);
+    setFrameStyle(NoFrame);
+#else
+    setFrameStyle(StyledPanel | Raised);
+#endif
+}
+
+QDate QPEDatePickerPopup::selectedDate() const
+{
+    if (monthView)
+	return monthView->selectedDate();
+    return mdt;
+}
+
+void QPEDatePickerPopup::setDate(const QDate &dt)
+{
+    mdt = dt;
+    if (monthView)
+	monthView->setDate(dt);
+}
+
+void QPEDatePickerPopup::passOnNullDate()
+{
+    emit dateClicked(QDate());
+}
+
+void QPEDatePickerPopup::setWeekStartsMonday(bool b)
+{
+    wsm = b;
+    if (monthView)
+	monthView->setWeekStartsMonday(b);
+}
+
+void QPEDatePickerPopup::keyPressEvent( QKeyEvent *e )
+{
+#ifdef QTOPIA_PHONE
+    if (e->key() == Key_Back || e->key() == Key_No) {
+	e->accept();
+	close();
+    }
+#else
+    Q_UNUSED(*e);
+#endif
+}
+
+void QPEDatePickerPopup::closeEvent( QCloseEvent *e )
+{
+    e->accept();
+
+    if (!parentWidget())
+	return;
+
+    // remember that we (as a popup) might recieve the mouse release
+    // event instead of the popupParent. This is due to the fact that
+    // the popupParent popped us up in its mousePressEvent handler. To
+    // avoid the button remaining in pressed state we simply send a
+    // faked mouse button release event to it.
+    QMouseEvent me( QEvent::MouseButtonRelease, QPoint(0,0), QPoint(0,0), QMouseEvent::LeftButton, QMouseEvent::NoButton);
+    QApplication::sendEvent( parentWidget(), &me );
+}
+
+void QPEDatePickerPopup::popup()
+{
+    populate();
+#ifndef Q_WS_QWS
+    QRect qt_maxWindowRect = qApp->desktop()->geometry();
+#endif
+#ifdef QTOPIA_PHONE
+    showMaximized();
+    monthView->setFocus();
+    if( !mousePreferred )
+	monthView->setModalEditing(TRUE);
+#else
+    // base of parents geometry.
+    QWidget *p = parentWidget();
+    if (p) {
+	//want to show just above, or just below,
+	//want to show fully inside window rect.
+	// which is greater width, above or below.
+	QRect pg(p->mapToGlobal(QPoint(0,0)), p->size());
+	QRect geo;
+	geo.setSize(QSize(sizeHint().width()+2*frameWidth(), sizeHint().height()+2*frameWidth()));
+	if (pg.y() > qt_maxWindowRect.height() - (pg.y() + pg.height())) {
+	    // above,
+	    geo.moveTopLeft(
+		    QPoint(QMIN(pg.x(), qt_maxWindowRect.width() - geo.width()),
+	    QMAX(qt_maxWindowRect.y(), pg.y() - geo.height())));
+	} else {
+//	    // below.
+	    geo.moveTopLeft(QPoint(QMIN(pg.x(), qt_maxWindowRect.width() - geo.width()),
+		    QMIN(qt_maxWindowRect.height() - geo.height(), pg.bottom() )));
+	}
+	setGeometry(geo);
+    } else {
+	// um.... full screen?
+	setGeometry(qt_maxWindowRect);
+    }
+#endif
+    show();
+}
+
+void QPEDatePickerPopup::populate()
+{
+    if (!monthView) {
+	QVBoxLayout *vbl = new QVBoxLayout(this);
+	vbl->setMargin(frameWidth());
+	monthView = new QPEDatePicker(this);
+	connect(monthView, SIGNAL(dateClicked(const QDate &)), this, SIGNAL(dateClicked(const QDate &)));
+	connect(monthView, SIGNAL(dateClicked(const QDate &)), this, SLOT(close()));
+	vbl->addWidget(monthView);
+
+	if (mdt.isValid())
+	    monthView->setDate(mdt);
+	else
+	    monthView->setDate(QDate::currentDate());
+
+	monthView->setWeekStartsMonday(wsm);
+
+	if (mShowNull) {
+	    nullButton = new QPushButton(tr("None", "no date selected"), this);
+	    connect(nullButton, SIGNAL( clicked() ), this, SLOT(passOnNullDate()));
+	    connect(nullButton, SIGNAL( clicked() ), this, SLOT(close()));
+	    vbl->addWidget(nullButton);
+	}
+    }
+}
 void QPEDateEdit::init()
 {
-    QPopupMenu *popup = new QPopupMenu( this );
-    monthView = new QPEDatePicker( popup );
-    connect( monthView, SIGNAL(dateClicked(const QDate&)), popup, SLOT(close()) );
+    d = new QPEDateEditPrivate();
+    d->popup = new QPEDatePickerPopup( mAllowNullButton, this );
+    connect(this, SIGNAL(pressed()), d->popup, SLOT(popup()));
 
-    // XXX WARNING DO NOT CHANGE THIS UNLESS....
-    // you test VERY carefully.  There has been
-    // three attempts to allow this to be changed after
-    // init, and all of them resulted in a host of wierd bugs.
-    // Resulting in having to roll back the change.
-    // Watch espcially for:
-    //    Focus bugs, whereby the keys don't do what they should
-    //                Until TAB is pressed, or you can't get to the
-    //                None Button.
-    //    Layout bugs, Make sure the button actually hides/shows,
-    //		      Both on the first show and later shows.
-    //	  Key bugs.  All these should work,
-    //		    Left,Right,Up,Down,Space.
-    // XXX
-    if (mAllowNullButton)  // set to 1 for show, 
-	noneButton = new QPushButton(tr("None"), popup);
-    // XXX WARNING See above.
-
-    //
-    // Geometry information for the QPEDatePicker widget is
-    // setup by the QPopupMenu (parent).  However at 176x220,
-    // the widget hangs off the side of the screen.  Force the
-    // widget to be bounded by the desktop width.
-    //
-    monthView->setMaximumWidth(qApp->desktop()->width());
-
-    popup->insertItem( monthView );
-
-    if (mAllowNullButton) {
-	popup->insertItem( noneButton );
-	connect(noneButton, SIGNAL( clicked() ), this, SLOT(setNull()));
-    }
-
-    connect( monthView, SIGNAL( dateClicked( const QDate &) ),
-	    this, SLOT( setDate( const QDate &) ) );
-    connect( monthView, SIGNAL( dateClicked( const QDate &) ),
-	    this, SIGNAL( valueChanged( const QDate &) ) );
+    connect( d->popup, SIGNAL( dateClicked(const QDate&) ),
+	    this, SLOT( setDate(const QDate&) ) );
+    connect( d->popup, SIGNAL( dateClicked(const QDate&) ),
+	    this, SIGNAL( valueChanged(const QDate&) ) );
     TimeString::connectChange(this,SLOT(clockChanged()));
-    setPopup( popup );
-    popup->setFocusPolicy(NoFocus);
-    setDate( QDate::currentDate() );
+    // This is the size policy for the button, not the popup
     setSizePolicy( QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed) );
+
+    {
+	Config config( "qpe" );
+	config.setGroup("Time");
+	bool onMonday = config.readBoolEntry( "MONDAY" );
+	setWeekStartsMonday( onMonday );
+    }
+    connect( qApp, SIGNAL(weekChanged(bool)), this, SLOT(setWeekStartsMonday(bool)) );
 }
 
 /*!
@@ -471,12 +727,12 @@ bool QPEDateEdit::allowNullDate() const
 void QPEDateEdit::setWeekStartsMonday( bool startMonday )
 {
     weekStartsMonday = startMonday;
-    monthView->setWeekStartsMonday( weekStartsMonday );
+    d->popup->setWeekStartsMonday( weekStartsMonday );
 }
 
 void QPEDateEdit::setNull()
 {
-    popup()->close();
+    d->popup->close();
     setDate( QDate() );
     emit valueChanged( QDate() );
 }
@@ -484,16 +740,15 @@ void QPEDateEdit::setNull()
 void QPEDateEdit::updateButtonText()
 {
     if ( currDate.isValid() ) {
-#if defined(_WS_QWS_)
-	setText( longFmt ? TimeString::longDateString(currDate,df) : TimeString::dateString(currDate,df) );
+#ifdef QTOPIA_PHONE
+	setText( TimeString::shortDate(currDate,df) );
 #else
-	//setText( longFmt ? currDate.toString( "ddd MMMM d yy" ) : currDate.toString("dd/MM/yyyy"));
-	setText( longFmt ? currDate.toString( "ddd MMMM d yy" ) : currDate.toString(Qt::LocalDate));
+	setText( longFmt ? TimeString::longDateString(currDate,df) : TimeString::dateString(currDate,df) );
 #endif
-	monthView->setDate( currDate.year(), currDate.month(), currDate.day() );
+	d->popup->setDate( currDate );
     }
     else {
-	setText( tr("None") );
+	setText( tr("None", "no date selected") );
     }
 }
 
@@ -510,6 +765,8 @@ QDate QPEDateEdit::date() const
 */
 void QPEDateEdit::setDate( const QDate &d )
 {
+    if (isDown())
+	setDown(FALSE);
     if ( d != currDate ) {
 	currDate = d;
 	updateButtonText();
@@ -534,20 +791,22 @@ void QPEDateEdit::setDateFormat( DateFormat format )
   \brief The QPEDateTimeEdit class provides a compact widget for selecting
   a date and time.
 
-  QPEDateTimeEdit displays a QPEDateEdit and QPETimeEdit side-by-side.
+  QPEDateTimeEdit displays a QPEDateEdit and QPETimeEdit above each other.
 
   \ingroup qtopiaemb
 */
 
 /*!
-  \fn QPEDateTimeEdit::valueChanged( const QDateTime &t );
+  \fn QPEDateTimeEdit::valueChanged( const QDateTime &dt );
 
-  This signal is emitted when the date or time is changed.
+  This signal is emitted when the date or time is changed to \a dt.
 */
 
 /*!
   Constructs a QPEDateTimeEdit with the date set to today and the time
   set to 00:00.
+
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 
 QPEDateTimeEdit::QPEDateTimeEdit( QWidget *parent, const char *name)
@@ -555,24 +814,27 @@ QPEDateTimeEdit::QPEDateTimeEdit( QWidget *parent, const char *name)
 {
     de = new QPEDateEdit(this, "date"); // No tr
     te = new QPETimeEdit(this, "time"); // No tr
-    connect(de, SIGNAL(valueChanged(const QDate &)),
-	    this, SLOT(setDate( const QDate &)));
-    connect(te, SIGNAL(valueChanged(const QTime &)),
-	    this, SLOT(setTime( const QTime &)));
+    connect(de, SIGNAL(valueChanged(const QDate&)),
+	    this, SLOT(setDate(const QDate&)));
+    connect(te, SIGNAL(valueChanged(const QTime&)),
+	    this, SLOT(setTime(const QTime&)));
 }
 
 /*!
   Constructs QPEDateTimeEdit with the date and time \a dt.
+
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 QPEDateTimeEdit::QPEDateTimeEdit( const QDateTime &dt, QWidget *parent,
-	const char *name ) : QHBox(parent, name)
+	const char *name )
+    : QHBox(parent, name)
 {
     de = new QPEDateEdit(dt.date(), this, "date"); // No tr
     te = new QPETimeEdit(dt.time(), this, "time"); // No tr
-    connect(de, SIGNAL(valueChanged(const QDate &)),
-	    this, SLOT(setDate( const QDate &)));
-    connect(te, SIGNAL(valueChanged(const QTime &)),
-	    this, SLOT(setTime( const QTime &)));
+    connect(de, SIGNAL(valueChanged(const QDate&)),
+	    this, SLOT(setDate(const QDate&)));
+    connect(te, SIGNAL(valueChanged(const QTime&)),
+	    this, SLOT(setTime(const QTime&)));
 }
 
 /*!
@@ -680,3 +942,5 @@ bool QPEDateTimeEdit::timeIsEnabled() const
 {
     return te->isEnabled();
 }
+
+#include "datetimeedit.moc"

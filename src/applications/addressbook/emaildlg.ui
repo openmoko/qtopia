@@ -109,10 +109,6 @@
                         <name>focusPolicy</name>
                         <enum>TabFocus</enum>
                     </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Move Up</string>
-                    </property>
                 </widget>
                 <widget>
                     <class>QToolButton</class>
@@ -123,10 +119,6 @@
                     <property stdset="1">
                         <name>focusPolicy</name>
                         <enum>TabFocus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Move Down</string>
                     </property>
                 </widget>
             </hbox>

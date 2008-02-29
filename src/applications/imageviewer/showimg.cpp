@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -33,6 +48,7 @@
 #include <qtopia/qpemenubar.h>
 #include <qtopia/qpetoolbar.h>
 #include <qtopia/config.h>
+#include <qtopia/global.h>
 #include <qwidgetstack.h>
 #include <qaction.h>
 #include <qfiledialog.h>
@@ -44,6 +60,10 @@
 #include <qtimer.h>
 #include <qcopchannel_qws.h>
 #include <qtopia/docproperties.h>
+#ifdef QTOPIA_PHONE
+# include <qtopia/contextmenu.h>
+# include <qtopia/contextbar.h>
+#endif
 
 //===========================================================================
 /*
@@ -91,14 +111,30 @@ void ImagePane::hideStatus()
     status->hide();
 }
 
+#ifdef QTOPIA_PHONE
 void ImagePane::keyPressEvent(QKeyEvent *e)
 {
-    emit keypress(e->key());
+    if( !Global::mousePreferred() ) {
+	QWidget::keyPressEvent(e);
+	if (!e->isAccepted()) {
+	    e->accept();
+	    emit keypress(e->key());
+	}
+    }
 }
+#endif
 
 void ImagePane::closeEvent(QCloseEvent *e)
 {
     e->ignore();
+}
+
+ImageWidget::ImageWidget(QWidget *parent) :
+    QWidget( parent ), pixmap( 0 )
+{
+    QIconSet waitset = Resource::loadIconSet("wait");
+
+    wait = waitset.pixmap();
 }
 
 //===========================================================================
@@ -118,6 +154,8 @@ void ImageWidget::paintEvent( QPaintEvent *e )
 	painter.drawPixmap((width() - pixmap.width()) / 2,
 	    (height() - pixmap.height()) / 2, pixmap);
     }
+
+//    QTOPIA_PROFILE("drawn image");
 }
 
 /*
@@ -127,13 +165,12 @@ void ImageWidget::showBusy()
 {
     QPainter painter(this);
     painter.setBrush( white );
-    QPixmap wait = Resource::loadPixmap( "wait" );
     int pw = wait.width();
     int ph = wait.height();
     int w = pw * 3/2;
     int h = ph * 3/2;
     painter.drawEllipse( 0, 0, w, h );
-    painter.drawPixmap( (w-pw)/2+1, (h-ph)/2+1, wait  );
+    painter.drawPixmap( (w-pw)/2+1, (h-ph)/2+1, wait );
     
 }
 
@@ -152,7 +189,8 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     : QMainWindow( parent, name, wFlags | Qt::WResizeNoErase ),
       filename( 0 ), 
       doc(NULL),
-      bFromDocView( FALSE )
+      bFromDocView( FALSE ),
+      edit(0)
 {
     setCaption( tr("Image Viewer") );
     setIcon( Resource::loadPixmap( "ImageViewer" ) );
@@ -162,13 +200,6 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     needPmScaled90 = TRUE;
     rotated90 = FALSE;
     isFullScreen = FALSE;
-
-    setToolBarsMovable( FALSE );
-
-    toolBar = new QPEToolBar( this );
-    toolBar->setHorizontalStretchable( TRUE );
-
-    menubar = new QPEMenuBar( toolBar );
 
     stack = new QWidgetStack( this );
     stack->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
@@ -180,11 +211,46 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
 
     connect(this, SIGNAL(keypress(int)), this, SLOT(handleKeypress(int)));
 
-    fileSelector = new FileSelector("image/*", stack, "fs", FALSE, FALSE);
+    fileSelector = new FileSelector("image/" "*", stack, "fs", FALSE, FALSE);
     connect( fileSelector, SIGNAL( closeMe() ), this, SLOT( closeFileSelector() ) );
-    connect( fileSelector, SIGNAL( fileSelected( const DocLnk &) ), this, SLOT( openFile( const DocLnk & ) ) );
+    connect( fileSelector, SIGNAL( fileSelected(const DocLnk&) ), this, SLOT( openFile(const DocLnk&) ) );
     connect(fileSelector, SIGNAL(categoryChanged()), this, SLOT(docsChanged()));
     connect(fileSelector, SIGNAL(typeChanged()), this, SLOT(docsChanged()));
+
+    openAction = new QAction( tr( "Open" ), Resource::loadIconSet( "fileopen" ), QString::null, 0, this, 0 );
+    connect( openAction, SIGNAL( activated() ), this, SLOT( open() ) );
+
+    flipAction = new QAction( tr( "Rotate 180" ), Resource::loadIconSet( "repeat" ), QString::null, 0, this, 0 );
+    connect( flipAction, SIGNAL( activated() ), this, SLOT( rot180() ) );
+
+    rotateAction = new QAction( tr( "Rotate 90"), Resource::loadIconSet( "rotate90" ), QString::null, 0, this, 0);
+    connect( rotateAction, SIGNAL( activated() ), this, SLOT( rot90() ) );
+
+    propAction = new QAction(tr("Properties..."), QIconSet(), QString::null, 0, this, 0);
+    connect(propAction, SIGNAL( activated() ), this, SLOT(properties()));
+
+    fullscreenAction = new QAction( tr( "Fullscreen" ), Resource::loadIconSet( "fullscreen" ), QString::null, 0, this, 0 );
+    connect( fullscreenAction, SIGNAL( activated() ), this, SLOT( fullScreen() ) );
+
+    slideAction = new QAction( tr( "Slide show" ), Resource::loadIconSet( "slideshow" ), QString::null, 0, this, 0 );
+    slideAction->setToggleAction( TRUE );
+    connect( slideAction, SIGNAL( toggled(bool) ), this, SLOT( slideShow(bool) ) );
+    slideAction->setEnabled( FALSE );
+
+    prevImageAction = new QAction(tr("Previous"), Resource::loadIconSet("back"),
+	QString::null, 0, this, 0);
+    connect(prevImageAction, SIGNAL(activated()), this, SLOT(prevImage()));
+
+    nextImageAction = new QAction(tr("Next"), Resource::loadIconSet("forward"),
+	QString::null, 0, this, 0);
+    connect(nextImageAction, SIGNAL(activated()), this, SLOT(nextImage()));
+
+#ifndef QTOPIA_PHONE
+    setToolBarsMovable( FALSE );
+
+    toolBar = new QPEToolBar( this );
+    toolBar->setHorizontalStretchable( TRUE );
+    menubar = new QPEMenuBar( toolBar );
 
     edit = new QPopupMenu( menubar );
     QPopupMenu *view = new QPopupMenu( menubar );
@@ -194,8 +260,6 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
 
     toolBar = new QPEToolBar( this );
 
-    openAction = new QAction( tr( "Open" ), Resource::loadIconSet( "fileopen" ), QString::null, 0, this, 0 );
-    connect( openAction, SIGNAL( activated() ), this, SLOT( open() ) );
     openAction->addTo( toolBar );
     openAction->addTo( edit );
 
@@ -203,48 +267,30 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     hflip_id = edit->insertItem(tr("Horizontal flip"), this, SLOT(hFlip()), 0);
     vflip_id = edit->insertItem(tr("Vertical flip"), this, SLOT(vFlip()), 0);
 
-    flipAction = new QAction( tr( "Rotate 180" ), Resource::loadIconSet( "repeat" ), QString::null, 0, this, 0 );
-    connect( flipAction, SIGNAL( activated() ), this, SLOT( rot180() ) );
     flipAction->addTo( toolBar );
     flipAction->addTo( edit );
-
-    rotateAction = new QAction( tr( "Rotate 90"), Resource::loadIconSet( "rotate90" ), QString::null, 0, this, 0);
-    connect( rotateAction, SIGNAL( activated() ), this, SLOT( rot90() ) );
     rotateAction->addTo( toolBar );
     rotateAction->addTo( edit );
-
     edit->insertSeparator();
-    propAction = new QAction(tr("Properties..."), QIconSet(), QString::null, 0, this, 0);
-    connect(propAction, SIGNAL( activated() ), this, SLOT(properties()));
     propAction->addTo(edit);
-    //edit->insertItem(tr("Properties..."), this, SLOT(properties()), 0);
-
-    fullscreenAction = new QAction( tr( "Fullscreen" ), Resource::loadIconSet( "fullscreen" ), QString::null, 0, this, 0 );
-    connect( fullscreenAction, SIGNAL( activated() ), this, SLOT( fullScreen() ) );
     fullscreenAction->addTo( toolBar );
     fullscreenAction->addTo( view);
-
-    slideAction = new QAction( tr( "Slide show" ), Resource::loadIconSet( "slideshow" ), QString::null, 0, this, 0 );
-    slideAction->setToggleAction( TRUE );
-    connect( slideAction, SIGNAL( toggled(bool) ), this, SLOT( slideShow(bool) ) );
     slideAction->addTo( view);
     slideAction->addTo( toolBar );
-    slideAction->setEnabled( FALSE );
-
-    prevImageAction = new QAction(tr("Previous"), Resource::loadIconSet("back"),
-	QString::null, 0, this, 0);
-    connect(prevImageAction, SIGNAL(activated()), this, SLOT(prevImage()));
     prevImageAction->addTo(toolBar);
     prevImageAction->addTo(view);
-
-    nextImageAction = new QAction(tr("Next"), Resource::loadIconSet("forward"),
-	QString::null, 0, this, 0);
-    connect(nextImageAction, SIGNAL(activated()), this, SLOT(nextImage()));
     nextImageAction->addTo(toolBar);
     nextImageAction->addTo(view);
 
     view->insertSeparator();
     view->insertItem(tr("Settings..."), this, SLOT(settings()), 0);
+#else
+    contextMenu = new ContextMenu(this);
+    fullscreenAction->addTo(contextMenu);
+    slideAction->addTo(contextMenu);
+    contextMenu->insertItem(tr("Settings..."), this, SLOT(settings()), 0);
+    ContextBar::setLabel(this, Key_Select, ContextBar::NoLabel);
+#endif
 
     stack->raiseWidget( fileSelector );
     openAction->setEnabled( FALSE );
@@ -260,8 +306,7 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     slideReverse = config.readBoolEntry("Reverse", FALSE);
 
     config.setGroup("Default");
-    rotateOnLoad = config.readBoolEntry("Rotate", FALSE);
-    rotateClockwise = config.readBoolEntry("Clockwise", TRUE);
+    rot = RotationDirection(config.readNumEntry("Rotate"));
     fastLoad = config.readBoolEntry("FastLoad", TRUE);
     smallScale = config.readBoolEntry("SmallScale", FALSE);
 
@@ -275,7 +320,7 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
 
 void ImageViewer::updateDocs()
 {
-    QTimer::singleShot(1000, this, SLOT(docsChanged()));
+    QTimer::singleShot(0, this, SLOT(docsChanged()));
 }
 
 ImageViewer::~ImageViewer()
@@ -325,6 +370,7 @@ void ImageViewer::docsChanged(void)
     // empty, or we need it to scan because we are viewing the file selector.
     if ( fileSelector->isVisible() || !imageList.isEmpty() ) {
 	imageList.clear();
+	fileSelector->reread();
 	imageList = fileSelector->fileList();
 	setControls();
     }
@@ -336,8 +382,7 @@ void ImageViewer::settings()
     dlg.setDelay( slideDelay );
     dlg.setRepeat( slideRepeat );
     dlg.setReverse( slideReverse );
-    dlg.setRotate(rotateOnLoad);
-    dlg.setClockwise(rotateClockwise);
+    dlg.setRotation(rot);
     dlg.setFastLoad(fastLoad);
     dlg.setSmallScale(smallScale);
 
@@ -345,8 +390,7 @@ void ImageViewer::settings()
 	slideDelay = dlg.delay();
 	slideRepeat = dlg.repeat();
 	slideReverse = dlg.reverse();
-	rotateOnLoad = dlg.rotate();
-        rotateClockwise = dlg.clockwise();
+	rot = dlg.rotation();
 	fastLoad = dlg.fastLoad();
 	smallScale = dlg.smallScale();
 
@@ -357,8 +401,7 @@ void ImageViewer::settings()
 	config.writeEntry("Reverse", slideReverse);
 
 	config.setGroup("Default");
-	config.writeEntry("Clockwise", rotateClockwise);
-	config.writeEntry("Rotate", rotateOnLoad);
+	config.writeEntry("Rotate", rot);
 	config.writeEntry("FastLoad", fastLoad);
 	config.writeEntry("SmallScale", smallScale);
     }
@@ -444,7 +487,8 @@ void ImageViewer::updateCaption( QString name )
     }
 }
 
-void ImageViewer::loadFilename( const QString &file ) {
+void ImageViewer::loadFilename( const QString &file )
+{
     if ( file ) {
 	filename = file;
 	if ( !slideTimer->isActive() )
@@ -508,9 +552,9 @@ void ImageViewer::loadFilename( const QString &file ) {
 	    bool portraitDisplay = imagePanel->height() > imagePanel->width();
 	    bool portraitImage = imageheight > imagewidth;
 	
-	    if (rotateOnLoad && portraitImage != portraitDisplay ) {
+	    if (rot != rotate_none && portraitImage != portraitDisplay ) {
 		rotated90 = TRUE;
-		if ( rotateClockwise )
+		if ( rot == rotate_clockwise )
 		    matrix.rotate( 90.0 );
 		else
 		    matrix.rotate( -90.0 );
@@ -535,8 +579,10 @@ void ImageViewer::setControls()
     prevImageAction->setEnabled(validPicture && multipleImages);
     nextImageAction->setEnabled(validPicture && multipleImages);
 
-    edit->setItemEnabled(hflip_id, validPicture);
-    edit->setItemEnabled(vflip_id, validPicture);
+    if (edit) {
+	edit->setItemEnabled(hflip_id, validPicture);
+	edit->setItemEnabled(vflip_id, validPicture);
+    }
 }
 
 bool ImageViewer::loadSelected()
@@ -562,8 +608,12 @@ bool ImageViewer::loadSelected()
 int ImageViewer::h()
 {
     if ( !isFullScreen)
+#ifndef QTOPIA_PHONE
 	 return  height() - menubar->heightForWidth( width() )
 		    - imagePanel->statusLabel()->height();
+#else
+	 return  height() - imagePanel->statusLabel()->height();
+#endif
     else
          return qApp->desktop()->height();
 }
@@ -874,11 +924,19 @@ ImageViewer::prevImage(void)
     return idx == 0 ? TRUE : FALSE;
 }
 
+#ifdef QT_KEYPAD_MODE
 void
 ImageViewer::keyPressEvent(QKeyEvent *e)
 {
-    emit keypress(e->key());
+    QMainWindow::keyPressEvent(e);
+    if (!e->isAccepted()) {
+	if ((e->key() != Key_Back && e->key() != Key_No) || stack->visibleWidget() != fileSelector) {
+	    e->accept();
+	    emit keypress(e->key());
+	}
+    }
 }
+#endif
 
 void
 ImageViewer::handleKeypress(int keycode)
@@ -904,16 +962,28 @@ ImageViewer::handleKeypress(int keycode)
 	break;
 
     case Qt::Key_Escape:
+#ifdef QT_KEYPAD_MODE
+    case Qt::Key_Select:
+#endif	// QT_KEYPAD_MODE
 	if (isFullScreen) {
 	    normalView();
 	}
 	break;
 
+
+#ifdef QT_KEYPAD_MODE
+    case Qt::Key_No:
+    case Qt::Key_Back:
+#endif
     case Qt::Key_Space:
 	if (isFullScreen) {
 	    normalView();
 	} else {
-	    open();
+	    if (bFromDocView) {
+		close();
+	    } else {
+		open();
+	    }
 	}
 	break;
     }

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/windowdecorationinterface.doc:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/windowdecorationinterface.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>WindowDecorationInterface Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>WindowDecorationInterface Class Reference</h1>
 
 <p>The WindowDecorationInterface class provides an interface for Qtopia
 window decoration styles.
@@ -46,16 +54,16 @@ window decoration styles.
 The WindowDecorationInterface class provides an interface for Qtopia
 window decoration styles.
 <p> Window decoration styles may be added to Qtopia via plugins. In order to
-write a style plugin you must create an interface to your <a href="qstyle.html">QStyle</a> derived
+write a style plugin you must create an interface to your QStyle derived
 class by deriving from the WindowDecorationInterface class and implementing
 the pure virtual functions.
 <p> The window being decorated is defined by the
 WindowDecorationInterface::WindowData struct:
 <pre>
 struct WindowData {
-    <a href="qrect.html">QRect</a> rect;
-    <a href="qpalette.html">QPalette</a> palette;
-    <a href="qstring.html">QString</a> caption;
+    QRect rect;
+    QPalette palette;
+    QString caption;
     enum Flags { Maximized=0x01, Dialog=0x02, Active=0x04 };
     Q_UINT32 flags;
     Q_UINT32 reserved;
@@ -98,24 +106,24 @@ each corner of the window.
 </h3> 
 <p> Deconstructor.
 
-<h3 class=fn>void <a name="drawArea"></a>WindowDecorationInterface::drawArea ( <a href="windowdecorationinterface.html#Area-enum">Area</a>&nbsp;area, <a href="qpainter.html">QPainter</a>&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd ) const<tt> [virtual]</tt>
+<h3 class=fn>void <a name="drawArea"></a>WindowDecorationInterface::drawArea ( <a href="windowdecorationinterface.html#Area-enum">Area</a>&nbsp;area, QPainter&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd ) const<tt> [virtual]</tt>
 </h3> 
-<p> Draw the specified <em>area</em> using <a href="qpainter.html">QPainter</a> <em>p</em> for window <em>wd</em>.
+<p> Draw the specified <em>area</em> using QPainter <em>p</em> for window <em>wd</em>.
 
-<h3 class=fn>void <a name="drawButton"></a>WindowDecorationInterface::drawButton ( <a href="windowdecorationinterface.html#Button-enum">Button</a>&nbsp;b, <a href="qpainter.html">QPainter</a>&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd, int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h, QWSButton::State&nbsp;state ) const<tt> [virtual]</tt>
+<h3 class=fn>void <a name="drawButton"></a>WindowDecorationInterface::drawButton ( <a href="windowdecorationinterface.html#Button-enum">Button</a>&nbsp;b, QPainter&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd, int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h, QWSButton::State&nbsp;state ) const<tt> [virtual]</tt>
 </h3> 
-<p> Draw button <em>b</em> with <a href="qpainter.html">QPainter</a> <em>p</em> for window <em>wd</em> within the bounds
+<p> Draw button <em>b</em> with QPainter <em>p</em> for window <em>wd</em> within the bounds
 supplied by <em>x</em>, <em>y</em>, <em>w</em>, <em>h</em> in the state specified by <em>state</em>.
 
-<h3 class=fn><a href="qpixmap.html">QPixmap</a> <a name="icon"></a>WindowDecorationInterface::icon () const<tt> [pure virtual]</tt>
+<h3 class=fn>QPixmap <a name="icon"></a>WindowDecorationInterface::icon () const<tt> [pure virtual]</tt>
 </h3> 
 <p> The <a href="#icon">icon</a>() function returns the icon of the decoration. This may
 be displayed in the appearance settings dialog.
 
-<h3 class=fn><a href="qregion.html">QRegion</a> <a name="mask"></a>WindowDecorationInterface::mask ( const&nbsp;WindowData&nbsp;*&nbsp;wd ) const<tt> [virtual]</tt>
+<h3 class=fn>QRegion <a name="mask"></a>WindowDecorationInterface::mask ( const&nbsp;WindowData&nbsp;*&nbsp;wd ) const<tt> [virtual]</tt>
 </h3> 
 <p> Returns the mask of the decoration including all borders and the title
-for window <em>wd</em> as a <a href="qregion.html">QRegion</a>.  The window decorations do not necessarily
+for window <em>wd</em> as a QRegion.  The window decorations do not necessarily
 need to be rectangular, however the title bar \em must be rectangular and
 must be the width of the window.  This ensures the title is drawn correctly
 for maximized windows.
@@ -124,18 +132,20 @@ for maximized windows.
 </h3> 
 <p> returns the metric <em>m</em> for the window <em>wd</em>.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="name"></a>WindowDecorationInterface::name () const<tt> [pure virtual]</tt>
+<h3 class=fn>QString <a name="name"></a>WindowDecorationInterface::name () const<tt> [pure virtual]</tt>
 </h3> 
 <p> The <a href="#name">name</a>() function returns the name of the decoration. This will
 be displayed in the appearance settings dialog.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

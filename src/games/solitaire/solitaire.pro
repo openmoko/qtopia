@@ -1,15 +1,51 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
+CONFIG		+= qtopiaapp
 
-CONFIG		+= qtopia warn_on release
+HEADERS		= canvasitemtimer.h \
+		cardmetrics.h \
+		canvascard.h \
+		canvasshapes.h \
+		cardgame.h \
+		cardpile.h \
+		canvascardpile.h \
+		card.h \
+		canvascardgame.h \
+		freecellcardgame.h \
+		patiencecardgame.h \
+		canvascardwindow.h
 
-HEADERS		= canvasitemtimer.h   cardmetrics.h   canvascard.h   canvasshapes.h   cardgame.h   cardgamelayout.h   cardpile.h   card.h   carddeck.h   canvascardgame.h   freecellcardgame.h   patiencecardgame.h   canvascardwindow.h
-SOURCES		= canvasitemtimer.cpp cardmetrics.cpp canvascard.cpp canvasshapes.cpp cardgame.cpp cardgamelayout.cpp cardpile.cpp card.cpp carddeck.cpp canvascardgame.cpp freecellcardgame.cpp patiencecardgame.cpp canvascardwindow.cpp 
+SOURCES		= canvasitemtimer.cpp \
+		cardmetrics.cpp \
+		canvascard.cpp \
+		canvasshapes.cpp \
+		cardgame.cpp \
+		cardpile.cpp \
+		canvascardpile.cpp \
+		card.cpp \
+		canvascardgame.cpp \
+		freecellcardgame.cpp \
+		patiencecardgame.cpp \
+		canvascardwindow.cpp \
+		main.cpp
 
-multiprocess:SOURCES+=main.cpp
+QTOPIA_PHONE:INTERFACES	= phone_settings.ui
+!QTOPIA_PHONE:INTERFACES = pda_settings.ui
 
-TARGET		= patience
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
 
-TRANSLATIONS = patience-en_GB.ts patience-de.ts patience-ja.ts patience-no.ts
+TARGET		= solitaire
+
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/solitaire*
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/solitaire.desktop
+desktop.path=/apps/Games
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/solitaire/*
+pics.path=/pics/solitaire
+cardpics.files=$${QTOPIA_DEPOT_PATH}/pics/cards/*.png
+contains(QTOPIA_DISP_SIZES,C):cardpics.files+=$${QTOPIA_DEPOT_PATH}/pics/cards/micro
+contains(QTOPIA_DISP_SIZES,P):cardpics.files+=$${QTOPIA_DEPOT_PATH}/pics/cards/small
+contains(QTOPIA_DISP_SIZES,W)|contains(QTOPIA_DISP_SIZES,T):cardpics.files+=$${QTOPIA_DEPOT_PATH}/pics/cards/normal
+contains(QTOPIA_DISP_SIZES,T):cardpics.files+=$${QTOPIA_DEPOT_PATH}/pics/cards/large
+cardpics.path=/pics/cards
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics cardpics

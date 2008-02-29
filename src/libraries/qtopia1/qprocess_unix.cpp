@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -674,6 +689,9 @@ bool QProcess::start( QStringList *env )
 	if ( fd[1] )
 	    ::fcntl( fd[1], F_SETFD, FD_CLOEXEC ); // close on exec shows sucess
 
+	// put the child process into its parent's process group
+	::setpgid( ::getpid(), ::getppid() );
+
 	if ( env == 0 ) { // inherit environment and start process
 	    ::execvp( arglist[0], (char*const*)arglist ); // ### cast not nice
 	} else { // start process with environment settins as specified in env
@@ -1046,8 +1064,8 @@ void QProcess::socketRead( int fd )
 
 
 /*
-  This private slot is called when the process tries to read data from standard
-  input.
+  This private slot is called when the process tries to write data to 
+  standard input of the child process.
 */
 void QProcess::socketWrite( int fd )
 {
@@ -1065,6 +1083,12 @@ void QProcess::socketWrite( int fd )
 	    d->stdinBuf.head()->size() - d->stdinBufRead );
     if ( ret > 0 )
 	d->stdinBufRead += ret;
+    else if ( ret < 0 && errno == EPIPE ) {
+	// turn off the socket notifier and discard the remaining data
+	// because the pipe has been disconnected on the remote end.
+	d->notifierStdin->setEnabled( FALSE );
+	d->stdinBufRead = (ssize_t)d->stdinBuf.head()->size();
+    }
     if ( d->stdinBufRead == (ssize_t)d->stdinBuf.head()->size() ) {
 	d->stdinBufRead = 0;
 	delete d->stdinBuf.dequeue();
@@ -1161,6 +1185,11 @@ int QProcess::priority() const
     return 0;
 }
 
+/*!
+  Sets the process priority to \a p, a value from -20 to 20,
+  where 0 is normal, lower values a give more favourable
+  priority, larger values less favourable.
+*/
 void QProcess::setPriority(int p)
 {
     if ( d->proc )

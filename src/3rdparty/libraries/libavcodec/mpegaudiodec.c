@@ -16,6 +16,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+/**
+ * @file mpegaudiodec.c
+ * MPEG Audio decoder.
+ */ 
+
 //#define DEBUG
 #include "avcodec.h"
 #include "mpegaudio.h"
@@ -42,17 +48,17 @@
 
 #define FRAC_ONE    (1 << FRAC_BITS)
 
-#define MULL(a,b) (((INT64)(a) * (INT64)(b)) >> FRAC_BITS)
-#define MUL64(a,b) ((INT64)(a) * (INT64)(b))
+#define MULL(a,b) (((int64_t)(a) * (int64_t)(b)) >> FRAC_BITS)
+#define MUL64(a,b) ((int64_t)(a) * (int64_t)(b))
 #define FIX(a)   ((int)((a) * FRAC_ONE))
 /* WARNING: only correct for posititive numbers */
 #define FIXR(a)   ((int)((a) * FRAC_ONE + 0.5))
 #define FRAC_RND(a) (((a) + (FRAC_ONE/2)) >> FRAC_BITS)
 
 #if FRAC_BITS <= 15
-typedef INT16 MPA_INT;
+typedef int16_t MPA_INT;
 #else
-typedef INT32 MPA_INT;
+typedef int32_t MPA_INT;
 #endif
 
 /****************/
@@ -61,14 +67,14 @@ typedef INT32 MPA_INT;
 #define BACKSTEP_SIZE 512
 
 typedef struct MPADecodeContext {
-    UINT8 inbuf1[2][MPA_MAX_CODED_FRAME_SIZE + BACKSTEP_SIZE];	/* input buffer */
+    uint8_t inbuf1[2][MPA_MAX_CODED_FRAME_SIZE + BACKSTEP_SIZE];	/* input buffer */
     int inbuf_index;
-    UINT8 *inbuf_ptr, *inbuf;
+    uint8_t *inbuf_ptr, *inbuf;
     int frame_size;
     int free_format_frame_size; /* frame size in case of free format
                                    (zero if currently unknown) */
     /* next header (used in free format parsing) */
-    UINT32 free_format_next_header; 
+    uint32_t free_format_next_header; 
     int error_protection;
     int layer;
     int sample_rate;
@@ -80,10 +86,10 @@ typedef struct MPADecodeContext {
     int mode;
     int mode_ext;
     int lsf;
-    MPA_INT synth_buf[MPA_MAX_CHANNELS][512 * 2];
+    MPA_INT synth_buf[MPA_MAX_CHANNELS][512 * 2] __attribute__((aligned(16)));
     int synth_buf_offset[MPA_MAX_CHANNELS];
-    INT32 sb_samples[MPA_MAX_CHANNELS][36][SBLIMIT];
-    INT32 mdct_buf[MPA_MAX_CHANNELS][SBLIMIT * 18]; /* previous samples, for layer 3 MDCT */
+    int32_t sb_samples[MPA_MAX_CHANNELS][36][SBLIMIT] __attribute__((aligned(16)));
+    int32_t mdct_buf[MPA_MAX_CHANNELS][SBLIMIT * 18]; /* previous samples, for layer 3 MDCT */
 #ifdef DEBUG
     int frame_count;
 #endif
@@ -91,22 +97,22 @@ typedef struct MPADecodeContext {
 
 /* layer 3 "granule" */
 typedef struct GranuleDef {
-    UINT8 scfsi;
+    uint8_t scfsi;
     int part2_3_length;
     int big_values;
     int global_gain;
     int scalefac_compress;
-    UINT8 block_type;
-    UINT8 switch_point;
+    uint8_t block_type;
+    uint8_t switch_point;
     int table_select[3];
     int subblock_gain[3];
-    UINT8 scalefac_scale;
-    UINT8 count1table_select;
+    uint8_t scalefac_scale;
+    uint8_t count1table_select;
     int region_size[3]; /* number of huffman codes in each region */
     int preflag;
     int short_start, long_end; /* long/short band indexes */
-    UINT8 scale_factors[40];
-    INT32 sb_hybrid[SBLIMIT * 18]; /* 576 samples */
+    uint8_t scale_factors[40];
+    int32_t sb_hybrid[SBLIMIT * 18]; /* 576 samples */
 } GranuleDef;
 
 #define MODE_EXT_MS_STEREO 2
@@ -115,63 +121,63 @@ typedef struct GranuleDef {
 /* layer 3 huffman tables */
 typedef struct HuffTable {
     int xsize;
-    const UINT8 *bits;
-    const UINT16 *codes;
+    const uint8_t *bits;
+    const uint16_t *codes;
 } HuffTable;
 
 #include "mpegaudiodectab.h"
 
 /* vlc structure for decoding layer 3 huffman tables */
 static VLC huff_vlc[16]; 
-static UINT8 *huff_code_table[16];
+static uint8_t *huff_code_table[16];
 static VLC huff_quad_vlc[2];
 /* computed from band_size_long */
-static UINT16 band_index_long[9][23];
+static uint16_t band_index_long[9][23];
 /* XXX: free when all decoders are closed */
 #define TABLE_4_3_SIZE (8191 + 16)
-static INT8  *table_4_3_exp;
+static int8_t  *table_4_3_exp;
 #if FRAC_BITS <= 15
-static UINT16 *table_4_3_value;
+static uint16_t *table_4_3_value;
 #else
-static UINT32 *table_4_3_value;
+static uint32_t *table_4_3_value;
 #endif
 /* intensity stereo coef table */
-static INT32 is_table[2][16];
-static INT32 is_table_lsf[2][2][16];
-static INT32 csa_table[8][2];
-static INT32 mdct_win[8][36];
+static int32_t is_table[2][16];
+static int32_t is_table_lsf[2][2][16];
+static int32_t csa_table[8][2];
+static int32_t mdct_win[8][36];
 
 /* lower 2 bits: modulo 3, higher bits: shift */
-static UINT16 scale_factor_modshift[64];
+static uint16_t scale_factor_modshift[64];
 /* [i][j]:  2^(-j/3) * FRAC_ONE * 2^(i+2) / (2^(i+2) - 1) */
-static INT32 scale_factor_mult[15][3];
+static int32_t scale_factor_mult[15][3];
 /* mult table for layer 2 group quantization */
 
 #define SCALE_GEN(v) \
 { FIXR(1.0 * (v)), FIXR(0.7937005259 * (v)), FIXR(0.6299605249 * (v)) }
 
-static INT32 scale_factor_mult2[3][3] = {
+static int32_t scale_factor_mult2[3][3] = {
     SCALE_GEN(4.0 / 3.0), /* 3 steps */
     SCALE_GEN(4.0 / 5.0), /* 5 steps */
     SCALE_GEN(4.0 / 9.0), /* 9 steps */
 };
 
 /* 2^(n/4) */
-static UINT32 scale_factor_mult3[4] = {
+static uint32_t scale_factor_mult3[4] = {
     FIXR(1.0),
     FIXR(1.18920711500272106671),
     FIXR(1.41421356237309504880),
     FIXR(1.68179283050742908605),
 };
 
-static MPA_INT window[512];
+static MPA_INT window[512] __attribute__((aligned(16)));
     
 /* layer 1 unscaling */
 /* n = number of bits of the mantissa minus 1 */
 static inline int l1_unscale(int n, int mant, int scale_factor)
 {
     int shift, mod;
-    INT64 val;
+    int64_t val;
 
     shift = scale_factor_modshift[scale_factor];
     mod = shift & 3;
@@ -203,7 +209,7 @@ static inline int l3_unscale(int value, int exponent)
 #if FRAC_BITS <= 15    
     unsigned int m;
 #else
-    UINT64 m;
+    uint64_t m;
 #endif
     int e;
 
@@ -221,7 +227,7 @@ static inline int l3_unscale(int value, int exponent)
     return m;
 #else
     m = MUL64(m, scale_factor_mult3[exponent & 3]);
-    m = (m + (UINT64_C(1) << (e-1))) >> e;
+    m = (m + (uint64_t_C(1) << (e-1))) >> e;
     return m;
 #endif
 }
@@ -232,7 +238,7 @@ static inline int l3_unscale(int value, int exponent)
 #define POW_FRAC_BITS 24
 #define POW_FRAC_ONE    (1 << POW_FRAC_BITS)
 #define POW_FIX(a)   ((int)((a) * POW_FRAC_ONE))
-#define POW_MULL(a,b) (((INT64)(a) * (INT64)(b)) >> POW_FRAC_BITS)
+#define POW_MULL(a,b) (((int64_t)(a) * (int64_t)(b)) >> POW_FRAC_BITS)
 
 static int dev_4_3_coefs[DEV_ORDER];
 
@@ -304,7 +310,7 @@ static int decode_init(AVCodecContext * avctx)
     static int init=0;
     int i, j, k;
 
-    if(!init) {
+    if (!init && !avctx->parse_only) {
         /* scale factors table for layer 1/2 */
         for(i=0;i<64;i++) {
             int shift, mod;
@@ -318,7 +324,7 @@ static int decode_init(AVCodecContext * avctx)
         for(i=0;i<15;i++) {
             int n, norm;
             n = i + 2;
-            norm = ((INT64_C(1) << n) * FRAC_ONE) / ((1 << n) - 1);
+            norm = ((int64_t_C(1) << n) * FRAC_ONE) / ((1 << n) - 1);
             scale_factor_mult[i][0] = MULL(FIXR(1.0 * 2.0), norm);
             scale_factor_mult[i][1] = MULL(FIXR(0.7937005259 * 2.0), norm);
             scale_factor_mult[i][2] = MULL(FIXR(0.6299605249 * 2.0), norm);
@@ -348,8 +354,9 @@ static int decode_init(AVCodecContext * avctx)
         huff_code_table[0] = NULL;
         for(i=1;i<16;i++) {
             const HuffTable *h = &mpa_huff_tables[i];
-            int xsize, n, x, y;
-            UINT8 *code_table;
+	    int xsize, x, y;
+            unsigned int n;
+            uint8_t *code_table;
 
             xsize = h->xsize;
             n = xsize * xsize;
@@ -379,17 +386,13 @@ static int decode_init(AVCodecContext * avctx)
             band_index_long[i][22] = k;
         }
 
-        /* compute n ^ (4/3) and store it in mantissa/exp format */
-        table_4_3_exp = av_mallocz(TABLE_4_3_SIZE * 
-                                   sizeof(table_4_3_exp[0]));
-        if (!table_4_3_exp)
+	/* compute n ^ (4/3) and store it in mantissa/exp format */
+	if (!av_mallocz_static(&table_4_3_exp,
+			       TABLE_4_3_SIZE * sizeof(table_4_3_exp[0])))
+	    return -1;
+	if (!av_mallocz_static(&table_4_3_value,
+			       TABLE_4_3_SIZE * sizeof(table_4_3_value[0])))
             return -1;
-        table_4_3_value = av_mallocz(TABLE_4_3_SIZE * 
-                                     sizeof(table_4_3_value[0]));
-        if (!table_4_3_value) {
-            av_free(table_4_3_exp);
-            return -1;
-        }
         
         int_pow_init();
         for(i=1;i<TABLE_4_3_SIZE;i++) {
@@ -511,7 +514,7 @@ static int decode_init(AVCodecContext * avctx)
     return 0;
 }
 
-/* tab[i][j] = 1.0 / (2.0 * cos(pi*(2*k+1) / 2^(6 - j))) */;
+/* tab[i][j] = 1.0 / (2.0 * cos(pi*(2*k+1) / 2^(6 - j))) */
 
 /* cos(i*pi/64) */
 
@@ -580,7 +583,7 @@ static int decode_init(AVCodecContext * avctx)
 #define ADD(a, b) tab[a] += tab[b]
 
 /* DCT32 without 1/sqrt(2) coef zero scaling. */
-static void dct32(INT32 *out, INT32 *tab)
+static void dct32(int32_t *out, int32_t *tab)
 {
     int tmp0, tmp1;
 
@@ -734,75 +737,114 @@ static void dct32(INT32 *out, INT32 *tab)
 
 #if FRAC_BITS <= 15
 
-#define OUT_SAMPLE(sum)\
-{\
-    int sum1;\
-    sum1 = (sum + (1 << (OUT_SHIFT - 1))) >> OUT_SHIFT;\
-    if (sum1 < -32768)\
-        sum1 = -32768;\
-    else if (sum1 > 32767)\
-        sum1 = 32767;\
-    *samples = sum1;\
-    samples += incr;\
+static inline int round_sample(int sum)
+{
+    int sum1;
+    sum1 = (sum + (1 << (OUT_SHIFT - 1))) >> OUT_SHIFT;
+    if (sum1 < -32768)
+        sum1 = -32768;
+    else if (sum1 > 32767)
+        sum1 = 32767;
+    return sum1;
 }
 
-#define SUM8(off, op)                           \
-{                                               \
-    sum op w[0 * 64 + off] * p[0 * 64];\
-    sum op w[1 * 64 + off] * p[1 * 64];\
-    sum op w[2 * 64 + off] * p[2 * 64];\
-    sum op w[3 * 64 + off] * p[3 * 64];\
-    sum op w[4 * 64 + off] * p[4 * 64];\
-    sum op w[5 * 64 + off] * p[5 * 64];\
-    sum op w[6 * 64 + off] * p[6 * 64];\
-    sum op w[7 * 64 + off] * p[7 * 64];\
-}
+#if defined(ARCH_POWERPC_405)
+
+/* signed 16x16 -> 32 multiply add accumulate */
+#define MACS(rt, ra, rb) \
+    asm ("maclhw %0, %2, %3" : "=r" (rt) : "0" (rt), "r" (ra), "r" (rb));
+
+/* signed 16x16 -> 32 multiply */
+#define MULS(ra, rb) \
+    ({ int __rt; asm ("mullhw %0, %1, %2" : "=r" (__rt) : "r" (ra), "r" (rb)); __rt; })
 
 #else
 
-#define OUT_SAMPLE(sum)\
-{\
-    int sum1;\
-    sum1 = (int)((sum + (INT64_C(1) << (OUT_SHIFT - 1))) >> OUT_SHIFT);\
-    if (sum1 < -32768)\
-        sum1 = -32768;\
-    else if (sum1 > 32767)\
-        sum1 = 32767;\
-    *samples = sum1;\
-    samples += incr;\
-}
+/* signed 16x16 -> 32 multiply add accumulate */
+#define MACS(rt, ra, rb) rt += (ra) * (rb)
 
-#define SUM8(off, op)                           \
-{                                               \
-    sum op MUL64(w[0 * 64 + off], p[0 * 64]);\
-    sum op MUL64(w[1 * 64 + off], p[1 * 64]);\
-    sum op MUL64(w[2 * 64 + off], p[2 * 64]);\
-    sum op MUL64(w[3 * 64 + off], p[3 * 64]);\
-    sum op MUL64(w[4 * 64 + off], p[4 * 64]);\
-    sum op MUL64(w[5 * 64 + off], p[5 * 64]);\
-    sum op MUL64(w[6 * 64 + off], p[6 * 64]);\
-    sum op MUL64(w[7 * 64 + off], p[7 * 64]);\
-}
+/* signed 16x16 -> 32 multiply */
+#define MULS(ra, rb) ((ra) * (rb))
 
 #endif
+
+#else
+
+static inline int round_sample(int64_t sum) 
+{
+    int sum1;
+    sum1 = (int)((sum + (int64_t_C(1) << (OUT_SHIFT - 1))) >> OUT_SHIFT);
+    if (sum1 < -32768)
+        sum1 = -32768;
+    else if (sum1 > 32767)
+        sum1 = 32767;
+    return sum1;
+}
+
+#define MULS(ra, rb) MUL64(ra, rb)
+
+#endif
+
+#define SUM8(sum, op, w, p) \
+{                                               \
+    sum op MULS((w)[0 * 64], p[0 * 64]);\
+    sum op MULS((w)[1 * 64], p[1 * 64]);\
+    sum op MULS((w)[2 * 64], p[2 * 64]);\
+    sum op MULS((w)[3 * 64], p[3 * 64]);\
+    sum op MULS((w)[4 * 64], p[4 * 64]);\
+    sum op MULS((w)[5 * 64], p[5 * 64]);\
+    sum op MULS((w)[6 * 64], p[6 * 64]);\
+    sum op MULS((w)[7 * 64], p[7 * 64]);\
+}
+
+#define SUM8P2(sum1, op1, sum2, op2, w1, w2, p) \
+{                                               \
+    int tmp;\
+    tmp = p[0 * 64];\
+    sum1 op1 MULS((w1)[0 * 64], tmp);\
+    sum2 op2 MULS((w2)[0 * 64], tmp);\
+    tmp = p[1 * 64];\
+    sum1 op1 MULS((w1)[1 * 64], tmp);\
+    sum2 op2 MULS((w2)[1 * 64], tmp);\
+    tmp = p[2 * 64];\
+    sum1 op1 MULS((w1)[2 * 64], tmp);\
+    sum2 op2 MULS((w2)[2 * 64], tmp);\
+    tmp = p[3 * 64];\
+    sum1 op1 MULS((w1)[3 * 64], tmp);\
+    sum2 op2 MULS((w2)[3 * 64], tmp);\
+    tmp = p[4 * 64];\
+    sum1 op1 MULS((w1)[4 * 64], tmp);\
+    sum2 op2 MULS((w2)[4 * 64], tmp);\
+    tmp = p[5 * 64];\
+    sum1 op1 MULS((w1)[5 * 64], tmp);\
+    sum2 op2 MULS((w2)[5 * 64], tmp);\
+    tmp = p[6 * 64];\
+    sum1 op1 MULS((w1)[6 * 64], tmp);\
+    sum2 op2 MULS((w2)[6 * 64], tmp);\
+    tmp = p[7 * 64];\
+    sum1 op1 MULS((w1)[7 * 64], tmp);\
+    sum2 op2 MULS((w2)[7 * 64], tmp);\
+}
+
 
 /* 32 sub band synthesis filter. Input: 32 sub band samples, Output:
    32 samples. */
 /* XXX: optimize by avoiding ring buffer usage */
 static void synth_filter(MPADecodeContext *s1,
-                         int ch, INT16 *samples, int incr, 
-                         INT32 sb_samples[SBLIMIT])
+                         int ch, int16_t *samples, int incr, 
+                         int32_t sb_samples[SBLIMIT])
 {
-    INT32 tmp[32];
-    register MPA_INT *synth_buf, *p;
-    register MPA_INT *w;
+    int32_t tmp[32];
+    register MPA_INT *synth_buf;
+    const register MPA_INT *w, *w2, *p;
     int j, offset, v;
+    int16_t *samples2;
 #if FRAC_BITS <= 15
-    int sum;
+    int sum, sum2;
 #else
-    volatile INT64 sum;
+    int64_t sum, sum2;
 #endif
-
+    
     dct32(tmp, sb_samples);
     
     offset = s1->synth_buf_offset[ch];
@@ -823,32 +865,42 @@ static void synth_filter(MPADecodeContext *s1,
     /* copy to avoid wrap */
     memcpy(synth_buf + 512, synth_buf, 32 * sizeof(MPA_INT));
 
+    samples2 = samples + 31 * incr;
     w = window;
-    for(j=0;j<16;j++) {
-        sum = 0;
-        p = synth_buf + 16 + j;    /* 0-15  */
-        SUM8(0, +=);
-        p = synth_buf + 48 - j;    /* 32-47 */
-        SUM8(32, -=);
-        OUT_SAMPLE(sum);
-        w++;
-    }
-    
-    p = synth_buf + 32; /* 48 */
+    w2 = window + 31;
+
     sum = 0;
-    SUM8(32, -=);
-    OUT_SAMPLE(sum);
+    p = synth_buf + 16;
+    SUM8(sum, +=, w, p);
+    p = synth_buf + 48;
+    SUM8(sum, -=, w + 32, p);
+    *samples = round_sample(sum);
+    samples += incr;
     w++;
 
-    for(j=17;j<32;j++) {
+    /* we calculate two samples at the same time to avoid one memory
+       access per two sample */
+    for(j=1;j<16;j++) {
         sum = 0;
-        p = synth_buf + 48 - j; /* 17-31 */
-        SUM8(0, -=);
-        p = synth_buf + 16 + j; /* 49-63 */
-        SUM8(32, -=);
-        OUT_SAMPLE(sum);
+        sum2 = 0;
+        p = synth_buf + 16 + j;
+        SUM8P2(sum, +=, sum2, -=, w, w2, p);
+        p = synth_buf + 48 - j;
+        SUM8P2(sum, -=, sum2, -=, w + 32, w2 + 32, p);
+
+        *samples = round_sample(sum);
+        samples += incr;
+        *samples2 = round_sample(sum2);
+        samples2 -= incr;
         w++;
+        w2--;
     }
+    
+    p = synth_buf + 32;
+    sum = 0;
+    SUM8(sum, -=, w + 32, p);
+    *samples = round_sample(sum);
+
     offset = (offset - 32) & 511;
     s1->synth_buf_offset[ch] = offset;
 }
@@ -866,7 +918,7 @@ static void synth_filter(MPADecodeContext *s1,
 static void imdct12(int *out, int *in)
 {
     int tmp;
-    INT64 in1_3, in1_9, in4_3, in4_9;
+    int64_t in1_3, in1_9, in4_3, in4_9;
 
     in1_3 = MUL64(in[1], C3);
     in1_9 = MUL64(in[1], C9);
@@ -958,7 +1010,7 @@ static void imdct36(int *out, int *in)
 {
     int i, j, t0, t1, t2, t3, s0, s1, s2, s3;
     int tmp[18], *tmp1, *in1;
-    INT64 in3_3, in6_6;
+    int64_t in3_3, in6_6;
 
     for(i=17;i>=1;i--)
         in[i] += in[i-1];
@@ -1033,7 +1085,7 @@ static void imdct36(int *out, int *in)
 }
 
 /* fast header check for resync */
-static int check_header(UINT32 header)
+static int check_header(uint32_t header)
 {
     /* header */
     if ((header & 0xffe00000) != 0xffe00000)
@@ -1057,7 +1109,7 @@ static int check_header(UINT32 header)
 /* header decoding. MUST check the header before because no
    consistency check is done there. Return 1 if free format found and
    that the frame size must be computed externally */
-static int decode_header(MPADecodeContext *s, UINT32 header)
+static int decode_header(MPADecodeContext *s, uint32_t header)
 {
     int sample_rate, frame_size, mpeg25, padding;
     int sample_rate_index, bitrate_index;
@@ -1154,12 +1206,53 @@ static int decode_header(MPADecodeContext *s, UINT32 header)
     return 0;
 }
 
+/* useful helper to get mpeg audio stream infos. Return -1 if error in
+   header */
+int mp_decode_header(int *sample_rate_ptr,
+                     int *nb_channels_ptr, 
+                     int *coded_frame_size_ptr,
+                     int *decoded_frame_size_ptr,
+                     uint32_t head)
+{
+    MPADecodeContext s1, *s = &s1;
+    int decoded_frame_size;
+
+    if (check_header(head) != 0)
+        return -1;
+
+    if (decode_header(s, head) != 0) {
+        return -1;
+    }
+
+    switch(s->layer) {
+    case 1:
+        decoded_frame_size = 384;
+        break;
+    case 2:
+        decoded_frame_size = 1152;
+        break;
+    default:
+    case 3:
+        if (s->lsf)
+            decoded_frame_size = 576;
+        else
+            decoded_frame_size = 1152;
+        break;
+    }
+
+    *sample_rate_ptr = s->sample_rate;
+    *nb_channels_ptr = s->nb_channels;
+    *coded_frame_size_ptr = s->frame_size;
+    *decoded_frame_size_ptr = decoded_frame_size * 2 * s->nb_channels;
+    return 0;
+}
+
 /* return the number of decoded frames */
 static int mp_decode_layer1(MPADecodeContext *s)
 {
     int bound, i, v, n, ch, j, mant;
-    UINT8 allocation[MPA_MAX_CHANNELS][SBLIMIT];
-    UINT8 scale_factors[MPA_MAX_CHANNELS][SBLIMIT];
+    uint8_t allocation[MPA_MAX_CHANNELS][SBLIMIT];
+    uint8_t scale_factors[MPA_MAX_CHANNELS][SBLIMIT];
 
     if (s->mode == MPA_JSTEREO) 
         bound = (s->mode_ext + 1) * 4;
@@ -1452,19 +1545,19 @@ static int mp_decode_layer2(MPADecodeContext *s)
 /*
  * Seek back in the stream for backstep bytes (at most 511 bytes)
  */
-static void seek_to_maindata(MPADecodeContext *s, long backstep)
+static void seek_to_maindata(MPADecodeContext *s, unsigned int backstep)
 {
-    UINT8 *ptr;
+    uint8_t *ptr;
 
     /* compute current position in stream */
-    ptr = s->gb.buffer + (get_bits_count(&s->gb)>>3);
+    ptr = (uint8_t *)(s->gb.buffer + (get_bits_count(&s->gb)>>3));
 
     /* copy old data before current one */
     ptr -= backstep;
     memcpy(ptr, s->inbuf1[s->inbuf_index ^ 1] + 
            BACKSTEP_SIZE + s->old_frame_size - backstep, backstep);
     /* init get bits again */
-    init_get_bits(&s->gb, ptr, s->frame_size + backstep);
+    init_get_bits(&s->gb, ptr, (s->frame_size + backstep)*8);
 
     /* prepare next buffer */
     s->inbuf_index ^= 1;
@@ -1494,11 +1587,11 @@ static inline void lsf_sf_expand(int *slen,
 
 static void exponents_from_scale_factors(MPADecodeContext *s, 
                                          GranuleDef *g,
-                                         INT16 *exponents)
+                                         int16_t *exponents)
 {
-    const UINT8 *bstab, *pretab;
+    const uint8_t *bstab, *pretab;
     int len, i, j, k, l, v0, shift, gain, gains[3];
-    INT16 *exp_ptr;
+    int16_t *exp_ptr;
 
     exp_ptr = exponents;
     gain = g->global_gain - 210;
@@ -1540,13 +1633,13 @@ static inline int get_bitsz(GetBitContext *s, int n)
 }
 
 static int huffman_decode(MPADecodeContext *s, GranuleDef *g,
-                          INT16 *exponents, int end_pos)
+                          int16_t *exponents, int end_pos)
 {
     int s_index;
     int linbits, code, x, y, l, v, i, j, k, pos;
     GetBitContext last_gb;
     VLC *vlc;
-    UINT8 *code_table;
+    uint8_t *code_table;
 
     /* low frequencies (called big values) */
     s_index = 0;
@@ -1645,8 +1738,8 @@ static int huffman_decode(MPADecodeContext *s, GranuleDef *g,
 static void reorder_block(MPADecodeContext *s, GranuleDef *g)
 {
     int i, j, k, len;
-    INT32 *ptr, *dst, *ptr1;
-    INT32 tmp[576];
+    int32_t *ptr, *dst, *ptr1;
+    int32_t tmp[576];
 
     if (g->block_type != 2)
         return;
@@ -1671,7 +1764,7 @@ static void reorder_block(MPADecodeContext *s, GranuleDef *g)
                 dst += 3;
             }
         }
-        memcpy(ptr1, tmp, len * 3 * sizeof(INT32));
+        memcpy(ptr1, tmp, len * 3 * sizeof(int32_t));
     }
 }
 
@@ -1681,10 +1774,10 @@ static void compute_stereo(MPADecodeContext *s,
                            GranuleDef *g0, GranuleDef *g1)
 {
     int i, j, k, l;
-    INT32 v1, v2;
+    int32_t v1, v2;
     int sf_max, tmp0, tmp1, sf, len, non_zero_found;
-    INT32 (*is_tab)[16];
-    INT32 *tab0, *tab1;
+    int32_t (*is_tab)[16];
+    int32_t *tab0, *tab1;
     int non_zero_found_short[3];
 
     /* intensity stereo */
@@ -1807,7 +1900,7 @@ static void compute_stereo(MPADecodeContext *s,
 static void compute_antialias(MPADecodeContext *s,
                               GranuleDef *g)
 {
-    INT32 *ptr, *p0, *p1, *csa;
+    int32_t *ptr, *p0, *p1, *csa;
     int n, tmp0, tmp1, i, j;
 
     /* we antialias only "long" bands */
@@ -1840,13 +1933,13 @@ static void compute_antialias(MPADecodeContext *s,
 
 static void compute_imdct(MPADecodeContext *s,
                           GranuleDef *g, 
-                          INT32 *sb_samples,
-                          INT32 *mdct_buf)
+                          int32_t *sb_samples,
+                          int32_t *mdct_buf)
 {
-    INT32 *ptr, *win, *win1, *buf, *buf2, *out_ptr, *ptr1;
-    INT32 in[6];
-    INT32 out[36];
-    INT32 out2[12];
+    int32_t *ptr, *win, *win1, *buf, *buf2, *out_ptr, *ptr1;
+    int32_t in[6];
+    int32_t out[36];
+    int32_t out2[12];
     int i, j, k, mdct_long_end, v, sblimit;
 
     /* find last non zero block */
@@ -1939,12 +2032,12 @@ static void compute_imdct(MPADecodeContext *s,
 }
 
 #if defined(DEBUG)
-void sample_dump(int fnum, INT32 *tab, int n)
+void sample_dump(int fnum, int32_t *tab, int n)
 {
     static FILE *files[16], *f;
     char buf[512];
     int i;
-    INT32 v;
+    int32_t v;
     
     f = files[fnum];
     if (!f) {
@@ -1975,7 +2068,7 @@ void sample_dump(int fnum, INT32 *tab, int n)
     for(i=0;i<n;i++) {
         /* normalize to 23 frac bits */
         v = tab[i] << (23 - FRAC_BITS);
-        fwrite(&v, 1, sizeof(INT32), f);
+        fwrite(&v, 1, sizeof(int32_t), f);
     }
 }
 #endif
@@ -1987,7 +2080,7 @@ static int mp_decode_layer3(MPADecodeContext *s)
     int nb_granules, main_data_begin, private_bits;
     int gr, ch, blocksplit_flag, i, j, k, n, bits_pos, bits_left;
     GranuleDef granules[2][2], *g;
-    INT16 exponents[576];
+    int16_t exponents[576];
 
     /* read side info */
     if (s->lsf) {
@@ -2127,7 +2220,7 @@ static int mp_decode_layer3(MPADecodeContext *s)
             bits_pos = get_bits_count(&s->gb);
             
             if (!s->lsf) {
-                UINT8 *sc;
+                uint8_t *sc;
                 int slen, slen1, slen2;
 
                 /* MPEG1 scale factors */
@@ -2284,7 +2377,7 @@ static int mp_decode_frame(MPADecodeContext *s,
     short *samples_ptr;
 
     init_get_bits(&s->gb, s->inbuf + HEADER_SIZE, 
-                  s->inbuf_ptr - s->inbuf - HEADER_SIZE);
+                  (s->inbuf_ptr - s->inbuf - HEADER_SIZE)*8);
     
     /* skip error protection field */
     if (s->error_protection)
@@ -2331,11 +2424,11 @@ static int mp_decode_frame(MPADecodeContext *s,
 
 static int decode_frame(AVCodecContext * avctx,
 			void *data, int *data_size,
-			UINT8 * buf, int buf_size)
+			uint8_t * buf, int buf_size)
 {
     MPADecodeContext *s = avctx->priv_data;
-    UINT32 header;
-    UINT8 *buf_ptr;
+    uint32_t header;
+    uint8_t *buf_ptr;
     int len, out_size;
     short *out_samples = data;
 
@@ -2373,7 +2466,7 @@ static int decode_frame(AVCodecContext * avctx,
 
 		if (check_header(header) < 0) {
 		    /* no sync found : move by one byte (inefficient, but simple!) */
-		    memcpy(s->inbuf, s->inbuf + 1, s->inbuf_ptr - s->inbuf - 1);
+		    memmove(s->inbuf, s->inbuf + 1, s->inbuf_ptr - s->inbuf - 1);
 		    s->inbuf_ptr--;
                     dprintf("skip %x\n", header);
                     /* reset free format frame size to give a chance
@@ -2388,7 +2481,21 @@ static int decode_frame(AVCodecContext * avctx,
                     avctx->sample_rate = s->sample_rate;
                     avctx->channels = s->nb_channels;
                     avctx->bit_rate = s->bit_rate;
-                    avctx->frame_size = s->frame_size;
+                    avctx->sub_id = s->layer;
+                    switch(s->layer) {
+                    case 1:
+                        avctx->frame_size = 384;
+                        break;
+                    case 2:
+                        avctx->frame_size = 1152;
+                        break;
+                    case 3:
+                        if (s->lsf)
+                            avctx->frame_size = 576;
+                        else
+                            avctx->frame_size = 1152;
+                        break;
+                    }
 		}
 	    }
         } else if (s->frame_size == -1) {
@@ -2399,11 +2506,11 @@ static int decode_frame(AVCodecContext * avctx,
             if (len == 0) {
 		/* frame too long: resync */
                 s->frame_size = 0;
-		memcpy(s->inbuf, s->inbuf + 1, s->inbuf_ptr - s->inbuf - 1);
+		memmove(s->inbuf, s->inbuf + 1, s->inbuf_ptr - s->inbuf - 1);
 		s->inbuf_ptr--;
             } else {
-                UINT8 *p, *pend;
-                UINT32 header1;
+                uint8_t *p, *pend;
+                uint32_t header1;
                 int padding;
 
                 memcpy(s->inbuf_ptr, buf_ptr, len);
@@ -2454,15 +2561,22 @@ static int decode_frame(AVCodecContext * avctx,
 	    buf_ptr += len;
 	    s->inbuf_ptr += len;
 	    buf_size -= len;
-	} else {
-            out_size = mp_decode_frame(s, out_samples);
+	}
+    next_data:
+        if (s->frame_size > 0 && 
+            (s->inbuf_ptr - s->inbuf) >= s->frame_size) {
+            if (avctx->parse_only) {
+                /* simply return the frame data */
+                *(uint8_t **)data = s->inbuf;
+                out_size = s->inbuf_ptr - s->inbuf;
+            } else {
+                out_size = mp_decode_frame(s, out_samples);
+            }
 	    s->inbuf_ptr = s->inbuf;
 	    s->frame_size = 0;
 	    *data_size = out_size;
 	    break;
 	}
-    next_data:
-	;
     }
     return buf_ptr - buf;
 }
@@ -2477,27 +2591,18 @@ AVCodec mp2_decoder =
     NULL,
     NULL,
     decode_frame,
+    CODEC_CAP_PARSE_ONLY,
 };
 
 AVCodec mp3_decoder =
 {
     "mp3",
     CODEC_TYPE_AUDIO,
-    CODEC_ID_MP3LAME,
+    CODEC_ID_MP3,
     sizeof(MPADecodeContext),
     decode_init,
     NULL,
     NULL,
     decode_frame,
+    CODEC_CAP_PARSE_ONLY,
 };
-
-#undef C1
-#undef C2
-#undef C3
-#undef C4
-#undef C5
-#undef C6
-#undef C7
-#undef C8
-#undef FRAC_BITS
-#undef HEADER_SIZE

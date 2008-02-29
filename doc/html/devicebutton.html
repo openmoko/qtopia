@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia1/devicebutton.cpp:26 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia1/devicebutton.cpp:26 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>DeviceButton Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>DeviceButton Class Reference</h1>
 
 <p>The DeviceButton class represents a physical user mappable button on a Qtopia device.
 <a href="#details">More...</a>
@@ -50,6 +58,7 @@ device may have "user programmable" buttons.
 The location and number of buttons will vary from device to
 device.    <a href="#userText">userText</a>() and <a href="#pixmap">pixmap</a>() may be used to describe this button
 to the user in help documentation.
+<p> First availability: Qtopia 1.6
 <p> 
 <p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
 
@@ -75,7 +84,7 @@ Returns the button's keycode.
 </h3>
 Returns TRUE if this DeviceButton is equal to <em>e</em>.
 
-<h3 class=fn><a href="qpixmap.html">QPixmap</a> <a name="pixmap"></a>DeviceButton::pixmap () const
+<h3 class=fn>QPixmap <a name="pixmap"></a>DeviceButton::pixmap () const
 </h3>
 Returns the pixmap for this button.    If there isn't one
 it will return an empty (null) pixmap.
@@ -93,30 +102,32 @@ held to <em>action</em>.
 </h3>
 Sets the keycode <em>keycode</em> that is set when the button is pressed.
 
-<h3 class=fn>void <a name="setPixmap"></a>DeviceButton::setPixmap ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;pmn )
+<h3 class=fn>void <a name="setPixmap"></a>DeviceButton::setPixmap ( const&nbsp;QString&nbsp;&amp;&nbsp;pmn )
 </h3>
-Set the pixmap for this button.  This will ideally match the label
-on the physical button.
+Set the pixmap for this button to the <a href="resource.html">Resource</a> names <em>pmn</em>.
+This will ideally match the label on the physical button.
 
 <h3 class=fn>void <a name="setPressedAction"></a>DeviceButton::setPressedAction ( const&nbsp;<a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp;&nbsp;action )
 </h3>
 Set the action to be performed when this button is pressed to <em>action</em>.
 
-<h3 class=fn>void <a name="setUserText"></a>DeviceButton::setUserText ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;text )
+<h3 class=fn>void <a name="setUserText"></a>DeviceButton::setUserText ( const&nbsp;QString&nbsp;&amp;&nbsp;text )
 </h3>
-Sets the human readable, translated description of the button.
+Sets the human readable, translated description of the button to <em>text</em>.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="userText"></a>DeviceButton::userText () const
+<h3 class=fn>QString <a name="userText"></a>DeviceButton::userText () const
 </h3>
 Returns a human readable, translated description of the button.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

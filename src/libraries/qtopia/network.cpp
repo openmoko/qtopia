@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -127,10 +142,12 @@ QStringList Network::choices(QListBox* lb, const QString& dir)
 	QString filename = settingsdir.filePath(*it);
 	Config cfg(filename, Config::File);
 	cfg.setGroup("Info");
-	if ( lb )
-	    lb->insertItem(Resource::loadPixmap("Network/" + cfg.readEntry("Type")),
-		cfg.readEntry("Name"));
-	list.append(filename);
+	if ( cfg.readNumEntry("UserSelectable",1) ) {
+	    if ( lb )
+		lb->insertItem(Resource::loadPixmap("Network/" + cfg.readEntry("Type")),
+		    cfg.readEntry("Name"));
+	    list.append(filename);
+	}
     }
 
     return list;
@@ -141,11 +158,12 @@ class NetworkServer : public QCopChannel {
 public:
     NetworkServer(QObject* parent) : QCopChannel("QPE/Network",parent), wait(0), reannounce(FALSE)
     {
+	firstStart = TRUE;
 	up = FALSE;
-	examineNetworks( TRUE );
 	QCopChannel* card = new QCopChannel("QPE/Card",parent);
-	connect(card,SIGNAL(received(const QCString &, const QByteArray&)),
-	    this,SLOT(cardMessage(const QCString &, const QByteArray&)));
+	connect(card,SIGNAL(received(const QCString&,const QByteArray&)),
+	    this,SLOT(cardMessage(const QCString&,const QByteArray&)));
+	startTimer(2000);
     }
 
     ~NetworkServer()
@@ -202,7 +220,7 @@ private slots:
     }
 
 private:
-    void examineNetworks( bool firstStart = FALSE )
+    void examineNetworks()
     {
 	QStringList l = Network::choices();
 	bool wasup = up; up=FALSE;
@@ -229,7 +247,12 @@ private:
 		if ( plugin->isActive(cfg) ) {
 		    up = TRUE;
 		    if ( firstStart )
-			plugin->start( cfg );
+			Network::start(*it);
+		} else if ( cfg.readNumEntry("Auto",0)
+			    && plugin->isAvailable(cfg) )
+		{
+		    if ( firstStart && wait%128==0 )
+			Network::start(*it);
 		}
 		if ( plugin->isAvailable(cfg) )
 		    available.append(*it);
@@ -249,6 +272,7 @@ private:
 	}
 
 	reannounce = FALSE;
+	firstStart = FALSE;
     }
 
     void start( const QString& file, const QString& password )
@@ -329,6 +353,7 @@ private:
     bool up;
     int wait;
     bool reannounce;
+    bool firstStart;
 };
 
 static NetworkServer* ns=0;
@@ -385,6 +410,8 @@ bool Network::networkOnline()
 void Network::writeProxySettings( Config &cfg )
 {
     Config proxy( Network::settingsDir() + "/Proxies.conf", Config::File );
+    proxy.setGroup("Info");
+    proxy.writeEntry("UserSelectable",0);
     proxy.setGroup("Properties");
     cfg.setGroup("Proxy");
     proxy.writeEntry("type", cfg.readEntry("type") );
@@ -451,6 +478,31 @@ NetworkInterface* Network::loadPlugin(const QString& type)
 	ifaces->insert(type,iface);
     }
     return iface;
+#else
+    return 0;
+#endif
+}
+
+NetworkInterface2* Network::loadPlugin2(const QString& type)
+{
+    if ( type.isEmpty() )
+	return 0;
+#ifndef QT_NO_COMPONENT
+    if ( !ifaces )
+	ifaces = new QDict<NetworkInterface>;
+    if ( !loader )
+	loader = new PluginLoaderIntern( "network" ); // No tr
+    NetworkInterface *iface = ifaces->find(type);
+    NetworkInterface2 *iface2 = 0;
+    if ( !iface ) {
+	if ( loader->queryInterface( type, IID_Network2, (QUnknownInterface**)&iface2 ) != QS_OK )
+	    return 0;
+	ifaces->insert(type,iface2);
+	return iface2;
+    }
+    if ( iface->queryInterface(IID_Network2, (QUnknownInterface**)&iface2) != QS_OK )
+	return 0;
+    return iface2;
 #else
     return 0;
 #endif

@@ -1,10 +1,10 @@
+[Translation]
+File=QtopiaApplications
+Context=Calendar
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
-Comment=A Calendar and Scheduling Program
+Comment[]=A Calendar and Scheduling Program
 Exec=datebook
 Icon=DateBook
 Type=Application
-Name=Calendar
-Name[ja]=カレンダー
-Name[no]=Avtalebok
-Name[de]=Termin kalender
-Name[hu]=Naptár
+Name[]=Cal­en­dar

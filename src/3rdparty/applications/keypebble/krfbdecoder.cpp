@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 #include "krfbconnection.h"
 #include "krfboptions.h"
 #include "krfbserverinfo.h"
@@ -829,17 +850,17 @@ void KRFBDecoder::sendMouseEvent( QMouseEvent *e )
       if ( e->button() & LeftButton )
         buttonMask |= 0x01;
       if ( e->button() & MidButton )
-        buttonMask |= 0x04;
-      if ( e->button() & RightButton )
         buttonMask |= 0x02;
+      if ( e->button() & RightButton )
+        buttonMask |= 0x04;
     }
     else if ( e->type() == QEvent::MouseButtonRelease ) {
       if ( e->button() & LeftButton )
         buttonMask &= 0x06;
       if ( e->button() & MidButton )
-        buttonMask |= 0x03;
+        buttonMask &= 0x05;
       if ( e->button() & RightButton )
-        buttonMask |= 0x05;
+        buttonMask &= 0x03;
     }
   }
 

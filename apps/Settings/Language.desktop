@@ -1,10 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Language
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=language
 Icon=Language
-Name=Language
-Name[ja]=言語
-Name[no]=Språk
-Name[de]=Sprache
-Name[hu]=Nyelv
+Name[]=Lan­guage
 CanFastload=0

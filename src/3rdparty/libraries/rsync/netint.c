@@ -176,7 +176,7 @@ int rs_int_len(rs_long_t val)
         return 2;
     else if (!(val & ~0xffffffffL))
         return 4;
-    else if (!(val & ~0xffffffffffffffffL))
+    else if (!(val & ((rs_long_t)~0xffffffffffffffffL)))
         return 8;
     else {
         rs_fatal("can't encode integer %.0f yet", (double) val);

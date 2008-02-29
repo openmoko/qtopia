@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -30,7 +32,7 @@ remains with Trolltech.
 <hr>
 <pre>
 /****************************************************************************
-** &#36;Id&#58; qt/src/kernel/qnamespace.h   2.3.7   edited 2002-07-16 $
+** &#36;Id&#58; qt/src/kernel/qnamespace.h   2.3.9   edited 2004-12-13 $
 **
 ** Definition of Qt namespace (as class for compiler compatibility)
 **
@@ -164,7 +166,9 @@ public:
         WState_Maximized        = 0x00080000,
         WState_TranslateBackground = 0x00100000,
         WState_ForceDisabled    = 0x00200000,
-        WState_Exposed          = 0x00400000
+        WState_Exposed          = 0x00400000,
+        WState_TranslateBackground1 = 0x00800000,  // QWS from V2.3.8 only
+        WState_GlobalBrushOrigin = 0x01000000   // QWS from V2.3.9 only
     };
 
     // Widget flags2
@@ -513,6 +517,20 @@ public:
         Key_thorn = 0x0fe,
         Key_ydiaeresis = 0x0ff,
 
+#ifdef QT_KEYPAD_MODE
+        Key_Select = 0xffe0,
+        Key_Back = 0xffe1,
+        Key_Context1 = 0xffe2,
+        Key_Context2 = 0xffe3,
+        Key_Context3 = 0xffe4,
+        Key_Context4 = 0xffe5,
+        Key_Yes = 0xffe6,
+        Key_No = 0xffe7,
+        Key_Call = 0xffe8,
+        Key_Hangup = 0xffe9,
+        Key_Flip = 0xffea,
+#endif
+        
         Key_unknown = 0xffff
     };
 
@@ -658,5 +676,5 @@ public:
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

@@ -1,9 +1,10 @@
+[Translation]
+File=QtopiaGames
+Context=Asteroids
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
-Comment=Shoot the rocks
+Comment[]=Shoot the rocks
 Exec=qasteroids
 Icon=Asteroids
 Type=Application
-Name=Asteroids
-Name[ja]=アステロイド
-Name[hu]=Asteroids
-Name[de]=Asteroiden
+Name[]=As­ter­oids

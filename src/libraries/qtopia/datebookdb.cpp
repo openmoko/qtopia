@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -39,17 +54,23 @@
 
 #include <qapplication.h> // for translate
 
+QString qtopia_internal_homeDirPath();
+
 /*!
   \class DateBookDB
 
   \brief The DateBookDB class is used to access event information in the
   Qtopia database.
 
+
+  This class is now obsolete, the class DateBookAccess in the Qtopia PIM library
+  should be used instead.
+
   \ingroup qtopiaemb
 
   \obsolete
 
-  \sa DateBookIterator
+  \sa DateBookIterator DateBookAccess
 */
 
 class DateBookDBPrivate
@@ -59,15 +80,13 @@ public:
 };
 
 
+// QDOC_SKIP_BEGIN
+
 // Helper functions
 
 static QString dateBookJournalFile()
 {
-
-    QString str = QDir::homeDirPath(); 
-#ifdef QTOPIA_DESKTOP
-    str += "/.palmtopcenter/";
-#endif
+    QString str = ::qtopia_internal_homeDirPath(); 
     return QString( str +"/.caljournal" );
 }
 
@@ -356,57 +375,21 @@ bool nextOccurance(const Event &e, const QDate &from, QDateTime &next)
     }
 }
 
-static bool nextAlarm( const Event &ev, QDateTime& when, int& warn)
+static void addEventAlarm( const Event & )
 {
-    QDateTime now = QDateTime::currentDateTime();
-    if ( ev.hasRepeat() ) {
-	QDateTime ralarm;
-	if (nextOccurance(ev, now.date(), ralarm)) {
-	    ralarm = ralarm.addSecs(-ev.alarmTime()*60);
-	    if ( ralarm > now ) {
-		when = ralarm;
-		warn = ev.alarmTime();
-	    } else if ( nextOccurance(ev, now.date().addDays(1), ralarm) ) {
-		ralarm = ralarm.addSecs( -ev.alarmTime()*60 );
-		if ( ralarm > now ) {
-		    when = ralarm;
-		    warn = ev.alarmTime();
-		}
-	    }
-	}
-    } else {
-	warn = ev.alarmTime();
-	when = ev.start().addSecs( -ev.alarmTime()*60 );
-    }
-    return when > now;
 }
 
-static void addEventAlarm( const Event &ev )
+static void delEventAlarm( const Event & )
 {
-    QDateTime when;
-    int warn;
-    if ( nextAlarm(ev,when,warn) )
-	AlarmServer::addAlarm( when,
-			       "QPE/Application/datebook",
-			       "alarm(QDateTime,int)", warn );
 }
 
-static void delEventAlarm( const Event &ev )
-{
-    QDateTime when;
-    int warn;
-    if ( nextAlarm(ev,when,warn) )
-	AlarmServer::deleteAlarm( when,
-				  "QPE/Application/datebook",
-				  "alarm(QDateTime,int)", warn );
-}
-
-
+/*! */
 DateBookDB::DateBookDB()
 {
     init();
 }
 
+/*! */
 DateBookDB::~DateBookDB()
 {
     save();
@@ -418,7 +401,7 @@ DateBookDB::~DateBookDB()
 //#### Why is this code duplicated in getEffectiveEvents ?????
 //#### Addendum.  Don't use this function, lets faze it out if we can.
 
-/* obsolete */
+/*! obsolete \a from \a to */
 QValueList<Event> DateBookDB::getEvents( const QDate &from, const QDate &to )
 {
     QValueList<Event> tmpList;
@@ -455,6 +438,7 @@ QValueList<Event> DateBookDB::getEvents( const QDate &from, const QDate &to )
     return tmpList;
 }
 
+/*! \a start */
 QValueList<Event> DateBookDB::getEvents( const QDateTime &start )
 {
     QValueList<Event> day = getEvents(start.date(),start.date());
@@ -472,6 +456,7 @@ QValueList<Event> DateBookDB::getEvents( const QDateTime &start )
 
 //#### Why is this code duplicated in getEvents ?????
 
+/*! \a from \a to */
 QValueList<EffectiveEvent> DateBookDB::getEffectiveEvents( const QDate &from,
 							   const QDate &to )
 {
@@ -594,6 +579,7 @@ QValueList<EffectiveEvent> DateBookDB::getEffectiveEvents( const QDate &from,
     return tmpList;
 }
 
+/*! \a dt */
 QValueList<EffectiveEvent> DateBookDB::getEffectiveEvents( const QDateTime &dt)
 {
     QValueList<EffectiveEvent> day = getEffectiveEvents(dt.date(), dt.date());
@@ -611,6 +597,7 @@ QValueList<EffectiveEvent> DateBookDB::getEffectiveEvents( const QDateTime &dt)
 }
 
 
+/*! \a ev \a doalarm */
 void DateBookDB::addEvent( const Event &ev, bool doalarm )
 {
     // write to the journal...
@@ -619,6 +606,7 @@ void DateBookDB::addEvent( const Event &ev, bool doalarm )
     d->clean = false;
 }
 
+/*! \a ev \a doalarm */
 void DateBookDB::addJFEvent( const Event &ev, bool doalarm )
 {
     if ( doalarm && ev.hasAlarm() )
@@ -629,6 +617,7 @@ void DateBookDB::addJFEvent( const Event &ev, bool doalarm )
 	eventList.append( ev );
 }
 
+/*! \a old \a editedEv */
 void DateBookDB::editEvent( const Event &old, Event &editedEv )
 {
     int oldIndex=0;
@@ -667,6 +656,7 @@ void DateBookDB::editEvent( const Event &old, Event &editedEv )
     d->clean = false;
 }
 
+/*! \a ev */
 void DateBookDB::removeEvent( const Event &ev )
 {
     // write to the journal...
@@ -675,6 +665,7 @@ void DateBookDB::removeEvent( const Event &ev )
     d->clean = false;
 }
 
+/*! \a ev */
 void DateBookDB::removeJFEvent( const Event&ev )
 {
     if ( ev.hasAlarm() )
@@ -689,9 +680,10 @@ void DateBookDB::removeJFEvent( const Event&ev )
 }
 
 // also handles journaling...
+/*! \a strFile */
 void DateBookDB::loadFile( const QString &strFile )
 {
-    
+
     QFile f( strFile );
     if ( !f.open( IO_ReadOnly ) )
 	return;
@@ -939,6 +931,7 @@ void DateBookDB::loadFile( const QString &strFile )
     f.close();
 }
 
+/*! */
 void DateBookDB::init()
 {
     d = new DateBookDBPrivate;
@@ -947,9 +940,9 @@ void DateBookDB::init()
     if ( str.isNull() ) {
 	QMessageBox::warning( 0, qApp->translate( "DateBookDB", "Out of Space"),
 			      qApp->translate( "DateBookDB", 
-					       "Unable to create start up files\n"
-					       "Please free up some space\n"
-					       "before entering data") );
+					       "<qt>Unable to create start up files. "
+					       "Please free up some space "
+					       "before entering data</qt>"));
     }
     // continuing along, we call this datebook filename again,
     // because they may fix it before continuing, though it seems
@@ -965,81 +958,13 @@ void DateBookDB::init()
     d->clean = true;
 }
 
+/*! */
 bool DateBookDB::save()
 {
-    if ( d->clean == true )
-	return true;
-    QValueListIterator<Event> it;
-    int total_written;
-    QString strFileNew = dateBookFilename() + ".new";
-
-    QFile f( strFileNew );
-    if ( !f.open( IO_WriteOnly|IO_Raw ) )
-        return FALSE;
-
-    QString buf( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" );
-    buf += "<!DOCTYPE DATEBOOK><DATEBOOK>\n";
-    buf += "<events>\n";
-    QCString str = buf.utf8();
-    total_written = f.writeBlock( str.data(), str.length() );
-    if ( total_written != int(str.length()) ) {
-	f.close();
-	QFile::remove( strFileNew );
-	return false;
-    }
-
-    for ( it = eventList.begin(); it != eventList.end(); ++it ) {
-	buf = "<event"; // No tr
-        (*it).save( buf );
-        buf += " />\n";
-	str = buf.utf8();
-        total_written = f.writeBlock( str.data(), str.length() );
-	if ( total_written != int(str.length()) ) {
-	    f.close();
-	    QFile::remove( strFileNew );
-	    return false;
-	}
-    }
-    for ( it = repeatEvents.begin(); it != repeatEvents.end(); ++it ) {
-        buf = "<event"; // No tr
-        (*it).save( buf );
-        buf += " />\n";
-	str = buf.utf8();
-	total_written = f.writeBlock( str.data(), str.length() );
-	if ( total_written != int(str.length()) ) {
-	    f.close();
-	    QFile::remove( strFileNew );
-	    return false;
-	}
-    }
-    buf = "</events>\n</DATEBOOK>\n";
-    str = buf.utf8();
-    total_written = f.writeBlock( str.data(), str.length() );
-    if ( total_written != int(str.length()) ) {
-	f.close();
-	QFile::remove( strFileNew );
-	return false;
-    }
-    f.close();
-
-    // now rename... I like to use the systemcall
-    QDir dir;
-#ifdef Q_OS_WIN32
-    QFile::remove( dateBookFilename() );
-#endif
-    if ( dir.rename( strFileNew, dateBookFilename() ) == FALSE ) {
-	qWarning( "problem renaming file %s to %s errno %d",
-		  strFileNew.latin1(), dateBookFilename().latin1(), errno  );
-	// remove the file, otherwise it will just stick around...
-	QFile::remove( strFileNew );
-    }
-
-    // may as well remove the journal file...
-    QFile::remove( dateBookJournalFile() );
-    d->clean = true;
-    return true;
+    return false;
 }
 
+/*! */
 void DateBookDB::reload()
 {
     QValueList<Event>::Iterator it = eventList.begin();
@@ -1054,6 +979,7 @@ void DateBookDB::reload()
     init();
 }
 
+/*! \a ev */
 bool DateBookDB::removeRepeat( const Event &ev )
 {
     time_t removeMe = ev.repeatPattern().createTime;
@@ -1068,6 +994,7 @@ bool DateBookDB::removeRepeat( const Event &ev )
     return FALSE;
 }
 
+/*! \a ev \a orig */
 bool DateBookDB::origRepeat( const Event &ev, Event &orig ) const
 {
     time_t removeMe = ev.repeatPattern().createTime;
@@ -1081,38 +1008,25 @@ bool DateBookDB::origRepeat( const Event &ev, Event &orig ) const
     return FALSE;
 }
 
-void DateBookDB::saveJournalEntry( const Event &ev, journal_action action )
+/*! \a ev \a action */
+void DateBookDB::saveJournalEntry( const Event &, journal_action )
 {
-    saveJournalEntry( ev, action, -1, false );
 }
 
-bool DateBookDB::saveJournalEntry( const Event &evOld, journal_action action,
-				   int key, bool origHadRepeat )
+/*! \a evOld \a action \a key \a origHadRepeat */
+bool DateBookDB::saveJournalEntry( const Event &, journal_action,
+				   int, bool )
 {
-    bool status = false;
-    Event ev = evOld;
-    // write our log based on the action
-    QFile f( dateBookJournalFile() );
-    if ( !f.open( IO_WriteOnly|IO_Append ) )
-        return false;
-    QString buf = "<event"; // No tr
-    ev.save( buf );
-    buf += " action="; // No tr
-    buf += "\"" + QString::number(action) + "\"";
-    buf += " actionkey=\"" + QString::number(key) + "\"";
-    buf += " actionorig=\"" + QString::number(origHadRepeat) +"\"";
-    buf += " />\n";
-    QString str = buf.utf8();
-    status = ( f.writeBlock( str.data(), str.length() ) == int(str.length()) );
-    f.close();
-    return status;
+    return FALSE;
 }
 
+/*! */
 QValueList<Event> DateBookDB::getRawRepeats() const
 {
     return repeatEvents;
 }
 
+/*! \a from \a to */
 QValueList<Event> DateBookDB::getNonRepeatingEvents( const QDate &from,
 						     const QDate &to ) const
 {
@@ -1154,3 +1068,5 @@ QValueList<Event> DateBookDB::getNonRepeatingEvents( const QDate &from,
     }
     return tmpList;
 }
+
+// QDOC_SKIP_END

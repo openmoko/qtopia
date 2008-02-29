@@ -1,8 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Security
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=security
 Icon=Security
-Name=Security
-Name[ja]=セキュリティ
-Name[de]=Sicherheits einstellungen
+Name[]=Se­cu­ri­ty
 CanFastload=0

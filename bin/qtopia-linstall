@@ -3,8 +3,11 @@
 $basedir="$ENV{QPEDIR}/";
 if ( $ARGV[0] eq "-d" ) {
     shift;
-    $basedir="$ENV{QPEDIR}/src/qtopiadesktop";
+    $basedir=shift;
 }
+
+$dir = "$basedir/i18n";
+mkdir $dir,0700 if ! -d $dir;
 
 while (<>) {
     if ( /^TRANSLATIONS\s*=\s*(.*)/ ) {

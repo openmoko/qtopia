@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 #include "kvncconnectdlg.h"
 #include "krfbconnection.h"
 #include "krfbcanvas.h"
@@ -19,8 +40,8 @@ KRFBCanvas::KRFBCanvas( QWidget *parent, const char *name )
   : QScrollView( parent, name )
 {
     connection_ = new KRFBConnection();
-    connect( connection_, SIGNAL( passwordRequired( KRFBConnection * ) ),
-	    this, SLOT( passwordRequired( KRFBConnection * ) ) );
+    connect( connection_, SIGNAL( passwordRequired(KRFBConnection*) ),
+	    this, SLOT( passwordRequired(KRFBConnection*) ) );
     connect( connection_, SIGNAL( loggedIn() ),
 	    this, SLOT( loggedIn() ) );
 
@@ -111,9 +132,9 @@ void KRFBCanvas::loggedIn()
   setBackgroundMode( NoBackground );
 
   // Start using the buffer
-  connect( connection_->buffer(), SIGNAL( sizeChanged( int, int ) ),
+  connect( connection_->buffer(), SIGNAL( sizeChanged(int,int) ),
            this, SLOT( updateSizeChanged(int,int) ) );
-  connect( connection_->buffer(), SIGNAL( updated( int, int, int, int ) ),
+  connect( connection_->buffer(), SIGNAL( updated(int,int,int,int) ),
            this, SLOT( viewportUpdate(int,int,int,int) ) );
   connect( connection_->buffer(), SIGNAL( bell() ),
            this, SLOT( bell() ) );

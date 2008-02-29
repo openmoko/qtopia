@@ -1,0 +1,9 @@
+Files: services/Time.service
+Priority: optional
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-9
+Description: The Time service definition
+ A Qtopia service.

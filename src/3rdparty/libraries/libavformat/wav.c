@@ -21,7 +21,7 @@
 
 const CodecTag codec_wav_tags[] = {
     { CODEC_ID_MP2, 0x50 },
-    { CODEC_ID_MP3LAME, 0x55 },
+    { CODEC_ID_MP3, 0x55 },
     { CODEC_ID_AC3, 0x2000 },
     { CODEC_ID_PCM_S16LE, 0x01 },
     { CODEC_ID_PCM_U8, 0x01 }, /* must come after s16le in this list */
@@ -29,29 +29,34 @@ const CodecTag codec_wav_tags[] = {
     { CODEC_ID_PCM_MULAW, 0x07 },
     { CODEC_ID_ADPCM_MS, 0x02 },
     { CODEC_ID_ADPCM_IMA_WAV, 0x11 },
+    { CODEC_ID_ADPCM_IMA_DK4, 0x61 },  /* rogue format number */
+    { CODEC_ID_ADPCM_IMA_DK3, 0x62 },  /* rogue format number */
     { CODEC_ID_WMAV1, 0x160 },
     { CODEC_ID_WMAV2, 0x161 },
     { 0, 0 },
 };
 
+#ifdef CONFIG_ENCODERS
 /* WAVEFORMATEX header */
 /* returns the size or -1 on error */
 int put_wav_header(ByteIOContext *pb, AVCodecContext *enc)
 {
-    int tag, bps, blkalign, bytespersec;
+    int bps, blkalign, bytespersec;
     int hdrsize = 18;
 
-    tag = codec_get_tag(codec_wav_tags, enc->codec_id);
-    if (tag == 0)
+    if(!enc->codec_tag)
+       enc->codec_tag = codec_get_tag(codec_wav_tags, enc->codec_id);
+    if(!enc->codec_tag)
         return -1;
-    put_le16(pb, tag);
+
+    put_le16(pb, enc->codec_tag);
     put_le16(pb, enc->channels);
     put_le32(pb, enc->sample_rate);
     if (enc->codec_id == CODEC_ID_PCM_U8 ||
         enc->codec_id == CODEC_ID_PCM_ALAW ||
         enc->codec_id == CODEC_ID_PCM_MULAW) {
         bps = 8;
-    } else if (enc->codec_id == CODEC_ID_MP2 || enc->codec_id == CODEC_ID_MP3LAME) {
+    } else if (enc->codec_id == CODEC_ID_MP2 || enc->codec_id == CODEC_ID_MP3) {
         bps = 0;
     } else if (enc->codec_id == CODEC_ID_ADPCM_IMA_WAV || enc->codec_id == CODEC_ID_ADPCM_MS) {
         bps = 4;
@@ -59,7 +64,7 @@ int put_wav_header(ByteIOContext *pb, AVCodecContext *enc)
         bps = 16;
     }
     
-    if (enc->codec_id == CODEC_ID_MP2 || enc->codec_id == CODEC_ID_MP3LAME) {
+    if (enc->codec_id == CODEC_ID_MP2 || enc->codec_id == CODEC_ID_MP3) {
         blkalign = 1;
         //blkalign = 144 * enc->bit_rate/enc->sample_rate;
     } else if (enc->block_align != 0) { /* specified by the codec */
@@ -75,7 +80,7 @@ int put_wav_header(ByteIOContext *pb, AVCodecContext *enc)
     put_le32(pb, bytespersec); /* bytes per second */
     put_le16(pb, blkalign); /* block align */
     put_le16(pb, bps); /* bits per sample */
-    if (enc->codec_id == CODEC_ID_MP3LAME) {
+    if (enc->codec_id == CODEC_ID_MP3) {
         put_le16(pb, 12); /* wav_extra_size */
         hdrsize += 12;
         put_le16(pb, 1); /* wID */
@@ -102,28 +107,45 @@ int put_wav_header(ByteIOContext *pb, AVCodecContext *enc)
 
     return hdrsize;
 }
+#endif //CONFIG_ENCODERS
 
-void get_wav_header(ByteIOContext *pb, AVCodecContext *codec, 
-                    int has_extra_data)
+/* We could be given one of the three possible structures here:
+ * WAVEFORMAT, PCMWAVEFORMAT or WAVEFORMATEX. Each structure
+ * is an expansion of the previous one with the fields added
+ * at the bottom. PCMWAVEFORMAT adds 'WORD wBitsPerSample' and
+ * WAVEFORMATEX adds 'WORD  cbSize' and basically makes itself
+ * an openended structure.
+ */
+void get_wav_header(ByteIOContext *pb, AVCodecContext *codec, int size) 
 {
     int id;
 
     id = get_le16(pb);
     codec->codec_type = CODEC_TYPE_AUDIO;
     codec->codec_tag = id;
-    codec->fourcc = id;
     codec->channels = get_le16(pb);
     codec->sample_rate = get_le32(pb);
     codec->bit_rate = get_le32(pb) * 8;
     codec->block_align = get_le16(pb);
-    codec->frame_bits = get_le16(pb); /* bits per sample */
-    codec->codec_id = wav_codec_get_id(id, codec->frame_bits);
-    if (has_extra_data) {
+    if (size == 14) {  /* We're dealing with plain vanilla WAVEFORMAT */
+        codec->bits_per_sample = 8;
+    }else
+        codec->bits_per_sample = get_le16(pb);
+    codec->codec_id = wav_codec_get_id(id, codec->bits_per_sample);
+
+    if (size > 16) {  /* We're obviously dealing with WAVEFORMATEX */
 	codec->extradata_size = get_le16(pb);
 	if (codec->extradata_size > 0) {
+	    if (codec->extradata_size > size - 18)
+	        codec->extradata_size = size - 18;
             codec->extradata = av_mallocz(codec->extradata_size);
             get_buffer(pb, codec->extradata, codec->extradata_size);
-        }
+        } else
+	    codec->extradata_size = 0;
+	
+	/* It is possible for the chunk to contain garbage at the end */
+	if (size - codec->extradata_size - 18 > 0)
+	    url_fskip(pb, size - codec->extradata_size - 18);
     }
 }
 
@@ -140,6 +162,7 @@ int wav_codec_get_id(unsigned int tag, int bps)
     return id;
 }
 
+#ifdef CONFIG_ENCODERS
 typedef struct {
     offset_t data;
 } WAVContext;
@@ -171,7 +194,7 @@ static int wav_write_header(AVFormatContext *s)
 }
 
 static int wav_write_packet(AVFormatContext *s, int stream_index_ptr,
-                           UINT8 *buf, int size, int force_pts)
+                            const uint8_t *buf, int size, int64_t pts)
 {
     ByteIOContext *pb = &s->pb;
     put_buffer(pb, buf, size);
@@ -190,17 +213,18 @@ static int wav_write_trailer(AVFormatContext *s)
         /* update file size */
         file_size = url_ftell(pb);
         url_fseek(pb, 4, SEEK_SET);
-        put_le32(pb, (UINT32)(file_size - 8));
+        put_le32(pb, (uint32_t)(file_size - 8));
         url_fseek(pb, file_size, SEEK_SET);
 
         put_flush_packet(pb);
     }
     return 0;
 }
+#endif //CONFIG_ENCODERS
 
 /* return the size of the found tag */
 /* XXX: > 2GB ? */
-static int find_tag(ByteIOContext *pb, UINT32 tag1)
+static int find_tag(ByteIOContext *pb, uint32_t tag1)
 {
     unsigned int tag;
     int size;
@@ -260,7 +284,7 @@ static int wav_read_header(AVFormatContext *s,
     if (!st)
         return AVERROR_NOMEM;
 
-    get_wav_header(pb, &st->codec, (size >= 18));
+    get_wav_header(pb, &st->codec, size);
     
     size = find_tag(pb, MKTAG('d', 'a', 't', 'a'));
     if (size < 0)
@@ -305,6 +329,7 @@ static AVInputFormat wav_iformat = {
     wav_read_close,
 };
 
+#ifdef CONFIG_ENCODERS
 static AVOutputFormat wav_oformat = {
     "wav",
     "wav format",
@@ -317,10 +342,13 @@ static AVOutputFormat wav_oformat = {
     wav_write_packet,
     wav_write_trailer,
 };
+#endif //CONFIG_ENCODERS
 
 int wav_init(void)
 {
     av_register_input_format(&wav_iformat);
+#ifdef CONFIG_ENCODERS
     av_register_output_format(&wav_oformat);
+#endif //CONFIG_ENCODERS
     return 0;
 }

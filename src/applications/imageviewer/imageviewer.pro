@@ -1,22 +1,30 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE    = lib
-quicklaunch:DESTDIR     = $(QPEDIR)/plugins/application
-
-CONFIG          += qtopia warn_on release
+CONFIG          += qtopiaapp
 
 HEADERS		= showimg.h \
 		  settingsdialog.h
 
 SOURCES		= settingsdialog.cpp \
-		  showimg.cpp
-
-multiprocess:SOURCES+=main.cpp
+		  showimg.cpp \
+		  main.cpp
 
 INTERFACES	= settingsdialogbase.ui
 
-TARGET          = showimg
+TARGET          = imageviewer
 
-TRANSLATIONS = showimg-en_GB.ts showimg-de.ts showimg-ja.ts showimg-no.ts
+TRANSLATABLES   = $$HEADERS \
+                    $$SOURCES \
+                    $$INTERFACES
+
+help.files=\
+    $${QTOPIA_DEPOT_PATH}/help/html/showimg*\
+    $${QTOPIA_DEPOT_PATH}/help/html/imageviewer*
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/imageviewer.desktop
+desktop.path=/apps/Applications
+pic.files=$${QTOPIA_DEPOT_PATH}/pics/slideshow.png
+pic.path=/pics
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics
+
+PACKAGE_NAME=qpe-showimg
+PACKAGE_DESCRIPTION=The image viewer for the Qtopia environment.

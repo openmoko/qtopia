@@ -1,12 +1,15 @@
-TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+CONFIG		+= qtopiaplugin
+TARGET		= qpickboard
+
 HEADERS		= pickboard.h pickboardcfg.h pickboardimpl.h pickboardpicks.h
 SOURCES		= pickboard.cpp pickboardcfg.cpp pickboardimpl.cpp pickboardpicks.cpp
-TARGET		= qpickboard
-DESTDIR		= $(QPEDIR)/plugins/inputmethods
-VERSION		= 1.0.0
-win32:DEFINES += QTOPIA_MAKEDLL
 
-TRANSLATIONS = libqpickboard-en_GB.ts libqpickboard-de.ts libqpickboard-ja.ts libqpickboard-no.ts
+desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/inputmethods/qpickboard.desktop
+desktop.path=/plugins/inputmethods/
+
+INSTALLS+=desktop
+
+TRANSLATABLES = $${HEADERS} $${SOURCES}
+
+PACKAGE_NAME	= qpe-pickboard
+

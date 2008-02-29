@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -18,14 +33,13 @@
 **
 **********************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef TODOMAINWINDOW_H
+#define TODOMAINWINDOW_H
 
-#include <qtopia/pim/private/todoxmlio_p.h>
 #include <qtopia/pim/task.h>
 #include <qtopia/fieldmapimpl.h>
 
-#include <qtextview.h>
+#include <qtextbrowser.h>
 #include <qmainwindow.h>
 #include <qdialog.h>
 #include <qvbox.h>
@@ -36,7 +50,13 @@ class QPopupMenu;
 class Ir;
 class CategorySelect;
 class QLineEdit;
+class QLabel;
 class QPEToolBar;
+class ContextMenu;
+class CategorySelectDialog;
+#ifdef QTOPIA_DATA_LINKING
+class QDLClient;
+#endif
 
 class TodoSettings: public QDialog
 {
@@ -51,25 +71,23 @@ private:
     FieldMap *map;
 };
 
-class TodoView : public QTextView
+class TodoView : public QTextBrowser
 {
     Q_OBJECT
 public:
-    TodoView( QWidget *parent = 0, const char *name = 0)
-    	: QTextView(parent, name) {}
+    TodoView( QWidget *parent = 0, const char *name = 0);
 
-    void init( PimTask task)
-    {
-    	setText( task.toRichText() );
-    }
+    void init( const PimTask &task );
 
+    void setSource( const QString &name );
 signals:
     void done();
     void previous();
     void next();
-    
-protected:
-    void keyPressEvent( QKeyEvent *);
+private:
+#ifdef QTOPIA_DATA_LINKING
+    QDLClient *mNotesQC; 
+#endif
 };
 
 class TodoWindow : public QMainWindow
@@ -87,22 +105,22 @@ public slots:
     void flush();
 
 protected slots:
-    void slotNew();
-    void slotDelete();
-    void slotEdit();
-    void slotListView();
-    void slotDetailView();
+    void createNewEntry();
+    void deleteCurrentEntry();
+    void editCurrentEntry();
+    void showListView();
+    void showDetailView();
     void viewPrevious();
     void viewNext();
     void setShowCompleted( int );
-    void currentEntryChanged( int r, int c );
-    void slotFind( bool s );
+    void currentEntryChanged( );
+    void showFindWidget( bool s );
     void search();
     void findFound();
     void findNotFound();
     void findWrapped();
     void setDocument( const QString & );
-    void slotBeam();
+    void beamCurrentEntry();
     void beamDone( Ir * );
     void catSelected(int);
     void catChanged();
@@ -110,33 +128,41 @@ protected slots:
 
 protected:
     void closeEvent( QCloseEvent *e );
+#ifdef QTOPIA_PHONE
+    void keyPressEvent(QKeyEvent *);
+#endif
+    void createUI();
 
 private slots:
-    void addEntry( const PimTask &todo );
-    void removeEntry(const PimTask &todo );
-    void updateEntry(const PimTask &todo );
     void selectAll();
+    void selectCategory();
 
 private:
     bool receiveFile( const QString &filename );
-    void showView();
     TodoView* todoView();
-    void deleteTasks(const QValueList<QUuid> &);
-    
-    TodoXmlIO tasks;
+
+#ifdef Q_WS_QWS
+    QString beamfile;
+#endif
     TodoTable *table;
     TodoView *tView;
-    QAction *listAction;
-    QAction *detailsAction;
+    QAction *newAction;
+    QAction *backAction;
     QAction *editAction;
     QAction *deleteAction;
     QAction *findAction;
     QAction *beamAction;
     QPEToolBar *searchBar;
     QLineEdit *searchEdit;
-    QPopupMenu *contextMenu, *catMenu;
+    QPopupMenu *catMenu;
     CategorySelect *catSelect;
     QWidget *listView;
+#ifdef QTOPIA_PHONE
+    ContextMenu *contextMenu;
+    QAction *actionCategory;
+    CategorySelectDialog *categoryDlg;
+    QLabel *categoryLbl;
+#endif
 };
 
 #endif

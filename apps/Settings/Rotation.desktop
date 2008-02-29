@@ -1,10 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Rotation
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=rotation
 Icon=Rotation
-Name=Rotation
-Name[ja]=回転
-Name[no]=Rotasjon
-Name[de]=Rotation
-Name[hu]=Forgatás
+Name[]=Ro­ta­tion
 CanFastload=0

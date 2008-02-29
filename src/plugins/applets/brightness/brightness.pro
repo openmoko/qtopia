@@ -1,13 +1,13 @@
-TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+CONFIG		+= qtopiaplugin
+
+TARGET		= brightnessapplet
 
 HEADERS		= brightness.h brightnessappletimpl.h
 SOURCES		= brightness.cpp brightnessappletimpl.cpp
-TARGET		= brightnessapplet
-DESTDIR		= $(QPEDIR)/plugins/applets
-VERSION		= 1.0.0
 
+TRANSLATABLES = $${HEADERS} $${SOURCES}
 
+desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/applets/brightnessapplet.desktop
+desktop.path=/plugins/applets/
 
+INSTALLS+=desktop

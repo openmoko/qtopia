@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -114,11 +116,11 @@ The QPopupMenu class provides a popup menu widget.
 A popup menu widget is a selection menu. It can be both, a pull-down
 menu in a menu bar or a standalone context menu.  Pull-down menus
 are shown by the menu bar when the user clicks on the respective
-item or hits the specified shortcut key. Use <a href="qmenudata.html#0076cb">QMenuBar::insertItem</a>()
+item or hits the specified shortcut key. Use <a href="qmenudata.html#deddb9">QMenuBar::insertItem</a>()
 to insert a popup menu into a menu bar. Show a context menu either
 asynchronously with <a href="#0d7b5f">popup</a>() or synchronously with <a href="#ac4d90">exec</a>().
 <p>Technically, a popup menu consists of a list of menu items. You add
-items with <a href="qmenudata.html#0076cb">insertItem</a>().  An item is either a string, a pixmap or a
+items with <a href="qmenudata.html#deddb9">insertItem</a>().  An item is either a string, a pixmap or a
 custom item that provides its own drawing function (see
 <a href="qcustommenuitem.html">QCustomMenuItem</a>). In addition, items can have an optional icon drawn
 on the very left side and an accelerator key, like "Ctrl-X".
@@ -164,12 +166,12 @@ familiar with it. Consider using a <a href="qtoolbar.html">QToolBar</a> instead.
 <p>See also  <a href="qmenubar.html">QMenuBar</a> and <a href="guibooks.html#fowler">GUI Design Handbook: Menu, Drop-Down and Pop-Up</a>
 <p>Examples:
  <a href="qtimage-qtimage-cpp.html#QPopupMenu">qtimage/qtimage.cpp</a>
- <a href="grapher-grapher-cpp.html#QPopupMenu">grapher/grapher.cpp</a>
  <a href="mainlyQt-editor-cpp.html#QPopupMenu">mainlyQt/editor.cpp</a>
- <a href="layout-layout-cpp.html#QPopupMenu">layout/layout.cpp</a>
- <a href="menu-menu-cpp.html#QPopupMenu">menu/menu.cpp</a>
- <a href="progress-progress-cpp.html#QPopupMenu">progress/progress.cpp</a>
  <a href="scrollview-scrollview-cpp.html#QPopupMenu">scrollview/scrollview.cpp</a>
+ <a href="layout-layout-cpp.html#QPopupMenu">layout/layout.cpp</a>
+ <a href="progress-progress-cpp.html#QPopupMenu">progress/progress.cpp</a>
+ <a href="menu-menu-cpp.html#QPopupMenu">menu/menu.cpp</a>
+ <a href="grapher-grapher-cpp.html#QPopupMenu">grapher/grapher.cpp</a>
 
 <hr><h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="24c864"></a>QPopupMenu::QPopupMenu ( <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0 )</h3>
@@ -182,12 +184,12 @@ passed, the popup menu will be deleted on destruction of that parent
 <h3 class="fn">void <a name="d6c664"></a>QPopupMenu::aboutToHide () <code>[signal]</code></h3>
 <p>This signal is emitted just before the popup menu is hidden after it
 has been displayed.<p><b>Warning:</b> Do not open a widget in a slot connected to this signal.
-<p>See also  <a href="#245441">aboutToShow</a>(), <a href="qmenudata.html#c9a23c">setItemEnabled</a>(), <a href="qmenudata.html#319c05">setItemChecked</a>(), <a href="qmenudata.html#0076cb">insertItem</a>() and <a href="qmenudata.html#001b53">removeItem</a>().
+<p>See also  <a href="#245441">aboutToShow</a>(), <a href="qmenudata.html#c9a23c">setItemEnabled</a>(), <a href="qmenudata.html#319c05">setItemChecked</a>(), <a href="qmenudata.html#deddb9">insertItem</a>() and <a href="qmenudata.html#001b53">removeItem</a>().
 <h3 class="fn">void <a name="245441"></a>QPopupMenu::aboutToShow () <code>[signal]</code></h3>
 <p>This signal is emitted just before the popup menu is displayed.  You
 can connect it to any slot that sets up the menu contents (e.g. to
 ensure that the right items are enabled).
-<p>See also  <a href="#d6c664">aboutToHide</a>(), <a href="qmenudata.html#c9a23c">setItemEnabled</a>(), <a href="qmenudata.html#319c05">setItemChecked</a>(), <a href="qmenudata.html#0076cb">insertItem</a>() and <a href="qmenudata.html#001b53">removeItem</a>().
+<p>See also  <a href="#d6c664">aboutToHide</a>(), <a href="qmenudata.html#c9a23c">setItemEnabled</a>(), <a href="qmenudata.html#319c05">setItemChecked</a>(), <a href="qmenudata.html#deddb9">insertItem</a>() and <a href="qmenudata.html#001b53">removeItem</a>().
 <h3 class="fn">void <a name="8de478"></a>QPopupMenu::activateItemAt ( int index )</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <h3 class="fn">void <a name="b224f0"></a>QPopupMenu::activated ( int id ) <code>[signal]</code></h3>
@@ -341,12 +343,11 @@ depending on the menu's current contents.
 <p>Notice that checking is always enabled when in windows-style.
 <p>See also  <a href="#0ab7fe">isCheckable</a>() and <a href="qmenudata.html#319c05">QMenuData::setItemChecked</a>().
 <p>Examples:
- <a href="menu-menu-cpp.html#setCheckable">menu/menu.cpp</a>
- <a href="progress-progress-cpp.html#setCheckable">progress/progress.cpp</a>
  <a href="scrollview-scrollview-cpp.html#setCheckable">scrollview/scrollview.cpp</a>
-<h3 class="fn">void <a name="3e68bb"></a>QPopupMenu::setFont ( const <a href="qfont.html">QFont</a> &amp; font ) <code>[virtual]</code></h3>
+ <a href="progress-progress-cpp.html#setCheckable">progress/progress.cpp</a>
+ <a href="menu-menu-cpp.html#setCheckable">menu/menu.cpp</a>
+<h3 class="fn">void <a name="3e68bb"></a>QPopupMenu::setFont ( const <a href="qfont.html">QFont</a> &amp; font )</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#c52788">QWidget.</a>
 <h3 class="fn">void <a name="50a0ef"></a>QPopupMenu::show () <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#200ee5">QWidget.</a>
@@ -370,7 +371,7 @@ depending on the menu's current contents.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -378,5 +379,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

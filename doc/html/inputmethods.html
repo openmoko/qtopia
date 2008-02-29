@@ -1,8 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/inputmethods.doc:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/inputmethods.doc:12 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Input Methods</title>
 <style type="text/css"><!--
 h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
@@ -13,45 +14,101 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
-<p> 
-<p> <h2> Input Methods
-</h2>
-<a name="1"></a><p> There are two kinds of input method. The first is a widget that generates
-keystrokes, such as a virtual keyboard or a handwriting recogniser. This
-is the sort of input method supported by Qtopia 1.5.
-<p> Qtopia 1.6 adds support for a second type of input method: a composing
-input method. Composing input methods takes keyboard input from a
-keyboard (real or virtual) and compose several keystrokes into one
-character. Composing input methods can be used to input Chinese,
-Japanese and Korean text.
-<p> Input methods built using the Qtopia 1.6 interface can be either
-composing or virtual keyboard, but they cannot be installed on Qtopia
-1.5-based devices.
-<p> <h3> Qtopia 1.5 methods
-</h3>
-<a name="1-1"></a><p> These input methods must supply a <a href="qwidget.html">QWidget</a> that will be shown above the task bar
-and emit a signal when a key is pressed:
-<p> <pre>
-#include &lt;<a href="qwidget-h.html">qwidget.h</a>&gt;
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Input Methods</h1>
 
-class SimpleInputMethod : public <a href="qwidget.html">QWidget</a>
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> How to create a Popup Input Method
+</a>
+<ul>
+<li><a href="#2-1"> Designing the Widget for a Popup Input Method
+</a>
+<li><a href="#2-2"> Creating an InputMethodInterface plugin
+</a>
+<li><a href="#2-3"> Creating an ExtInputMethodInterface plugin
+</a>
+<li><a href="#2-4"> Building the plugin
+</a>
+</ul>
+<li><a href="#3"> How to create a Composing Input Method
+</a>
+<ul>
+<li><a href="#3-1"> Designing the Filter for a Composing Input Method
+</a>
+<li><a href="#3-2"> Creating an ExtInputMethodInterface plugin
+</a>
+<li><a href="#3-3"> Building the plugin
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> There are two kinds of Input Methods supported in Qtopia 2.x, Popup Input Methods
+and Composing Input Methods.
+<p> Popup Input Methods are used when there is no Keyboard or other text input device. 
+They popup a widget where the user can interact with via the touch screen of a
+device to generate key events.  They can also be thought of as Pen Based Input Methods.
+<p> Composing Input Methods are used to extend or transform the text from a separate text based
+input device.  This can be a keyboard, keypad, or a Popup Input Method.  They are called
+Composing Input Methods because they provide a compose step between the text generated
+by the widget, and that accepted by the current widget with keyboard focus.
+<p> Currently in 2.x it is not possible to create an input method that is both a Popup Input
+Method and a Composing Input Method.
+<p> The two Interfaces to create Input Method plugins are <a href="inputmethodinterface.html">InputMethodInterface</a> and <a href="extinputmethodinterface.html">ExtInputMethodInterface</a>.
+InputMethodInterface can only be used to create Popup Input Methods, and will only have access to
+the 1.5.x API.  ExtInputMethodInterface can be used to create either Popup Input Methods or Composing 
+Input Methods.  However they can not be installed on devices with a Qtopia version earlier than 1.6.
+<p> Examples of Qtopia input methods can be found in the <tt>examples/inputmethods</tt>
+directory of the Qtopia source code.
+<p> <h2> How to create a Popup Input Method
+</h2>
+<a name="2"></a><p> Popup Input Methods must supply a QWidget that will be shown on the screen and emit a signal when a key is pressed.
+Qtopia handles showing and hiding the input widget as appropriate.  It is possible to start development of a Popup Input
+Method in a single application that contains the Popup Input Method being developed and QMultiLineEdit to test
+the text output.  After the widget for the Popup Input Method is tested, you will need to turn it into a plugin.
+<p> The input method in this example is a very simple virtual keyboard.  It contains the keys A, B, C and D.
+<p> <h3> Designing the Widget for a Popup Input Method
+</h3>
+<a name="2-1"></a><p> The interface for our popup widget is quite simple.
+<p> <pre>
+#include &lt;qwidget.h&gt;
+
+class PopupIM : public QWidget
 {
     Q_OBJECT
 public:
-    SimpleInputMethod( <a href="qwidget.html">QWidget</a> *parent, const char *name, WFlags f );
+    PopupIM(QWidget *parent, const char *name = 0, int flags = 0);
+    ~PopupIM();
 
 signals:
-    void keyPress( ushort unicode, ushort keycode, ushort modifiers, bool press, bool repeat )
+    void keyPress( ushort unicode, ushort keycode,
+            ushort modifiers, bool press, bool repeat );
 };
 </pre>
  
+<p> Most important as the keyPress signal.  Later you will need to connect this
+signal to Qtopia, so it is important that it is compatible with the slot that will be provided.
 <p> The parameters of the keyPress signal are:
 <p> <center><table cellpadding="4" cellspacing="2" border="0">
 <tr bgcolor="#a2c511"> <th valign="top">Parameter <th valign="top">Notes
@@ -60,7 +117,7 @@ signals:
 <td valign="top">The unicode value of the character, or 0xFFFF if it is a non-printing key.
 <tr bgcolor="#d0d0d0"> 
 <td valign="top">keycode
-<td valign="top">The key code as specified in <a href="qnamespace-h.html">qnamespace.h</a>
+<td valign="top">The key code as specified in <tt>qnamespace.h</tt>
 <tr bgcolor="#f0f0f0"> 
 <td valign="top">modifiers
 <td valign="top">A combination of zero or more of the following OR'ed together:
@@ -70,58 +127,126 @@ Qt::ShiftButton, Qt::ControlButton and Qt::AltButton
 <td valign="top">TRUE for a key press, FALSE for a key release.
 <tr bgcolor="#f0f0f0"> 
 <td valign="top">repeat
-<td valign="top">TRUE if this is a repeating keypress.
+<td valign="top">TRUE if this is a repeating keypress.  Repeating key presses are the additional events that occur when a key is held down for a period of time.
 </table></center>
-<p> Input methods may be added to Qtopia via plugins. In order to write an
-input method plugin you must create an interface to your input method by
-deriving from the <a href="inputmethodinterface.html">InputMethodInterface</a> class and implementing the pure
-virtual functions.
-<p> To make an input method plugin the following implementation is required:
+<p> To make our Popup Input Method widget into a virtual keyboard,
+we will need some virtual keys and to lay them out on our PopupIM widget.
+<p> <pre>
+class PopupPushButton : public QPushButton
+{
+    Q_OBJECT
+public:
+    PopupPushButton ( const QChar uni, ushort key, QWidget *parent )
+        : QPushButton(parent), u(uni), k(key)
+    {
+        connect(this, SIGNAL(pressed()), this, SLOT(sendKeyForPress()));
+        connect(this, SIGNAL(released()), this, SLOT(sendKeyForRelease()));
+        setText(QChar(uni));
+    }
+signals:
+    void keyPress(ushort, ushort, ushort, bool, bool);
+
+private slots:
+    void sendKeyForPress()
+    {
+        emit keyPress(u.unicode(), k, 0, TRUE, FALSE);
+    }
+    void sendKeyForRelease()
+    {
+        emit keyPress(u.unicode(), k, 0, FALSE, FALSE);
+    }
+private:
+    QChar u;
+    ushort k;
+};
+</pre>
+ 
+<p> This makes a good virtual key as it records the information needed for the key in itself.
+It isn't able to add modifiers, or generate repeating keys, but it is sufficent to input
+a character as either text or a key code.
+<p> The constructor for our PopupIM simply lays the virtual keys in a grid and connects
+their signals to its own.
+<p> <pre>
+
+PopupIM::PopupIM(QWidget *parent, const char *name, int flags)
+    : QWidget(parent, name, flags)
+{
+    QGridLayout *gl = new QGridLayout(this, 2,2);
+    PopupPushButton *ppb;
+
+    ppb = new PopupPushButton(QChar('A'), Qt::Key_A, this);
+    connect(ppb, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)),
+            this, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)));
+    gl-&gt;addWidget(ppb, 0, 0);
+    ppb = new PopupPushButton(QChar('B'), Qt::Key_B, this);
+    connect(ppb, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)),
+            this, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)));
+    gl-&gt;addWidget(ppb, 0, 1);
+    ppb = new PopupPushButton(QChar('C'), Qt::Key_C, this);
+    connect(ppb, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)),
+            this, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)));
+    gl-&gt;addWidget(ppb, 1, 0);
+    ppb = new PopupPushButton(QChar('D'), Qt::Key_D, this);
+    connect(ppb, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)),
+            this, SIGNAL(keyPress(ushort, ushort, ushort, bool, bool)));
+    gl-&gt;addWidget(ppb, 1, 1);
+}
+</pre>
+ 
+<p> <h3> Creating an <a href="inputmethodinterface.html">InputMethodInterface</a> plugin
+</h3>
+<a name="2-2"></a><p> Because Popup Input Methods are usually simple its better to use the
+InputMethodInterface to turn it into a plugin so it will be usable with
+Qtopia 1.5 devices.  However it is also possible to use the
+<a href="extinputmethodinterface.html">ExtInputMethodInterface</a> as explained in the next section.
+<p> The definition of the plugin interface is:
 <p> <pre>
 #include &lt;qpe/inputmethodinterface.h&gt;
 
-class SimpleInputMethodImpl : public <a href="inputmethodinterface.html">InputMethodInterface</a>
+class PopupIMImpl : public <a href="inputmethodinterface.html">InputMethodInterface</a>
 {
 public:
-    SimpleInputMethodImpl();
-    virtual ~SimpleInputMethodImpl();
+    PopupIMImpl();
+    ~PopupIMImpl();
 
 #ifndef QT_NO_COMPONENT
     QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
     Q_REFCOUNT
 #endif
 
-    virtual QWidget *inputMethod( <a href="qwidget.html">QWidget</a> *parent, Qt::WFlags f );
-    virtual void resetState();
-    virtual QPixmap *icon();
-    virtual QString name();
-    virtual void onKeyPress( <a href="qobject.html">QObject</a> *receiver, const char *slot );
+    QWidget *inputMethod( QWidget *parent, Qt::WFlags f );
+    void resetState();
+    QPixmap *icon();
+    QString name();
+    void onKeyPress( QObject *receiver, const char *slot );
 
 private:
-    SimpleInputMethod *input;
-    <a href="qpixmap.html">QPixmap</a> *icn;
+    PopupIM *input;
+    QPixmap *icn;
     ulong ref;
 };
 </pre>
  
 <p> The constructor and destructor are very simple:
 <p> <pre>
-SimpleInputMethodImpl::SimpleInputMethodImpl()
+PopupIMImpl::PopupIMImpl()
     : input(0), icn(0), ref(0)
 {
 }
 
-SimpleInputMethodImpl::~SimpleInputMethodImpl()
+PopupIMImpl::~PopupIMImpl()
 {
-    delete input;
-    delete icn;
+    if (input)
+        delete input;
+    if (icn)
+        delete icn;
 }
 </pre>
  
 <p> The queryInterface() function can be implemented using the
 following boilerplate code:
 <p> <pre>
-QRESULT SimpleInputMethodImpl::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid, QUnknownInterface **iface )
+QRESULT PopupIMImpl::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid, QUnknownInterface **iface )
 {
     *iface = 0;
     if ( uuid == IID_QUnknown )
@@ -137,36 +262,41 @@ QRESULT SimpleInputMethodImpl::queryInterface( const <a href="quuid.html">QUuid<
 </pre>
  
 <p> The inputMethod() function returns the input method widget. This
-widget will be display just above the task bar when the user needs to input
+widget will be display on the screen when the user needs to input
 text. You should always return the same widget if this function is called
 multiple times.
 <p> <pre>
-QWidget *SimpleInputMethodImpl::inputMethod( <a href="qwidget.html">QWidget</a> *parent, Qt::WFlags f )
+QWidget *PopupIMImpl::inputMethod( QWidget *parent, Qt::WFlags f )
 {
     if ( !input )
-        input = new SimpleInputMethod( parent, "SimpleInput", f );
+        input = new PopupIM( parent, "SimpleInput", f );
     return input;
 }
 </pre>
  
 <p> The resetState() function should return the input method to its default
-state.
+state.  However since our PopupIM keeps no state it can be implemented with
+the empty function.
+<p> <pre>
+void PopupIMImpl::resetState() { }
+</pre>
+ 
 <p> The name() function returns the name of the input method. This will
 be displayed in the popup list of available input methods.
 <p> <pre>
-QString SimpleInputMethodImpl::name()
+QString PopupIMImpl::name()
 {
-    return qApp-&gt;<a href="qapplication.html#translate">translate</a>( "InputMethods", "SimpleInput" );
+    return qApp-&gt;translate( "InputMethods", "SimpleInput" );
 }
 </pre>
  
-<p> The name() function returns the icon for the input method. This will
+<p> The icon() function returns the icon for the input method. This will
 be displayed in the taskbar when the input method is selected.
 <p> <pre>
-QPixmap *SimpleInputMethodImpl::icon()
+QPixmap *PopupIMImpl::icon()
 {
     if ( !icn )
-        icn = new <a href="qpixmap.html">QPixmap</a>( your pixmap );
+        icn = new QPixmap( your pixmap );
     return icn;
 }
 </pre>
@@ -175,10 +305,10 @@ QPixmap *SimpleInputMethodImpl::icon()
 that is emitted when a key press is generated.
 <p> The following code will connect the signal to the supplied slot:
 <p> <pre>
-void SimpleInputMethodImpl::onKeyPress( <a href="qobject.html">QObject</a> *receiver, const char *slot )
+void PopupIMImpl::onKeyPress( QObject *receiver, const char *slot )
 {
     if ( input )
-        QObject::<a href="qobject.html#connect">connect</a>( input, SIGNAL(keyPress(ushort,ushort,ushort,bool,bool)), receiver, slot );
+        QObject::connect( input, SIGNAL(keyPress(ushort,ushort,ushort,bool,bool)), receiver, slot );
 }
 </pre>
  
@@ -187,44 +317,183 @@ following boilerplate code:
 <p> <pre>
 Q_EXPORT_INTERFACE()
 {
-    Q_CREATE_INSTANCE( SimpleInputMethodImpl )
+    Q_CREATE_INSTANCE( PopupIMImpl )
 }
 </pre>
  
-<p> The plugin must be compiled as a shared library and placed in the <tt>$QPEDIR/plugins/imputmethods</tt> directory. The following <tt>tmake</tt> project
-file will create a suitable Makefile:
+<p> <h3> Creating an <a href="extinputmethodinterface.html">ExtInputMethodInterface</a> plugin
+</h3>
+<a name="2-3"></a><p> If your Popup Input Method uses parts of the Qtopia API from 1.6 or onwards
+you may want to use the ExtInputMethodInterface.  While the interface
+does have more functions, for a Popup Input Method most of them can be
+set to null functions.
 <p> <pre>
-TEMPLATE     = lib
-CONFIG      += qt warn_on release
-HEADERS      = simpleinputmethod.h \
-               simpleinputmethodimpl.h
-SOURCES      = simpleinputmethod.cpp \
-               simpleinputmethodimpl.cpp
-TARGET       = simpleinputmethod
-DESTDIR      = $(QPEDIR)/plugins/inputmethods
-INCLUDEPATH += $(QPEDIR)/include
-LIBS        += -lqpe
-VERSION      = 1.0.0
+#include &lt;qpe/inputmethodinterface.h&gt;
+
+class PopupIMExtImpl : public <a href="extinputmethodinterface.html">ExtInputMethodInterface</a>
+{
+
+public:
+    PopupIMExtImpl();
+    ~PopupIMExtImpl();
+
+#ifndef QT_NO_COMPONENT
+    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
+    Q_REFCOUNT
+#endif
+    QString name();
+    QPixmap *icon();
+
+    QWidget *keyboardWidget( QWidget *parent, Qt::WFlags f);
+
+    void resetState() {}
+
+    QStringList compatible() { return QStringList(); }
+
+    QWSInputMethod *inputMethod( ) { return 0; }
+
+    QWidget *statusWidget( QWidget *parent, Qt::WFlags f) { return 0; }
+
+    void qcopReceive( const QCString &amp;msg, const QByteArray &amp;data ) { }
+private:
+    PopupIM *input;
+    ulong ref;
+};
+
 </pre>
  
-<p> Examples of Qtopia input methods can be found in the <tt>inputmethods/</tt>
-directory of the Qtopia source code.
-<p> <h3> Composing input methods
+<p> The constructor and destructor can be rather simply implemented
+<p> <pre>
+PopupIMExtImpl::PopupImExtImpl()
+    : input(0), icn(0), ref(0)
+{
+}
+
+PopupIMExtImpl::~PopupIMExtImpl()
+{
+    if (input)
+        delete input;
+    if (icn)
+        delete icn;
+}
+</pre>
+ 
+<p> The queryInterface() function can be implemented using the
+following boilerplate code:
+<p> <pre>
+QRESULT PopupIMExtImpl::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid, QUnknownInterface **iface )
+{
+    *iface = 0;
+    if ( uuid == IID_QUnknown )
+        *iface = this;
+    else if ( uuid == IID_InputMethod )
+        *iface = this;
+    else
+        return QS_FALSE;
+
+    (*iface)-&gt;addRef();
+    return QS_OK;
+}
+</pre>
+ 
+<p> The name() function returns the name of the input method. This will
+be displayed in the popup list of available input methods.
+<p> <pre>
+QString PopupIMExtImpl::name()
+{
+    return qApp-&gt;translate( "InputMethods", "SimpleInput" );
+}
+</pre>
+ 
+<p> The icon() function returns the icon for the input method. This will
+be displayed in the taskbar when the input method is selected.
+<p> <pre>
+QPixmap *PopupIMExtImpl::icon()
+{
+    if ( !icn )
+        icn = new QPixmap( your pixmap );
+    return icn;
+}
+</pre>
+ 
+<p> The keyboardWidget() function should return the widget for the
+Popup Input Method.  
+<p> <pre>
+QWidget *keyboardWidget( QWidget *parent, Qt::WFlags f)
+{
+    if (!input) {
+        input = new PopupIM( parent, "SimpleInput", f );
+    }
+    return input;
+}
+</pre>
+ 
+<p> The resetState() function should return the input method to its default
+state.  However since our PopupIM keeps no state it can be implemented with
+the empty function.
+<p> The compatible() function should return the list of compatible plugins
+that this plugin can work at the same time with, or the empty list for
+no restriction.
+<p> The inputMethod() function does not apply to a Popup Input Method and
+should return 0.
+<p> The statusWidget() function does not apply to a Popup Input Method and
+should return 0.
+<p> The qcopReceive() function is called to notify the plugin of events on the
+inputmethod channel.  As our plugin doesn't interpret any events on the
+inputmethod channel this can be an empty function.
+<p> Example message the input method might want to respond to include:
+<p> <ul>
+<li> inputMethodHint(int)
+One of the standard hints defined by QPEApplication::InputMethodHint,
+except QPEApplication::Named (see next item).
+<li> inputMethodHint(QString)
+A named hint. These are input method specific. If the input method
+does not recognize the hint, it should attempt to provide input of
+the largest range of characters it supports.
+</ul>
+<p> You must also create an instance of the input method plugin using the
+following boilerplate code:
+<p> <pre>
+Q_EXPORT_INTERFACE()
+{
+    Q_CREATE_INSTANCE( PopupIMImpl )
+}
+</pre>
+ 
+<p> <h3> Building the plugin
 </h3>
-<a name="1-2"></a><p> Qtopia 1.6 input methods are created by inheriting from 
-<a href="extinputmethodinterface.html">ExtInputMethodInterface</a>, in the same manner as <a href="inputmethodinterface.html">InputMethodInterface</a>.
-<p> The main new feature of ExtInputMethodInterface is support for
-composing input methods. The input method itself is implemented as a
-class that inherits from <a href="qwsinputmethod.html">QWSInputMethod</a>. It filters all keyboard
-events before they are sent to the application that has keyboard
-focus.
-<p> There is a complete example of a composing input method in the
-<tt>examples/inputmethod</tt> directory of Qtopia.
-<p> The main class of a composing input method inherits from QWSInputMethod. It
+<a name="2-4"></a><p> Building the input method plugin is the same for either <a href="inputmethodinterface.html">InputMethodInterface</a>
+or <a href="extinputmethodinterface.html">ExtInputMethodInterface</a>.
+<p> In you .pro file to build your plugin you will need to add <tt>qtopiaplugin</tt>
+to the <tt>CONFIG</tt> and set the <tt>QTOPIA_PROJECT_TYPE</tt> to <tt>inputmethods</tt>.
+<p> Also set a <tt>TARGET</tt> and specify your <tt>SOURCES</tt> and <tt>HEADERS</tt>.
+<p> <pre>
+TARGET       = popupim
+
+CONFIG      += qtopiaplugin
+HEADERS      = popupim.h popupimpl.h
+SOURCES      = popupim.cpp popupimpl.cpp
+
+QTOPIA_PROJECT_TYPE=inputmethods
+</pre>
+ 
+<p> To create the Makefile, run
+<p> <pre>
+qmake -spec $QPEDIR/mkspecs/qws/linux-generic-g++ popup.pro
+</pre>
+ 
+<p> <h2> How to create a Composing Input Method
+</h2>
+<a name="3"></a><p> Composing Input Methods filter key events from the server rather than
+generating key events itself.  When built as a plugin Qtopia will
+handle adding and removing the filter to the server as appropriate.
+<p> <h3> Designing the Filter for a Composing Input Method
+</h3>
+<a name="3-1"></a><p> The main class of a composing input method inherits from QWSInputMethod. It
 filters all keyboard events before they are sent to the application that
 has keyboard focus. A minimal input method could look like this:
 <p> <pre>
-class ComposeIM : public <a href="qwsinputmethod.html">QWSInputMethod</a>
+class ComposeIM : public QWSInputMethod
 {
 public:
     ComposeIM();
@@ -237,21 +506,118 @@ public:
 
 private:
     State state;
-    <a href="qstring.html">QString</a> composed;
+    QString composed;
 };
 </pre>
  
-<p> The <a href="qwsinputmethod.html#filter">QWSInputMethod::filter</a>() function is the central part of the input
+<p> The QWSInputMethod::filter() function is the central part of the input
 method. It implements the composition logic and maintains state. It
-uses <a href="qwsinputmethod.html#sendIMEvent">QWSInputMethod::sendIMEvent</a>() to send input method events.
-<p> The function <a href="qwsinputmethod.html#reset">QWSInputMethod::reset</a>() is called from the system when
-the input method needs to reset state, eg. when the focus widget
+uses QWSInputMethod::sendIMEvent() to send input method events.
+<p> The parameters of the filter function are:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Parameter <th valign="top">Notes
+<tr bgcolor="#d0d0d0"> 
+<td valign="top">unicode
+<td valign="top">The unicode value of the character, or 0xFFFF if it is a non-printing key.
+<tr bgcolor="#f0f0f0"> 
+<td valign="top">keycode
+<td valign="top">The key code as specified in <tt>qnamespace.h</tt>
+<tr bgcolor="#d0d0d0"> 
+<td valign="top">modifiers
+<td valign="top">A combination of zero or more of the following OR'ed together:
+Qt::ShiftButton, Qt::ControlButton and Qt::AltButton 
+<tr bgcolor="#f0f0f0"> 
+<td valign="top">press
+<td valign="top">TRUE for a key press, FALSE for a key release.
+<tr bgcolor="#d0d0d0"> 
+<td valign="top">repeat
+<td valign="top">TRUE if this is a repeating keypress.  Repeating key presses are the additional events that occur when a key is held down for a period of time.
+</table></center>
+<p> The function QWSInputMethod::reset() is called from the system when
+the input method needs to reset state. For example when the focus widget
 changes.
-<p> Other functions include <a href="qwsinputmethod.html#setMicroFocus">QWSInputMethod::setMicroFocus</a>() which is
+<p> Other functions include QWSInputMethod::setMicroFocus() which is
 called when the cursor position changes inside the focus widget, and
-<a href="qwsinputmethod.html#mouseHandler">QWSInputMethod::mouseHandler</a>() which is called when the user clicks
+QWSInputMethod::mouseHandler() which is called when the user clicks
 inside the composed text. 
-<p> A plugin for the <a href="extinputmethodinterface.html">ExtInputMethodInterface</a> requires the following implementation:
+<p> The constructor and destructor can be implemented simply:
+<p> <pre>
+ComposeIM::ComposeIM()
+{
+    state = Off;
+}
+
+ComposeIM::~ComposeIM()
+{
+}
+</pre>
+ 
+<p> The reset() function needs to return the IM to an initial state.
+As there may be uncomposed text still, it is better to apply the
+composed text when ending any active compose actions.
+<p> <pre>
+void ComposeIM::reset()
+{
+    if ( state == On ) {
+        state = Off;
+        sendIMEvent( QWSServer::IMEnd, composed, 0 );
+        composed = "";
+    }
+}
+</pre>
+ 
+<p> The filter() function filters key events from the server.
+The code below provides a way for the input method to be turned on or off,
+as well as transforming the text. The example below will turn on or off
+based of a combination of Shift+Space, and otherwise uses the compose
+function to transform the current text.  The filter function returns
+TRUE to block the original key event, and FALSE to let the original key
+event pass on to the current application and focus widget.  It generates
+additional input events with the sendIMEvent function.  This is documented in
+the class documentation for QWSInputMethod.
+<p> <pre>
+bool ComposeIM::filter(int unicode, int keycode, int modifiers, 
+  bool isPress, bool autoRepeat)
+{
+    if ( isPress &amp;&amp; keycode == Qt::Key_Space &amp;&amp; 
+         modifiers &amp; Qt::ShiftButton ) {
+        //switch to opposite state
+        if ( state == On ) {
+            sendIMEvent( QWSServer::IMEnd, QString::null, 0 );
+            composed = "";
+            state = Off; //reset and remove text
+        } else {
+            state = On;
+        }
+        return TRUE; //block event
+    } else if ( state == On ) {
+        if ( isPress ) {
+            if ( keycode == Qt::Key_Return ) {
+                //accept text and remain active
+                sendIMEvent( QWSServer::IMEnd, composed, composed.length() );
+                composed = "";
+            } else if ( keycode == Qt::Key_Backspace ) {
+                if ( composed.length() &gt; 0 )
+                    composed = composed.left( composed.length() - 1 );
+                sendIMEvent( QWSServer::IMCompose, composed, composed.length(), 0 );
+            } else if ( unicode &gt; 0 &amp;&amp; unicode &lt; 0xffff) {
+                composed += QChar( unicode );
+                // transform the given text before sending to the input widget
+                composed = compose( composed );
+                sendIMEvent( QWSServer::IMCompose, composed, composed.length(), 0 );
+            }
+        }
+        return TRUE; //block event
+    }  
+    return FALSE; //pass keystroke normally.
+}
+</pre>
+ 
+<p> <h3> Creating an <a href="extinputmethodinterface.html">ExtInputMethodInterface</a> plugin
+</h3>
+<a name="3-2"></a><p> Composing Input Methods must use the ExtInputMethodInterface when being 
+made into a plugin for Qtopia.
+<p> For our example the interface can be:
 <p> <pre>
 class ComposeImpl : public <a href="extinputmethodinterface.html">ExtInputMethodInterface</a>
 {
@@ -273,20 +639,21 @@ public:
 
     virtual QWSInputMethod *inputMethod( );
 
-    virtual QWidget *statusWidget( <a href="qwidget.html">QWidget</a> *parent, Qt::WFlags f);
-    virtual QWidget *keyboardWidget( <a href="qwidget.html">QWidget</a> *parent, Qt::WFlags f);
+    virtual QWidget *statusWidget( QWidget *parent, Qt::WFlags f);
+    virtual QWidget *keyboardWidget( QWidget *parent, Qt::WFlags f) { return 0; }
 
-    virtual void qcopReceive( const <a href="qcstring.html">QCString</a> &amp;msg, const QByteArray &amp;data );
+    virtual void qcopReceive( const QCString &amp;msg, const QByteArray &amp;data ) { }
 
 private:
     ComposeIM *input;
-    <a href="qpixmap.html">QPixmap</a> *icn;
-    <a href="qwidget.html">QWidget</a> *statWid;
+    QPixmap *icn;
+    QWidget *statWid;
     ulong ref;
 };
 </pre>
  
-<p> The queryInterface() function for this interface can be implemented as follows:
+<p> The queryInterface() function can be implemented using the
+following boilerplate code:
 <p> <pre>
 QRESULT ComposeImpl::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid, QUnknownInterface **iface )
 {
@@ -303,16 +670,51 @@ QRESULT ComposeImpl::queryInterface( const <a href="quuid.html">QUuid</a> &amp;u
 }
 </pre>
  
-<p> For a composing input method, the keyboardWidget() function returns 0:
-<pre>
-QWidget *ComposeImpl::keyboardWidget( <a href="qwidget.html">QWidget</a> *, Qt::WFlags )
+<p> The name() function returns the name of the input method. This will
+be displayed in the popup list of available input methods.
+<p> <pre>
+QString ComposeImpl::name()
 {
-    return 0;
+    return qApp-&gt;translate( "InputMethods", "SimpleInput" );
 }
 </pre>
  
-<p> The function inputMethod() returns the input method:
-<pre>
+<p> The icon() function returns the icon for the input method.  This is
+less relavent to composing input methods as they can provide a statusWidget
+instead.
+<p> <pre>
+QPixmap *ComposeImpl::icon()
+{
+    if ( !icn )
+        icn = new QPixmap( your pixmap );
+    return icn;
+}
+</pre>
+ 
+<p> The resetState() function should return the input method to its orignal
+state.
+<p> <pre>
+void ComposeImpl::resetState()
+{
+    if ( input )
+        input-&gt;reset();
+}
+</pre>
+ 
+<p> The compatible() function can be used to say that this input method is
+only compatible with certain other input methods. In this case the empty
+list is returned to indicate there are no restrictions.
+<p> <pre>
+QStringList ComposeImpl::compatible( )
+{
+    return QStringList();
+}
+</pre>
+ 
+<p> The inputMethod() function returns the QWSInputMethod described
+int the previous section.  It should return the same pointer if this
+function is called multiple times only creating the input method once.
+<p> <pre>
 QWSInputMethod *ComposeImpl::inputMethod( )
 {
     if ( !input )
@@ -321,39 +723,11 @@ QWSInputMethod *ComposeImpl::inputMethod( )
 }
 </pre>
  
-<p> resetState() resets the state of the input method:
-<pre>
-void ComposeImpl::resetState()
-{
-    if ( input )
-        input-&gt;reset();
-}
-</pre>
- 
-<p> icon() returns the icon.
-<pre>
-QPixmap *ComposeImpl::icon()
-{
-    if (!icn)
-        icn = new <a href="qpixmap.html">QPixmap</a>( \e pixmap );
-    return icn;
-}
-</pre>
- 
-<p> name() returns the name:
-<pre>
-QString ComposeImpl::name()
-{
-    return qApp-&gt;<a href="qapplication.html#translate">translate</a>( "InputMethods", "Latest" );
-}
-</pre>
- 
-<p> For a composing input method, the widget returned by statusWidget()
-will be placed in the taskbar when the input method is selected. This
-widget is typically used to display status, and can also be used to
-let the user interact with the input method.
-<pre>
-QWidget *ComposeImpl::statusWidget( <a href="qwidget.html">QWidget</a> *parent, Qt::WFlags )
+<p> The statusWidget() function returns the widget that will be placed in the
+header or taskbar when the input method is selected.  This widget is typically used to display status, and can also be used to let the user interact
+with the input method.
+<p> <pre>
+QWidget *ComposeImpl::statusWidget( QWidget *parent, Qt::WFlags )
 {
     if (!statWid) {
         (void) inputMethod(); //create input before we use it
@@ -363,30 +737,57 @@ QWidget *ComposeImpl::statusWidget( <a href="qwidget.html">QWidget</a> *parent, 
 }
 </pre>
  
-<p> The compatible() function can be used to say that this input method is
-only compatible with certain other input methods. In this case, there
-are no restrictions:
-<pre>
-QStringList ComposeImpl::compatible( )
+<p> The keyboardWidget() function does not apply to a Composing Input Method and
+should return 0.
+<p> The qcopReceive() function is called to notify the plugin of events on the
+inputmethod channel.  As our plugin doesn't interpret any events on the
+inputmethod channel this can be an empty function.
+<p> Example message the input method might want to respond to include:
+<p> <ul>
+<li> inputMethodHint(int)
+One of the standard hints defined by QPEApplication::InputMethodHint,
+except QPEApplication::Named (see next item).
+<li> inputMethodHint(QString)
+A named hint. These are input method specific. If the input method
+does not recognize the hint, it should attempt to provide input of
+the largest range of characters it supports.
+</ul>
+<p> You must also create an instance of the input method plugin using the
+following boilerplate code:
+<p> <pre>
+Q_EXPORT_INTERFACE()
 {
-    return QStringList();
+    Q_CREATE_INSTANCE( PopupIMImpl )
 }
 </pre>
  
-<p> In qcopReceive(), we get notified when there is an event on the
-inputmethod channel:
-<pre>
-void ComposeImpl::qcopReceive( const <a href="qcstring.html">QCString</a> &amp;msg, const QByteArray &amp;data )
-{
-    //process QCop event
-}
+<p> <h3> Building the plugin
+</h3>
+<a name="3-3"></a><p> In you .pro file to build your plugin you will need to add <tt>qtopiaplugin</tt>
+to the <tt>CONFIG</tt> and set the <tt>QTOPIA_PROJECT_TYPE</tt> to <tt>inputmethods</tt>.
+<p> Also set a <tt>TARGET</tt> and specify your <tt>SOURCES</tt> and <tt>HEADERS</tt>.
+<p> <pre>
+TARGET       = composeim
+
+CONFIG      += qtopiaplugin
+HEADERS      = composeim.h composeimpl.h
+SOURCES      = composeim.cpp composeimpl.cpp
+
+QTOPIA_PROJECT_TYPE=inputmethods
+</pre>
+ 
+<p> To create the Makefile, run
+<p> <pre>
+qmake -spec $QPEDIR/mkspecs/qws/linux-generic-g++ composing.pro
 </pre>
  
 <p> 
 <!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

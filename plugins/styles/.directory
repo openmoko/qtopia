@@ -1,5 +1,6 @@
+[Translation]
+File=QtopiaPlugins
+Context=Styles
 [Desktop Entry]
-Name=Styles
-Comment=Provides support for different user interface styles.
-Name[ja]=スタイル
-Comment[ja]=異なるユーザーインターフェイススタイル用のサポートを提供します。
+Name[]=Styles
+Comment[]=Provides support for different user interface styles.

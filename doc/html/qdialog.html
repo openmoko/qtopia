@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -39,7 +41,7 @@ Inherits <a href="qwidget.html">QWidget</a>.
 <li><div class="fn">int <a href="#0beb1a"><b>exec</b></a> () </div>
 <li><div class="fn">int <a href="#827937"><b>result</b></a> () const</div>
 <li><div class="fn">virtual void <a href="#bfe29c"><b>show</b></a> () </div>
-<li><div class="fn">void <b>setOrientation</b> ( Orientation orientation ) </div>
+<li><div class="fn">void <a href="#aa7dae"><b>setOrientation</b></a> ( Orientation orientation ) </div>
 <li><div class="fn">Orientation <a href="#ba9c31"><b>orientation</b></a> () const</div>
 <li><div class="fn">void <a href="#e68e4c"><b>setExtension</b></a> ( QWidget * extension ) </div>
 <li><div class="fn">QWidget* <a href="#b361c0"><b>extension</b></a> () const</div>
@@ -84,7 +86,7 @@ or Return map to the right button at any time.
 dialog. Typically, the dialog starts out small, has a "More" button,
 and when the user clicks "More", the dialog becomes bigger, and
 shows some less-used options.  QDialog supports this using
-<a href="#e68e4c">setExtension</a>(), <a href="#ae22ae">setOrientation</a>() and <a href="#a1f41d">showExtension</a>().
+<a href="#e68e4c">setExtension</a>(), <a href="#aa7dae">setOrientation</a>() and <a href="#a1f41d">showExtension</a>().
 <p>Since dialogs typically tend to have result value (pressing
 Enter/Return maps to one value and pressing Escape to the other),
 QDialog supports that.  A dialog can finish by calling the slots
@@ -159,15 +161,15 @@ the dialog, and FALSE if it does not.
 <p>Reimplemented from <a href="qwidget.html#39930b">QWidget.</a>
 <h3 class="fn">Qt::Orientation <a name="ba9c31"></a>QDialog::orientation() const</h3>
 <p>Returns the extension direction of the dialog.
-<p>See also  <a href="#ae22ae">setOrientation</a>().
+<p>See also  <a href="#aa7dae">setOrientation</a>().
 <h3 class="fn">void <a name="604679"></a>QDialog::reject () <code>[virtual protected slot]</code></h3>
 <p>Hides the dialog and sets the result code to <code>Rejected.</code>
 <h3 class="fn">void <a name="9d0e95"></a>QDialog::resize ( const <a href="qsize.html">QSize</a> &amp; s )</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
-<p>Examples:
- <a href="tabdialog-main-cpp.html#resize">tabdialog/main.cpp</a>
 <h3 class="fn">void <a name="d7e510"></a>QDialog::resize ( int w, int h ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
+<p>Examples:
+ <a href="tabdialog-main-cpp.html#resize">tabdialog/main.cpp</a>
 <p>Reimplemented from <a href="qwidget.html#8fcbbe">QWidget.</a>
 <h3 class="fn">void <a name="fc5201"></a>QDialog::resizeEvent ( <a href="qresizeevent.html">QResizeEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
@@ -180,13 +182,18 @@ extensions if <em>extension</em> is 0.
 <p>The dialogs takes over ownership of the extension. Any previously
 set extension is deleted.
 <p>This function can only be called while the dialog is hidden.
-<p>See also  <a href="#a1f41d">showExtension</a>(), <a href="#ae22ae">setOrientation</a>() and <a href="#b361c0">extension</a>().
+<p>See also  <a href="#a1f41d">showExtension</a>(), <a href="#aa7dae">setOrientation</a>() and <a href="#b361c0">extension</a>().
 <h3 class="fn">void <a name="bba7b0"></a>QDialog::setGeometry ( const <a href="qrect.html">QRect</a> &amp; r ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#5e9ab1">QWidget.</a>
 <h3 class="fn">void <a name="e54a1a"></a>QDialog::setGeometry ( int x, int y, int w, int h ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#9ede68">QWidget.</a>
+<h3 class="fn">void <a name="aa7dae"></a>QDialog::setOrientation ( <a href="qt.html#Orientation">Orientation</a> orientation )</h3>
+<p>Sets the dialog to display its extension to the right of the main
+are if <em>orientation</em> is <code>Horizonal,</code> and to display it below the
+main area if <em>orientation</em> is <code>Vertical.</code>
+<p>See also  <a href="#ba9c31">orientation</a>() and <a href="#e68e4c">setExtension</a>().
 <h3 class="fn">void <a name="efd31d"></a>QDialog::setResult ( int ) <code>[protected]</code></h3>
 <p>Sets the result code of the dialog.
 <h3 class="fn">void <a name="0a585b"></a>QDialog::setSizeGripEnabled ( bool enabled )</h3>
@@ -211,7 +218,7 @@ and hides it else.
 <p>This slot is usually connected to the <a href="qbutton.html#4069b1">QButton::toggled()</a> signal
 of a <a href="qpushbutton.html">QPushButton</a>.
 <p>If the dialog is not visible, nothing happens.
-<p>See also  <a href="#bfe29c">show</a>(), <a href="#e68e4c">setExtension</a>() and <a href="#ae22ae">setOrientation</a>().
+<p>See also  <a href="#bfe29c">show</a>(), <a href="#e68e4c">setExtension</a>() and <a href="#aa7dae">setOrientation</a>().
 <h3 class="fn"><a href="qsize.html">QSize</a> <a name="864e60"></a>QDialog::sizeHint () const <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#4511d1">QWidget.</a>
@@ -219,7 +226,7 @@ of a <a href="qpushbutton.html">QPushButton</a>.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -227,5 +234,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

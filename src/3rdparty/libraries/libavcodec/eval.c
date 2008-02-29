@@ -19,9 +19,15 @@
  *
  */
 
- /*
+/**
+ * @file eval.c
+ * simple arithmetic expression evaluator.
+ *
  * see http://joe.hotchkiss.com/programming/eval/eval.html
  */
+
+#include "avcodec.h"
+#include "mpegvideo.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,9 +49,9 @@ typedef struct Parser{
     int stack_index;
     char *s;
     double *const_value;
-    char **const_name;          // NULL terminated
+    const char **const_name;          // NULL terminated
     double (**func1)(void *, double a); // NULL terminated
-    char **func1_name;          // NULL terminated
+    const char **func1_name;          // NULL terminated
     double (**func2)(void *, double a, double b); // NULL terminated
     char **func2_name;          // NULL terminated
     void *opaque;
@@ -55,7 +61,7 @@ static void evalExpression(Parser *p);
 
 static void push(Parser *p, double d){
     if(p->stack_index+1>= STACK_SIZE){
-        fprintf(stderr, "stack overflow in the parser\n");
+        av_log(NULL, AV_LOG_ERROR, "stack overflow in the parser\n");
         return;
     }
     p->stack[ p->stack_index++ ]= d;
@@ -64,14 +70,14 @@ static void push(Parser *p, double d){
 
 static double pop(Parser *p){
     if(p->stack_index<=0){
-        fprintf(stderr, "stack underflow in the parser\n");
+        av_log(NULL, AV_LOG_ERROR, "stack underflow in the parser\n");
         return NAN;
     }
 //printf("pop\n"); fflush(stdout);
     return p->stack[ --p->stack_index ];
 }
 
-static int strmatch(char *s, char *prefix){
+static int strmatch(const char *s, const char *prefix){
     int i;
     for(i=0; prefix[i]; i++){
         if(prefix[i] != s[i]) return 0;
@@ -103,7 +109,7 @@ static void evalPrimary(Parser *p){
     
     p->s= strchr(p->s, '(');
     if(p->s==NULL){
-        fprintf(stderr, "Parser: missing ( in \"%s\"\n", next);
+        av_log(NULL, AV_LOG_ERROR, "Parser: missing ( in \"%s\"\n", next);
         return;
     }
     p->s++; // "("
@@ -126,7 +132,7 @@ static void evalPrimary(Parser *p){
     else if( strmatch(next, "log"   ) ) d= log(d);
     else if( strmatch(next, "squish") ) d= 1/(1+exp(4*d));
     else if( strmatch(next, "gauss" ) ) d= exp(-d*d/2)/sqrt(2*M_PI);
-    else if( strmatch(next, "abs"   ) ) d= abs(d);
+    else if( strmatch(next, "abs"   ) ) d= fabs(d);
     else if( strmatch(next, "max"   ) ) d= d > d2 ? d : d2;
     else if( strmatch(next, "min"   ) ) d= d < d2 ? d : d2;
     else if( strmatch(next, "gt"    ) ) d= d > d2 ? 1.0 : 0.0;
@@ -153,13 +159,13 @@ static void evalPrimary(Parser *p){
         }
 
         if(error){
-            fprintf(stderr, "Parser: unknown function in \"%s\"\n", next);
+            av_log(NULL, AV_LOG_ERROR, "Parser: unknown function in \"%s\"\n", next);
             return;
         }
     }
     
     if(p->s[-1]!= ')'){
-        fprintf(stderr, "Parser: missing ) in \"%s\"\n", next);
+        av_log(NULL, AV_LOG_ERROR, "Parser: missing ) in \"%s\"\n", next);
         return;
     }
     push(p, d);
@@ -179,7 +185,7 @@ static void evalPow(Parser *p){
         evalExpression(p);
 
         if(p->s[0]!=')')
-            fprintf(stderr, "Parser: missing )\n");
+            av_log(NULL, AV_LOG_ERROR, "Parser: missing )\n");
         p->s++;
     }else{
         evalPrimary(p);
@@ -228,8 +234,8 @@ static void evalExpression(Parser *p){
     }
 }
 
-double ff_eval(char *s, double *const_value, char **const_name,
-               double (**func1)(void *, double), char **func1_name, 
+double ff_eval(char *s, double *const_value, const char **const_name,
+               double (**func1)(void *, double), const char **func1_name,
                double (**func2)(void *, double, double), char **func2_name,
                void *opaque){
     Parser p;

@@ -1,8 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/distrib.doc:1 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/distrib.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Distribution Packaging</title>
 <style type="text/css"><!--
 h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
@@ -13,24 +14,57 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Distribution Packaging</h1>
+
+
 <p> 
-<p> <h2> Qtopia - Distribution Packaging
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Package Formats
+</a>
+<ul>
+<li><a href="#2-1"> The Control File
+</a>
+<li><a href="#2-2"> Supported Fields
+</a>
+<li><a href="#2-3"> Replacing the <b>.control</b> suffix
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
 </h2>
-<a name="1"></a><p> Packages for Qtopia devices should be distributed in IPKG format.
+<a name="1"></a><p> This document describes Qtopia device package distribution.
+<p> <h2> Package Formats
+</h2>
+<a name="2"></a><p> Packages for Qtopia devices should be distributed in IPKG (Itsy Package Management System) format.
 <p> Packages for Linux/X11 desktop systems (i.e. development systems)
-should be distributed in RPM format.
+should be distributed in RPM (Red Hat Package Manager) format.
 <p> Both of these formats are supported by the <tt>mkipks</tt> program which is
 part of the Qtopia SDK. This program takes a control file and produces
 either an IPKG file or an RPM file. Sample control files are included
-in the Qtopia SDK, such as <a href="file:/opt/Qtopia/example/example.control">example.control</a>.
-<p> The control file has the following form:
+in the Qtopia software developer's kit (SDK), such as example.control.
+<p> <h3> The Control File
+</h3>
+<a name="2-1"></a><p> The control file has the following form:
 <p> <pre>
 Files: bin/foo apps/Applications/foo.desktop etc/foo.dat
 Priority: optional
@@ -44,14 +78,17 @@ Description: Very brief description.
  description.
 </pre>
  
-<p> The following fields are supported:
+<p> <h3> Supported Fields
+</h3>
+<a name="2-2"></a><p> The following fields are supported:
 <p> <ul>
 <li> <tt>Files</tt>
 - List of files relative to $QPEDIR, wildcards are permitted.
+see <a href="files.html">Qtopia  Filesystem standards</a> for more information.
 <li> <tt>Priority</tt>
 - The priority (normally "optional").
 <li> <tt>Section</tt>
-- The classification of the package. The categories recognized by Qtopia Desktop are:
+- The classification of the package. The classifications recognized by Qtopia are:
 <ul>
 <li> qpe/applications
 <li> qpe/games
@@ -80,7 +117,9 @@ to the end of the control file.
 <p> Other IPKG fields are passed through unchanged to the the control file within
 the resulting .ipk file. See the documentation of the ipkg program for more
 information.
-<p> For IPKG format, you may also have files with the same name as the
+<p> <h3> Replacing the <b>.control</b> suffix
+</h3>
+<a name="2-3"></a><p> For IPKG format, you may also have files with the same name as the
 control file, but with the <b>.control</b> suffix replaced by one of
 the following:
 <p> <center><table cellpadding="4" cellspacing="2" border="0">
@@ -116,9 +155,11 @@ applets if your software was a taskbar applet.
 </table></center>
 <p> 
 <!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

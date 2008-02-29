@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* -------------------------------------------------------------------------- */
 /*                                                                            */
 /* [MyPty.C]               Pseudo Terminal Device                             */
@@ -9,9 +30,7 @@
 /* This file is part of Konsole - an X terminal for KDE                       */
 /* -------------------------------------------------------------------------- */
 /*									      */
-/* Ported Konsole to Qt/Embedded                                              */
-/*									      */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
+/* Konsole ported to Qt/Embedded by Trolltech                                 */
 /*									      */
 /* -------------------------------------------------------------------------- */
 
@@ -28,7 +47,7 @@
     \brief Ptys provide a pseudo terminal connection to a program.
 
     Although closely related to pipes, these pseudo terminal connections have
-    some ability, that makes it nessesary to uses them. Most importent, they
+    some ability, that makes it nessesary to use them. Most importantly, they
     know about changing screen sizes and UNIX job control.
 
     Within the terminal emulation framework, this class represents the
@@ -44,23 +63,23 @@
 
     publish the SIGCHLD signal if not related to an instance.
 
-    clearify TEPty::done vs. TEPty::~TEPty semantics.
-    check if pty is restartable via run after done.
+    clarify TEPty::done vs. TEPty::~TEPty semantics.
+    check if pty can be restarted via run after done.
 
     \par Pseudo terminals
 
-    Pseudo terminals are a unique feature of UNIX, and always come in form of
+    Pseudo terminals are a unique feature of UNIX, and always come in the form of
     pairs of devices (/dev/ptyXX and /dev/ttyXX), which are connected to each
     other by the operating system. One may think of them as two serial devices
-    linked by a null-modem cable. Being based on devices the number of
+    linked by a null-modem cable. Being based on devices, the number of
     simultanous instances of this class is (globally) limited by the number of
     those device pairs, which is 256.
 
-    Another technic are UNIX 98 PTY's. These are supported also, and prefered
+    Other techniques are the UNIX 98 PTY's. These are also supported, and preferred
     over the (obsolete) predecessor.
 
-    There's a sinister ioctl(2), signal(2) and job control stuff
-    nessesary to make everything work as it should.
+    There is sinister ioctl(2), signal(2) and job control stuff
+    nessesary to make everything work correctly.
 */
 
 
@@ -163,7 +182,8 @@ int MyPty::run(const char* cmd, QStrList &, const char*, int)
 	ttmode.c_cc[VINTR] = 3;
 	ttmode.c_cc[VERASE] = 8;
 	tcsetattr( STDIN_FILENO, TCSANOW, &ttmode );
-	setenv("TERM","vt100",1);
+	if(strlen(getenv("TERM")) <= 0)
+            setenv("TERM","vt100",1);
 	setenv("COLORTERM","0",1);
 
 	if (getuid() == 0) {
@@ -231,7 +251,7 @@ MyPty::MyPty() : cpid(0)
 /*
     Destructor.
     Note that the related client program is not killed
-    (yet) when a instance is deleted.
+    (yet) when an instance is deleted.
 */
 MyPty::~MyPty()
 {

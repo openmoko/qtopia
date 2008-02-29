@@ -1,8 +1,30 @@
-/*
- * MPEG1/2 tables
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+/**
+ * @file mpeg12data.h
+ * MPEG1/2 tables.
  */
 
-const INT16 ff_mpeg1_default_intra_matrix[64] = {
+const int16_t ff_mpeg1_default_intra_matrix[64] = {
 	8, 16, 19, 22, 26, 27, 29, 34,
 	16, 16, 22, 24, 27, 29, 34, 37,
 	19, 22, 26, 27, 29, 34, 34, 38,
@@ -13,7 +35,7 @@ const INT16 ff_mpeg1_default_intra_matrix[64] = {
 	27, 29, 35, 38, 46, 56, 69, 83
 };
 
-const INT16 ff_mpeg1_default_non_intra_matrix[64] = {
+const int16_t ff_mpeg1_default_non_intra_matrix[64] = {
     16, 16, 16, 16, 16, 16, 16, 16,
     16, 16, 16, 16, 16, 16, 16, 16,
     16, 16, 16, 16, 16, 16, 16, 16,
@@ -24,7 +46,7 @@ const INT16 ff_mpeg1_default_non_intra_matrix[64] = {
     16, 16, 16, 16, 16, 16, 16, 16,
 };
 
-const unsigned char vlc_dc_table[256] = {
+static const unsigned char vlc_dc_table[256] = {
     0, 1, 2, 2,
     3, 3, 3, 3,
     4, 4, 4, 4, 4, 4, 4, 4,
@@ -47,25 +69,21 @@ const unsigned char vlc_dc_table[256] = {
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-const UINT16 vlc_dc_lum_code[12] = {
+static const uint16_t vlc_dc_lum_code[12] = {
     0x4, 0x0, 0x1, 0x5, 0x6, 0xe, 0x1e, 0x3e, 0x7e, 0xfe, 0x1fe, 0x1ff,
 };
-const unsigned char vlc_dc_lum_bits[12] = {
+static const unsigned char vlc_dc_lum_bits[12] = {
     3, 2, 2, 3, 3, 4, 5, 6, 7, 8, 9, 9,
 };
 
-const UINT16 vlc_dc_chroma_code[12] = {
+const uint16_t vlc_dc_chroma_code[12] = {
     0x0, 0x1, 0x2, 0x6, 0xe, 0x1e, 0x3e, 0x7e, 0xfe, 0x1fe, 0x3fe, 0x3ff,
 };
 const unsigned char vlc_dc_chroma_bits[12] = {
     2, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10,
 };
 
-/* simple include everything table for dc, first byte is bits number next 3 are code*/
-static UINT32 mpeg1_lum_dc_uni[512];
-static UINT32 mpeg1_chr_dc_uni[512];
-
-static const UINT16 mpeg1_vlc[113][2] = {
+static const uint16_t mpeg1_vlc[113][2] = {
  { 0x3, 2 }, { 0x4, 4 }, { 0x5, 5 }, { 0x6, 7 },
  { 0x26, 8 }, { 0x21, 8 }, { 0xa, 10 }, { 0x1d, 12 },
  { 0x18, 12 }, { 0x13, 12 }, { 0x10, 12 }, { 0x1a, 13 },
@@ -98,7 +116,7 @@ static const UINT16 mpeg1_vlc[113][2] = {
  { 0x2, 2 }, /* EOB */
 };
 
-static const UINT16 mpeg2_vlc[113][2] = {
+static const uint16_t mpeg2_vlc[113][2] = {
   {0x02, 2}, {0x06, 3}, {0x07, 4}, {0x1c, 5},
   {0x1d, 5}, {0x05, 6}, {0x04, 6}, {0x7b, 7},
   {0x7c, 7}, {0x23, 8}, {0x22, 8}, {0xfa, 8},
@@ -131,7 +149,7 @@ static const UINT16 mpeg2_vlc[113][2] = {
   {0x06,4}, /* EOB */
 };
 
-static const INT8 mpeg1_level[111] = {
+static const int8_t mpeg1_level[111] = {
   1,  2,  3,  4,  5,  6,  7,  8,
   9, 10, 11, 12, 13, 14, 15, 16,
  17, 18, 19, 20, 21, 22, 23, 24,
@@ -148,7 +166,7 @@ static const INT8 mpeg1_level[111] = {
   1,  1,  1,  1,  1,  1,  1,
 };
 
-static const INT8 mpeg1_run[111] = {
+static const int8_t mpeg1_run[111] = {
   0,  0,  0,  0,  0,  0,  0,  0,
   0,  0,  0,  0,  0,  0,  0,  0,
   0,  0,  0,  0,  0,  0,  0,  0,
@@ -164,9 +182,6 @@ static const INT8 mpeg1_run[111] = {
  17, 18, 19, 20, 21, 22, 23, 24,
  25, 26, 27, 28, 29, 30, 31,
 };
-
-static UINT8 mpeg1_index_run[2][64];
-static INT8 mpeg1_max_level[2][64];
 
 static RLTable rl_mpeg1 = {
     111,
@@ -184,7 +199,7 @@ static RLTable rl_mpeg2 = {
     mpeg1_level,
 };
 
-static const UINT8 mbAddrIncrTable[35][2] = {
+static const uint8_t mbAddrIncrTable[36][2] = {
     {0x1, 1},
     {0x3, 3},
     {0x2, 3},
@@ -220,9 +235,10 @@ static const UINT8 mbAddrIncrTable[35][2] = {
     {0x18, 11},
     {0x8, 11}, /* escape */
     {0xf, 11}, /* stuffing */
+    {0x0, 8}, /* end (and 15 more 0 bits should follow) */
 };
 
-static const UINT8 mbPatTable[63][2] = {
+static const uint8_t mbPatTable[63][2] = {
     {0xb, 5},
     {0x9, 5},
     {0xd, 6},
@@ -288,83 +304,60 @@ static const UINT8 mbPatTable[63][2] = {
     {0xc, 6}
 };
 
-#define MB_INTRA 0x01
-#define MB_PAT   0x02
-#define MB_BACK  0x04
-#define MB_FOR   0x08
-#define MB_QUANT 0x10  
+#define MB_TYPE_PAT       0x40000000
+#define MB_TYPE_ZERO_MV   0x20000000
+#define IS_ZERO_MV(a)   ((a)&MB_TYPE_ZERO_MV)
+#define IS_PAT(a)       ((a)&MB_TYPE_PAT)
 
-static const UINT8 table_mb_ptype[32][2] = {
-    { 0, 0 }, // 0x00
+static const uint8_t table_mb_ptype[7][2] = {
     { 3, 5 }, // 0x01 MB_INTRA
     { 1, 2 }, // 0x02 MB_PAT
-    { 0, 0 }, // 0x03
-    { 0, 0 }, // 0x04
-    { 0, 0 }, // 0x05
-    { 0, 0 }, // 0x06
-    { 0, 0 }, // 0x07
     { 1, 3 }, // 0x08 MB_FOR
-    { 0, 0 }, // 0x09
     { 1, 1 }, // 0x0A MB_FOR|MB_PAT
-    { 0, 0 }, // 0x0B
-    { 0, 0 }, // 0x0C
-    { 0, 0 }, // 0x0D
-    { 0, 0 }, // 0x0E
-    { 0, 0 }, // 0x0F
-    { 0, 0 }, // 0x10
     { 1, 6 }, // 0x11 MB_QUANT|MB_INTRA
     { 1, 5 }, // 0x12 MB_QUANT|MB_PAT
-    { 0, 0 }, // 0x13
-    { 0, 0 }, // 0x14
-    { 0, 0 }, // 0x15
-    { 0, 0 }, // 0x16
-    { 0, 0 }, // 0x17
-    { 0, 0 }, // 0x18
-    { 0, 0 }, // 0x19
     { 2, 5 }, // 0x1A MB_QUANT|MB_FOR|MB_PAT
-    { 0, 0 }, // 0x1B
-    { 0, 0 }, // 0x1C
-    { 0, 0 }, // 0x1D
-    { 0, 0 }, // 0x1E
-    { 0, 0 }, // 0x1F
 };
 
-static const UINT8 table_mb_btype[32][2] = {
-    { 0, 0 }, // 0x00
+static const uint32_t ptype2mb_type[7] = {
+                    MB_TYPE_INTRA,
+                    MB_TYPE_L0 | MB_TYPE_PAT | MB_TYPE_ZERO_MV | MB_TYPE_16x16,
+                    MB_TYPE_L0,
+                    MB_TYPE_L0 | MB_TYPE_PAT,
+    MB_TYPE_QUANT | MB_TYPE_INTRA,
+    MB_TYPE_QUANT | MB_TYPE_L0 | MB_TYPE_PAT | MB_TYPE_ZERO_MV | MB_TYPE_16x16,
+    MB_TYPE_QUANT | MB_TYPE_L0 | MB_TYPE_PAT,
+};
+
+static const uint8_t table_mb_btype[11][2] = {
     { 3, 5 }, // 0x01 MB_INTRA
-    { 0, 0 }, // 0x02
-    { 0, 0 }, // 0x03
     { 2, 3 }, // 0x04 MB_BACK
-    { 0, 0 }, // 0x05
     { 3, 3 }, // 0x06 MB_BACK|MB_PAT
-    { 0, 0 }, // 0x07
     { 2, 4 }, // 0x08 MB_FOR
-    { 0, 0 }, // 0x09
     { 3, 4 }, // 0x0A MB_FOR|MB_PAT
-    { 0, 0 }, // 0x0B
     { 2, 2 }, // 0x0C MB_FOR|MB_BACK
-    { 0, 0 }, // 0x0D
     { 3, 2 }, // 0x0E MB_FOR|MB_BACK|MB_PAT
-    { 0, 0 }, // 0x0F
-    { 0, 0 }, // 0x10
     { 1, 6 }, // 0x11 MB_QUANT|MB_INTRA
-    { 0, 0 }, // 0x12
-    { 0, 0 }, // 0x13
-    { 0, 0 }, // 0x14
-    { 0, 0 }, // 0x15
     { 2, 6 }, // 0x16 MB_QUANT|MB_BACK|MB_PAT
-    { 0, 0 }, // 0x17
-    { 0, 0 }, // 0x18
-    { 0, 0 }, // 0x19
     { 3, 6 }, // 0x1A MB_QUANT|MB_FOR|MB_PAT
-    { 0, 0 }, // 0x1B
-    { 0, 0 }, // 0x1C
-    { 0, 0 }, // 0x1D
     { 2, 5 }, // 0x1E MB_QUANT|MB_FOR|MB_BACK|MB_PAT
-    { 0, 0 }, // 0x1F
 };
 
-static const UINT8 mbMotionVectorTable[17][2] = {
+static const uint32_t btype2mb_type[11] = {
+                    MB_TYPE_INTRA,
+                    MB_TYPE_L1,
+                    MB_TYPE_L1   | MB_TYPE_PAT,
+                    MB_TYPE_L0,
+                    MB_TYPE_L0   | MB_TYPE_PAT,
+                    MB_TYPE_L0L1,
+                    MB_TYPE_L0L1 | MB_TYPE_PAT,
+    MB_TYPE_QUANT | MB_TYPE_INTRA,
+    MB_TYPE_QUANT | MB_TYPE_L1   | MB_TYPE_PAT,
+    MB_TYPE_QUANT | MB_TYPE_L0   | MB_TYPE_PAT,
+    MB_TYPE_QUANT | MB_TYPE_L0L1 | MB_TYPE_PAT,
+};
+
+static const uint8_t mbMotionVectorTable[17][2] = {
 { 0x1, 1 },
 { 0x1, 2 },
 { 0x1, 3 },
@@ -384,26 +377,38 @@ static const UINT8 mbMotionVectorTable[17][2] = {
 { 0xc, 10 },
 };
 
-static const int frame_rate_tab[9] = {
-    0, 
-    (int)(23.976 * FRAME_RATE_BASE), 
-    (int)(24 * FRAME_RATE_BASE), 
-    (int)(25 * FRAME_RATE_BASE), 
-    (int)(29.97 * FRAME_RATE_BASE), 
-    (int)(30 * FRAME_RATE_BASE), 
-    (int)(50 * FRAME_RATE_BASE), 
-    (int)(59.94 * FRAME_RATE_BASE), 
-    (int)(60 * FRAME_RATE_BASE), 
+#define MPEG1_FRAME_RATE_BASE 1001
+
+static const int frame_rate_tab[16] = {
+        0,        
+    24000,
+    24024,
+    25025,
+    30000,
+    30030,
+    50050,
+    60000,
+    60060,
+  // Xing's 15fps: (9)
+    15015,
+  // libmpeg3's "Unofficial economy rates": (10-13)
+     5005,
+    10010,
+    12012,
+    15015,
+  // random, just to avoid segfault !never encode these
+    25025,
+    25025,
 };
 
-static const UINT8 non_linear_qscale[32] = {
+static const uint8_t non_linear_qscale[32] = {
     0, 1, 2, 3, 4, 5, 6, 7,
     8,10,12,14,16,18,20,22,
     24,28,32,36,40,44,48,52,
     56,64,72,80,88,96,104,112,
 };
 
-UINT8 ff_mpeg1_dc_scale_table[128]={ // MN: mpeg2 really can have such large qscales?
+uint8_t ff_mpeg1_dc_scale_table[128]={ // MN: mpeg2 really can have such large qscales?
 //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
@@ -411,4 +416,43 @@ UINT8 ff_mpeg1_dc_scale_table[128]={ // MN: mpeg2 really can have such large qsc
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
+static const float mpeg1_aspect[16]={
+    0.0000,
+    1.0000,
+    0.6735,
+    0.7031,
+    
+    0.7615,
+    0.8055,
+    0.8437,
+    0.8935,
+
+    0.9157,
+    0.9815,
+    1.0255,
+    1.0695,
+
+    1.0950,
+    1.1575,
+    1.2015,
+};
+
+static const AVRational mpeg2_aspect[16]={
+    {0,1},
+    {1,1},
+    {4,3},
+    {16,9},
+    {221,100},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+    {0,1},
+};
 

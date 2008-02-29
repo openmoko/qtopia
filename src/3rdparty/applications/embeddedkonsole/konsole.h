@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* ----------------------------------------------------------------------- */
 /*                                                                         */
 /* [konsole.h]                      Konsole                                   */
@@ -13,9 +34,7 @@
 /*                                                                            */
 /* -------------------------------------------------------------------------- */
 /*                        */
-/* Ported Konsole to Qt/Embedded                                              */
-/*                        */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
+/* Konsole ported to Qt/Embedded by Trolltech                                 */
 /*                        */
 /* -------------------------------------------------------------------------- */
 
@@ -47,7 +66,7 @@ Q_OBJECT
 public:
 
   Konsole(QWidget* parent = 0, const char* name = 0, WFlags fl = 0);
-  Konsole(const char * name, const char* pgm, QStrList & _args, int histon);
+//  Konsole(const char * name, const char* pgm, QStrList & _args, int histon);
   ~Konsole();
   void setColLin(int columns, int lines);
   QPEToolBar *secondToolBar; 
@@ -124,7 +143,7 @@ private:
   QString     dropText;
   QFont       defaultFont;
   QSize       defaultSize;
-
+  QAction *   newAct;    
 };
 
 #endif

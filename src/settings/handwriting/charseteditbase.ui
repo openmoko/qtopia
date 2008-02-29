@@ -1,0 +1,291 @@
+<!DOCTYPE UI><UI>
+<class>CharSetEditBase</class>
+<widget>
+    <class>QWidget</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>CharSetEditBase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>173</width>
+            <height>131</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Handwriting Setup</string>
+    </property>
+    <property>
+        <name>layoutMargin</name>
+    </property>
+    <property>
+        <name>layoutSpacing</name>
+    </property>
+    <grid>
+        <property stdset="1">
+            <name>margin</name>
+            <number>2</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>2</number>
+        </property>
+        <widget row="0"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>newCharBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>image0</pixmap>
+            </property>
+        </widget>
+        <widget row="1"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>delCharBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>image1</pixmap>
+            </property>
+        </widget>
+        <spacer row="2"  column="2" >
+            <property>
+                <name>name</name>
+                <cstring>Spacer1</cstring>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Vertical</enum>
+            </property>
+            <property stdset="1">
+                <name>sizeType</name>
+                <enum>Expanding</enum>
+            </property>
+            <property>
+                <name>sizeHint</name>
+                <size>
+                    <width>20</width>
+                    <height>20</height>
+                </size>
+            </property>
+        </spacer>
+        <widget row="0"  column="0"  rowspan="3"  colspan="2" >
+            <class>QListBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>charList</cstring>
+            </property>
+        </widget>
+        <widget row="3"  column="1" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>prevBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>image2</pixmap>
+            </property>
+        </widget>
+        <widget row="3"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>addBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>image3</pixmap>
+            </property>
+        </widget>
+        <widget row="4"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>removeBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>image1</pixmap>
+            </property>
+        </widget>
+        <widget row="6"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>resetCharBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>image4</pixmap>
+            </property>
+        </widget>
+        <widget row="6"  column="1" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>nextBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>image5</pixmap>
+            </property>
+        </widget>
+        <widget row="4"  column="1"  rowspan="2"  colspan="1" >
+            <class>QLabel</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>itemDisplay</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>1/3</string>
+            </property>
+            <property stdset="1">
+                <name>alignment</name>
+                <set>AlignCenter</set>
+            </property>
+            <property>
+                <name>hAlign</name>
+            </property>
+        </widget>
+        <widget row="3"  column="0"  rowspan="4"  colspan="1" >
+            <class>QIMPenSettingsWidget</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>pw</cstring>
+            </property>
+            <property stdset="1">
+                <name>sizePolicy</name>
+                <sizepolicy>
+                    <hsizetype>3</hsizetype>
+                    <vsizetype>5</vsizetype>
+                </sizepolicy>
+            </property>
+            <property stdset="1">
+                <name>minimumSize</name>
+                <size>
+                    <width>0</width>
+                    <height>75</height>
+                </size>
+            </property>
+            <property stdset="1">
+                <name>maximumSize</name>
+                <size>
+                    <width>32767</width>
+                    <height>75</height>
+                </size>
+            </property>
+        </widget>
+        <spacer row="5"  column="2" >
+            <property>
+                <name>name</name>
+                <cstring>Spacer2</cstring>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Vertical</enum>
+            </property>
+            <property stdset="1">
+                <name>sizeType</name>
+                <enum>Expanding</enum>
+            </property>
+            <property>
+                <name>sizeHint</name>
+                <size>
+                    <width>20</width>
+                    <height>20</height>
+                </size>
+            </property>
+        </spacer>
+    </grid>
+</widget>
+<customwidgets>
+    <customwidget>
+        <class>QIMPenSettingsWidget</class>
+        <header location="local">pensettingswidget.h</header>
+        <sizehint>
+            <width>40</width>
+            <height>40</height>
+        </sizehint>
+        <container>1</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+        </sizepolicy>
+        <pixmap>image6</pixmap>
+        <signal>changeCharSet(int)</signal>
+        <signal>beginStroke()</signal>
+        <signal>stroke(QIMPenStroke *)</signal>
+        <signal>changeCharSet( QIMPenCharSet *)</signal>
+        <slot access="public">removeStroke()</slot>
+        <slot access="public">timeout()</slot>
+    </customwidget>
+</customwidgets>
+<images>
+    <image>
+        <name>image0</name>
+        <data format="XPM.GZ" length="845">789c6dd0c96ac3301000d0bbbfc244b7509cd8b18d4de9217b2e2d3d164a0f5a6d277156276952faefd5682493968e40e88d4623a45ed77f7b7df6bb3defd8d0a6e23e2fe9c1ef8a535d5fdf3f9ebebc4e98fae1c01fe8b9f3e075029ffb2fdb8d8435d16bd23701ac91a11ec0b9658cdcb6cc8007cb0c3946467a0067c8344f297088cc44c6801b641ee631706f99e41cb8b0cc91534b81fc44d2849ab3174bc90c27489632015c594a9e0047482eb9d95d234524cceed53245ee90520770e9a85260815411f266499502524b851f5b39e2eed93073ff5c22a318bf8e01c3bee3c9309391341729e02077ad1a601c3a4a6012b9e2a3217514c03472c51c9831c7200808218109bd202e476d8e71f137c7a42a4c0eea294c412955b5c41cc5204c56abf5efba5a569bed7a77df4f57ed0f6457dce5ca63732a0951cb3647ceb2ba7c5eabdbadadd33756c31a1a8fda7ea6977947e1eac693e96c8e6f5b2cc8bfeffd7ef47e0089ebbaa1</data>
+    </image>
+    <image>
+        <name>image1</name>
+        <data format="XPM.GZ" length="1265">789c4dd24d6fe2301006e03bbf222237b4a271129ba0d51e0aa5d052282dfda2ab3d38b603140814480bacf6bfaf67c62d5839ccf36646195939ab782f839e57392b6db6723b559e9ac8b557d1c562b1fffde7d7df529909cf3e22f058f947a95cf594d75fe6066adfd67e800738758c8912995826c0916342e48e8a180359102886b38cc86262804c2cb13904462c5411ae7409e4210f78083c078a503081bc73e4c41429851612d802d6a21aab45c037645ae3b5143871ac13af1d35f11e9844359de0ec3b3161c4c291139f91a925cee68e9ad806d6e344d763e0925867c48123277691ca52015f1debc43550c6752db17948948c7870e4c41e5259e2ac7294c48da321de00d3589a146767c43424761c05f105a92d3570ec2889734743dc0215ffe2fe8b8a03355185c427a4564261f3ce51121b8e86b8026aae8cc6d98ca84362d351103f90c6127fef2b4749fc7434c40ba0b1ad4600fb4413126f1d0531421a230dce2e80993026c3b7869885c4476496c92c033e3866c4aa3dbe3b50bb4ca6caae928d27d3efcc7f9bcd17f972b19abffbdfd97ab32d3e3ef3ddfe70ccce67f346f3a2d998bf1db3d665bb935ded0eadeb933e95b7bb37875e27f58fdfbd2cc6fddbdde0dc3feee2b7efee27ef7977729a0ddbd9f861dcc84fb375b19a3dde3c3d9f6683fb71af3f7ce99d64a3e5eb66b91accd6a363164c861bdd78ea14ec9855c3627f1535bae1c9bd54abb1bda829c7b2fcef67e93f08b121a3</data>
+    </image>
+    <image>
+        <name>image2</name>
+        <data format="XPM.GZ" length="657">789c7dd0db6a83401080e17b9f62c9de859234c6354ae823b4f4b2507a313bb3e660ccd1044ae9bb77676653104a0791fd7e9555a763f3f6fa6cc6d3ecd243bf41836b389b315dbbeef3fde3e92b1bcd0a138f3c9e470fd96862d0bc1cf681d736aeeda30cb3673a70b503e69559e68eca9cd93117f3855bcc993ba18ff4cc1bb39a57b34aae5e129db265d658d73532f789a43c30a1a8090ae6510933e58ae90b9f7be146481e3c3143625012139d0fe8988d1273e55648582a3111509e3d2506e59a490e03c9cda0a45ce985814a923f794e04e56430ff141b6750ac05af29151b5f29a0242d3134ab55b3e624253e829b385b88494bbbebf6d4c4737b2f710e8847d9ef77afe6048d1dec8e678fc372e9afb761b1f797fee3bbbe97d90f64de9208</data>
+    </image>
+    <image>
+        <name>image3</name>
+        <data format="XPM.GZ" length="1100">789c75d2cb72da301406e03d4fe1413ba6a320c992ede9741120f740c885844ca70b5932011220e196904edfbd3e3a874017d5c2f6f7ebe866fba016f5bbeda87650592ced72e42237b4f3a8e65793c9e6e7af1fbf2b556122a122ad2251fd56a9f2c8459dd9b48067563eb37a68c0265267c82364a2910d642a903d6446bd63a425b68805f202994be439d120bb484fc5d7c8828aaf80e5a229f28ce890cf5f4c8153a0ac0b3ad12331461e139d08ec07668266b64095c9bacc8033a4332a700d8c859771788d878156d14239504be9b078043452a42a141748678c042e90de225f036dec70dd01b22cb6c015b22c0e7c0726ca178902de05e631bd8d3930559abec243609e681dc65e02b33811b8c90f6421b318b8241a64076863e371aa27601e275e873dfb40afeac809d0e9edbfb14166220eeb9e06fa6def27b02832facd6e91e5e91df0053830b9c199878103edf1080e997a1b8adf90397da313e4f63ddf23bdc1e236b2904e036f8806c9f71ab38c6f335636b8e7ceb3afac1840c69e86a35d361e43f6fc3299e25818389bc1f5f56d4ef3b1c572b55ebf7facd8e6f39053d668365aad46f3e8f8e4f48cefc69e5f9497cb76e78aeff6d2bd669cdddcdeb1bdacd72bb3fb873ee7ffee99b147b69771eae0ffcbfe7caffc0546c8e59f</data>
+    </image>
+    <image>
+        <name>image4</name>
+        <data format="XPM.GZ" length="2494">789c75d55d53e24a1006e07b7f0565df59a77a492081d4a973217e2b20282aeed6b9987ca0a28822a8b875fefb99997e7b5cab768d313ce94ef7cc24c16f5bb5f1a057dbfab6f1b234cbbba256dc9a456dab5ccd66eb1ffffef37363334a6bee376ad5e2cdbf363687cb5a51ebcf1f2b07260baafb1fef17b80d8fe0424cd7deed7a13f10eacf97318f95c8923d4a73be728d4a77358f3a762cd67e447e84763ef76a4f9a938d6fa05ace3abc3daefd439ae07f7609d5fdf3b0b1e881b5a2f8275be57b0e61f39372235c7e2a6e67ff7ce129ddfa9388de07338819f9c9b5153fb2f60bbe2de8938d4bb14a719c6e3ef6fd3a425e2c63989932492f8038c7cbe10673a9ed2db2459e4fbd181388c7720ce74bc4358fb3f3ba77118cf3b8cf1d0b6b885eb69086b7e256e6bbf36acfdcec499d65b7a9b506f056bbda958ebd1ad73ab11ea6562a3d777bd735d0fba84353e87757d1b6263e06b711e237fd7b9dd08ebb5233626f12f278fc5798a7cff3eb673a3fd47b0d6efc355627c7c22d67edc55b71a3e5ec2a8cf2db842fd57e7aca9f3e76d759cf9f8158cfe7401ebf5461cfaefa9a53ff78273ef2338457c3f58e2077085f1b3b8d0f9fbfb9d15617c3bb08eef4d1ce6bb0b1bd43f812bf8585ce8780e8325ee9f1713e6cb1371b8bf0b58fb7fc09adf1417ba5e7ebea608f93371a1f5f6607d1ed6ce79983fddc35aef495ceaf5c7b05e7f03ebf5fefdc9cb4af34f60cd7f742e92e0dcbb9ce8fdf5cf4b5955a61179bfc1157c2fb6f9f2fdd181f57ef8f5a9d290ff289ec4f2fdc4ef6ac4d7700aaf82e5fe1fc2fa7cf8ef9feab39fffbe9b7cc667f004f6eb339904e7ea54decf22d8c83fd3e192e9f79b8b498e95e19c0bbbe55ff6d26521a7e209dffc66bbe5bb9033e57b7be6e1cb76c3337ee4b9e4d84e4fd6cffeecaffb83dd174cf23f9e97bce2577ee377bbafed5f77fcb06756bccd1dd4d9e15ddee37d3ee0433eb2c7633ee12ef7ece73eea109ff280877cc6e7b6a69bf3c87e3ae30b7bf632e45cf198aff9bb8fd739f2c7981bdce44472ecbc526e71db9eaf38b361b2d9237b30945311e6dea1922a7b764237744b7734a57b7aa01985b9bb75a6393dd1332de88596b4a2577aa3775ad3c72feb4cb44d1ddab1e777698ff6edf1c07e3aa4e9979c233aa613ea528ffa746a35a0219db9116bce7049e734b2db85ddba7469476bacae68fc79df7da5eb3f3e1bfffdbdf13fcf7414ff</data>
+    </image>
+    <image>
+        <name>image5</name>
+        <data format="XPM.GZ" length="687">789c75d0cd6e83300c07f03b4f1135b76aa283126835ed1136ed3869dac189534acb470bf4639af6eec3715885d4591cf2fb0b3b86c55cbcbfbd88f922e87ae80b23cc165a31c753557d7d7c3e7f07b32811c313a7229a3d04b35018f1dad496ce7238cb4757c40b51815a2b205e3d91d912339dad334d3c1157cb0c574be299b98a98960809449010f79e8ab9753423bb3f1a62e109ccdcd33237449d80d5ae77c7d431b374440d1a8907a251da1a453c324dcc44cf94098e38d0f5569ec06c3c2db327a2c2185daff64c99c6d10e74ffb9f6046638a9ff13e96a928036384dec26df4e9362b7dbdf121a8165096e142755ad9bc3b1aa4d3326b2edaaa16c3bbe4351d1f4fb13ddef274b79dee467b7d06dc3cb75ba6138ae7cefbb7e9e825f891f9be4</data>
+    </image>
+    <image>
+        <name>image6</name>
+        <data format="XPM.GZ" length="646">789c6dd2c10ac2300c00d07bbf2234b7229d1be245fc04c5a3201e4615f430059d0711ff5ddb2e6bb236ec90eed134cb5a19d8ef36602af5ecdbfeeac05dda0798d3abebde87e3faa374d3807fa0d633a52d38d8de6f679fe33fc776e196f53cd010188256a3600a292882096246517815ca99884606e18044a3a40d91824820924265a7923a2e8bcd05f33db1173e002913175f2a6be6d3294871a2d95fa00e8a94ee017b69d339d90df1e77c57ea072ede6758</data>
+    </image>
+</images>
+</UI>

@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 #include "qrsync.h"
 #include <stdio.h>
 extern "C" {
@@ -17,9 +38,9 @@ extern "C" {
   
   Librsync is distributed under the terms of the
   GNU Lesser General Public License. The primary copyright holder and
-  and author is Martin Pool \<mbp@samba.org\>. The primary copyright
-  holder and author for rsync is Andrew Tridgell \<tridge@samba.org\>.
-  More information about librsync can be found at http://librsync.sourceforge.net
+  and author is <a href="mailto:mbp@samba.org">Martin Pool</a>. The primary copyright
+  holder and author for rsync is <a href="mailto:tridge@samba.org">Andrew Tridgell</a>.
+  More information about librsync can be found at <a       href="http://librsync.sourceforge.net">http://librsync.sourceforge.net</a>
 */
 
 

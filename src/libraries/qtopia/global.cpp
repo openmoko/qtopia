@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -23,6 +38,9 @@
 #ifndef QTOPIA_INTERNAL_FILEOPERATIONS
 #define QTOPIA_INTERNAL_FILEOPERATIONS
 #endif
+#ifndef QTOPIA_INTERNAL_DICTOPERATIONS
+#define QTOPIA_INTERNAL_DICTOPERATIONS
+#endif
 #include <qtopia/global.h>
 
 #ifdef Q_WS_QWS
@@ -32,6 +50,7 @@
 #include <qtopia/resource.h>
 #include <qtopia/storage.h>
 #include <qtopia/applnk.h>
+#include <qwindowsystem_qws.h> 
 #endif
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
 #include <qtopia/qcopenvelope_qws.h>
@@ -46,10 +65,6 @@
 #include <qmessagebox.h>
 #include <qregexp.h>
 #include <qdatetime.h>
-
-#ifdef QTOPIA_DESKTOP
-#include <qsettings.h>
-#endif
 
 #ifndef Q_OS_WIN32
 #include <sys/stat.h>
@@ -67,19 +82,26 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifdef QTOPIA_DESKTOP
+#include <qdconfig.h>
+#endif
+
+// this must be after <qdconfig.h>
+#include "../qtopia1/qpe_homeDirPath.cpp"
+
+#ifdef QTOPIA_HAVE_PROFILE
+struct tms qtopia_prof_times;
+#endif
+
 extern bool mkdirRecursive( QString path );
 
 // added in qtopia 1.6, so don't export this
 QString qtopia_tempName( const QString &fname )
 {
     QString temp;
-#ifndef Q_OS_WIN32
-    temp = fname + ".new";
-#else
     QFileInfo fileInfo( fname );
     temp = fileInfo.dirPath( TRUE ) + "/" + fileInfo.baseName() +
 		 "_new." + fileInfo.extension(); // No tr
-#endif
     return temp;
 }
 
@@ -150,6 +172,7 @@ static QDict<QDawg> *named_dawg = 0;
 
 static QString dictDir()
 {
+    // Directory for fixed dawgs
     return QPEApplication::qpeDir() + "etc/dict";
 }
 
@@ -213,6 +236,43 @@ Global::Global()
 {
 }
 
+void qtopia_load_fixedwords(QDawg* dawg, const QString& dictname)
+{
+    QString basename = dictDir() + "/" + dictname;
+    QString words_lang;
+    QString dawgfilename = basename + ".dawg";
+
+    QStringList langs = Global::languageList();
+    for (QStringList::ConstIterator it = langs.begin(); it!=langs.end(); ++it) {
+	QString lang = *it;
+	words_lang = basename + "-" + lang;
+	QString dawgfilename_lang = words_lang + ".dawg";
+	if ( QFile::exists(dawgfilename_lang) ||
+	     QFile::exists(words_lang) ) {
+	    dawgfilename = dawgfilename_lang;
+	    break;
+	}
+    }
+
+    if ( dawgfilename.isEmpty() || !QFile::exists(dawgfilename) ) {
+	// Not recommended to generate the dawgs from the word lists
+	// on a device (slow), but we put it here so eg. SDK can easily
+	// generate dawgs as required.
+
+	QString fn = QFile::exists(words_lang) ? words_lang : basename;
+	qWarning("Generating '%s' dawg from word list.", fn.latin1());
+	QFile in(fn);
+	QFile dawgfile(fn+".dawg");
+	if ( in.open(IO_ReadOnly) && dawgfile.open(IO_WriteOnly) ) {
+	    dawg->createFromWords(&in);
+	    dawg->write(&dawgfile);
+	    dawgfile.close();
+	}
+    } else {
+	dawg->readFile(dawgfilename);
+    }
+}
+
 /*!
   Returns the unchangeable QDawg that contains general
   words for the current locale.
@@ -226,35 +286,7 @@ const QDawg& Global::fixedDawg()
 	    createDocDir();
 
 	fixed_dawg = new QDawg;
-	QString dawgfilename = dictDir() + "/dawg";
-	QString words_lang;
-	QStringList langs = Global::languageList();
-	for (QStringList::ConstIterator it = langs.begin(); it!=langs.end(); ++it) {
-	    QString lang = *it;
-	    words_lang = dictDir() + "/words." + lang;
-	    QString dawgfilename_lang = dawgfilename + "." + lang;
-	    if ( QFile::exists(dawgfilename_lang) ||
-		 QFile::exists(words_lang) ) {
-		dawgfilename = dawgfilename_lang;
-		break;
-	    }
-	}
-	QFile dawgfile(dawgfilename);
-
-	if ( !dawgfile.exists() ) {
-	    QString fn = dictDir() + "/words";
-	    if ( QFile::exists(words_lang) )
-		fn = words_lang;
-	    QFile in(fn);
-	    if ( in.open(IO_ReadOnly) ) {
-		fixed_dawg->createFromWords(&in);
-		dawgfile.open(IO_WriteOnly);
-		fixed_dawg->write(&dawgfile);
-		dawgfile.close();
-	    }
-	} else {
-	    fixed_dawg->readFile(dawgfilename);
-	}
+	qtopia_load_fixedwords(fixed_dawg,"words");
     }
 
     return *fixed_dawg;
@@ -271,56 +303,84 @@ const QDawg& Global::addedDawg()
     return dawg("local"); // No tr
 }
 
+void qtopia_reload_words(const QString& dictname)
+{
+    // Reload dictname, if we have it loaded.
+    if ( named_dawg ) {
+	QDawg* r = named_dawg->find(dictname);
+	if ( r ) {
+	    QString dawgfilename = Global::applicationFileName("Dictionary", dictname) + ".dawg"; // No tr
+	    QFile dawgfile(dawgfilename);
+	    if ( dawgfile.open(IO_ReadOnly) )
+		r->readFile(dawgfilename);
+	}
+    }
+}
+
 /*!
   Returns the QDawg with the given \a name.
   This is an application-specific word list.
 
-  \a name should not contain "/".
+  \a name should not contain "/". If \a name starts
+  with "_", it is a read-only system word list.
 */
 const QDawg& Global::dawg(const QString& name)
 {
-    createDocDir();
     if ( !named_dawg )
 	named_dawg = new QDict<QDawg>;
     QDawg* r = named_dawg->find(name);
+
     if ( !r ) {
+	createDocDir();
 	r = new QDawg;
 	named_dawg->insert(name,r);
-	QString dawgfilename = applicationFileName("Dictionary", name) + ".dawg"; // No tr
-	QFile dawgfile(dawgfilename);
-	if ( dawgfile.open(IO_ReadOnly) )
-	    r->readFile(dawgfilename);
+
+	if ( !r->root() ) {
+	    if ( name[0] == '_' ) {
+		QString n = name.mid(1);
+		qtopia_load_fixedwords(r, n);
+	    } else {
+		qtopia_reload_words(name);
+	    }
+	}
     }
+
     return *r;
 }
 
 /*!
-  \overload
-  Adds \a wordlist to the addedDawg().
+  Adds \a wordlist to the addedDawg(). Words that are already there
+  are not added. Words that are in the 'deleted' dictionary are
+  removed from there.
 
   Note that the addition of words persists between program executions
   (they are saved in the dictionary files), so you should confirm the
   words with the user before adding them.
+
+  This is a slow operation. Call it once with a large list rather than
+  multiple times with a small list.
 */
 void Global::addWords(const QStringList& wordlist)
 {
-    addWords("local",wordlist); // No tr
+    QStringList toadd;
+    QStringList toundel;
+    QDawg& del = (QDawg&)dawg("deleted"); // No tr
+    for (QStringList::ConstIterator it=wordlist.begin(); it!=wordlist.end(); ++it) {
+	if ( del.contains(*it) )
+	    toundel.append(*it);
+	else
+	    toadd.append(*it);
+    }
+    addWords("local",toadd); // No tr
+    removeWords("deleted",toundel); // No tr
 }
 
-/*!
-  Adds \a wordlist to the dawg() named \a dictname.
-
-  Note that the addition of words persists between program executions
-  (they are saved in the dictionary files), so you should confirm the
-  words with the user before adding them.
-*/
-void Global::addWords(const QString& dictname, const QStringList& wordlist)
+static void setDawgWords(const QString& dictname, const QStringList& words)
 {
-    QDawg& d = (QDawg&)dawg(dictname);
-    QStringList all = d.allWords() + wordlist;
-    d.createFromWords(all);
+    QDawg& d = (QDawg&)Global::dawg(dictname);
+    d.createFromWords(words);
 
-    QString dawgfilename = applicationFileName("Dictionary", dictname) + ".dawg"; // No tr
+    QString dawgfilename = Global::applicationFileName("Dictionary", dictname) + ".dawg"; // No tr
     QString dawgfilenamenew = dawgfilename + ".new";
     QFile dawgfile(dawgfilenamenew);
     if ( dawgfile.open(IO_WriteOnly) ) {
@@ -329,11 +389,69 @@ void Global::addWords(const QString& dictname, const QStringList& wordlist)
 	qtopia_renameFile(dawgfilenamenew,dawgfilename);
     }
 
-    // #### Re-read the dawg here if we use mmap().
-
-    // #### Signal other processes to re-read.
+    // Signal *other* processes to re-read.
+    QCopEnvelope e( "QPE/System", "wordsChanged(QString,int)" );
+    e << dictname << (int)getpid();
 }
 
+/*!
+  Adds \a wordlist to the dawg() named \a dictname.
+
+  Note that the addition of words persists between program executions
+  (they are saved in the dictionary files), so you should confirm the
+  words with the user before adding them.
+
+  This is a slow operation. Call it once with a large list rather than
+  multiple times with a small list.
+*/
+void Global::addWords(const QString& dictname, const QStringList& wordlist)
+{
+    if ( wordlist.isEmpty() )
+	return;
+    QDawg& d = (QDawg&)dawg(dictname);
+    QStringList all = d.allWords() + wordlist;
+    setDawgWords(dictname,all);
+}
+
+/*!
+  Removes \a wordlist from the addedDawg(). If the words are in
+  the fixed dictionary, they are added to the "deleted" dictionary.
+
+  This is a slow operation. Call it once with a large list rather than
+  multiple times with a small list.
+*/
+void Global::removeWords(const QStringList& wordlist)
+{
+    if ( wordlist.isEmpty() )
+	return;
+    QDawg& d = (QDawg&)dawg("local");
+    QStringList loc = d.allWords();
+    int nloc = loc.count();
+    QStringList del;
+    for (QStringList::ConstIterator it=wordlist.begin(); it!=wordlist.end(); ++it) {
+	loc.remove(*it);
+	if ( fixedDawg().contains(*it) )
+	    del.append(*it);
+    }
+    if ( nloc != (int)loc.count() )
+	setDawgWords("local",loc);
+    addWords("deleted",del);
+}
+
+/*!
+  Removes \a wordlist from the dawg() named \a dictname.
+
+  This is a slow operation. Call it once with a large list rather than
+  multiple times with a small list.
+*/
+void Global::removeWords(const QString& dictname, const QStringList& wordlist)
+{
+    QDawg& d = (QDawg&)dawg(dictname);
+    QStringList all = d.allWords();
+    for (QStringList::ConstIterator it=wordlist.begin(); it!=wordlist.end(); ++it)
+	all.remove(*it);
+    setDawgWords(dictname,all);
+}
 
 /*!
   \internal
@@ -445,6 +563,13 @@ bool Global::isBuiltinCommand( const QString &name )
   \internal
 */
 
+void Global::removeRunningArray()
+{
+    if ( running )
+	delete [] running;
+    running = 0;
+}
+
 /*!
   \internal
 */
@@ -461,6 +586,7 @@ void Global::setBuiltinCommands( Command* list )
 	count++;
 
     running = new QGuardedPtr<QWidget> [ count ];
+    qAddPostRoutine( removeRunningArray );
 }
 
 /*!
@@ -527,10 +653,10 @@ void Global::execute( const QString &c, const QString& document )
 {
 #ifndef QT_NO_COP
     if ( document.isNull() ) {
-	QCopEnvelope e( "QPE/System", "execute(QString)" );
+	QCopEnvelope e( "QPE/Server", "execute(QString)" );
 	e << c;
     } else {
-	QCopEnvelope e( "QPE/System", "execute(QString,QString)" );
+	QCopEnvelope e( "QPE/Server", "execute(QString,QString)" );
 	e << c << document;
     }
 #endif
@@ -610,41 +736,42 @@ void Global::findDocuments(DocLnkSet* folder, const QString &mimefilter)
 QStringList Global::languageList()
 {
     QString lang;
+    QStringList langs;
 #ifdef QTOPIA_DESKTOP
-    QSettings settings;
-    settings.insertSearchPath( QSettings::Unix,
-	    QDir::homeDirPath() + "/.palmtopcenter/" );
-    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
-
-    lang = settings.readEntry( "/palmtopcenter/language" );
-#endif
+    langs = gQtopiaDesktopConfig->langs();
+#else
     if (lang.isEmpty())
 	lang = getenv("LANG");
 
-    QStringList langs;
-    langs.append(lang);
     int i  = lang.find(".");
     if ( i > 0 )
 	lang = lang.left( i );
+    langs.append(lang);
     i = lang.find( "_" );
     if ( i > 0 )
 	langs.append(lang.left(i));
+#endif
     return langs;
 }
 
 #ifdef Q_WS_QWS
+#include "global_qtopiapaths.cpp"
+
 QStringList Global::helpPath()
 {
     QStringList path;
     QStringList langs = Global::languageList();
-    for (QStringList::ConstIterator it = langs.fromLast(); it!=langs.end(); --it) {
-	QString lang = *it;
-	if ( !lang.isEmpty() )
-	    path += QPEApplication::qpeDir() + "help/" + lang + "/html";
+    QStringList qpepaths = global_qtopiapaths();
+    for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
+	for (QStringList::ConstIterator it = langs.fromLast(); it!=langs.end(); --it) {
+	    QString lang = *it;
+	    if ( !lang.isEmpty() )
+		path += *qit + "help/" + lang + "/html";
+	}
+	path += *qit + "pics";
+	path += *qit + "help/html";
+	path += *qit + "docs";
     }
-    path += QPEApplication::qpeDir() + "pics";
-    path += QPEApplication::qpeDir() + "help/html";
-    path += QPEApplication::qpeDir() + "docs";
     return path;
 }
 #endif
@@ -659,10 +786,8 @@ QStringList Global::helpPath()
 QString Global::applicationFileName(const QString& appname, const QString& filename)
 {
     QDir d;
-    QString r = QDir::homeDirPath();
-#ifdef QTOPIA_DESKTOP
-    r += "/.palmtopcenter/";
-#else
+    QString r = ::qpe_homeDirPath();
+#ifndef QTOPIA_DESKTOP
     r += "/Applications/";
 #endif
     if ( !QFile::exists( r ) )
@@ -687,6 +812,8 @@ void Global::statusMessage(const QString& message)
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
     QCopEnvelope e( "QPE/TaskBar", "message(QString)" );
     e << message;
+#else
+    Q_UNUSED( message );
 #endif
 }
 
@@ -723,6 +850,11 @@ bool Global::truncateFile(QFile &f, int size){
 #endif	// Q_OS_WIN32
 
 
+
+#if defined(Q_OS_UNIX) && defined(Q_WS_QWS)
+extern int qws_display_id;
+#endif
+
 /*!
   /internal
   Returns the default system path for storing temporary files.
@@ -732,7 +864,11 @@ QString Global::tempDir()
 {
     QString result;
 #ifdef Q_OS_UNIX
-    result = "/tmp/";
+#ifdef Q_WS_QWS
+    result = QString("/tmp/qtopia-%1/").arg(QString::number(qws_display_id));
+#else
+    result="/tmp/";
+#endif
 #else
     if (getenv("TEMP"))
 	result = getenv("TEMP");
@@ -746,7 +882,9 @@ QString Global::tempDir()
     return result;
 }
 
-#ifdef Q_WS_QWS
+#endif
+
+#if (defined(QTOPIA_INTERNAL_FILEOPERATIONS) && defined(Q_WS_QWS)) || defined(QTOPIA_DESKTOP)
   /*! \enum Global::Lockflags
     \internal
      This enum controls what type of locking is performed on file.
@@ -886,8 +1024,21 @@ bool Global::isFileLocked(QFile &f, int flags)
 }
 
 #endif
-#include "global.moc"
 #endif
 
-#endif  //qws
+QString qtopia_internal_homeDirPath()
+{
+    return ::qpe_homeDirPath();
+}
+
+#include "../qtopia2/qpe_defaultButtonsFile.cpp"
+
+QString qtopia_internal_defaultButtonsFile()
+{
+    return ::qpe_defaultButtonsFile();
+}
+
+#ifdef Q_WS_QWS
+#include "global.moc"
+#endif
 

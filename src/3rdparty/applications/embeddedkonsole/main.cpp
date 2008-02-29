@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* ---------------------------------------------------------------------- */
 /*                                                                        */
 /* [main.C]                        Konsole                                */
@@ -13,57 +34,14 @@
 /*                                                                        */
 /* ---------------------------------------------------------------------- */
 /*									      */
-/* Ported Konsole to Qt/Embedded                                              */
+/* Konsole ported to Qt/Embedded by Trolltech                             */
 /*									      */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
-/*									      */
-/* -------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------- */
 
 #include "konsole.h"
 
 #include <qtopia/qpeapplication.h>
 
-#include <qfile.h>
+QTOPIA_ADD_APPLICATION("embeddedkonsole",Konsole);
+QTOPIA_MAIN
 
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-
-/* --| main |------------------------------------------------------ */
-int main(int argc, char* argv[])
-{
-#if !defined (_OS_WIN32_)
-  setuid(getuid()); setgid(getgid()); // drop privileges
-#endif
-
-  QPEApplication a( argc, argv );
-
-#ifdef FAKE_CTRL_AND_ALT
-  QPEApplication::grabKeyboard(); // for CTRL and ALT
-#endif
-
-  QStrList tmp;
-  const char* shell = getenv("SHELL");
-  if (shell == NULL || *shell == '\0'){
-#if !defined (_OS_WIN32_)
-      shell = "/bin/sh";
-
-  // sh is completely broken on familiar. Let's try to get something better
-  if ( qstrcmp( shell, "/bin/shell" ) == 0 && QFile::exists( "/bin/bash" ) )
-      shell = "/bin/bash";
-#else
-      shell ="command"; // No tr
-#endif
-  }
-
-
-  
-  putenv((char*)"COLORTERM="); // to trigger mc's color detection
-
-  Konsole m( "test", shell, tmp, TRUE  ); // No tr
-  m.setCaption( Konsole::tr("Terminal") );
-  a.showMainWidget( &m );
-
-  return a.exec();
-}

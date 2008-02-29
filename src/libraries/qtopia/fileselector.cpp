@@ -1,22 +1,39 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
+
+#define QTOPIA_INTERNAL_FS_SEL
 #include "global.h"
 
 #include "fileselector.h"
@@ -37,9 +54,13 @@
 #include "mimetype.h"
 #include "categories.h"
 #include "qpemessagebox.h"
+#ifdef QTOPIA_PHONE
+# include <qtopia/categorydialog.h>
+#endif
 
 #include <stdlib.h>
 
+#include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qdir.h>
 #include <qwidget.h>
@@ -50,22 +71,84 @@
 #include <qheader.h>
 #include <qpainter.h>
 #include <qtooltip.h>
+#include <qlistbox.h>
 #include <qwhatsthis.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qaction.h>
 
 QIconSet qtopia_internal_loadIconSet( const QString &pix );
 
-class TypeCombo : public QComboBox
+class TypeFilter : public QHBox
 {
     Q_OBJECT
 public:
-    TypeCombo( QWidget *parent, const char *name=0 )
-	: QComboBox( parent, name )
+    enum WidgetType { ComboBox, ListBox };
+
+    TypeFilter( WidgetType t, QWidget *parent, const char *name=0 )
+	: QHBox( parent, name ), type(t)
     {
-	setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred) );
-	connect( this, SIGNAL(activated(int)), this, SLOT(selectType(int)) );
+	if (type == ComboBox) {
+	    combo = new QComboBox(this);
+	    combo->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred) );
+	    connect( combo, SIGNAL(activated(int)), this, SLOT(selectType(int)) );
+	} else {
+	    list = new QListBox(this);
+	    connect( list, SIGNAL(selected(int)), this, SLOT(selectType(int)) );
+	}
     }
 
     void reread( DocLnkSet &files, const QString &filter );
+
+    void clear()
+    {
+	if (type == ComboBox)
+	    combo->clear();
+	else
+	    list->clear();
+    }
+    uint count()
+    {
+	if (type == ComboBox)
+	    return combo->count();
+	else
+	    return list->count();
+    }
+    void setCurrentItem(int i)
+    {
+	if (type == ComboBox)
+	    combo->setCurrentItem(i);
+	else
+	    list->setCurrentItem(i);
+    }
+    void insertItem( const QString &s )
+    {
+	if (type == ComboBox)
+	    combo->insertItem(s);
+	else
+	    list->insertItem(s);
+    }
+    void insertStringList( const QStringList &s )
+    {
+	if (type == ComboBox)
+	    combo->insertStringList(s);
+	else
+	    list->insertStringList(s);
+    }
+    QString currentText() const
+    {
+	if (type == ComboBox)
+	    return combo->currentText();
+	else
+	    return list->currentText();
+    }
+    QString text(int i) const
+    {
+	if (type == ComboBox)
+	    return combo->text(i);
+	else
+	    return list->text(i);
+    }
 
 signals:
     void selected( const QString & );
@@ -78,9 +161,12 @@ protected slots:
 protected:
     QStringList typelist;
     QString prev;
+    QComboBox *combo;
+    QListBox *list;
+    WidgetType type;
 };
 
-void TypeCombo::reread( DocLnkSet &files, const QString &filter )
+void TypeFilter::reread( DocLnkSet &files, const QString &filter )
 {
     typelist.clear();
     QStringList filters = QStringList::split( ';', filter );
@@ -88,9 +174,9 @@ void TypeCombo::reread( DocLnkSet &files, const QString &filter )
     //### do for each filter
     if ( filters.count() == 1 && pos >= 0 && filter[pos+1] != '*' ) {
 	typelist.append( filter );
-	clear();
 	QString minor = filter.mid( pos+1 );
 	minor[0] = minor[0].upper();
+	clear();
 	insertItem( tr("%1 files").arg(minor) );
 	setCurrentItem(0);
 	setEnabled( FALSE );
@@ -148,7 +234,7 @@ void TypeCombo::reread( DocLnkSet &files, const QString &filter )
     prev = currentText();
     clear();
     insertStringList(types);
-    for (int i=0; i<count(); i++) {
+    for (int i=0; i<(int)count(); i++) {
 	if ( text(i) == prev ) {
 	    setCurrentItem(i);
 	    break;
@@ -159,8 +245,16 @@ void TypeCombo::reread( DocLnkSet &files, const QString &filter )
     setEnabled( TRUE );
 }
 
-
 //===========================================================================
+
+static QColor mixColors(const QColor& a, const QColor& b, int pcth)
+{
+    int pcthb = 100 - pcth;
+    return QColor(
+	    (a.red() * pcth + b.red() * pcthb) / 100,
+	    (a.green() * pcth + b.green() * pcthb) / 100,
+	    (a.blue() * pcth + b.blue() * pcthb) / 100);
+}
 
 FileSelectorItem::FileSelectorItem( QListView *parent, const DocLnk &f )
     : QListViewItem( parent ), fl( f )
@@ -173,12 +267,26 @@ FileSelectorItem::~FileSelectorItem()
 {
 }
 
+void FileSelectorItem::paintCell( QPainter *p, const QColorGroup &cg,
+                               int column, int width, int align )
+{
+    QColorGroup mycg(cg);
+    if ((itemPos() / height()) & 1) {
+	QBrush sb = ((FileSelectorView*)listView())->altBrush();
+	mycg.setBrush(QColorGroup::Base, sb);
+    }
+	
+    QListViewItem::paintCell(p, mycg, column, width, align);
+}
+
 FileSelectorView::FileSelectorView( QWidget *parent, const char *name )
     : QListView( parent, name )
 {
     setAllColumnsShowFocus( TRUE );
     addColumn( tr( "Name" ) );
+    setColumnWidthMode( 0, QListView::Manual );
     header()->hide();
+    paletteChange(palette());
 }
 
 FileSelectorView::~FileSelectorView()
@@ -196,12 +304,23 @@ void FileSelectorView::keyPressEvent( QKeyEvent *e )
 	QListView::keyPressEvent(e);
 }
 
+QBrush FileSelectorView::altBrush() const
+{
+    return stripebrush;
+}
+
+void FileSelectorView::paletteChange( const QPalette &p )
+{
+    stripebrush = mixColors(colorGroup().base(), colorGroup().highlight(), 90);
+    QListView::paletteChange(p);
+}
+
 class NewDocItem : public FileSelectorItem
 {
 public:
     NewDocItem( QListView *parent, const DocLnk &f )
 	: FileSelectorItem( parent, f ) {
-	setText( 0, FileSelector::tr("New Document") );
+	setText( 0, FileSelector::tr("New") );
 	QImage img( Resource::loadImage( "new" ) );
 	QPixmap pm;
 	pm = img.smoothScale( AppLnk::smallIconSize(), AppLnk::smallIconSize() );
@@ -227,40 +346,6 @@ public:
 
 //===========================================================================
 
-class FileSelectorPrivate
-{
-public:
-    FileSelectorPrivate()
-    {
-	newDocItem = 0;
-	files = new DocLnkSet;
-    }
-
-    ~FileSelectorPrivate()
-    {
-	delete files;
-	// everything else is a subobject
-    }
-
-    void initReread( QListView *view, int timeout ) {
-	view->clear();
-	new QListViewItem( view, FileSelector::tr("Finding Documents...") );
-	rereadTimer->start( timeout, TRUE );
-    }
-
-    TypeCombo *typeCombo;
-    CategorySelect *catSelect;
-    QValueList<QRegExp> mimeFilters;
-    int catId;
-    bool showNew;
-    NewDocItem *newDocItem; // child of listview
-    DocLnkSet* files;
-    QHBox *toolbar;
-    StorageInfo *storage;
-    bool needReread;
-    QTimer *rereadTimer;
-};
-
 /*!
   \class FileSelector fileselector.h
   \brief The FileSelector widget allows the user to select DocLnk objects.
@@ -281,7 +366,7 @@ public:
   a document or not. The number of files in the view is available from
   fileCount(). To force the view to be updated call reread().
 
-  If the user presses the 'New Document' button the newSelected()
+  If the user presses the 'New' button the newSelected()
   signal is emitted. If the user selects an existing file the
   fileSelected() signal is emitted. The selected file's \link
   doclnk.html DocLnk\endlink is available from the selected()
@@ -322,6 +407,9 @@ public:
 FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name, bool newVisible, bool closeVisible )
     : QVBox( parent, name ), filter( f )
 {
+#define VIEW_ID 1
+#define MESSAGE_ID 2
+
     setMargin( 0 );
     setSpacing( 0 );
 
@@ -330,15 +418,16 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     d->catId = -2; // All files
     d->files = 0;
 
-    d->toolbar = new QHBox( this );
-    d->toolbar->setBackgroundMode( PaletteButton );   // same colour as toolbars
-    d->toolbar->setSpacing( 0 );
-    d->toolbar->hide();
-
     d->rereadTimer = new QTimer( this );
     connect( d->rereadTimer, SIGNAL(timeout()), this, SLOT(slotReread()) );
 
     d->needReread = TRUE;
+
+#ifndef QTOPIA_PHONE
+    d->toolbar = new QHBox( this );
+    d->toolbar->setBackgroundMode( PaletteButton );   // same colour as toolbars
+    d->toolbar->setSpacing( 0 );
+    d->toolbar->hide();
 
     QWidget *spacer = new QWidget( d->toolbar );
     spacer->setBackgroundMode( PaletteButton );
@@ -351,25 +440,40 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     tb->setAutoRaise( TRUE );
     QToolTip::add( tb, tr( "Close the File Selector" ) );
     QPEMenuToolFocusManager::manager()->addWidget( tb );
+#endif
 
+#ifdef QTOPIA_PHONE
+    d->widgetStack = new QWidgetStack( this );
+    d->widgetStack->addWidget( view = new FileSelectorView( d->widgetStack, "fileview" ), VIEW_ID );
+#else
     view = new FileSelectorView( this, "fileview" );
+#endif
     view->setSorting(-1);
     view->setFrameStyle( QFrame::NoFrame );
     QPEApplication::setStylusOperation( view->viewport(), QPEApplication::RightOnHold );
-    connect( view, SIGNAL( mouseButtonClicked( int, QListViewItem *, const QPoint &, int ) ),
-	     this, SLOT( fileClicked( int, QListViewItem *, const QPoint &, int ) ) );
-    connect( view, SIGNAL( mouseButtonPressed( int, QListViewItem *, const QPoint &, int ) ),
-	     this, SLOT( filePressed( int, QListViewItem *, const QPoint &, int ) ) );
-    connect( view, SIGNAL( returnPressed( QListViewItem * ) ),
-	     this, SLOT( fileClicked( QListViewItem * ) ) );
+    connect( view, SIGNAL( mouseButtonClicked(int,QListViewItem*,const QPoint&,int) ),
+	     this, SLOT( fileClicked(int,QListViewItem*,const QPoint&,int) ) );
+    connect( view, SIGNAL( mouseButtonPressed(int,QListViewItem*,const QPoint&,int) ),
+	     this, SLOT( filePressed(int,QListViewItem*,const QPoint&,int) ) );
+    connect( view, SIGNAL( returnPressed(QListViewItem*) ),
+	     this, SLOT( fileClicked(QListViewItem*) ) );
+    connect( view, SIGNAL( currentChanged(QListViewItem*) ),
+	     this, SLOT( currentChanged(QListViewItem*) ) );
 
+#ifndef QTOPIA_PHONE
     setFocusProxy( view );
+#endif
+    
+#ifdef QTOPIA_PHONE
+   d->widgetStack->addWidget( d->message = new QLabel( d->widgetStack ), MESSAGE_ID );
+#endif
 
+#ifndef QTOPIA_PHONE
     QHBox *hb = new QHBox( this );
-    d->typeCombo = new TypeCombo( hb );
-    connect( d->typeCombo, SIGNAL(selected(const QString&)),
+    d->typeFilter = new TypeFilter( TypeFilter::ComboBox, hb );
+    connect( d->typeFilter, SIGNAL(selected(const QString&)),
 	    this, SLOT(typeSelected(const QString&)) );
-    QWhatsThis::add( d->typeCombo, tr("Show documents of this type") );
+    QWhatsThis::add( d->typeFilter, tr("Show documents of this type") );
 
     Categories c;
     c.load(categoryFileName());
@@ -383,6 +487,17 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     QWhatsThis::add( d->catSelect, tr("Show documents in this category") );
 
     setCloseVisible( closeVisible );
+#else
+    Q_UNUSED(closeVisible);
+    d->filterDlg = new CategorySelectDialog("Document View", this, 0, TRUE);
+    d->filterDlg->setAllCategories(TRUE);
+    connect(d->filterDlg, SIGNAL(selected(int)), this, SLOT(catSelected(int)));
+
+    d->categoryLabel = new QLabel(d->filterDlg->currentCategoryText(), this);
+    d->categoryLabel->hide();
+
+    d->haveContextMenu = FALSE;
+#endif
 
     d->storage = new StorageInfo( this );
     connect( d->storage, SIGNAL( disksChanged() ), SLOT( cardChanged() ) );
@@ -463,6 +578,16 @@ void FileSelector::fileClicked( QListViewItem *i )
     }
 }
 
+void FileSelector::currentChanged(QListViewItem *item)
+{
+#ifdef QTOPIA_PHONE
+    if (d->newDocItem) 
+	d->deleteAction->setEnabled( item != d->newDocItem );
+#else
+    Q_UNUSED( item );
+#endif
+}
+
 void FileSelector::typeSelected( const QString &type )
 {
     d->mimeFilters.clear();
@@ -478,8 +603,27 @@ void FileSelector::catSelected( int c )
 {
     d->catId = c;
     updateView();
+#ifdef QTOPIA_PHONE
+    if (d->filterDlg->currentCategory() == -2) { // All categories
+	d->categoryLabel->hide();
+    } else {
+	d->categoryLabel->setText(tr("Category: %1").arg(d->filterDlg->currentCategoryText()));
+	d->categoryLabel->show();
+    }
+#endif
 
     emit categoryChanged();
+}
+
+void FileSelector::deleteFile()
+{
+    FileSelectorItem *item = (FileSelectorItem *)view->selectedItem();
+    if (item && item != d->newDocItem) {
+	DocLnk l = item->file();
+	if (QPEMessageBox::confirmDelete(this, tr("Delete"), l.name())) {
+	    l.removeFiles();
+	}
+    }
 }
 
 void FileSelector::cardChanged()
@@ -501,10 +645,8 @@ void FileSelector::linkChanged( const QString & )
 const DocLnk *FileSelector::selected()
 {
     FileSelectorItem *item = (FileSelectorItem *)view->selectedItem();
-    if ( item && item != d->newDocItem ) {
-	qWarning( "Using the FileSelector::selected() function is deprecated.\nPlease remember to delete the returned object." );
+    if ( item && item != d->newDocItem )
 	return new DocLnk( item->file() );
-    }
     return NULL;
 }
 
@@ -553,10 +695,14 @@ void FileSelector::setNewVisible( bool b )
 */
 void FileSelector::setCloseVisible( bool b )
 {
+#ifndef QTOPIA_PHONE
     if (  b )
 	d->toolbar->show();
     else
 	d->toolbar->hide();
+#else
+    Q_UNUSED(b);
+#endif
 }
 
 /*!
@@ -568,7 +714,8 @@ void FileSelector::reread()
     delete d->files;
     d->files = new DocLnkSet;
     Global::findDocuments(d->files, filter);
-    d->typeCombo->reread( *d->files, filter );
+    if (d->typeFilter)
+	d->typeFilter->reread( *d->files, filter );
 #endif
     d->needReread = FALSE;
     updateView();
@@ -583,6 +730,10 @@ void FileSelector::showEvent( QShowEvent *e )
 {
     if ( d->needReread )
 	d->initReread( view, 0 );
+    QScrollBar *sb = view->verticalScrollBar();
+    int sbWidth = sb->isVisible() ? sb->width() : 0;
+    view->setColumnWidth( 0, view->width() - sbWidth );
+    view->triggerUpdate();
     QVBox::showEvent( e );
 }
 
@@ -625,6 +776,29 @@ static int compareDocLnk(const void* va, const void* vb)
     }
 }
 
+static int compareDocLnkReverse(const void* va, const void* vb)
+{
+    return -compareDocLnk(va, vb);
+}
+
+static int compareDocLnkChron(const void* va, const void* vb)
+{
+    const DocLnk* docB = *(const DocLnk**)va;
+    const DocLnk* docA = *(const DocLnk**)vb;
+    QFileInfo fa(linkFileKnown(docA) ? docA->linkFile() : docA->file());
+    QFileInfo fb(linkFileKnown(docB) ? docB->linkFile() : docB->file());
+    return fb.lastModified().secsTo(fa.lastModified());
+}
+
+static int compareDocLnkChronReverse(const void* va, const void* vb)
+{
+    const DocLnk* docB = *(const DocLnk**)va;
+    const DocLnk* docA = *(const DocLnk**)vb;
+    QFileInfo fa(linkFileKnown(docA) ? docA->linkFile() : docA->file());
+    QFileInfo fb(linkFileKnown(docB) ? docB->linkFile() : docB->file());
+    return fa.lastModified().secsTo(fb.lastModified());
+}
+
 void FileSelector::updateView()
 {
     FileSelectorItem *item = (FileSelectorItem *)view->selectedItem();
@@ -634,14 +808,31 @@ void FileSelector::updateView()
     if ( item )
 	oldFile = item->file().file();
     view->clear();
-    int ndocs = d->files->children().count();
+    int ndocs = fileCount();
     QListIterator<DocLnk> dit( d->files->children() );
     DocLnk* *doc = new DocLnk*[ndocs];
     int i=0;
     for ( ; dit.current(); ++dit ) {
 	doc[i++] = dit.current();
     }
-    qsort(doc,ndocs,sizeof(doc[0]),compareDocLnk);
+    switch( d->sortMode ) {
+	case FileSelector::Alphabetical:
+	default:
+	    qsort(doc,ndocs,sizeof(doc[0]),compareDocLnk);
+	    break;
+
+	case FileSelector::ReverseAlphabetical:
+	    qsort(doc,ndocs,sizeof(doc[0]),compareDocLnkReverse);
+	    break;
+
+	case FileSelector::Chronological:
+	    qsort(doc,ndocs,sizeof(doc[0]),compareDocLnkChron);
+	    break;
+
+	case FileSelector::ReverseChronological:
+	    qsort(doc,ndocs,sizeof(doc[0]),compareDocLnkChronReverse);
+	    break;
+    }
     for ( i=0; i<ndocs; ++i ) {
 	bool mimeMatch = FALSE;
 	if ( d->mimeFilters.count() ) {
@@ -666,26 +857,77 @@ void FileSelector::updateView()
 
     delete [] doc;
 
-    if ( d->showNew )
+    if (d->showNew)
 	d->newDocItem = new NewDocItem( view, DocLnk() );
     else 
 	d->newDocItem = 0;
+        
+#ifdef QTOPIA_PHONE
+    if( view->childCount() == 0 && !d->newDocItem ) {
+        if( d->haveContextMenu ) d->deleteAction->setEnabled( FALSE );
+        d->message->setText( tr( "<qt><center><p>No documents found.</p></center></qt>" ) );
+        if( d->widgetStack->visibleWidget() != d->message ) d->widgetStack->raiseWidget( d->message );
+        d->message->setFocus();
+    } else {
+        if( d->haveContextMenu ) d->deleteAction->setEnabled( TRUE );
+        if( d->widgetStack->visibleWidget() != view ) d->widgetStack->raiseWidget( view );
+        view->setFocus();
+    }
+#endif
 
     if ( !view->selectedItem() || view->childCount() == 1 ) {
 	view->setCurrentItem( view->firstChild() );
 	view->setSelected( view->firstChild(), TRUE );
     }
+    
+    qApp->processEvents();
+    QScrollBar *sb = view->verticalScrollBar();
+    int sbWidth = sb->isVisible() ? sb->width() : 0;
+    view->setColumnWidth( 0, view->width() - sbWidth );
+    view->triggerUpdate();
 }
 
 void FileSelector::updateWhatsThis()
 {
     QWhatsThis::remove( this );
-    QString text = tr("Click to select a document from the list");
-    if ( d->showNew )
-	text += tr(", or select <b>New Document</b> to create a new document.");
-    text += tr("<br><br>Click and hold for document properties.");
+    QString text;
+    if (d->showNew)
+    {
+	text = tr("Click to select a document from the list, or select <b>New</b> to create a new document.  <br><br>Click and hold for document properties");
+    } else {
+	text = tr("Click to select a document from the list<br><br>Click and hold for document properties");
+    }
+
     QWhatsThis::add( this, text );
 }
+
+void FileSelector::showFilterDlg()
+{
+#ifdef QTOPIA_PHONE
+    QPEApplication::execDialog(d->filterDlg);
+#endif
+}
+
+#ifdef QTOPIA_PHONE
+void FileSelector::addOptions(QPopupMenu *menu)
+{
+    if (!d->filterAction) {
+	d->newAction = new QAction(tr("New"), Resource::loadIconSet("new"), QString::null, 0, this, 0);
+	connect(d->newAction, SIGNAL(activated()), this, SLOT(createNew()));
+	d->deleteAction = new QAction(tr("Delete"), Resource::loadIconSet("trash"), QString::null, 0, this, 0);
+	connect(d->deleteAction, SIGNAL(activated()), this, SLOT(deleteFile()));
+	d->filterAction = new QAction(tr("View Category..."), Resource::loadIconSet("viewcategory"), QString::null, 0, this, 0);
+	connect(d->filterAction, SIGNAL(activated()), this, SLOT(showFilterDlg()));
+    }
+
+    if (d->showNew)
+	d->newAction->addTo(menu);
+    d->deleteAction->addTo(menu);
+    menu->insertSeparator();
+    d->filterAction->addTo(menu);
+    d->haveContextMenu = TRUE;
+}
+#endif
 
 /*!
     \fn const DocLnk *FileSelector::selected()
@@ -694,18 +936,6 @@ void FileSelector::updateWhatsThis()
     must be deleted by the caller.
     This function is deprecated. It will be removed in Qtopia 2.
     Please switch to using \link selectedDocument() \endlink instead.
-*/
-
-/*!
-    \fn DocLnk FileSelector::selectedDocument() const
-
-    Returns the selected \link doclnk.html DocLnk\endlink.
-*/
-
-/*!
-    \fn QValueList<DocLnk> FileSelector::fileList() const
-
-    Returns the entire list of documents.
 */
 
 #include "fileselector.moc"

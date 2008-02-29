@@ -4,20 +4,20 @@
     <class>QWidget</class>
     <property stdset="1">
         <name>name</name>
-        <cstring>Form1</cstring>
+        <cstring>ShutdownDialog</cstring>
     </property>
     <property stdset="1">
         <name>geometry</name>
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>437</width>
+            <width>433</width>
             <height>465</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Shut down...</string>
+        <string>Shutdown</string>
     </property>
     <property>
         <name>layoutMargin</name>

@@ -1,8 +1,4 @@
-TEMPLATE	= app
-
-CONFIG		+= qtopia warn_on release
-
-DESTDIR		= $(QPEDIR)/bin
+CONFIG		+= qtopiaapp
 
 HEADERS		= TEWidget.h \
 		  TEScreen.h \
@@ -23,12 +19,27 @@ SOURCES		= TEScreen.cpp \
 		  session.cpp \
 		  keytrans.cpp \
 		  konsole.cpp \
-		  main.cpp 
+		  main.cpp
+
+TRANSLATABLES += $${HEADERS} \
+                    $${SOURCES} \
+                    MyPty.cpp
 
 unix:SOURCES  += MyPty.cpp 
 
+
 TARGET		= embeddedkonsole
 
-REQUIRES	= embeddedkonsole
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/embeddedkonsole/*
+pics.path=/pics/embeddedkonsole
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/embeddedkonsole.desktop
+desktop.path=/apps/Applications
+keytabs.file=$${QTOPIA_DEPOT_PATH}/etc/keytabs
+keytabs.path=/etc
+INSTALLS+=desktop keytabs
+PICS_INSTALLS+=pics
 
-TRANSLATIONS = embeddedkonsole-en_GB.ts embeddedkonsole-de.ts embeddedkonsole-ja.ts embeddedkonsole-no.ts
+*x86*|*generic*|*ipaq*|*sharp* {
+    LIBS+=-lutil
+    DEFINES+=HAVE_OPENPTY
+}

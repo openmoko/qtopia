@@ -1,10 +1,10 @@
+[Translation]
+File=QtopiaGames
+Context=ParaShoot
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
-Comment=A Parachute Attack Game
+Comment[]=A Parachute Attack Game
 Exec=parashoot
 Icon=ParaShoot
 Type=Application
-Name=ParaShoot
-Name[ja]=パラシュート
-Name[no]=Fallskjerm
-Name[de]=Fallschirmjäger
-Name[hu]=Védd a bázist
+Name[]=Para­Shoot

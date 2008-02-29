@@ -1,5 +1,6 @@
+[Translation]
+File=QtopiaPlugins
+Context=Calculator
 [Desktop Entry]
-Name=Calculator
-Comment=Calculator mode plugins.
-Name[ja]=電卓
-Comment[ja]=電卓モードプラグイン
+Name[]=Calculator
+Comment[]=Calculator mode plugins.

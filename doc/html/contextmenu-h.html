@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/include/qtopia/contextmenu.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>contextmenu.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>contextmenu.h</h1>
+
+<p>This is the verbatim text of the contextmenu.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2003 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef CONTEXT_MENU_H 
+#define CONTEXT_MENU_H 
+
+#include &lt;qpopupmenu.h&gt;
+
+#ifdef QTOPIA_PHONE
+
+class QPopupMenu;
+class ContextMenuData;
+class QAction;
+
+class ContextMenu : public QPopupMenu
+{
+    Q_OBJECT
+public:
+    enum EditingState {
+	Modal=1, NonModal=2
+    };
+
+    ContextMenu(QWidget *parent=0, const char *name=0, int state=0);
+    ~ContextMenu();
+
+
+    void setEnableHelp(bool b);
+
+    void addTo(QWidget *w, int state=0);
+    void removeFrom(QWidget *w, int state=0);
+
+    void insertAction(QAction *, int idx=-1);
+    void addAction(QAction *);
+
+    void popup();
+    void popup(const QPoint &amp;pos);
+
+    virtual bool helpExists() const;
+
+    static int key();
+    static ContextMenu *menuFor(QWidget *w, int state=0);
+
+public slots:
+    virtual void help();
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e);
+    void keyPressEvent(QKeyEvent *);
+    void keyReleaseEvent(QKeyEvent *);
+    void mouseReleaseEvent(QMouseEvent *);
+
+private slots:
+    void editMenuActivated(int);
+    void widgetDestroyed();
+
+private:
+    void init();
+    static ContextMenu *internalMenuFor(QWidget *w, int state);
+    static ContextMenu *createEditMenu(QWidget *w, int state);
+
+private:
+    ContextMenuData *d;
+
+    friend class QPEApplication;
+};
+
+#endif
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

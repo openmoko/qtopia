@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -86,5 +101,50 @@ private:
     QLabel *lblDesc;
     QTimer *tHide;
 };
+
+class WeekViewContents : public QScrollView
+{
+    Q_OBJECT
+public:
+    WeekViewContents( WeekView *parent = 0, const char *name = 0 );
+
+    void showEvents( QValueList<Occurrence> &ev , const QDate &startDate );
+    void moveToHour( int h );
+    void setStartOfWeek( bool bOnMonday );
+
+    void alterDay( int );
+
+signals:
+    void activateWeekDay( int d );
+    void eventsSelected( QValueList<Occurrence> & );
+    void selectionCleared();
+
+protected slots:
+    void keyPressEvent(QKeyEvent *);
+    void timeStringChanged();
+
+private:
+    void positionItem( LayoutItem *i );
+    LayoutItem *intersects( const LayoutItem * );
+    void drawContents( QPainter *p, int cx, int cy, int cw, int ch );
+    void drawContents( QPainter *p);
+    void contentsMousePressEvent( QMouseEvent * );
+    void contentsMouseReleaseEvent( QMouseEvent * );
+    void mousePressEvent( QMouseEvent * );
+    void mouseReleaseEvent( QMouseEvent * );
+    void resizeEvent( QResizeEvent * );
+    void updateWeekNames(bool wsom);
+
+private:
+    int posOfHour(int h) const;
+    int hourAtPos(int p) const;
+    QHeader *header;
+    QVector<LayoutManager> items;
+    QList<LayoutItem> dayItems;
+    int rowHeight;
+    bool showingEvent;
+    WeekView *wv;
+};
+
 
 #endif

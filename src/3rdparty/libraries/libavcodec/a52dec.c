@@ -16,6 +16,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+/**
+ * @file a52dec.c
+ * A52 decoder.
+ */
+
 #include "avcodec.h"
 #include "liba52/a52.h"
 
@@ -29,8 +35,8 @@ static const char* liba52name = "liba52.so.0";
  * released under the GPL license.
  */
 typedef struct AC3DecodeState {
-    UINT8 inbuf[4096]; /* input buffer */
-    UINT8 *inbuf_ptr;
+    uint8_t inbuf[4096]; /* input buffer */
+    uint8_t *inbuf_ptr;
     int frame_size;
     int flags;
     int channels;
@@ -123,7 +129,7 @@ static inline int blah (int32_t i)
     return i - 0x43c00000;
 }
 
-static inline void float_to_int (float * _f, INT16 * s16, int nchannels)
+static inline void float_to_int (float * _f, int16_t * s16, int nchannels)
 {
     int i, j, c;
     int32_t * f = (int32_t *) _f;	// XXX assumes IEEE float format
@@ -142,10 +148,10 @@ static inline void float_to_int (float * _f, INT16 * s16, int nchannels)
 
 static int a52_decode_frame(AVCodecContext *avctx,
                             void *data, int *data_size,
-                            UINT8 *buf, int buf_size)
+                            uint8_t *buf, int buf_size)
 {
     AC3DecodeState *s = avctx->priv_data;
-    UINT8 *buf_ptr;
+    uint8_t *buf_ptr;
     int flags, i, len;
     int sample_rate, bit_rate;
     short *out_samples = data;
@@ -184,7 +190,7 @@ static int a52_decode_frame(AVCodecContext *avctx,
 			/* No specific number of channel requested */
 			avctx->channels = s->channels;
 		    else if (s->channels < avctx->channels) {
-			fprintf(stderr, "ac3dec: AC3 Source channels are less than specified: output to %d channels.. (frmsize: %d)\n", s->channels, len);
+			av_log(avctx, AV_LOG_ERROR, "ac3dec: AC3 Source channels are less than specified: output to %d channels.. (frmsize: %d)\n", s->channels, len);
 			avctx->channels = s->channels;
 		    }
 		    avctx->bit_rate = bit_rate;
@@ -221,7 +227,7 @@ static int a52_decode_frame(AVCodecContext *avctx,
             }
             s->inbuf_ptr = s->inbuf;
             s->frame_size = 0;
-            *data_size = 6 * avctx->channels * 256 * sizeof(INT16);
+            *data_size = 6 * avctx->channels * 256 * sizeof(int16_t);
             break;
         }
     }

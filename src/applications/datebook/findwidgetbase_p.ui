@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>226</width>
+            <width>222</width>
             <height>256</height>
         </rect>
     </property>
@@ -163,6 +163,7 @@
                     <property stdset="1">
                         <name>text</name>
                         <string>Start Search at:</string>
+                        <comment>start searching at a specific date</comment>
                     </property>
                 </widget>
                 <widget row="0"  column="0" >
@@ -193,34 +194,38 @@
 </widget>
 <customwidgets>
     <customwidget>
+        <class>QPEDateEdit</class>
+        <header location="global">qtopia/datetimeedit.h</header>
+        <sizehint>
+            <width>25</width>
+            <height>20</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>3</hordata>
+            <verdata>0</verdata>
+        </sizepolicy>
+        <pixmap>image0</pixmap>
+        <signal>valueChanged(QDate)</signal>
+        <signal>valueChanged(const QDate &amp;)</signal>
+        <slot access="public">setDate(QDate)</slot>
+        <slot access="public">setWeekStartsMonday(int)</slot>
+        <slot access="public">setDateFormat(DateFormat)</slot>
+        <slot access="public">setDate(const QDate &amp;)</slot>
+    </customwidget>
+    <customwidget>
         <class>CategorySelect</class>
-        <header location="global">qpe/categoryselect.h</header>
+        <header location="global">qtopia/categoryselect.h</header>
         <sizehint>
             <width>-1</width>
             <height>-1</height>
         </sizehint>
-        <container>1</container>
+        <container>0</container>
         <sizepolicy>
             <hordata>7</hordata>
             <verdata>1</verdata>
         </sizepolicy>
         <pixmap>image0</pixmap>
-    </customwidget>
-    <customwidget>
-        <class>QPEDateEdit</class>
-        <header location="global">qtopia/datetimeedit.h</header>
-        <sizehint>
-            <width>20</width>
-            <height>10</height>
-        </sizehint>
-        <container>0</container>
-        <sizepolicy>
-            <hordata>5</hordata>
-            <verdata>5</verdata>
-        </sizepolicy>
-        <pixmap>image0</pixmap>
-        <signal>valueChanged(const QDate &amp;)</signal>
-        <slot access="public">setDate(const QDate &amp;)</slot>
     </customwidget>
 </customwidgets>
 <images>

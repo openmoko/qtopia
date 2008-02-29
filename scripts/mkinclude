@@ -1,0 +1,147 @@
+#!/usr/bin/perl -w
+
+#
+#  WARNING: This script is used to automatically generate snapshots. Be
+#  careful.
+#
+
+use POSIX qw(strftime);
+use FileHandle;
+use IPC::Open2;
+
+sub readIncludeDir( \$ \$);
+sub realIncludeFile( \$ );
+
+$QPE_BASE_DIR="$ENV{QPEDIR}";
+$QPE_DEST_DIR="$ENV{QPEDIR}/image/opt/Qtopia";
+
+sub usage
+{
+    die "
+Usage:  mkinclude [options]
+      -qpedir ........ Qpe source dir (default = $QPEDIR).
+      -dest........... Destination (default = $QPEDIR/image/opt/Qtopia).
+
+      mkinclude converts the 'symbolic link(oln)' include files into the real include files.
+";
+}
+# '
+
+$|=1;
+
+while ($#ARGV>=0) {
+    if ( $ARGV[0] eq "-dest") {
+        shift;
+        $QPE_DEST_DIR=$ARGV[0];
+    } elsif ( $ARGV[0] eq "-qpedir") {
+        shift;
+        $QPE_BASE_DIR=$ARGV[0];
+    } elsif ( $ARGV[0] eq "-help") {
+        usage();
+    }
+    shift;
+}
+
+sub realIncludeFile( \$ )
+{
+    my ($ref1) = @_;
+    my $version_h=$$ref1;
+
+    while (1) {
+       open H_FILE, $version_h or die "Couldn't open $version_h\n";
+#       print "reading from $version_h\n";
+       $head = <H_FILE>;
+       close H_FILE;
+
+       chomp($head);
+#       print "head= $head\n";
+       if ($head =~ m/^#include/) { # ... and basename equals basename of $version_h
+          $head =~ s/^#include "//;
+          $head =~ s/"$//;
+          $head =~ s/\.\.\///g;
+#          print "substituded with: $head\n";
+          if ($head =~ m/^include\//) {
+            $tmp = "$ENV{QPEDIR}/$head";
+            return realIncludeFile( $tmp );
+          } else {
+            return realIncludeFile( $head );
+          }
+       } else {
+          return $version_h;
+       }
+    }
+    return $version_h;
+}
+
+sub readIncludeDir( \$ \$ )
+{
+    my ($ref1, $ref2) = @_;
+    my $read_dir = $$ref1;
+    my $target_dir = $$ref2;
+
+    my $sb;
+    my $dir;
+    my @allfiles;
+    print "Entering DIR: $read_dir\n";
+    system( "mkdir -p $target_dir" );
+
+    opendir( THISDIR, $read_dir ) or die "Couldn't open dir";
+#'
+    # read all directories and skip . and ..
+    @allfiles = grep !/^\.\.?\z/, readdir THISDIR;
+    closedir THISDIR;
+
+    for $dir (@allfiles) {
+        if (-d "$read_dir/$dir") {
+#            print "$read_dir/$dir is a dir\n";
+            if ( -l "$read_dir/$dir") {
+               print "$read_dir/$dir is a symbolic link: skipping\n";
+            } else {
+              $tmp_src="$read_dir/$dir";
+              $tmp_tgt="$target_dir/$dir";
+              readIncludeDir( $tmp_src, $tmp_tgt );
+            }
+        } else {
+#            print "source = $read_dir/$dir\n";
+            $SCALAR="$read_dir/$dir";
+            $myrealfile = realIncludeFile( $SCALAR );
+#           print "$myrealfile\n";
+            if (system( "test -e $myrealfile") == 0) {
+                system( "cp -f $myrealfile $target_dir" );
+            } else {
+                die "Couldn't copy $myrealfile to $target_dir\n";
+            }
+        }
+    }
+#    print "Leaving DIR: $read_dir\n";
+}
+
+$QPEINCLDIR="$QPE_BASE_DIR/include";
+$QPEIMAGEDIR="$QPE_DEST_DIR/include";
+
+    print( "** Fix include dir \n" );
+    print( "         QPE dir             = $QPEINCLDIR\n" );
+    print( "         include destination = $QPEIMAGEDIR\n" );
+
+readIncludeDir( $QPEINCLDIR, $QPEIMAGEDIR );
+
+# the include/qpe dir is a symbolic link to include/qtopia (but it's a fully specified path, which is WRONG).
+# so fix that here (HACK)
+  system( "rm -f $QPEIMAGEDIR/qpe" );
+  system( "cd $QPEIMAGEDIR; ln -s qtopia qpe" );
+
+# qd also has the 'symbolic link hack' so we want to convert them to the real files.
+# When package building however, we specify a different dest dir, i.e. $QPEDIR/image/opt/Qtopia
+# but we don't want QD header files to end up there, so we use the same $QPE_BASE_DIR for source and target.
+# This ensures that the symbolic links ARE replaced with the real ones, but we never run into the risk of
+# distributing these files in the image.
+if ( -d "$QPE_BASE_DIR/src/qtopiadesktop" ) {
+  $QPEINCLDIR="$QPE_BASE_DIR/src/qtopiadesktop/include";
+  $QPEIMAGEDIR="$QPE_BASE_DIR/src/qtopiadesktop/include";
+
+  print( "** Fix qtopiadesktop include dir \n" );
+  print( "         QPE dir             = $QPEINCLDIR\n" );
+  print( "         include destination = $QPEIMAGEDIR\n" );
+
+#  readIncludeDir( $QPEINCLDIR, $QPEIMAGEDIR );
+}

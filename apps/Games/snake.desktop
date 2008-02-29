@@ -1,10 +1,9 @@
+[Translation]
+File=QtopiaGames
+Context=Snake
 [Desktop Entry]
-Comment=A Snake Game
+Comment[]=A Snake Game
 Exec=snake
 Icon=Snake
 Type=Application
-Name=Snake
-Name[ja]=スネーク
-Name[no]=Slange
-Name[de]=Schlange
-Name[hu]=Kígyó
+Name[]=Snake

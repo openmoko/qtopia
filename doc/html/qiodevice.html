@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -183,12 +185,12 @@ is sequential (e.g. an RS-232 port).
 <h3 class="fn">bool <a name="90fb01"></a>QIODevice::at ( int pos ) <code>[virtual]</code></h3>
 <p>Virtual function that sets the I/O device index to <em>pos.</em>
 <p>See also  <a href="#8ddedd">size</a>().
-<p>Reimplemented in <a href="qsocketdevice.html#aaa87c">QSocketDevice</a>, <a href="qfile.html#858d0b">QFile</a>, <a href="qsocket.html#b852fb">QSocket</a> and <a href="qbuffer.html#491c1f">QBuffer</a>.
+<p>Reimplemented in <a href="qsocketdevice.html#aaa87c">QSocketDevice</a>, <a href="qbuffer.html#491c1f">QBuffer</a>, <a href="qsocket.html#b852fb">QSocket</a> and <a href="qfile.html#858d0b">QFile</a>.
 <h3 class="fn">int <a name="a8b90e"></a>QIODevice::at () const <code>[virtual]</code></h3>
 <p>Virtual function that returns the current I/O device index.
 <p>This index is the data read/write head of the I/O device.
 <p>See also  <a href="#8ddedd">size</a>().
-<p>Reimplemented in <a href="qbuffer.html#3c9864">QBuffer</a>, <a href="qsocketdevice.html#00088b">QSocketDevice</a>, <a href="qfile.html#8218c0">QFile</a> and <a href="qsocket.html#d13990">QSocket</a>.
+<p>Reimplemented in <a href="qfile.html#8218c0">QFile</a>, <a href="qbuffer.html#3c9864">QBuffer</a>, <a href="qsocket.html#d13990">QSocket</a> and <a href="qsocketdevice.html#00088b">QSocketDevice</a>.
 <h3 class="fn">bool <a name="d51a01"></a>QIODevice::atEnd () const <code>[virtual]</code></h3>
 <p>Virtual function that returns TRUE if the I/O device index is at the
 end of the input.
@@ -197,7 +199,7 @@ end of the input.
 <p>Closes the I/O device.
 <p>This virtual function must be reimplemented by all subclasses.
 <p>See also  <a href="#756b18">open</a>().
-<p>Reimplemented in <a href="qfile.html#64e640">QFile</a>, <a href="qbuffer.html#bcf8f3">QBuffer</a>, <a href="qsocketdevice.html#dfe8ce">QSocketDevice</a> and <a href="qsocket.html#9e4421">QSocket</a>.
+<p>Reimplemented in <a href="qsocket.html#9e4421">QSocket</a>, <a href="qbuffer.html#bcf8f3">QBuffer</a>, <a href="qfile.html#64e640">QFile</a> and <a href="qsocketdevice.html#dfe8ce">QSocketDevice</a>.
 <h3 class="fn">int <a name="6cd02d"></a>QIODevice::flags () const</h3>
 <p>Returns the current I/O device flags setting.
 <p>Flags consists of mode flags and state flags.
@@ -205,14 +207,14 @@ end of the input.
 <h3 class="fn">void <a name="dfd9f0"></a>QIODevice::flush () <code>[virtual]</code></h3>
 <p>Flushes an open I/O device.
 <p>This virtual function must be reimplemented by all subclasses.
-<p>Reimplemented in <a href="qfile.html#cb0092">QFile</a>, <a href="qsocket.html#a0a8a9">QSocket</a>, <a href="qbuffer.html#c73504">QBuffer</a> and <a href="qsocketdevice.html#951a6c">QSocketDevice</a>.
+<p>Reimplemented in <a href="qbuffer.html#c73504">QBuffer</a>, <a href="qfile.html#cb0092">QFile</a>, <a href="qsocket.html#a0a8a9">QSocket</a> and <a href="qsocketdevice.html#951a6c">QSocketDevice</a>.
 <h3 class="fn">int <a name="09409b"></a>QIODevice::getch () <code>[virtual]</code></h3>
 <p>Reads a single byte/character from the I/O device.
 <p>Returns the byte/character read, or -1 if the end of the I/O device has been
 reached.
 <p>This virtual function must be reimplemented by all subclasses.
 <p>See also  <a href="#71cd12">putch</a>() and <a href="#05a43c">ungetch</a>().
-<p>Reimplemented in <a href="qfile.html#596f05">QFile</a>, <a href="qsocket.html#42465c">QSocket</a>, <a href="qbuffer.html#9769c6">QBuffer</a> and <a href="qsocketdevice.html#6bb6e4">QSocketDevice</a>.
+<p>Reimplemented in <a href="qbuffer.html#9769c6">QBuffer</a>, <a href="qfile.html#596f05">QFile</a>, <a href="qsocket.html#42465c">QSocket</a> and <a href="qsocketdevice.html#6bb6e4">QSocketDevice</a>.
 <h3 class="fn">bool <a name="7d84ac"></a>QIODevice::isAsynchronous () const</h3>
 <p>Returns TRUE if the I/O device is a asynchronous device, otherwise
 FALSE.
@@ -288,13 +290,13 @@ writing binary data to it. Cannot be combined with <code>IO_Raw.</code>
 </ul>
 <p>This virtual function must be reimplemented by all subclasses.
 <p>See also  <a href="#50fcfd">close</a>().
-<p>Reimplemented in <a href="qsocket.html#45f735">QSocket</a>, <a href="qbuffer.html#53d514">QBuffer</a>, <a href="qfile.html#84dd8e">QFile</a> and <a href="qsocketdevice.html#32c3be">QSocketDevice</a>.
+<p>Reimplemented in <a href="qfile.html#84dd8e">QFile</a>, <a href="qsocketdevice.html#32c3be">QSocketDevice</a>, <a href="qsocket.html#45f735">QSocket</a> and <a href="qbuffer.html#53d514">QBuffer</a>.
 <h3 class="fn">int <a name="71cd12"></a>QIODevice::putch ( int ch ) <code>[virtual]</code></h3>
 <p>Writes the character <em>ch</em> to the I/O device.
 <p>Returns <em>ch,</em> or -1 if some error occurred.
 <p>This virtual function must be reimplemented by all subclasses.
 <p>See also  <a href="#09409b">getch</a>() and <a href="#05a43c">ungetch</a>().
-<p>Reimplemented in <a href="qsocketdevice.html#89d3fd">QSocketDevice</a>, <a href="qfile.html#d70b87">QFile</a>, <a href="qsocket.html#64bd57">QSocket</a> and <a href="qbuffer.html#434945">QBuffer</a>.
+<p>Reimplemented in <a href="qsocketdevice.html#89d3fd">QSocketDevice</a>, <a href="qfile.html#d70b87">QFile</a>, <a href="qbuffer.html#434945">QBuffer</a> and <a href="qsocket.html#64bd57">QSocket</a>.
 <h3 class="fn"><a href="qbytearray.html">QByteArray</a> <a name="c272a4"></a>QIODevice::readAll ()</h3>
 <p>This convenience function returns all of the remaining data in the
 device.  Note that this only works for direct access devices, such
@@ -305,7 +307,7 @@ as <a href="qfile.html">QFile</a>.
 returns the number of bytes actually read.
 <p>This virtual function must be reimplemented by all subclasses.
 <p>See also  <a href="#924d2f">writeBlock</a>().
-<p>Reimplemented in <a href="qbuffer.html#9062f3">QBuffer</a>, <a href="qsocket.html#d942f7">QSocket</a>, <a href="qfile.html#8c8ccc">QFile</a> and <a href="qsocketdevice.html#f51391">QSocketDevice</a>.
+<p>Reimplemented in <a href="qbuffer.html#9062f3">QBuffer</a>, <a href="qsocket.html#d942f7">QSocket</a>, <a href="qsocketdevice.html#f51391">QSocketDevice</a> and <a href="qfile.html#8c8ccc">QFile</a>.
 <h3 class="fn">int <a name="0b6051"></a>QIODevice::readLine ( char * data, uint maxlen ) <code>[virtual]</code></h3>
 <p>Reads a line of text, up to <em>maxlen</em> bytes including a terminating
 \0.  If there is a newline at the end if the line, it is not stripped.
@@ -314,7 +316,7 @@ of error.
 <p>This virtual function can be reimplemented much more efficiently by
 the most subclasses.
 <p>See also  <a href="#c12e6e">readBlock</a>() and <a href="qtextstream.html#ae4af4">QTextStream::readLine</a>().
-<p>Reimplemented in <a href="qfile.html#0a06c2">QFile</a>, <a href="qsocket.html#068c90">QSocket</a> and <a href="qbuffer.html#07bef1">QBuffer</a>.
+<p>Reimplemented in <a href="qbuffer.html#07bef1">QBuffer</a>, <a href="qfile.html#0a06c2">QFile</a> and <a href="qsocket.html#068c90">QSocket</a>.
 <h3 class="fn">bool <a name="f119f6"></a>QIODevice::reset ()</h3>
 <p>Sets the device index to 0.
 <p>See also  <a href="#90fb01">at</a>().
@@ -324,7 +326,7 @@ the most subclasses.
 <h3 class="fn">uint <a name="8ddedd"></a>QIODevice::size () const <code>[virtual]</code></h3>
 <p>Virtual function that returns the size of the I/O device.
 <p>See also  <a href="#90fb01">at</a>().
-<p>Reimplemented in <a href="qsocket.html#abe4ea">QSocket</a>, <a href="qfile.html#1e3b5e">QFile</a>, <a href="qbuffer.html#c4d405">QBuffer</a> and <a href="qsocketdevice.html#a126c7">QSocketDevice</a>.
+<p>Reimplemented in <a href="qfile.html#1e3b5e">QFile</a>, <a href="qbuffer.html#c4d405">QBuffer</a>, <a href="qsocket.html#abe4ea">QSocket</a> and <a href="qsocketdevice.html#a126c7">QSocketDevice</a>.
 <h3 class="fn">int <a name="27e36d"></a>QIODevice::state () const</h3>
 <p>Returns bits OR'ed together that specify the current state.
 <p>The flags are: <code>IO_Open.</code>
@@ -354,7 +356,7 @@ index if it is not zero.
 <p>Returns <em>ch,</em> or -1 if some error occurred.
 <p>This virtual function must be reimplemented by all subclasses.
 <p>See also  <a href="#09409b">getch</a>() and <a href="#71cd12">putch</a>().
-<p>Reimplemented in <a href="qsocket.html#a6be3e">QSocket</a>, <a href="qbuffer.html#4788e0">QBuffer</a>, <a href="qfile.html#471cf3">QFile</a> and <a href="qsocketdevice.html#68f6c9">QSocketDevice</a>.
+<p>Reimplemented in <a href="qsocket.html#a6be3e">QSocket</a>, <a href="qbuffer.html#4788e0">QBuffer</a>, <a href="qsocketdevice.html#68f6c9">QSocketDevice</a> and <a href="qfile.html#471cf3">QFile</a>.
 <h3 class="fn">int <a name="ed9d37"></a>QIODevice::writeBlock ( const <a href="qbytearray.html">QByteArray</a> &amp; data )</h3>
 <p>This convenience function is the same as calling
 <a href="#924d2f">writeBlock</a>( data.data(), data.<a href="#8ddedd">size</a>() ).
@@ -363,7 +365,7 @@ index if it is not zero.
 bytes actually written.
 <p>This virtual function must be reimplemented by all subclasses.
 <p>See also  <a href="#c12e6e">readBlock</a>().
-<p>Reimplemented in <a href="qsocketdevice.html#61dc32">QSocketDevice</a>, <a href="qfile.html#a44b6a">QFile</a>, <a href="qbuffer.html#d0ec2c">QBuffer</a> and <a href="qsocket.html#3cd3d6">QSocket</a>.
+<p>Reimplemented in <a href="qsocketdevice.html#61dc32">QSocketDevice</a>, <a href="qbuffer.html#d0ec2c">QBuffer</a>, <a href="qfile.html#a44b6a">QFile</a> and <a href="qsocket.html#3cd3d6">QSocket</a>.
 <h3 class="fn">void <a name="3975e7"></a>QIODevice::setFlags ( int f ) <code>[protected]</code></h3>
 <p>For internal use only.
 <h3 class="fn">void <a name="fff4ec"></a>QIODevice::setMode ( int m ) <code>[protected]</code></h3>
@@ -378,7 +380,7 @@ bytes actually written.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -386,5 +388,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

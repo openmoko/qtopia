@@ -1,11 +1,16 @@
-<html>
-<head>
-<title>Repeating Weekly Events</title>
-</head>
-<body>
-<p><b>Repeating Weekly Events</b>
-<p> Tap the up/down arrows beside the <b>Every</b> no. weeks box to set the interval between each repeat.</p>
-<p>Tap the appropriate buttons for the days of the week that event should repeat on.</p>
-<p>Tap <img src= OKButton.png alt= OK > to confirm the repeat or <img src= CloseButton.png alt= X > to cancel.</p>
-</body>
-</html>
+%%PDA%%
+{Tap}={Tap}
+{OkButton}={qpe/pda/OKButton.png}
+{CancelButton}={qpe/pda/CloseButton.png}
+@@PDA@@
+%%PHONE%%
+{Tap}={Press}
+{OkButton}={contextbar/ok.png}
+{CancelButton}={contextbar/cancel.png}
+@@PHONE@@
+<qt title="Repeating Weekly Events">
+<h3>Repeating Weekly Events</h3>
+<p>Use the up/down arrows beside the <b>Every</b> no. weeks box to set the interval between each repeat.</p>
+<p>Select the appropriate buttons for the days of the week that event should repeat on.</p>
+<p>$${Tap} <img src="$${OkButton}" alt="OK"> to confirm the repeat or <img src="$${CancelButton}" alt="X"> to cancel.</p>
+</qt>

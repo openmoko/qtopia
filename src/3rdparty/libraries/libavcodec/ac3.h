@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*
  * Common code between AC3 encoder and decoder
  * Copyright (c) 2000, 2001, 2002 Fabrice Bellard.
@@ -15,6 +36,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+/**
+ * @file ac3.h
+ * Common code between AC3 encoder and decoder.
  */
 
 #define AC3_MAX_CODED_FRAME_SIZE 3840 /* in bytes */
@@ -38,19 +64,19 @@ typedef struct AC3BitAllocParameters {
     int cplfleak, cplsleak;
 } AC3BitAllocParameters;
 
-extern const UINT16 ac3_freqs[3];
-extern const UINT16 ac3_bitratetab[19];
-extern const INT16 ac3_window[256];
-extern const UINT8 sdecaytab[4];
-extern const UINT8 fdecaytab[4];
-extern const UINT16 sgaintab[4];
-extern const UINT16 dbkneetab[4];
-extern const UINT16 floortab[8];
-extern const UINT16 fgaintab[8];
+extern const uint16_t ac3_freqs[3];
+extern const uint16_t ac3_bitratetab[19];
+extern const int16_t ac3_window[256];
+extern const uint8_t sdecaytab[4];
+extern const uint8_t fdecaytab[4];
+extern const uint16_t sgaintab[4];
+extern const uint16_t dbkneetab[4];
+extern const uint16_t floortab[8];
+extern const uint16_t fgaintab[8];
 
 void ac3_common_init(void);
-void ac3_parametric_bit_allocation(AC3BitAllocParameters *s, UINT8 *bap,
-                                   INT8 *exp, int start, int end,
+void ac3_parametric_bit_allocation(AC3BitAllocParameters *s, uint8_t *bap,
+                                   int8_t *exp, int start, int end,
                                    int snroffset, int fgain, int is_lfe,
                                    int deltbae,int deltnseg, 
-                                   UINT8 *deltoffst, UINT8 *deltlen, UINT8 *deltba);
+                                   uint8_t *deltoffst, uint8_t *deltlen, uint8_t *deltba);

@@ -89,6 +89,7 @@ BT	+2728+08939	Asia/Thimphu
 BW	-2545+02555	Africa/Gaborone
 BY	+5354+02734	Europe/Minsk
 BZ	+1730-08812	America/Belize
+CA	+4525-07542	America/Ottawa		Copied from St_Johns
 CA	+4734-05243	America/St_Johns	Newfoundland Island
 CA	+4439-06336	America/Halifax	Atlantic Time - Nova Scotia (most places), NB, W Labrador, E Quebec & PEI
 CA	+4612-05957	America/Glace_Bay	Atlantic Time - Nova Scotia - places that did not observe DST 1966-1971
@@ -122,6 +123,7 @@ CK	-2114-15946	Pacific/Rarotonga
 CL	-3327-07040	America/Santiago	most locations
 CL	-2710-10927	Pacific/Easter	Easter Island & Sala y Gomez
 CM	+0403+00942	Africa/Douala
+CN	+3955+11625	Asia/Beijing	east China - Beijing, Guangdong, Shanghai, etc.
 CN	+3114+12128	Asia/Shanghai	east China - Beijing, Guangdong, Shanghai, etc.
 CN	+4545+12641	Asia/Harbin	Heilongjiang
 CN	+2934+10635	Asia/Chongqing	central China - Gansu, Guizhou, Sichuan, Yunnan, etc.

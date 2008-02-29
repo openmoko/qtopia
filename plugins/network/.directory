@@ -1,5 +1,6 @@
+[Translation]
+File=QtopiaPlugins
+Context=Network
 [Desktop Entry]
-Name=Network
-Comment=Network plugins add support for connecting to networks.
-Name[ja]=ネットワーク
-Comment[ja]=ネットワークプラグインでネットワーク接続のためのサポートを追加します。
+Name[]=Network
+Comment[]=Network plugins add support for connecting to networks.

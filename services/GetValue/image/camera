@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaServices
+Context=Camera
+[Standard]
+Version=100
+Actions=getImage(QCString,QString,int,int,QImage)
+[getImage(QCString,QString,int,int,QImage)]
+Name[]=Take Photo
+Icon=Camera_48

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -41,6 +56,8 @@
 #include <qtopia/qpemenubar.h>
 #include <qtopia/qpetoolbar.h>
 #include <qtopia/mimetype.h>
+#include <qtopia/fileselector.h>
+#include <qtopia/categories.h>
 #ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>
 #endif
@@ -49,6 +66,10 @@
 #include <qcombobox.h>
 #include <qmessagebox.h>
 #include <qfile.h>
+#ifdef QTOPIA_PHONE
+#include <qtopia/contextmenu.h>
+#include <qtopia/contextbar.h>
+#endif
 
 #include <stdlib.h>
 
@@ -56,30 +77,32 @@
 MediaRecorder::MediaRecorder( QWidget *parent, const char *name, WFlags f )
     : QMainWindow( parent, name, f )
 {
+    audioDeviceIsReady = false;
+    startWhenAudioDeviceReady = false;
+    requestMode = false;
+
     // Load the media plugins.
     recorderPlugins = new MediaRecorderPluginList();
     playerPlugins = new MediaPlayerPluginList();
 
     setToolBarsMovable( FALSE );
     setBackgroundMode( PaletteButton );
-    setCaption( tr("Voice Recorder") );
+    setCaption( tr("Voice Notes") );
 
     setIcon( Resource::loadPixmap( "SoundPlayer" ) );
 
-    QPEToolBar *bar = new QPEToolBar( this );
-    bar->setHorizontalStretchable( TRUE );
-    menu = bar;
+    // We don't need an input method with this application.
+    QPEApplication::setInputMethodHint( this, QPEApplication::AlwaysOff );
 
-    QPEMenuBar *mb = new QPEMenuBar( bar );
-    QPopupMenu *options = new QPopupMenu( this );
-
-    mb->insertItem( tr( "Options" ), options );
-
-    configureAction = new QAction( tr( "Configure Qualities ..." ), QString::null, 0, this, 0 );
-    connect( configureAction, SIGNAL( activated() ), this, SLOT( configure() ) );
-    configureAction->setWhatsThis( tr("Configure the recording quality settings.") );
-    configureAction->addTo( options );
-    configureAction->setEnabled( TRUE );
+    // Make sure that the "Recordings" category is registered.
+    Categories cats;
+    cats.load(categoryFileName());
+    recordingsCategory = cats.id("Document View","_Recordings"); // No tr
+    if ( !recordingsCategory ) {
+	recordingsCategory =
+	    cats.addCategory("Document View","_Recordings"); // No tr
+	cats.save(categoryFileName());
+    }
 
     stack = new QWidgetStack( this );
     stack->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
@@ -88,8 +111,43 @@ MediaRecorder::MediaRecorder( QWidget *parent, const char *name, WFlags f )
     contents = new MediaRecorderBase( stack );
     stack->addWidget( contents, 0 );
 
+    selector = new FileSelector( "audio/*", stack, "fileselector", TRUE, FALSE );
+    selector->setCurrentCategory( recordingsCategory );
+    selector->setSortMode( FileSelector::ReverseChronological );
+    stack->addWidget( selector, 1 );
+    connect( selector, SIGNAL(fileSelected(const DocLnk&)),
+	     this, SLOT(fileSelected(const DocLnk&)) );
+    connect( selector, SIGNAL(newSelected(const DocLnk&)),
+	     this, SLOT(newSelected(const DocLnk&)) );
+
+#ifdef QTOPIA_PHONE
+
+    // Create the context menu for the file selector screen.
+    ContextMenu *options = new ContextMenu( selector );
+    selector->addOptions( options );
+
+    // Create the context menu for the record/playback screen.
+    options = new ContextMenu( contents );
+
+#else
+    QPEToolBar *bar = new QPEToolBar( this );
+    bar->setHorizontalStretchable( TRUE );
+    menu = bar;
+
+    QPEMenuBar *mb = new QPEMenuBar( bar );
+    QPopupMenu *options = new QPopupMenu( this );
+
+    mb->insertItem( tr( "Options" ), options );
+#endif
+
+    configureAction = new QAction(tr( "Settings..."), Resource::loadIconSet("settings"), QString::null, 0, this, 0 );
+    connect( configureAction, SIGNAL( activated() ), this, SLOT( configure() ) );
+    configureAction->setWhatsThis( tr("Configure the recording quality settings.") );
+    configureAction->addTo( options );
+    configureAction->setEnabled( TRUE );
+
     initializeContents();
-    stack->raiseWidget( contents );
+    switchToFileSelector();
 
     audioInput = 0;
     audioOutput = 0;
@@ -114,11 +172,29 @@ MediaRecorder::MediaRecorder( QWidget *parent, const char *name, WFlags f )
     connect( lightTimer, SIGNAL( timeout() ),
 	     this, SLOT( recordLightBlink() ) );
 
+#ifdef QTOPIA_PHONE
+
+    // Don't display the buttons in Qtopia Phone Edition, because
+    // they take up too much screen real estate and have confusing
+    // key navigation behaviours.
+    //contents->recordButton->hide();
+    contents->replayButton->hide();
+    contents->deleteButton->hide();
+
+    // Make the context key say "Record".
+    setContextKey( TRUE );
+
+#endif
+
     // Listen on the system tray for clicks on the record light so that
     // we can raise the application when the user clicks on it.
     trayChannel = new QCopChannel( "Qt/Tray", this );
-    connect( trayChannel, SIGNAL(received(const QCString&, const QByteArray&)),
-	     this, SLOT(traySocket(const QCString&, const QByteArray&)) );
+    connect( trayChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(traySocket(const QCString&,const QByteArray&)) );
+
+    // Listen for app messages, particularly the "recordSound" request.
+    connect( qApp, SIGNAL(appMessage(const QCString&,const QByteArray&)),
+             this, SLOT(appMessage(const QCString&,const QByteArray&)) );
 
     // Force the MIME type handling system to preload the list
     // of extensions.  If we don't do this, then "startRecording"
@@ -159,8 +235,8 @@ void MediaRecorder::initializeContents()
     contents->progress->setProgress( -1 );
 
     // Cannot replay yet, because there is no recorded sound.
-    contents->replayButton->setEnabled( FALSE );
-    contents->deleteButton->setEnabled( FALSE );
+    setReplayEnabled( FALSE );
+    setDeleteEnabled( FALSE );
 
     // Load the initial quality settings.
     config = new ConfigureRecorder( qualities, recorderPlugins, this );
@@ -172,6 +248,14 @@ void MediaRecorder::initializeContents()
     connect( contents->storageLocation, SIGNAL(newPath()), 
 	     this, SLOT(newLocation()) );
     recomputeMaxTime();
+
+#ifdef QTOPIA_PHONE
+
+    // Disable the settings boxes in phone mode.
+    contents->GroupBox1->hide();
+    contents->GroupBox2->hide();
+
+#endif
 }
 
 
@@ -308,32 +392,40 @@ void MediaRecorder::newLocation()
 }
 
 
-void MediaRecorder::startSave()
+bool MediaRecorder::startSave()
 {
     // Find the plugin to use to save the data.
     encoder = recorderPlugins->fromType
-	( qualities[config->currentQuality()].mimeType,
-	  qualities[config->currentQuality()].formatTag );
+	( recordQuality.mimeType, recordQuality.formatTag );
 
     // Open the document.
     DocLnk doc;
     FileManager fm;
     QString name =
-	tr("Recorded Sound %1","date").arg(TimeString::localYMDHMS(QDateTime::currentDateTime()));
+	tr("%1 %2","date,time")
+	    .arg(TimeString::localYMD(QDate::currentDate(),TimeString::Short))
+	    .arg(TimeString::localHM(QTime::currentTime()));
     doc.setName( name );
     doc.setType( encoder->pluginMimeType() );
-    doc.setLocation( contents->storageLocation->documentPath() );
+    QArray<int> cats( 1 );
+    cats[0] = recordingsCategory;
+    doc.setCategories( cats );
 
-    io = fm.saveFile( doc );
+    if (doc.setLocation( contents->storageLocation->documentPath() )) {
+	io = fm.saveFile( doc );
 
-    // Write the sample data using the encoder.
-    encoder->begin( io, qualities[config->currentQuality()].formatTag );
-    encoder->setAudioChannels( audioInput->channels() );
-    encoder->setAudioFrequency( audioInput->frequency() );
+	// Write the sample data using the encoder.
+	encoder->begin( io, recordQuality.formatTag );
+	encoder->setAudioChannels( audioInput->channels() );
+	encoder->setAudioFrequency( audioInput->frequency() );
 
-    // Record the location of the file that we are saving.
-    lastSaved = doc.file();
-    lastSavedLink = doc.linkFile();
+	// Record the location of the file that we are saving.
+	lastSaved = doc.file();
+	lastSavedLink = doc.linkFile();
+	return true;
+    }
+    QMessageBox::information(this, tr("Voice Notes"), tr("<P>Could not save file at location %1").arg(contents->storageLocation->currentText()), QMessageBox::Ok);
+    return false;
 }
 
 void MediaRecorder::endSave()
@@ -364,10 +456,12 @@ void MediaRecorder::endSave()
 
 void MediaRecorder::startRecording()
 {
-    QualitySetting *qual = &(qualities[config->currentQuality()]);
+    if ( !requestMode )
+	recordQuality = qualities[config->currentQuality()];
 
     // Bail out if we don't have a plugin for the selected format.
-    if( recorderPlugins->fromType( qual->mimeType, qual->formatTag ) == 0) {
+    if( recorderPlugins->fromType
+	    ( recordQuality.mimeType, recordQuality.formatTag ) == 0) {
     	noPluginError();
 	return;
     }
@@ -382,7 +476,8 @@ void MediaRecorder::startRecording()
     // Open the audio input device and normalize the parameters.
     if ( audioInput )
 	delete audioInput;
-    audioInput = new AudioInput( qual->frequency, qual->channels );
+    audioInput = new AudioInput
+	( recordQuality.frequency, recordQuality.channels );
     qDebug( "channels: %d", audioInput->channels() );
     qDebug( "frequency: %d", audioInput->frequency() );
     qDebug( "bufferSize: %d", audioInput->bufferSize() );
@@ -401,48 +496,53 @@ void MediaRecorder::startRecording()
 #endif
 
     // Start the save process.
-    startSave();
+    if (startSave()) {
 
-    // Create the waveform display.
-    contents->waveform->changeSettings( audioInput->frequency(),
-					audioInput->channels() );
+	// Create the waveform display.
+	contents->waveform->changeSettings( audioInput->frequency(),
+		audioInput->channels() );
 
-    configureAction->setEnabled( FALSE );
-    contents->qualityCombo->setEnabled( FALSE );
-    contents->storageLocation->setEnabled( FALSE );
-    recordTime = 0;
-    contents->progress->setTotalSteps( 120 );
-    contents->progress->setProgress( 0 );
-    contents->progress->setRecording();
-    recording = TRUE;
-    contents->recordButton->setText( tr("Stop") );
-    contents->recordButton->setEnabled( TRUE );
-    contents->replayButton->setEnabled( FALSE );
-    contents->deleteButton->setEnabled( FALSE );
+	if ( configureAction )
+	    configureAction->setEnabled( FALSE );
+	contents->qualityCombo->setEnabled( FALSE );
+	contents->storageLocation->setEnabled( FALSE );
+	recordTime = 0;
+	contents->progress->setTotalSteps( 120 );
+	contents->progress->setProgress( 0 );
+	contents->progress->setRecording();
+	recording = TRUE;
+	setContextKey( FALSE );
+	contents->recordButton->setText( tr("Stop") );
+	contents->recordButton->setEnabled( TRUE );
+	setReplayEnabled( FALSE );
+	setDeleteEnabled( FALSE );
 
-    // Turn on the recording light.
-    setRecordLight( TRUE );
+	// Turn on the recording light.
+	setRecordLight( TRUE );
 
-    // Some audio devices may start sending us data immediately, but
-    // others may need an initial "read" to start the ball rolling.
-    // Processing at least one data block will prime the device.
-    audioInput->start();
-    processAudioData();
+	// Some audio devices may start sending us data immediately, but
+	// others may need an initial "read" to start the ball rolling.
+	// Processing at least one data block will prime the device.
+	audioInput->start();
+	processAudioData();
+    }
 }
 
 
-void MediaRecorder::stopRecording()
+void MediaRecorder::stopRecordingNoSwitch()
 {
     audioInput->stop();
     contents->waveform->reset();
-    configureAction->setEnabled( TRUE );
+    if ( configureAction )
+	configureAction->setEnabled( TRUE );
     contents->qualityCombo->setEnabled( TRUE );
     contents->storageLocation->setEnabled( TRUE );
     contents->recordButton->setEnabled( FALSE );
     recording = FALSE;
+    setContextKey( TRUE );
     contents->recordButton->setText( tr("Record") );
-    contents->replayButton->setEnabled( TRUE );
-    contents->deleteButton->setEnabled( TRUE );
+    setReplayEnabled( TRUE );
+    setDeleteEnabled( TRUE );
 
     // Turn off the recording light.
     setRecordLight( FALSE );
@@ -454,6 +554,22 @@ void MediaRecorder::stopRecording()
 #ifdef Q_WS_QWS
     QPEApplication::setTempScreenSaverMode( QPEApplication::Enable );
 #endif
+
+    // If we were in request mode, then send the response and quit the app.
+    if ( requestMode ) {
+	qDebug("Respond to id: %s", responseId.latin1());
+        QCopEnvelope e( responseChannel, "valueSupplied(QString,QString)" );
+	e << responseId << lastSavedLink;
+	requestMode = FALSE;
+	qApp->quit();
+    }
+}
+
+
+void MediaRecorder::stopRecording()
+{
+    stopRecordingNoSwitch();
+    switchToFileSelector();
 }
 
 
@@ -473,14 +589,15 @@ void MediaRecorder::startPlaying()
     decoder = playerPlugins->fromFile( lastSaved );
     if ( decoder == 0 || !( decoder->open( lastSaved ) ) ) {
         QMessageBox::critical( this, tr( "No playback plugin found" ),
-			       tr( "Voice Recorder was unable to\n"
-			           "locate a suitable plugin to\n"
-			           "play the selected format." ) );
+			       tr( "<qt>Voice Recorder was unable to "
+			           "locate a suitable plugin to "
+			           "play the selected format.</qt>" ) );
 	return;
     }
 
     // Reconfigure the UI to reflect the current mode.
-    configureAction->setEnabled( FALSE );
+    if ( configureAction )
+	configureAction->setEnabled( FALSE );
     contents->qualityCombo->setEnabled( FALSE );
     contents->storageLocation->setEnabled( FALSE );
     recordTime = 0;
@@ -492,28 +609,48 @@ void MediaRecorder::startPlaying()
     contents->progress->setProgress( 0 );
     contents->progress->setPlaying();
     playing = TRUE;
+    setContextKey( FALSE );
     contents->recordButton->setEnabled( FALSE );
     contents->replayButton->setText( tr("Stop") );
-    contents->replayButton->setEnabled( TRUE );
-    contents->deleteButton->setEnabled( TRUE );
+    setReplayEnabled( TRUE );
+    setReplayEnabled( TRUE );
 
     // Create the waveform display.
     contents->waveform->changeSettings( decoder->audioFrequency( 0 ),
 					decoder->audioChannels( 0 ) );
 
     // Open the audio output device.
-    audioOutput = new AudioDevice( decoder->audioFrequency( 0 ),
+    audioOutput = new AudioDevice( this, "voiceNotesAudioDevice" );
+    audioOutput->open( decoder->audioFrequency( 0 ),
 				   decoder->audioChannels( 0 ), 2 );
     sampleBuffer = new short [ audioOutput->bufferSize() ];
     QObject::connect( audioOutput, SIGNAL(completedIO()),
 		      this, SLOT(audioOutputDone()) );
-
-    // Force the first block to be played, to prime the device.
-    audioOutputDone();
+    connect( audioOutput, SIGNAL(deviceReady()), this, SLOT(audioDeviceReady()) );
+    connect( audioOutput, SIGNAL(deviceOpenError()), this, SLOT(audioDeviceError()) );
+    audioDeviceIsReady = false;
+    startWhenAudioDeviceReady = true;
 }
 
 
-void MediaRecorder::stopPlaying()
+void MediaRecorder::audioDeviceReady()
+{
+    audioDeviceIsReady = true;
+    if (startWhenAudioDeviceReady)
+	// Force the first block to be played, to prime the device.
+	QTimer::singleShot(1, this, SLOT(audioOutputDone())); // ready signal generated by audiodevice, it's no longer reentrant
+}
+
+
+void MediaRecorder::audioDeviceError()
+{
+    audioDeviceIsReady = false;
+//    QMessageBox::critical(0, tr("Audio Error"), tr("<qt>Error initialising audio.</qt>"));
+    QTimer::singleShot(1, this, SLOT(stopPlaying())); // error signal generated by audiodevice, it's no longer reentrant
+}
+
+
+void MediaRecorder::stopPlayingNoSwitch()
 {
     // Stop playing back the recorded sound
     if ( audioOutput ) {
@@ -531,15 +668,24 @@ void MediaRecorder::stopPlaying()
 
     // Return the UI to the default state.
     contents->waveform->reset();
-    configureAction->setEnabled( TRUE );
+    if ( configureAction )
+	configureAction->setEnabled( TRUE );
     contents->qualityCombo->setEnabled( TRUE );
     contents->storageLocation->setEnabled( TRUE );
     contents->recordButton->setEnabled( TRUE );
     playing = FALSE;
-    contents->replayButton->setEnabled( TRUE );
+    setReplayEnabled( TRUE );
+    setContextKey( TRUE );
     contents->replayButton->setText( tr("Play") );
-    contents->deleteButton->setEnabled( TRUE );
+    setReplayEnabled( TRUE );
     contents->progress->setProgress( 0 );
+}
+
+
+void MediaRecorder::stopPlaying()
+{
+    stopPlayingNoSwitch();
+    switchToFileSelector();
 }
 
 
@@ -561,8 +707,8 @@ void MediaRecorder::deleteClicked()
     DocLnk doc( lastSaved );
     doc.setLinkFile( lastSavedLink );
     doc.removeFiles();
-    contents->replayButton->setEnabled( FALSE );
-    contents->deleteButton->setEnabled( FALSE );
+    setReplayEnabled( FALSE );
+    setDeleteEnabled( FALSE );
 }
 
 
@@ -572,7 +718,8 @@ void MediaRecorder::clearData()
     samples->clear();
 #endif
     contents->waveform->reset();
-    configureAction->setEnabled( TRUE );
+    if ( configureAction )
+	configureAction->setEnabled( TRUE );
     contents->recordButton->setEnabled( TRUE );
     recordTime = 0;
     contents->progress->setTotalSteps( 120 );
@@ -642,9 +789,9 @@ void MediaRecorder::configure()
 void MediaRecorder::noPluginError()
 {
     QMessageBox::critical( this, tr( "No plugin found" ),
-			   tr( "Voice Recorder was unable to\n"
-			       "locate a suitable plugin to\n"
-			       "record in the selected format." ) );
+			   tr( "<qt>Voice Recorder was unable to "
+			       "locate a suitable plugin to "
+			       "record in the selected format.</qt>" ) );
 }
 
 
@@ -685,19 +832,46 @@ void MediaRecorder::recordLightBlink()
 void MediaRecorder::closeEvent( QCloseEvent *e )
 {
     // Shut down recording or playback.
-    if ( recording ) {
-	stopRecording();
-    } else if ( playing ) {
-	stopPlaying();
-    }
+    stopEverythingNoSwitch();
 
     // Disable the "Play" and "Delete" buttons so that if we
     // are restarted in "fast load" mode, we will return to
     // the initial "nothing is recorded" state in the UI.
-    contents->replayButton->setEnabled( FALSE );
-    contents->deleteButton->setEnabled( FALSE );
+    setReplayEnabled( FALSE );
+    setReplayEnabled( FALSE );
 
-    e->accept();
+    // Determine if we should return to the file selector screen,
+    // or exit from the application.
+    if ( stack->visibleWidget() == selector ) {
+	e->accept();
+    } else if ( requestMode ) {
+	// The user did not record any sounds during the request.
+        QCopEnvelope qcop( responseChannel, "valueSupplied(QString,QString)" );
+	qcop << responseId << QString::null;
+	requestMode = FALSE;
+	e->accept();
+    } else {
+	switchToFileSelector();
+	e->ignore();
+    }
+}
+
+
+void MediaRecorder::keyPressEvent( QKeyEvent *e )
+{
+#ifdef QTOPIA_PHONE
+    if ( e->key() == Qt::Key_Select ) {
+	if ( playing )
+	    stopPlaying();
+	else if ( recording )
+	    stopRecording();
+	else
+	    startRecording();
+	e->accept();
+	return;
+    }
+#endif
+    QMainWindow::keyPressEvent( e );
 }
 
 
@@ -713,7 +887,6 @@ void MediaRecorder::audioOutputDone()
 	stopPlaying();
 	return;
     }
-
     // Write the samples to the audio output device.
     audioOutput->write( (char *)sampleBuffer, (int)( samplesRead * 4 ) );
 
@@ -753,3 +926,173 @@ void MediaRecorder::traySocket( const QCString& msg, const QByteArray &data )
     }
 }
 
+
+void MediaRecorder::setContextKey( bool record )
+{
+#ifdef QTOPIA_PHONE
+    if ( record )
+	ContextBar::setLabel( contents->recordButton, Qt::Key_Select, "mediarecorder/record", tr("Record") );
+    else
+	ContextBar::setLabel( contents->recordButton, Qt::Key_Select, "mediarecorder/stop", tr("Stop") );
+#else
+    Q_UNUSED(record);
+#endif
+}
+
+
+void MediaRecorder::setReplayEnabled( bool flag )
+{
+    contents->replayButton->setEnabled( flag );
+}
+
+
+void MediaRecorder::setDeleteEnabled( bool flag )
+{
+    contents->deleteButton->setEnabled( flag );
+}
+
+
+void MediaRecorder::fileSelected( const DocLnk& doc )
+{
+    stopEverythingNoSwitch();
+    lastSaved = doc.file();
+    lastSavedLink = doc.linkFile();
+    switchToPlayback();
+    startPlaying();
+}
+
+
+void MediaRecorder::newSelected( const DocLnk& )
+{
+    stopEverythingNoSwitch();
+    switchToRecorder();
+}
+
+
+void MediaRecorder::appMessage( const QCString& msg, const QByteArray& data )
+{
+    QCString chan;
+    QString id, mimeType, formatTag;
+    int frequency, channels;
+    
+    // Parameters to "getAudio" message:
+    //
+    //	    QCString	Name of the QCop channel to send the reply on.
+    //	    QString	Unique id.
+    //	    QString	MIME type of the requested format.
+    //	    QString	Requested sub-format (e.g. "pcm", "amr", etc).
+    //	    int		Frequency to record with.
+    //	    int		Number of channels to record with.
+    //
+    // The mediarecorder will eventually respond with the message
+    // "valueSupplied(QString,QString)", indicating the ID and the
+    // name of the file
+    // containing the recording.  If the user quit the recorder without
+    // recording a sound, then the filename will be empty.
+    //
+    // Note: it is conceivable that something will go wrong and the
+    // response will never be sent (e.g. app crash).  Applications that
+    // request recording functionality should not rely upon getting
+    // an answer back.
+    //
+    if ( msg == "getAudio(QCString,QString,QString,QString,int,int)" ) {
+
+	// Decode the parameters to the message.
+	QDataStream stream( data, IO_ReadOnly );
+	stream >> chan;
+	stream >> id;
+	stream >> mimeType;
+	stream >> formatTag;
+	stream >> frequency;
+	stream >> channels;
+
+	// Stop existing recording or playback sessions.
+	stopEverythingNoSwitch();
+
+	// Copy the parameters into place.
+	responseChannel = chan;
+	responseId = id;
+	recordQuality.frequency = frequency;
+	recordQuality.channels = channels;
+	recordQuality.mimeType = mimeType;
+	recordQuality.formatTag = formatTag;
+	requestMode = TRUE;
+
+	// Switch to the recording mode.
+	switchToRecorder();
+
+	// Make sure that the app keeps running.
+	QPEApplication::setKeepRunning();
+    }
+}
+
+
+void MediaRecorder::switchToFileSelector()
+{
+#ifndef QTOPIA_PHONE
+    menu->hide();
+#endif
+    stack->raiseWidget( selector );
+    configureAction->setEnabled( FALSE );
+}
+
+
+void MediaRecorder::switchToOther()
+{
+    stack->raiseWidget( contents );
+}
+
+void MediaRecorder::switchToRecorder()
+{
+    switchToOther();
+    setContextKey( TRUE );
+    setReplayEnabled( FALSE );
+    setDeleteEnabled( FALSE );
+    configureAction->setEnabled( TRUE );
+#ifndef QTOPIA_PHONE
+    if ( requestMode ) {
+	contents->GroupBox1->hide();
+	contents->GroupBox2->hide();
+	menu->hide();
+	configureAction->setEnabled( FALSE );
+    } else {
+	contents->GroupBox1->show();
+	contents->GroupBox2->show();
+	menu->show();
+    }
+#endif
+    contents->recordButton->show();
+    contents->replayButton->hide();
+    contents->deleteButton->hide();
+    contents->waveform->reset();
+    contents->recordButton->setFocus();
+}
+
+
+void MediaRecorder::switchToPlayback()
+{
+    switchToOther();
+    setContextKey( FALSE );
+    setReplayEnabled( TRUE );
+    setDeleteEnabled( FALSE );
+    configureAction->setEnabled( FALSE );
+#ifndef QTOPIA_PHONE
+    contents->GroupBox1->hide();
+    contents->GroupBox2->hide();
+    menu->hide();
+#endif
+    contents->replayButton->show();
+    contents->recordButton->hide();
+    contents->deleteButton->hide();
+    contents->waveform->reset();
+    contents->recordButton->setFocus();
+}
+
+void MediaRecorder::stopEverythingNoSwitch()
+{
+    if ( recording ) {
+	stopRecordingNoSwitch();
+    } else if ( playing ) {
+	stopPlayingNoSwitch();
+    }
+}

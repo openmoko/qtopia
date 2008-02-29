@@ -1,10 +1,30 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /* -------------------------------------------------------------------------- */
 /*									      */
-/* Ported Konsole to Qt/Embedded                                              */
-/*									      */
-/* Copyright (C) 2000 by John Ryland <jryland@trolltech.com>                  */
+/* Konsole ported to Qt/Embedded by Trolltech                                 */
 /*									      */
 /* -------------------------------------------------------------------------- */
+
 #include "session.h"
 #include <qpushbutton.h>
 // #include <kdebug.h>
@@ -38,7 +58,7 @@ TESession::TESession(QMainWindow* main, TEWidget* te, const char* _pgm, QStrList
   QObject::connect( em,SIGNAL(ImageSizeChanged(int,int)),
                     sh,SLOT(setSize(int,int)));
 
-  // 'main' should do those connects itself, somehow.
+  // 'main' should preferably do those connects itself.
   // These aren't KTMW's slots, but konsole's.(David)
 
 /*
@@ -50,8 +70,8 @@ TESession::TESession(QMainWindow* main, TEWidget* te, const char* _pgm, QStrList
   QObject::connect( em,SIGNAL(changeColumns(int)),
                     main,SLOT(changeColumns(int)) );
 /*
-  QObject::connect( em,SIGNAL(changeTitle(int, const QString&)),
-                    main,SLOT(changeTitle(int, const QString&)) );
+  QObject::connect( em,SIGNAL(changeTitle(int,const QString&)),
+                    main,SLOT(changeTitle(int,const QString&)) );
 */
   QObject::connect( sh,SIGNAL(done(int)), this,SLOT(done(int)) );
 }
@@ -71,8 +91,8 @@ void TESession::kill(int ) // signal)
 
 TESession::~TESession()
 {
- QObject::disconnect( sh, SIGNAL( done( int ) ),
-		      this, SLOT( done( int ) ) );
+ QObject::disconnect( sh, SIGNAL( done(int) ),
+		      this, SLOT( done(int) ) );
   delete em;
   delete sh;
 }
@@ -97,7 +117,7 @@ TEmulation* TESession::getEmulation()
   return em;
 }
 
-// following interfaces might be misplaced ///
+// the following interfaces might be misplaced ///
 
 int TESession::schemaNo()
 {

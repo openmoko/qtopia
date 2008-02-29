@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -34,6 +49,11 @@
 #endif
 
 #include <qdialog.h>
+#ifdef QTOPIA_PHONE
+#include <qtopia/contextbar.h>
+#include <qtopia/contextmenu.h>
+#include <qlayout.h>
+#endif
 
 #ifndef Q_OS_WIN32
 #include <unistd.h> //for sleep
@@ -43,6 +63,11 @@
 #endif
 #include "passwordbase_p.h"
 
+#include "../qtopia1/qpe_show_dialog.cpp"
+
+#ifdef QTOPIA_PHONE
+extern bool mousePreferred; // can't call Global::mousePreferred in libqtopia2 from libqtopia
+#endif
 
 class PasswordDialog : public PasswordBase
 {
@@ -70,13 +95,17 @@ private:
     QString text;
 };
 
+//////
+// START COPIED CODE to password2.cpp
+//////
 #ifndef Q_OS_WIN32
 extern "C" char *crypt(const char *key, const char *salt);
 #else
-   char *crypt(const char *key, const char *salt){
-     //#### revise  
-     return (char*)key;
-   }
+static char *crypt(const char *key, const char *salt) {
+    //#### revise  
+    Q_UNUSED(salt)
+    return (char*)key;
+}
 #endif
 
 static QString qcrypt(const QString& k, const char *salt)
@@ -97,6 +126,9 @@ static QString qcrypt(const QString& k, const char *salt)
 
     return result;
 }
+//////
+// END COPIED CODE to password2.cpp
+//////
 
 /*
  *  Constructs a PasswordDialog which is a child of 'parent', with the
@@ -106,15 +138,41 @@ PasswordDialog::PasswordDialog( QWidget* parent,  const char* name, WFlags fl )
     : PasswordBase( parent, name, fl )
 {
     QRect desk = qApp->desktop()->geometry();
+    int dlgfontsize, promptfontsize;
+#ifdef QTOPIA_PHONE
+    if  (mousePreferred) {
+	dlgfontsize = 12;
+	promptfontsize = 10;
+    } else 
+#endif
+    {
+	dlgfontsize = 18;
+	promptfontsize = 12;
+    }
 
     if ( desk.width() < 220  || desk.height() < 320) {
 	QFont f( font() );
-	f.setPointSize( 18 );
+	f.setPointSize( dlgfontsize );
 	setFont( f );
-	f.setPointSize( 12 );
+	f.setPointSize( promptfontsize );
 	prompt->setFont( f );
     }
-    
+
+#ifdef QTOPIA_PHONE
+    if  (!mousePreferred) {
+	button_0->hide();
+	button_1->hide();
+	button_2->hide();
+	button_3->hide();
+	button_4->hide();
+	button_5->hide();
+	button_6->hide();
+	button_7->hide();
+	button_8->hide();
+	button_9->hide();
+    }
+    button_OK->hide();
+#endif
     connect(button_0,SIGNAL(clicked()),this,SLOT(key()));
     connect(button_1,SIGNAL(clicked()),this,SLOT(key()));
     connect(button_2,SIGNAL(clicked()),this,SLOT(key()));
@@ -127,6 +185,18 @@ PasswordDialog::PasswordDialog( QWidget* parent,  const char* name, WFlags fl )
     connect(button_9,SIGNAL(clicked()),this,SLOT(key()));
     connect(button_OK,SIGNAL(clicked()),this,SLOT(key()));
 
+#ifdef QTOPIA_PHONE
+    ContextBar::setLabel(this, Key_Select, ContextBar::NoLabel);
+#endif    
+
+    QPalette pal = display->palette();
+    QBrush base = pal.brush(QPalette::Normal, QColorGroup::Base);
+    QColor text = pal.color(QPalette::Normal, QColorGroup::Text);
+    pal.setBrush(QPalette::Disabled, QColorGroup::Background, base);
+    pal.setColor(QPalette::Disabled, QColorGroup::Text, text);
+    display->setPalette(pal);
+
+    setFocusPolicy(StrongFocus);
     setFocus();
 }
 
@@ -161,6 +231,14 @@ void PasswordDialog::key()
 
 void PasswordDialog::keyPressEvent( QKeyEvent *e )
 {
+#ifdef QTOPIA_PHONE
+    if ( (Global::mousePreferred() || (!Global::mousePreferred() && isModalEditing())) && (e->key() == Key_Back || e->key() == Key_No) ) {
+	if( !mousePreferred )
+	    setModalEditing(FALSE);
+	e->ignore();
+	return;
+    }
+#endif
     if ( e->key() == Key_Enter || e->key() == Key_Return )
 	emit passwordEntered( text );
     else {
@@ -200,14 +278,26 @@ void PasswordDialog::clear()
 
 class PasswdDlg : public QDialog
 {
+    Q_OBJECT
 public:
     PasswdDlg( QWidget *parent, const char * name, bool modal, bool fullscreen = FALSE )
 	: QDialog( parent, name, modal, fullscreen ? WStyle_NoBorder | WStyle_Customize | WStyle_StaysOnTop : 0 ),
 	    modl(modal)
     {
-	passw = new PasswordDialog( this );
+	setCaption(tr("Password"));
 
-	if ( fullscreen ) {
+#ifdef QTOPIA_PHONE
+	ContextMenu *cm = new ContextMenu(this);
+	cm->setEnableHelp(FALSE);
+#endif
+
+	passw = new PasswordDialog( this );
+#ifdef QTOPIA_PHONE
+	if ( fullscreen || mousePreferred )
+#else
+	if ( fullscreen )
+#endif
+	{
 	    QRect desk = qApp->desktop()->geometry();
 	    setGeometry( 0, 0, desk.width(), desk.height() );
 	}
@@ -298,21 +388,39 @@ private:
   The returned value is QString::null if the user cancels the operation,
   or the empty string if the user enters no password (but confirms the
   dialog).
+
+  Qtopia 2: If the prompt is prefixed with "@:", the dialog is not maximized,
+  and the returned value is not crypted.
 */
 
 QString Password::getPassword( const QString& prompt )
 {
-    PasswdDlg pd(0,0,TRUE);
-    pd.passw->setPrompt( prompt );
+    bool max = TRUE;
+    bool cry = TRUE;
 
-    pd.showMaximized();
-    int r = pd.exec();
+    QString p = prompt;
+    if ( prompt.left(2) == "@:" ) {
+	max = FALSE;
+	cry = FALSE;
+	p = prompt.mid(2);
+    }
+    PasswdDlg pd(0,0,TRUE); //, TRUE);
+    pd.passw->setPrompt( p );
+
+    int r;
+    if ( max ) {
+	pd.showMaximized();
+	r = pd.exec();
+    } else {
+	qpe_show_dialog(&pd,FALSE);
+	r = pd.exec();
+    }
 
     if ( r == QDialog::Accepted ) {
 	if (pd.passw->text.isEmpty())
 	    return "";
 	else
-	    return qcrypt(pd.passw->text,"a0");
+	    return cry ? qcrypt(pd.passw->text,"a0") : pd.passw->text;
     } else {
 	return QString::null;
     }
@@ -329,7 +437,7 @@ QString Password::getPassword( const QString& prompt )
 
 void Password::authenticate(bool at_poweron)
 {
-    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File);
+    Config cfg("Security");
     cfg.setGroup("Passcode");
     QString passcode = cfg.readEntry("passcode");
     if ( !passcode.isEmpty()

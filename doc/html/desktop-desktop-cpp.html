@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -34,7 +36,7 @@ height="100" src="face.png" alt="Home" border="0">
 
   Implementation:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/desktop/desktop.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/desktop/desktop.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -164,7 +166,7 @@ void rotate()
 
     <a name="QPixmap"></a><a href="qpixmap.html">QPixmap</a> pm;
     pm = image;                                 // convert image to pixmap
-    pm.<a name="setOptimization"></a><a href="qpixmap.html#41f5cf">setOptimization</a>( QPixmap::BestOptim );   // rotation will be faster
+    pm.<a name="setOptimization"></a><a href="qpixmap.html#e6ae80">setOptimization</a>( QPixmap::BestOptim );   // rotation will be faster
 
     <a href="qwidget.html">QWidget</a> *d = QApplication::desktop();       // w = desktop widget
 
@@ -268,7 +270,7 @@ DesktopWidget::~DesktopWidget()
     delete pm;
 }
 
-void <a name="341"></a>DesktopWidget::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> * )
+void <a name="468"></a>DesktopWidget::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> * )
 {
     <a href="qcolor.html">QColor</a> c1 = backgroundColor();
     <a href="qcolor.html">QColor</a> c2 = c1.<a name="light"></a><a href="qcolor.html#b8743e">light</a>(104);
@@ -383,5 +385,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

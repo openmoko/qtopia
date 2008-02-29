@@ -1,7 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Application Services
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=appservices
 Icon=AppServices
-Name=Application Services
-Name[ja]=アプリケーションサービス
+Name[]=Ap­pli­ca­tion Ser­vices
 CanFastload=0

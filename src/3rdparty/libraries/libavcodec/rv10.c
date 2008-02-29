@@ -16,6 +16,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+/**
+ * @file rv10.c
+ * RV10 codec.
+ */
+ 
 #include "avcodec.h"
 #include "dsputil.h"
 #include "mpegvideo.h"
@@ -24,7 +30,7 @@
 
 #define DC_VLC_BITS 14 //FIXME find a better solution
 
-static const UINT16 rv_lum_code[256] =
+static const uint16_t rv_lum_code[256] =
 {
  0x3e7f, 0x0f00, 0x0f01, 0x0f02, 0x0f03, 0x0f04, 0x0f05, 0x0f06,
  0x0f07, 0x0f08, 0x0f09, 0x0f0a, 0x0f0b, 0x0f0c, 0x0f0d, 0x0f0e,
@@ -60,7 +66,7 @@ static const UINT16 rv_lum_code[256] =
  0x0f78, 0x0f79, 0x0f7a, 0x0f7b, 0x0f7c, 0x0f7d, 0x0f7e, 0x0f7f,
 };
 
-static const UINT8 rv_lum_bits[256] = 
+static const uint8_t rv_lum_bits[256] = 
 {
  14, 12, 12, 12, 12, 12, 12, 12,
  12, 12, 12, 12, 12, 12, 12, 12,
@@ -96,7 +102,7 @@ static const UINT8 rv_lum_bits[256] =
  12, 12, 12, 12, 12, 12, 12, 12,
 };
 
-static const UINT16 rv_chrom_code[256] =
+static const uint16_t rv_chrom_code[256] =
 {
  0xfe7f, 0x3f00, 0x3f01, 0x3f02, 0x3f03, 0x3f04, 0x3f05, 0x3f06,
  0x3f07, 0x3f08, 0x3f09, 0x3f0a, 0x3f0b, 0x3f0c, 0x3f0d, 0x3f0e,
@@ -132,7 +138,7 @@ static const UINT16 rv_chrom_code[256] =
  0x3f78, 0x3f79, 0x3f7a, 0x3f7b, 0x3f7c, 0x3f7d, 0x3f7e, 0x3f7f,
 };
 
-static const UINT8 rv_chrom_bits[256] =
+static const uint8_t rv_chrom_bits[256] =
 {
  16, 14, 14, 14, 14, 14, 14, 14,
  14, 14, 14, 14, 14, 14, 14, 14,
@@ -182,14 +188,14 @@ int rv_decode_dc(MpegEncContext *s, int n)
                if they had thought about it !!! */
             code = get_bits(&s->gb, 7);
             if (code == 0x7c) {
-                code = (INT8)(get_bits(&s->gb, 7) + 1);
+                code = (int8_t)(get_bits(&s->gb, 7) + 1);
             } else if (code == 0x7d) {
                 code = -128 + get_bits(&s->gb, 7);
             } else if (code == 0x7e) {
                 if (get_bits(&s->gb, 1) == 0)
-                    code = (INT8)(get_bits(&s->gb, 8) + 1);
+                    code = (int8_t)(get_bits(&s->gb, 8) + 1);
                 else
-                    code = (INT8)(get_bits(&s->gb, 8));
+                    code = (int8_t)(get_bits(&s->gb, 8));
             } else if (code == 0x7f) {
                 get_bits(&s->gb, 11);
                 code = 1;
@@ -203,14 +209,14 @@ int rv_decode_dc(MpegEncContext *s, int n)
         if (code < 0) {
             code = get_bits(&s->gb, 9);
             if (code == 0x1fc) {
-                code = (INT8)(get_bits(&s->gb, 7) + 1);
+                code = (int8_t)(get_bits(&s->gb, 7) + 1);
             } else if (code == 0x1fd) {
                 code = -128 + get_bits(&s->gb, 7);
             } else if (code == 0x1fe) {
                 get_bits(&s->gb, 9);
                 code = 1;
             } else {
-                fprintf(stderr, "chroma dc error\n");
+                av_log(s->avctx, AV_LOG_ERROR, "chroma dc error\n");
                 return 0xffff;
             }
         } else {
@@ -219,6 +225,8 @@ int rv_decode_dc(MpegEncContext *s, int n)
     }
     return -code;
 }
+
+#ifdef CONFIG_ENCODERS
 
 /* write RV 1.0 compatible frame header */
 void rv10_encode_picture_header(MpegEncContext *s, int picture_number)
@@ -262,6 +270,8 @@ static int get_num(GetBitContext *gb)
     }
 }
 
+#endif //CONFIG_ENCODERS
+
 /* read RV 1.0 compatible frame header */
 static int rv10_decode_picture_header(MpegEncContext *s)
 {
@@ -276,7 +286,7 @@ static int rv10_decode_picture_header(MpegEncContext *s)
     else
         s->pict_type = I_TYPE;
 //printf("h:%X ver:%d\n",h,s->rv10_version);
-    if(!marker) printf("marker missing\n");
+    if(!marker) av_log(s->avctx, AV_LOG_ERROR, "marker missing\n");
     pb_frame = get_bits(&s->gb, 1);
 
 #ifdef DEBUG
@@ -284,13 +294,13 @@ static int rv10_decode_picture_header(MpegEncContext *s)
 #endif
     
     if (pb_frame){
-        fprintf(stderr, "pb frame not supported\n");
+        av_log(s->avctx, AV_LOG_ERROR, "pb frame not supported\n");
         return -1;
     }
 
     s->qscale = get_bits(&s->gb, 5);
     if(s->qscale==0){
-        fprintf(stderr, "error, qscale:0\n");
+        av_log(s->avctx, AV_LOG_ERROR, "error, qscale:0\n");
         return -1;
     }
 
@@ -330,7 +340,7 @@ static int rv10_decode_picture_header(MpegEncContext *s)
 static int rv10_decode_init(AVCodecContext *avctx)
 {
     MpegEncContext *s = avctx->priv_data;
-    static int done;
+    static int done=0;
 
     s->avctx= avctx;
     s->out_format = FMT_H263;
@@ -353,7 +363,7 @@ static int rv10_decode_init(AVCodecContext *avctx)
         s->h263_long_vectors=0;
         break;
     default:
-        fprintf(stderr, "unknown header %X\n", avctx->sub_id);
+        av_log(s->avctx, AV_LOG_ERROR, "unknown header %X\n", avctx->sub_id);
     }
 //printf("ver:%X\n", avctx->sub_id);
     s->flags= avctx->flags;
@@ -377,6 +387,8 @@ static int rv10_decode_init(AVCodecContext *avctx)
                  rv_chrom_code, 2, 2);
         done = 1;
     }
+    
+    avctx->pix_fmt = PIX_FMT_YUV420P;
 
     return 0;
 }
@@ -390,28 +402,28 @@ static int rv10_decode_end(AVCodecContext *avctx)
 }
 
 static int rv10_decode_packet(AVCodecContext *avctx, 
-                             UINT8 *buf, int buf_size)
+                             uint8_t *buf, int buf_size)
 {
     MpegEncContext *s = avctx->priv_data;
     int i, mb_count, mb_pos, left;
 
-    init_get_bits(&s->gb, buf, buf_size);
+    init_get_bits(&s->gb, buf, buf_size*8);
     
     mb_count = rv10_decode_picture_header(s);
     if (mb_count < 0) {
-        fprintf(stderr, "HEADER ERROR\n");
+        av_log(s->avctx, AV_LOG_ERROR, "HEADER ERROR\n");
         return -1;
     }
     
     if (s->mb_x >= s->mb_width ||
         s->mb_y >= s->mb_height) {
-        fprintf(stderr, "POS ERROR %d %d\n", s->mb_x, s->mb_y);
+        av_log(s->avctx, AV_LOG_ERROR, "POS ERROR %d %d\n", s->mb_x, s->mb_y);
         return -1;
     }
     mb_pos = s->mb_y * s->mb_width + s->mb_x;
     left = s->mb_width * s->mb_height - mb_pos;
     if (mb_count > left) {
-        fprintf(stderr, "COUNT ERROR\n");
+        av_log(s->avctx, AV_LOG_ERROR, "COUNT ERROR\n");
         return -1;
     }
 
@@ -451,9 +463,10 @@ static int rv10_decode_packet(AVCodecContext *avctx,
         s->mv_dir = MV_DIR_FORWARD;
         s->mv_type = MV_TYPE_16X16; 
         if (ff_h263_decode_mb(s, s->block) == SLICE_ERROR) {
-            fprintf(stderr, "ERROR at MB %d %d\n", s->mb_x, s->mb_y);
+            av_log(s->avctx, AV_LOG_ERROR, "ERROR at MB %d %d\n", s->mb_x, s->mb_y);
             return -1;
         }
+        ff_h263_update_motion_val(s);
         MPV_decode_mb(s, s->block);
         if (++s->mb_x == s->mb_width) {
             s->mb_x = 0;
@@ -468,11 +481,11 @@ static int rv10_decode_packet(AVCodecContext *avctx,
 
 static int rv10_decode_frame(AVCodecContext *avctx, 
                              void *data, int *data_size,
-                             UINT8 *buf, int buf_size)
+                             uint8_t *buf, int buf_size)
 {
     MpegEncContext *s = avctx->priv_data;
     int i;
-    AVPicture *pict = data; 
+    AVFrame *pict = data; 
 
 #ifdef DEBUG
     printf("*****frame %d size=%d\n", avctx->frame_number, buf_size);
@@ -505,15 +518,9 @@ static int rv10_decode_frame(AVCodecContext *avctx,
     if(s->mb_y>=s->mb_height){
         MPV_frame_end(s);
         
-        pict->data[0] = s->current_picture[0];
-        pict->data[1] = s->current_picture[1];
-        pict->data[2] = s->current_picture[2];
-        pict->linesize[0] = s->linesize;
-        pict->linesize[1] = s->uvlinesize;
-        pict->linesize[2] = s->uvlinesize;
+        *pict= *(AVFrame*)&s->current_picture;
     
-        avctx->quality = s->qscale;
-        *data_size = sizeof(AVPicture);
+        *data_size = sizeof(AVFrame);
     }else{
         *data_size = 0;
     }

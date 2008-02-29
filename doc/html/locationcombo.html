@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia1/locationcombo.cpp:56 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia1/locationcombo.cpp:57 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,26 +14,34 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>LocationCombo Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>LocationCombo Class Reference</h1>
 
 <p>The LocationCombo class displays a list of available storage
 locations.
 <a href="#details">More...</a>
 <p><tt>#include &lt;<a href="locationcombo-h.html">qtopia/locationcombo.h</a>&gt;</tt>
-<p>Inherits <a href="qcombobox.html">QComboBox</a>.
 <p><a href="locationcombo-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
 <li><div class=fn><a href="#LocationCombo"><b>LocationCombo</b></a> ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )</div></li>
 <li><div class=fn><a href="#LocationCombo-2"><b>LocationCombo</b></a> ( const&nbsp;AppLnk&nbsp;*&nbsp;lnk, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )</div></li>
 <li><div class=fn><a href="#~LocationCombo"><b>~LocationCombo</b></a> ()</div></li>
-<li><div class=fn>void <a href="#setLocation"><b>setLocation</b></a> ( const&nbsp;AppLnk&nbsp;*&nbsp;lnk )</div></li>
+<li><div class=fn>void <a href="#setLocation"><b>setLocation</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;path )</div></li>
+<li><div class=fn>void <a href="#setLocation-2"><b>setLocation</b></a> ( const&nbsp;AppLnk&nbsp;*&nbsp;lnk )</div></li>
 <li><div class=fn>QString <a href="#installationPath"><b>installationPath</b></a> () const</div></li>
 <li><div class=fn>QString <a href="#documentPath"><b>documentPath</b></a> () const</div></li>
 <li><div class=fn>const FileSystem * <a href="#fileSystem"><b>fileSystem</b></a> () const</div></li>
@@ -48,15 +56,16 @@ locations.
 
 The LocationCombo class displays a list of available storage
 locations.
+<p> First availability: Qtopia 1.6
 <p> 
 <p>See also <a href="docpropertiesdialog.html">DocPropertiesDialog</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
 
 <hr><h2>Member Function Documentation</h2>
-<h3 class=fn><a name="LocationCombo"></a>LocationCombo::LocationCombo ( <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+<h3 class=fn><a name="LocationCombo"></a>LocationCombo::LocationCombo ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
 </h3>
 Constructs a LocationCombo with parent <em>parent</em> and name <em>name</em>.
 
-<h3 class=fn><a name="LocationCombo-2"></a>LocationCombo::LocationCombo ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;lnk, <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+<h3 class=fn><a name="LocationCombo-2"></a>LocationCombo::LocationCombo ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;lnk, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
 </h3>
 Constructs a LocationCombo with parent <em>parent</em> and name <em>name</em>.
 <em>lnk</em> is pointer to an existing <a href="applnk.html">AppLnk</a>.
@@ -65,7 +74,7 @@ Constructs a LocationCombo with parent <em>parent</em> and name <em>name</em>.
 </h3>
 Destroys the widget.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="documentPath"></a>LocationCombo::documentPath () const
+<h3 class=fn>QString <a name="documentPath"></a>LocationCombo::documentPath () const
 </h3>
 Returns the document path associated with this LocationCombo.  This
 will be "&lt;path&gt;/Documents".
@@ -75,7 +84,7 @@ will be "&lt;path&gt;/Documents".
 Returns a pointer to <a href="filesystem.html">FileSystem</a> object, associated with the current
 selection of the LocationCombo.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="installationPath"></a>LocationCombo::installationPath () const
+<h3 class=fn>QString <a name="installationPath"></a>LocationCombo::installationPath () const
 </h3>
 Returns the default (home) location for the file associated with this
 LocationCombo.
@@ -92,18 +101,26 @@ examined to check for a change of location.
 
 Emitted when the LocationCombo changes to a new location.
 
-<h3 class=fn>void <a name="setLocation"></a>LocationCombo::setLocation ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;lnk )
+<h3 class=fn>void <a name="setLocation"></a>LocationCombo::setLocation ( const&nbsp;QString&nbsp;&amp;&nbsp;path )
+</h3>
+Sets the display of the LocationCombo to the location containing
+<em>path</em>.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="setLocation-2"></a>LocationCombo::setLocation ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;lnk )
 </h3>
 Sets the display of the LocationCombo to the location associated with the
 <a href="applnk.html">AppLnk</a> <em>lnk</em>.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

@@ -122,7 +122,7 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 //#ifdef PALMTOPCENTER
 //#include <qpe/vobject_p.h>
 //#else
-#include "vobject_p.h"
+#include <vobject_p.h>
 //#endif
 
 /****  Types, Constants  ****/
@@ -135,6 +135,7 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 
 
 /****  Global Variables  ****/
+int QTOPIA_EXPORT q_DontDecodeBase64Photo = 0;
 int mime_lineNum, mime_numErrors; /* yyerror() can use these */
 static VObject* vObjList;
 static VObject *curProp;
@@ -158,6 +159,7 @@ int yyparse();
 
 enum LexMode {
 	L_NORMAL,
+	L_PARAMWORD,
 	L_VCARD,
 	L_VCAL,
 	L_VEVENT,
@@ -289,10 +291,14 @@ attr: name
 	{
 	enterAttr($1,0);
 	}
-	| name EQ name
+	| name EQ
 	{
-	enterAttr($1,$3);
-
+	lexPushMode(L_PARAMWORD);
+	}
+	    name
+	{
+	lexPopMode(0);
+	enterAttr($1,$4);
 	}
 	;
 	
@@ -451,10 +457,15 @@ static void enterAttr(const char *s1, const char *s2)
 	}
     else
 	addProp(curProp,p1);
-    if (qstricmp(p1,VCBase64Prop) == 0 || (s2 && qstricmp(p2,VCBase64Prop)==0))
+    /* Lookup strings so we can quickly use pointer comparison */
+    static const char* base64 = lookupProp_(VCBase64Prop);
+    static const char* qp = lookupProp_(VCQuotedPrintableProp);
+    static const char* photo = lookupProp_(VCPhotoProp);
+    static const char* encoding = lookupProp_(VCEncodingProp);
+    if ((!q_DontDecodeBase64Photo || vObjectName(curProp) != photo)
+	&& (p1 == base64 || p1 == encoding && p2 == base64))
 	lexPushMode(L_BASE64);
-    else if (qstricmp(p1,VCQuotedPrintableProp) == 0
-	    || (s2 && qstricmp(p2,VCQuotedPrintableProp)==0))
+    else if (p1 == qp || p1 == encoding && p2 == qp)
 	lexPushMode(L_QUOTED_PRINTABLE);
     deleteStr(s1); deleteStr(s2);
     }
@@ -640,6 +651,20 @@ static char* lexGetWord() {
     lexAppendc(0);
     return lexStr();
     }
+
+static char* lexGetParamWord()
+{
+    int c;
+    lexClearToken();
+    c = lexLookahead();
+    while (c >= ' ' && c < 127 && !strchr("[]:=,.;",c)) {
+	lexAppendc(c);
+	lexSkipLookahead();
+	c = lexLookahead();
+    }
+    lexAppendc(0);
+    return lexStr();
+}
 
 static void lexPushLookaheadc(int c) {
     int putptr;
@@ -1010,6 +1035,7 @@ static int yylex() {
     int lexmode = LEXMODE();
     if (lexmode == L_VALUES) {
 	int c = lexGetc();
+	int c2;
 	if (c == ';' && fieldedProp) {
 	    DBG_(("db: SEMICOLON\n"));
 	    lexPushLookaheadc(c);
@@ -1017,13 +1043,12 @@ static int yylex() {
 	    lexSkipLookahead();
 	    return SEMICOLON;
 	    }
-	else if (strchr("\n",c)) {
+	else if (strchr("\n",c) && (c2 = lexLookahead()) != ' ' && c2 != '\t') {
 	    ++mime_lineNum;
 	    /* consume all line separator(s) adjacent to each other */
-	    c = lexLookahead();
-	    while (strchr("\n",c)) {
+	    while (strchr("\n",c2)) {
 		lexSkipLookahead();
-		c = lexLookahead();
+		c2 = lexLookahead();
 		++mime_lineNum;
 		}
 	    DBG_(("db: LINESEP\n"));
@@ -1054,8 +1079,10 @@ static int yylex() {
 		}
 	    else return 0;
 	    }
-	}
-    else {
+    } else if (lexmode == L_PARAMWORD) {
+	yylval.str = lexGetParamWord();
+	return ID;
+    } else {
 	/* normal mode */
 	while (1) {
 	    int c = lexGetc();

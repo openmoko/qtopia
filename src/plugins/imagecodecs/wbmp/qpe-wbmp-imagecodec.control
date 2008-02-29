@@ -1,0 +1,10 @@
+Files: plugins/imagecodecs/libwbmp.so*
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: WBMP Wireless Bitmap image reader.
+    Allows you to view WBMP images from WAP and GSM services.

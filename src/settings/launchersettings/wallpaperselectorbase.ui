@@ -1,0 +1,146 @@
+<!DOCTYPE UI><UI>
+<class>WallpaperSelectorBase</class>
+<widget>
+    <class>QDialog</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>WallpaperSelectorBase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>244</width>
+            <height>310</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Select Background</string>
+    </property>
+    <vbox>
+        <property stdset="1">
+            <name>margin</name>
+            <number>11</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>6</number>
+        </property>
+        <widget>
+            <class>QButtonGroup</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>sourceButtonGroup</cstring>
+            </property>
+            <property stdset="1">
+                <name>title</name>
+                <string>Source</string>
+            </property>
+            <property>
+                <name>whatsThis</name>
+                <string>You may choose from a selection of wallpapers provided, or from your own images.</string>
+            </property>
+            <hbox>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>11</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>6</number>
+                </property>
+                <widget>
+                    <class>QRadioButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>RadioButton1</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Wallpaper</string>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QRadioButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>RadioButton2</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Your Images</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget>
+            <class>QListBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>wallpaperListBox</cstring>
+            </property>
+            <property>
+                <name>whatsThis</name>
+                <string>Select the image you would like for your background.  A preview will appear below.</string>
+            </property>
+        </widget>
+        <widget>
+            <class>QGroupBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>GroupBox1</cstring>
+            </property>
+            <property stdset="1">
+                <name>title</name>
+                <string>Preview</string>
+            </property>
+            <vbox>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>11</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>6</number>
+                </property>
+                <widget>
+                    <class>QLabel</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>preview</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>7</hsizetype>
+                            <vsizetype>7</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>TextLabel1</string>
+                    </property>
+                </widget>
+            </vbox>
+        </widget>
+    </vbox>
+</widget>
+<connections>
+    <connection>
+        <sender>sourceButtonGroup</sender>
+        <signal>clicked(int)</signal>
+        <receiver>WallpaperSelectorBase</receiver>
+        <slot>sourceSelected(int)</slot>
+    </connection>
+    <connection>
+        <sender>wallpaperListBox</sender>
+        <signal>highlighted(QListBoxItem*)</signal>
+        <receiver>WallpaperSelectorBase</receiver>
+        <slot>imageSelected(QListBoxItem *)</slot>
+    </connection>
+    <slot access="protected">imageSelected(QListBoxItem *)</slot>
+    <slot access="protected">sourceSelected(int)</slot>
+</connections>
+</UI>

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -24,7 +39,8 @@
 #include <stdlib.h>
 
 /*!
-  Note: in Qtopia 1.5.0, invalid dates gave undefined results.
+  \obsolete
+  \sa TimeString
 */
 QString TimeConversion::toString( const QDate &d )
 {
@@ -36,6 +52,10 @@ QString TimeConversion::toString( const QDate &d )
     return r;
 }
 
+/*!
+  \obsolete
+  \sa TimeString
+*/
 QDate TimeConversion::fromString( const QString &datestr )
 {
     int monthPos = datestr.find('.');
@@ -48,6 +68,9 @@ QDate TimeConversion::fromString( const QString &datestr )
     return QDate( y,m,d );
 }
 
+/*!
+  Converts local-time \a dt to a Unix time_t.
+*/
 time_t TimeConversion::toUTC( const QDateTime& dt )
 {
     time_t tmp;
@@ -80,6 +103,9 @@ time_t TimeConversion::toUTC( const QDateTime& dt )
     return tmp;
 }
 
+/*!
+  Converts Unix time_t \a time to a local-time QDateTime.
+*/
 QDateTime TimeConversion::fromUTC( time_t time )
 {
     struct tm *lt;
@@ -97,11 +123,19 @@ QDateTime TimeConversion::fromUTC( time_t time )
 }
 
 
+/*!
+  Returns the number of real seconds between \a from and \a to,
+  accounting for any summertime/wintertime changes.
+*/
 int TimeConversion::secsTo( const QDateTime &from, const QDateTime &to )
 {
     return toUTC( to ) - toUTC( from );
 }
 
+/*!
+  Converts local-time \a d, at time 0:00, to an ISO8601 string, specified
+  with a UTC timezone. You may prefer to use toISO8601(d,FALSE).
+*/
 QCString TimeConversion::toISO8601( const QDate &d )
 {
     time_t tmp = toUTC( d );
@@ -112,6 +146,10 @@ QCString TimeConversion::toISO8601( const QDate &d )
     return str;
 }
 
+/*!
+  Converts local-time \a dt to an ISO8601 string, specified
+  with a UTC timezone.
+*/
 QCString TimeConversion::toISO8601( const QDateTime &dt )
 {
     time_t tmp = toUTC( dt );
@@ -124,6 +162,9 @@ QCString TimeConversion::toISO8601( const QDateTime &dt )
     return str;
 }
 
+/*!
+  Converts the ISO8601 time string \a s to a local-time QDateTime.
+*/
 QDateTime TimeConversion::fromISO8601( const QCString &s )
 {
 

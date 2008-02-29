@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -29,6 +44,8 @@
 #include <qtimer.h>
 #include <qtoolbutton.h>
 #include <qdatetime.h>
+#include <qtimer.h>
+#include <qlayout.h>
 
 /*
  *  Constructs a DateBookDayHeader which is a child of 'parent', with the
@@ -37,21 +54,17 @@
  *  The dialog will by default be modeless, unless you set 'modal' to
  *  TRUE to construct a modal dialog.
  */
-DayViewHeader::DayViewHeader( bool useMonday,
-				      QWidget* parent,  const char* name )
-    : DateBookDayHeaderBase( parent, name ),
-      bUseMonday( useMonday )
+DayViewHeader::DayViewHeader( bool useMonday, QWidget* parent, const char *name )
+    : QWidget( parent, name ),
+    bUseMonday( useMonday )
 {
-    back->setIconSet(Resource::loadIconSet("back"));
-    forward->setIconSet(Resource::loadIconSet("forward"));
-
-    setupNames();
+    init();
 
     setBackgroundMode( PaletteButton );
     grpDays->setBackgroundMode( PaletteButton );
 
     dButton->setDate( currDate );
-    connect(dButton,SIGNAL(valueChanged(const QDate &)),this,SIGNAL(dateChanged(const QDate &)));
+    connect(dButton,SIGNAL(valueChanged(const QDate&)),this,SIGNAL(dateChanged(const QDate&)));
 }
 
 /*
@@ -62,6 +75,58 @@ DayViewHeader::~DayViewHeader()
     // no need to delete child widgets, Qt does it all for us
 }
 
+void DayViewHeader::init()
+{
+    
+    back = new QToolButton(this);
+    back->setIconSet(Resource::loadIconSet("back"));
+    back->setAutoRepeat( TRUE );
+    back->setAutoRaise( TRUE );
+    connect( back, SIGNAL(clicked()), this, SLOT(goBack()) );
+
+    forward = new QToolButton(this);
+    forward->setIconSet(Resource::loadIconSet("forward"));
+    forward->setAutoRepeat( TRUE );
+    forward->setAutoRaise( TRUE );
+    connect( forward, SIGNAL(clicked()), this, SLOT(goForward()) );
+
+    grpDays = new QButtonGroup(this);
+    grpDays->setExclusive( TRUE );
+    connect( grpDays, SIGNAL(clicked(int)), this, SLOT(setDay(int)) );
+
+    cmdDay1 = new QToolButton(grpDays);
+    cmdDay2 = new QToolButton(grpDays);
+    cmdDay3 = new QToolButton(grpDays);
+    cmdDay4 = new QToolButton(grpDays);
+    cmdDay5 = new QToolButton(grpDays);
+    cmdDay6 = new QToolButton(grpDays);
+    cmdDay7 = new QToolButton(grpDays);
+    QToolButton *cmdDays[7] = { cmdDay1, cmdDay2, cmdDay3, cmdDay4, cmdDay5, cmdDay6, cmdDay7 };
+    for ( int i = 0; i < 7; i++ ) {
+	cmdDays[i]->setAutoRaise( TRUE );
+	cmdDays[i]->setToggleButton( TRUE );
+    }
+
+    setupNames();
+
+    dButton = new QPEDateEdit(this);
+
+    QHBoxLayout *hbox = new QHBoxLayout( this );
+    hbox->add(back);
+    hbox->add(grpDays);
+    hbox->add(forward);
+    hbox->add(dButton);
+
+    hbox = new QHBoxLayout( grpDays );
+    hbox->add( cmdDay1 );
+    hbox->add( cmdDay2 );
+    hbox->add( cmdDay3 );
+    hbox->add( cmdDay4 );
+    hbox->add( cmdDay5 );
+    hbox->add( cmdDay6 );
+    hbox->add( cmdDay7 );
+}
+
 void DayViewHeader::setStartOfWeek( bool onMonday )
 {
     bUseMonday = onMonday;
@@ -69,25 +134,21 @@ void DayViewHeader::setStartOfWeek( bool onMonday )
     setDate( currDate.year(), currDate.month(), currDate.day() );
 }
 
+static void setButton( QButton *btn, int day )
+{
+    btn->setText( TimeString::localDayOfWeek( day + 1, TimeString::Short ) );
+}
+
 void DayViewHeader::setupNames()
 {
-    if ( bUseMonday ) {
-	cmdDay1->setText( DateBookDayHeaderBase::tr("Monday").left(1) );
-	cmdDay2->setText( DateBookDayHeaderBase::tr("Tuesday").left(1) );
-	cmdDay3->setText( DateBookDayHeaderBase::tr("Wednesday").left(1) );
-	cmdDay4->setText( DateBookDayHeaderBase::tr("Thursday").left(1) );
-	cmdDay5->setText( DateBookDayHeaderBase::tr("Friday").left(1) );
-	cmdDay6->setText( DateBookDayHeaderBase::tr("Saturday").left(1) );
-	cmdDay7->setText( DateBookDayHeaderBase::tr("Sunday").left(1) );
-    } else {
-	cmdDay1->setText( DateBookDayHeaderBase::tr("Sunday").left(1) );
-	cmdDay2->setText( DateBookDayHeaderBase::tr("Monday").left(1) );
-	cmdDay3->setText( DateBookDayHeaderBase::tr("Tuesday").left(1) );
-	cmdDay4->setText( DateBookDayHeaderBase::tr("Wednesday").left(1) );
-	cmdDay5->setText( DateBookDayHeaderBase::tr("Thursday").left(1) );
-	cmdDay6->setText( DateBookDayHeaderBase::tr("Friday").left(1) );
-	cmdDay7->setText( DateBookDayHeaderBase::tr("Saturday").left(1) );
-    }
+    int i = 0;
+    ::setButton( cmdDay1, (bUseMonday?i:(i+6)%7) ); i++;
+    ::setButton( cmdDay2, (bUseMonday?i:(i+6)%7) ); i++;
+    ::setButton( cmdDay3, (bUseMonday?i:(i+6)%7) ); i++;
+    ::setButton( cmdDay4, (bUseMonday?i:(i+6)%7) ); i++;
+    ::setButton( cmdDay5, (bUseMonday?i:(i+6)%7) ); i++;
+    ::setButton( cmdDay6, (bUseMonday?i:(i+6)%7) ); i++;
+    ::setButton( cmdDay7, (bUseMonday?i:(i+6)%7) );
 }
 
 /*

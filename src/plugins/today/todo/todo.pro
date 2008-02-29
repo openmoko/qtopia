@@ -1,21 +1,20 @@
-TEMPLATE = lib
-CONFIG -=
-CONFIG += qtopia warn_on release
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+CONFIG += qtopiaplugin 
 
-# Input
+TARGET = todoplugin
+
 HEADERS = todoplugin.h todopluginimpl.h todopluginoptions.h
 SOURCES = todoplugin.cpp todopluginimpl.cpp todopluginoptions.cpp
 INTERFACES = todooptionsbase.ui
 
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
 INCLUDEPATH     += ../ ../library
 DEPENDPATH      += ../ ../library
 
-unix:LIBS    += -lqpepim
-win32:LIBS   += $(QPEDIR)/lib/qpepim.lib
+CONFIG+=pimlib
 
-DESTDIR = $(QPEDIR)/plugins/today
-TARGET = todoplugin
+desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/today/todoplugin.desktop
+desktop.path=/plugins/today/
 
-TRANSLATIONS = libtodoplugin-en_GB.ts libtodoplugin-de.ts libtodoplugin-ja.ts libtodoplugin-no.ts
+INSTALLS+=desktop
+
+PACKAGE_NAME	= qpe-today-todoplugin

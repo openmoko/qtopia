@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -30,7 +32,7 @@ remains with Trolltech.
 <hr>
 <pre>
 /****************************************************************************
-** &#36;Id&#58; qt/src/kernel/qwindowsystem_qws.h   2.3.7   edited 2003-05-16 $
+** &#36;Id&#58; qt/src/kernel/qwindowsystem_qws.h   2.3.9   edited 2004-12-13 $
 **
 ** Definition of Qt/FB central server classes
 **
@@ -210,6 +212,7 @@ class <a href="qwsserver.html">QWSServer</a> : public QObject
     friend class QWSWindow;
     friend class QWSDisplay;
     friend class QWSInputMethod;
+    friend class QWSGestureMethod;
     Q_OBJECT
 
 public:
@@ -262,6 +265,11 @@ public:
     static void setMicroFocus( int x, int y );
     static void requestMarkedText();
 #endif
+    
+#ifndef QT_NO_QWS_FSIM
+    static void setCurrentGestureMethod( QWSGestureMethod *im );
+    static void resetGestureMethod();
+#endif
 
     static void setDefaultMouse( const char * );
     static void setDefaultKeyboard( const char * );
@@ -288,13 +296,18 @@ public:
 #endif
 
     static void setScreenSaver(QWSScreenSaver*);
+    static void setScreenSaverIntervals(int* ms, int eventBlockLevel /* = -1 */);
+    static void setScreenSaverInterval(int, int eventBlockLevel /* = -1 */);
+    // the next two are provided for backwards compabitility
     static void setScreenSaverIntervals(int* ms);
     static void setScreenSaverInterval(int);
     static bool screenSaverActive();
     static void screenSaverActivate(bool);
+    static void restartScreenSaverTimer();
 
     // the following are internal.
     void refresh();
+    void refresh(const QRegion &amp;);
     void enablePainting(bool);
     static void processEventQueue();
     static QList&lt;QWSInternalWindowInfo&gt; * windowList();
@@ -319,8 +332,9 @@ public:
     static bool isCursorVisible();
 #endif
 
-    enum WindowEvent { Create=0x01, Destroy=0x02, Hide=0x04, Show=0x08,
-                       Raise=0x10, Lower=0x20, Geometry=0x40, Active=0x80 };
+    enum WindowEvent { Create=0x0001, Destroy=0x0002, Hide=0x0004, Show=0x0008,
+                       Raise=0x0010, Lower=0x0020, Geometry=0x0040, Active=0x0080,
+                       Name=0x0100 };
 
 signals:
     void windowEvent( QWSWindow *w, QWSServer::WindowEvent e );
@@ -354,6 +368,8 @@ private:
                                        bool autoRepeat);
 
 #endif
+    static void sendMouseEventUnfiltered(const QPoint &amp;, int state);
+
     static void emergency_cleanup();
 
     static QColor *bgColor;
@@ -386,6 +402,7 @@ private:
     void invokeDefineCursor( QWSDefineCursorCommand *cmd, QWSClient *client );
     void invokeSelectCursor( QWSSelectCursorCommand *cmd, QWSClient *client );
 #endif
+    void invokeMoveCursor( QWSMoveCursorCommand *cmd );
     void invokeGrabMouse( QWSGrabMouseCommand *cmd, QWSClient *client );
     void invokeGrabKeyboard( QWSGrabKeyboardCommand *cmd, QWSClient *client );
 #ifndef QT_NO_SOUND
@@ -517,7 +534,7 @@ extern QWSServer *qwsServer; //there can be only one
 
 
 #ifndef QT_NO_QWS_IM
-class QWSInputMethod : public QObject
+class <a href="qwsinputmethod.html">QWSInputMethod</a> : public QObject
 {
 public:
     QWSInputMethod();
@@ -530,7 +547,7 @@ public:
     QFont font() const;
     QRect inputRect() const; 
 protected:
-    void sendIMEvent( QWSServer::IMState, const QString&amp; txt, int cpos, int selLen = 0 );
+    void sendIMEvent (QWSServer::IMState state, const QString &amp; txt, int cpos, int selLen = 0);
 };
 
 inline void QWSInputMethod::sendIMEvent( QWSServer::IMState state, const QString &amp;txt, int cpos, int selLen )
@@ -540,7 +557,43 @@ inline void QWSInputMethod::sendIMEvent( QWSServer::IMState state, const QString
 }
 #endif
 
+#ifndef QT_NO_QWS_FSIM
+class QWSGestureMethod : public QObject
+{
+public:
+    QWSGestureMethod();
+    virtual ~QWSGestureMethod();
+    virtual bool filter(const QPoint &amp;, int) = 0;
+    virtual void reset();
+protected:
+    uint setInputResolution(bool isHigh);
+    uint inputResolutionShift() const;
+    void sendIMEvent( QWSServer::IMState, const QString&amp; txt, int cpos, int selLen = 0 );
+    void sendKeyEvent( int, int, int, bool, bool);
+    void sendFilteredKeyEvent( int, int, int, bool, bool);
+    void sendMouseEvent( const QPoint &amp;, int );
+private:
+    bool mIResolution;
+};
 
+inline void QWSGestureMethod::sendIMEvent( QWSServer::IMState state, const QString &amp;txt, int cpos, int selLen )
+{
+    qwsServer-&gt;sendIMEvent( state, txt, cpos, selLen );
+
+}
+
+inline void QWSGestureMethod::sendFilteredKeyEvent( int uni, int code, int mod, bool press, bool repeat)
+{
+    qwsServer-&gt;sendKeyEvent( uni, code, mod, press, repeat );
+}
+
+inline void QWSGestureMethod::sendKeyEvent( int uni, int code, int mod, bool press, bool repeat)
+{
+    qwsServer-&gt;sendKeyEventUnfiltered( uni, code, mod, press, repeat );
+
+}
+
+#endif
 
 
 /*********************************************************************
@@ -602,5 +655,5 @@ private:
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

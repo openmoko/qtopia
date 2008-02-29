@@ -1,20 +1,44 @@
-multiprocess:TEMPLATE   = app
-multiprocess:DESTDIR    = $(QPEDIR)/bin
-singleprocess:TEMPLATE  = lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE    = lib
-quicklaunch:DESTDIR     = $(QPEDIR)/plugins/application
-
-CONFIG		+= qtopia warn_on release
-HEADERS		= audiodevice.h audioinput.h mediarecorder.h pluginlist.h \
+CONFIG		+= qtopiaapp
+HEADERS		= audioinput.h mediarecorder.h pluginlist.h \
 		  samplebuffer.h timeprogressbar.h confrecorder.h waveform.h
-SOURCES		= audiodevice.cpp audioinput.cpp mediarecorder.cpp \
+SOURCES		= audioinput.cpp mediarecorder.cpp \
 		  pluginlist.cpp samplebuffer.cpp timeprogressbar.cpp \
-		  confrecorder.cpp waveform.cpp
-multiprocess:SOURCES+=main.cpp
+		  confrecorder.cpp waveform.cpp main.cpp
+
 INTERFACES      = mediarecorderbase.ui confrecorderbase.ui
 
 TARGET		= mediarecorder
-TRANSLATIONS = mediarecorder-en_GB.ts mediarecorder-de.ts mediarecorder-ja.ts mediarecorder-no.ts
 
-unix:LIBS       += -lpthread
+DEPENDS         += mediaplayerbase
+INCLUDEPATH     += ../../libraries/mediaplayer
+DEPENDPATH      += ../../libraries/mediaplayer
+
+LIBS            += -lmediaplayer -lpthread
+
+TRANSLATABLES   = $$HEADERS \
+                    $$SOURCES \
+                    $$INTERFACES
+
+i18n.path=$${INSTALL_PREFIX}/i18n
+i18n.commands=$${COMMAND_HEADER}\
+    for lang in $$TRANSLATIONS; \
+    do \
+	for pkg in Categories-mediarecorder; \
+	do \
+	    $${DQTDIR}/bin/lrelease $${QTOPIA_DEPOT_PATH}/i18n/\$$lang/\$$pkg.ts \
+		-qm $(INSTALL_ROOT)/i18n/\$$lang/\$$pkg.qm; \
+	done; \
+    done
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/voicerecorder.desktop
+desktop.path=/apps/Applications
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/mediarecorder*
+help.path=/help/html
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/mediarecorder/*
+pics.path=/pics/mediarecorder
+service.files=$${QTOPIA_DEPOT_PATH}/services/GetValue/audio/mediarecorder
+service.path=/services/GetValue/audio
+INSTALLS+=desktop help service
+PICS_INSTALLS+=pics
+!isEmpty(DQTDIR):!isEmpty(TRANSLATIONS):INSTALLS+=i18n
+
+PACKAGE_DESCRIPTION=The multimedia recorder for the Qtopia environment.

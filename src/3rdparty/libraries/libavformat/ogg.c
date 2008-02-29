@@ -30,8 +30,10 @@ typedef struct OggContext {
 } OggContext ;
 
 
-static int ogg_write_header(AVFormatContext *avfcontext) {
-    OggContext *context ;
+#ifdef CONFIG_ENCODERS
+static int ogg_write_header(AVFormatContext *avfcontext) 
+{
+    OggContext *context = avfcontext->priv_data;
     AVCodecContext *avccontext ;
     vorbis_info vi ;
     vorbis_dsp_state vd ;
@@ -39,10 +41,6 @@ static int ogg_write_header(AVFormatContext *avfcontext) {
     vorbis_block vb ;
     ogg_packet header, header_comm, header_code ; 
     int n ;
-    
-    if(!(context = malloc(sizeof(OggContext))))
-	return -1 ;
-    avfcontext->priv_data = context ;
     
     srand(time(NULL));
     ogg_stream_init(&context->os, rand());
@@ -75,8 +73,11 @@ static int ogg_write_header(AVFormatContext *avfcontext) {
 	ogg_stream_packetin(&context->os, &header_comm) ;
 	ogg_stream_packetin(&context->os, &header_code) ;  
 	
+	vorbis_block_clear(&vb) ;
+	vorbis_dsp_clear(&vd) ;
+	vorbis_info_clear(&vi) ;
 	vorbis_comment_clear(&vc) ;
-
+	
 	/* end of vorbis specific code */
 
 	context->header_handled = 0 ;
@@ -89,7 +90,7 @@ static int ogg_write_header(AVFormatContext *avfcontext) {
 
 static int ogg_write_packet(AVFormatContext *avfcontext,
 			    int stream_index,
-			    unsigned char *buf, int size, int force_pts)
+			    const uint8_t *buf, int size, int64_t force_pts)
 {
     OggContext *context = avfcontext->priv_data ;
     ogg_packet *op ;
@@ -109,7 +110,7 @@ static int ogg_write_packet(AVFormatContext *avfcontext,
 
     while(l < size) {
 	op = (ogg_packet*)(buf + l) ;
-	op->packet = buf + l + sizeof(ogg_packet) ; /* fix data pointer */
+	op->packet = (uint8_t*) buf + l + sizeof( ogg_packet) ; /* fix data pointer */
 
 	if(!context->base_packet_no) { /* this is the first packet */
 	    context->base_packet_no = op->packetno ; 
@@ -162,6 +163,7 @@ static AVOutputFormat ogg_oformat = {
     ogg_write_packet,
     ogg_write_trailer,
 } ;
+#endif //CONFIG_ENCODERS
 
 
 static int next_packet(AVFormatContext *avfcontext, ogg_packet *op) {
@@ -190,17 +192,11 @@ static int next_packet(AVFormatContext *avfcontext, ogg_packet *op) {
 
 static int ogg_read_header(AVFormatContext *avfcontext, AVFormatParameters *ap)
 {
-    OggContext *context ;
+    OggContext *context = avfcontext->priv_data;
     char *buf ;
     ogg_page og ;
     AVStream *ast ;
     
-    if(!(context = malloc(sizeof(OggContext)))) {
-	perror("malloc") ;
-	return -1 ;
-    }
-    avfcontext->priv_data = context ;
-
     ogg_sync_init(&context->oy) ;
     buf = ogg_sync_buffer(&context->oy, DECODER_BUFFER_SIZE) ;
 
@@ -263,7 +259,9 @@ static AVInputFormat ogg_iformat = {
 
 
 int ogg_init(void) {
+#ifdef CONFIG_ENCODERS
     av_register_output_format(&ogg_oformat) ;
+#endif
     av_register_input_format(&ogg_iformat);
     return 0 ;
 }

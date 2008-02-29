@@ -18,7 +18,10 @@
  */
 #include "avformat.h"
 
+static int default_interrupt_cb(void);
+
 URLProtocol *first_protocol = NULL;
+URLInterruptCB *url_interrupt_cb = default_interrupt_cb;
 
 int register_protocol(URLProtocol *protocol)
 {
@@ -41,12 +44,16 @@ int url_open(URLContext **puc, const char *filename, int flags)
     p = filename;
     q = proto_str;
     while (*p != '\0' && *p != ':') {
+        /* protocols can only contain alphabetic chars */
+        if (!isalpha(*p))
+            goto file_proto;
         if ((q - proto_str) < sizeof(proto_str) - 1)
             *q++ = *p;
         p++;
     }
     /* if the protocol has length 1, we consider it is a dos drive */
     if (*p == '\0' || (q - proto_str) <= 1) {
+    file_proto:
         strcpy(proto_str, "file");
     } else {
         *q = '\0';
@@ -61,11 +68,12 @@ int url_open(URLContext **puc, const char *filename, int flags)
     err = -ENOENT;
     goto fail;
  found:
-    uc = av_malloc(sizeof(URLContext));
+    uc = av_malloc(sizeof(URLContext) + strlen(filename));
     if (!uc) {
         err = -ENOMEM;
         goto fail;
     }
+    strcpy(uc->filename, filename);
     uc->prot = up;
     uc->flags = flags;
     uc->is_streamed = 0; /* default = not streamed */
@@ -92,6 +100,7 @@ int url_read(URLContext *h, unsigned char *buf, int size)
     return ret;
 }
 
+#if defined(CONFIG_ENCODERS) || defined(CONFIG_NETWORK)
 int url_write(URLContext *h, unsigned char *buf, int size)
 {
     int ret;
@@ -103,6 +112,7 @@ int url_write(URLContext *h, unsigned char *buf, int size)
     ret = h->prot->url_write(h, buf, size);
     return ret;
 }
+#endif //CONFIG_ENCODERS
 
 offset_t url_seek(URLContext *h, offset_t pos, int whence)
 {
@@ -153,4 +163,28 @@ offset_t url_filesize(URLContext *h)
 int url_get_max_packet_size(URLContext *h)
 {
     return h->max_packet_size;
+}
+
+void url_get_filename(URLContext *h, char *buf, int buf_size)
+{
+    pstrcpy(buf, buf_size, h->filename);
+}
+
+
+static int default_interrupt_cb(void)
+{
+    return 0;
+}
+
+/** 
+ * The callback is called in blocking functions to test regulary if
+ * asynchronous interruption is needed. -EINTR is returned in this
+ * case by the interrupted function. 'NULL' means no interrupt
+ * callback is given.  
+ */
+void url_set_interrupt_cb(URLInterruptCB *interrupt_cb)
+{
+    if (!interrupt_cb)
+        interrupt_cb = default_interrupt_cb;
+    url_interrupt_cb = interrupt_cb;
 }

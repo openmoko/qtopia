@@ -1,0 +1,446 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/devices-keys-buttons.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia - Customizing Qtopia for a Device: Keys and Buttons</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia - Customizing Qtopia for a Device: Keys and Buttons</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Default scan-codes for Qtopia keys
+</a>
+<ul>
+<li><a href="#2-1"> Overriding scancode mapping for Qtopia
+</a>
+<li><a href="#2-2"> Overriding the keyboard handler Qtopia Keys
+</a>
+<li><a href="#2-3"> Key behavior in Qtopia
+</a>
+<ul>
+<li><a href="#2-3-1"> Keys that are always intercepted
+</a>
+<li><a href="#2-3-2"> Keys that are sometimes intercepted
+</a>
+</ul>
+</ul>
+<li><a href="#3"> Configuration of Hardware Buttons
+</a>
+<ul>
+<li><a href="#3-1"> User Defineable Button Mappings
+</a>
+<li><a href="#3-2"> Phone Launcher Menu
+</a>
+<li><a href="#3-3"> Phone Buttons
+</a>
+<li><a href="#3-4"> Phone SoftKey Definition
+</a>
+</ul>
+<li><a href="#4"> Non-installed Components
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document sets out the key and button related implementation requirements for specific devices and makes recommendations for the optimal installation of Qtopia on a handheld device. How you install Qtopia on a given device will be determined by the functionality of that device.
+<p> This document should be read in conjunction with <a href="devices.html">Qtopia - Customizing Qtopia for a Device</a>.
+<p> <h2> Default scan-codes for Qtopia keys
+</h2>
+<a name="2"></a><p> Nearly all PDA's and Phones have keys that are not found on a regular keyboard. In order for Qtopia to function correctly when installed on a device, it needs these keys to be defined. The easiest way to do this is to have the keyboard driver for the device emit the scancodes for the existing mapping for Qtopia.
+<p> In addition to the normal mapping for a US-101 keyboard, the following table sets out the codes that are required / available / optional:
+<p> <table>
+<tr><th>scancode</th><th>Qt key code</th><th>description</th>                     <th>keypad mode</th><th>no keypad mode</th></tr>
+<tr><td>65</td>      <td>Key_Menu</td>   <td>Application menu key</td>            <td>Optional</td><td>Not Available</td></tr>
+<tr><td>67</td>      <td>Key_Back</td>   <td>Accept/Close dialog key</td>         <td>Required</td><td>Not Available</td></tr>
+<tr><td>68</td>      <td>Key_Yes</td>    <td>Yes</td>                <td>Optional</td><td>Not Available</td></tr>
+<tr><td>69</td>      <td>Key_No</td>     <td>No</td>                <td>Optional</td><td>Not Available</td></tr>
+<tr><td>87</td>      <td>Key_Call</td>   <td>Start call, accept incoming call</td><td>Optional</td><td>Not Available</td></tr>
+<tr><td>88</td>      <td>Key_Hangup</td> <td>End call, reject incoming call</td>  <td>Optional</td><td>Not Available</td></tr>
+<tr><td>116</td>     <td>Key_Select</td> <td>Select menu option, checkbox, pressbutton</td><td>Required</td><td>Not Available</td></tr>
+<tr><td>120</td>     <td>F31</td>        <td>Toggle input method</td>             <td>Optional</td><td>Optional</td></tr>
+<tr><td>121</td>     <td>F32</td>        <td>Sync device</td>                     <td>Optional</td><td>Optional</td></tr>
+<tr><td>122</td>     <td>F34</td>        <td>Power/Sleep</td>                     <td>Optional?</td><td>Required</td></tr>
+<tr><td>123</td>     <td>F35</td>        <td>Toggle backlight</td>                <td>Optional</td><td>Optional</td></tr>
+<tr><td>124</td>     <td>Context1</td>   <td>First Context button</td>            <td>Optional</td><td>Not Available</td></tr>
+<tr><td>125</td>     <td>Context2</td>   <td>Second Context button</td>           <td>Optional</td><td>Not Available</td></tr>
+<tr><td>126</td>     <td>Context3</td>   <td>Third Context button</td>            <td>Optional</td><td>Not Available</td></tr>
+<tr><td>127</td>     <td>Context4</td>   <td>Forth Context button</td>            <td>Optional</td><td>Not Available</td></tr>
+</table>
+<p> There are two additional keys that do not have default mappings, and should not be used. They are listed below only for reasons of compatibility.
+<p> <table>
+<tr><th>Qt key code</th><th>description</th>                        <th>keypad mode</th><th>no keypad mode</th></tr>
+<tr><td>Key_F30</td>   <td>maps to space on widgets that need select</td><td>Not Applicable</td><td>Optional</td></tr>
+<tr><td>Key_F33</td>   <td>maps to enter on widgets that need ok</td><td>Not Applicable</td><td>Optional</td></tr>
+</table>
+<p> Qtopia is designed to be flexible in terms of the keys required. The default
+mapping for Qtopia has the following keys:
+<p> <ul>
+<li> Key_Select - selects/activates/toggles/edits the currently highlighted item.
+<li> Key_Context1 - soft key 1; mapped to Key_Menu in default mapping.
+<li> Key_Back - leave dialog, or Key_Backspace while editing text and no real Key_Backspace.
+<li> Key_Call - answer or make a call.
+<li> Key_Hangup - hang up a call or return to home screen.
+<li> Key_Up - navigate to previous item, or up one line.
+<li> Key_Down - navigate to next item, or down one line.
+<li> Key_Left - navigate to previous page in Tab Widget, or left one character.
+<li> Key_Right - navigate to next page in Tab Widget, or left one character.
+</ul>
+<p> Qtopia also acts upon:
+<ul>
+<li> Key_Flip - pressed and held while the display is "closed" (eg. Clamshell phone),
+released when open. Answers or hangs up calls.
+<li> Key_Backspace - deletes character/item.
+</ul>
+<p> Qtopia can operate without Key_Call and Key_Hangup.
+<p> Qtopia can operate without Key_Left and Key_Right.
+<p> Qtopia can operate with Key_Menu rather than Key_Context1.
+<p> If a device has an alternate button mapping, Trolltech
+will endeavour to provide assistance in getting Qtopia to
+work with alternate button mapping.
+<p> <h3> Overriding scancode mapping for Qtopia
+</h3>
+<a name="2-1"></a><p> If it is not possible to map the device buttons' emit to the default scan codes
+for the Qtopia keys, then the mapping can be overridden in <tt>custom-linux-&lt;device&gt;-g++.*</tt>.
+In <tt>custom-linux-&lt;device&gt;-g++.h</tt> add:
+<p> <pre>
+#define QPE_OVERRIDE_KEYMAP
+struct KeyOverride;
+extern const KeyOverride* qtopia_override_keys();
+</pre>
+ 
+<p> And in <tt>custom-linux-&lt;device&gt;-g++.cpp</tt> add:
+<pre>
+typedef struct KeyOverride {
+    ushort scan_code;
+    QWSServer::KeyMap map;
+};
+
+static const KeyOverride deviceKeys[] = {
+   { 0x79,   {   Qt::Key_F34,    0xffff, 0xffff, 0xffff  } }, // power
+#if defined(QT_KEYPAD_MODE)
+   { 0x7a,   {   Qt::Key_Call,      0xffff, 0xffff, 0xffff  } },
+   { 0x7b,   {   Qt::Key_Context1,  0xffff, 0xffff, 0xffff  } },
+   { 0x7c,   {   Qt::Key_Back,      0xffff, 0xffff, 0xffff  } },
+   { 0x7d,   {   Qt::Key_Hangup,    0xffff, 0xffff, 0xffff  } },
+   { 0x7e,   {   Qt::Key_Flip,      0xffff, 0xffff, 0xffff  } },
+#else
+   { 0x7a,   {   Qt::Key_F9,        0xffff, 0xffff, 0xffff  } },
+   { 0x7b,   {   Qt::Key_F10,       0xffff, 0xffff, 0xffff  } },
+   { 0x7c,   {   Qt::Key_F11,       0xffff, 0xffff, 0xffff  } },
+   { 0x7d,   {   Qt::Key_F12,       0xffff, 0xffff, 0xffff  } },
+   { 0x7e,   {   Qt::Key_F13,       0xffff, 0xffff, 0xffff  } },
+#endif
+   { 0,      {   0,                 0xffff, 0xffff, 0xffff  } }
+};
+
+const KeyOverride* qtopia_override_keys()
+{
+    return deviceKeys;
+}
+</pre>
+ 
+<p> Where deviceKeys is the mapping of scan code to the structure composing of:
+<p> <ul>
+<li>The Qt Key for the scan code</li>
+<li>The unicode character for the scan code</li>
+<li>The unicode character for the scan code if shift is active</li>
+<li>The unicode character for the scan code if control is active</li>
+</ul>
+<p> The example above is for the iPAQ h3xxx models.
+<p> <h3> Overriding the keyboard handler Qtopia Keys
+</h3>
+<a name="2-2"></a><p> If your device does not have a keyboard driver, then it is possible to implement a
+special keyboard handler for the device.  However this is not recommended.  If it
+not possible to use set one scan codes, please email support for instructions on
+overriding the keyboard handler.
+<p> <h3> Key behavior in Qtopia
+</h3>
+<a name="2-3"></a><p> <h4> Keys that are always intercepted
+</h4>
+<a name="2-3-1"></a><p> Some keys are always intercepted before they reach an application. If a pointer device is
+available an application can do a keyboard grab to get these keys.
+<p> <ul>
+<li>Key_F30</li>
+<li>Key_F31</li>
+<li>Key_F32</li>
+<li>Key_F33</li>
+<li>Key_F34</li>
+<li>Key_F35</li>
+<li>Key_NumLock</li>
+<li>Key_CapsLock</li>
+<li>Key_Menu</li>
+<li>Key_Call</li>
+<li>Key_Hangup</li>
+<li>Key_Flip</li>
+</ul>
+<p> <h4> Keys that are sometimes intercepted
+</h4>
+<a name="2-3-2"></a><p> <ul>
+<li><em>Key_Escape</em> Rejects active dialog</li>
+<li><em>Key_F33</em> Accepts active dialog</li>
+<li><em>Key_Back</em> Accepts active dialog</li>
+<li><em>Key_Context1</em> When behaving as Key_Menu</li>
+</ul>
+<p> While the screen lock is active (sim card pin required for example) the applications will only be allowed keys such as Key_Back and Key_No.  This is to reduce the chance of anyone accessing the phone's data while the sim-card pin is still required.
+<p> <h2> Configuration of Hardware Buttons
+</h2>
+<a name="3"></a><p> The configuration of hardware buttons for a device is defined
+by the etc/defaultbuttons-&lt;platform-spec&gt;.conf files.
+<p> The file is divided into sections.
+<p> See the existing files, especially the generic file, for guidance.
+<p> <h3> User Defineable Button Mappings
+</h3>
+<a name="3-1"></a><p> Button Mappings are what maps the hard buttons on a device to application shortcuts in Qtopia.
+For example a calendar button that brings up todays schedule, or a button to beam your business card.
+<p> The description of the buttons should be included in defaultbuttons.conf on the device, or
+defaultbuttons-&lt;platform&gt;.conf if in the build tree.
+<p> An example of what this may look like:
+<p> <pre>
+[Button]
+Count=2
+[Button0]
+Name=Calendar Button
+Key=F9
+PressedActionService=Calendar
+PressedActionMessage=raiseToday()
+HeldActionService=Calendar
+HeldActionMessage=raise()
+[Button1]
+Name=Contacts Button
+Key=F10
+PressedActionService=Contacts
+PressedActionMessage=raise()
+HeldActionService=Contacts
+HeldActionMessage=beamBusinessCard()
+</pre>
+ 
+<p> This example describes a device with two hardware buttons.  One that opens the calendar application,
+and another that opens the contacts application or beams the owners business card.
+<p> <pre>
+[Button]
+Count=2
+</pre>
+ 
+<p> This indicates that also in defaultbuttons.conf there are two groups, named <tt>Button0</tt> and <tt>Button1</tt>.
+Each group describes the button and its actions. For example starting from the line <tt>[Button0]</tt>
+to another group definition or the end of the file defines the first button mapping.
+<p> <pre>
+Name=Calendar Button
+</pre>
+ 
+<p> This describes the name of the button.  Qtopia provides a Buttons application where the user
+can change the button mapping for shortcut buttons on their device.  The Name of a button
+is how the button is described to them.  You can also provide Translations for the button's name
+by include a field with:
+<p> <pre>
+Name[ja]=...
+</pre>
+ 
+<p> This line describes the name of the button if the language is set to 'ja' or Japanese.
+<p> Images can be provided for the buttons by placing them in <tt>pics/Button/</tt>. The name of the image should be the
+number of the button as described in defaultbuttons.conf.  For this example, the image for the
+calendar button would be <tt>pics/Button/0.png</tt>.
+<p> <pre>
+Key=F9
+</pre>
+ 
+<p> This describes the Qt keycode the button maps to.  These are the codes listed in <tt>qnamespace.h</tt> found in the
+Qt include directory.  To map a key to a Qt keycode, see
+<a href="#2-1">Overriding scancode mapping for Qtopia</a>.
+<p> <pre>
+PressedActionService=Calendar
+PressedActionMessage=raiseToday()
+HeldActionService=Calendar
+HeldActionMessage=raise()
+</pre>
+ 
+<p> These describe what occurs when a button is pressed or held.  The <a href="service.html">Service</a> is a Qtopia Service, described
+in <a href="qtopiaservices.html">Qtopia Application Services</a>.  In this case the name of the
+services is calendar, and the action is raise(), or raiseToday().  Both the service and actions are
+already provided for the Qtopia calendar application.  Only actions that take no parameters can be used.
+<p> <h3> Phone Launcher Menu
+</h3>
+<a name="3-2"></a><p> The launcher menu on a phone is often a 3 by 4 grid, corresponding
+to the positioning of the keys 1 to 9, *, 0, and #.
+<p> The format of the launcher menu section of the file is as follows:
+<p> <pre>
+[Menu]
+Rows=&lt;rows of icons&gt;
+Columns=&lt;columns of icons&gt;
+Map=&lt;one character for each icon, left to right, top to bottom&gt;
+Default=&lt;character of initially focussed icon&gt;
+&lt;character&gt;=&lt;desktop file or directory&gt;
+... for each character in Map.
+</pre>
+ 
+<p> An example of what this may look like in a real example is:
+<p> <pre>
+[Menu]
+Rows=3
+Columns=3
+Map=123456789
+Default=5
+1=
+2=Applications/datebook.desktop
+3=Games
+4=
+5=Applications/addressbook.desktop
+6=Settings
+7=
+8=Applications
+9=Documents
+</pre>
+ 
+<p> <h3> Phone Buttons
+</h3>
+<a name="3-3"></a><p> The dialing and other buttons of a phone are configured by the "SystemButtons",
+"TextButtons", "PhoneTextButtons", and "LocaleTextButtons" sections
+of the defaultbuttons.conf file.
+<p> The format of the SystemButtons section of the file is as follows:
+<p> <pre>
+[SystemButtons]
+Count=n
+Key0=Name of Qt key code, e.g. Menu, Select, Context1
+... for each system button on the device 0 to n
+</pre>
+ 
+<p> An example of what this may look like in a real example is:
+<p> <pre>
+[SystemButtons]
+Count=5
+Key0=Menu
+Key1=Select
+Key2=Back
+Key3=Call
+Key4=Hangup
+</pre>
+ 
+<p> The TextButtons section defines all text and actions
+associated with each button. For
+example, the "2" key is associated with "2", as well as the letters
+"a", "b", "c", and all variants of those letters.
+<p> The LocaleTextButtons section is like the TextButtons section, except it
+only defines the text associated with the current language. The texts in
+these sections are translated in the standard way for <a href="config.html">Config</a> files.
+<p> The PhoneTextButtons section defines all phone number text and actions
+associated with each button.
+For example, the "*" key might choose between any of the characters "*", "+", and "p"
+(for pause).
+<p> The format of the TextButtons, PhoneTextButtons, and LocaleTextButtons
+sections of the file are similar, as follows:
+<p> <pre>
+[TextButtons]
+Buttons=0123456789*#
+Tap0= ...
+Hold0= ...
+...
+</pre>
+ 
+<p> For each button listed in "Buttons", define:
+<p> <ul>
+<li> Tap<em>X</em> - the action to do when key <em>X</em> is pressed and released.
+This is either:
+<ul>
+<li> '<em>text</em> - insert character from <em>text</em>.
+<li> "<em>text</em> - insert character from <em>text</em>, while showing all options.
+<li> space - insert a space.
+<li> symbol - popup symbol selector.
+<li> modify - choose between alternatives.
+<li> mode - change mode or language.
+<li> shift - toggle upper/lowercase.
+</ul>
+<li> Hold<em>X</em> - the action to do when key <em>X</em> is held down. This is the
+same as for Tap, except "<em>text</em> is not supported.
+</ul>
+<p> Character insertions where the first character is punctuation are treated specially.
+The details of the special treatment are internal.
+<p> The help file "help/html/help-input.html" should be modified to explain
+the usage of phone keys. 
+<p> <h3> Phone SoftKey Definition
+</h3>
+<a name="3-4"></a><p> The format of the soft-key definition section of the file is as follows:
+<p> <pre>
+[SoftKeys]
+Count=n
+Key0=Name of Qt key code, e.g. Menu, Select, Context1
+</pre>
+ 
+<p> An example of what this may look like in a real example is:
+<p> <pre>
+[SoftKeys]
+Count=3
+Key0=Context1
+Key1=Select
+Key2=Back
+</pre>
+ 
+<p> <h2> Non-installed Components
+</h2>
+<a name="4"></a><p> There are a number of applications/features supplied with Qtopia that are
+not intended to be shipped with production devices:
+<p> <ul>
+<li> Rotation Setting - This is provided to test and demonstrate Qtopia's ability
+to display in different orientations. This may be helpful during development
+if the device uses the transformation display driver.
+<li> Shutdown Setting - This is provided as a development tool.  It should
+not be necessary on a production device.  It can be removed by deleting
+apps/Settings/quit.desktop, on most devices it is expected that there is
+a physical power button, therefore the user is not expected to ever manually
+run or shutdown Qtopia.
+<li> screensize applet - allows changing the maximum window size for testing
+different screensizes quickly during development. This is a
+development tool only which is also not intended for end users. 
+<li> Terminal - This is provided as a development tool. It may be reasonable to
+provide this as a seperate installable package for advanced users who are
+familiar with Linux however it is not expected that the majority of users will
+find this tool at all useful, only confusing. Therefore it is recommended this
+program is not included.
+<li> File Manager - Provided as a development tool. Qtopia is functional without
+it using just Qtopia's document model.
+Adding
+the File Browser can make it possible for users to add and remove files from the
+device in a way which does not correspond to Qtopia's document model which can break the
+interface. We therefore do not recommend this program should be included on a device
+to ensure a consistent document model in addition to protecting critical user and system
+files and settings.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

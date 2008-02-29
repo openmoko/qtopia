@@ -1,29 +1,43 @@
 #!/bin/sh
 
-QTE_VERSION=2.3.7
 DEB_VERSION=2.0
 
-LIBQPE_VERSION=1.5.2
+LIBQPE_VERSION=1.5.3
 LIBQPE_VERSION_MAJ=1
 LIBQPE_VERSION_MIN=5
-LIBQPE_VERSION_PAT=2
+LIBQPE_VERSION_PAT=3
 
 # Have to do this here, since CVS can't store symlinks
 mkdir -p $QPEDIR/etc/rc2.d
 rm -f $QPEDIR/etc/rc2.d/S98qpe
 ln -s ../init.d/qpe $QPEDIR/etc/rc2.d/S98qpe
 
-VERSION_MAJ=$(sed -n -e 's/.*QPE_VERSION "\([0-9]*\)\..*\..*".*/\1/p' <$QPEDIR/include/qpe/version.h)
-VERSION_MIN=$(sed -n -e 's/.*QPE_VERSION ".*\.\([0-9]*\)\..*".*/\1/p' <$QPEDIR/include/qpe/version.h)
-VERSION_PAT=$(sed -n -e 's/.*QPE_VERSION ".*\..*\.\([0-9]*\).*/\1/p' <$QPEDIR/include/qpe/version.h)
-if grep -q 'QPE_VERSION .*snapshot' $QPEDIR/include/qpe/version.h
-then
-    VERSION_CVS="_$(date +%Y%m%d)"
-else
-    VERSION_CVS=""
-fi
+get_version()
+{
+    version_h=$1
+    while :; do
+	orig=`head -1 $version_h | sed 's/^#include "\(.*\)"$/\1/'`
+	if [ -e "$orig" ]; then
+	    version_h=$orig
+	else
+	    break
+	fi
+    done
+    VERSION_MAJ=$(sed -n -e 's/.*'$2' "\([0-9]*\)\..*\..*".*/\1/p' <$version_h)
+    VERSION_MIN=$(sed -n -e 's/.*'$2' ".*\.\([0-9]*\)\..*".*/\1/p' <$version_h)
+    VERSION_PAT=$(sed -n -e 's/.*'$2' ".*\..*\.\([0-9]*\).*/\1/p' <$version_h)
+    if [ $2 = QPE_VERSION ]; then
+	if grep -q $2' .*snapshot' $version_h; then
+	    VERSION_CVS="_$(date +%Y%m%d)"
+	else
+	    VERSION_CVS=""
+	fi
+    fi
+    echo $VERSION_MAJ.$VERSION_MIN.$VERSION_PAT
+}
 
-QPE_VERSION=$VERSION_MAJ.$VERSION_MIN.$VERSION_PAT
+QTE_VERSION=$(get_version $QTDIR/include/qglobal.h QT_VERSION_STR)
+QPE_VERSION=$(get_version $QPEDIR/include/qtopia/version.h QPE_VERSION)
 
 ARCH=arm
 CPU_ARCH=arm
@@ -47,7 +61,7 @@ do
     case "$1" in
      -v)
 	VERB=1
-	echo >&2 "Packaging for version $VERSION_MAJ.$VERSION_MIN.$VERSION_PAT$VERSION_CVS"
+	echo >&2 "Packaging for version $QPE_VERSION$VERSION_CVS"
     ;; -l)
 	LIST=1
     ;; -i)
@@ -58,7 +72,7 @@ do
     ;; -rpm)
 	if [ "$QPEDIR" != "/opt/Qtopia" ]
 	then
-	    echo >&2 '$QPEDIR is not the standard /usr/Qtopia directory.'
+	    echo >&2 '$QPEDIR is not the standard /opt/Qtopia directory.'
 	    sleep 1
 	    #exit 1
 	fi
@@ -218,7 +232,7 @@ do
 	    # rm $SPEC
 	elif [ -z "$IMAGEDIR" ]
 	then
-	    if [ -z `which mkfs.jffs2` ]
+	    if [ ! -x "`which mkfs.jffs2`" ]
 	    then
 		size=$(du -h -s $DATADIR | sed -e 's/[	 ].*//')
 	    else

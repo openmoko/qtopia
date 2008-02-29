@@ -1,11 +1,11 @@
+[Translation]
+File=QtopiaSettings
+Context=Shutdown
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=shutdown
 Icon=Shutdown
-Name=Shutdown
-Name[ja]=シャットダウン
-Name[no]=Skru av
-Name[de]=Beenden
-Name[hu]=Leállítás
+Name[]=Shut­down
 CanFastload=0
 Builtin=1

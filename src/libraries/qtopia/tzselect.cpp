@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -19,11 +34,13 @@
 **********************************************************************/
 
 #define QTOPIA_INTERNAL_TZSELECT_INC_LOCAL
+#define QTOPIA_INTERNAL_LOADTRANSLATIONS
 
 #include "tzselect.h"
 #include "resource.h"
 #include "global.h"
 #include "config.h"
+#include "qpeapplication.h"
 #include <qtoolbutton.h>
 #include <qfile.h>
 #include <qregexp.h>
@@ -71,7 +88,7 @@ void TimeZoneSelectorPrivate::doEmitConfigureTimeZones() {
 #endif
 
 TZCombo::TZCombo( QWidget *p, const char* n )
-    : QComboBox( p, n )
+    : QComboBox( FALSE, p, n )
 {
     updateZones();
     // check to see if TZ is set, if it is set the current item to that
@@ -102,8 +119,8 @@ TZCombo::TZCombo( QWidget *p, const char* n )
 #if defined(Q_WS_QWS)
 #if !defined(QT_NO_COP)
     QCopChannel *channel = new QCopChannel( "QPE/System", this );
-    connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
-	this, SLOT(handleSystemChannel(const QCString&, const QByteArray&)) );
+    connect( channel, SIGNAL(received(const QCString&,const QByteArray&)),
+	this, SLOT(handleSystemChannel(const QCString&,const QByteArray&)) );
 #endif
 #endif
 
@@ -145,6 +162,10 @@ void TZCombo::updateZones()
 	    tzFound = TRUE;
 	QString nm = cfg.readEntry("ZoneName"+QString::number(cfgIndex));
 	identifiers.append(zn);
+#ifndef QT_NO_TRANSLATION //might be translated already
+        if (qApp)
+            nm = qApp->translate("TimeZone", nm);
+#endif
 	insertItem(nm);
 	if ( nm == cur )
 	    curix = listIndex;
@@ -162,12 +183,18 @@ void TZCombo::updateZones()
 	int i =  tz.find( '/' );
 	QString nm = tz.mid( i+1 ).replace(QRegExp("_"), " ");
 	identifiers.append(tz);
+#ifndef QT_NO_TRANSLATION
+        if (qApp)
+            nm = qApp->translate("TimeZone", nm);
+#endif
 	insertItem(nm);
 	if ( nm == cur )
 	    curix = listIndex;
 	++listIndex;
     }
     setCurrentItem(curix);
+
+    insertItem(tr("More..."));
 }
 
 
@@ -198,8 +225,17 @@ void TZCombo::setCurrZone( const QString& id )
 	    return;
 	}
     }
-    insertItem(id);
-    setCurrentItem( count() - 1);
+    // I could use TimeZone(id).city() but that's in libqtopia1
+    QString name;
+    int pos = id.find( '/' );
+    name = id.mid( pos + 1 );
+#if QT_VERSION < 0x030000
+    name.replace( QRegExp("_"), " ");
+#else
+    name.replace( '_', ' ' );
+#endif
+    insertItem(name, count() - 1);
+    setCurrentItem( count() - 2);
     identifiers.append(id);
     extras.append(id);
 }
@@ -221,27 +257,25 @@ void TZCombo::handleSystemChannel(const QCString&msg, const QByteArray&)
 TimeZoneSelector::TimeZoneSelector(QWidget* p, const char* n) :
     QHBox(p,n)
 {
+#ifndef QT_NO_TRANSLATION
+    static int transLoaded = 0;
+    if (!transLoaded) {
+        QPEApplication::loadTranslations("timezone");
+        transLoaded++;
+    }
+#endif
     d = new TimeZoneSelectorPrivate();
 
     // build the combobox before we do any updates...
     cmbTz = new TZCombo( this, "timezone combo" );
-
-    cmdTz = new QToolButton( this, "timezone button" ); // No tr
-    cmdTz->setIconSet( qtopia_internal_loadIconSet( "citytime_icon" ) );
-    cmdTz->setMaximumSize( cmdTz->sizeHint() );
 #ifdef QTOPIA_DESKTOP
     d->cmbTz = cmbTz;
 #endif
 
-    cmdTz->setFocusPolicy(QWidget::TabFocus);
-    setTabOrder(cmbTz, cmdTz);
-
     // set up a connection to catch a newly selected item and throw our
     // signal
-    QObject::connect( cmbTz, SIGNAL( activated( int ) ),
-                      this, SLOT( slotTzActive( int ) ) );
-    QObject::connect( cmdTz, SIGNAL( clicked() ),
-                      this, SLOT( slotExecute() ) );
+    QObject::connect( cmbTz, SIGNAL( activated(int) ),
+                      this, SLOT( slotTzActive(int) ) );
 }
 
 /*!
@@ -284,13 +318,19 @@ void TimeZoneSelector::setCurrentZone( const QString& id )
 }
 
 /*! \fn void TimeZoneSelector::signalNewTz( const QString& id )
-  This signal is emitted when a timezone has been selected by the user. The id
+  This signal is emitted when a timezone has been selected by the user.
+  The \a id
   is a \l QString in location format, eg \code Australia/Brisbane \endcode
 */
 
-void TimeZoneSelector::slotTzActive( int )
+void TimeZoneSelector::slotTzActive( int idx )
 {
-    emit signalNewTz( cmbTz->currZone() );
+    if (idx == cmbTz->count()-1) {
+	slotExecute();
+	cmbTz->setCurrentItem(0);
+    } else {
+	emit signalNewTz( cmbTz->currZone() );
+    }
 }
 
 /*!

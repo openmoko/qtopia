@@ -16,13 +16,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+ 
+/**
+ * @file imgresample.c
+ * High quality image resampling with polyphase filters .
+ */
+ 
 #include "avcodec.h"
 #include "dsputil.h"
 
 #ifdef USE_FASTMEMCPY
 #include "fastmemcpy.h"
 #endif
-
 
 #define NB_COMPONENTS 3
 
@@ -42,9 +47,9 @@
 struct ImgReSampleContext {
     int iwidth, iheight, owidth, oheight, topBand, bottomBand, leftBand, rightBand;
     int h_incr, v_incr;
-    INT16 h_filters[NB_PHASES][NB_TAPS] __align8; /* horizontal filters */
-    INT16 v_filters[NB_PHASES][NB_TAPS] __align8; /* vertical filters */
-    UINT8 *line_buf;
+    int16_t h_filters[NB_PHASES][NB_TAPS] __align8; /* horizontal filters */
+    int16_t v_filters[NB_PHASES][NB_TAPS] __align8; /* vertical filters */
+    uint8_t *line_buf;
 };
 
 static inline int get_phase(int pos)
@@ -53,12 +58,13 @@ static inline int get_phase(int pos)
 }
 
 /* This function must be optimized */
-static void h_resample_fast(UINT8 *dst, int dst_width, UINT8 *src, int src_width,
-                            int src_start, int src_incr, INT16 *filters)
+static void h_resample_fast(uint8_t *dst, int dst_width, const uint8_t *src,
+			    int src_width, int src_start, int src_incr,
+			    int16_t *filters)
 {
     int src_pos, phase, sum, i;
-    UINT8 *s;
-    INT16 *filter;
+    const uint8_t *s;
+    int16_t *filter;
 
     src_pos = src_start;
     for(i=0;i<dst_width;i++) {
@@ -96,11 +102,11 @@ static void h_resample_fast(UINT8 *dst, int dst_width, UINT8 *src, int src_width
 }
 
 /* This function must be optimized */
-static void v_resample(UINT8 *dst, int dst_width, UINT8 *src, int wrap, 
-                       INT16 *filter)
+static void v_resample(uint8_t *dst, int dst_width, const uint8_t *src,
+		       int wrap, int16_t *filter)
 {
     int sum, i;
-    UINT8 *s;
+    const uint8_t *s;
 
     s = src;
     for(i=0;i<dst_width;i++) {
@@ -112,7 +118,7 @@ static void v_resample(UINT8 *dst, int dst_width, UINT8 *src, int wrap,
 #else
         {
             int j;
-            UINT8 *s1 = s;
+            uint8_t *s1 = s;
 
             sum = 0;
             for(j=0;j<NB_TAPS;j++) {
@@ -155,12 +161,13 @@ static void v_resample(UINT8 *dst, int dst_width, UINT8 *src, int wrap,
 #define DUMP(reg) movq_r2m(reg, tmp); printf(#reg "=%016Lx\n", tmp.uq);
 
 /* XXX: do four pixels at a time */
-static void h_resample_fast4_mmx(UINT8 *dst, int dst_width, UINT8 *src, int src_width,
-                                 int src_start, int src_incr, INT16 *filters)
+static void h_resample_fast4_mmx(uint8_t *dst, int dst_width,
+				 const uint8_t *src, int src_width,
+                                 int src_start, int src_incr, int16_t *filters)
 {
     int src_pos, phase;
-    UINT8 *s;
-    INT16 *filter;
+    const uint8_t *s;
+    int16_t *filter;
     mmx_t tmp;
     
     src_pos = src_start;
@@ -199,11 +206,11 @@ static void h_resample_fast4_mmx(UINT8 *dst, int dst_width, UINT8 *src, int src_
     emms();
 }
 
-static void v_resample4_mmx(UINT8 *dst, int dst_width, UINT8 *src, int wrap, 
-                            INT16 *filter)
+static void v_resample4_mmx(uint8_t *dst, int dst_width, const uint8_t *src,
+			    int wrap, int16_t *filter)
 {
     int sum, i, v;
-    UINT8 *s;
+    const uint8_t *s;
     mmx_t tmp;
     mmx_t coefs[4];
     
@@ -240,7 +247,7 @@ static void v_resample4_mmx(UINT8 *dst, int dst_width, UINT8 *src, int wrap,
         packuswb_r2r(mm7, mm0);
         movq_r2m(mm0, tmp);
 
-        *(UINT32 *)dst = tmp.ud[0];
+        *(uint32_t *)dst = tmp.ud[0];
         dst += 4;
         s += 4;
         dst_width -= 4;
@@ -264,13 +271,141 @@ static void v_resample4_mmx(UINT8 *dst, int dst_width, UINT8 *src, int wrap,
 }
 #endif
 
+#ifdef HAVE_ALTIVEC
+typedef	union {
+    vector unsigned char v;
+    unsigned char c[16];
+} vec_uc_t;
+
+typedef	union {
+    vector signed short v;
+    signed short s[8];
+} vec_ss_t;
+
+void v_resample16_altivec(uint8_t *dst, int dst_width, const uint8_t *src,
+			  int wrap, int16_t *filter)
+{
+    int sum, i;
+    const uint8_t *s;
+    vector unsigned char *tv, tmp, dstv, zero;
+    vec_ss_t srchv[4], srclv[4], fv[4];
+    vector signed short zeros, sumhv, sumlv;    
+    s = src;
+
+    for(i=0;i<4;i++)
+    {
+        /*
+           The vec_madds later on does an implicit >>15 on the result.
+           Since FILTER_BITS is 8, and we have 15 bits of magnitude in
+           a signed short, we have just enough bits to pre-shift our
+           filter constants <<7 to compensate for vec_madds.
+        */
+        fv[i].s[0] = filter[i] << (15-FILTER_BITS);
+        fv[i].v = vec_splat(fv[i].v, 0);
+    }
+    
+    zero = vec_splat_u8(0);
+    zeros = vec_splat_s16(0);
+
+
+    /*
+       When we're resampling, we'd ideally like both our input buffers,
+       and output buffers to be 16-byte aligned, so we can do both aligned
+       reads and writes. Sadly we can't always have this at the moment, so
+       we opt for aligned writes, as unaligned writes have a huge overhead.
+       To do this, do enough scalar resamples to get dst 16-byte aligned.
+    */
+    i = (-(int)dst) & 0xf;
+    while(i>0) {
+        sum = s[0 * wrap] * filter[0] +
+        s[1 * wrap] * filter[1] +
+        s[2 * wrap] * filter[2] +
+        s[3 * wrap] * filter[3];
+        sum = sum >> FILTER_BITS;
+        if (sum<0) sum = 0; else if (sum>255) sum=255;
+        dst[0] = sum;
+        dst++;
+        s++;
+        dst_width--;
+        i--;
+    }
+    
+    /* Do our altivec resampling on 16 pixels at once. */
+    while(dst_width>=16) {
+        /*
+           Read 16 (potentially unaligned) bytes from each of
+           4 lines into 4 vectors, and split them into shorts.
+           Interleave the multipy/accumulate for the resample
+           filter with the loads to hide the 3 cycle latency
+           the vec_madds have.
+        */
+        tv = (vector unsigned char *) &s[0 * wrap];
+        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[i * wrap]));
+        srchv[0].v = (vector signed short) vec_mergeh(zero, tmp);
+        srclv[0].v = (vector signed short) vec_mergel(zero, tmp);
+        sumhv = vec_madds(srchv[0].v, fv[0].v, zeros);
+        sumlv = vec_madds(srclv[0].v, fv[0].v, zeros);
+
+        tv = (vector unsigned char *) &s[1 * wrap];
+        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[1 * wrap]));
+        srchv[1].v = (vector signed short) vec_mergeh(zero, tmp);
+        srclv[1].v = (vector signed short) vec_mergel(zero, tmp);
+        sumhv = vec_madds(srchv[1].v, fv[1].v, sumhv);
+        sumlv = vec_madds(srclv[1].v, fv[1].v, sumlv);
+
+        tv = (vector unsigned char *) &s[2 * wrap];
+        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[2 * wrap]));
+        srchv[2].v = (vector signed short) vec_mergeh(zero, tmp);
+        srclv[2].v = (vector signed short) vec_mergel(zero, tmp);
+        sumhv = vec_madds(srchv[2].v, fv[2].v, sumhv);
+        sumlv = vec_madds(srclv[2].v, fv[2].v, sumlv);
+
+        tv = (vector unsigned char *) &s[3 * wrap];
+        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[3 * wrap]));
+        srchv[3].v = (vector signed short) vec_mergeh(zero, tmp);
+        srclv[3].v = (vector signed short) vec_mergel(zero, tmp);
+        sumhv = vec_madds(srchv[3].v, fv[3].v, sumhv);
+        sumlv = vec_madds(srclv[3].v, fv[3].v, sumlv);
+    
+        /*
+           Pack the results into our destination vector,
+           and do an aligned write of that back to memory.
+        */
+        dstv = vec_packsu(sumhv, sumlv) ;
+        vec_st(dstv, 0, (vector unsigned char *) dst);
+        
+        dst+=16;
+        s+=16;
+        dst_width-=16;
+    }
+
+    /*
+       If there are any leftover pixels, resample them
+       with the slow scalar method.
+    */
+    while(dst_width>0) {
+        sum = s[0 * wrap] * filter[0] +
+        s[1 * wrap] * filter[1] +
+        s[2 * wrap] * filter[2] +
+        s[3 * wrap] * filter[3];
+        sum = sum >> FILTER_BITS;
+        if (sum<0) sum = 0; else if (sum>255) sum=255;
+        dst[0] = sum;
+        dst++;
+        s++;
+        dst_width--;
+    }
+}
+#endif
+
 /* slow version to handle limit cases. Does not need optimisation */
-static void h_resample_slow(UINT8 *dst, int dst_width, UINT8 *src, int src_width,
-                            int src_start, int src_incr, INT16 *filters)
+static void h_resample_slow(uint8_t *dst, int dst_width,
+			    const uint8_t *src, int src_width,
+                            int src_start, int src_incr, int16_t *filters)
 {
     int src_pos, phase, sum, j, v, i;
-    UINT8 *s, *src_end;
-    INT16 *filter;
+    const uint8_t *s, *src_end;
+    int16_t *filter;
 
     src_end = src + src_width;
     src_pos = src_start;
@@ -300,8 +435,9 @@ static void h_resample_slow(UINT8 *dst, int dst_width, UINT8 *src, int src_width
     }
 }
 
-static void h_resample(UINT8 *dst, int dst_width, UINT8 *src, int src_width,
-                       int src_start, int src_incr, INT16 *filters)
+static void h_resample(uint8_t *dst, int dst_width, const uint8_t *src,
+		       int src_width, int src_start, int src_incr,
+		       int16_t *filters)
 {
     int n, src_end;
 
@@ -337,11 +473,11 @@ static void h_resample(UINT8 *dst, int dst_width, UINT8 *src, int src_width,
 }
 
 static void component_resample(ImgReSampleContext *s, 
-                               UINT8 *output, int owrap, int owidth, int oheight,
-                               UINT8 *input, int iwrap, int iwidth, int iheight)
+                               uint8_t *output, int owrap, int owidth, int oheight,
+                               uint8_t *input, int iwrap, int iwidth, int iheight)
 {
     int src_y, src_y1, last_src_y, ring_y, phase_y, y1, y;
-    UINT8 *new_line, *src_line;
+    uint8_t *new_line, *src_line;
 
     last_src_y = - FCENTER - 1;
     /* position of the bottom of the filter in the source image */
@@ -384,6 +520,13 @@ static void component_resample(ImgReSampleContext *s,
                             &s->v_filters[phase_y][0]);
         else
 #endif
+#ifdef HAVE_ALTIVEC
+            if ((mm_flags & MM_ALTIVEC) && NB_TAPS == 4 && FILTER_BITS <= 6)
+                v_resample16_altivec(output, owidth,
+                                s->line_buf + (ring_y - NB_TAPS + 1) * owidth, owidth,
+                                &s->v_filters[phase_y][0]);
+        else
+#endif
             v_resample(output, owidth, 
                        s->line_buf + (ring_y - NB_TAPS + 1) * owidth, owidth, 
                        &s->v_filters[phase_y][0]);
@@ -395,7 +538,7 @@ static void component_resample(ImgReSampleContext *s,
 
 /* XXX: the following filter is quite naive, but it seems to suffice
    for 4 taps */
-static void build_filter(INT16 *filter, float factor)
+static void build_filter(int16_t *filter, float factor)
 {
     int ph, i, v;
     float x, y, tab[NB_TAPS], norm, mult;
@@ -468,7 +611,7 @@ ImgReSampleContext *img_resample_full_init(int owidth, int oheight,
 }
 
 void img_resample(ImgReSampleContext *s, 
-                  AVPicture *output, AVPicture *input)
+                  AVPicture *output, const AVPicture *input)
 {
     int i, shift;
 
@@ -508,15 +651,15 @@ void av_free(void *ptr)
 /* input */
 #define XSIZE 256
 #define YSIZE 256
-UINT8 img[XSIZE * YSIZE];
+uint8_t img[XSIZE * YSIZE];
 
 /* output */
 #define XSIZE1 512
 #define YSIZE1 512
-UINT8 img1[XSIZE1 * YSIZE1];
-UINT8 img2[XSIZE1 * YSIZE1];
+uint8_t img1[XSIZE1 * YSIZE1];
+uint8_t img2[XSIZE1 * YSIZE1];
 
-void save_pgm(const char *filename, UINT8 *img, int xsize, int ysize)
+void save_pgm(const char *filename, uint8_t *img, int xsize, int ysize)
 {
     FILE *f;
     f=fopen(filename,"w");
@@ -525,7 +668,7 @@ void save_pgm(const char *filename, UINT8 *img, int xsize, int ysize)
     fclose(f);
 }
 
-static void dump_filter(INT16 *filter)
+static void dump_filter(int16_t *filter)
 {
     int i, ph;
 

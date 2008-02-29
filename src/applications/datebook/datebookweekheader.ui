@@ -30,13 +30,13 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>277</width>
+            <width>273</width>
             <height>30</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string></string>
+        <string>DateBookWeekHeaderBase</string>
     </property>
     <property>
         <name>layoutMargin</name>
@@ -69,6 +69,7 @@
             <property stdset="1">
                 <name>prefix</name>
                 <string>Y: </string>
+                <comment>short for year</comment>
             </property>
             <property stdset="1">
                 <name>maxValue</name>
@@ -103,6 +104,7 @@
             <property stdset="1">
                 <name>prefix</name>
                 <string>W: </string>
+                <comment>short for week</comment>
             </property>
             <property stdset="1">
                 <name>value</name>

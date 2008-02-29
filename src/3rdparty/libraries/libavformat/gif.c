@@ -166,9 +166,129 @@ static void gif_flush_put_bits_rev(PutBitContext *s)
 
 /* !RevPutBitContext */
 
+/* GIF header */
+static int gif_image_write_header(ByteIOContext *pb, 
+                                  int width, int height, uint32_t *palette)
+{
+    int i;
+    unsigned int v;
+
+    put_tag(pb, "GIF");
+    put_tag(pb, "89a");
+    put_le16(pb, width);
+    put_le16(pb, height);
+
+    put_byte(pb, 0xf7); /* flags: global clut, 256 entries */
+    put_byte(pb, 0x1f); /* background color index */
+    put_byte(pb, 0); /* aspect ratio */
+
+    /* the global palette */
+    if (!palette) {
+        put_buffer(pb, (unsigned char *)gif_clut, 216*3);
+        for(i=0;i<((256-216)*3);i++)
+            put_byte(pb, 0);
+    } else {
+        for(i=0;i<256;i++) {
+            v = palette[i];
+            put_byte(pb, (v >> 16) & 0xff);
+            put_byte(pb, (v >> 8) & 0xff);
+            put_byte(pb, (v) & 0xff);
+        }
+    }
+
+    /* application extension header */
+    /* XXX: not really sure what to put in here... */
+#ifdef GIF_ADD_APP_HEADER
+    put_byte(pb, 0x21);
+    put_byte(pb, 0xff);
+    put_byte(pb, 0x0b);
+    put_tag(pb, "NETSCAPE2.0");
+    put_byte(pb, 0x03);
+    put_byte(pb, 0x01);
+    put_byte(pb, 0x00);
+    put_byte(pb, 0x00);
+#endif
+    return 0;
+}
+
+/* this is maybe slow, but allows for extensions */
+static inline unsigned char gif_clut_index(uint8_t r, uint8_t g, uint8_t b)
+{
+    return ((((r)/47)%6)*6*6+(((g)/47)%6)*6+(((b)/47)%6));
+}
+
+
+static int gif_image_write_image(ByteIOContext *pb, 
+                                 int x1, int y1, int width, int height,
+                                 const uint8_t *buf, int linesize, int pix_fmt)
+{
+    PutBitContext p;
+    uint8_t buffer[200]; /* 100 * 9 / 8 = 113 */
+    int i, left, w, v;
+    const uint8_t *ptr;
+    /* image block */
+
+    put_byte(pb, 0x2c);
+    put_le16(pb, x1);
+    put_le16(pb, y1);
+    put_le16(pb, width);
+    put_le16(pb, height);
+    put_byte(pb, 0x00); /* flags */
+    /* no local clut */
+
+    put_byte(pb, 0x08);
+
+    left= width * height;
+
+    init_put_bits(&p, buffer, 130);
+
+/*
+ * the thing here is the bitstream is written as little packets, with a size byte before
+ * but it's still the same bitstream between packets (no flush !)
+ */
+    ptr = buf;
+    w = width;
+    while(left>0) {
+
+        gif_put_bits_rev(&p, 9, 0x0100); /* clear code */
+
+        for(i=0;i<GIF_CHUNKS;i++) {
+            if (pix_fmt == PIX_FMT_RGB24) {
+                v = gif_clut_index(ptr[0], ptr[1], ptr[2]);
+                ptr+=3;
+            } else {
+                v = *ptr++;
+            }
+            gif_put_bits_rev(&p, 9, v);
+            if (--w == 0) {
+                w = width;
+                buf += linesize;
+                ptr = buf;
+            }
+        }
+
+        if(left<=GIF_CHUNKS) {
+            gif_put_bits_rev(&p, 9, 0x101); /* end of stream */
+            gif_flush_put_bits_rev(&p);
+        }
+        if(pbBufPtr(&p) - p.buf > 0) {
+            put_byte(pb, pbBufPtr(&p) - p.buf); /* byte count of the packet */
+            put_buffer(pb, p.buf, pbBufPtr(&p) - p.buf); /* the actual buffer */
+            p.data_out_size += pbBufPtr(&p) - p.buf;
+            p.buf_ptr = p.buf; /* dequeue the bytes off the bitstream */
+        }
+        if(left<=GIF_CHUNKS) {
+            put_byte(pb, 0x00); /* end of image block */
+        }
+
+        left-=GIF_CHUNKS;
+    }
+    return 0;
+}
+
 typedef struct {
-    UINT8 buffer[100]; /* data chunks */
-    INT64 time, file_time;
+    int64_t time, file_time;
+    uint8_t buffer[100]; /* data chunks */
 } GIFContext;
 
 static int gif_write_header(AVFormatContext *s)
@@ -176,7 +296,7 @@ static int gif_write_header(AVFormatContext *s)
     GIFContext *gif = s->priv_data;
     ByteIOContext *pb = &s->pb;
     AVCodecContext *enc, *video_enc;
-    int i, width, height, rate;
+    int i, width, height/*, rate*/;
 
 /* XXX: do we reject audio streams or just ignore them ?
     if(s->nb_streams > 1)
@@ -198,72 +318,25 @@ static int gif_write_header(AVFormatContext *s)
     } else {
         width = video_enc->width;
         height = video_enc->height;
-        rate = video_enc->frame_rate;
+//        rate = video_enc->frame_rate;
     }
 
     /* XXX: is it allowed ? seems to work so far... */
     video_enc->pix_fmt = PIX_FMT_RGB24;
 
-    /* GIF header */
-
-    put_tag(pb, "GIF");
-    put_tag(pb, "89a");
-    put_le16(pb, width);
-    put_le16(pb, height);
-
-    put_byte(pb, 0xf7); /* flags: global clut, 256 entries */
-    put_byte(pb, 0x1f); /* background color index */
-    put_byte(pb, 0); /* aspect ratio */
-
-    /* the global palette */
-
-    put_buffer(pb, (unsigned char *)gif_clut, 216*3);
-    for(i=0;i<((256-216)*3);i++)
-       put_byte(pb, 0);
-
-    /* application extension header */
-    /* XXX: not really sure what to put in here... */
-#ifdef GIF_ADD_APP_HEADER
-    put_byte(pb, 0x21);
-    put_byte(pb, 0xff);
-    put_byte(pb, 0x0b);
-    put_tag(pb, "NETSCAPE2.0");
-    put_byte(pb, 0x03);
-    put_byte(pb, 0x01);
-    put_byte(pb, 0x00);
-    put_byte(pb, 0x00);
-#endif
+    gif_image_write_header(pb, width, height, NULL);
 
     put_flush_packet(&s->pb);
     return 0;
 }
 
-/* this is maybe slow, but allows for extensions */
-static inline unsigned char gif_clut_index(rgb_triplet *clut, UINT8 r, UINT8 g, UINT8 b)
-{
-    return ((((r)/47)%6)*6*6+(((g)/47)%6)*6+(((b)/47)%6));
-}
-
-/* chunk writer callback */
-/* !!! XXX:deprecated
-static void gif_put_chunk(void *pbctx, UINT8 *buffer, int count)
-{
-    ByteIOContext *pb = (ByteIOContext *)pbctx;
-    put_byte(pb, (UINT8)count);
-    put_buffer(pb, buffer, count);
-}
-*/
-
 static int gif_write_video(AVFormatContext *s, 
-                           AVCodecContext *enc, UINT8 *buf, int size)
+                           AVCodecContext *enc, const uint8_t *buf, int size)
 {
     ByteIOContext *pb = &s->pb;
     GIFContext *gif = s->priv_data;
-    int i, left, jiffies;
-    INT64 delay;
-    PutBitContext p;
-    UINT8 buffer[200]; /* 100 * 9 / 8 = 113 */
-
+    int jiffies;
+    int64_t delay;
 
     /* graphic control extension block */
     put_byte(pb, 0x21);
@@ -278,66 +351,22 @@ static int gif_write_video(AVFormatContext *s,
     /* XXX: should use delay, in order to be more accurate */
     /* instead of using the same rounded value each time */
     /* XXX: don't even remember if I really use it for now */
-    jiffies = (70*FRAME_RATE_BASE/enc->frame_rate) - 1;
+    jiffies = (70*enc->frame_rate_base/enc->frame_rate) - 1;
 
     put_le16(pb, jiffies);
 
     put_byte(pb, 0x1f); /* transparent color index */
     put_byte(pb, 0x00);
 
-    /* image block */
-
-    put_byte(pb, 0x2c);
-    put_le16(pb, 0);
-    put_le16(pb, 0);
-    put_le16(pb, enc->width);
-    put_le16(pb, enc->height);
-    put_byte(pb, 0x00); /* flags */
-    /* no local clut */
-
-    put_byte(pb, 0x08);
-
-    left=size/3;
-
-    init_put_bits(&p, buffer, 130, NULL, NULL);
-
-/*
- * the thing here is the bitstream is written as little packets, with a size byte before
- * but it's still the same bitstream between packets (no flush !)
- */
-
-    while(left>0) {
-
-        gif_put_bits_rev(&p, 9, 0x0100); /* clear code */
-
-        for(i=0;i<GIF_CHUNKS;i++) {
-	    gif_put_bits_rev(&p, 9, gif_clut_index(NULL, *buf, buf[1], buf[2]));
-            buf+=3;
-        }
-
-        if(left<=GIF_CHUNKS) {
-            gif_put_bits_rev(&p, 9, 0x101); /* end of stream */
-            gif_flush_put_bits_rev(&p);
-        }
-        if(pbBufPtr(&p) - p.buf > 0) {
-            put_byte(pb, pbBufPtr(&p) - p.buf); /* byte count of the packet */
-            put_buffer(pb, p.buf, pbBufPtr(&p) - p.buf); /* the actual buffer */
-            p.data_out_size += pbBufPtr(&p) - p.buf;
-            p.buf_ptr = p.buf; /* dequeue the bytes off the bitstream */
-        }
-        if(left<=GIF_CHUNKS) {
-            put_byte(pb, 0x00); /* end of image block */
-        }
-
-        left-=GIF_CHUNKS;
-    }
+    gif_image_write_image(pb, 0, 0, enc->width, enc->height,
+                          buf, enc->width * 3, PIX_FMT_RGB24);
 
     put_flush_packet(&s->pb);
     return 0;
 }
 
 static int gif_write_packet(AVFormatContext *s, int stream_index, 
-                           UINT8 *buf, int size, int force_pts)
+                            const uint8_t *buf, int size, int64_t pts)
 {
     AVCodecContext *codec = &s->streams[stream_index]->codec;
     if (codec->codec_type == CODEC_TYPE_AUDIO)
@@ -355,6 +384,20 @@ static int gif_write_trailer(AVFormatContext *s)
     return 0;
 }
 
+/* better than nothing gif image writer */
+int gif_write(ByteIOContext *pb, AVImageInfo *info)
+{
+    gif_image_write_header(pb, info->width, info->height, 
+                           (uint32_t *)info->pict.data[1]);
+    gif_image_write_image(pb, 0, 0, info->width, info->height, 
+                          info->pict.data[0], info->pict.linesize[0], 
+                          PIX_FMT_PAL8);
+    put_byte(pb, 0x3b);
+    put_flush_packet(pb);
+    return 0;
+}
+
+#ifdef CONFIG_ENCODERS
 static AVOutputFormat gif_oformat = {
     "gif",
     "GIF Animation",
@@ -367,9 +410,15 @@ static AVOutputFormat gif_oformat = {
     gif_write_packet,
     gif_write_trailer,
 };
+#endif //CONFIG_ENCODERS
+
+extern AVInputFormat gif_iformat;
 
 int gif_init(void)
 {
     av_register_output_format(&gif_oformat);
+#ifdef CONFIG_ENCODERS
+    av_register_input_format(&gif_iformat);
+#endif //CONFIG_ENCODERS
     return 0;
 }

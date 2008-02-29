@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/networkservices.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Network Services</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Network Services</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> How it works
+</a>
+<ul>
+<li><a href="#2-1"> The dialup plugin
+</a>
+<li><a href="#2-2"> The lan plugin
+</a>
+<li><a href="#2-3"> The Proxies page
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia Network Services are defined by files that
+allow the configuration of Linux system networking services.
+<p> <h2> How it works
+</h2>
+<a name="2"></a><p> Network <a href="service.html">Service</a> Files are standard Qtopia <a href="config.html">Config</a> files. They have three
+groups, with the following keys:
+<p> <ul>
+<li> [Info]
+<ul>
+<li> Name - the name presented to the user.
+<li> Type - the plugin which this Config parameterizes (see below).
+<li> UserSelectable - 0 to hide the option when adding new service.
+<li> Layer - only "TCP/IP" currently.
+</ul>
+<li> [Help]
+<ul>
+<li> Help - long description of the service.
+</ul>
+<li> [Properties]
+<ul>
+<li> Device - the network interface type (ppp, eth, etc.)
+<li> CardType - the pcmcia card type (network, serial, etc.)
+<li> ReadOnly - space-separated list of properties fields that
+should not be editable. The fields depend on the plugin.
+<li> Hide - same as ReadOnly, for for fields that should not be visible at all.
+</ul>
+</ul>
+<p> The <a href="networkinterface.html">NetworkInterface</a> class defines the interface for plugins. Two
+plugins are provided with Qtopia: "dialup" and "lan", which configure
+<tt>pppd</tt> and <tt>ethernet</tt> respectively.
+<p> <h3> The dialup plugin
+</h3>
+<a name="2-1"></a><p> The dialup plugin configures PPPD peer files.
+It has the following keys in the
+Network <a href="service.html">Service</a> <a href="config.html">Config</a> file. Most are self-explanatory or documented
+in the pppd documentation:
+<p> <ul>
+<li> [Properties]
+<ul>
+<li> Device - must be "ppp".
+<li> CardType - must be "serial".
+<li> SerialDevice - optional, the device, eg. "/dev/ttyU0"
+<li> GPRS - 1 = the service uses a GPRS modem.
+<li> username
+<li> password
+<li> phone - phone number to dial (non-GPRS only)
+<li> apn - Access Point Name (GPRS only)
+<li> atdial - dial string prefix, default is "ATDT".
+<li> gateway
+<li> dns1
+<li> dns2
+<li> speed
+<li> script - optional, program to make connection (otherwise, uses pppd).
+<li> connectdelay
+<li> crtscts - (0 or 1)
+<li> defaultroute - (0 or 1)
+<li> dialmode - (0 = Manual, 1 = Auto-off, 2 = Auto on/off)
+<li> idletime
+<li> usepeerdns - (0 or 1)
+</ul>
+</ul>
+<p> The field names supported by the Hide and ReadOnly keys are below. Note
+that entire tabs can be hidden by adding the tab name to Hide.
+<p> <ul>
+<li> account - the entire tab including:
+<ul>
+<li> acname
+<li> username
+<li> password
+<li> apn
+<li> phone
+</ul>
+<li> modem - the entire tab including:
+<ul>
+<li> atdial
+<li> speed
+<li> connectdelay
+<li> crtscts
+</ul>
+<li> dialing - the entire tab including:
+<ul>
+<li> dial_manual
+<li> dial_demand
+<li> dial_idle
+<li> idletime
+</ul>
+<li> network - the entire tab including:
+<ul>
+<li> usepeerdns
+<li> defaultroute
+<li> dns
+<li> dns_1
+<li> dns_2
+</ul>
+<li> proxies - the entire tab including:
+<ul>
+<li> type
+<li> autoconfig
+<li> http
+<li> ftp
+<li> noproxies
+</ul>
+</ul>
+<p> <h3> The lan plugin
+</h3>
+<a name="2-2"></a><p> The lan plugin configures the PCMCIA networking files
+network.opts, wlan-ng.opts, and wireless.opts.
+It has the following keys in the
+Network <a href="service.html">Service</a> <a href="config.html">Config</a> file. Most are self-explanatory or documented
+in the PCMCIA documentation:
+<p> <ul>
+<li> AuthType
+<li> BASICRATES
+<li> BCNINT
+<li> BOOTP
+<li> BROADCAST
+<li> CHANNEL
+<li> DHCP
+<li> DHCP_HOSTNAME
+<li> DNS_1
+<li> DNS_2
+<li> DNS_3
+<li> DOMAIN
+<li> FRAG
+<li> FREQ
+<li> GATEWAY
+<li> IF_PORT
+<li> IPADDR
+<li> IS_ADHOC
+<li> IWCONFIG
+<li> IWPRIV
+<li> IWSPY
+<li> MOUNTS
+<li> MTU
+<li> NETMASK
+<li> NETWORK
+<li> NO_CHECK
+<li> NO_FUSER
+<li> NWID
+<li> OPRATES
+<li> PRIV_GENERATOR
+<li> PRIV_GENSTR
+<li> PRIV_KEY128
+<li> RATE
+<li> RTS
+<li> SEARCH
+<li> SENS
+<li> SSID
+<li> USER_MIBS
+<li> WEP - (NO = None, PP = Passphrase, K0 = Key 0, K1 = Key 1, K2 = Key 2, K3 = Key 3)
+<li> WLAN_ENABLE
+<li> dot11ExcludeUnencrypted
+<li> dot11PrivacyInvoked
+<li> dot11WEPDefaultKey
+<li> dot11WEPDefaultKey0
+<li> dot11WEPDefaultKey1
+<li> dot11WEPDefaultKey2
+<li> dot11WEPDefaultKey3
+<li> dot11WEPDefaultKeyID
+<li> start_fn
+<li> stop_fn
+</ul>
+<p> The Hide and ReadOnly keys are not supported at this time.
+<p> Some Linux distributions ship network.opts, wlan-ng.opts, and wireless.opts
+with many partial configurations.
+These will override all settings created by Qtopia, which
+inserts its configurations before the final "*,*,*,*)" catch-all
+configuration.
+<p> <h3> The Proxies page
+</h3>
+<a name="2-3"></a><p> The dialup and lan plugins share a Proxies page. The settings
+for this page are in the <a href="config.html">Config</a> as:
+<p> <ul>
+<li> [Proxy]
+<ul>
+<li> type - 0 = No proxies, 1 = Automatic, 2 = Manual.
+<li> autoconfig
+<li> httphost
+<li> httpport
+<li> ftphost
+<li> ftpport
+<li> noproxies
+</ul>
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

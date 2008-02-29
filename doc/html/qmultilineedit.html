@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -189,12 +191,12 @@ be customized except by inheriting the class.
 <p><img src=qmlined-m.png> <img src=qmlined-w.png>
 <p>Examples:
  <a href="mainlyQt-editor-cpp.html#QMultiLineEdit">mainlyQt/editor.cpp</a>
+ <a href="mainlyMotif-editor-cpp.html#QMultiLineEdit">mainlyMotif/editor.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#QMultiLineEdit">scrollview/scrollview.cpp</a>
  <a href="layout-layout-cpp.html#QMultiLineEdit">layout/layout.cpp</a>
  <a href="mainlyXt-editor-cpp.html#QMultiLineEdit">mainlyXt/editor.cpp</a>
- <a href="mainlyMotif-editor-cpp.html#QMultiLineEdit">mainlyMotif/editor.cpp</a>
- <a href="rot13-rot13-cpp.html#QMultiLineEdit">rot13/rot13.cpp</a>
- <a href="scrollview-scrollview-cpp.html#QMultiLineEdit">scrollview/scrollview.cpp</a>
  <a href="customlayout-main-cpp.html#QMultiLineEdit">customlayout/main.cpp</a>
+ <a href="rot13-rot13-cpp.html#QMultiLineEdit">rot13/rot13.cpp</a>
 
 <hr><h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="EchoMode">QMultiLineEdit::EchoMode</a></h3>
@@ -345,7 +347,7 @@ cursor is moved, all marked text is unmarked.
 <h3 class="fn">void <a name="d0afd5"></a>QMultiLineEdit::focusInEvent ( <a href="qfocusevent.html">QFocusEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>Starts the cursor blinking.
 <p>Reimplemented from <a href="qwidget.html#21a4b8">QWidget.</a>
-<h3 class="fn">bool <a name="e09aac"></a>QMultiLineEdit::focusNextPrevChild ( bool ) <code>[virtual protected]</code></h3>
+<h3 class="fn">bool <a name="e09aac"></a>QMultiLineEdit::focusNextPrevChild ( bool b ) <code>[virtual protected]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#8d74a1">QWidget.</a>
 <h3 class="fn">void <a name="e964c8"></a>QMultiLineEdit::focusOutEvent ( <a href="qfocusevent.html">QFocusEvent</a> * ) <code>[virtual protected]</code></h3>
@@ -377,9 +379,9 @@ the cursor is moved, all marked text is unmarked.
 <h3 class="fn">void <a name="a651bf"></a>QMultiLineEdit::insert ( const <a href="qstring.html">QString</a> &amp; str, bool mark ) <code>[virtual protected]</code></h3>
 <p>Inserts <em>c</em> at the current cursor position.
 <h3 class="fn">void <a name="56c164"></a>QMultiLineEdit::insertAt ( const <a href="qstring.html">QString</a> &amp; s, int line, int col, bool mark = FALSE ) <code>[virtual]</code></h3>
-<p>Inserts <em>txt</em> at line number <em>line,</em> after character number <em>col</em>
+<p>Inserts <em>s</em> at line number <em>line,</em> after character number <em>col</em>
 in the line.
-If <em>txt</em> contains newline characters, new lines are inserted.
+If <em>s</em> contains newline characters, new lines are inserted.
 <p>The cursor position is adjusted. If the insertion position is equal to
 the cursor position, the cursor is placed after the end of the new text.
 <h3 class="fn">void <a name="e6a71e"></a>QMultiLineEdit::insertChar ( <a href="qchar.html">QChar</a> c ) <code>[protected]</code></h3>
@@ -433,7 +435,7 @@ action.
 <li><i> Control-H </i> Delete the character to the left of the cursor
 <li><i> Control-K </i> Delete to end of line
 <li><i> Control-N </i> Move the cursor one line downwards
-<li><i> Control-P </i> Move the cursor one line upwards
+<li><i> Control-<a href="P.html">P</a> </i> Move the cursor one line upwards
 <li><i> Control-V </i> Paste the clipboard text into line edit
 <li><i> Control-X </i> Cut the marked text, copy to clipboard
 <li><i> Control-Z </i> Undo the last operation
@@ -557,12 +559,12 @@ when text has been inserted or deleted).
 its internal state variables itself when it is changed.  This can be
 useful to avoid flicker during large changes, and is singularly
 useless otherwise: Disable auto-update, do the changes, re-enable
-auto-update, and call <a href="qtableview.html#49f85b">repaint</a>().<p><b>Warning:</b> Do not leave the view in this state for a long time
+auto-update, and call <a href="qtableview.html#a783dc">repaint</a>().<p><b>Warning:</b> Do not leave the view in this state for a long time
 (i.e. between events ). If, for example, the user interacts with the
 view when auto-update is off, strange things can happen.
 <p>Setting auto-update to TRUE does not repaint the view, you must call
 repaint() to do this (preferable repaint(FALSE) to avoid flicker).
-<p>See also  <a href="#d5d3b8">autoUpdate</a>() and <a href="qtableview.html#49f85b">repaint</a>().
+<p>See also  <a href="#d5d3b8">autoUpdate</a>() and <a href="qtableview.html#a783dc">repaint</a>().
 <h3 class="fn">void <a name="cc2986"></a>QMultiLineEdit::setCursorPosition ( int line, int col, bool mark = FALSE ) <code>[virtual]</code></h3>
 <p>Sets the cursor position to character number <em>col</em> in line number <em>line.</em>
 The parameters are adjusted to lie within the legal range.
@@ -579,7 +581,7 @@ it before any QMultiLineEdit widgets are shown.
 <p>The display is updated according.
 <p>See also  setEchoMode().
 <h3 class="fn">void <a name="21be83"></a>QMultiLineEdit::setEdited ( bool e )</h3>
-<p>Sets the edited flag of this line edit to <em>on.</em>  The edited flag
+<p>Sets the edited flag of this line edit to <em>e.</em>  The edited flag
 is never read by QMultiLineEdit, but is changed to TRUE whenever the user
 changes its contents.
 <p>This is useful e.g. for things that need to provide a default value,
@@ -629,10 +631,10 @@ at row_to, col_to.
 <p>Sets the text to <em>s,</em> removing old text, if any.
 <p>Examples:
  <a href="mainlyQt-editor-cpp.html#setText">mainlyQt/editor.cpp</a>
- <a href="layout-layout-cpp.html#setText">layout/layout.cpp</a>
- <a href="mainlyXt-editor-cpp.html#setText">mainlyXt/editor.cpp</a>
  <a href="mainlyMotif-editor-cpp.html#setText">mainlyMotif/editor.cpp</a>
  <a href="scrollview-scrollview-cpp.html#setText">scrollview/scrollview.cpp</a>
+ <a href="layout-layout-cpp.html#setText">layout/layout.cpp</a>
+ <a href="mainlyXt-editor-cpp.html#setText">mainlyXt/editor.cpp</a>
  <a href="customlayout-main-cpp.html#setText">customlayout/main.cpp</a>
 <h3 class="fn">void <a name="1ac368"></a>QMultiLineEdit::setUndoDepth ( int depth )</h3>
 <p>Sets the maximum number of operations that can be stored on the undo stack.
@@ -715,7 +717,7 @@ mode.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -723,5 +725,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

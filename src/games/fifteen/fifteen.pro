@@ -1,14 +1,19 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-
-CONFIG		+= qtopia warn_on release
+CONFIG		+= qtopiaapp
 
 HEADERS		= fifteen.h
-SOURCES		= fifteen.cpp
+SOURCES		= fifteen.cpp main.cpp
 
-multiprocess:SOURCES+=main.cpp
+TRANSLATABLES = $${HEADERS} $${SOURCES}
 
 TARGET		= fifteen
-TRANSLATIONS = fifteen-en_GB.ts fifteen-de.ts fifteen-ja.ts fifteen-no.ts
+
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/fifteen.desktop
+desktop.path=/apps/Games
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/fifteen.html
+help.path=/help/html
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/fifteen/*
+pics.path=/pics/fifteen
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics
+
+PACKAGE_DESCRIPTION=Try to get the fifteen pieces in order by sliding them around.

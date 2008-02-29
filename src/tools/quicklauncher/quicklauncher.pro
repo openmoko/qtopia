@@ -1,11 +1,15 @@
 TEMPLATE	= app
-CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
-
-HEADERS		= 
-SOURCES		= main.cpp
-INTERFACES	= 
-
-unix:LIBS       += -lqpepim -lpthread
 
 TARGET		= quicklauncher
+DESTDIR         = $$(QPEDIR)/bin
+
+CONFIG		+= qtopialib
+SOURCES		= main.cpp
+
+target.path	= /bin
+INSTALLS	+= target
+
+PACKAGE_DESCRIPTION=Quicklauncher stub for quicklaunch enabled applications.
+PACKAGE_DEPENDS=qpe-libqtopia2
+
+TRANSLATIONS=

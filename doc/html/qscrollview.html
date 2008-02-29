@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -370,12 +372,12 @@ point on the contents.
 <p>This event handler is called whenever the QScrollView receives a
 <a href="qwidget.html#e36586">mouseDoubleClickEvent</a>() - the click position is translated to be a
 point on the contents.
-<p>Reimplemented in <a href="qtable.html#202026">QTable</a> and <a href="qlistview.html#0bdad0">QListView</a>.
+<p>Reimplemented in <a href="qlistview.html#0bdad0">QListView</a> and <a href="qtable.html#202026">QTable</a>.
 <h3 class="fn">void <a name="31fb33"></a>QScrollView::contentsMouseMoveEvent ( <a href="qmouseevent.html">QMouseEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler is called whenever the QScrollView receives a
 <a href="qwidget.html#a51d92">mouseMoveEvent</a>() - the mouse position is translated to be a
 point on the contents.
-<p>Reimplemented in <a href="qtable.html#0e6bd9">QTable</a> and <a href="qlistview.html#f62cf3">QListView</a>.
+<p>Reimplemented in <a href="qlistview.html#f62cf3">QListView</a> and <a href="qtable.html#0e6bd9">QTable</a>.
 <h3 class="fn">void <a name="495587"></a>QScrollView::contentsMousePressEvent ( <a href="qmouseevent.html">QMouseEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler is called whenever the QScrollView receives a
 <a href="qwidget.html#2ecc04">mousePressEvent</a>() - the press position is translated to be a
@@ -385,7 +387,7 @@ point on the contents.
 <p>This event handler is called whenever the QScrollView receives a
 <a href="qwidget.html#9aa77f">mouseReleaseEvent</a>() - the release position is translated to be a
 point on the contents.
-<p>Reimplemented in <a href="qtable.html#30c747">QTable</a> and <a href="qlistview.html#a15942">QListView</a>.
+<p>Reimplemented in <a href="qlistview.html#a15942">QListView</a> and <a href="qtable.html#30c747">QTable</a>.
 <h3 class="fn">void <a name="479944"></a>QScrollView::contentsMoving ( int x, int y ) <code>[signal]</code></h3>
 <p>This signal is emitted just before the contents is moved
 to the given position.
@@ -447,13 +449,13 @@ in the scroll views's coordinates.
 </pre>
 <p>The clip rectangle and translation of the painter <em>p</em> is already set
 appropriately.
-<p>Reimplemented in <a href="qcanvasview.html#6184cb">QCanvasView</a> and <a href="qtable.html#7c58a9">QTable</a>.
+<p>Reimplemented in <a href="qtable.html#7c58a9">QTable</a> and <a href="qcanvasview.html#6184cb">QCanvasView</a>.
 <h3 class="fn">void <a name="d9fbf6"></a>QScrollView::drawContentsOffset ( <a href="qpainter.html">QPainter</a> * p, int offsetx, int offsety, int clipx, int clipy, int clipw, int cliph ) <code>[virtual protected]</code></h3>
 <p>For backward compatibility only.
 It is easier to use <a href="#7548fb">drawContents</a>(<a href="qpainter.html">QPainter</a>*,int,int,int,int).
 <p>The default implementation translates the painter appropriately
 and calls drawContents(QPainter*,int,int,int,int).
-<p>Reimplemented in <a href="qlistview.html#4fb89f">QListView</a> and <a href="qtextview.html#7fd2a8">QTextView</a>.
+<p>Reimplemented in <a href="qtextview.html#7fd2a8">QTextView</a> and <a href="qlistview.html#4fb89f">QListView</a>.
 <h3 class="fn">void <a name="1ed884"></a>QScrollView::enableClipper ( bool y )</h3>
 <p>When large numbers of child widgets are in a scrollview, especially
 if they are close together, the scrolling performance can suffer
@@ -511,7 +513,7 @@ This functions the same as <a href="#476636">addChild</a>().
 <p>Removes a child from the scrolled area.  Note that this happens
 automatically if the child is deleted.
 <h3 class="fn">void <a name="3d2c3b"></a>QScrollView::repaintContents ( int x, int y, int w, int h, bool erase=TRUE )</h3>
-<p>Calls <a href="qwidget.html#d5cfc3">repaint</a>() on rectangle defined by <em>x, y, w, h,</em>
+<p>Calls <a href="qwidget.html#138c7b">repaint</a>() on rectangle defined by <em>x, y, w, h,</em>
 translated appropriately.  If the rectangle in not visible,
 nothing is repainted.
 <p>See also  <a href="#767cfe">updateContents</a>().
@@ -537,7 +539,7 @@ pixels high, and updates the viewport accordingly.
 <p>Returns the current right margin.
 <p>See also  <a href="#75898e">setMargins</a>().
 <h3 class="fn">void <a name="dfe2bd"></a>QScrollView::scrollBy ( int dx, int dy ) <code>[slot]</code></h3>
-<p>Scrolls the content by <em>x</em> to the left and <em>y</em> upwards.
+<p>Scrolls the content by <em>dx</em> to the left and <em>dy</em> upwards.
 <h3 class="fn">void <a name="15a368"></a>QScrollView::setContentsPos ( int x, int y ) <code>[virtual slot]</code></h3>
 <p>Scrolls the content so that the point (x, y) is in the top-left corner.
 <p>Reimplemented in <a href="qlistview.html#8000a5">QListView</a>.
@@ -697,14 +699,14 @@ move events sent to the viewport.
 <p>The default implementation translates the event and calls
 <a href="#31fb33">contentsMouseMoveEvent</a>().
 <p>See also  <a href="qwidget.html#a51d92">QWidget::mouseMoveEvent</a>().
-<p>Reimplemented in <a href="qtextbrowser.html#73358f">QTextBrowser</a>, <a href="qtextview.html#d01e49">QTextView</a> and <a href="qlistbox.html#8b41ba">QListBox</a>.
+<p>Reimplemented in <a href="qtextview.html#d01e49">QTextView</a>, <a href="qtextbrowser.html#73358f">QTextBrowser</a> and <a href="qlistbox.html#8b41ba">QListBox</a>.
 <h3 class="fn">void <a name="013843"></a>QScrollView::viewportMousePressEvent ( <a href="qmouseevent.html">QMouseEvent</a> * e ) <code>[virtual protected]</code></h3>
 <p>To provide simple processing of events on the contents, this method receives all mouse
 press events sent to the viewport.
 <p>The default implementation translates the event and calls
 <a href="#495587">contentsMousePressEvent</a>().
 <p>See also  <a href="#495587">contentsMousePressEvent</a>() and <a href="qwidget.html#2ecc04">QWidget::mousePressEvent</a>().
-<p>Reimplemented in <a href="qlistbox.html#2e5e5e">QListBox</a>, <a href="qtextview.html#4cc80d">QTextView</a> and <a href="qtextbrowser.html#54715c">QTextBrowser</a>.
+<p>Reimplemented in <a href="qtextview.html#4cc80d">QTextView</a>, <a href="qlistbox.html#2e5e5e">QListBox</a> and <a href="qtextbrowser.html#54715c">QTextBrowser</a>.
 <h3 class="fn">void <a name="ff7b46"></a>QScrollView::viewportMouseReleaseEvent ( <a href="qmouseevent.html">QMouseEvent</a> * e ) <code>[virtual protected]</code></h3>
 <p>To provide simple processing of events on the contents,
 this method receives all mouse
@@ -712,7 +714,7 @@ release events sent to the viewport.
 <p>The default implementation translates the event and calls
 <a href="#2aef88">contentsMouseReleaseEvent</a>().
 <p>See also  <a href="qwidget.html#9aa77f">QWidget::mouseReleaseEvent</a>().
-<p>Reimplemented in <a href="qtextbrowser.html#7ccf73">QTextBrowser</a>, <a href="qlistbox.html#78f328">QListBox</a> and <a href="qtextview.html#989864">QTextView</a>.
+<p>Reimplemented in <a href="qtextbrowser.html#7ccf73">QTextBrowser</a>, <a href="qtextview.html#989864">QTextView</a> and <a href="qlistbox.html#78f328">QListBox</a>.
 <h3 class="fn">void <a name="ca8463"></a>QScrollView::viewportPaintEvent ( <a href="qpaintevent.html">QPaintEvent</a> * pe ) <code>[virtual protected]</code></h3>
 <p>This is a low-level painting routine that draws the viewport
 contents.  Reimplement this if <a href="#7548fb">drawContents</a>() is too high-level.
@@ -761,7 +763,7 @@ events sent to the viewport.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -769,5 +771,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

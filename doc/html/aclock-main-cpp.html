@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -30,7 +32,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/aclock/aclock.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/aclock/aclock.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -71,7 +73,7 @@ private:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/aclock/aclock.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/aclock/aclock.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -94,7 +96,7 @@ AnalogClock::AnalogClock( <a href="qwidget.html">QWidget</a> *parent, const char
 {
     time = QTime::currentTime();                // get current time
     <a href="qtimer.html">QTimer</a> *internalTimer = new <a href="qtimer.html">QTimer</a>( this ); // create internal timer
-    <a href="qobject.html#7f8e37">connect</a>( internalTimer, SIGNAL(<a href=#113>timeout</a>()), SLOT(<a href=#113>timeout</a>()) );
+    <a href="qobject.html#fbde73">connect</a>( internalTimer, SIGNAL(<a href=#16>timeout</a>()), SLOT(<a href=#16>timeout</a>()) );
     internalTimer-&gt;<a href="qtimer.html#ce33bc">start</a>( 5000 );               // emit signal every 5 seconds
 }
 
@@ -102,40 +104,40 @@ AnalogClock::AnalogClock( <a href="qwidget.html">QWidget</a> *parent, const char
 // The QTimer::timeout() signal is received by this slot.
 //
 
-void <a name="113"></a>AnalogClock::timeout()
+void <a name="16"></a>AnalogClock::timeout()
 {
     <a href="qtime.html">QTime</a> new_time = QTime::currentTime();      // get the current time
     if ( new_time.<a href="qtime.html#83f0e2">minute</a>() != time.minute() ) { // minute has changed
         if (autoMask())
-            <a href=#115>updateMask</a>();
+            <a href=#18>updateMask</a>();
         else
             <a href="qwidget.html#a66a88">update</a>();
     }
 }
 
-void <a name="114"></a>AnalogClock::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> * )
+void <a name="17"></a>AnalogClock::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> * )
 {
     if ( autoMask() )
         return;
     <a href="qpainter.html">QPainter</a> paint( this );
     paint.<a href="qpainter.html#3e0cc8">setBrush</a>( <a href="qwidget.html#d92bf4">colorGroup</a>().foreground() );
-    <a href=#116>drawClock</a>( &amp;paint );
+    <a href=#19>drawClock</a>( &amp;paint );
 }
 
 // If the clock is transparent, we use updateMask()
 // instead of paintEvent()
 
-void <a name="115"></a>AnalogClock::updateMask()  // paint clock mask
+void <a name="18"></a>AnalogClock::updateMask()  // paint clock mask
 {
     <a href="qbitmap.html">QBitmap</a> bm( <a href="qwidget.html#50b75e">size</a>() );
-    bm.<a href="qpixmap.html#9167e5">fill</a>( color0 );                  //transparent
+    bm.<a href="qpixmap.html#6910a0">fill</a>( color0 );                  //transparent
 
     <a href="qpainter.html">QPainter</a> paint;
     paint.<a href="qpainter.html#02ed5d">begin</a>( &amp;bm, this );
     paint.<a href="qpainter.html#3e0cc8">setBrush</a>( color1 );           // use non-transparent color
     paint.<a href="qpainter.html#0183e4">setPen</a>( color1 );
 
-    <a href=#116>drawClock</a>( &amp;paint );
+    <a href=#19>drawClock</a>( &amp;paint );
 
     paint.<a href="qpainter.html#365784">end</a>();
     <a href="qwidget.html#3aa0a1">setMask</a>( bm );
@@ -146,7 +148,7 @@ void <a name="115"></a>AnalogClock::updateMask()  // paint clock mask
 // the a centered square, as big as possible.  The painter's pen and
 // brush colors are used.
 //
-void <a name="116"></a>AnalogClock::drawClock( <a href="qpainter.html">QPainter</a> *paint )
+void <a name="19"></a>AnalogClock::drawClock( <a href="qpainter.html">QPainter</a> *paint )
 {
     paint-&gt;<a href="qpainter.html#938d23">save</a>();
 
@@ -180,7 +182,7 @@ void <a name="116"></a>AnalogClock::drawClock( <a href="qpainter.html">QPainter<
     paint-&gt;<a href="qpainter.html#ddb3f4">restore</a>();
 }
 
-void <a name="117"></a>AnalogClock::setAutoMask(bool b)
+void <a name="20"></a>AnalogClock::setAutoMask(bool b)
 {
     if (b)
         <a href="qwidget.html#e84bbe">setBackgroundMode</a>( PaletteForeground );
@@ -195,7 +197,7 @@ void <a name="117"></a>AnalogClock::setAutoMask(bool b)
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/aclock/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/aclock/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -225,5 +227,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

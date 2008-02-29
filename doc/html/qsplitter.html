@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -34,10 +36,10 @@ Inherits <a href="qframe.html">QFrame</a>.
 <ul>
 <li><div class="fn">enum <a href="#ResizeMode"><b>ResizeMode</b></a> { Stretch, KeepSize, FollowSizeHint }</div>
 <li><div class="fn"><a href="#b0612a"><b>QSplitter</b></a> ( QWidget * parent=0, const char * name=0 ) </div>
-<li><div class="fn"><a href="#e839b1"><b>QSplitter</b></a> ( Orientation, QWidget * parent=0, const char * name=0 ) </div>
+<li><div class="fn"><b>QSplitter</b> ( Orientation, QWidget * parent=0, const char * name=0 ) </div>
 <li><div class="fn"><a href="#006da1"><b>~QSplitter</b></a> () </div>
-<li><div class="fn">virtual void <a href="#5ae208"><b>setOrientation</b></a> ( Orientation ) </div>
-<li><div class="fn">Orientation <a href="#0dd282"><b>orientation</b></a> () const</div>
+<li><div class="fn">virtual void <b>setOrientation</b> ( Orientation ) </div>
+<li><div class="fn">Orientation <b>orientation</b> () const</div>
 <li><div class="fn">virtual void <a href="#33bf83"><b>setResizeMode</b></a> ( QWidget * w, ResizeMode ) </div>
 <li><div class="fn">virtual void <a href="#28096e"><b>setOpaqueResize</b></a> ( bool = TRUE ) </div>
 <li><div class="fn">bool <a href="#566963"><b>opaqueResize</b></a> () const</div>
@@ -76,11 +78,11 @@ may be controlled.
 </pre>
 <p>In QSplitter the boundary can be either horizontal or vertical.  The
 default is horizontal (the children are side by side) and you
-can use <a href="#5ae208">setOrientation</a>( QSplitter::Vertical ) to set it to vertical.
+can use <a href="#552dd6">setOrientation</a>( QSplitter::Vertical ) to set it to vertical.
 <p>By default, all widgets can be as large or as small as the user
 wishes, down to <a href="qwidget.html#553e08">minimumSizeHint()</a>.
 You can naturally use <a href="qwidget.html#c0b5fb">setMinimumSize</a>() and/or
-<a href="qwidget.html#c78dce">setMaximumSize</a>() on the children. Use <a href="#33bf83">setResizeMode</a>() to specify that
+<a href="qwidget.html#30296d">setMaximumSize</a>() on the children. Use <a href="#33bf83">setResizeMode</a>() to specify that
 a widget should keep its size when the splitter is resized.
 <p>QSplitter normally resizes the children only at the end of a
 resize operation, but if you call <a href="#28096e">setOpaqueResize</a>( TRUE ), the
@@ -94,8 +96,8 @@ children. When you <a href="qwidget.html#200ee5">show</a>() it again, it will be
 <p><img src=qsplitter-m.png> <img src=qsplitter-w.png>
 <p>See also  <a href="qtabbar.html">QTabBar</a>.
 <p>Examples:
- <a href="mainlyQt-editor-cpp.html#QSplitter">mainlyQt/editor.cpp</a>
  <a href="splitter-splitter-cpp.html#QSplitter">splitter/splitter.cpp</a>
+ <a href="mainlyQt-editor-cpp.html#QSplitter">mainlyQt/editor.cpp</a>
 
 <hr><h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ResizeMode">QSplitter::ResizeMode</a></h3>
@@ -108,8 +110,6 @@ unchanged.
 size hint changes.
 <p></ul>
 <hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="e839b1"></a>QSplitter::QSplitter ( <a href="qt.html#Orientation">Orientation</a> o, <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0 )</h3>
-<p>Constructs splitter with orientation <em>o.</em>
 <h3 class="fn"><a name="b0612a"></a>QSplitter::QSplitter ( <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0 )</h3>
 <p>Constructs a horizontal splitter.
 <h3 class="fn"><a name="006da1"></a>QSplitter::~QSplitter ()</h3>
@@ -150,9 +150,6 @@ top) edge of the widget.
 <h3 class="fn">bool <a name="566963"></a>QSplitter::opaqueResize () const</h3>
 <p>Returns TRUE if opaque resize is on, FALSE otherwise.
 <p>See also  <a href="#28096e">setOpaqueResize</a>().
-<h3 class="fn"><a href="qt.html#Orientation">Orientation</a> <a name="0dd282"></a>QSplitter::orientation () const</h3>
-<p>Returns the orientation (<code>Horizontal</code> or <code>Vertical)</code> of the splitter.
-<p>See also  <a href="#5ae208">setOrientation</a>().
 <h3 class="fn">void <a name="d2b706"></a>QSplitter::refresh ()</h3>
 <p>Updates the splitter state. You should not need to call this
 function during normal use of the splitter.
@@ -163,12 +160,8 @@ function during normal use of the splitter.
 <p>Sets opaque resize to <em>on.</em> Opaque resize is initially turned off.
 <p>See also  <a href="#566963">opaqueResize</a>().
 <p>Examples:
- <a href="mainlyQt-editor-cpp.html#setOpaqueResize">mainlyQt/editor.cpp</a>
  <a href="splitter-splitter-cpp.html#setOpaqueResize">splitter/splitter.cpp</a>
-<h3 class="fn">void <a name="5ae208"></a>QSplitter::setOrientation ( <a href="qt.html#Orientation">Orientation</a> o ) <code>[virtual]</code></h3>
-<p>Sets the orientation to <em>o.</em>  By default the orientation is
-horizontal (the widgets are side by side).
-<p>See also  <a href="#0dd282">orientation</a>().
+ <a href="mainlyQt-editor-cpp.html#setOpaqueResize">mainlyQt/editor.cpp</a>
 <h3 class="fn">void <a name="33bf83"></a>QSplitter::setResizeMode ( <a href="qwidget.html">QWidget</a> * w, <a href="qsplitter.html#ResizeMode">ResizeMode</a> mode )</h3>
 <p>Sets resize mode of <em>w</em> to <em>mode.</em>
 <p>See also  <a href="#ResizeMode">ResizeMode</a>.
@@ -205,7 +198,7 @@ layout as this one.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -213,5 +206,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

@@ -1,13 +1,23 @@
-TEMPLATE    = app
-CONFIG	    += qtopia warn_on release
-DESTDIR	    = $(QPEDIR)/bin
+CONFIG	    += qtopiaapp
 
 HEADERS	    = buttoneditordialog.h  
 
-SOURCES	    = main.cpp \
-	      buttoneditordialog.cpp 
+SOURCES	    = buttoneditordialog.cpp main.cpp
 
 INTERFACES  = buttonrow.ui
 
+TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
 TARGET	    = buttoneditor
-TRANSLATIONS = buttoneditor-en_GB.ts buttoneditor-de.ts buttoneditor-ja.ts buttoneditor-no.ts
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/buttoneditor.html
+help.path=/help/html
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/buttoneditor/*
+pics.path=/pics/buttoneditor
+buttonpics.files=$${QTOPIA_DEPOT_PATH}/pics/Button/*
+buttonpics.path=/pics/Button/
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/Buttons.desktop
+desktop.path=/apps/Settings/
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics buttonpics
+
+PACKAGE_DESCRIPTION=Hardware buttons editor for the Qtopia environment.

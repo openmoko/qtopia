@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -114,20 +116,20 @@ the other widget (called the QLabel's "buddy"). Example:
      <a href="qlabel.html">QLabel</a>* phoneLabel = new <a href="qlabel.html">QLabel</a>( phoneEdit, "&amp;Phone:", this, "phoneLabel" );
 </pre>
 <p>In this example, keyboard focus is transferred to the label's buddy
-(the <a href="qlineedit.html">QLineEdit</a>) when the user presses <dfn>Alt-P.</dfn> You can also
+(the <a href="qlineedit.html">QLineEdit</a>) when the user presses <dfn>Alt-<a href="P.html">P</a>.</dfn> You can also
 use the <a href="#085fdb">setBuddy</a>() function to accomplish the same.
 <p><img src=qlabel-m.png> <img src=qlabel-w.png>
 <p>See also  <a href="qlineedit.html">QLineEdit</a>, <a href="qtextview.html">QTextView</a>, <a href="qpixmap.html">QPixmap</a>, <a href="qmovie.html">QMovie</a> and <a href="guibooks.html#fowler">GUI Design Handbook: Label</a>
 <p>Examples:
+ <a href="movies-main-cpp.html#QLabel">movies/main.cpp</a>
  <a href="cursor-cursor-cpp.html#QLabel">cursor/cursor.cpp</a>
+ <a href="xml-tagreader-with-features-tagreader-cpp.html#QLabel">xml/tagreader-with-features/tagreader.cpp</a>
  <a href="layout-layout-cpp.html#QLabel">layout/layout.cpp</a>
- <a href="popup-popup-cpp.html#QLabel">popup/popup.cpp</a>
- <a href="menu-menu-cpp.html#QLabel">menu/menu.cpp</a>
+ <a href="customlayout-main-cpp.html#QLabel">customlayout/main.cpp</a>
  <a href="progress-progress-cpp.html#QLabel">progress/progress.cpp</a>
  <a href="qmag-qmag-cpp.html#QLabel">qmag/qmag.cpp</a>
- <a href="xml-tagreader-with-features-tagreader-cpp.html#QLabel">xml/tagreader-with-features/tagreader.cpp</a>
- <a href="movies-main-cpp.html#QLabel">movies/main.cpp</a>
- <a href="customlayout-main-cpp.html#QLabel">customlayout/main.cpp</a>
+ <a href="menu-menu-cpp.html#QLabel">menu/menu.cpp</a>
+ <a href="popup-popup-cpp.html#QLabel">popup/popup.cpp</a>
 
 <hr><h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="101d95"></a>QLabel::QLabel ( <a href="qwidget.html">QWidget</a> * buddy, const <a href="qstring.html">QString</a> &amp; text, <a href="qwidget.html">QWidget</a> * parent, const char * name=0, WFlags f=0 )</h3>
@@ -211,9 +213,9 @@ the label has a buddy.
 <p>Examples:
  <a href="cursor-cursor-cpp.html#setAlignment">cursor/cursor.cpp</a>
  <a href="layout-layout-cpp.html#setAlignment">layout/layout.cpp</a>
- <a href="popup-popup-cpp.html#setAlignment">popup/popup.cpp</a>
- <a href="qmag-qmag-cpp.html#setAlignment">qmag/qmag.cpp</a>
  <a href="customlayout-main-cpp.html#setAlignment">customlayout/main.cpp</a>
+ <a href="qmag-qmag-cpp.html#setAlignment">qmag/qmag.cpp</a>
+ <a href="popup-popup-cpp.html#setAlignment">popup/popup.cpp</a>
 <h3 class="fn">void <a name="fa2ec1"></a>QLabel::setAutoMask ( bool b ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#efa8f9">QWidget.</a>
@@ -247,7 +249,7 @@ left of its data entry widget (its "buddy"), somewhat like this:
     // ( layout setup not shown )
 </pre>
 <p>With the code above, the focus jumps to the Name field when the user
-presses Alt-N, and to the Phone field when the user presses Alt-P.
+presses Alt-N, and to the Phone field when the user presses Alt-<a href="P.html">P</a>.
 <p>To unset a previously set buddy, call this function with <em>buddy</em>
 set to 0.
 <p>See also  <a href="#e6f867">buddy</a>(), <a href="#bc5ea6">setText</a>(), <a href="qaccel.html">QAccel</a> and <a href="#4743c8">setAlignment</a>().
@@ -313,9 +315,9 @@ less on resize and can also provide a scrollbar if necessary.
 <p>Examples:
  <a href="cursor-cursor-cpp.html#setText">cursor/cursor.cpp</a>
  <a href="layout-layout-cpp.html#setText">layout/layout.cpp</a>
- <a href="popup-popup-cpp.html#setText">popup/popup.cpp</a>
- <a href="qmag-qmag-cpp.html#setText">qmag/qmag.cpp</a>
  <a href="customlayout-main-cpp.html#setText">customlayout/main.cpp</a>
+ <a href="qmag-qmag-cpp.html#setText">qmag/qmag.cpp</a>
+ <a href="popup-popup-cpp.html#setText">popup/popup.cpp</a>
 <h3 class="fn">void <a name="b5c8c1"></a>QLabel::setTextFormat ( <a href="qt.html#TextFormat">Qt::TextFormat</a> format )</h3>
 <p>Sets the text format to <em>format.</em> See the <a href="qt.html#TextFormat">Qt::TextFormat</a> enum for
 an explanation of the possible options.
@@ -341,7 +343,7 @@ empty/null string.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -349,5 +351,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

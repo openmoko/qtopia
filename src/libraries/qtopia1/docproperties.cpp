@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -35,6 +50,7 @@
 #include <qtopia/global.h>
 #include <qtopia/qpemessagebox.h>
 
+#include <qapplication.h>
 #include <qlineedit.h>
 #include <qtoolbutton.h>
 #include <qpushbutton.h>
@@ -81,9 +97,30 @@ public:
   and category of a file associated with a particular AppLnk.  The file can
   also be deleted, copied and beamed from the DocPropertiesWidget.
 
+  First availability: Qtopia 1.6
+
   \ingroup qtopiaemb
   \sa DocPropertiesDialog
 */
+
+#if QT_VERSION >= 0x40000
+#error "use dehyphenate from stringutil.h"
+#endif
+static QString dehyphenate(const QString& s)
+{
+    QChar shy(0x00ad);
+    int i=0;
+    while (i<(int)s.length() && s[i]!=shy)
+	i++;
+    if ( i==(int)s.length() )
+	return s;
+    QString r = s.left(i);
+    for (; i<(int)s.length(); ++i) {
+	if ( s[i]!=shy )
+	    r += s[i];
+    }
+    return r;
+}
 
 /*!
   Constructs a DocPropertiesWidget with parent \a parent and name \a name.
@@ -107,17 +144,23 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char
 
     int row = 0;
     
-    grid->addWidget( new QLabel( tr("Name:"), main ), row, 0 );
+    grid->addWidget( new QLabel( tr("Name"), main ), row, 0 );
     d->docname = new QLineEdit( main );
     grid->addWidget( d->docname, row, 1 );
-    d->docname->setText(lnk->name());
-    if ( !isDocument )
+    if ( isDocument ) {
+	d->docname->setText(lnk->name());
+    } else {
+	d->docname->setText(dehyphenate(lnk->name()));
 	d->docname->setEnabled( FALSE );
+    }
     row++;
     
     
     if ( isDocument ) {
-	grid->addWidget( new QLabel( tr("Location:"), main ), row, 0 );
+	if (qApp->desktop()->width() < 240)
+	    grid->addWidget( new QLabel( tr("Loc"), main ), row, 0 );
+	else
+	    grid->addWidget( new QLabel( tr("Location"), main ), row, 0 );
 	d->locationCombo = new LocationCombo( lnk, main );
 	grid->addWidget( d->locationCombo, row, 1 );
 	row++;
@@ -126,7 +169,12 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char
     }
 
     if ( isDocument ) {
-	grid->addWidget( new QLabel( tr("Categories:"), main ), row, 0 );
+	QString cl;
+	if (qApp->desktop()->width() < 240)
+	    cl = tr("Cat");
+	else
+	    cl = tr("Category");
+	grid->addWidget( new QLabel( cl, main ), row, 0 );
 	d->categoryEdit = new CategorySelect( main );
 	grid->addWidget( d->categoryEdit, row, 1 );
 	d->categoryEdit->setCategories( lnk->categories(),
@@ -136,7 +184,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char
     }
     
     if ( !lnk->type().isEmpty() ) {
-	grid->addWidget( new QLabel( tr("Type:"), main ), row, 0 );
+	grid->addWidget( new QLabel( tr("Type"), main ), row, 0 );
 	d->doctype = new QLabel( main );
 	grid->addWidget( d->doctype, row, 1 );
 	d->doctype->setText( lnk->type() );    
@@ -144,7 +192,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char
     }
     
     if ( !lnk->comment().isEmpty() ) {
-	grid->addWidget( new QLabel( tr("Comment:"), main ), row, 0 );
+	grid->addWidget( new QLabel( tr("Comment"), main ), row, 0 );
 	d->comment = new QLabel( main );
 	grid->addWidget( d->comment, row, 1 );
 	d->comment->setText( "<qt>" + lnk->comment() + "</qt>" );
@@ -171,6 +219,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char
 
     tll->addStretch();
 
+#ifndef QTOPIA_PHONE	//XXX confusing due to context buttons.
     if ( isDocument ) {
 	QFrame *hline = new QFrame( this, "hline" );
 	hline->setFrameShadow( QFrame::Sunken );
@@ -193,6 +242,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char
 	connect(del,SIGNAL(clicked()),this,SLOT(unlinkLnk()));
 	connect(copy,SIGNAL(clicked()),this,SLOT(duplicateLnk()));
     }
+#endif
 }
 
 /*!
@@ -209,7 +259,8 @@ DocPropertiesWidget::~DocPropertiesWidget()
 void DocPropertiesWidget::applyChanges()
 {
     bool changed=FALSE;
-    if ( lnk->name() != d->docname->text() ) {
+    bool isDocument = lnk->isDocLnk();
+    if ( isDocument && lnk->name() != d->docname->text() ) {
 	lnk->setName(d->docname->text());
 	changed=TRUE;
     }
@@ -265,7 +316,7 @@ void DocPropertiesWidget::duplicateLnk()
 	newdoc.setName(d->docname->text());
 
     if ( !copyFile( newdoc ) ) {
-	QMessageBox::warning( this, tr("Duplicate"), tr("File copy failed.") );
+	QMessageBox::warning( this, tr("Duplicate"), tr("<qt>File copy failed.</qt>") );
 	return;
     }
     emit done();
@@ -280,7 +331,7 @@ bool DocPropertiesWidget::moveLnk()
     newdoc.setName(d->docname->text());
 
     if ( !copyFile( newdoc ) ) {
-	QMessageBox::warning( this, tr("Details"), tr("Moving Document failed.") );
+	QMessageBox::warning( this, tr("Details"), tr("<qt>Moving Document failed.</qt>") );
 	return FALSE;
     }
     // remove old lnk
@@ -343,7 +394,7 @@ void DocPropertiesWidget::unlinkLnk()
     if ( QPEMessageBox::confirmDelete( this, tr("Delete"), lnk->name() ) ) {
 	lnk->removeFiles();
 	if ( QFile::exists(lnk->file()) ) {
-	    QMessageBox::warning( this, tr("Delete"), tr("File deletion failed.") );
+	    QMessageBox::warning( this, tr("Delete"), tr("<qt>File deletion failed.</qt>") );
 	} else {
 	    emit done();
 	}
@@ -369,6 +420,8 @@ void DocPropertiesWidget::unlinkLnk()
 
   The DocPropertiesDialog uses a DocPropertiesWidget to allow the user to
   examine and modify attributes associated with a file.
+
+  First availability: Qtopia 1.6
 
   \ingroup qtopiaemb
   \sa DocPropertiesWidget

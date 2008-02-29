@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -24,6 +39,9 @@
 #include <qtopia/mimetype.h>
 #include <qtopia/version.h>
 #include <qtopia/custom.h>
+#ifndef QTOPIA_DESKTOP
+#include <qtopia/qcopenvelope_qws.h>
+#endif
 #include <qtopia/qpeapplication.h>
 #include <qtopia/private/contact.h>
 
@@ -42,9 +60,18 @@ extern "C" {
 
 #include <errno.h>
 
+#ifdef QTOPIA_DESKTOP
+#include <qdconfig.h>
+#endif
+
+// this must be after <qdconfig.h>
+#include "qpe_homeDirPath.cpp"
+
 /*!
   Returns TRUE if the user regards their week as starting on Monday.
   Returns FALSE if the user regards their week as starting on Sunday.
+
+  First availability: Qtopia 1.6
 */
 
 bool Global::weekStartsOnMonday()
@@ -58,6 +85,8 @@ bool Global::weekStartsOnMonday()
   Sets the day the user regards their week starting on.
   If \a v is TRUE, then the week begins on Monday.
   If \a v is FALSE, then the week begins on Sunday.
+
+  First availability: Qtopia 1.6
 */
 
 void Global::setWeekStartsMonday(bool v)
@@ -70,20 +99,20 @@ void Global::setWeekStartsMonday(bool v)
 /*!
   Returns the name of the directory to be used as the current
   users home directory.
+
+  First availability: Qtopia 1.6
 */
 
 QString Global::homeDirPath()
 {
-    QString r = QDir::homeDirPath();
-#ifdef QTOPIA_DESKTOP
-    r += "/.palmtopcenter/";
-#endif
-    return r;
+    return ::qpe_homeDirPath();
 }
 
 /*!
   Renames the file \a from to \a to.
   Returns TRUE if the operation is successful.
+
+  First availability: Qtopia 1.6
 */
 
 bool Global::renameFile( QString from, QString to )
@@ -127,6 +156,8 @@ bool Global::renameFile( QString from, QString to )
 /*!
   Returns a filename suitable for use as a temporary file using \a fname
   as a base.
+
+  First availability: Qtopia 1.6
 */
 
 QString Global::tempName(const QString &fname)
@@ -145,13 +176,15 @@ QString Global::tempName(const QString &fname)
 /*!
   \internal
   Sets the journal filename as \a filename.
+
+  First availability: Qtopia 1.6
 */
 
 QString Global::journalFileName(const QString &filename)
 {
-    QString r = QDir::homeDirPath();
+    QString r = Global::homeDirPath();
 #ifndef Q_WS_QWS
-    r += "/.palmtopcenter/temp";
+    r += "/temp";
 #endif
     QDir d( r );
     if ( !d.exists() )
@@ -165,6 +198,8 @@ QString Global::journalFileName(const QString &filename)
 
 /*!
   Returns a Uuid with system-wide uniqueness.
+
+  First availability: Qtopia 1.6
 */
 
 QUuid Global::generateUuid()
@@ -195,6 +230,8 @@ QUuid Global::generateUuid()
 
 /*!
   Returns TRUE if \a file is the filename of a document.
+
+  First availability: Qtopia 1.6
 */
 
 bool Global::isDocumentFileName(const QString& file)
@@ -218,6 +255,8 @@ bool Global::isDocumentFileName(const QString& file)
 
 /*!
   Returns TRUE if \a file is the filename of an application.
+
+  First availability: Qtopia 1.6
 */
 
 bool Global::isAppLnkFileName(const QString& file)
@@ -234,6 +273,8 @@ bool Global::isAppLnkFileName(const QString& file)
   <i>major</i>.<i>minor</i>.<i>patchlevel</i> (eg. "1.2.3"),
     possibly followed by a space and special information
     (eg. "1.2.3 beta4").
+
+  First availability: Qtopia 1.6
 */
 
 QString Global::version()
@@ -245,6 +286,8 @@ QString Global::version()
   Returns the device architecture string. This is a sequence
   of identifiers separated by "/", from most general to most
   specific (eg. "IBM/PC").
+
+  First availability: Qtopia 1.6
 */
 
 QString Global::architecture()
@@ -258,11 +301,13 @@ QString Global::architecture()
 /*!
   Returns a unique ID for this device. The value can change, if
   for example, the device is reset.
+
+  First availability: Qtopia 1.6
 */
 
 QString Global::deviceId()
 {
-    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
+    Config cfg("Security");
     cfg.setGroup("Sync");
     QString r=cfg.readEntry("serverid");
     if ( r.isEmpty() ) {
@@ -274,11 +319,13 @@ QString Global::deviceId()
 
 /*!
   Returns the name of the owner of the device.
+
+  First availability: Qtopia 1.6
 */
 
 QString Global::ownerName()
 {
-    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
+    Config cfg("Security");
     cfg.setGroup("Sync");
     QString r=cfg.readEntry("ownername");
     return r;
@@ -286,6 +333,8 @@ QString Global::ownerName()
 
 /*!
   \internal
+
+  First availability: Qtopia 1.6
 */
 
 Global::Command* Global::builtinCommands()
@@ -295,6 +344,8 @@ Global::Command* Global::builtinCommands()
 
 /*!
   \internal
+
+  First availability: Qtopia 1.6
 */
 
 QGuardedPtr<QWidget>* Global::builtinRunning()
@@ -353,6 +404,8 @@ static int parse64base(char *src, char *bufOut)
 /*!
   Decodes base64 encoded \a encoded and returns a QByteArray containing
   the decoded data.
+
+  First availability: Qtopia 1.6
 */
 QByteArray Global::decodeBase64( const QByteArray& encoded )
 {
@@ -388,6 +441,8 @@ QByteArray Global::decodeBase64( const QByteArray& encoded )
 /*!
  Encodes \a origData using base64 mapping and returns a QString containing the
  encoded form.
+
+  First availability: Qtopia 1.6
 */
 QByteArray Global::encodeBase64(const QByteArray& origData)
 {

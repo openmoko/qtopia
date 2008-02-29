@@ -1,10 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=Help
 [Desktop Entry]
-Comment=A HTML Help Browser Program
+Comment[]=A HTML Help Browser Program
 Exec=helpbrowser
 Icon=HelpBrowser
 Type=Application
-Name=Help Browser
-Name[ja]=ヘルプブラウザ
-Name[no]=Hjelp
-Name[de]=Hilfe
-Name[hu]=Segítség
+Name[]=Help

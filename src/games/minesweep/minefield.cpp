@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -20,6 +35,7 @@
 #include "minefield.h"
 
 #include <qtopia/config.h>
+#include <qtopia/global.h>
 #include <qtopia/qpeapplication.h>
 
 #include <qpainter.h>
@@ -103,9 +119,18 @@ public:
     bool isMined() const { return mined; }
     void setMined( bool m ) { mined = m; }
 
+#ifdef QTOPIA_PHONE
+    bool selected() const { return mSelected; }
+    void setSelected( bool f ) { mSelected = f; }
+#endif
+
     static void paletteChange();
 
 private:
+#ifdef QTOPIA_PHONE
+    bool mSelected;
+#endif
+
     bool mined;
     int hint;
 
@@ -125,6 +150,9 @@ QPixmap* Mine::mine_pix = 0;
 
 Mine::Mine( MineField *f )
 {
+#ifdef QTOPIA_PHONE
+    mSelected = FALSE;
+#endif
     mined = FALSE;
     st = Hidden;
     hint = 0;
@@ -185,36 +213,75 @@ void Mine::paint( QPainter* p, const QColorGroup &cg, const QRect& cr )
 {
     int x = cr.x();
     int y = cr.y();
-    if ( !knownField || knownField->width() != cr.width() ||
-	 knownField->height() != cr.height() ) {
-	delete knownField;
-	knownField = new QPixmap( cr.width(), cr.height() );
-	QPainter pp( knownField );
-	QBrush br( cg.button().dark(115) );
-	qDrawWinButton( &pp, cr, cg, TRUE, &br );
+
+    QColorGroup scg;
+    scg = cg;
+#ifdef QTOPIA_PHONE
+    if( selected()  && !Global::mousePreferred())
+    {
+	scg.setBrush( QColorGroup::Base, cg.brush( QColorGroup::Highlight ) );
+	scg.setBrush( QColorGroup::Button, cg.brush( QColorGroup::Highlight ) );
     }
+#endif
 
     const int pmmarg=cr.width()/5;
 
+#ifndef QTOPIA_PHONE
     if ( !unknownField || unknownField->width() != cr.width() ||
          unknownField->height() != cr.height() ) {
 	delete unknownField;
 	unknownField = new QPixmap( cr.width(), cr.height() );
 	QPainter pp( unknownField );
-	QBrush br( cg.button() );
-	qDrawWinButton( &pp, cr, cg, FALSE, &br );
+	QBrush br( scg.button() );
+	qDrawWinButton( &pp, QRect( 0, 0, cr.width(), cr.height() ), scg, FALSE, &br );
+	pp.flush();
     }
+#else
+    QPainter pixp;
+
+    if( unknownField )
+	delete unknownField;
+    unknownField = new QPixmap( cr.width(), cr.height() );
+    pixp.begin( unknownField );
+    const QBrush ubr( scg.button() );
+    qDrawWinButton( &pixp, QRect(0, 0, cr.width(), cr.height()), scg, FALSE, &ubr );
+    pixp.flush();
+    pixp.end();
+#endif
+
+#ifndef QTOPIA_PHONE
+    if ( !knownField || knownField->width() != cr.width() ||
+	 knownField->height() != cr.height() ) {
+	delete knownField;
+	knownField = new QPixmap( cr.width(), cr.height() );
+	QPainter pp( knownField );
+	QBrush br( scg.button().dark(115) );
+	qDrawWinButton( &pp, QRect( 0, 0, cr.width(), cr.height() ), scg, TRUE, &br );
+	pp.flush();
+    }
+#else
+    if( knownField )
+	delete knownField;
+    knownField = new QPixmap( cr.width(), cr.height() );
+    pixp.begin( knownField );
+    const QBrush kbr( scg.button().dark(115) );
+    qDrawWinButton( &pixp, QRect(0, 0, cr.width(), cr.height()), scg, TRUE, &kbr );
+    pixp.flush();
+    pixp.end();
+#endif
 
     if ( !flag_pix || flag_pix->width() != cr.width()-pmmarg*2 ||
 	 flag_pix->height() != cr.height()-pmmarg*2 ) {
-	delete flag_pix;
+	if( flag_pix )
+	    delete flag_pix;
 	flag_pix = new QPixmap( cr.width()-pmmarg*2, cr.height()-pmmarg*2 );
 	flag_pix->convertFromImage( QImage(pix_flag).smoothScale(cr.width()-pmmarg*2, cr.height()-pmmarg*2) );
     }
 
     if ( !mine_pix || mine_pix->width() != cr.width()-pmmarg*2 ||
 	 mine_pix->height() != cr.height()-pmmarg*2 ) {
-	delete mine_pix;
+	if( mine_pix )
+	    delete mine_pix;
 	mine_pix = new QPixmap( cr.width()-pmmarg*2, cr.height()-pmmarg*2 );
 	mine_pix->convertFromImage( QImage(pix_mine).smoothScale(cr.width()-pmmarg*2, cr.height()-pmmarg*2) );
     }
@@ -292,8 +359,9 @@ void Mine::paint( QPainter* p, const QColorGroup &cg, const QRect& cr )
 MineField::MineField( QWidget* parent, const char* name )
 : QScrollView( parent, name )
 {
-    viewport()->setBackgroundMode( NoBackground );
+    //viewport()->setBackgroundMode( NoBackground );
     setState( GameOver );
+    setFrameStyle(NoFrame);
 
     setSizePolicy( QSizePolicy( QSizePolicy::Maximum, QSizePolicy::Maximum ) );
     
@@ -305,10 +373,14 @@ MineField::MineField( QWidget* parent, const char* name )
     flagAction = NoAction;
     ignoreClick = FALSE;
     currRow = currCol = -1;
+    pressed = FALSE;
     minecount=0;
     mineguess=0;
     nonminecount=0;
     cellSize = -1;
+#ifdef QTOPIA_PHONE
+    mAlreadyHeld = FALSE;
+#endif
 
     numRows = numCols = 0;
     mines = NULL;
@@ -328,6 +400,9 @@ void MineField::setState( State st )
 
 void MineField::setup( int level )
 {
+#ifdef QTOPIA_PHONE
+    currRow = 0; currCol = 0;
+#endif
     lev = level;
     setState( Waiting );
     //viewport()->setUpdatesEnabled( FALSE );
@@ -358,6 +433,10 @@ void MineField::setup( int level )
     for ( i = 0; i < numCols*numRows; i++ )
 	mines[i] = new Mine( this );
 
+#ifdef QTOPIA_PHONE
+    if( mines[0] )
+	mines[0]->setSelected( TRUE );
+#endif
     
     nonminecount = numRows*numCols - minecount;
     mineguess = minecount;
@@ -385,7 +464,15 @@ void MineField::drawContents( QPainter * p, int clipx, int clipy, int clipw, int
 	    int y = r * cellSize;
 	    Mine *m = mine( r, c );
 	    if ( m )
+	    {
+#ifdef QTOPIA_PHONE
+		if( r == currRow && c == currCol )
+		    m->setSelected( TRUE );
+		else
+		    m->setSelected( FALSE );
+#endif
 		m->paint( p, colorGroup(), QRect(x, y, cellSize, cellSize ) );
+	    }
 	}
     }
 }
@@ -424,7 +511,7 @@ int MineField::findCellSize()
 
 void MineField::setCellSize( int cellsize )
 {
-    int b = 2;
+    int b = 0;
     
     int w2 = cellsize*numCols;
     int h2 = cellsize*numRows;
@@ -475,24 +562,30 @@ void MineField::updateCell( int r, int c )
 
 void MineField::contentsMousePressEvent( QMouseEvent* e )
 {
-    int c = e->pos().x() / cellSize;
-    int r = e->pos().y() / cellSize;
-    if ( onBoard( r, c ) )
-	cellPressed( r, c );
-    else
-	currCol = currRow = -1;
+    if (Global::mousePreferred()) {
+        int c = e->pos().x() / cellSize;
+        int r = e->pos().y() / cellSize;
+        if ( onBoard( r, c ) )
+	    cellPressed( r, c );
+        else
+	    currCol = currRow = -1;
+        pressed = TRUE;
+    }
 }
 
 void MineField::contentsMouseReleaseEvent( QMouseEvent* e )
 {
-    int c = e->pos().x() / cellSize;
-    int r = e->pos().y() / cellSize;
-    if ( onBoard( r, c ) && c == currCol && r == currRow )
-	cellClicked( r, c );
+    if (Global::mousePreferred()) {
+        int c = e->pos().x() / cellSize;
+        int r = e->pos().y() / cellSize;
+        if ( onBoard( r, c ) && c == currCol && r == currRow )
+	    cellClicked( r, c );
     
     
-    if ( flagAction == FlagNext ) {
-	flagAction = NoAction;
+        if ( flagAction == FlagNext ) {
+	    flagAction = NoAction;
+        }
+        pressed = FALSE;
     }
 }
 
@@ -515,9 +608,20 @@ void MineField::cellPressed( int row, int col )
 
 void MineField::held()
 {
+#ifndef QTOPIA_PHONE
     flagAction = FlagNext;
     updateMine( currRow, currCol );
     ignoreClick = TRUE;
+#else
+    if( !mAlreadyHeld || Global::mousePreferred())
+    {
+	flagAction = FlagNext;
+	updateMine( currRow, currCol );
+	ignoreClick = TRUE;
+        if (!Global::mousePreferred())
+    	    mAlreadyHeld = TRUE;
+    }
+#endif
 }
 
 
@@ -525,16 +629,91 @@ void MineField::held()
 
 void MineField::keyPressEvent( QKeyEvent* e )
 {
+#ifndef QTOPIA_PHONE
 #if defined(Q_WS_QWS) || defined(_WS_QWS_)
     flagAction = ( e->key() == Key_Up ) ? FlagOn : NoAction;
 #else
     flagAction = ( ( e->state() & ShiftButton ) ==  ShiftButton ) ? FlagOn : NoAction;
 #endif
+#endif
+
+#ifdef QTOPIA_PHONE
+    if (e->isAutoRepeat()) {
+	QScrollView::keyPressEvent( e );
+	return;
+    }
+
+    int row = currRow, col = currCol;
+    int key = e->key();
+
+    if ( key == Key_Select ) {
+	cellPressed( currRow, currCol );
+	pressed = TRUE;
+    } else if( key == Key_Back || key == Key_No ) {
+	QScrollView::keyPressEvent( e );
+    } else {
+	if( state() == GameOver )
+	    return;
+
+	switch( key )
+	{
+	    case Key_Up:
+		--row;
+		break;
+	    case Key_Down:
+		++row;
+		break;
+	    case Key_Left:
+		--col;
+		break;
+	    case Key_Right:
+		++col;
+		break;
+	    default:
+		QScrollView::keyPressEvent( e );
+		break;
+	}
+
+	if( (currRow != row || currCol != col) && onBoard( row, col ) )
+	{
+	    //update affected mines
+	    updateCell( currRow, currCol );
+	    currRow = row;
+	    currCol = col;
+	    updateCell( currRow, currCol );
+	    
+	    //qDebug("curRow=%d curCol=%d", currRow, currCol );
+	}
+    }
+#endif
 }
 
-void MineField::keyReleaseEvent( QKeyEvent* )
+void MineField::keyReleaseEvent( QKeyEvent *e )
 {
     flagAction = NoAction;
+
+#ifdef QTOPIA_PHONE
+    if (e->isAutoRepeat()) {
+	QScrollView::keyPressEvent( e );
+	return;
+    }
+    int key = e->key();
+
+    if ( key == Key_Select && pressed ) {
+	mAlreadyHeld = FALSE;
+	if( state() == GameOver )
+	    emit newGameSelected();
+	else
+	    cellClicked( currRow, currCol );
+    } else {
+	QScrollView::keyReleaseEvent( e );
+    }
+
+    pressed = FALSE;
+#else
+    Q_UNUSED( e );
+#endif
+
 }
 
 int MineField::getHint( int row, int col )
@@ -743,9 +922,9 @@ void MineField::readConfig(Config& cfg)
 
 QSize MineField::sizeHint() const
 {
-    if ( qApp->desktop()->width() >= 240 )
+    if ( qApp->desktop()->width() >= 240 && qApp->desktop()->height() >= 260 ) 
 	return QSize(200,200);
-    else
+    else 
 	return QSize(160, 160);
 }
 

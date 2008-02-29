@@ -6,7 +6,7 @@
  * Status:        Stable
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Wed May  5 11:53:44 1999
- * CVS ID:        $Id: obex_connect.c,v 1.4 2000/12/01 13:13:07 pof Exp $
+ * CVS ID:        $Id: obex_connect.c,v 1.8 2002/11/22 19:06:10 holtmann Exp $
  * 
  *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
@@ -28,8 +28,11 @@
  *     
  ********************************************************************/
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
+#include <stdio.h>
 #include <string.h>
 
 #include "obex_main.h"
@@ -44,11 +47,11 @@
  *    Add the data needed to send/reply to a connect
  *
  */
-gint obex_insert_connectframe(obex_t *self, obex_object_t *object)
+int obex_insert_connectframe(obex_t *self, obex_object_t *object)
 {
 	obex_connect_hdr_t *conn_hdr;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 
 	object->tx_nonhdr_data = g_netbuf_new(4);
 	if(!object->tx_nonhdr_data) 
@@ -67,18 +70,18 @@ gint obex_insert_connectframe(obex_t *self, obex_object_t *object)
  *    Parse a Connect
  *
  */
-gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
+int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 {
 	obex_connect_hdr_t *conn_hdr;
 	obex_common_hdr_t *common_hdr;
 		
-	guint8 version;
-	gint flags;
-	guint16 mtu;  /* Maximum send data unit */
-	guint8 opcode;
-	guint16 length;
+	uint8_t version;
+	int flags;
+	uint16_t mtu;  /* Maximum send data unit */
+	uint8_t opcode;
+	uint16_t length;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 
 	/* Remember opcode and size for later */
 	common_hdr = (obex_common_hdr_t *) msg->data;
@@ -89,7 +92,7 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 	if( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) && (opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
 		return 1;
 
-	DEBUG(4, G_GNUC_FUNCTION "() Len: %d\n", msg->len);
+	DEBUG(4, "Len: %d\n", msg->len);
 	if(msg->len >= 7) {
 		/* Get what we need */
 		conn_hdr = (obex_connect_hdr_t *) ((msg->data) + 3);
@@ -97,16 +100,17 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 		flags   = conn_hdr->flags;
 		mtu     = ntohs(conn_hdr->mtu);
 
-		DEBUG(1, G_GNUC_FUNCTION "version=%02x\n", version);
+		DEBUG(1, "version=%02x\n", version);
 
-		if(mtu < OBEX_DEFAULT_MTU)
+		/* Limit to some reasonable value (usually OBEX_DEFAULT_MTU) */
+		if(mtu < self->mtu_tx_max)
 			self->mtu_tx = mtu;
 		else
-			self->mtu_tx = OBEX_DEFAULT_MTU;
+			self->mtu_tx = self->mtu_tx_max;
 
-		DEBUG(1, G_GNUC_FUNCTION "() requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
+		DEBUG(1, "requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
 		return 1;
 	}
-	DEBUG(1, G_GNUC_FUNCTION "() Malformed connect-header received\n");
+	DEBUG(1, "Malformed connect-header received\n");
 	return -1;
 }

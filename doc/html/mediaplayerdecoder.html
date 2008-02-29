@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia/mediaplayerplugininterface.cpp:22 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia/mediaplayerplugininterface.cpp:22 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,19 +14,27 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>MediaPlayerDecoder Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MediaPlayerDecoder Class Reference</h1>
 
 <p>The MediaPlayerDecoder class provides an abstract base class for
 Qtopia MediaPlayer decoder plugins.
 <a href="#details">More...</a>
 <p><tt>#include &lt;<a href="mediaplayerplugininterface-h.html">qtopia/mediaplayerplugininterface.h</a>&gt;</tt>
-<p>Inherited by <a href="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</a>, <a href="libflashplugin.html">LibFlashPlugin</a>, <a href="libmadplugin.html">LibMadPlugin</a> and <a href="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</a>.
+<p>Inherited by <a href="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</a>, <a href="libmadplugin.html">LibMadPlugin</a> and <a href="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</a>.
 <p><a href="mediaplayerdecoder-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
@@ -72,11 +80,11 @@ Qtopia MediaPlayer decoder plugins.
 
 
 <p> The MediaPlayerDecoder class provides an abstract base class for
-Qtopia MediaPlayer decoder plugins.
+Qtopia <a href="mediaplayer.html">MediaPlayer</a> decoder plugins.
 <p> Writing a decoder plugin is achieved by subclassing this base class,
 reimplementing the pure virtual functions and exporting the class with
-the <tt>Q_EXPORT_PLUGIN</tt> macro. See the <a href="pluginintro.html">Plugins
-    documentation</a> for details.
+the <tt>Q_EXPORT_PLUGIN</tt> macro. See the Plugins
+    documentation for details.
 <p> 
 <p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
 
@@ -93,7 +101,7 @@ allocated for decoding.
 
 <p> Returns the number of audio channels for the given <em>stream</em>. A mono
 file will return 1, stereo returns 2, and so on.
-<p> (The Qtopia MediaPlayer currently only supports decoding up to the first
+<p> (The Qtopia <a href="mediaplayer.html">MediaPlayer</a> currently only supports decoding up to the first
 2 channels of audio, however it is quite possible for a <em>stream</em> to have
 up to 6 channels, and for those to be decoded when audioReadSamples is
 called with 6 channels requested.)
@@ -159,7 +167,7 @@ to the appropriate positions.
 </h3>
 
 <p> If the opened file contains audio streams, the number of audio streams
-are returned here, otherwise zero is returned. The Qtopia MediaPlayer currently
+are returned here, otherwise zero is returned. The Qtopia <a href="mediaplayer.html">MediaPlayer</a> currently
 only supports opening the first stream (stream 0) from a decoder if there is
 more than one stream.
 <p> The return value is normally 1 or 0.
@@ -170,10 +178,10 @@ more than one stream.
 <p> This function closes all open streams. If there is a failure or no streams
 are open, this function returns FALSE;
 
-<h3 class=fn>const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp; <a name="fileInfo"></a>MediaPlayerDecoder::fileInfo ()<tt> [pure virtual]</tt>
+<h3 class=fn>const QString &amp; <a name="fileInfo"></a>MediaPlayerDecoder::fileInfo ()<tt> [pure virtual]</tt>
 </h3>
 
-<p> This function returns an internationalized <a href="qstring.html">QString</a> which describes
+<p> This function returns an internationalized QString which describes
 information fields which are comma seperated and paired with colons
 about the currently open stream.
 <p> An example would be:
@@ -185,13 +193,13 @@ about the currently open stream.
 qApp->translate() function around the translatable strings.
 <p> For the above example, the code to generate the string might be written like this:
 <pre>
-        qApp-&gt;<a href="qapplication.html#translate">translate</a>( "PluginName", "Format: MPEG1 Layer3" ) + ", " +
-            qApp-&gt;<a href="qapplication.html#translate">translate</a>( "PluginName", "Year: " + "1998";
+        qApp-&gt;translate( "PluginName", "Format: MPEG1 Layer3" ) + ", " +
+            qApp-&gt;translate( "PluginName", "Year: " + "1998";
     </pre>
  
-<p> Please refer to the <a href="qt.html">Qt</a> Internationalization documentation for more detailed
+<p> Please refer to the Qt Internationalization documentation for more detailed
 information on creating code which makes good translations possible.
-<p> The translation files are loaded by the Qtopia MediaPlayer for the decoder
+<p> The translation files are loaded by the Qtopia <a href="mediaplayer.html">MediaPlayer</a> for the decoder
 plugin by searching the language directories for files matching
 $QPEDIR/i18n/[LANG]/[PLUGIN].qm for the supported languages.
 
@@ -211,7 +219,7 @@ derive the elapsed time from the frame rate.
 the media stream.
 <p> Please refer to <a href="#getPlayTime">getPlayTime</a>() for a discussion on how best to query the elapsed time.
 
-<h3 class=fn>bool <a name="isFileSupported"></a>MediaPlayerDecoder::isFileSupported ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;file )<tt> [pure virtual]</tt>
+<h3 class=fn>bool <a name="isFileSupported"></a>MediaPlayerDecoder::isFileSupported ( const&nbsp;QString&nbsp;&amp;&nbsp;file )<tt> [pure virtual]</tt>
 </h3>
 
 <p> If the given <em>file</em> can be decoded successfully by this plugin, a return
@@ -224,7 +232,7 @@ value of TRUE is returned, otherwise FALSE is returned.
 been closed with a call to <a href="#close">close</a>(), this function returns TRUE, otherwise it
 returns FALSE;
 
-<h3 class=fn>bool <a name="open"></a>MediaPlayerDecoder::open ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;file )<tt> [pure virtual]</tt>
+<h3 class=fn>bool <a name="open"></a>MediaPlayerDecoder::open ( const&nbsp;QString&nbsp;&amp;&nbsp;file )<tt> [pure virtual]</tt>
 </h3>
 
 <p> If the given <em>file</em> is opened successfully by this plugin, a return
@@ -255,7 +263,7 @@ The primary use of this string is for providing debug information.
 <p> The output of this function is never used in any user interface, so
 it is safe to provide a non-internationalized string. (Future decoder
 APIs will provide a replacement/additional function which will be
-declared const and will expect an internationalized <a href="qstring.html">QString</a> return
+declared const and will expect an internationalized QString return
 value that will be able to be used in user interfaces if nessaccery).
 
 <h3 class=fn>double <a name="pluginVersion"></a>MediaPlayerDecoder::pluginVersion ()<tt> [pure virtual]</tt>
@@ -273,14 +281,14 @@ optimizations if being used on an x86 processor and <em>useMMX</em> is true. On 
 incompatible processors, this function is interpreted to mean use the MMX equivelant
 optimizations for that processor family. For example on MIPS, this function
 translates to using MMI optimizations.
-<p> (Currently the Qtopia MediaPlayer doesn't use this function.)
+<p> (Currently the Qtopia <a href="mediaplayer.html">MediaPlayer</a> doesn't use this function.)
 
 <h3 class=fn>bool <a name="setSMP"></a>MediaPlayerDecoder::setSMP ( int&nbsp;CPUs )<tt> [pure virtual]</tt>
 </h3>
 
 <p> This function is used as a hint to the decoder for how many decoding threads
 it should consider using based on the provided number of <em>CPUs</em>.
-<p> (Currently the Qtopia MediaPlayer doesn't use this function.)
+<p> (Currently the Qtopia <a href="mediaplayer.html">MediaPlayer</a> doesn't use this function.)
 
 <h3 class=fn>bool <a name="supportsAudio"></a>MediaPlayerDecoder::supportsAudio ()<tt> [pure virtual]</tt>
 </h3>
@@ -329,7 +337,7 @@ applicable.
 </h3>
 
 <p> Returns the frames per second of the given video <em>stream</em>.
-<p> (The Qtopia MediaPlayer makes its best effort to play the video frames at the specified rate.)
+<p> (The Qtopia <a href="mediaplayer.html">MediaPlayer</a> makes its best effort to play the video frames at the specified rate.)
 
 <h3 class=fn>int <a name="videoFrames"></a>MediaPlayerDecoder::videoFrames ( int&nbsp;stream )<tt> [pure virtual]</tt>
 </h3>
@@ -364,10 +372,10 @@ parameters specify the width and height of the input stream to decode.
 <p> The <em>out_w</em> and <em>out_h</em> parameters specify the width and height to scale the input to.
 <p> The <em>color_model</em> specifies the format of the bits for color in the output_rows.
 A typical value for the color_model is RGB565.
-<p> This function can be used (as is done in the Qtopia MediaPlayer)
+<p> This function can be used (as is done in the Qtopia <a href="mediaplayer.html">MediaPlayer</a>)
 to decode video directly to a frame buffer device using the QDirectPainter class or
-directly to a <a href="qimage.html">QImage</a>. In the case of decoding to a QImage, the
-<a href="qimage.html#jumpTable">QImage::jumpTable</a>() of the QImage is provided as the first parameter
+directly to a QImage. In the case of decoding to a QImage, the
+QImage::jumpTable() of the QImage is provided as the first parameter
 to this function. In the QDirectPainter case, a jump table for the frame
 buffer's scanlines needs to be constructed, but this is only required to be done
 once, and could be reused by the caller for every subsequent call to this function.
@@ -396,7 +404,7 @@ to the appropriate positions.
 
 <p> If the opened file contains video streams, the number of video streams
 is returned, otherwise zero is returned.
-<p> (The Qtopia MediaPlayer currently only supports opening the first
+<p> (The Qtopia <a href="mediaplayer.html">MediaPlayer</a> currently only supports opening the first
 stream (stream 0) from a decoder if there is more than one stream.)
 <p> The return value is normally 1 or 0.
 
@@ -407,11 +415,13 @@ stream (stream 0) from a decoder if there is more than one stream.)
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

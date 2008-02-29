@@ -1,10 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=World Time
 [Desktop Entry]
-Comment=A World Clock and Time Zone Editor
+Comment[]=A World Clock and Time Zone Editor
 Exec=worldtime
 Icon=CityTime
 Type=Application
-Name=World Time
-Name[no]=Verdensur
-Name[de]=Weltzeituhr
-Name[ja]=世界時計
-Name[hu]=Idõzóna
+Name[]=World Time

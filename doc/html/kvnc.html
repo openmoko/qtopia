@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/3rdparty/applications/keypebble/kvnc.cpp:47 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/3rdparty/applications/keypebble/kvnc.cpp:47 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,66 +14,104 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>KVNC Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>KVNC Class Reference</h1>
 
 <p>The KVNC class is a VNC client.
 <a href="#details">More...</a>
 <p><tt>#include &lt;<a href="kvnc-h.html">kvnc.h</a>&gt;</tt>
-<p>Inherits <a href="qmainwindow.html">QMainWindow</a>.
 <p><a href="kvnc-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
-<li><div class=fn><b>KVNC</b> ( const&nbsp;char&nbsp;*&nbsp;name = 0 )</div></li>
-<li><div class=fn><b>~KVNC</b> ()</div></li>
+<li><div class=fn><a href="#KVNC"><b>KVNC</b></a> ( const&nbsp;char&nbsp;*&nbsp;name = 0 )</div></li>
+<li><div class=fn><a href="#~KVNC"><b>~KVNC</b></a> ()</div></li>
 </ul>
 <h2>Public Slots</h2>
 <ul>
-<li><div class=fn>void <b>toggleFullScreen</b> ( bool )</div></li>
-<li><div class=fn>void <b>openURL</b> ( const QUrl &amp; )</div></li>
-<li><div class=fn>void <b>connectToServer</b> ()</div></li>
-<li><div class=fn>void <b>showOptions</b> ()</div></li>
+<li><div class=fn>void <a href="#toggleFullScreen"><b>toggleFullScreen</b></a> ( bool&nbsp;f )</div></li>
+<li><div class=fn>void <a href="#openURL"><b>openURL</b></a> ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url )</div></li>
+<li><div class=fn>void <a href="#connectToServer"><b>connectToServer</b></a> ()</div></li>
+<li><div class=fn>void <a href="#showOptions"><b>showOptions</b></a> ()</div></li>
 </ul>
 <h2>Protected Members</h2>
 <ul>
-<li><div class=fn>void <b>setupActions</b> ()</div></li>
+<li><div class=fn>void <a href="#setupActions"><b>setupActions</b></a> ()</div></li>
 </ul>
 <h2>Protected Slots</h2>
 <ul>
-<li><div class=fn>void <b>showMenu</b> ()</div></li>
-<li><div class=fn>void <b>connected</b> ()</div></li>
-<li><div class=fn>void <b>loggedIn</b> ()</div></li>
-<li><div class=fn>void <b>disconnected</b> ()</div></li>
-<li><div class=fn>void <b>statusMessage</b> ( const QString &amp; )</div></li>
-<li><div class=fn>void <b>error</b> ( const QString &amp; )</div></li>
-<li><div class=fn>void <b>zoom</b> ( bool )</div></li>
+<li><div class=fn>void <a href="#showMenu"><b>showMenu</b></a> ()</div></li>
+<li><div class=fn>void <a href="#connected"><b>connected</b></a> ()</div></li>
+<li><div class=fn>void <a href="#loggedIn"><b>loggedIn</b></a> ()</div></li>
+<li><div class=fn>void <a href="#disconnected"><b>disconnected</b></a> ()</div></li>
+<li><div class=fn>void <a href="#statusMessage"><b>statusMessage</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;m )</div></li>
+<li><div class=fn>void <a href="#error"><b>error</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;msg )</div></li>
+<li><div class=fn>void <a href="#zoom"><b>zoom</b></a> ( bool&nbsp;z )</div></li>
 </ul>
 <hr><a name="details"></a><h2>Detailed Description</h2>
 
 
 The KVNC class is a VNC client.
 <p> 
-Keypebble, the VNC client for Qtopia, is based on Keystone from 
+Keypebble, the VNC client for Qtopia, is based on Keystone from
 the KDE project. Keystone and Keypebble are distributed
 under the terms of the GNU General Public License. The VNC server
-code in <a href="qt.html">Qt</a>/Embedded is copyright Trolltech.
-<p> A primary copyright holder is Richard Moore &lt;rich@kde.org&gt;.
+code in Qt/Embedded is copyright Trolltech.
+<p> A primary copyright holder is <a href="mailto:rich@kde.org">Richard Moore</a>.
 <p> This software owes a lot to Markus Wuebben's kvncviewer,
 which some of the code is derived from. Thanks also go to ORL for
 making the RFB protocol and servers GPL.
 
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="KVNC"></a>KVNC::KVNC ( const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3> <em>name</em> 
+<h3 class=fn><a name="~KVNC"></a>KVNC::~KVNC ()
+</h3> 
+<h3 class=fn>void <a name="connectToServer"></a>KVNC::connectToServer ()<tt> [slot]</tt>
+</h3> 
+<h3 class=fn>void <a name="connected"></a>KVNC::connected ()<tt> [protected slot]</tt>
+</h3> 
+<h3 class=fn>void <a name="disconnected"></a>KVNC::disconnected ()<tt> [protected slot]</tt>
+</h3> 
+<h3 class=fn>void <a name="error"></a>KVNC::error ( const&nbsp;QString&nbsp;&amp;&nbsp;msg )<tt> [protected slot]</tt>
+</h3> <em>msg</em> 
+<h3 class=fn>void <a name="loggedIn"></a>KVNC::loggedIn ()<tt> [protected slot]</tt>
+</h3> 
+<h3 class=fn>void <a name="openURL"></a>KVNC::openURL ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url )<tt> [slot]</tt>
+</h3> <em>url</em> 
+<h3 class=fn>void <a name="setupActions"></a>KVNC::setupActions ()<tt> [protected]</tt>
+</h3> 
+<h3 class=fn>void <a name="showMenu"></a>KVNC::showMenu ()<tt> [protected slot]</tt>
+</h3> 
+<h3 class=fn>void <a name="showOptions"></a>KVNC::showOptions ()<tt> [slot]</tt>
+</h3> 
+<h3 class=fn>void <a name="statusMessage"></a>KVNC::statusMessage ( const&nbsp;QString&nbsp;&amp;&nbsp;m )<tt> [protected slot]</tt>
+</h3> <em>m</em> 
+<h3 class=fn>void <a name="toggleFullScreen"></a>KVNC::toggleFullScreen ( bool&nbsp;f )<tt> [slot]</tt>
+</h3> <em>f</em> 
+<h3 class=fn>void <a name="zoom"></a>KVNC::zoom ( bool&nbsp;z )<tt> [protected slot]</tt>
+</h3> <em>z</em> 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

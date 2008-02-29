@@ -1,17 +1,24 @@
-<html>
-<head>
-<title>New Event Times</title>
-</head>
-<body>
-<p><b>New Event Times</b>
-<p>The start time and end time of events are set automatically, however, you can edit them.</p>
-<p><b>To indicate that an event lasts all day:</b><br>
-- Tick the <b>All day</b> tick box.</p>
-<p><b>To set the event's timezone:</b><br>
-- Tap the <b>time zone</b> dropdown box, then select a time zone. 
-- If the time zone required is not shown tap <img align="middle" src="citytime_icon.xpm">
- it can be added to the list using <a href="worldtime.html">World Time</a>.</p>
-<p><i>You can also set </i><a href="datebook-event-alarm.html">Event Alarms</a><i>, and create </i><a href="datebook-event-repeat.html">Repeating Events</a>.</p>
-<p>Tap <img src= OKButton.png alt= OK > to add the event, or <img src= CloseButton.png alt= X > to cancel.</p>
-</body>
-</html>
+%%PDA%%
+{Tap}={Tap}
+{OkButton}={qpe/pda/OKButton.png}
+{CancelButton}={qpe/pda/CloseButton.png}
+@@PDA@@
+%%PHONE%%
+{Tap}={Press}
+{OkButton}={contextbar/ok.png}
+{CancelButton}={contextbar/cancel.png}
+@@PHONE@@
+<qt title="New Event Times">
+<h3>New Event Times</h3>
+<p>The start time and end time of events are automatically set but can be edited.</p>
+<p><b>To indicate that an event lasts all day:</b></p>
+<ul>
+<li>Tick the <b>All day</b> tick box.</li>
+</ul>
+<p><b>To set the event's timezone:</b></p>
+<ul>
+<li>Use the <b>time zone</b> drop-down box, then select a time zone.</li>
+<li>If the time zone required is not shown use <img src="citytime_icon"> to add it to the list.</li>
+</ul>
+<p>$${Tap} <img src="$${OkButton}" alt="OK"> to add the event or <img src="$${CancelButton}" alt="X"> to cancel.</p>
+</qt>

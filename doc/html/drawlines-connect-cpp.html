@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -34,7 +36,7 @@ height="100" src="face.png" alt="Home" border="0">
 
   Implementation:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/drawlines/connect.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/drawlines/connect.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -98,7 +100,7 @@ ConnectWidget::~ConnectWidget()
 // Handles paint events for the connect widget.
 //
 
-void <a name="120"></a>ConnectWidget::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> * )
+void <a name="88"></a>ConnectWidget::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> * )
 {
     <a name="QPainter"></a><a href="qpainter.html">QPainter</a> paint( this );
     for ( int i=0; i&lt;count-1; i++ ) {           // connect all points
@@ -113,7 +115,7 @@ void <a name="120"></a>ConnectWidget::paintEvent( <a href="qpaintevent.html">QPa
 // Handles mouse press events for the connect widget.
 //
 
-void <a name="121"></a>ConnectWidget::mousePressEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
+void <a name="89"></a>ConnectWidget::mousePressEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
 {
     down = TRUE;
     count = 0;                                  // start recording points
@@ -124,7 +126,7 @@ void <a name="121"></a>ConnectWidget::mousePressEvent( <a href="qmouseevent.html
 // Handles mouse release events for the connect widget.
 //
 
-void <a name="122"></a>ConnectWidget::mouseReleaseEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
+void <a name="90"></a>ConnectWidget::mouseReleaseEvent( <a href="qmouseevent.html">QMouseEvent</a> * )
 {
     down = FALSE;                               // done recording points
     <a name="update"></a><a href="qwidget.html#a66a88">update</a>();                                   // draw the lines
@@ -134,7 +136,7 @@ void <a name="122"></a>ConnectWidget::mouseReleaseEvent( <a href="qmouseevent.ht
 // Handles mouse move events for the connect widget.
 //
 
-void <a name="123"></a>ConnectWidget::mouseMoveEvent( <a href="qmouseevent.html">QMouseEvent</a> *e )
+void <a name="91"></a>ConnectWidget::mouseMoveEvent( <a href="qmouseevent.html">QMouseEvent</a> *e )
 {
     if ( down &amp;&amp; count &lt; MAXPOINTS ) {
         <a href="qpainter.html">QPainter</a> paint( this );
@@ -160,5 +162,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

@@ -1,11 +1,12 @@
-TEMPLATE	=  lib
-CONFIG		+= qt qtopia warn_on release embedded
-win32:CONFIG += dll
-win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+CONFIG		+= qtopiaplugin
+
+TARGET		=  wavrecord
+
 HEADERS		=  wavrecord.h wavrecordimpl.h
 SOURCES	        =  wavrecord.cpp wavrecordimpl.cpp
-TARGET		=  wavrecord
-DESTDIR		=  $(QPEDIR)/plugins/codecs
-INCLUDEPATH	+= $(QPEDIR)/src/3rdparty/libraries/gsm
-unix:LIBS       +=  -lgsm
-VERSION		=  1.0.0
+
+TRANSLATABLES = $${HEADERS} $${SOURCES}
+
+INCLUDEPATH	+= ../../../3rdparty/libraries/gsm
+
+LIBS    +=  -lgsm

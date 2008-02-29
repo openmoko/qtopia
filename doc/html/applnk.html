@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/libraries/qtopia/applnk.cpp:264 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia/applnk.cpp:302 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>AppLnk Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>AppLnk Class Reference</h1>
 
 <p>The AppLnk class represents an application available on the system.
 <a href="#details">More...</a>
@@ -123,7 +131,7 @@ At this point, the <a href="#file">file</a>() and <a href="#linkFile">linkFile</
 this is uninteresting, and the names become automatically known,
 and more importantly, becomes reserved, when you ask what they are:
 <p> <pre>
-    <a href="qstring.html">QString</a> fn = d.file();
+    QString fn = d.file();
     </pre>
  
 This invents a filename, and creates the file on disk (an empty
@@ -178,7 +186,7 @@ created after the calls) with <a href="#setSmallIconSize">setSmallIconSize</a>()
 Creates an invalid AppLnk.
 <p> <p>See also <a href="#isValid">isValid</a>().
 
-<h3 class=fn><a name="AppLnk-2"></a>AppLnk::AppLnk ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;file )
+<h3 class=fn><a name="AppLnk-2"></a>AppLnk::AppLnk ( const&nbsp;QString&nbsp;&amp;&nbsp;file )
 </h3>
 Loads <em>file</em> (e.g. <em>app.desktop</em>) as an AppLnk.
 <p> <p>See also <a href="#writeLink">writeLink</a>().
@@ -198,7 +206,7 @@ of an <a href="applnkset.html">AppLnkSet</a>, this will produce a run-time warni
 Returns the size used for large icons.
 <p> <p>See also <a href="#setBigIconSize">setBigIconSize</a>() and <a href="#setIcon">setIcon</a>().
 
-<h3 class=fn>const&nbsp;<a href="qpixmap.html">QPixmap</a>&nbsp;&amp; <a name="bigPixmap"></a>AppLnk::bigPixmap () const
+<h3 class=fn>const QPixmap &amp; <a name="bigPixmap"></a>AppLnk::bigPixmap () const
 </h3>
 Returns a large pixmap associated with the application.
 <p> <p>See also <a href="#pixmap">pixmap</a>() and <a href="#setIcon">setIcon</a>().
@@ -210,7 +218,7 @@ Returns a large pixmap associated with the application.
 <p> See the CategoryWidget for more details.
 <p> <p>See also <a href="#setCategories">setCategories</a>().
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="comment"></a>AppLnk::comment () const
+<h3 class=fn>QString <a name="comment"></a>AppLnk::comment () const
 </h3>
 
 <p> Returns the Comment property.
@@ -223,14 +231,14 @@ including creating any required directories. Returns TRUE if
 successful; otherwise returns FALSE.
 <p> You should not need to use this function.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="exec"></a>AppLnk::exec () const<tt> [virtual]</tt>
+<h3 class=fn>QString <a name="exec"></a>AppLnk::exec () const<tt> [virtual]</tt>
 </h3>
 
 <p> Returns the Exec property. This is the name of the executable
 program associated with the AppLnk.
 <p> <p>See also <a href="#setExec">setExec</a>().
 
-<h3 class=fn>void <a name="execute"></a>AppLnk::execute ( const&nbsp;<a href="qstringlist.html">QStringList</a>&nbsp;&amp;&nbsp;args ) const
+<h3 class=fn>void <a name="execute"></a>AppLnk::execute ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args ) const
 </h3>
 Executes the application associated with this AppLnk, with
 <em>args</em> as arguments.
@@ -242,7 +250,7 @@ This is an overloaded member function, provided for convenience. It behaves esse
 <p> Executes the application associated with this AppLnk.
 <p> <p>See also <a href="#exec">exec</a>().
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="file"></a>AppLnk::file () const
+<h3 class=fn>QString <a name="file"></a>AppLnk::file () const
 </h3>
 Returns the file associated with the AppLnk.
 <p> <p>See also <a href="#exec">exec</a>() and <a href="#name">name</a>().
@@ -253,7 +261,7 @@ Returns the file associated with the AppLnk.
 <p> Returns TRUE is the file associated with AppLnk is already
 known. If FALSE, calling <a href="#file">file</a>() will generate a file name.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="icon"></a>AppLnk::icon () const
+<h3 class=fn>QString <a name="icon"></a>AppLnk::icon () const
 </h3>
 
 <p> Returns the Icon property.
@@ -267,7 +275,7 @@ this value is 0, otherwise it is a value that is unique for the
 duration of the current process.
 <p> <p>See also <a href="applnkset.html#find">AppLnkSet::find</a>().
 
-<h3 class=fn>void <a name="invoke"></a>AppLnk::invoke ( const&nbsp;<a href="qstringlist.html">QStringList</a>&nbsp;&amp;&nbsp;args ) const<tt> [virtual protected]</tt>
+<h3 class=fn>void <a name="invoke"></a>AppLnk::invoke ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args ) const<tt> [virtual protected]</tt>
 </h3>
 Invokes the application associated with this AppLnk, with
 <em>args</em> as arguments. Rotation is not taken into account by
@@ -277,13 +285,14 @@ this function, so you should not call it directly.
 <h3 class=fn>bool <a name="isDocLnk"></a>AppLnk::isDocLnk () const
 </h3>
 Returns TRUE if the AppLnk is a <a href="doclnk.html">DocLnk</a>.
+<p> First availability: Qtopia 1.6
 
 <h3 class=fn>bool <a name="isValid"></a>AppLnk::isValid () const
 </h3>
 
 <p> Returns TRUE if this AppLnk is valid; otherwise returns FALSE.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="linkFile"></a>AppLnk::linkFile () const
+<h3 class=fn>QString <a name="linkFile"></a>AppLnk::linkFile () const
 </h3>
 Returns the desktop file corresponding to this AppLnk.
 <p> <p>See also <a href="#file">file</a>(), <a href="#exec">exec</a>() and <a href="#name">name</a>().
@@ -294,18 +303,18 @@ Returns the desktop file corresponding to this AppLnk.
 <p> Returns TRUE is the link file associated with AppLnk is already
 known. If FALSE, calling <a href="#linkFile">linkFile</a>() will generate a file name.
 
-<h3 class=fn><a href="qstringlist.html">QStringList</a> <a name="mimeTypeIcons"></a>AppLnk::mimeTypeIcons () const
+<h3 class=fn>QStringList <a name="mimeTypeIcons"></a>AppLnk::mimeTypeIcons () const
 </h3>
 
 <p> Returns the MimeTypeIcons property of the AppLnk.
 
-<h3 class=fn><a href="qstringlist.html">QStringList</a> <a name="mimeTypes"></a>AppLnk::mimeTypes () const
+<h3 class=fn>QStringList <a name="mimeTypes"></a>AppLnk::mimeTypes () const
 </h3>
 
 <p> Returns the MimeTypes property. This is the list of MIME types
 that the application can view or edit.
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="name"></a>AppLnk::name () const
+<h3 class=fn>QString <a name="name"></a>AppLnk::name () const
 </h3>
 
 <p> Returns the Name property. This is the user-visible name for the
@@ -316,13 +325,14 @@ document or application, not the filename.
 <h3 class=fn><a href="applnk.html">AppLnk</a>&nbsp;&amp; <a name="operator-eq"></a>AppLnk::operator= ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;&amp;&nbsp;copy )
 </h3>
 Returns an AppLnk that is a deep copy of <em>copy</em>.
+<p> First availability: Qtopia 1.6
 
-<h3 class=fn>const&nbsp;<a href="qpixmap.html">QPixmap</a>&nbsp;&amp; <a name="pixmap"></a>AppLnk::pixmap () const
+<h3 class=fn>const QPixmap &amp; <a name="pixmap"></a>AppLnk::pixmap () const
 </h3>
 Returns a small pixmap associated with the application.
 <p> <p>See also <a href="#bigPixmap">bigPixmap</a>() and <a href="#setIcon">setIcon</a>().
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="property"></a>AppLnk::property ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;key ) const
+<h3 class=fn>QString <a name="property"></a>AppLnk::property ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const
 </h3>
 Returns the property named <em>key</em>.
 <p> <p>See also <a href="#setProperty">setProperty</a>().
@@ -337,7 +347,7 @@ Deletes both the <a href="#linkFile">linkFile</a>() and the <a href="#file">file
 Deletes the <a href="#linkFile">linkFile</a>(), leaving any <a href="#file">file</a>() untouched.
 <p> <p>See also <a href="#removeFiles">removeFiles</a>().
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="rotation"></a>AppLnk::rotation () const
+<h3 class=fn>QString <a name="rotation"></a>AppLnk::rotation () const
 </h3>
 
 <p> Returns the Rotation property. The value is 0, 90, 180 or 270
@@ -355,44 +365,45 @@ Sets the <a href="categories.html">Categories</a> property to <em>c</em>.
 <p> See the CategoryWidget for more details.
 <p> <p>See also <a href="#categories">categories</a>().
 
-<h3 class=fn>void <a name="setComment"></a>AppLnk::setComment ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;comment )
+<h3 class=fn>void <a name="setComment"></a>AppLnk::setComment ( const&nbsp;QString&nbsp;&amp;&nbsp;comment )
 </h3>
 Sets the Comment property to <em>comment</em>.
 <p> This text is displayed in the 'Details Dialog', for example if the
 user uses the 'press-and-hold' gesture.
 <p> <p>See also <a href="#comment">comment</a>().
 
-<h3 class=fn>void <a name="setExec"></a>AppLnk::setExec ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;exec )
+<h3 class=fn>void <a name="setExec"></a>AppLnk::setExec ( const&nbsp;QString&nbsp;&amp;&nbsp;exec )
 </h3>
 Sets the Exec property to <em>exec</em>.
 <p> <p>See also <a href="#exec">exec</a>() and <a href="#name">name</a>().
 
-<h3 class=fn>void <a name="setFile"></a>AppLnk::setFile ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;filename )
+<h3 class=fn>void <a name="setFile"></a>AppLnk::setFile ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )
 </h3>
 Sets the File property to <em>filename</em>.
 <p> <p>See also <a href="#file">file</a>() and <a href="#name">name</a>().
 
-<h3 class=fn>void <a name="setIcon"></a>AppLnk::setIcon ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;iconname )
+<h3 class=fn>void <a name="setIcon"></a>AppLnk::setIcon ( const&nbsp;QString&nbsp;&amp;&nbsp;iconname )
 </h3>
 Sets the Icon property to <em>iconname</em>. This is the filename from
 which the <a href="#pixmap">pixmap</a>() and <a href="#bigPixmap">bigPixmap</a>() are obtained.
 <p> <p>See also <a href="#icon">icon</a>(), <a href="#setSmallIconSize">setSmallIconSize</a>() and <a href="#setBigIconSize">setBigIconSize</a>().
 
-<h3 class=fn>void <a name="setLinkFile"></a>AppLnk::setLinkFile ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;filename )
+<h3 class=fn>void <a name="setLinkFile"></a>AppLnk::setLinkFile ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )
 </h3>
 Sets the LinkFile property to <em>filename</em>.
 <p> <p>See also <a href="#linkFile">linkFile</a>().
 
-<h3 class=fn>bool <a name="setLocation"></a>AppLnk::setLocation ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;docPath )
+<h3 class=fn>bool <a name="setLocation"></a>AppLnk::setLocation ( const&nbsp;QString&nbsp;&amp;&nbsp;docPath )
 </h3>
 This function sets the location for an AppLnk to <em>docPath</em>.
+<p> First availability: Qtopia 1.6
 
-<h3 class=fn>void <a name="setName"></a>AppLnk::setName ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;docname )
+<h3 class=fn>void <a name="setName"></a>AppLnk::setName ( const&nbsp;QString&nbsp;&amp;&nbsp;docname )
 </h3>
 Sets the Name property to <em>docname</em>.
 <p> <p>See also <a href="#name">name</a>().
 
-<h3 class=fn>void <a name="setProperty"></a>AppLnk::setProperty ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;key, const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;value )
+<h3 class=fn>void <a name="setProperty"></a>AppLnk::setProperty ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )
 </h3>
 Sets the property named <em>key</em> to <em>value</em>.
 <p> <p>See also <a href="#property">property</a>().
@@ -403,7 +414,7 @@ Sets the size used for small icons to <em>small</em> pixels.
 Only affects AppLnk objects created after the call.
 <p> <p>See also <a href="#smallIconSize">smallIconSize</a>() and <a href="#setIcon">setIcon</a>().
 
-<h3 class=fn>void <a name="setType"></a>AppLnk::setType ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;type )
+<h3 class=fn>void <a name="setType"></a>AppLnk::setType ( const&nbsp;QString&nbsp;&amp;&nbsp;type )
 </h3>
 Sets the Type property to <em>type</em>.
 <p> For applications, games and settings the type should be <tt>Application</tt>; for documents the type should be the document's MIME
@@ -415,7 +426,7 @@ type.
 Returns the size used for small icons.
 <p> <p>See also <a href="#setSmallIconSize">setSmallIconSize</a>() and <a href="#setIcon">setIcon</a>().
 
-<h3 class=fn><a href="qstring.html">QString</a> <a name="type"></a>AppLnk::type () const
+<h3 class=fn>QString <a name="type"></a>AppLnk::type () const
 </h3>
 Returns the type of the AppLnk. For applications, games and
 settings the type is <tt>Application</tt>; for documents the type is the
@@ -425,16 +436,18 @@ document's MIME type.
 </h3>
 Commits the AppLnk to disk. Returns TRUE if the operation succeeded;
 otherwise returns FALSE.
-<p> In addition, the "linkChanged(<a href="qstring.html">QString</a>)" message is sent to the
+<p> In addition, the "linkChanged(QString)" message is sent to the
 "QPE/System" <a href="qcop.html">QCop</a> channel.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia </a>,
-copyright &copy; 1995-2002
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

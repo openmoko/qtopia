@@ -1,18 +1,19 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -59,23 +60,26 @@ QIr::QIr( QObject *parent, const char *name )
       sendWindow( 0 )
 {
     obexServer = new QIrServer( this );
+    connect( obexServer, SIGNAL(receiving(int,const QString&,const QString&)),
+	    this, SLOT(receiving(int,const QString&,const QString&)) );
+    connect( obexServer, SIGNAL(receiveDone()), this, SLOT(receiveDone()) );
     connect( obexServer, SIGNAL( receiveInit() ), this, SLOT( receiveInit() ) );
-    connect( obexServer, SIGNAL( received( const QString &, const QString & ) ),
- 	     this, SLOT( received( const QString &, const QString & ) ) );
     connect( obexServer, SIGNAL( receiveError() ), this, SLOT( receiveError() ) );
 
     connect( obexServer, SIGNAL( beamDone() ), this, SLOT( beamDone() ) );
     connect( obexServer, SIGNAL( beamError() ), this, SLOT( beamError() ) );
 
     obexChannel = new QCopChannel( "QPE/Obex", this );
-    connect( obexChannel, SIGNAL(received(const QCString&, const QByteArray&)),
-	     this, SLOT(obexMessage(const QCString&, const QByteArray&)) );
+    connect( obexChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(obexMessage(const QCString&,const QByteArray&)) );
 
     trayChannel = new QCopChannel( "Qt/Tray", this );
-    connect( trayChannel, SIGNAL(received(const QCString&, const QByteArray&)),
-	     this, SLOT(traySocket(const QCString&, const QByteArray&)) );
+    connect( trayChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(traySocket(const QCString&,const QByteArray&)) );
 
     ips = new IrPowerSave(this);
+
+  receiveWindow = new ReceiveDialog(obexServer, 0, "irReceive");
 }
 
 QIr::~QIr()
@@ -112,7 +116,7 @@ void QIr::obexMessage( const QCString &msg , const QByteArray &data )
 #ifdef QTOPIA_IR_DEBUG
 	qDebug("sending obex object, filename=%s, mimetype=%s", filename.latin1(), mimetype.latin1());
 #endif
-	if ( obexServer->state() != QIrServer::Ready ) {
+	if ( obexServer->isBeaming() ) {
 	    QString desc = name;
 	    if ( name.isEmpty() )
 		desc = filename;
@@ -126,7 +130,7 @@ void QIr::obexMessage( const QCString &msg , const QByteArray &data )
 	    sendWindow = new SendWindow(obexServer, 0, "irSend");
 	
 	// anoher test, just in case we used some time to create the sendwindow (and an incoming request came)
-	if ( obexServer->state() == QIrServer::Ready ) {
+	if ( !obexServer->isBeaming() ) {
 	    BeamItem item;
 	    item.name = name;
 	    item.fileName = fi.fileName();
@@ -158,48 +162,49 @@ void QIr::traySocket( const QCString &msg, const QByteArray &data)
     }
 
     if ( id == BEAM_TRAY_ID ) {
-	
-	switch( obexServer->state() ) {
-	    case QIrServer::Beaming:	    
-		if ( sendWindow->isVisible() )
-		    sendWindow->raise();
-		else
-		    sendWindow->showMaximized();
-		break;
-	    case QIrServer::Receiving:
-		if ( receiveWindow->isVisible() ) {
-		    receiveWindow->raise();
-		} else {
-		    receiveWindow->showMaximized();
-		    Global::statusMessage( "" );
-		}
-		break;
-	   default:
-		notifyBeamDone();
-		break;
+	if ( obexServer->isBeaming() ) {
+	    if ( sendWindow->isVisible() )
+		sendWindow->raise();
+	    else
+		sendWindow->showMaximized();
+	}
+	if ( obexServer->isReceiving() ) {
+	    if ( receiveWindow->isVisible() ) {
+		receiveWindow->raise();
+	    } else {
+		receiveWindow->showMaximized();
+		Global::statusMessage( "" );
+	    }
+	} else if ( !obexServer->isBeaming() ) {
+	    notifyBeamDone();
 	}
     }
 }
 
 void QIr::receiveInit()
 {
-    if ( !receiveWindow )
-      receiveWindow = new ReceiveDialog(obexServer, 0, "irReceive");
-
+    ips->initBeam();
     notifyBeamBegin();
 }
 
-void QIr::received( const QString&, const QString &)
+void QIr::receiveDone()
 {
-    if ( receiveWindow->isVisible() ) {
-	receiveWindow->raise();
-    } else {
-	receiveWindow->showMaximized();
-	Global::statusMessage( "" );
+    if ( !obexServer->isBeaming() ) {
+	notifyBeamDone();
+	ips->beamingDone(TRUE);
     }
+}
 
-    notifyBeamDone();
-    ips->beamingDone(TRUE);
+void QIr::receiving( int, const QString&, const QString &mimetype )
+{
+    if( mimetype != "text/x-vCard" &&
+	mimetype != "text/x-vCalendar" ) {
+	if ( receiveWindow->isVisible() )
+	    receiveWindow->raise();
+	else
+	    receiveWindow->showMaximized();
+    }
+    //don't show receive dialog for pim data
 }
 
 void QIr::receiveError()
@@ -210,14 +215,19 @@ void QIr::receiveError()
     }
     
     receiveWindow->failed();
-    // let's show the window
+    // no need to show the window - it will be already shown if sending something
+   // other than PIM data
+    /*
     if ( receiveWindow->isVisible() )
 	receiveWindow->raise();
     else
 	receiveWindow->showMaximized();
+    */
 
-    notifyBeamDone();
-    ips->beamingDone(TRUE);
+    if ( !obexServer->isBeaming() ) {
+	notifyBeamDone();
+	ips->beamingDone(TRUE);
+    }
 }
 
 void QIr::beamDone()
@@ -228,8 +238,10 @@ void QIr::beamDone()
 	QTimer::singleShot(0, this, SLOT(beamNext()) );
     } else {
 	sendWindow->finished();
-	ips->beamingDone();
-	notifyBeamDone();
+	if ( !obexServer->isReceiving() ) {
+	    ips->beamingDone();
+	    notifyBeamDone();
+	}
     }
 }
 
@@ -251,8 +263,10 @@ void QIr::beamError()
     }
     
     sendWindow->failed();
-    notifyBeamDone();
-    ips->beamingDone();
+    if ( !obexServer->isReceiving() ) {
+	notifyBeamDone();
+	ips->beamingDone();
+    }
 }
 
 
@@ -276,8 +290,8 @@ IrPowerSave::IrPowerSave( QObject *parent, const char *name)
     }
     
     QCopChannel *obexChannel = new QCopChannel( "QPE/Obex", this );
-    connect( obexChannel, SIGNAL(received(const QCString&, const QByteArray&)),
-	     this, SLOT(obexMessage(const QCString&, const QByteArray&)) );
+    connect( obexChannel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(obexMessage(const QCString&,const QByteArray&)) );
 
 }
 
@@ -311,6 +325,10 @@ void IrPowerSave::beamingDone(bool received)
 	    }
 	    break;
 	case OnMinutes:
+	    if ( !timer->isActive() ) {
+		state = Off;
+		service("stop"); // No tr
+	    }
 	    break;
     }
 }
@@ -377,8 +395,9 @@ void IrPowerSave::applyReceiveState(State s)
 void IrPowerSave::timeout()
 {
     timer->stop();
-    if ( state != Off )
+    if ( state != Off && !inUse )
 	applyReceiveState( Off );
+    // If inUse, will turn off in beamingDone().
 }
 
 void IrPowerSave::service(const QString& command)

@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -34,10 +36,10 @@ Inherits <a href="qrangecontrol.html">QRangeControl</a> and <a href="qwidget.htm
 <ul>
 <li><div class="fn">enum <a href="#TickSetting"><b>TickSetting</b></a> { NoMarks = 0, Above = 1, Left = Above, Below = 2, Right = Below, Both = 3 }</div>
 <li><div class="fn"><a href="#91879d"><b>QSlider</b></a> ( QWidget * parent, const char * name=0 ) </div>
-<li><div class="fn"><a href="#09987e"><b>QSlider</b></a> ( Orientation, QWidget * parent, const char * name=0 ) </div>
-<li><div class="fn"><a href="#29b312"><b>QSlider</b></a> ( int minValue, int maxValue, int pageStep, int value, Orientation, QWidget * parent, const char * name=0 ) </div>
-<li><div class="fn">virtual void <a href="#7c6fad"><b>setOrientation</b></a> ( Orientation ) </div>
-<li><div class="fn">Orientation <a href="#646dac"><b>orientation</b></a> () const</div>
+<li><div class="fn"><b>QSlider</b> ( Orientation, QWidget * parent, const char * name=0 ) </div>
+<li><div class="fn"><b>QSlider</b> ( int minValue, int maxValue, int pageStep, int value, Orientation, QWidget * parent, const char * name=0 ) </div>
+<li><div class="fn">virtual void <b>setOrientation</b> ( Orientation ) </div>
+<li><div class="fn">Orientation <b>orientation</b> () const</div>
 <li><div class="fn">virtual void <a href="#4adf7d"><b>setTracking</b></a> ( bool enable ) </div>
 <li><div class="fn">bool <a href="#aefda9"><b>tracking</b></a> () const</div>
 <li><div class="fn">virtual void <a href="#f82be6"><b>setPalette</b></a> ( const QPalette &amp; ) </div>
@@ -102,7 +104,7 @@ for information about the many other functions that class provides.
 <p>The main functions offered by the slider itself are tickmark and
 orientation control; you can use <a href="#0c633e">setTickmarks</a>() to indicate where
 you want the tickmarks to be, <a href="#c111f7">setTickInterval</a>() to indicate how many
-of them you want, and <a href="#7c6fad">setOrientation</a>() to indicate whether the
+of them you want, and <a href="#6b3cdb">setOrientation</a>() to indicate whether the
 slider is to e horizontal or vertical.
 <p>A slider has a default <a href="qwidget.html#3d478d">focusPolicy</a>() of <em>WeakWheelFocus,</em> i.e. it
 accepts focus on Tab and by using the mouse wheel, and a
@@ -123,24 +125,9 @@ to draw tickmarks above and below the (horizontal) slider.  <code>Left</code>
 and <code>Right</code> mean to draw tickmarks to the left and right of the
 (vertical) slider.
 <hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="09987e"></a>QSlider::QSlider ( <a href="qt.html#Orientation">Orientation</a> orientation, <a href="qwidget.html">QWidget</a> * parent, const char * name=0 )</h3>
-<p>Constructs a slider.
-<p>The <em>orientation</em> must be QSlider::Vertical or QSlider::Horizontal.
-<p>The <em>parent</em> and <em>name</em> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.
 <h3 class="fn"><a name="91879d"></a>QSlider::QSlider ( <a href="qwidget.html">QWidget</a> * parent, const char * name=0 )</h3>
 <p>Constructs a vertical slider.
 <p>The <em>parent</em> and <em>name</em> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.
-<h3 class="fn"><a name="29b312"></a>QSlider::QSlider ( int minValue, int maxValue, int pageStep, int value, <a href="qt.html#Orientation">Orientation</a> orientation, <a href="qwidget.html">QWidget</a> * parent, const char * name=0 )</h3>
-<p>Constructs a slider.
-<p>Arguments:
-<ul>
-<li><em>minValue</em> is the minimum slider value.
-<li><em>maxValue</em> is the maximum slider value.
-<li><em>step</em> is the page step value.
-<li><em>value</em> is the initial value.
-<li><em>orientation</em> must be QSlider::Vertical or QSlider::Horizontal.
-</ul>
-The <em>parent</em> and <em>name</em> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.
 <h3 class="fn">void <a name="f8da10"></a>QSlider::addStep () <code>[slot]</code></h3>
 <p>Moves the slider one <a href="#66a537">pageStep</a>() upwards.
 <h3 class="fn">void <a name="381bf6"></a>QSlider::drawTicks ( <a href="qpainter.html">QPainter</a> * p, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, int dist, int w, int i=1 ) const <code>[protected]</code></h3>
@@ -186,10 +173,6 @@ the center of the groove.
 <h3 class="fn">void <a name="600888"></a>QSlider::mouseReleaseEvent ( <a href="qmouseevent.html">QMouseEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#9aa77f">QWidget.</a>
-<h3 class="fn"><a href="qt.html#Orientation">Orientation</a> <a name="646dac"></a>QSlider::orientation () const</h3>
-<p>Returns the slider orientation; QSlider::Vertical or
-QSlider::Horizontal.
-<p>See also  <a href="#7c6fad">setOrientation</a>().
 <h3 class="fn">int <a name="66a537"></a>QSlider::pageStep () const</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <h3 class="fn">void <a name="d7e45a"></a>QSlider::paintEvent ( <a href="qpaintevent.html">QPaintEvent</a> * ) <code>[virtual protected]</code></h3>
@@ -221,10 +204,6 @@ different from the previous setting.
 <p>A convenience function which just calls
 <a href="qrangecontrol.html#f2409c">setRange</a>( i, <a href="#b4a4db">maxValue</a>() )
 <p>See also  <a href="qrangecontrol.html#f2409c">setRange</a>().
-<h3 class="fn">void <a name="7c6fad"></a>QSlider::setOrientation ( <a href="qt.html#Orientation">Orientation</a> orientation ) <code>[virtual]</code></h3>
-<p>Sets the slider orientation.  The <em>orientation</em> must be
-QSlider::Vertical or QSlider::Horizontal.
-<p>See also  <a href="#646dac">orientation</a>().
 <h3 class="fn">void <a name="38a5f2"></a>QSlider::setPageStep ( int i )</h3>
 <p>Sets the page step to <em>i.</em>
 <p>Calls the virtual <a href="qrangecontrol.html#e0aaf5">stepChange</a>() function if the new page step is
@@ -324,7 +303,7 @@ new slider value as an argument.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -332,5 +311,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

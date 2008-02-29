@@ -15,15 +15,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
- 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "../dsputil.h"
 #include "../mpegvideo.h"
 
-
-// Used when initializing constant vectors
-#define FOUR_INSTANCES(x) x,x,x,x
+#include "gcc_fixes.h"
+ 
+#include "dsputil_altivec.h"
 
 // Swaps two variables (used for altivec registers)
 #define SWAP(a,b) \
@@ -93,6 +93,13 @@ do { \
     vec = vec_splat(vec, 0); \
 }
 
+
+#ifdef CONFIG_DARWIN
+#define FOUROF(a) (a)
+#else
+// slower, for dumb non-apple GCC
+#define FOUROF(a) {a,a,a,a}
+#endif
 int dct_quantize_altivec(MpegEncContext* s, 
                         DCTELEM* data, int n,
                         int qscale, int* overflow)
@@ -100,7 +107,7 @@ int dct_quantize_altivec(MpegEncContext* s,
     int lastNonZero;
     vector float row0, row1, row2, row3, row4, row5, row6, row7;
     vector float alt0, alt1, alt2, alt3, alt4, alt5, alt6, alt7;
-    const vector float zero = {FOUR_INSTANCES(0.0f)};
+    const vector float zero = (const vector float)FOUROF(0.);
 
     // Load the data into the row/alt vectors
     {
@@ -144,18 +151,18 @@ int dct_quantize_altivec(MpegEncContext* s,
 		// in the vector local variables, as floats, which we'll use during the
 		// quantize step...
     {
-        const vector float vec_0_298631336 = {FOUR_INSTANCES(0.298631336f)};
-        const vector float vec_0_390180644 = {FOUR_INSTANCES(-0.390180644f)};
-        const vector float vec_0_541196100 = {FOUR_INSTANCES(0.541196100f)};
-        const vector float vec_0_765366865 = {FOUR_INSTANCES(0.765366865f)};
-        const vector float vec_0_899976223 = {FOUR_INSTANCES(-0.899976223f)};
-        const vector float vec_1_175875602 = {FOUR_INSTANCES(1.175875602f)};
-        const vector float vec_1_501321110 = {FOUR_INSTANCES(1.501321110f)};
-        const vector float vec_1_847759065 = {FOUR_INSTANCES(-1.847759065f)};
-        const vector float vec_1_961570560 = {FOUR_INSTANCES(-1.961570560f)};
-        const vector float vec_2_053119869 = {FOUR_INSTANCES(2.053119869f)};
-        const vector float vec_2_562915447 = {FOUR_INSTANCES(-2.562915447f)};
-        const vector float vec_3_072711026 = {FOUR_INSTANCES(3.072711026f)};
+        const vector float vec_0_298631336 = (vector float)FOUROF(0.298631336f);
+        const vector float vec_0_390180644 = (vector float)FOUROF(-0.390180644f);
+        const vector float vec_0_541196100 = (vector float)FOUROF(0.541196100f);
+        const vector float vec_0_765366865 = (vector float)FOUROF(0.765366865f);
+        const vector float vec_0_899976223 = (vector float)FOUROF(-0.899976223f);
+        const vector float vec_1_175875602 = (vector float)FOUROF(1.175875602f);
+        const vector float vec_1_501321110 = (vector float)FOUROF(1.501321110f);
+        const vector float vec_1_847759065 = (vector float)FOUROF(-1.847759065f);
+        const vector float vec_1_961570560 = (vector float)FOUROF(-1.961570560f);
+        const vector float vec_2_053119869 = (vector float)FOUROF(2.053119869f);
+        const vector float vec_2_562915447 = (vector float)FOUROF(-2.562915447f);
+        const vector float vec_3_072711026 = (vector float)FOUROF(3.072711026f);
 
 
         int whichPass, whichHalf;
@@ -309,7 +316,7 @@ int dct_quantize_altivec(MpegEncContext* s,
 				// rounding when we convert to int, instead of flooring.)
         {
             vector signed int biasInt;
-            const vector float negOneFloat = (vector float)(FOUR_INSTANCES(-1.0f));
+            const vector float negOneFloat = (vector float)FOUROF(-1.0f);
             LOAD4(biasInt, biasAddr);
             bias = vec_ctf(biasInt, QUANT_BIAS_SHIFT);
             negBias = vec_madd(bias, negOneFloat, zero);
@@ -464,7 +471,7 @@ int dct_quantize_altivec(MpegEncContext* s,
         // and handle it using the vector unit if we can.  This is the permute used
         // by the altivec idct, so it is common when using the altivec dct.
 
-        if ((lastNonZero > 0) && (s->idct_permutation_type == FF_TRANSPOSE_IDCT_PERM))
+        if ((lastNonZero > 0) && (s->dsp.idct_permutation_type == FF_TRANSPOSE_IDCT_PERM))
         {
             TRANSPOSE8(data0, data1, data2, data3, data4, data5, data6, data7);
         }
@@ -497,13 +504,142 @@ int dct_quantize_altivec(MpegEncContext* s,
     // We handled the tranpose permutation above and we don't
     // need to permute the "no" permutation case.
     if ((lastNonZero > 0) &&
-        (s->idct_permutation_type != FF_TRANSPOSE_IDCT_PERM) &&
-        (s->idct_permutation_type != FF_NO_IDCT_PERM))
+        (s->dsp.idct_permutation_type != FF_TRANSPOSE_IDCT_PERM) &&
+        (s->dsp.idct_permutation_type != FF_NO_IDCT_PERM))
     {
-        ff_block_permute(data, s->idct_permutation,
+        ff_block_permute(data, s->dsp.idct_permutation,
                 s->intra_scantable.scantable, lastNonZero);
     }
 
     return lastNonZero;
 }
+#undef FOUROF
 
+/*
+  AltiVec version of dct_unquantize_h263
+  this code assumes `block' is 16 bytes-aligned
+*/
+void dct_unquantize_h263_altivec(MpegEncContext *s, 
+                                 DCTELEM *block, int n, int qscale)
+{
+POWERPC_PERF_DECLARE(altivec_dct_unquantize_h263_num, 1);
+    int i, level, qmul, qadd;
+    int nCoeffs;
+    
+    assert(s->block_last_index[n]>=0);
+
+POWERPC_PERF_START_COUNT(altivec_dct_unquantize_h263_num, 1);
+    
+    qadd = (qscale - 1) | 1;
+    qmul = qscale << 1;
+    
+    if (s->mb_intra) {
+        if (!s->h263_aic) {
+            if (n < 4) 
+                block[0] = block[0] * s->y_dc_scale;
+            else
+                block[0] = block[0] * s->c_dc_scale;
+        }else
+            qadd = 0;
+        i = 1;
+        nCoeffs= 63; //does not allways use zigzag table 
+    } else {
+        i = 0;
+        nCoeffs= s->intra_scantable.raster_end[ s->block_last_index[n] ];
+    }
+
+#ifdef ALTIVEC_USE_REFERENCE_C_CODE
+    for(;i<=nCoeffs;i++) {
+        level = block[i];
+        if (level) {
+            if (level < 0) {
+                level = level * qmul - qadd;
+            } else {
+                level = level * qmul + qadd;
+            }
+            block[i] = level;
+        }
+    }
+#else /* ALTIVEC_USE_REFERENCE_C_CODE */
+    {
+      register const vector short vczero = (const vector short)vec_splat_s16(0);
+      short __attribute__ ((aligned(16))) qmul8[] =
+          {
+            qmul, qmul, qmul, qmul,
+            qmul, qmul, qmul, qmul
+          };
+      short __attribute__ ((aligned(16))) qadd8[] =
+          {
+            qadd, qadd, qadd, qadd,
+            qadd, qadd, qadd, qadd
+          };
+      short __attribute__ ((aligned(16))) nqadd8[] =
+          {
+            -qadd, -qadd, -qadd, -qadd,
+            -qadd, -qadd, -qadd, -qadd
+          };
+      register vector short blockv, qmulv, qaddv, nqaddv, temp1;
+      register vector bool short blockv_null, blockv_neg;
+      register short backup_0 = block[0];
+      register int j = 0;
+      
+      qmulv = vec_ld(0, qmul8);
+      qaddv = vec_ld(0, qadd8);
+      nqaddv = vec_ld(0, nqadd8);
+
+#if 0 // block *is* 16 bytes-aligned, it seems.
+      // first make sure block[j] is 16 bytes-aligned
+      for(j = 0; (j <= nCoeffs) && ((((unsigned long)block) + (j << 1)) & 0x0000000F) ; j++) {
+        level = block[j];
+        if (level) {
+          if (level < 0) {
+                level = level * qmul - qadd;
+            } else {
+                level = level * qmul + qadd;
+            }
+            block[j] = level;
+        }
+      }
+#endif
+      
+      // vectorize all the 16 bytes-aligned blocks
+      // of 8 elements
+      for(; (j + 7) <= nCoeffs ; j+=8)
+      {
+        blockv = vec_ld(j << 1, block);
+        blockv_neg = vec_cmplt(blockv, vczero);
+        blockv_null = vec_cmpeq(blockv, vczero);
+        // choose between +qadd or -qadd as the third operand
+        temp1 = vec_sel(qaddv, nqaddv, blockv_neg);
+        // multiply & add (block{i,i+7} * qmul [+-] qadd)
+        temp1 = vec_mladd(blockv, qmulv, temp1);
+        // put 0 where block[{i,i+7} used to have 0
+        blockv = vec_sel(temp1, blockv, blockv_null);
+        vec_st(blockv, j << 1, block);
+      }
+
+      // if nCoeffs isn't a multiple of 8, finish the job
+      // using good old scalar units.
+      // (we could do it using a truncated vector,
+      // but I'm not sure it's worth the hassle)
+      for(; j <= nCoeffs ; j++) {
+        level = block[j];
+        if (level) {
+          if (level < 0) {
+                level = level * qmul - qadd;
+            } else {
+                level = level * qmul + qadd;
+            }
+            block[j] = level;
+        }
+      }
+      
+      if (i == 1)
+      { // cheat. this avoid special-casing the first iteration
+        block[0] = backup_0;
+      }
+    }
+#endif /* ALTIVEC_USE_REFERENCE_C_CODE */
+
+POWERPC_PERF_STOP_COUNT(altivec_dct_unquantize_h263_num, nCoeffs == 63);
+}

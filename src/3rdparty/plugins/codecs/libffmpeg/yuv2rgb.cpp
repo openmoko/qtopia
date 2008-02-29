@@ -1,5 +1,6 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -12,6 +13,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -102,6 +104,7 @@ static int yuv2rgb_configure (yuv2rgb_t *c_this, int source_width, int source_he
   c_this->dest_height   = dest_height;
   c_this->rgb_stride    = rgb_stride;
 
+printf("yuv2rgb config - w: %d h: %d\n", source_width, source_height);
 
   switch ( format ) {
     case FORMAT_YUV444:
@@ -128,15 +131,18 @@ static int yuv2rgb_configure (yuv2rgb_t *c_this, int source_width, int source_he
   
   if (c_this->y_chunk) {
     free (c_this->y_chunk);
-    c_this->y_buffer = (uint8_t *)c_this->y_chunk = 0;
+    c_this->y_chunk = 0;
+    c_this->y_buffer = (uint8_t *)c_this->y_chunk;
   }
   if (c_this->u_chunk) {
     free (c_this->u_chunk);
-    c_this->u_buffer = (uint8_t *)c_this->u_chunk = 0;
+    c_this->u_chunk = 0;
+    c_this->u_buffer = (uint8_t *)c_this->u_chunk;
   }
   if (c_this->v_chunk) {
     free (c_this->v_chunk);
-    c_this->v_buffer = (uint8_t *)c_this->v_chunk = 0;
+    c_this->v_chunk = 0;
+    c_this->v_buffer = (uint8_t *)c_this->v_chunk;
   }
 
   
@@ -407,11 +413,13 @@ static scale_line_func_t find_scale_line_func(int step)
 #define RGB16(i) RGB(i,uint16_t)
 #define RGB32(i) RGB(i,uint32_t)
 
-#define DST(i,dst)				\
-	Y = py_##dst[2*i];                      \
-	dst_##dst[2*i] = r[Y] + g[Y] + b[Y];	\
-	Y = py_##dst[2*i+1];			\
-	dst_##dst[2*i+1] = r[Y] + g[Y] + b[Y];
+#define _DST(i,dst,x) \
+	Y = py_##dst[2*i+x]; \
+	dst_##dst[2*i+x] = r[Y] + g[Y] + b[Y];
+
+#define DST(i,dst) \
+	_DST(i,dst,0) \
+	_DST(i,dst,1) \
 
 #define DST1(i) DST(i,1)
 #define DST2(i) DST(i,2)
@@ -468,8 +476,19 @@ static void yuv2rgb_c_32 (yuv2rgb_t *c_this, uint8_t * _dst,
       } while (--width);
 
       int edge_pixels = c_this->dest_width % 8;
-      for ( int i = 0; i < edge_pixels; i++ )
-	*dst_1++ = 0;
+      for ( int i = 0; i < (edge_pixels-1); i+=2 ) {
+	  RGB32(0);
+	  DST1(0);
+	  pu += 1;
+	  pv += 1;
+	  py_1 += 2;
+	  dst_1 += 2;
+      }
+      if (c_this->dest_width % 1) {
+	  RGB32(0);
+	  _DST(0,1,0);
+      }
+
 
       dy += c_this->step_dy;
       _dst += c_this->rgb_stride;
@@ -542,9 +561,21 @@ static void yuv2rgb_c_32 (yuv2rgb_t *c_this, uint8_t * _dst,
       } while (--width);
 
       int edge_pixels = c_this->source_width % 8;
-      for ( int i = 0; i < edge_pixels; i++ )
-	*dst_1++ = 0,
-	*dst_2++ = 0; 
+      for ( int i = 0; i < (edge_pixels-1); i+=2 ) {
+	RGB32(0)
+	DST1(0)
+	DST2(0)
+	pu += 1;
+	pv += 1;
+	py_1 += 2;
+	py_2 += 2;
+	dst_1 += 2;
+	dst_2 += 2;
+      }
+      if (c_this->source_width % 1) {
+	  RGB32(0);
+	  _DST(0,1,0);
+      }
 
       _dst += 2 * c_this->rgb_stride; 
       _py += 2 * c_this->y_stride;
@@ -610,8 +641,18 @@ static void yuv2rgb_c_16 (yuv2rgb_t *c_this, uint8_t * _dst,
       } while (--width);
 
       int edge_pixels = c_this->dest_width % 8;
-      for ( int i = 0; i < edge_pixels; i++ )
-	*dst_1++ = 0; 
+      for ( int i = 0; i < (edge_pixels-1); i+=2 ) {
+	  RGB16(0);
+	  DST1(0);
+	  pu += 1;
+	  pv += 1;
+	  py_1 += 2;
+	  dst_1 += 2;
+      }
+      if (c_this->dest_width % 1) {
+	  RGB16(0);
+	  _DST(0,1,0);
+      }
 
       dy += c_this->step_dy;
       _dst += c_this->rgb_stride;
@@ -683,9 +724,21 @@ static void yuv2rgb_c_16 (yuv2rgb_t *c_this, uint8_t * _dst,
       } while (--width);
 
       int edge_pixels = c_this->source_width % 8;
-      for ( int i = 0; i < edge_pixels; i++ )
-	*dst_1++ = 0,
-	*dst_2++ = 0; 
+      for ( int i = 0; i < (edge_pixels-1); i+=2 ) {
+	RGB16(0);
+	DST1(0);
+	DST2(0);
+	pu += 1;
+	pv += 1;
+	py_1 += 2;
+	py_2 += 2;
+	dst_1 += 2;
+	dst_2 += 2;
+      }
+      if (c_this->source_width % 1) {
+	  RGB16(0);
+	  _DST(0,1,0);
+      }
 
       _dst += 2 * c_this->rgb_stride; 
       _py += 2 * c_this->y_stride;
@@ -843,9 +896,12 @@ yuv2rgb_factory_t* yuv2rgb_factory_init (int mode, int swapped, int gamma)
 
     // yuv2rgb_set_gamma 
     for (int i = 0; i < 256; i++) {
-	(uint8_t *)c_this->table_rV[i] += c_this->entry_size*(gamma - c_this->gamma);
-	(uint8_t *)c_this->table_gU[i] += c_this->entry_size*(gamma - c_this->gamma);
-	(uint8_t *)c_this->table_bU[i] += c_this->entry_size*(gamma - c_this->gamma);
+	uint8_t *rV_table = (uint8_t *)c_this->table_rV;
+	uint8_t *gU_table = (uint8_t *)c_this->table_gU;
+	uint8_t *bU_table = (uint8_t *)c_this->table_bU;
+	rV_table[i] += c_this->entry_size*(gamma - c_this->gamma);
+	gU_table[i] += c_this->entry_size*(gamma - c_this->gamma);
+	bU_table[i] += c_this->entry_size*(gamma - c_this->gamma);
     }
     c_this->gamma = gamma;
 

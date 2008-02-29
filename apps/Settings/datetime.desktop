@@ -1,11 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Date/Time
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
-Comment=Set date and time
 Exec=systemtime
 Icon=DateTime
 Type=Application
-Name=Date/Time
-Name[ja]=日付/時刻
-Name[no]=Dato/Tid
-Name[de]=Datum/Zeit
-Name[hu]=Dátum/Idõ
+Name[]=Date/­Time
 CanFastload=0

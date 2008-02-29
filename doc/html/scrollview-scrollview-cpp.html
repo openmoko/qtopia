@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -33,7 +35,7 @@ height="100" src="face.png" alt="Home" border="0">
 
   Implementation:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/scrollview/scrollview.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/scrollview/scrollview.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -239,25 +241,25 @@ public:
 
         <a name="QPopupMenu"></a><a href="qpopupmenu.html">QPopupMenu</a>* file = new <a href="qpopupmenu.html">QPopupMenu</a>();
         CHECK_PTR( file );
-        menubar-&gt;<a name="insertItem"></a><a href="qmenudata.html#0076cb">insertItem</a>( "&amp;File", file );
-        file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Quit", qApp,  SLOT(quit()) );
+        menubar-&gt;<a name="insertItem"></a><a href="qmenudata.html#deddb9">insertItem</a>( "&amp;File", file );
+        file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Quit", qApp,  SLOT(quit()) );
 
         vp_options = new <a href="qpopupmenu.html">QPopupMenu</a>();
         CHECK_PTR( vp_options );
         vp_options-&gt;<a name="setCheckable"></a><a href="qpopupmenu.html#672d77">setCheckable</a>( TRUE );
-        menubar-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;ScrollView", vp_options );
+        menubar-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;ScrollView", vp_options );
         connect( vp_options, SIGNAL(activated(int)),
             this, SLOT(doVPMenuItem(int)) );
 
-        vauto_id = vp_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Vertical Auto" );
-        vaoff_id = vp_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Vertical AlwaysOff" );
-        vaon_id = vp_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Vertical AlwaysOn" );
+        vauto_id = vp_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Vertical Auto" );
+        vaoff_id = vp_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Vertical AlwaysOff" );
+        vaon_id = vp_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Vertical AlwaysOn" );
         vp_options-&gt;<a name="insertSeparator"></a><a href="qmenudata.html#e34b79">insertSeparator</a>();
-        hauto_id = vp_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Horizontal Auto" );
-        haoff_id = vp_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Horizontal AlwaysOff" );
-        haon_id = vp_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Horizontal AlwaysOn" );
+        hauto_id = vp_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Horizontal Auto" );
+        haoff_id = vp_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Horizontal AlwaysOff" );
+        haon_id = vp_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Horizontal AlwaysOn" );
         vp_options-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-        corn_id = vp_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "cornerWidget" );
+        corn_id = vp_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "cornerWidget" );
 
         if (technique == 1) {
             vp = new <a href="qscrollview.html">QScrollView</a>(this);
@@ -283,19 +285,19 @@ public:
         f_options = new <a href="qpopupmenu.html">QPopupMenu</a>();
         CHECK_PTR( f_options );
         f_options-&gt;<a href="qpopupmenu.html#672d77">setCheckable</a>( TRUE );
-        menubar-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;Frame", f_options );
+        menubar-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;Frame", f_options );
         connect( f_options, SIGNAL(activated(int)),
             this, SLOT(doFMenuItem(int)) );
 
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "No frame", style_id );
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Box", style_id|QFrame::Box );
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Panel", style_id|QFrame::Panel );
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "WinPanel", style_id|QFrame::WinPanel );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "No frame", style_id );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Box", style_id|QFrame::Box );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Panel", style_id|QFrame::Panel );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "WinPanel", style_id|QFrame::WinPanel );
         f_options-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Plain", style_id|QFrame::Plain );
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Raised", style_id|QFrame::Raised );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Plain", style_id|QFrame::Plain );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Raised", style_id|QFrame::Raised );
         f_laststyle = f_options-&gt;<a name="indexOf"></a><a href="qmenudata.html#49862d">indexOf</a>(
-            f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Sunken", style_id|QFrame::Sunken ));
+            f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Sunken", style_id|QFrame::Sunken ));
         f_options-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
         lw_options = new <a href="qpopupmenu.html">QPopupMenu</a>;
         CHECK_PTR( lw_options );
@@ -303,9 +305,9 @@ public:
         for (int lw = 1; lw &lt;= max_lw; lw++) {
             <a href="qstring.html">QString</a> str;
             str.<a href="qstring.html#926f67">sprintf</a>("%d pixels", lw);
-            lw_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( str, lw_id | lw );
+            lw_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( str, lw_id | lw );
         }
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Line width", lw_options );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Line width", lw_options );
         connect( lw_options, SIGNAL(activated(int)),
             this, SLOT(doFMenuItem(int)) );
         mlw_options = new <a href="qpopupmenu.html">QPopupMenu</a>;
@@ -314,9 +316,9 @@ public:
         for (int mlw = 0; mlw &lt;= max_mlw; mlw++) {
             <a href="qstring.html">QString</a> str;
             str.<a href="qstring.html#926f67">sprintf</a>("%d pixels", mlw);
-            mlw_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( str, mlw_id | mlw );
+            mlw_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( str, mlw_id | mlw );
         }
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Midline width", mlw_options );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Midline width", mlw_options );
         connect( mlw_options, SIGNAL(activated(int)),
             this, SLOT(doFMenuItem(int)) );
         mw_options = new <a href="qpopupmenu.html">QPopupMenu</a>;
@@ -325,9 +327,9 @@ public:
         for (int mw = 0; mw &lt;= max_mw; mw++) {
             <a href="qstring.html">QString</a> str;
             str.<a href="qstring.html#926f67">sprintf</a>("%d pixels", mw);
-            mw_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( str, mw_id | mw );
+            mw_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( str, mw_id | mw );
         }
-        f_options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Margin width", mw_options );
+        f_options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Margin width", mw_options );
         connect( mw_options, SIGNAL(activated(int)),
             this, SLOT(doFMenuItem(int)) );
 
@@ -476,5 +478,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

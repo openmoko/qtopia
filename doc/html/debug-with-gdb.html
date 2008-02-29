@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/debug-with-gdb.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Debugging Qtopia Application With Gdb</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Debugging Qtopia Application With Gdb</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Rebuild the application with Debug symbols
+</a>
+<li><a href="#3"> Run the debugging environment
+</a>
+<li><a href="#4"> Debug crashes
+</a>
+<li><a href="#5"> Other References
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> GDB is the GNU Debugger. It is used to monitor a program while it executes and to examine what a program was doing when it crashed.
+<p> For more information on what GDB is, please refer to the GNU site <a href="http://www.gnu.org/software/gdb/gdb.html">http://www.gnu.org/software/gdb/gdb.html</a>
+<p> The rest of this page provides instructions how to debug Qtopia applications using gdb in a Linux environment.
+<p> <h2> Rebuild the application with Debug symbols
+</h2>
+<a name="2"></a><p> This is done by changing the .pro file CONFIG settings:
+<p> <PRE>
+CONFIG = qt warn_on debug
+</PRE>
+<p> Then rebuild the makefiles:
+<PRE>
+$ tmake -o Makefile thefile.pro
+</PRE>
+<p> And rebuild the application and install the application binary into the /opt/Qtopia/bin directory (/bin):
+<PRE>
+$ make clean
+$ make
+$ make install
+</PRE>
+<p> </a> GDB reference
+<p> <h2> Run the debugging environment
+</h2>
+<a name="3"></a><p> Start the virtual framebuffer environment and the qtopia environment, then start gdb:
+<PRE>
+$ qvfb &amp;
+$ qpe &amp;
+$ gdb theProgram
+(gdb) r # run
+</PRE>
+<p> Alternatively to debug an application outside of the qtopia environment, start the virtual framebuffer environment and ensure that the application hooks into the virtual frame buffer:
+<PRE>
+$ qvfb &amp;
+$ gdb theProgram
+(gdb) set args - qws # we need this to hook to the virtual frame buffer.
+(gdb) list # if you want to list the main.cpp file
+(gdb) b 6 # break at line six
+(gdb) r # run
+(gdb) s # step into
+(gdb) r # continue
+</PRE>
+<p> <h2> Debug crashes
+</h2>
+<a name="4"></a><p> If the application crashes, it should produce a core file. To examine this core file (assuming the build was done as a debug build so the symbolic information is present to figure out what happened), do the following:
+<p> <PRE>
+$ gdb theapplication core
+(gdb) backtrace full
+</PRE>
+<p> <h2> Other References
+</h2>
+<a name="5"></a><p> <ul>
+<li> <a href="http://www.cslab.vt.edu/manuals/gdb/gdb_toc.html">GDB online manual</a> -  (http://www.cslab.vt.edu/manuals/gdb/gdb_toc.html)
+<li> <a href="http://www.refcards.com">GDB reference card</a> - (http://www.refcards.com)
+<li> <a href="http://www.gnu.org/software/gdb/gdb.html">GDB: The GNU Project Debugger</a> - (http://www.gnu.org/software/gdb/gdb.html)
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

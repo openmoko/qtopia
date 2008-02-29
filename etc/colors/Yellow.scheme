@@ -1,8 +1,11 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
 [Global]
-Name = Yellow
-Name[ja] = 黄
+Name[]=Yellow
 [Colors]
-Background = #EFEFAA
-Button = #D1D194
-Highlight = #FFFF00
-HighlightedText = #000000
+Background=#FFFFE7
+Button=#EBECA8
+Highlight=#E9E900
+AlternateBase=#FFFFCC
+HighlightedText=#000000

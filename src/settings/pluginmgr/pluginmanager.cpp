@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -133,64 +148,72 @@ void PluginManager::drawWait(bool on)
 void PluginManager::init()
 {
     drawWait( TRUE );
-    QString path = QPEApplication::qpeDir() + "plugins/";
-    QDir tdir(path);
+    QStringList qpepaths = Global::qtopiaPaths();
+    QDict<PluginTypeItem> items;
+    for (QStringList::Iterator qit=qpepaths.begin(); qit != qpepaths.end(); ++qit ) {
+	QString path = *qit + "plugins/";
+	QDir tdir(path);
 
-    QStringList tlist = tdir.entryList( QDir::Dirs );
-    QStringList::Iterator it;
-    for ( it = tlist.begin(); it != tlist.end(); ++it ) {
-	if ( (*it)[0] == '.' || *it == "application" )
-	    continue;
-	QString pluginPath = path + *it + '/';
-	QStringList required;
-	QString apply, comment;
-	QString tname = *it;
-	tname[0] = tname[0].upper();
-	if ( QFile::exists(pluginPath + ".directory") ) {
-	    Config config( pluginPath + ".directory", Config::File );
-	    tname = config.readEntry( "Name", tname );
-	    required = config.readListEntry( "Required", ',' );
-	    apply = config.readEntry( "Apply" );
-	    comment = config.readEntry( "Comment" );
-	}
-	PluginTypeItem *titem = new PluginTypeItem( pluginListView, tname );
-	titem->pluginDir = *it;
-	titem->apply = apply.simplifyWhiteSpace();
-	titem->comment = comment;
-	if ( *it == "applets" ) {
-	    titem->setOpen(TRUE);
-	    pluginListView->setCurrentItem( titem );
-	    selectionChanged( titem );
-	}
+	QStringList tlist = tdir.entryList( QDir::Dirs );
+	QStringList::Iterator it;
+	for ( it = tlist.begin(); it != tlist.end(); ++it ) {
+	    if ( (*it)[0] == '.' || *it == "application" )
+		continue;
+	    QString pluginPath = path + *it + '/';
+	    QStringList required;
+	    QString apply, comment;
+	    QString tname = *it;
+	    tname[0] = tname[0].upper();
+	    if ( QFile::exists(pluginPath + ".directory") ) {
+		Config config( pluginPath + ".directory", Config::File );
+		tname = config.readEntry( "Name", tname );
+		required = config.readListEntry( "Required", ',' );
+		apply = config.readEntry( "Apply" );
+		comment = config.readEntry( "Comment" );
+	    }
+	    PluginTypeItem *titem = items.find(*it);
+	    if ( !titem ) {
+		titem = new PluginTypeItem( pluginListView, tname );
+		items.insert(*it,titem);
+		titem->pluginDir = *it;
+		titem->apply = apply.simplifyWhiteSpace();
+		titem->comment = comment;
+		if ( *it == "applets" ) {
+		    titem->setOpen(TRUE);
+		    pluginListView->setCurrentItem( titem );
+		    selectionChanged( titem );
+		}
+	    }
 
-	PluginLoader loader( *it );
+	    PluginLoader loader( *it );
 #ifndef Q_OS_WIN32
-	QDir pdir(path + *it, "lib*.so");
+	    QDir pdir(path + *it, "lib*.so");
 #else
-	QDir pdir(path + *it, "*.dll");
+	    QDir pdir(path + *it, "*.dll");
 #endif
 
-	QStringList plist = pdir.entryList();
-	QStringList::Iterator pit;
-	for ( pit = plist.begin(); pit != plist.end(); ++pit ) {
-	    QString base = stripSystem( *pit );
-	    QString name = base;
-	    name[0] = name[0].upper();
-	    if ( QFile::exists( pluginPath + base + ".desktop" ) ) {
-		Config config( pluginPath + base + ".desktop", Config::File );
-		name = config.readEntry( "Name", name );
-		comment = config.readEntry( "Comment" );
-		if ( !required.count() )
-		    required = config.readListEntry( "Required", ',' );
+	    QStringList plist = pdir.entryList();
+	    QStringList::Iterator pit;
+	    for ( pit = plist.begin(); pit != plist.end(); ++pit ) {
+		QString base = stripSystem( *pit );
+		QString name = base;
+		name[0] = name[0].upper();
+		if ( QFile::exists( pluginPath + base + ".desktop" ) ) {
+		    Config config( pluginPath + base + ".desktop", Config::File );
+		    name = config.readEntry( "Name", name );
+		    comment = config.readEntry( "Comment" );
+		    if ( !required.count() )
+			required = config.readListEntry( "Required", ',' );
+		}
+		PluginItem *pitem = new PluginItem( titem, name );
+		pitem->pluginType = *it;
+		pitem->pluginName = *pit;
+		pitem->comment = comment;
+		if ( loader.isEnabled( *pit ) )
+		    pitem->setOn( TRUE );
+		if ( required.contains(base) )
+		    pitem->setEnabled(FALSE);
 	    }
-	    PluginItem *pitem = new PluginItem( titem, name );
-	    pitem->pluginType = *it;
-	    pitem->pluginName = *pit;
-	    pitem->comment = comment;
-	    if ( loader.isEnabled( *pit ) )
-		pitem->setOn( TRUE );
-	    if ( required.contains(base) )
-		pitem->setEnabled(FALSE);
 	}
     }
     drawWait( FALSE );
@@ -240,7 +263,7 @@ void PluginManager::save()
 
     if ( restartQtopia ) {
 	QMessageBox::warning(0, tr("Restart Qtopia"),
-	    tr("<p>Qtopia must be restarted for the changes to take affect."),
+	    tr("<qt>Qtopia must be restarted for the changes to take affect.</qt>"),
 	    QMessageBox::Ok, QMessageBox::NoButton );
 	Global::restart();
     }

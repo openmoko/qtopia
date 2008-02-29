@@ -1,17 +1,24 @@
-/* DCT test. (c) 2001 Fabrice Bellard. 
-   Started from sample code by Juan J. Sierralta P.
-*/
+/**
+ * @file dct-test.c
+ * DCT test. (c) 2001 Fabrice Bellard. 
+ * Started from sample code by Juan J. Sierralta P.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <getopt.h>
 
 #include "dsputil.h"
 
 #include "i386/mmx.h"
 #include "simple_idct.h"
+#include "faandct.h"
+
+#ifndef MAX
+#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
+#endif
 
 /* reference fdct/idct */
 extern void fdct(DCTELEM *block);
@@ -23,12 +30,6 @@ extern void ff_mmx_idct(DCTELEM *data);
 extern void ff_mmxext_idct(DCTELEM *data);
 
 extern void odivx_idct_c (short *block);
-
-void (*add_pixels_clamped)(const DCTELEM *block/*align 16*/, 
-                           UINT8 *pixels/*align 8*/, int line_size);
-
-void (*put_pixels_clamped)(const DCTELEM *block/*align 16*/, 
-                           UINT8 *pixels/*align 8*/, int line_size);
 
 #define AANSCALE_BITS 12
 static const unsigned short aanscales[64] = {
@@ -43,13 +44,13 @@ static const unsigned short aanscales[64] = {
     4520,  6270,  5906,  5315,  4520,  3552,  2446,  1247
 };
 
-UINT8 cropTbl[256 + 2 * MAX_NEG_CROP];
+uint8_t cropTbl[256 + 2 * MAX_NEG_CROP];
 
-INT64 gettime(void)
+int64_t gettime(void)
 {
     struct timeval tv;
     gettimeofday(&tv,NULL);
-    return (INT64)tv.tv_sec * 1000000 + tv.tv_usec;
+    return (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
 }
 
 #define NB_ITS 20000
@@ -89,8 +90,8 @@ void dct_error(const char *name, int is_idct,
 {
     int it, i, scale;
     int err_inf, v;
-    INT64 err2, ti, ti1, it1;
-    INT64 sysErr[64], sysErrMax=0;
+    int64_t err2, ti, ti1, it1;
+    int64_t sysErr[64], sysErrMax=0;
     int maxout=0;
     int blockSumErrMax=0, blockSumErr;
 
@@ -160,7 +161,11 @@ void dct_error(const char *name, int is_idct,
         fdct_func(block);
         emms(); /* for ff_mmx_idct */
 
-        if (fdct_func == fdct_ifast) {
+        if (fdct_func == fdct_ifast 
+#ifndef FAAN_POSTSCALE        
+            || fdct_func == ff_faandct
+#endif
+            ) {
             for(i=0; i<64; i++) {
                 scale = 8*(1 << (AANSCALE_BITS + 11)) / aanscales[i];
                 block[i] = (block[i] * scale /*+ (1<<(AANSCALE_BITS-1))*/) >> AANSCALE_BITS;
@@ -264,10 +269,10 @@ void dct_error(const char *name, int is_idct,
 #endif
 }
 
-static UINT8 img_dest[64] __attribute__ ((aligned (8)));
-static UINT8 img_dest1[64] __attribute__ ((aligned (8)));
+static uint8_t img_dest[64] __attribute__ ((aligned (8)));
+static uint8_t img_dest1[64] __attribute__ ((aligned (8)));
 
-void idct248_ref(UINT8 *dest, int linesize, INT16 *block)
+void idct248_ref(uint8_t *dest, int linesize, int16_t *block)
 {
     static int init;
     static double c8[8][8];
@@ -348,7 +353,7 @@ void idct248_ref(UINT8 *dest, int linesize, INT16 *block)
 }
 
 void idct248_error(const char *name, 
-                    void (*idct248_put)(UINT8 *dest, int line_size, INT16 *block))
+                    void (*idct248_put)(uint8_t *dest, int line_size, int16_t *block))
 {
     int it, i, it1, ti, ti1, err_max, v;
 
@@ -479,6 +484,8 @@ int main(int argc, char **argv)
             dct_error("IJG-AAN-INT", 0, fdct_ifast, fdct, test);
             dct_error("IJG-LLM-INT", 0, ff_jpeg_fdct_islow, fdct, test);
             dct_error("MMX", 0, ff_fdct_mmx, fdct, test);
+            dct_error("MMX2", 0, ff_fdct_mmx2, fdct, test);
+            dct_error("FAAN", 0, ff_faandct, fdct, test);
         } else {
             dct_error("REF-DBL", 1, idct, idct, test);
             dct_error("INT", 1, j_rev_dct, idct, test);

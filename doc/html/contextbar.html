@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia/contextbar.cpp:24 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ContextBar Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>ContextBar Class Reference</h1>
+
+<p>The ContextBar class allows the context label in the phone
+context bar to be set.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="contextbar-h.html">qtopia/contextbar.h</a>&gt;</tt>
+<p><a href="contextbar-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn>enum <a href="#EditingState-enum"><b>EditingState</b></a> { Modal = 1, NonModal = 2, ModalAndNonModal = 3 }</div></li>
+<li><div class=fn>enum <a href="#StandardLabel-enum"><b>StandardLabel</b></a> { NoLabel, Options, Ok, Edit, Select, View, Cancel, Back, BackSpace, Next, Previous }</div></li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li><div class=fn>void <a href="#setLabel"><b>setLabel</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;pm, const&nbsp;QString&nbsp;&amp;&nbsp;t, EditingState&nbsp;state = ModalAndNonModal )</div></li>
+<li><div class=fn>void <a href="#setLabel-2"><b>setLabel</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;key, StandardLabel&nbsp;label, EditingState&nbsp;state = ModalAndNonModal )</div></li>
+<li><div class=fn>void <a href="#clearLabel"><b>clearLabel</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;key, EditingState&nbsp;state = ModalAndNonModal )</div></li>
+<li><div class=fn>const QArray&lt;int&gt; &amp; <a href="#keys"><b>keys</b></a> ()</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The ContextBar class allows the context label in the phone
+context bar to be set.
+<p> ContextBar is only available in the Qtopia phone edition.  It is
+used to set the text in the context bar to describe the action
+performed when pressing the associated context button.  Keep in
+mind that not all phones have soft keys and therefore may not have
+a visible context bar.  The application should be useable without
+soft key shortcuts.
+<p> The context labels are updated whenever a widget gains or loses focus
+or their modal editing state changes.  Therefore, the labels should
+be set for each widget that may gain focus, and will respond to a
+context key.  The standard Qt and Qtopia widgets
+set the labels appropriately, so this is usually only necessary for
+custom widgets.
+<p> The rule for determining what label is displayed on the context bar and
+where the key events are delivered is:
+<p> <ul>
+<li> If the current focus widget has claimed the key, then the corresponding
+context label is shown.
+<li> Otherwise, the widget's parent, grandparent and so on may set the label.
+<li> If the focus widget has not claimed the key and an ancestor has, then
+the key event will be sent directly to the ancestor.
+</ul>
+<p> ContextBar labels specify both a pixmap and a text label.  Currently,
+Qtopia Phone Edition will always use the pixmap rather than text.  The
+text label must still be provided because future versions of Qtopia
+Phone Edition may allow the user to choose to view text labels.
+<p> ContextBar is only available in the Qtopia Phone Edition.
+<p> 
+<p>See also <a href="qtopiaphone.html">Qtopia Phone Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="EditingState-enum"></a>ContextBar::EditingState</h3>
+
+<ul>
+<li><tt>ContextBar::Modal</tt> - apply the label setting when in Modal editing state.
+<li><tt>ContextBar::NonModal</tt> - apply the label setting when in Nonmodal editing state.
+<li><tt>ContextBar::ModalAndNonModal</tt> - apply the label setting regardless of editing state.
+</ul>
+<h3 class=fn><a name="StandardLabel-enum"></a>ContextBar::StandardLabel</h3>
+
+<ul>
+<li><tt>ContextBar::NoLabel</tt>
+<li><tt>ContextBar::Options</tt>
+<li><tt>ContextBar::Ok</tt>
+<li><tt>ContextBar::Edit</tt>
+<li><tt>ContextBar::Select</tt>
+<li><tt>ContextBar::View</tt>
+<li><tt>ContextBar::Cancel</tt>
+<li><tt>ContextBar::Back</tt>
+<li><tt>ContextBar::BackSpace</tt>
+<li><tt>ContextBar::Next</tt>
+<li><tt>ContextBar::Previous</tt>
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>void <a name="clearLabel"></a>ContextBar::clearLabel ( QWidget&nbsp;*&nbsp;w, int&nbsp;key, <a href="contextbar.html#EditingState-enum">EditingState</a>&nbsp;state = ModalAndNonModal )<tt> [static]</tt>
+</h3>
+Clears any label set for widget <em>w</em>, key <em>key</em> in state <em>state</em>.
+<p> <p>See also <a href="#setLabel">setLabel</a>().
+
+<h3 class=fn>const QArray&lt;int&gt; &amp; <a name="keys"></a>ContextBar::keys ()<tt> [static]</tt>
+</h3>
+Returns the list of context keys.
+
+<h3 class=fn>void <a name="setLabel"></a>ContextBar::setLabel ( QWidget&nbsp;*&nbsp;w, int&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;pm, const&nbsp;QString&nbsp;&amp;&nbsp;t, <a href="contextbar.html#EditingState-enum">EditingState</a>&nbsp;state = ModalAndNonModal )<tt> [static]</tt>
+</h3>
+When widget <em>w</em> gains focus, sets the label in the context bar for key
+<em>key</em> to text <em>t</em> and pixmap <em>pm</em> when in state <em>state</em>.
+<p> The pixmaps used in the context bar may be no larger than 22x16 pixels.
+
+<h3 class=fn>void <a name="setLabel-2"></a>ContextBar::setLabel ( QWidget&nbsp;*&nbsp;w, int&nbsp;key, <a href="contextbar.html#StandardLabel-enum">StandardLabel</a>&nbsp;label, <a href="contextbar.html#EditingState-enum">EditingState</a>&nbsp;state = ModalAndNonModal )<tt> [static]</tt>
+</h3>
+When widget <em>w</em> gains focus, sets the label in the context bar for key
+<em>key</em> to the standard label <em>label</em> when in state <em>state</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

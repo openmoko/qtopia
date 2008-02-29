@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -32,7 +34,7 @@ height="100" src="face.png" alt="Home" border="0">
 
   Implementation:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/progress/progress.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/progress/progress.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -178,23 +180,23 @@ public:
 
         <a name="QPopupMenu"></a><a href="qpopupmenu.html">QPopupMenu</a>* file = new <a href="qpopupmenu.html">QPopupMenu</a>();
         CHECK_PTR( file );
-        menubar-&gt;<a name="insertItem"></a><a href="qmenudata.html#0076cb">insertItem</a>( "&amp;File", file );
+        menubar-&gt;<a name="insertItem"></a><a href="qmenudata.html#deddb9">insertItem</a>( "&amp;File", file );
         for (int i=first_draw_item; i&lt;=last_draw_item; i++)
-            file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( drawItemText(i), i );
+            file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( drawItemText(i), i );
         connect( menubar, SIGNAL(activated(int)), this, SLOT(doMenuItem(int)) );
         file-&gt;<a name="insertSeparator"></a><a href="qmenudata.html#e34b79">insertSeparator</a>();
-        file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Quit", qApp,  SLOT(quit()) );
+        file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Quit", qApp,  SLOT(quit()) );
 
         options = new <a href="qpopupmenu.html">QPopupMenu</a>();
         CHECK_PTR( options );
-        menubar-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "&amp;Options", options );
-        td_id = options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Timer driven", this, SLOT(timerDriven()) );
-        ld_id = options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Loop driven", this, SLOT(loopDriven()) );
+        menubar-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "&amp;Options", options );
+        td_id = options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Timer driven", this, SLOT(timerDriven()) );
+        ld_id = options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Loop driven", this, SLOT(loopDriven()) );
         options-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-        dl_id = options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Default label", this, SLOT(defaultLabel()) );
-        cl_id = options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "Custom label", this, SLOT(customLabel()) );
+        dl_id = options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Default label", this, SLOT(defaultLabel()) );
+        cl_id = options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "Custom label", this, SLOT(customLabel()) );
         options-&gt;<a href="qmenudata.html#e34b79">insertSeparator</a>();
-        md_id = options-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "No minimum duration", this, SLOT(toggleMinimumDuration()) );
+        md_id = options-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "No minimum duration", this, SLOT(toggleMinimumDuration()) );
         options-&gt;<a name="setCheckable"></a><a href="qpopupmenu.html#672d77">setCheckable</a>( TRUE );
         loopDriven();
         defaultLabel();
@@ -370,5 +372,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

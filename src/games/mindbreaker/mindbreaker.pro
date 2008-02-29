@@ -1,14 +1,18 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-
-CONFIG          += qtopia warn_on release
+CONFIG          += qtopiaapp
 
 HEADERS		= mindbreaker.h
-SOURCES		= mindbreaker.cpp
-multiprocess:SOURCES+=main.cpp
+SOURCES		= mindbreaker.cpp main.cpp
+
+TRANSLATABLES = $${HEADERS} $${SOURCES}
 
 TARGET          = mindbreaker
 
-TRANSLATIONS = mindbreaker-en_GB.ts mindbreaker-de.ts mindbreaker-ja.ts mindbreaker-no.ts
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/mindbreaker.html
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/mindbreaker.desktop
+desktop.path=/apps/Games
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/mindbreaker/*
+pics.path=/pics/mindbreaker
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics

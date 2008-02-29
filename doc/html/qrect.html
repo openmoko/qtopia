@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -117,10 +119,10 @@ corner, the positive direction of the y axis is downwards and the
 positive x axis is from the left to the right.
 <p>See also  <a href="qpoint.html">QPoint</a> and <a href="qsize.html">QSize</a>.
 <p>Examples:
- <a href="xform-xform-cpp.html#QRect">xform/xform.cpp</a>
- <a href="forever-forever-cpp.html#QRect">forever/forever.cpp</a>
- <a href="desktop-desktop-cpp.html#QRect">desktop/desktop.cpp</a>
  <a href="movies-main-cpp.html#QRect">movies/main.cpp</a>
+ <a href="forever-forever-cpp.html#QRect">forever/forever.cpp</a>
+ <a href="xform-xform-cpp.html#QRect">xform/xform.cpp</a>
+ <a href="desktop-desktop-cpp.html#QRect">desktop/desktop.cpp</a>
 
 <hr><h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="8f82a6"></a>QRect::QRect ()</h3>
@@ -173,9 +175,9 @@ bottom right point.
 top and bottom edges, ie. height = bottom - top + 1.
 <p>See also  <a href="#45fe95">width</a>(), <a href="#507cd9">size</a>() and <a href="#324bcf">setHeight</a>().
 <p>Examples:
+ <a href="movies-main-cpp.html#height">movies/main.cpp</a>
  <a href="xform-xform-cpp.html#height">xform/xform.cpp</a>
  <a href="desktop-desktop-cpp.html#height">desktop/desktop.cpp</a>
- <a href="movies-main-cpp.html#height">movies/main.cpp</a>
 <h3 class="fn">QRect <a name="4fc24a"></a>QRect::intersect ( const QRect &amp; r ) const</h3>
 <p><pre> r.intersect(s)
 </pre>
@@ -334,8 +336,8 @@ height, but will never change the bottom edge of the rectangle.
 <p>Returns the size of the rectangle.
 <p>See also  <a href="#45fe95">width</a>() and <a href="#581ab8">height</a>().
 <p>Examples:
- <a href="desktop-desktop-cpp.html#size">desktop/desktop.cpp</a>
  <a href="movies-main-cpp.html#size">movies/main.cpp</a>
+ <a href="desktop-desktop-cpp.html#size">desktop/desktop.cpp</a>
 <h3 class="fn">int <a name="4dd27e"></a>QRect::top () const</h3>
 <p>Returns the top coordinate of the rectangle. Identical to <a href="#f448f7">y</a>().
 <p>See also  <a href="#f448f7">y</a>(), <a href="#369cab">left</a>(), <a href="#2de4b0">bottom</a>(), <a href="#2052ad">setTop</a>(), <a href="#349186">topLeft</a>() and <a href="#d59dee">topRight</a>().
@@ -360,23 +362,23 @@ height, but will never change the bottom edge of the rectangle.
 left and right edges, ie. width = right - left + 1.
 <p>See also  <a href="#581ab8">height</a>(), <a href="#507cd9">size</a>() and <a href="#324bcf">setHeight</a>().
 <p>Examples:
+ <a href="movies-main-cpp.html#width">movies/main.cpp</a>
  <a href="xform-xform-cpp.html#width">xform/xform.cpp</a>
  <a href="desktop-desktop-cpp.html#width">desktop/desktop.cpp</a>
- <a href="movies-main-cpp.html#width">movies/main.cpp</a>
 <h3 class="fn">int <a name="fccae7"></a>QRect::x () const</h3>
 <p>Returns the left coordinate of the rectangle.  Identical to <a href="#369cab">left</a>().
 <p>See also  <a href="#369cab">left</a>(), <a href="#f448f7">y</a>() and <a href="#d39dfb">setX</a>().
 <p>Examples:
+ <a href="movies-main-cpp.html#x">movies/main.cpp</a>
  <a href="xform-xform-cpp.html#x">xform/xform.cpp</a>
  <a href="desktop-desktop-cpp.html#x">desktop/desktop.cpp</a>
- <a href="movies-main-cpp.html#x">movies/main.cpp</a>
 <h3 class="fn">int <a name="f448f7"></a>QRect::y () const</h3>
 <p>Returns the top coordinate of the rectangle.  Identical to <a href="#4dd27e">top</a>().
 <p>See also  <a href="#4dd27e">top</a>(), <a href="#fccae7">x</a>() and <a href="#f83aa7">setY</a>().
 <p>Examples:
+ <a href="movies-main-cpp.html#y">movies/main.cpp</a>
  <a href="xform-xform-cpp.html#y">xform/xform.cpp</a>
  <a href="desktop-desktop-cpp.html#y">desktop/desktop.cpp</a>
- <a href="movies-main-cpp.html#y">movies/main.cpp</a>
 <hr><h2>Related Functions</h2>
 <h3>bool <a name="138029"></a>operator== (const QRect &amp; r1, const QRect &amp; r2)</h3>
 <p>Returns TRUE if <em>r1</em> and <em>r2</em> are equal, or FALSE if they are different.
@@ -396,7 +398,7 @@ left and right edges, ie. width = right - left + 1.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -404,5 +406,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

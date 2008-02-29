@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -30,7 +32,7 @@ remains with Trolltech.
 <hr>
 <pre>
 /****************************************************************************
-** &#36;Id&#58; qt/src/widgets/qmainwindow.h   2.3.7   edited 2003-01-31 $
+** &#36;Id&#58; qt/src/widgets/qmainwindow.h   2.3.9   edited 2004-12-13 $
 **
 ** Definition of QMainWindow class
 **
@@ -111,7 +113,7 @@ public:
     enum ToolBarDock {
         Unmanaged, TornOff, Top, Bottom, Right, Left, Minimized
     };
-
+#ifndef QT_NO_TOOLBAR
     virtual void setDockEnabled( ToolBarDock dock, bool enable );
     bool isDockEnabled( ToolBarDock dock ) const;
     void setDockEnabled( QToolBar *tb, ToolBarDock dock, bool enable ); // ########### make virtual
@@ -124,7 +126,7 @@ public:
     void moveToolBar( QToolBar *, ToolBarDock, bool nl, int index, int extraOffset = -1 );
 
     void removeToolBar( QToolBar * );
-
+#endif
 
     void show();
     QSize sizeHint() const;
@@ -183,7 +185,9 @@ protected:
 private:
     QMainWindowPrivate * d;
     void triggerLayout( bool deleteLayout = TRUE);
+#ifndef QT_NO_TOOLBAR
     void moveToolBar( QToolBar *, QMouseEvent * );
+#endif
     void rightMouseButtonMenu( const QPoint &amp;p );
 
 #ifndef QT_NO_MENUBAR
@@ -212,5 +216,5 @@ private:        // Disabled copy constructor and operator=
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

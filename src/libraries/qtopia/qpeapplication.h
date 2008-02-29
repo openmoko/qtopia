@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -20,11 +35,14 @@
 #ifndef __QPE_APPLICATION_H__
 #define __QPE_APPLICATION_H__
 
-
 #include <qtopia/qpeglobal.h>
 #include <qapplication.h>
 #include <qdialog.h>
 #include <qtopia/timestring.h>
+
+#ifdef QTOPIA_TEST
+# include "qpetestslave.h"
+#endif
 
 class QCopChannel;
 class QPEApplicationData;
@@ -47,6 +65,7 @@ public:
     static void grabKeyboard();
     static void ungrabKeyboard();
 
+
     enum StylusMode {
 	LeftOnly,
 	RightOnHold
@@ -59,6 +78,12 @@ public:
 	Normal,
 	AlwaysOff,
 	AlwaysOn
+	,
+	Number,
+	PhoneNumber,
+	Words,
+	Text,
+	Named,
     };
 
     enum screenSaverHint {
@@ -68,13 +93,17 @@ public:
 	Enable = 100
     };
 
-    static void setInputMethodHint( QWidget *, InputMethodHint );
+    static void setInputMethodHint( QWidget *, InputMethodHint, const QString& param=QString::null );
+    static void setInputMethodHint( QWidget *, const QString& named );
     static InputMethodHint inputMethodHint( QWidget * );
+    static QString inputMethodHintParam( QWidget * );
 
     void showMainWidget( QWidget*, bool nomax=FALSE );
     void showMainDocumentWidget( QWidget*, bool nomax=FALSE );
     static void showDialog( QDialog*, bool nomax=FALSE );   // libqtopia
     static int execDialog( QDialog*, bool nomax=FALSE );    // libqtopia
+    static void setMenuLike( QDialog *, bool ); // libqtopia2
+    static bool isMenuLike( const QDialog* ); // libqtopia2
     static void setTempScreenSaverMode(screenSaverHint);    // libqtopia
 
     static void setKeepRunning();
@@ -84,6 +113,9 @@ public:
 
     int exec();
 
+#ifdef QTOPIA_INTERNAL_LOADTRANSLATIONS
+    static void loadTranslations(const QStringList&);
+#endif
 #ifdef QTOPIA_INTERNAL_INITAPP
     void initApp( int argc, char **argv );
 #endif
@@ -100,15 +132,24 @@ signals:
     void flush();
     void reload();
     void linkChanged( const QString &linkFile );
-
+    
 private slots:
     void systemMessage( const QCString &msg, const QByteArray &data );
     void pidMessage( const QCString &msg, const QByteArray &data );
     void removeSenderFromStylusDict();
+    void removeSenderFromIMDict();
     void hideOrQuit();
     void pluginLibraryManager(PluginLibraryManager**);
+    void lineEditTextChange(const QString &);
+    void multiLineEditTextChange();
+
+    void removeFromWidgetFlags();
+    
 
 protected:
+#if defined(QTOPIA_PHONE) || defined(QTOPIA_TEST)  // since not binary compatible
+    bool notify(QObject*,QEvent*);
+#endif
     bool qwsEventFilter( QWSEvent * );
     void internalSetStyle( const QString &style );
     void prepareForTermination(bool willrestart);
@@ -123,6 +164,10 @@ private:
     void mapToDefaultAction( QWSKeyEvent *ke, int defKey );
     void processQCopFile();
 
+#if defined(QTOPIA_INTERNAL_SENDINPUTHINT)
+    static void sendInputHintFor(QWidget*,QEvent::Type);
+#endif
+
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
     QCopChannel *sysChannel;
     QCopChannel *pidChannel;
@@ -131,8 +176,15 @@ private:
 
     bool reserved_sh;
 
-
-
+#if defined QTOPIA_TEST
+public:
+    QString appName();
+    void stopCycleCount() { hasPerfMonitor = FALSE; };
+    void startCycleCount() { hasPerfMonitor = TRUE; };
+    QPETestSlave app_slave;
+private:
+    bool hasPerfMonitor;
+#endif
 };
 
 #ifdef Q_OS_WIN32
@@ -156,6 +208,11 @@ typedef QMap<QString,qpeAppCreateFunc> QPEAppMap;
 	return new IMPLEMENTATION(p,n,f); } \
     QPEAppMap *qpeAppMap(); \
     static QPEAppMap::Iterator dummy_ ## IMPLEMENTATION = qpeAppMap()->insert(NAME,create_ ## IMPLEMENTATION);
+
+#ifdef QTOPIA_NO_MAIN
+#define QTOPIA_MAIN
+
+#else
 
 #ifdef QTOPIA_APP_INTERFACE
 
@@ -209,7 +266,7 @@ typedef QMap<QString,qpeAppCreateFunc> QPEAppMap;
 	else if ( qpeAppMap()->count() ) \
 	    mw = qpeAppMap()->begin().data()(0,0,0); \
 	if ( mw ) { \
-	    if ( mw->metaObject()->slotNames().contains("setDocument(const QString&)") ) \
+	    if ( mw->metaObject()->slotNames(true).contains("setDocument(const QString&)") ) \
 		a.showMainDocumentWidget( mw ); \
 	    else \
 		a.showMainWidget( mw ); \
@@ -226,4 +283,5 @@ typedef QMap<QString,qpeAppCreateFunc> QPEAppMap;
 	return am; \
     } \
 
+#endif
 #endif

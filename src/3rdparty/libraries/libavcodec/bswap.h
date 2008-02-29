@@ -1,3 +1,29 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+/**
+ * @file bswap.h
+ * byte swap.
+ */
+
 #ifndef __BSWAP_H__
 #define __BSWAP_H__
 
@@ -6,7 +32,7 @@
 #else
 
 #ifdef ARCH_X86
-inline static unsigned short ByteSwap16(unsigned short x)
+static inline unsigned short ByteSwap16(unsigned short x)
 {
   __asm("xchgb %b0,%h0"	:
         "=q" (x)	:
@@ -15,7 +41,7 @@ inline static unsigned short ByteSwap16(unsigned short x)
 }
 #define bswap_16(x) ByteSwap16(x)
 
-inline static unsigned int ByteSwap32(unsigned int x)
+static inline unsigned int ByteSwap32(unsigned int x)
 {
 #if __CPU__ > 386
  __asm("bswap	%0":
@@ -31,7 +57,7 @@ inline static unsigned int ByteSwap32(unsigned int x)
 }
 #define bswap_32(x) ByteSwap32(x)
 
-inline static unsigned long long int ByteSwap64(unsigned long long int x)
+static inline unsigned long long int ByteSwap64(unsigned long long int x)
 {
   register union { __extension__ uint64_t __ll;
           uint32_t __l[2]; } __x;
@@ -39,6 +65,39 @@ inline static unsigned long long int ByteSwap64(unsigned long long int x)
       "=r"(__x.__l[0]),"=r"(__x.__l[1]):
       "0"(bswap_32((unsigned long)x)),"1"(bswap_32((unsigned long)(x>>32))));
   return __x.__ll;
+}
+#define bswap_64(x) ByteSwap64(x)
+
+#elif defined(ARCH_SH4)
+
+static inline uint16_t ByteSwap16(uint16_t x) {
+	__asm__("swap.b %0,%0":"=r"(x):"0"(x));
+	return x;
+}
+
+static inline uint32_t ByteSwap32(uint32_t x) {
+	__asm__(
+	"swap.b %0,%0\n"
+	"swap.w %0,%0\n"
+	"swap.b %0,%0\n"
+	:"=r"(x):"0"(x));
+	return x;
+}
+
+#define bswap_16(x) ByteSwap16(x)
+#define bswap_32(x) ByteSwap32(x)
+
+static inline uint64_t ByteSwap64(uint64_t x)
+{
+    union { 
+        uint64_t ll;
+        struct {
+           uint32_t l,h;
+        } l;
+    } r;
+    r.l.l = bswap_32 (x);
+    r.l.h = bswap_32 (x>>32);
+    return r.ll;
 }
 #define bswap_64(x) ByteSwap64(x)
 
@@ -52,7 +111,7 @@ inline static unsigned long long int ByteSwap64(unsigned long long int x)
      ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) | \
       (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24))
 
-inline static uint64_t ByteSwap64(uint64_t x)
+static inline uint64_t ByteSwap64(uint64_t x)
 {
     union { 
         uint64_t ll;

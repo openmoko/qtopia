@@ -1,0 +1,336 @@
+#!/bin/sh
+
+# Welcome to the Qtopia build script
+#
+# We have created this script for your convenience.
+# It is an attempt to simplify the building of Qtopia, but it is certainly
+# not the only way how Qtopia can be build. So if you prefer to build
+# things on your own, by all means go ahead.
+#
+# To run the script, please do the following:
+# - export environment variables for TMAKEDIR, QT2DIR, QT3DIR, QTEDIR and QPEDIR.
+# - run this script e.g.
+#    $QPEDIR/scripts/build_qtopia
+#
+# Please be advised that we cannot give a 100% guarantee that
+# it will work on your system. Systems are too different for that, but in
+# any case should the script be a good starting point to get things building.
+# In case the script doesn't work and you cannot fix the problem yourself, please:
+# - run the script again using:
+#    $QPEDIR/scripts/build_qtopia > mylog
+# - attach both the log and the script to your support request to Trolltech.
+#
+# Good luck!!
+
+
+# For a better understanding of what's going on we have tried to document
+# this script as complete as possible. We hope that this provides you with
+# some help and enables you to solve problems.
+
+
+    echo " "
+    echo "***********************************"
+    echo "********** environment ************"
+    echo "***********************************"
+    # We start with logging some environment values
+    # These are essential when you encounter problems and ask for our support
+    echo " "
+    echo "QTEDIR="$QTEDIR
+    echo " "
+    echo "QT3DIR="$QT3DIR
+    echo " "
+    echo "QT2DIR="$QT2DIR
+    echo " "
+    echo "QPEDIR="$QPEDIR
+    echo " "
+    echo "TMAKEDIR="$TMAKEDIR
+    echo " "
+    echo "QMAKESPEC="$QMAKESPEC
+    echo " "
+    echo "PATH="$PATH
+    echo " "
+    echo "LD_LIBRARY_PATH="$LD_LIBRARY_PATH
+    echo " "
+    echo "PWD="$PWD
+    echo " "
+    echo "df"
+    df
+    echo "ls -la"
+    ls -la
+
+    export QTOPIA_BASE_PATH=$PATH
+
+    # before doing any build stuff we are going to check every env variable
+    echo " "
+    echo "***********************************"
+    echo "Check environment variables..."
+    echo "***********************************"
+
+    # check if QPEDIR exists
+    if test -z $QPEDIR; then
+        echo "PROBLEM:"
+        echo "  QPEDIR is not set."
+        echo "  Please set QPEDIR to the location where the Qtopia sources are installed."
+        exit
+    fi
+    if ! test -d $QPEDIR; then
+        echo "PROBLEM:"
+        echo "  QPEDIR doesn't exist."
+        echo "  Please set QPEDIR to the location where the Qtopia sources are installed."
+        exit
+    fi
+
+    # check if we can find qpeapplication.cpp. If we can't find that file something is absolutely wrong.
+    if ! test -f $QPEDIR/src/libraries/qtopia/qpeapplication.cpp; then
+        echo "PROBLEM:"
+        echo "  QPEDIR exists, but it doesn't seem to contain the required source files."
+        echo "  QPEDIR is set to: "$QPEDIR
+        echo "  Please check QPEDIR to verify that it points to the location where the Qtopia sources are installed."
+        exit
+    fi
+    echo "QPEDIR  : OK"
+
+    # check if QTEDIR exists
+    if test -z $QTEDIR; then
+        echo "PROBLEM:"
+        echo "  QTEDIR is not set."
+        echo "  Please set QTEDIR to the location where the Qt-embedded sources are installed."
+        exit
+    fi
+    if ! test -d $QTEDIR; then
+        echo "PROBLEM:"
+        echo "  QTEDIR doesn't exist."
+        echo "  Please set QTEDIR to the location where the Qt-embedded sources are installed."
+        exit
+    fi
+
+    # check if we can find qapplication.cpp. If we can't find that file something is absolutely wrong.
+    if ! test -f $QTEDIR/src/kernel/qapplication.cpp; then
+        echo "PROBLEM:"
+        echo "  QTEDIR exists, but it doesn't seem to contain the required source files."
+        echo "  QTEDIR is set to: "$QTEDIR
+        echo "  Please check QTEDIR to verify that it points to the location where the Qt-embedded sources are installed."
+        exit
+    fi
+    echo "QTEDIR  : OK"
+
+    # check if QT3DIR exists
+    if test -z $QT3DIR; then
+        echo "PROBLEM:"
+        echo "  QT3DIR is not set."
+        echo "  Please set QT3DIR to the location where the Qt-X11 3.3 sources are installed."
+        exit
+    fi
+    if ! test -d $QT3DIR; then
+        echo "PROBLEM:"
+        echo "  QT3DIR doesn't exist."
+        echo "  Please set QT3DIR to the location where the Qt-X11 3.3 sources are installed."
+        exit
+    fi
+
+    # check if we can find qapplication.cpp. If we can't find that file something is absolutely wrong.
+    # also check if we can find qmake. If we can't find that directory then QT3DIR is not pointing to a Qt 3 version.
+    if ! test -f $QT3DIR/src/kernel/qapplication.cpp || ! test -d $QT3DIR/qmake; then
+        echo "PROBLEM:"
+        echo "  QT3DIR exists, but it doesn't seem to contain the required source files."
+        echo "  QT3DIR is set to: "$QT3DIR
+        echo "  Please check QT3DIR to verify that it points to the location where the Qt-X11 3.3 sources are installed."
+        exit
+    fi
+    echo "QT3DIR  : OK"
+
+    # check if QT2DIR exists
+    if test -z $QT2DIR; then
+        echo "PROBLEM:"
+        echo "  QT2DIR is not set."
+        echo "  Please set QT2DIR to the location where the Qt-X11 2.3.2 sources are installed."
+        exit
+    fi
+    if ! test -d $QT2DIR; then
+        echo "PROBLEM:"
+        echo "  QT2DIR doesn't exist."
+        echo "  Please set QT2DIR to the location where the Qt-X11 2.3.2 sources are installed."
+        exit
+    fi
+
+    # check if we can find qapplication.cpp. If we can't find that file something is absolutely wrong.
+    # also check that we CAN'T find qmake in here.
+    if ! test -f $QT2DIR/src/kernel/qapplication.cpp || test -d $QT2DIR/qmake; then
+        echo "PROBLEM:"
+        echo "  QT2DIR exists, but it doesn't seem to contain the required source files."
+        echo "  QT2DIR is set to: "$QT2DIR
+        echo "  Please check QT2DIR to verify that it points to the location where the Qt-X11 2.3.2 sources are installed."
+        exit
+    fi
+    echo "QT2DIR  : OK"
+
+    # check if TMAKEDIR exists
+    if test -z $TMAKEDIR; then
+        echo "PROBLEM:"
+        echo "  TMAKEDIR is not set."
+        echo "  Please set TMAKEDIR to the location where the TMake sources are installed."
+        exit
+    fi
+    if ! test -d $TMAKEDIR; then
+        echo "PROBLEM:"
+        echo "  TMAKEDIR doesn't exist."
+        echo "  Please set TMAKEDIR to the location where the TMake sources are installed."
+        exit
+    fi
+
+    # check if we can find . If we can't find that file something is absolutely wrong.
+    if ! test -f $TMAKEDIR/bin/tmake || ! test -d $TMAKEDIR/lib/linux-g++; then
+        echo "PROBLEM:"
+        echo "  TMAKEDIR exists, but it doesn't seem to contain the required TMake files."
+        echo "  TMAKEDIR is set to: "$TMAKEDIR
+        echo "  Please check TMAKEDIR to verify that it points to the location where the TMake files are installed."
+        exit
+    fi
+    echo "TMAKEDIR: OK"
+
+    if test -d $QPEDIR/src/libraries/qtopiaphone; then
+        echo " "
+        echo "Building Qtopia: Phone"
+    elif test -d $QPEDIR/src/libraries/qtopiapim; then
+        echo " "
+        echo "Building Qtopia: PDA"
+    else
+        echo " "
+        echo "Building Qtopia: Core"
+    fi
+
+    export TMAKEPATH=$TMAKEDIR/lib/qws/linux-x86-g++
+    export QTOPIA_BASE_PATH=$TMAKEDIR/bin:$QTOPIA_BASE_PATH
+
+    echo " "
+    echo "***********************************"
+    echo "******** Build Qt/Embedded ********"
+    echo "***********************************"
+    export QTDIR=$QTEDIR
+    cd $QTDIR
+    export PATH=$QTDIR/bin:$QTOPIA_BASE_PATH
+    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+    cp $QPEDIR/src/qt/qconfig-qpe.h src/tools/
+    if test -d $QPEDIR/src/libraries/qtopiaphone; then
+        echo yes | ./configure -qconfig qpe -qvfb -depths 4,8,16,32 -keypad-mode -system-jpeg -gif
+    else
+        echo yes | ./configure -qconfig qpe -qvfb -depths 4,8,16,32 -system-jpeg -gif -D QT_TRANSFORM_VFB
+    fi
+
+    make sub-src
+
+    echo " "
+    echo "***********************************"
+    echo "******* Build Qt/X11 2.3.2 ******"
+    echo "***********************************"
+    export QTDIR=$QT2DIR
+    cd $QTDIR
+    export PATH=$QTDIR/bin:$QTOPIA_BASE_PATH
+    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+    echo yes | ./configure -no-opengl -no-xft
+    make sub-src
+    cd tools/designer/util
+    make
+    cd ../uic
+    make
+    cp $QTDIR/bin/uic $QTEDIR/bin
+
+    echo " "
+    echo "***********************************"
+    echo "********** Build QVFB *************"
+    echo "***********************************"
+    # You will need to build qvfb using the libraries from qt-x11-2.3.2 and the source
+    # from your qt-embedded-2.3.8 directory.  Make sure QTDIR still points to the location of qt-x11-2.3.2.
+    cd $QTEDIR
+    export TMAKEPATH=$TMAKEDIR/lib/linux-g++
+    cd tools/qvfb
+    tmake qvfb.pro > Makefile
+    make
+    cp qvfb $QTEDIR/bin
+    cd ../../..
+
+    echo " "
+    echo "***********************************"
+    echo "******** Build Qt X11 3.3 *********"
+    echo "***********************************"
+    export QTDIR=$QT3DIR
+    cd $QTDIR
+    export PATH=$QTDIR/bin:$QTOPIA_BASE_PATH
+    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+    echo yes | ./configure -fast -thread
+    make sub-src
+    cd tools/linguist/lrelease
+    make
+    cd ../lupdate
+    make
+    cd ../../designer/uilib
+    make
+    cd ../uic
+    make
+
+    echo " "
+    echo "***********************************"
+    echo "**** Build and install Qtopia *****"
+    echo "***********************************"
+    cd $QPEDIR
+    export QTDIR=$QTEDIR
+    export PATH=$QPEDIR/bin:$QTOPIA_BASE_PATH
+    if test -d $QPEDIR/src/libraries/qtopiaphone; then
+        ./configure -edition phone -no-qtopiadesktop -displaysize 176x208 -dqt $QT3DIR
+    elif test -d $QPEDIR/src/libraries/qtopiapim; then
+        ./configure -edition pda -no-qtopiadesktop -displaysize 240x320 -dqt $QT3DIR
+    else
+        ./configure -edition core -no-qtopiadesktop -displaysize 240x320 -dqt $QT3DIR
+    fi
+    make
+    if test -d $QPEDIR/src/libraries/qtopiaphone; then
+        cd src/tools/phonesim
+        make
+        cd ../../..
+    fi
+    make install
+    prefix=`awk -F= '/^PREFIX/{print $2}' $QPEDIR/src/Makefile`
+    if test -d $QPEDIR/src/libraries/qtopiaphone; then
+        cp src/tools/phonesim/troll.xml $prefix/etc
+        cp src/tools/phonesim/peers.xml $prefix/etc
+    fi
+
+    if test -d $QPEDIR/src/libraries/qtopiapim; then
+	echo "***********************************"
+	echo "**** Build and install Desktop ****"
+	echo "***********************************"
+	cd $QPEDIR
+	export PATH=$QPEDIR/bin:$QT3DIR/bin:$QTOPIA_BASE_PATH
+	export LD_LIBRARY_PATH=$QPEDIR/lib:$QT3DIR/lib:$LD_LIBRARY_PATH
+	./configure -no-qtopia -qtopiadesktop -dqt $QT3DIR
+	make
+	make install
+    fi
+
+    # hmm, well actually we have done all the checking before,
+    # so this is just a summary that all went ok.
+    echo " "
+    echo "***********************************"
+    echo "***** Check (some) binaries *******"
+    echo "***********************************"
+    echo "libqte    : OK"
+    echo "libqtopia : OK"
+    echo "qpe       : OK"
+
+    echo " "
+    echo "***********************************"
+    echo "*                                 *"
+    echo "* The build script has finished.  *"
+    echo "*                                 *"
+    echo "* If you don't know what to do    *"
+    echo "* next, please open:              *"
+    echo "* $QPEDIR/doc/html/index.html     *"
+    echo "* with your browser and go to the *"
+    echo "* getting started section.        *"
+    echo "*                                 *"
+    echo "* Success, and have fun in        *"
+    echo "*                                 *"
+    echo "*            QTOPIA               *"
+    echo "*                                 *"
+    echo "***********************************"
+

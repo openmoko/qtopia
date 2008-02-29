@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -32,18 +47,32 @@ class AppLnk;
 class DocLnkSet;
 class QFile;
 
+#if defined(__GNUC__) && !defined(NO_DEBUG)
+// C99 defines __func__ instead of __FUNCTION__, possibly supported on windows
+# include <time.h>
+# include <sys/times.h>
+# define QTOPIA_HAVE_PROFILE
+# define QTOPIA_PROFILE(s)    extern struct tms qtopia_prof_times; qDebug("%fms %s (%s), line: %i file: %s", times(&qtopia_prof_times)*1000.0/CLOCKS_PER_SEC, __FUNCTION__, s, __LINE__, __FILE__ )
+#else
+# define QTOPIA_PROFILE(s)
+#endif
+
 class QTOPIA_EXPORT Global
 {
 public:
     static QUuid generateUuid(); // libqtopia
 
+    static QStringList qtopiaPaths(); // libqtopia2
+    static QString defaultButtonsFile(); // libqtopia2
     static QString homeDirPath(); // libqtopia
     static bool renameFile( QString from, QString to ); // libqtopia
     static QString tempName(const QString &filename); // libqtopia
     static QString journalFileName(const QString &filename); // libqtopia
 
     static QString applicationFileName(const QString& appname, const QString& filename);
+#ifdef Q_WS_QWS
     static void findDocuments(DocLnkSet* folder, const QString &mimefilter=QString::null);
+#endif
     static bool isDocumentFileName(const QString& file); // libqtopia
     static bool isAppLnkFileName(const QString& file); // libqtopia
 
@@ -67,6 +96,22 @@ public:
     static bool weekStartsOnMonday(); // libqtopia
     static void setWeekStartsMonday(bool ); // libqtopia
 
+    static bool mousePreferred(); // libqtopia2
+    static bool hasKey(int key); // libqtopia2
+
+    // System independant sleep
+    static void sleep( unsigned long secs ); // libqtopia2
+    static void msleep( unsigned long msecs ); // libqtopia2
+    static void usleep( unsigned long usecs ); // libqtopia2
+
+    // libqtopiamail relies on these so they need to be available to Qtopia Desktop
+#ifdef QTOPIA_DESKTOP
+    enum Lockflags {LockShare = 1, LockWrite = 2, LockBlock = 4};
+    static bool lockFile(QFile &f, int flags = -1);
+    static bool unlockFile(QFile &f);
+    static bool isFileLocked(QFile &f, int flags = -1);
+#endif
+
 #ifdef Q_WS_QWS
 
     Global();
@@ -78,7 +123,10 @@ public:
 
     static void addWords(const QStringList& word);
     static void addWords(const QString& dictname, const QStringList& word);
-    // static void removeWords(const QStringList& word); -- if someone wants it
+#if defined(QTOPIA_PHONE) || defined(QTOPIA_INTERNAL_DICTOPERATIONS)
+    static void removeWords(const QStringList& word);
+    static void removeWords(const QString& dictname, const QStringList& word);
+#endif
 
     static void createDocDir();
 
@@ -124,6 +172,7 @@ private:
     static void invoke( const QString &exec);
     static Command* builtin;
     static QGuardedPtr<QWidget> *running;
+    static void removeRunningArray();
 #endif
 };
 

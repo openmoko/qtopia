@@ -1,8 +1,31 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+/**
+ * @file common.h
+ * common internal api header.
+ */
+
 #ifndef COMMON_H
 #define COMMON_H
-
-#define FFMPEG_VERSION_INT 0x000406
-#define FFMPEG_VERSION     "0.4.6"
 
 #if defined(WIN32) && !defined(__MINGW32__) && !defined(__CYGWIN__)
 #    define CONFIG_WIN32
@@ -14,6 +37,7 @@
 #define ALT_BITSTREAM_READER
 //#define LIBMPEG2_BITSTREAM_READER
 //#define A32_BITSTREAM_READER
+#define LIBMPEG2_BITSTREAM_READER_HACK //add BERO
 
 #ifdef HAVE_AV_CONFIG_H
 /* only include the following when compiling package */
@@ -22,6 +46,7 @@
 #    include <stdlib.h>
 #    include <stdio.h>
 #    include <string.h>
+#    include <ctype.h>
 #    ifndef __BEOS__
 #        include <errno.h>
 #    else
@@ -32,6 +57,38 @@
 #    ifndef ENODATA
 #        define ENODATA  61
 #    endif
+
+#ifndef M_PI
+#define M_PI    3.14159265358979323846
+#endif
+
+#include <stddef.h>
+#ifndef offsetof
+# define offsetof(T,F) ((unsigned int)((char *)&((T *)0)->F))
+#endif
+
+#define AVOPTION_CODEC_BOOL(name, help, field) \
+    { name, help, offsetof(AVCodecContext, field), FF_OPT_TYPE_BOOL }
+#define AVOPTION_CODEC_DOUBLE(name, help, field, minv, maxv, defval) \
+    { name, help, offsetof(AVCodecContext, field), FF_OPT_TYPE_DOUBLE, minv, maxv, defval }
+#define AVOPTION_CODEC_FLAG(name, help, field, flag, defval) \
+    { name, help, offsetof(AVCodecContext, field), FF_OPT_TYPE_FLAG, flag, 0, defval }
+#define AVOPTION_CODEC_INT(name, help, field, minv, maxv, defval) \
+    { name, help, offsetof(AVCodecContext, field), FF_OPT_TYPE_INT, minv, maxv, defval }
+#define AVOPTION_CODEC_STRING(name, help, field, str, val) \
+    { name, help, offsetof(AVCodecContext, field), FF_OPT_TYPE_STRING, .defval = val, .defstr = str }
+#define AVOPTION_CODEC_RCOVERRIDE(name, help, field) \
+    { name, help, offsetof(AVCodecContext, field), FF_OPT_TYPE_RCOVERRIDE, .defval = 0, .defstr = NULL }
+#define AVOPTION_SUB(ptr) { .name = NULL, .help = (const char*)ptr }
+#define AVOPTION_END() AVOPTION_SUB(NULL)
+
+struct AVOption;
+#ifdef HAVE_MMX
+extern const struct AVOption avoptions_common[3 + 5];
+#else
+extern const struct AVOption avoptions_common[3];
+#endif
+extern const struct AVOption avoptions_workaround_bug[11];
 
 #endif /* HAVE_AV_CONFIG_H */
 
@@ -46,86 +103,105 @@
 #    define always_inline inline
 #endif
 
+#ifdef EMULATE_FAST_INT
+/* note that we don't emulate 64bit ints */
+typedef signed char int_fast8_t;
+typedef signed int  int_fast16_t;
+typedef signed int  int_fast32_t;
+typedef unsigned char uint_fast8_t;
+typedef unsigned int  uint_fast16_t;
+typedef unsigned int  uint_fast32_t;
+#endif
+
+#if defined(CONFIG_OS2) || defined(CONFIG_SUNOS)
+static inline float floorf(float f) { 
+    return floor(f); 
+}
+#endif
+
 #ifdef CONFIG_WIN32
 
 /* windows */
 
-typedef unsigned short UINT16;
-typedef signed short INT16;
-typedef unsigned char UINT8;
-typedef unsigned int UINT32;
-typedef unsigned __int64 UINT64;
-typedef signed char INT8;
-typedef signed int INT32;
-typedef signed __int64 INT64;
-
-typedef UINT8 uint8_t;
-typedef INT8 int8_t;
-typedef UINT16 uint16_t;
-typedef INT16 int16_t;
-typedef UINT32 uint32_t;
-typedef INT32 int32_t;
-typedef UINT64 uint64_t;
-typedef INT64 int64_t;
+typedef unsigned short uint16_t;
+typedef signed short int16_t;
+typedef unsigned char uint8_t;
+typedef unsigned int uint32_t;
+typedef unsigned __int64 uint64_t;
+typedef signed char int8_t;
+typedef signed int int32_t;
+typedef signed __int64 int64_t;
 
 #    ifndef __MINGW32__
-#        define INT64_C(c)     (c ## i64)
-#        define UINT64_C(c)    (c ## i64)
+#        define int64_t_C(c)     (c ## i64)
+#        define uint64_t_C(c)    (c ## i64)
 
-#        define inline __inline
-
-#    else
-#        define INT64_C(c)     (c ## LL)
-#        define UINT64_C(c)    (c ## ULL)
-#    endif /* __MINGW32__ */
-
-#    define M_PI    3.14159265358979323846
-#    define M_SQRT2 1.41421356237309504880  /* sqrt(2) */
-
-#    ifdef _DEBUG
-#        define DEBUG
+#    ifdef HAVE_AV_CONFIG_H
+#            define inline __inline
 #    endif
 
-#    define snprintf _snprintf
+#    else
+#        define int64_t_C(c)     (c ## LL)
+#        define uint64_t_C(c)    (c ## ULL)
+#    endif /* __MINGW32__ */
 
-#else /* CONFIG_WIN32 */
+#    ifdef HAVE_AV_CONFIG_H
+#        ifdef _DEBUG
+#            define DEBUG
+#        endif
+
+#        define snprintf _snprintf
+#        define vsnprintf _vsnprintf
+#    endif
+
+/* CONFIG_WIN32 end */
+#elif defined (CONFIG_OS2)
+/* OS/2 EMX */
+
+#include <inttypes.h>
+
+#ifndef int64_t_C
+#define int64_t_C(c)     (c ## LL)
+#define uint64_t_C(c)    (c ## ULL)
+#endif
+
+#ifdef HAVE_AV_CONFIG_H
+
+#ifdef USE_FASTMEMCPY
+#include "fastmemcpy.h"
+#endif
+
+#include <float.h>
+
+#endif /* HAVE_AV_CONFIG_H */
+
+/* CONFIG_OS2 end */
+#else
 
 /* unix */
 
-#    include <inttypes.h>
+#include <inttypes.h>
 
-#    ifndef __WINE_WINDEF16_H
-/* workaround for typedef conflict in MPlayer (wine typedefs) */
-typedef unsigned short UINT16;
-typedef signed short INT16;
-#    endif
+#ifndef int64_t_C
+#define int64_t_C(c)     (c ## LL)
+#define uint64_t_C(c)    (c ## ULL)
+#endif
 
-typedef unsigned char UINT8;
-typedef unsigned int UINT32;
-typedef unsigned long long UINT64;
-typedef signed char INT8;
-typedef signed int INT32;
-typedef signed long long INT64;
-
-#    ifdef HAVE_AV_CONFIG_H
-#        ifndef INT64_C
-#            define INT64_C(c)     (c ## LL)
-#            define UINT64_C(c)    (c ## ULL)
-#        endif
+#ifdef HAVE_AV_CONFIG_H
 
 #        ifdef USE_FASTMEMCPY
 #            include "fastmemcpy.h"
 #        endif
 #    endif /* HAVE_AV_CONFIG_H */
 
-#endif /* !CONFIG_WIN32 */
+#endif /* !CONFIG_WIN32 && !CONFIG_OS2 */
 
 #ifdef HAVE_AV_CONFIG_H
 
 #    include "bswap.h"
 
 #    if defined(__MINGW32__) || defined(__CYGWIN__) || \
-        defined(__OS2__) || defined (__OpenBSD__)
+        defined(__OS2__) || (defined (__OpenBSD__) && !defined(__ELF__))
 #        define MANGLE(a) "_" #a
 #    else
 #        define MANGLE(a) #a
@@ -146,14 +222,18 @@ inline void dprintf(const char* fmt,...) {}
 #    else
 
 #        ifdef DEBUG
-#            define dprintf(fmt,args...) printf(fmt, ## args)
+#            define dprintf printf
 #        else
-#            define dprintf(fmt,args...)
+#            if defined(__GNUC__) && (__GNUC__ < 3)
+#                define dprintf(__VA_ARGS__...)
+#            else
+#                define dprintf(...)
+#            endif
 #        endif
 
 #    endif /* !CONFIG_WIN32 */
 
-#    define av_abort()      do { fprintf(stderr, "Abort at %s:%d\n", __FILE__, __LINE__); abort(); } while (0)
+#    define av_abort()      do { av_log(NULL, AV_LOG_ERROR, "Abort at %s:%d\n", __FILE__, __LINE__); abort(); } while (0)
 
 //rounded divison & shift
 #define RSHIFT(a,b) ((a) > 0 ? ((a) + (1<<((b)-1)))>>(b) : ((a) + (1<<((b)-1))-1)>>(b))
@@ -164,6 +244,25 @@ inline void dprintf(const char* fmt,...) {}
 #define FFMAX(a,b) ((a) > (b) ? (a) : (b))
 #define FFMIN(a,b) ((a) > (b) ? (b) : (a))
 
+extern const uint32_t inverse[256];
+
+#ifdef ARCH_X86
+#    define FASTDIV(a,b) \
+    ({\
+        int ret,dmy;\
+        asm volatile(\
+            "mull %3"\
+            :"=d"(ret),"=a"(dmy)\
+            :"1"(a),"g"(inverse[b])\
+            );\
+        ret;\
+    })
+#elif defined(CONFIG_FASTDIV)
+#    define FASTDIV(a,b)   ((uint32_t)((((uint64_t)a)*inverse[b])>>32))
+#else
+#    define FASTDIV(a,b)   ((a)/(b))
+#endif
+ 
 #ifdef ARCH_X86
 // avoid +32 for shift optimization (gcc should do that ...)
 static inline  int32_t NEG_SSR32( int32_t a, int8_t s){
@@ -189,26 +288,23 @@ static inline uint32_t NEG_USR32(uint32_t a, int8_t s){
 
 struct PutBitContext;
 
-typedef void (*WriteDataFunc)(void *, UINT8 *, int);
+typedef void (*WriteDataFunc)(void *, uint8_t *, int);
 
 typedef struct PutBitContext {
 #ifdef ALT_BITSTREAM_WRITER
-    UINT8 *buf, *buf_end;
+    uint8_t *buf, *buf_end;
     int index;
 #else
-    UINT32 bit_buf;
+    uint32_t bit_buf;
     int bit_left;
-    UINT8 *buf, *buf_ptr, *buf_end;
+    uint8_t *buf, *buf_ptr, *buf_end;
 #endif
-    INT64 data_out_size; /* in bytes */
+    int64_t data_out_size; /* in bytes */
 } PutBitContext;
 
-void init_put_bits(PutBitContext *s, 
-                   UINT8 *buffer, int buffer_size,
-                   void *opaque,
-                   void (*write_data)(void *, UINT8 *, int));
+void init_put_bits(PutBitContext *s, uint8_t *buffer, int buffer_size);
 
-INT64 get_bit_count(PutBitContext *s); /* XXX: change function name */
+int64_t get_bit_count(PutBitContext *s); /* XXX: change function name */
 void align_put_bits(PutBitContext *s);
 void flush_put_bits(PutBitContext *s);
 void put_string(PutBitContext * pbc, char *s);
@@ -216,29 +312,29 @@ void put_string(PutBitContext * pbc, char *s);
 /* bit input */
 
 typedef struct GetBitContext {
-    UINT8 *buffer, *buffer_end;
+    const uint8_t *buffer, *buffer_end;
 #ifdef ALT_BITSTREAM_READER
     int index;
 #elif defined LIBMPEG2_BITSTREAM_READER
-    UINT8 *buffer_ptr;
-    UINT32 cache;
+    uint8_t *buffer_ptr;
+    uint32_t cache;
     int bit_count;
 #elif defined A32_BITSTREAM_READER
-    UINT32 *buffer_ptr;
-    UINT32 cache0;
-    UINT32 cache1;
+    uint32_t *buffer_ptr;
+    uint32_t cache0;
+    uint32_t cache1;
     int bit_count;
 #endif
-    int size;
+    int size_in_bits;
 } GetBitContext;
 
 static inline int get_bits_count(GetBitContext *s);
 
-#define VLC_TYPE INT16
+#define VLC_TYPE int16_t
 
 typedef struct VLC {
     int bits;
-    VLC_TYPE (*table)[2]; // code, bits
+    VLC_TYPE (*table)[2]; ///< code, bits
     int table_size, table_allocated;
 } VLC;
 
@@ -248,9 +344,13 @@ typedef struct RL_VLC_ELEM {
     uint8_t run;
 } RL_VLC_ELEM;
 
+#ifdef ARCH_SPARC64
+#define UNALIGNED_STORES_ARE_BAD
+#endif
+
 /* used to avoid missaligned exceptions on some archs (alpha, ...) */
 #ifdef ARCH_X86
-#    define unaligned32(a) (*(UINT32*)(a))
+#    define unaligned32(a) (*(uint32_t*)(a))
 #else
 #    ifdef __GNUC__
 static inline uint32_t unaligned32(const void *v) {
@@ -294,7 +394,15 @@ static inline void put_bits(PutBitContext *s, int n, unsigned int value)
     } else {
 	bit_buf<<=bit_left;
         bit_buf |= value >> (n - bit_left);
-        *(UINT32 *)s->buf_ptr = be2me_32(bit_buf);
+#ifdef UNALIGNED_STORES_ARE_BAD
+        if (3 & (int) s->buf_ptr) {
+            s->buf_ptr[0] = bit_buf >> 24;
+            s->buf_ptr[1] = bit_buf >> 16;
+            s->buf_ptr[2] = bit_buf >>  8;
+            s->buf_ptr[3] = bit_buf      ;
+        } else
+#endif
+        *(uint32_t *)s->buf_ptr = be2me_32(bit_buf);
         //printf("bitbuf = %08x\n", bit_buf);
         s->buf_ptr+=4;
 	bit_left+=32 - n;
@@ -428,6 +536,16 @@ LAST_SKIP_BITS(name, gb, num)
 for examples see get_bits, show_bits, skip_bits, get_vlc
 */
 
+static inline int unaligned32_be(const void *v)
+{
+#ifdef CONFIG_ALIGN
+	const uint8_t *p=v;
+	return (((p[0]<<8) | p[1])<<16) | (p[2]<<8) | (p[3]);
+#else
+	return be2me_32( unaligned32(v)); //original
+#endif
+}
+
 #ifdef ALT_BITSTREAM_READER
 #   define MIN_CACHE_BITS 25
 
@@ -439,7 +557,7 @@ for examples see get_bits, show_bits, skip_bits, get_vlc
         (gb)->index= name##_index;\
 
 #   define UPDATE_CACHE(name, gb)\
-        name##_cache= be2me_32( unaligned32( ((uint8_t *)(gb)->buffer)+(name##_index>>3) ) ) << (name##_index&0x07);\
+        name##_cache= unaligned32_be( ((uint8_t *)(gb)->buffer)+(name##_index>>3) ) << (name##_index&0x07);\
 
 #   define SKIP_CACHE(name, gb, num)\
         name##_cache <<= (num);\
@@ -472,7 +590,7 @@ static inline int get_bits_count(GetBitContext *s){
 #elif defined LIBMPEG2_BITSTREAM_READER
 //libmpeg2 like reader
 
-#   define MIN_CACHE_BITS 16
+#   define MIN_CACHE_BITS 17
 
 #   define OPEN_READER(name, gb)\
         int name##_bit_count=(gb)->bit_count;\
@@ -484,12 +602,25 @@ static inline int get_bits_count(GetBitContext *s){
         (gb)->cache= name##_cache;\
         (gb)->buffer_ptr= name##_buffer_ptr;\
 
+#ifdef LIBMPEG2_BITSTREAM_READER_HACK
+
 #   define UPDATE_CACHE(name, gb)\
-    if(name##_bit_count > 0){\
+    if(name##_bit_count >= 0){\
+        name##_cache+= (int)be2me_16(*(uint16_t*)name##_buffer_ptr) << name##_bit_count;\
+        ((uint16_t*)name##_buffer_ptr)++;\
+        name##_bit_count-= 16;\
+    }\
+
+#else
+
+#   define UPDATE_CACHE(name, gb)\
+    if(name##_bit_count >= 0){\
         name##_cache+= ((name##_buffer_ptr[0]<<8) + name##_buffer_ptr[1]) << name##_bit_count;\
         name##_buffer_ptr+=2;\
         name##_bit_count-= 16;\
     }\
+
+#endif
 
 #   define SKIP_CACHE(name, gb, num)\
         name##_cache <<= (num);\
@@ -586,6 +717,44 @@ static inline int get_bits_count(GetBitContext *s){
 
 #endif
 
+/**
+ * read mpeg1 dc style vlc (sign bit + mantisse with no MSB).
+ * if MSB not set it is negative 
+ * @param n length in bits
+ * @author BERO  
+ */
+static inline int get_xbits(GetBitContext *s, int n){
+    register int tmp;
+    register int32_t cache;
+    OPEN_READER(re, s)
+    UPDATE_CACHE(re, s)
+    cache = GET_CACHE(re,s);
+    if ((int32_t)cache<0) { //MSB=1
+        tmp = NEG_USR32(cache,n);
+    } else {
+    //   tmp = (-1<<n) | NEG_USR32(cache,n) + 1; mpeg12.c algo
+    //   tmp = - (NEG_USR32(cache,n) ^ ((1 << n) - 1)); h263.c algo
+        tmp = - NEG_USR32(~cache,n);
+    }
+    LAST_SKIP_BITS(re, s, n)
+    CLOSE_READER(re, s)
+    return tmp;
+}
+
+static inline int get_sbits(GetBitContext *s, int n){
+    register int tmp;
+    OPEN_READER(re, s)
+    UPDATE_CACHE(re, s)
+    tmp= SHOW_SBITS(re, s, n);
+    LAST_SKIP_BITS(re, s, n)
+    CLOSE_READER(re, s)
+    return tmp;
+}
+
+/**
+ * reads 0-17 bits.
+ * Note, the alt bitstream reader can read upto 25 bits, but the libmpeg2 reader cant
+ */
 static inline unsigned int get_bits(GetBitContext *s, int n){
     register int tmp;
     OPEN_READER(re, s)
@@ -596,6 +765,12 @@ static inline unsigned int get_bits(GetBitContext *s, int n){
     return tmp;
 }
 
+unsigned int get_bits_long(GetBitContext *s, int n);
+
+/**
+ * shows 0-17 bits.
+ * Note, the alt bitstream reader can read upto 25 bits, but the libmpeg2 reader cant
+ */
 static inline unsigned int show_bits(GetBitContext *s, int n){
     register int tmp;
     OPEN_READER(re, s)
@@ -604,6 +779,8 @@ static inline unsigned int show_bits(GetBitContext *s, int n){
 //    CLOSE_READER(re, s)
     return tmp;
 }
+
+unsigned int show_bits_long(GetBitContext *s, int n);
 
 static inline void skip_bits(GetBitContext *s, int n){
  //Note gcc seems to optimize this to s->index+=n for the ALT_READER :))
@@ -637,7 +814,7 @@ static inline void skip_bits1(GetBitContext *s){
 }
 
 void init_get_bits(GetBitContext *s,
-                   UINT8 *buffer, int buffer_size);
+                   const uint8_t *buffer, int buffer_size);
 
 int check_marker(GetBitContext *s, const char *msg);
 void align_get_bits(GetBitContext *s);
@@ -646,6 +823,12 @@ int init_vlc(VLC *vlc, int nb_bits, int nb_codes,
              const void *codes, int codes_wrap, int codes_size);
 void free_vlc(VLC *vlc);
 
+/**
+ *
+ * if the vlc code is invalid and max_depth=1 than no bits will be removed
+ * if the vlc code is invalid and max_depth>1 than the number of bits removed
+ * is undefined
+ */
 #define GET_VLC(code, name, gb, table, bits, max_depth)\
 {\
     int n, index, nb_bits;\
@@ -714,6 +897,14 @@ static inline int get_vlc(GetBitContext *s, VLC *vlc)
     return code;
 }
 
+/**
+ * parses a vlc code, faster then get_vlc()
+ * @param bits is the number of bits which will be read at once, must be 
+ *             identical to nb_bits in init_vlc()
+ * @param max_depth is the number of times bits bits must be readed to completly
+ *                  read the longest vlc code 
+ *                  = (max_vlc_length + bits - 1) / bits
+ */
 static always_inline int get_vlc2(GetBitContext *s, VLC_TYPE (*table)[2],
                                   int bits, int max_depth)
 {
@@ -728,6 +919,65 @@ static always_inline int get_vlc2(GetBitContext *s, VLC_TYPE (*table)[2],
     return code;
 }
 
+//#define TRACE
+
+#ifdef TRACE
+
+static inline void print_bin(int bits, int n){
+    int i;
+    
+    for(i=n-1; i>=0; i--){
+        printf("%d", (bits>>i)&1);
+    }
+    for(i=n; i<24; i++)
+        printf(" ");
+}
+
+static inline int get_bits_trace(GetBitContext *s, int n, char *file, char *func, int line){
+    int r= get_bits(s, n);
+    
+    print_bin(r, n);
+    printf("%5d %2d %3d bit @%5d in %s %s:%d\n", r, n, r, get_bits_count(s)-n, file, func, line);
+    return r;
+}
+static inline int get_vlc_trace(GetBitContext *s, VLC_TYPE (*table)[2], int bits, int max_depth, char *file, char *func, int line){
+    int show= show_bits(s, 24);
+    int pos= get_bits_count(s);
+    int r= get_vlc2(s, table, bits, max_depth);
+    int len= get_bits_count(s) - pos;
+    int bits2= show>>(24-len);
+    
+    print_bin(bits2, len);
+    
+    printf("%5d %2d %3d vlc @%5d in %s %s:%d\n", bits2, len, r, pos, file, func, line);
+    return r;
+}
+static inline int get_xbits_trace(GetBitContext *s, int n, char *file, char *func, int line){
+    int show= show_bits(s, n);
+    int r= get_xbits(s, n);
+    
+    print_bin(show, n);
+    printf("%5d %2d %3d xbt @%5d in %s %s:%d\n", show, n, r, get_bits_count(s)-n, file, func, line);
+    return r;
+}
+
+#define get_bits(s, n)  get_bits_trace(s, n, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+#define get_bits1(s)    get_bits_trace(s, 1, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+#define get_xbits(s, n) get_xbits_trace(s, n, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+#define get_vlc(s, vlc)            get_vlc_trace(s, (vlc)->table, (vlc)->bits, 3, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+#define get_vlc2(s, tab, bits, max) get_vlc_trace(s, tab, bits, max, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+
+#define tprintf printf
+
+#else //TRACE
+
+#  if defined(__GNUC__) && (__GNUC__ < 3)
+#    define tprintf(__VA_ARGS__...) {}
+#  else
+#    define tprintf(...) {}
+#  endif
+
+#endif
 
 /* define it to include statistics code (useful only for optimizing
    codec efficiency */
@@ -754,6 +1004,7 @@ void print_stats(void);
 #endif
 
 /* misc math functions */
+extern const uint8_t ff_log2_tab[256];
 
 static inline int av_log2(unsigned int v)
 {
@@ -768,19 +1019,25 @@ static inline int av_log2(unsigned int v)
         v >>= 8;
         n += 8;
     }
-    if (v & 0xf0) {
-        v >>= 4;
-        n += 4;
-    }
-    if (v & 0xc) {
-        v >>= 2;
-        n += 2;
-    }
-    if (v & 0x2) {
-        n++;
-    }
+    n += ff_log2_tab[v];
+
     return n;
 }
+
+static inline int av_log2_16bit(unsigned int v)
+{
+    int n;
+
+    n = 0;
+    if (v & 0xff00) {
+        v >>= 8;
+        n += 8;
+    }
+    n += ff_log2_tab[v];
+
+    return n;
+}
+
 
 /* median of 3 */
 static inline int mid_pred(int a, int b, int c)
@@ -811,9 +1068,9 @@ static inline int clip(int a, int amin, int amax)
 }
 
 /* math */
-extern const UINT8 ff_sqrt_tab[128];
+extern const uint8_t ff_sqrt_tab[128];
 
-int ff_gcd(int a, int b);
+int64_t ff_gcd(int64_t a, int64_t b);
 
 static inline int ff_sqrt(int a)
 {
@@ -838,11 +1095,12 @@ static inline int ff_sqrt(int a)
  */
 static inline int ff_get_fourcc(const char *s){
     assert( strlen(s)==4 );
-    
+
     return (s[0]) + (s[1]<<8) + (s[2]<<16) + (s[3]<<24);
 }
 
-void ff_float2fraction(int *nom_arg, int *denom_arg, double f, int max);
+#define MKTAG(a,b,c,d) (a | (b << 8) | (c << 16) | (d << 24))
+#define MKBETAG(a,b,c,d) (d | (c << 8) | (b << 16) | (a << 24))
 
 
 #ifdef ARCH_X86
@@ -879,7 +1137,50 @@ if((y)<(x)){\
 }
 #endif
 
+#ifdef ARCH_X86
+static inline long long rdtsc()
+{
+	long long l;
+	asm volatile(	"rdtsc\n\t"
+		: "=A" (l)
+	);
+	return l;
+}
+
+#define START_TIMER \
+static uint64_t tsum=0;\
+static int tcount=0;\
+static int tskip_count=0;\
+uint64_t tend;\
+uint64_t tstart= rdtsc();\
+
+#define STOP_TIMER(id) \
+tend= rdtsc();\
+if(tcount<2 || tend - tstart < 4*tsum/tcount){\
+    tsum+= tend - tstart;\
+    tcount++;\
+}else\
+    tskip_count++;\
+if(256*256*256*64%(tcount+tskip_count)==0){\
+    fprintf(stderr, "%Ld dezicycles in %s, %d runs, %d skips\n", tsum*10/tcount, id, tcount, tskip_count);\
+}
+#endif
+
 #define CLAMP_TO_8BIT(d) ((d > 0xff) ? 0xff : (d < 0) ? 0 : d)
+
+/* avoid usage of various functions */
+#define malloc please_use_av_malloc
+#define free please_use_av_free
+#define realloc please_use_av_realloc
+
+#define CHECKED_ALLOCZ(p, size)\
+{\
+    p= av_mallocz(size);\
+    if(p==NULL && (size)!=0){\
+        perror("malloc");\
+        goto fail;\
+    }\
+}
 
 #endif /* HAVE_AV_CONFIG_H */
 

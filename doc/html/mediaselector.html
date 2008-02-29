@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/mediaplayer/mediaselector.cpp:39 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MediaSelector Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MediaSelector Class Reference</h1>
+
+<p>This class is specific to the mediaplayer apps.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="mediaselector-h.html">mediaselector.h</a>&gt;</tt>
+<p><a href="mediaselector-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><b>MediaSelector</b> ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )</div></li>
+<li><div class=fn><b>~MediaSelector</b> ()</div></li>
+<li><div class=fn>const DocLnk * <b>current</b> ()</div></li>
+<li><div class=fn>void <b>setCategoryFilter</b> ( ContainsCategoryInterface * )</div></li>
+<li><div class=fn>void <b>setLocationFilter</b> ( QComboBox * )</div></li>
+<li><div class=fn>bool <b>advanceSelector</b> ()</div></li>
+<li><div class=fn>MediaSelectorItem * <b>newItem</b> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;lnk )</div></li>
+<li><div class=fn>QBrush <b>altBrush</b> () const</div></li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li><div class=fn>void <b>removeAll</b> ()</div></li>
+<li><div class=fn>void <b>addLink</b> ( const DocLnk &amp; )</div></li>
+<li><div class=fn>void <b>removeLink</b> ( const DocLnk &amp; )</div></li>
+<li><div class=fn>void <b>changeLink</b> ( const DocLnk &amp;, const DocLnk &amp; )</div></li>
+<li><div class=fn>void <b>addToSelector</b> ( const DocLnk &amp; )</div></li>
+<li><div class=fn>void <b>removeSelected</b> ()</div></li>
+<li><div class=fn>void <b>moveSelectedUp</b> ()</div></li>
+<li><div class=fn>void <b>moveSelectedDown</b> ()</div></li>
+<li><div class=fn>bool <b>prev</b> ()</div></li>
+<li><div class=fn>bool <b>next</b> ()</div></li>
+<li><div class=fn>bool <b>first</b> ()</div></li>
+<li><div class=fn>bool <b>last</b> ()</div></li>
+<li><div class=fn>void <b>categorize</b> ()</div></li>
+<li><div class=fn>void <b>selectAll</b> ()</div></li>
+<li><div class=fn>void <b>addSelectionToCategory</b> ( int&nbsp;catId )</div></li>
+<li><div class=fn>void <b>showItemProperties</b> ( QListViewItem&nbsp;*&nbsp;i )</div></li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li><div class=fn>virtual void <b>viewportResizeEvent</b> ( QResizeEvent * )</div></li>
+<li><div class=fn>virtual void <b>contentsMouseMoveEvent</b> ( QMouseEvent * )</div></li>
+<li><div class=fn>virtual void <b>contentsMousePressEvent</b> ( QMouseEvent * )</div></li>
+<li><div class=fn>virtual void <b>contentsMouseReleaseEvent</b> ( QMouseEvent * )</div></li>
+<li><div class=fn>virtual void <b>paletteChange</b> ( const QPalette &amp; )</div></li>
+<li><div class=fn>virtual void <b>keyPressEvent</b> ( QKeyEvent&nbsp;*&nbsp;ke )</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+This class is specific to the mediaplayer apps.
+<p> It is currently private to those apps, and its API,
+and therefore binary compatibilty may change in later
+versions.
+<p> This class lists MediaSelectorItems. Media items could
+be listed by various media specific attributes, id3 tags or
+other criteria. Phone version only lists the document name
+due to space restrictions.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

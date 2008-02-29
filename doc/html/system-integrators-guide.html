@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/system-integrators-guide.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>System Integrators' Guide</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>System Integrators' Guide</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Getting Qtopia Running
+</a>
+<li><a href="#3"> Serial Proxy
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document is for System Integrators and those who who are going to install Qtopia onto a new device.
+<p> See Also:
+<ul>
+<li> devices.html located at <a href="devices.html">devices.html</a> and at $QPEDIR/doc/html/devices.html.
+<li> features.html located at <a href="features.html">features.html</a> and at $QTEDIR/doc/html/features.html.
+</ul>
+<p> <h2> Getting Qtopia Running
+</h2>
+<a name="2"></a><p> Getting Qtopia running on target device involves:
+<p> <ol type=1>
+<p> <li> Creating the custom configs files if needed. It through these configuration files that compilation tools to use and extra global defines are specified. For example a new arm based device might create a qws/linux-myarm-g++ tool chain configuration based on a qws/linux-arm-g++ : eg
+<p> <pre>
+cp -r $TMAKEDIR/lib/qws/linux-arm-g++ $TMAKEDIR/lib/qws/linux-myarm-g++
+cp -r $QTEDIR/configs/linux-arm-g++-shared $QTEDIR/configs/linux-myarm-g++-shared
+cp -r $QPEDIR/mkspecs/qws/linux-arm-g++ $QPEDIR/mkspecs/qws/linux-myarm-g++
+</pre>
+ 
+<p> <li> Customizing Qtopia as needed  (for power, backlighting control keyboard scancodes) : eg to create a new custom.cpp based on the one that suits an ipaq:
+<p> <pre>
+cp $QPEDIR/src/libraries/qtopia/custom-linux-ipaq-g++.cpp $QPEDIR/src/libraries/qtopia/custom-linux-myarm-g++.cpp
+cp $QPEDIR/src/libraries/qtopia/custom-linux-ipaq-g++.h $QPEDIR/src/libraries/qtopia/custom-linux-myarm-g++.h
+</pre>
+ 
+<p> Note: keyboard scancode customization via Qtopia is only available in a release later than Qtopia Phone beta 1 with a Qte greater than the version 2.3.8. For earlier Qtopia Phone releases customize $QTDIR/src/kernel/qkeyboard_qws.cpp to change the Qt keycode to scancode mapping.
+<p> <li> Create a keyboard handler in Qt if none of the existing drivers suits : see $QTDIR/src/kernel/qkeyboard_qws.cpp
+<p> <li> Configuring Qte to suit your device when : see <a href="devices.html">devices.html</a> and <a href="features.html">features.html</a>. Following example above you need to have added
+<pre> -xplatform linux-myarm-g++</pre>
+  as parameters to Qte's configure.
+<p> <p style="text-decoration:underline;">Hints</p>
+<p> <ul>
+<li> It is a good idea to have Qte for x86 and Qte for target device in different directories
+<li> For a list of compile time options to Qte run
+<pre> $QTDIR/configure --help</pre>
+ 
+</ul>
+</ol>
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Macros defined at Qte compile time <th valign="top">Mouse device used
+<tr bgcolor="#f0f0f0">
+<td valign="top">QT_QWS_IPAQ and QT_QWS_IPAQ_RAW
+<td valign="top">/dev/h3600_tsraw
+<tr bgcolor="#d0d0d0">
+<td valign="top">QT_QWS_IPAQ
+<td valign="top">/dev/h3600_ts
+<tr bgcolor="#f0f0f0">
+<td valign="top">QT_QWS_SL5XXX
+<td valign="top">/dev/ts
+</table></center>
+<p> <ol type=1 start=5>
+<p> <li> Configuring Qtopia to suit your device when : see <a href="devices.html">$QPEDIR/doc/html/devices.html</a>.  Following example above you need to have added:
+<pre> -xplatform linux-myarm-g++</pre>
+  as parameters to Qtopia's configure.
+<p> <p style="text-decoration:underline;">Hints</p>
+<ul>
+<li> For a list of compile time options to Qtopia run
+<pre> $QPEDIR/configure --help</pre>
+ 
+<li> When cross compiling it is preferable to use different directories to keep the x86 and cross complied files.
+</ul>
+<p> <li> Meeting Qtopia prerequists:
+<ul>
+<li> Linux with framebuffer support
+</ul>
+<p> <li> Create and install the Qtopia image for the target device. When configuring Qtopia for the target device the $QPEDIR/image is the default prefix for the image that Qtopia will create. After building Qtopia and running make install an example of  getting the image onto the device is to:
+<ul>
+<li> tar up $QPEDIR/image on your compilation host eg:
+<pre>
+        cd $QPEDIR/image
+        tar -cf   $HOME/qtopiaimage.tar $QPEDIR/image
+        </pre>
+ 
+<li> copy/mount the file onto the target device  eg:
+<pre>
+        mount -t nfs myhost:/home/myuser /mnt/tmp
+        </pre>
+ 
+<li> extra the image on target device
+<pre>
+        cd /
+        tar xf /mnt/tmp/qtopiaimage.tar
+        </pre>
+ 
+</ul>
+<p> <li> Configuring environment variables on the device to suit Qtopia.
+Set QPEDIR and QTDIR to where Qtopia was installed, and add Qtopia's programs and libraries to the system paths eg:
+<pre>
+        export QPEDIR=/opt/Qtopia
+        export QTDIR=$QPEDIR
+        export QTEDIR=$QTDIR
+        export PATH=$QPEDIR/bin:$PATH
+        export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
+        </pre>
+ 
+<p> <li> Initial tests on Qtopia on the device:
+<ul>
+<li> run
+<pre>
+        textedit -qws
+        </pre>
+ 
+</ul>
+<p style="text-decoration:underline;">Hints</p>
+<ul>
+<li> For running Qtopia <p>See also <a href="running-qtopia.html">running-qtopia.html</a>.
+
+<p> </ul>
+<li> and confirm that:
+<ul>
+<li> the framebuffer is used
+<li> no warnings are shown indicate file reading/writing problems
+<li> Qtopia is working with the installed keyboard. For Qtopia Phone edition check that any softkeys defined work
+<li> run
+<pre>
+        qpe
+        </pre>
+ 
+<li> and confirm that you can launch a program eg: Notes and that new text documents created appear in the "Documents" tab
+</ul>
+</ol>
+<p> <h2> Serial Proxy
+</h2>
+<a name="3"></a><p> Most modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications.
+<p> The SerialProxy class assists with this process.  It sets up a proxy connection between the external serial interface and an internal <a href="gsm.html">GSM</a> 07.10 capable modem.  The serial interface may be RS-232, USB, Bluetooth, or any other suitable connection protocol.
+<p> We assume that the cable that connects the phone to the computer is wired like a null modem, even if the "cable" is USB, Bluetooth, etc:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#d0d0d0"> <td valign="top">TD <td valign="top">--> <td valign="top">RD
+<tr bgcolor="#f0f0f0"> <td valign="top">RD <td valign="top"><-- <td valign="top">TD
+<tr bgcolor="#d0d0d0"> <td valign="top">DTR <td valign="top">--> <td valign="top">DSR, DCD
+<tr bgcolor="#f0f0f0"> <td valign="top">CTS <td valign="top"><-- <td valign="top">RTS
+<tr bgcolor="#d0d0d0"> <td valign="top">RTS <td valign="top">--> <td valign="top">CTS
+<tr bgcolor="#f0f0f0"> <td valign="top">DSR, DCD <td valign="top"><-- <td valign="top">DTR
+</table></center>
+<p> If the cable isn't wired in this fashion, then the SerialProxy code may need to be modified for a specific device. 
+<p> The external device must be configured in the <tt>Phone.conf</tt> file. For example:
+<p> <pre>
+[SerialDevices]
+ExternalAccessDevice=/dev/ttyS1
+ExternalAccessSpeed=115200
+</pre>
+ 
+<p> The <tt>Phone.conf</tt> file needs to be placed under the "etc/default" directory on a vendor's system.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

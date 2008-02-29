@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -31,7 +33,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/listboxcombo/listboxcombo.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/listboxcombo/listboxcombo.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -73,7 +75,7 @@ protected slots:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/listboxcombo/listboxcombo.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/listboxcombo/listboxcombo.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -109,7 +111,7 @@ protected:
 
 };
 
-void <a name="374"></a>MyListBoxItem::paint( <a href="qpainter.html">QPainter</a> *painter )
+void <a name="315"></a>MyListBoxItem::paint( <a href="qpainter.html">QPainter</a> *painter )
 {
     // evil trick: find out whether we are painted onto our listbox
     bool in_list_box = listBox() &amp;&amp; listBox()-&gt;viewport() == painter-&gt;<a href="qpainter.html#82920f">device</a>();
@@ -158,7 +160,7 @@ ListBoxCombo::ListBoxCombo( <a href="qwidget.html">QWidget</a> *parent, const ch
     // Create a pushbutton...
     <a href="qpushbutton.html">QPushButton</a> *arrow1 = new <a href="qpushbutton.html">QPushButton</a>( " -&gt; ", row1 );
     // ...and connect the clicked SIGNAL with the SLOT slotLeft2Right
-    <a href="qobject.html#7f8e37">connect</a>( arrow1, SIGNAL( clicked() ), this, SLOT( <a href=#375>slotLeft2Right</a>() ) );
+    <a href="qobject.html#fbde73">connect</a>( arrow1, SIGNAL( clicked() ), this, SLOT( <a href=#312>slotLeft2Right</a>() ) );
 
     // create an empty single-selection ListBox
     lb2 = new <a href="qlistbox.html">QListBox</a>( row1 );
@@ -203,8 +205,8 @@ ListBoxCombo::ListBoxCombo( <a href="qwidget.html">QWidget</a> *parent, const ch
     }
 
     // Connect the activated SIGNALs of the Comboboxes with SLOTs
-    <a href="qobject.html#7f8e37">connect</a>( cb1, SIGNAL( activated( const QString &amp; ) ), this, SLOT( <a href=#376>slotCombo1Activated</a>( const QString &amp; ) ) );
-    <a href="qobject.html#7f8e37">connect</a>( cb2, SIGNAL( activated( const QString &amp; ) ), this, SLOT( <a href=#377>slotCombo2Activated</a>( const QString &amp; ) ) );
+    <a href="qobject.html#fbde73">connect</a>( cb1, SIGNAL( activated( const QString &amp; ) ), this, SLOT( <a href=#313>slotCombo1Activated</a>( const QString &amp; ) ) );
+    <a href="qobject.html#fbde73">connect</a>( cb2, SIGNAL( activated( const QString &amp; ) ), this, SLOT( <a href=#314>slotCombo2Activated</a>( const QString &amp; ) ) );
 }
 
 /*
@@ -214,7 +216,7 @@ ListBoxCombo::ListBoxCombo( <a href="qwidget.html">QWidget</a> *parent, const ch
  * second ListBox
  */
 
-void <a name="375"></a>ListBoxCombo::slotLeft2Right()
+void <a name="312"></a>ListBoxCombo::slotLeft2Right()
 {
     // Go through all items of the first ListBox
     for ( unsigned int i = 0; i &lt; lb1-&gt;count(); i++ ) {
@@ -240,7 +242,7 @@ void <a name="375"></a>ListBoxCombo::slotLeft2Right()
  * the first Label.
  */
 
-void <a name="376"></a>ListBoxCombo::slotCombo1Activated( const QString &amp;s )
+void <a name="313"></a>ListBoxCombo::slotCombo1Activated( const QString &amp;s )
 {
     label1-&gt;setText( <a href="qstring.html">QString</a>( "Current Item: %1" ).arg( s ) );
 }
@@ -253,7 +255,7 @@ void <a name="376"></a>ListBoxCombo::slotCombo1Activated( const QString &amp;s )
  * the second Label.
  */
 
-void <a name="377"></a>ListBoxCombo::slotCombo2Activated( const QString &amp;s )
+void <a name="314"></a>ListBoxCombo::slotCombo2Activated( const QString &amp;s )
 {
     label2-&gt;setText( <a href="qstring.html">QString</a>( "Current Item: %1" ).arg( s ) );
 }
@@ -264,7 +266,7 @@ void <a name="377"></a>ListBoxCombo::slotCombo2Activated( const QString &amp;s )
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/listboxcombo/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/listboxcombo/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -292,5 +294,5 @@ int main( int argc, char **argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

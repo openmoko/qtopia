@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -74,7 +76,7 @@ Inherits <a href="qpaintdevice.html">QPaintDevice</a> and <a href="qt.html">Qt</
 <li><div class="fn">bool <a href="#a38b1c"><b>save</b></a> ( const QString &amp; fileName, const char * format, int quality ) const</div>
 <li><div class="fn">int <a href="#4f47d9"><b>serialNumber</b></a> () const</div>
 <li><div class="fn">Optimization <a href="#ae6199"><b>optimization</b></a> () const</div>
-<li><div class="fn">void <a href="#41f5cf"><b>setOptimization</b></a> ( Optimization ) </div>
+<li><div class="fn">void <b>setOptimization</b> ( Optimization ) </div>
 <li><div class="fn">virtual void <a href="#81b941"><b>detach</b></a> () </div>
 <li><div class="fn">bool <a href="#c0b272"><b>isQBitmap</b></a> () const</div>
 </ul>
@@ -145,14 +147,14 @@ Windows 98, then we recommend using code like this:
 </pre>
 <p>See also  <a href="qbitmap.html">QBitmap</a>, <a href="qimage.html">QImage</a>, <a href="qimageio.html">QImageIO</a> and <a href="shclass.html">Shared Classes</a>
 <p>Examples:
- <a href="qtimage-qtimage-cpp.html#QPixmap">qtimage/qtimage.cpp</a>
- <a href="xform-xform-cpp.html#QPixmap">xform/xform.cpp</a>
- <a href="menu-menu-cpp.html#QPixmap">menu/menu.cpp</a>
- <a href="qmag-qmag-cpp.html#QPixmap">qmag/qmag.cpp</a>
- <a href="desktop-desktop-cpp.html#QPixmap">desktop/desktop.cpp</a>
- <a href="scrollview-scrollview-cpp.html#QPixmap">scrollview/scrollview.cpp</a>
  <a href="movies-main-cpp.html#QPixmap">movies/main.cpp</a>
+ <a href="qtimage-qtimage-cpp.html#QPixmap">qtimage/qtimage.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#QPixmap">scrollview/scrollview.cpp</a>
  <a href="picture-picture-cpp.html#QPixmap">picture/picture.cpp</a>
+ <a href="qmag-qmag-cpp.html#QPixmap">qmag/qmag.cpp</a>
+ <a href="menu-menu-cpp.html#QPixmap">menu/menu.cpp</a>
+ <a href="xform-xform-cpp.html#QPixmap">xform/xform.cpp</a>
+ <a href="desktop-desktop-cpp.html#QPixmap">desktop/desktop.cpp</a>
 
 <hr><h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ColorMode">QPixmap::ColorMode</a></h3>
@@ -327,7 +329,7 @@ if -1 is specified.
 <p>See also  <a href="#3c91c2">depth</a>().
 <h3 class="fn">QPixmap::Optimization <a name="3ad81f"></a>QPixmap::defaultOptimization() <code>[static]</code></h3>
 <p>Returns the default pixmap optimization setting.
-<p>See also  <a href="#7675b8">setDefaultOptimization</a>(), <a href="#41f5cf">setOptimization</a>() and <a href="#ae6199">optimization</a>().
+<p>See also  <a href="#7675b8">setDefaultOptimization</a>(), <a href="#e6ae80">setOptimization</a>() and <a href="#ae6199">optimization</a>().
 <h3 class="fn">int <a name="3c91c2"></a>QPixmap::depth () const</h3>
 <p>Returns the depth of the image.
 <p>The pixmap depth is also called bits per pixel (bpp) or bit planes
@@ -425,11 +427,11 @@ This depends on the underlying window system.
 <p>Returns the height of the pixmap.
 <p>See also  <a href="#86dbc5">width</a>(), <a href="#60b65f">size</a>() and <a href="#fbdfe3">rect</a>().
 <p>Examples:
+ <a href="movies-main-cpp.html#height">movies/main.cpp</a>
  <a href="qtimage-qtimage-cpp.html#height">qtimage/qtimage.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#height">scrollview/scrollview.cpp</a>
  <a href="xform-xform-cpp.html#height">xform/xform.cpp</a>
  <a href="desktop-desktop-cpp.html#height">desktop/desktop.cpp</a>
- <a href="scrollview-scrollview-cpp.html#height">scrollview/scrollview.cpp</a>
- <a href="movies-main-cpp.html#height">movies/main.cpp</a>
 <h3 class="fn">const char* <a name="360626"></a>QPixmap::imageFormat ( const <a href="qstring.html">QString</a> &amp; fileName ) <code>[static]</code></h3>
 <p>Returns a string that specifies the image format of the file <em>fileName,</em>
 or null if the file cannot be read or if the format cannot be recognized.
@@ -443,8 +445,8 @@ You cannot draw in a null pixmap or <a href="qpaintdevice.html#35ae2e">bitBlt</a
 pixmap.
 <p>See also  <a href="#b4f156">resize</a>().
 <p>Examples:
- <a href="qmag-qmag-cpp.html#isNull">qmag/qmag.cpp</a>
  <a href="scrollview-scrollview-cpp.html#isNull">scrollview/scrollview.cpp</a>
+ <a href="qmag-qmag-cpp.html#isNull">qmag/qmag.cpp</a>
 <h3 class="fn">bool <a name="c0b272"></a>QPixmap::isQBitmap () const</h3>
 <p>Returns TRUE if this is a <a href="qbitmap.html">QBitmap</a>, otherwise FALSE.
 <h3 class="fn">bool <a name="a728cf"></a>QPixmap::load ( const <a href="qstring.html">QString</a> &amp; fileName, const char * format, int conversion_flags )</h3>
@@ -459,9 +461,9 @@ of the <em>conversion_flags</em> argument.
 explains how to add extra formats.
 <p>See also  <a href="#79475e">loadFromData</a>(), <a href="#a38b1c">save</a>(), <a href="#360626">imageFormat</a>(), <a href="qimage.html#42a675">QImage::load</a>() and <a href="qimageio.html">QImageIO</a>.
 <p>Examples:
- <a href="xform-xform-cpp.html#load">xform/xform.cpp</a>
  <a href="scrollview-scrollview-cpp.html#load">scrollview/scrollview.cpp</a>
  <a href="picture-picture-cpp.html#load">picture/picture.cpp</a>
+ <a href="xform-xform-cpp.html#load">xform/xform.cpp</a>
 <h3 class="fn">bool <a name="bdbe68"></a>QPixmap::load ( const <a href="qstring.html">QString</a> &amp; fileName, const char * format=0, <a href="qpixmap.html#ColorMode">ColorMode</a> mode=Auto )</h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <h3 class="fn">bool <a name="79475e"></a>QPixmap::loadFromData ( const uchar * buf, uint len, const char * format, int conversion_flags )</h3>
@@ -500,10 +502,10 @@ change this settings in two ways:
 <ul>
 <li> Call <a href="#7675b8">setDefaultOptimization</a>() to set the default optimization
 for all new pixmaps.
-<li> Call <a href="#41f5cf">setOptimization</a>() to set a the optimization for individual
+<li> Call <a href="#e6ae80">setOptimization</a>() to set a the optimization for individual
 pixmaps.
 </ul>
-<p>See also  <a href="#41f5cf">setOptimization</a>(), <a href="#7675b8">setDefaultOptimization</a>() and <a href="#3ad81f">defaultOptimization</a>().
+<p>See also  <a href="#e6ae80">setOptimization</a>(), <a href="#7675b8">setDefaultOptimization</a>() and <a href="#3ad81f">defaultOptimization</a>().
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="fbdfe3"></a>QPixmap::rect () const</h3>
 <p>Returns the enclosing rectangle (0,0,<a href="#86dbc5">width</a>(),<a href="#d5bb33">height</a>()) of the pixmap.
 <p>See also  <a href="#86dbc5">width</a>(), <a href="#d5bb33">height</a>() and <a href="#60b65f">size</a>().
@@ -545,9 +547,9 @@ The serial number is for example very useful for caching.
 <p>Sets the default pixmap optimization.
 <p>All <em>new</em> pixmaps that are created will use this default optimization.
 You may also set optimization for individual pixmaps using the
-<a href="#41f5cf">setOptimization</a>() function.
+<a href="#e6ae80">setOptimization</a>() function.
 <p>The initial default optimization setting is <code>QPixmap::Normal.</code>
-<p>See also  <a href="#3ad81f">defaultOptimization</a>(), <a href="#41f5cf">setOptimization</a>() and <a href="#ae6199">optimization</a>().
+<p>See also  <a href="#3ad81f">defaultOptimization</a>(), <a href="#e6ae80">setOptimization</a>() and <a href="#ae6199">optimization</a>().
 <h3 class="fn">void <a name="68a75d"></a>QPixmap::setMask ( const <a href="qbitmap.html">QBitmap</a> &amp; newmask )</h3>
 <p>Sets a mask bitmap.
 <p>The <em>mask</em> bitmap defines the clip mask for this pixmap. Every pixel in
@@ -556,26 +558,12 @@ and pixel value 0 means transparent. The mask must have the same size as
 this pixmap.
 <p>Setting a <a href="#7803c4">null</a> mask resets the mask,
 <p>See also  <a href="#99119c">mask</a>(), <a href="#20dfb1">createHeuristicMask</a>() and <a href="qbitmap.html">QBitmap</a>.
-<h3 class="fn">void <a name="41f5cf"></a>QPixmap::setOptimization ( <a href="qpixmap.html#Optimization">Optimization</a> optimization )</h3>
-<p>Sets pixmap drawing optimization for this pixmap.
-<p>The optimization setting affects pixmap operations, in particular
-drawing of transparent pixmaps (<a href="qpaintdevice.html#35ae2e">bitBlt</a>() a pixmap with a mask set) and
-pixmap transformations (the <a href="#ff5fcf">xForm</a>() function).
-<p>Pixmap optimization involves keeping intermediate results in a cache
-buffer and use the data in the cache to speed up bitBlt() and xForm().
-The cost is more memory consumption, up to twice as much as an
-unoptimized pixmap.
-<p>Use the <a href="#7675b8">setDefaultOptimization</a>() to change the default optimization
-for all new pixmaps.
-<p>See also  <a href="#ae6199">optimization</a>(), <a href="#7675b8">setDefaultOptimization</a>() and <a href="#3ad81f">defaultOptimization</a>().
-<p>Examples:
- <a href="desktop-desktop-cpp.html#setOptimization">desktop/desktop.cpp</a>
 <h3 class="fn"><a href="qsize.html">QSize</a> <a name="60b65f"></a>QPixmap::size () const</h3>
 <p>Returns the size of the pixmap.
 <p>See also  <a href="#86dbc5">width</a>(), <a href="#d5bb33">height</a>() and <a href="#fbdfe3">rect</a>().
 <p>Examples:
- <a href="qtimage-qtimage-cpp.html#size">qtimage/qtimage.cpp</a>
  <a href="movies-main-cpp.html#size">movies/main.cpp</a>
+ <a href="qtimage-qtimage-cpp.html#size">qtimage/qtimage.cpp</a>
 <h3 class="fn"><a href="qwmatrix.html">QWMatrix</a> <a name="952384"></a>QPixmap::trueMatrix ( const <a href="qwmatrix.html">QWMatrix</a> &amp; matrix, int w, int h ) <code>[static]</code></h3>
 <p>Returns the actual matrix used for transforming a pixmap with <em>w</em>
 width and <em>h</em> height.
@@ -590,11 +578,11 @@ correctly from the original pixmap into the new pixmap.
 <p>Returns the width of the pixmap.
 <p>See also  <a href="#d5bb33">height</a>(), <a href="#60b65f">size</a>() and <a href="#fbdfe3">rect</a>().
 <p>Examples:
+ <a href="movies-main-cpp.html#width">movies/main.cpp</a>
  <a href="qtimage-qtimage-cpp.html#width">qtimage/qtimage.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#width">scrollview/scrollview.cpp</a>
  <a href="xform-xform-cpp.html#width">xform/xform.cpp</a>
  <a href="desktop-desktop-cpp.html#width">desktop/desktop.cpp</a>
- <a href="scrollview-scrollview-cpp.html#width">scrollview/scrollview.cpp</a>
- <a href="movies-main-cpp.html#width">movies/main.cpp</a>
 <h3 class="fn">QPixmap <a name="ff5fcf"></a>QPixmap::xForm ( const <a href="qwmatrix.html">QWMatrix</a> &amp; matrix ) const</h3>
 <p>Returns a copy of the pixmap that is transformed using <em>matrix.</em>
 <p>Qt uses this function to implement rotated text on window systems
@@ -655,11 +643,11 @@ above, except that it uses a <a href="qpainter.html">QPainter</a>.
 <li>2 and 4 bits pixmaps are not supported.
 </ul>
 <p>Examples:
- <a href="qtimage-qtimage-cpp.html#xForm">qtimage/qtimage.cpp</a>
- <a href="xform-xform-cpp.html#xForm">xform/xform.cpp</a>
- <a href="qmag-qmag-cpp.html#xForm">qmag/qmag.cpp</a>
- <a href="desktop-desktop-cpp.html#xForm">desktop/desktop.cpp</a>
  <a href="movies-main-cpp.html#xForm">movies/main.cpp</a>
+ <a href="qtimage-qtimage-cpp.html#xForm">qtimage/qtimage.cpp</a>
+ <a href="qmag-qmag-cpp.html#xForm">qmag/qmag.cpp</a>
+ <a href="xform-xform-cpp.html#xForm">xform/xform.cpp</a>
+ <a href="desktop-desktop-cpp.html#xForm">desktop/desktop.cpp</a>
 <hr><h2>Related Functions</h2>
 <h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="3d1a55"></a>operator&gt;&gt; (<a href="qdatastream.html">QDataStream</a> &amp; s, QPixmap &amp; pixmap)</h3>
 <p>Reads a pixmap from the stream.
@@ -673,7 +661,7 @@ above, except that it uses a <a href="qpainter.html">QPainter</a>.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -681,5 +669,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

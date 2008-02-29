@@ -1,19 +1,34 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
-** Contact info\@trolltech.com if any conditions of this licensing are
+** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
@@ -115,8 +130,8 @@ EventXmlIO::EventXmlIO(AccessMode m,
 #ifndef QT_NO_COP
 	QCopChannel *channel = new QCopChannel( "QPE/PIM",  this );
 
-	connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
-		this, SLOT(pimMessage(const QCString&, const QByteArray&)) );
+	connect( channel, SIGNAL(received(const QCString&,const QByteArray&)),
+		this, SLOT(pimMessage(const QCString&,const QByteArray&)) );
 
 #endif
     }
@@ -149,7 +164,7 @@ void EventXmlIO::pimMessage(const QCString &message, const QByteArray &data)
 	ds >> pid;
 	ds >> event;
 	if (pid != getpid()) {
-	    internalUpdateRecord( &event );
+	    internalUpdateRecord( new PimEvent(event) );
 	    emit eventsUpdated();
 	}
     } else if (message == "reloadEvents()") {
@@ -205,10 +220,12 @@ bool EventXmlIO::internalUpdateRecord(PimRecord *rec)
 	if (current->uid() == ev->uid()) {
 	    if ( current != ev ) {
 		*current = *ev;
+		delete ev;
 	    }
 	    return TRUE;
 	}
     }
+    delete ev;
     return FALSE;
 }
 
@@ -332,6 +349,75 @@ QValueList<Occurrence> EventXmlIO::getOccurrencesInCurrentTZ(const QDate& from, 
     return results;
 }
 
+Occurrence EventXmlIO::getNextOccurrenceInCurrentTZ( const QDateTime& from, 
+                                                     bool * ok ) const
+{
+    if( ok ) *ok = false;
+
+    bool closestOccurValid = false;
+    Occurrence closestOccur;
+
+    for( QListIterator<PrEvent> iter = m_PrEvents; iter.current(); ++iter ) {
+        PrEvent e(*(iter.current()));
+
+        bool ocok = false;
+        QDate date = e.nextOccurrence( from.date(), &ocok );
+        if( ocok ) {
+            Occurrence o(date, e);
+            if( o.startInCurrentTZ() >= from ) {
+
+                if( false == closestOccurValid ||
+                    o.startInCurrentTZ() < closestOccur.startInCurrentTZ() ||
+                    (o.startInCurrentTZ() == closestOccur.startInCurrentTZ() &&
+                     o.event().uid().toString() < 
+                     closestOccur.event().uid().toString()) ) {
+
+                    closestOccur = o;
+                    closestOccurValid = true;
+
+                }
+
+            }
+        }
+    }
+
+    if( ok ) *ok = closestOccurValid;
+    return closestOccur;
+}
+
+Occurrence EventXmlIO::getNextOccurrenceInCurrentTZ( const Occurrence& from, 
+                                                     bool * ok ) const
+{
+    if( ok ) *ok = false;
+
+    bool closestOccurValid = false;
+    Occurrence closestOccur;
+
+    for( QListIterator<PrEvent> iter = m_PrEvents; iter.current(); ++iter ) {
+        PrEvent e(*(iter.current()));
+
+        bool ocok = false;
+        QDate date = e.nextOccurrence( from.date(), &ocok );
+        if( ocok ) {
+            Occurrence o(date, e);
+            
+            if( o.startInCurrentTZ() == from.startInCurrentTZ() && 
+                o.event().uid().toString() <= from.event().uid().toString() ) 
+                continue;
+
+            if( o.startInCurrentTZ() >= from.startInCurrentTZ() &&
+                (false == closestOccurValid || 
+                 o.startInCurrentTZ() < closestOccur.startInCurrentTZ()) ) {
+                closestOccur = o;
+                closestOccurValid = true;
+            }
+        }
+    }
+
+    if( ok ) *ok = closestOccurValid;
+    return closestOccur;
+}
+
 QUuid EventXmlIO::addEvent(const PimEvent &event, bool assignUid )
 {
     QUuid u;
@@ -341,6 +427,8 @@ QUuid EventXmlIO::addEvent(const PimEvent &event, bool assignUid )
     // Don't add events that will never occur.
     if (!event.isValid())
 	return u;
+
+    ensureDataCurrent();
 
     PrEvent *ev = new PrEvent((const PrEvent &)event);
 
@@ -372,32 +460,31 @@ void EventXmlIO::addException(const QDate &d, const PimEvent &p)
     if (accessMode() == ReadOnly)
 	return;
 
-    PrEvent *parent = new PrEvent((const PrEvent &)p);
-    parent->addException(d);
+    ensureDataCurrent();
+    PrEvent parent((const PrEvent &)p);
+    parent.addException(d);
     // don't add empty uid to parent.
-    //parent->addChildUid(QUuid());
+    parent.addChildUid(QUuid());
 
-    if (!parent->isValid()) {
+    if (!parent.isValid()) {
 	// apperently this is really a delete of the event.
-	delete (parent);
 	removeEvent(p);
 	return;
     }
 
-    if (internalUpdateRecord(parent)) {
+    if (internalUpdateRecord(new PrEvent(parent))) {
 	needsSave = TRUE;
 
-	updateJournal(*parent, ACTION_REPLACE);
+	updateJournal(parent, ACTION_REPLACE);
 
 #ifndef QT_NO_COP
 	{
 	    QCopEnvelope e("QPE/PIM", "updatedEvent(int,PimEvent)");
 	    e << getpid();
-	    e << *parent;
+	    e << parent;
 	}
 #endif
     }
-    delete parent;
 }
 
 QUuid EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent& event)
@@ -406,24 +493,25 @@ QUuid EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent
     if (accessMode() == ReadOnly)
 	return u;
 
+    ensureDataCurrent();
     // don't need to check is valid as can't disapear by adding an exception.
-    PrEvent *parent = new PrEvent((const PrEvent &)p);
+    PrEvent parent((const PrEvent &)p);
     PrEvent *ev = new PrEvent((const PrEvent &)event);
 
     assignNewUid(ev);
     u = ev->uid();
 
-    ev->setParentUid(parent->uid());
-    parent->addException(d);
-    parent->addChildUid(ev->uid());
+    ev->setParentUid(parent.uid());
+    parent.addException(d);
+    parent.addChildUid(ev->uid());
 
-    if (internalAddRecord(ev) && internalUpdateRecord(parent)) {
+    if (internalAddRecord(ev) && internalUpdateRecord(new PrEvent(parent))) {
 	needsSave = TRUE;
 	if (ev->hasAlarm())
 	    addEventAlarm(*ev);
 
 	updateJournal(*ev, ACTION_ADD);
-	updateJournal(*parent, ACTION_REPLACE);
+	updateJournal(parent, ACTION_REPLACE);
 
 #ifndef QT_NO_COP
 	{
@@ -434,11 +522,10 @@ QUuid EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent
 	{
 	    QCopEnvelope e("QPE/PIM", "updatedEvent(int,PimEvent)");
 	    e << getpid();
-	    e << *parent;
+	    e << parent;
 	}
 #endif
     }
-    delete parent;
     return u;
 }
 
@@ -448,6 +535,7 @@ void EventXmlIO::removeEvent(const PimEvent &event)
     if (accessMode() == ReadOnly)
 	return;
 
+    ensureDataCurrent();
     // in case parent becomes invalid.
     PimEvent parent;
 
@@ -456,7 +544,21 @@ void EventXmlIO::removeEvent(const PimEvent &event)
     if (event.isException()) {
 	for (m_PrEvents.first(); m_PrEvents.current(); m_PrEvents.next()) {
 	    if (m_PrEvents.current()->uid() == ev->seriesUid()) {
-		m_PrEvents.current()->removeChildUid(ev->uid());
+
+		QValueList<QDate>::ConstIterator eit = m_PrEvents.current()->exceptions().begin();
+		QValueList<QUuid>::ConstIterator cit = m_PrEvents.current()->childUids().begin();
+
+		QDate tdate;
+		for(; eit != m_PrEvents.current()->exceptions().end() && cit != m_PrEvents.current()->childUids().end();
+			++eit, ++cit)
+		{
+		    if (*cit == ev->uid()) {
+			tdate = *eit;
+		    }
+		}
+		m_PrEvents.current()->removeException(ev->uid());
+		m_PrEvents.current()->PimEvent::addException(tdate, QUuid());
+
 		if (!m_PrEvents.current()->isValid()) {
 		    parent = *(m_PrEvents.current());
 		}
@@ -495,6 +597,8 @@ void EventXmlIO::updateEvent(const PimEvent &event)
     if (accessMode() == ReadOnly)
 	return;
 
+    ensureDataCurrent();
+
     if (!event.isValid()) {
 	// really a remove.
 	removeEvent(event);
@@ -512,19 +616,18 @@ void EventXmlIO::updateEvent(const PimEvent &event)
 
     if (internalUpdateRecord(ev)) {
 	needsSave = TRUE;
-	if (ev->hasAlarm())
-	    addEventAlarm(*ev);
+	if (event.hasAlarm())
+	    addEventAlarm((const PrEvent &)event);
 
-	updateJournal(*ev, ACTION_REPLACE);
+	updateJournal(event, ACTION_REPLACE);
 	{
 #ifndef QT_NO_COP
 	    QCopEnvelope e("QPE/PIM", "updatedEvent(int,PimEvent)");
 	    e << getpid();
-	    e << *ev;
+	    e << event;
 #endif
 	}
     }
-    delete ev;
 }
 
 void EventXmlIO::ensureDataCurrent(bool forceReload)
@@ -573,6 +676,8 @@ void EventXmlIO::addEventAlarm(const PrEvent &ev)
 	AlarmServer::addAlarm(when, "QPE/Application/datebook",
 		"alarm(QDateTime,int)", warn);
     }
+#else
+    Q_UNUSED( ev );
 #endif
 }
 
@@ -585,5 +690,7 @@ void EventXmlIO::delEventAlarm(const PrEvent &ev)
 	AlarmServer::deleteAlarm( when, "QPE/Application/datebook",
 		"alarm(QDateTime,int)", warn);
     }
+#else
+    Q_UNUSED( ev );
 #endif
 }

@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -109,7 +111,7 @@ canvas in any way, add other items, or remove items.
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="156958"></a>QCanvasItem::boundingRect () const <code>[virtual]</code></h3>
 <p>Returns the bounding rectangle of pixels that the item covers.
 <p>See also  <a href="#266f32">boundingRectAdvanced</a>().
-<p>Reimplemented in <a href="qcanvastext.html#cd3f03">QCanvasText</a>, <a href="qcanvaspolygonalitem.html#d6f596">QCanvasPolygonalItem</a> and <a href="qcanvassprite.html#107def">QCanvasSprite</a>.
+<p>Reimplemented in <a href="qcanvaspolygonalitem.html#d6f596">QCanvasPolygonalItem</a>, <a href="qcanvastext.html#cd3f03">QCanvasText</a> and <a href="qcanvassprite.html#107def">QCanvasSprite</a>.
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="266f32"></a>QCanvasItem::boundingRectAdvanced () const <code>[virtual]</code></h3>
 <p>Returns the bounding rectangle of pixels that the item <em>will</em> cover
 after <a href="#3bf03d">advance</a>(1) is called.
@@ -120,7 +122,7 @@ after <a href="#3bf03d">advance</a>(1) is called.
 <p>Returns TRUE if the item will collide with the <em>other</em> item <em>after</em> they
 have moved by their current velocities.
 <p>See also  <a href="#62cd80">collisions</a>().
-<p>Reimplemented in <a href="qcanvaspolygonalitem.html#45b639">QCanvasPolygonalItem</a>, <a href="qcanvasrectangle.html#f5573d">QCanvasRectangle</a>, <a href="qcanvassprite.html#6e05e0">QCanvasSprite</a>, <a href="qcanvasellipse.html#0e91e8">QCanvasEllipse</a> and <a href="qcanvastext.html#a637ac">QCanvasText</a>.
+<p>Reimplemented in <a href="qcanvastext.html#a637ac">QCanvasText</a>, <a href="qcanvasellipse.html#0e91e8">QCanvasEllipse</a>, <a href="qcanvaspolygonalitem.html#45b639">QCanvasPolygonalItem</a>, <a href="qcanvassprite.html#6e05e0">QCanvasSprite</a> and <a href="qcanvasrectangle.html#f5573d">QCanvasRectangle</a>.
 <h3 class="fn">QCanvasItemList <a name="62cd80"></a>QCanvasItem::collisions ( bool exact ) const</h3>
 <p>Returns the list of items that this item collides with.
 <p>A collision is generally defined as pixels of one item drawing on the
@@ -145,7 +147,7 @@ collision detection only works for parts of an item
 that are within the area of the canvas.
 <h3 class="fn">void <a name="cce3d0"></a>QCanvasItem::draw ( <a href="qpainter.html">QPainter</a> &amp; painter ) <code>[virtual]</code></h3>
 <p>This abstract virtual function draws the item using <em>painter.</em>
-<p>Reimplemented in <a href="qcanvassprite.html#ae5194">QCanvasSprite</a> and <a href="qcanvaspolygonalitem.html#3656a8">QCanvasPolygonalItem</a>.
+<p>Reimplemented in <a href="qcanvaspolygonalitem.html#3656a8">QCanvasPolygonalItem</a> and <a href="qcanvassprite.html#ae5194">QCanvasSprite</a>.
 <h3 class="fn">bool <a name="226783"></a>QCanvasItem::enabled () const</h3>
 <p>Returns TRUE if the QCanvasItem is enabled.
 <h3 class="fn">void <a name="a4304f"></a>QCanvasItem::hide ()</h3>
@@ -155,7 +157,7 @@ that are within the area of the canvas.
 virtual function.
 <h3 class="fn">void <a name="799882"></a>QCanvasItem::moveBy ( double dx, double dy ) <code>[virtual]</code></h3>
 <p>Moves the item from its current position by the given amounts.
-<p>Reimplemented in <a href="qcanvaspolygon.html#7c9c71">QCanvasPolygon</a> and <a href="qcanvastext.html#8b3b2f">QCanvasText</a>.
+<p>Reimplemented in <a href="qcanvastext.html#8b3b2f">QCanvasText</a> and <a href="qcanvaspolygon.html#7c9c71">QCanvasPolygon</a>.
 <h3 class="fn">int <a name="f75ac7"></a>QCanvasItem::rtti () const <code>[virtual]</code></h3>
 <p>Returns 0.
 <p>Although often frowned upon by purists, Run Time
@@ -181,7 +183,7 @@ upon the object based on its rtti value.
         ...
     }
 </pre>
-<p>Reimplemented in <a href="qcanvasrectangle.html#5353c5">QCanvasRectangle</a>, <a href="qcanvaspolygonalitem.html#e52555">QCanvasPolygonalItem</a>, <a href="qcanvasline.html#391039">QCanvasLine</a>, <a href="qcanvasellipse.html#c784c6">QCanvasEllipse</a> and <a href="qcanvaspolygon.html#03cb08">QCanvasPolygon</a>.
+<p>Reimplemented in <a href="qcanvaspolygonalitem.html#e52555">QCanvasPolygonalItem</a>, <a href="qcanvasline.html#391039">QCanvasLine</a>, <a href="qcanvasrectangle.html#5353c5">QCanvasRectangle</a>, <a href="qcanvasellipse.html#c784c6">QCanvasEllipse</a> and <a href="qcanvaspolygon.html#03cb08">QCanvasPolygon</a>.
 <h3 class="fn">bool <a name="86b89e"></a>QCanvasItem::selected () const</h3>
 <p>Returns TRUE if the QCanvasItem is selected.
 <h3 class="fn">void <a name="55dfed"></a>QCanvasItem::setActive ( bool yes ) <code>[virtual]</code></h3>
@@ -260,7 +262,7 @@ higher-z items obscure lower-z ones.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -268,5 +270,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

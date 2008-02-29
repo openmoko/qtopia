@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -20,43 +35,22 @@
 
 #include "obstacle.h"
 #include "codes.h"
+#include "sprites.h"
 
 #include <qtopia/resource.h>
 
 
 
-Obstacle::Obstacle(QCanvas* canvas, int y)
-         : QCanvasSprite(0,canvas)
+Obstacle::Obstacle(QCanvas* c, int x, int y,
+	bool left, bool right, bool up, bool down)
+         : QCanvasSprite(0,c)
 {
-    newObstacle(y);
-} 
-
-void Obstacle::newObstacle(int y)
-{
-   QPixmap obstaclePix( Resource::loadPixmap("snake/wall") );
-   
-   if ( obstaclePix.width() > canvas()->width()*3/5 ) {
-       int w = canvas()->width()*3/5;
-       w = w - w % 16;
-       obstaclePix.resize( w, obstaclePix.height() );
-   }
-
-   QList<QPixmap> pixl;
-   pixl.append( &obstaclePix );
-
-   QPoint nullp;
-   QList<QPoint> pl;
-   pl.append( &nullp );
-   
-   QCanvasPixmapArray* obstaclearray = new QCanvasPixmapArray(pixl, pl);
-   setSequence(obstaclearray);
-   
-   int x = ( canvas()->width() - obstaclePix.width() )/2;
-   x = x - x % 16;
-   y = y - y % 16;
+   setSequence(SpriteDB::spriteCache());
+   setFrame(SpriteDB::wall(left, right, up, down));
    move(x, y);
    setZ( -100 );
    show();
+   
    canvas()->update();
 }
  

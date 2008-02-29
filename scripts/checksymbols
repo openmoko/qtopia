@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+$filetocheck = shift;
+unless (defined ($filetocheck)) {
+    die "couldn't get file to check.\nThe file to check must be passed as the first argument to this script\n";
+}
+
+unless (defined ($ENV{QPEDIR})) {
+    die "QPEDIR is not set.\nQPEDIR must be set for this script to work\n";
+}
+
+open (NM, "nm -C $filetocheck|");
+undef %filelist;
+while(<NM>) {
+    $item = $_;
+    chomp $item;
+    if ($item =~ / T _fini/ or $item =~ / T _init/) {
+	next;
+    }
+    if ($item =~ / [VWT] (.*)$/) {
+	$newitem = $1;
+	if (!defined($filelist{$newitem})) {
+	    $filelist{$newitem} = true;
+	}
+    }
+}
+
+foreach $checkagainst (`ls $ENV{QPEDIR}/lib/*.so.*.*.*`) {
+    chomp $checkagainst;
+    open (NM, "nm -C $checkagainst |");
+    while (<NM>) {
+	$item = $_;
+	chomp $item;
+	if ($item =~ / T (.*)$/) {
+	    $newitem = $1;
+	    if (defined($filelist{$newitem})) {
+		print "found duplicate symbol $newitem in both $filetocheck and $checkagainst\n";
+	    }
+	}
+    }
+    close NM;
+}
+
+

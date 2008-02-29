@@ -1,53 +1,65 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
-#ifndef CANVAS_ITEM_TIMER_H
-#define CANVAS_ITEM_TIMER_H
+#ifndef ANIMATED_ITEM_H
+#define ANIMATED_ITEM_H
 
 
 #include <qobject.h>
 #include <qdatetime.h>
-#include <qcanvas.h>
+#include <qtimer.h>
 
 
-class AnimatedCanvasItem //: public QCanvasRectangle
+class AnimatedItem : public QObject
 {
-public:
-    AnimatedCanvasItem();
-    virtual ~AnimatedCanvasItem();
-    virtual void updatePosition( double percent ) = 0;
-};
-
-
-class CanvasItemTimer : public QObject {
     Q_OBJECT
 public:
-    CanvasItemTimer( AnimatedCanvasItem *c, int msecs );
-    ~CanvasItemTimer();
+    AnimatedItem();
+    virtual ~AnimatedItem();
+    virtual void updatePosition(double percent) = 0;
+    void start(int msec);
+    void stop();
+signals:
+    void finished();
 public slots:
     void processNext();
 private:
-    AnimatedCanvasItem *card;
     QTime counter;
+    QTimer timer;
     int msecs;
 };
 
 
-#endif // CANVAS_ITEM_TIMER_H
+#endif // ANIMATED_ITEM_H
 

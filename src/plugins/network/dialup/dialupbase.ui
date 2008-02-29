@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>277</width>
-            <height>340</height>
+            <width>380</width>
+            <height>441</height>
         </rect>
     </property>
     <property stdset="1">
@@ -38,7 +38,7 @@
             <class>QTabWidget</class>
             <property stdset="1">
                 <name>name</name>
-                <cstring>TabWidget2</cstring>
+                <cstring>tabs</cstring>
             </property>
             <property>
                 <name>layoutMargin</name>
@@ -50,7 +50,7 @@
                 <class>QWidget</class>
                 <property stdset="1">
                     <name>name</name>
-                    <cstring>tab</cstring>
+                    <cstring>account</cstring>
                 </property>
                 <attribute>
                     <name>title</name>
@@ -87,7 +87,7 @@
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel1</cstring>
+                            <cstring>username_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
@@ -98,40 +98,11 @@
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel2</cstring>
+                            <cstring>password_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
                             <string>Password:</string>
-                        </property>
-                    </widget>
-                    <widget row="5"  column="0" >
-                        <class>QLabel</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>TextLabel1_2_2</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>text</name>
-                            <string>Phone:</string>
-                        </property>
-                    </widget>
-                    <widget row="5"  column="1" >
-                        <class>QLineEdit</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>phone</cstring>
-                        </property>
-                    </widget>
-                    <widget row="4"  column="0"  rowspan="1"  colspan="2" >
-                        <class>Line</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>Line3</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>orientation</name>
-                            <enum>Horizontal</enum>
                         </property>
                     </widget>
                     <widget row="0"  column="1" >
@@ -145,7 +116,7 @@
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel1_2</cstring>
+                            <cstring>acname_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
@@ -156,14 +127,14 @@
                         <class>Line</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>Line4</cstring>
+                            <cstring>line1</cstring>
                         </property>
                         <property stdset="1">
                             <name>orientation</name>
                             <enum>Horizontal</enum>
                         </property>
                     </widget>
-                    <spacer row="9"  column="1" >
+                    <spacer row="7"  column="1" >
                         <property>
                             <name>name</name>
                             <cstring>Spacer4</cstring>
@@ -184,13 +155,60 @@
                             </size>
                         </property>
                     </spacer>
+                    <widget row="6"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>apn</cstring>
+                        </property>
+                    </widget>
+                    <widget row="6"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>apn_label</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>APN:</string>
+                        </property>
+                    </widget>
+                    <widget row="5"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>phone_label</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Phone:</string>
+                        </property>
+                    </widget>
+                    <widget row="5"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>phone</cstring>
+                        </property>
+                    </widget>
+                    <widget row="4"  column="0"  rowspan="1"  colspan="2" >
+                        <class>Line</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>line2</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>orientation</name>
+                            <enum>Horizontal</enum>
+                        </property>
+                    </widget>
                 </grid>
             </widget>
             <widget>
                 <class>QWidget</class>
                 <property stdset="1">
                     <name>name</name>
-                    <cstring>tab</cstring>
+                    <cstring>modem</cstring>
                 </property>
                 <attribute>
                     <name>title</name>
@@ -203,13 +221,13 @@
                     </property>
                     <property stdset="1">
                         <name>spacing</name>
-                        <number>2</number>
+                        <number>4</number>
                     </property>
                     <widget row="0"  column="0" >
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel3_2_2</cstring>
+                            <cstring>atdial_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
@@ -243,7 +261,7 @@
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel1_4</cstring>
+                            <cstring>speed_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
@@ -324,7 +342,7 @@
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel1_3</cstring>
+                            <cstring>connectdelay_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
@@ -360,22 +378,23 @@
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel5</cstring>
+                            <cstring>connectdelay_suffix</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>sec</string>
+                            <string>s</string>
+                            <comment>short for second</comment>
                         </property>
                     </widget>
                     <widget row="2"  column="0" >
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>TextLabel3</cstring>
+                            <cstring>crtscts_label</cstring>
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>Flow control:</string>
+                            <string>Flow ctrl:</string>
                         </property>
                     </widget>
                     <widget row="2"  column="1"  rowspan="1"  colspan="3" >
@@ -386,7 +405,7 @@
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>Hardware flow control</string>
+                            <string>Hardware</string>
                         </property>
                         <property stdset="1">
                             <name>checked</name>
@@ -414,18 +433,40 @@
                             </size>
                         </property>
                     </spacer>
-                    <widget row="5"  column="0"  rowspan="1"  colspan="4" >
+                </grid>
+            </widget>
+            <widget>
+                <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>dialing</cstring>
+                </property>
+                <attribute>
+                    <name>title</name>
+                    <string>Dialing</string>
+                </attribute>
+                <vbox>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>6</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>4</number>
+                    </property>
+                    <widget>
                         <class>QButtonGroup</class>
                         <property stdset="1">
                             <name>name</name>
                             <cstring>dialmode</cstring>
                         </property>
                         <property stdset="1">
-                            <name>title</name>
-                            <string>Demand Dialing</string>
+                            <name>frameShape</name>
+                            <enum>NoFrame</enum>
                         </property>
-                        <property>
-                            <name>layoutMargin</name>
+                        <property stdset="1">
+                            <name>title</name>
+                            <string></string>
                         </property>
                         <property>
                             <name>layoutSpacing</name>
@@ -433,7 +474,7 @@
                         <grid>
                             <property stdset="1">
                                 <name>margin</name>
-                                <number>5</number>
+                                <number>0</number>
                             </property>
                             <property stdset="1">
                                 <name>spacing</name>
@@ -447,7 +488,7 @@
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
-                                    <string>Manual connect and disconnect</string>
+                                    <string>Manual on and off</string>
                                 </property>
                             </widget>
                             <widget row="3"  column="1" >
@@ -458,7 +499,7 @@
                                 </property>
                                 <property stdset="1">
                                     <name>suffix</name>
-                                    <string> seconds</string>
+                                    <string>s</string>
                                 </property>
                                 <property stdset="1">
                                     <name>maxValue</name>
@@ -477,7 +518,7 @@
                                 <class>QLabel</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>TextLabel1_5</cstring>
+                                    <cstring>idletime_label</cstring>
                                 </property>
                                 <property stdset="1">
                                     <name>sizePolicy</name>
@@ -506,7 +547,7 @@
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
-                                    <string>Automatic connect and disconnect</string>
+                                    <string>Auto on and off</string>
                                 </property>
                                 <property stdset="1">
                                     <name>buttonGroupId</name>
@@ -521,7 +562,7 @@
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
-                                    <string>Manual connect, automatic disconnect</string>
+                                    <string>Manual on, auto off</string>
                                 </property>
                                 <property stdset="1">
                                     <name>buttonGroupId</name>
@@ -530,13 +571,13 @@
                             </widget>
                         </grid>
                     </widget>
-                </grid>
+                </vbox>
             </widget>
             <widget>
                 <class>QWidget</class>
                 <property stdset="1">
                     <name>name</name>
-                    <cstring>tab</cstring>
+                    <cstring>network</cstring>
                 </property>
                 <attribute>
                     <name>title</name>
@@ -580,7 +621,7 @@
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>Auto-detect name servers</string>
+                            <string>Auto name servers</string>
                         </property>
                         <property stdset="1">
                             <name>checked</name>
@@ -591,7 +632,7 @@
                         <class>QGroupBox</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>gatewaybox</cstring>
+                            <cstring>gateway_box</cstring>
                         </property>
                         <property stdset="1">
                             <name>enabled</name>
@@ -614,7 +655,7 @@
                                 <class>QLabel</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>TextLabel4_2</cstring>
+                                    <cstring>gateway_label</cstring>
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
@@ -642,7 +683,7 @@
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>Auto-detect routing</string>
+                            <string>Auto routing</string>
                         </property>
                         <property stdset="1">
                             <name>checked</name>
@@ -653,7 +694,7 @@
                         <class>QGroupBox</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>dnsbox</cstring>
+                            <cstring>dns_box</cstring>
                         </property>
                         <property stdset="1">
                             <name>enabled</name>
@@ -676,7 +717,7 @@
                                 <class>QLineEdit</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>dns1</cstring>
+                                    <cstring>dns_1</cstring>
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
@@ -687,7 +728,7 @@
                                 <class>QLineEdit</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>dns2</cstring>
+                                    <cstring>dns_2</cstring>
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
@@ -698,7 +739,7 @@
                                 <class>QLabel</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>TextLabel1_2_3</cstring>
+                                    <cstring>dns_1_label</cstring>
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
@@ -709,7 +750,7 @@
                                 <class>QLabel</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>TextLabel1_2_2_2</cstring>
+                                    <cstring>dns_2_label</cstring>
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
@@ -724,7 +765,202 @@
                 <class>QWidget</class>
                 <property stdset="1">
                     <name>name</name>
-                    <cstring>proxiestab</cstring>
+                    <cstring>wap</cstring>
+                </property>
+                <attribute>
+                    <name>title</name>
+                    <string>WAP</string>
+                </attribute>
+                <grid>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>4</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>2</number>
+                    </property>
+                    <widget row="2"  column="0" >
+                        <class>QComboBox</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyLoginType</cstring>
+                        </property>
+                    </widget>
+                    <widget row="3"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyAuthPassword_label</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Password:</string>
+                        </property>
+                        <property stdset="1">
+                            <name>alignment</name>
+                            <set>AlignVCenter|AlignRight</set>
+                        </property>
+                        <property>
+                            <name>hAlign</name>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="1" >
+                        <class>QSpinBox</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyPort</cstring>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyPort_label</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Port:</string>
+                        </property>
+                        <property stdset="1">
+                            <name>alignment</name>
+                            <set>AlignVCenter|AlignRight</set>
+                        </property>
+                        <property>
+                            <name>hAlign</name>
+                        </property>
+                    </widget>
+                    <widget row="2"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyAuthName</cstring>
+                        </property>
+                    </widget>
+                    <widget row="3"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyAuthPassword</cstring>
+                        </property>
+                    </widget>
+                    <widget row="0"  column="0" >
+                        <class>QComboBox</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyAddressType</cstring>
+                        </property>
+                    </widget>
+                    <widget row="0"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyAddress</cstring>
+                        </property>
+                    </widget>
+                    <widget row="4"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel3</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Proxy Service:</string>
+                        </property>
+                        <property stdset="1">
+                            <name>alignment</name>
+                            <set>AlignVCenter|AlignRight</set>
+                        </property>
+                        <property>
+                            <name>hAlign</name>
+                        </property>
+                    </widget>
+                    <widget row="5"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel4</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Default Page:</string>
+                        </property>
+                        <property stdset="1">
+                            <name>alignment</name>
+                            <set>AlignVCenter|AlignRight</set>
+                        </property>
+                        <property>
+                            <name>hAlign</name>
+                        </property>
+                    </widget>
+                    <widget row="5"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapDefaultHomePage</cstring>
+                        </property>
+                    </widget>
+                    <widget row="6"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>mmsURL</cstring>
+                        </property>
+                    </widget>
+                    <widget row="6"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel5</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>MMS URL:</string>
+                        </property>
+                        <property stdset="1">
+                            <name>alignment</name>
+                            <set>AlignVCenter|AlignRight</set>
+                        </property>
+                        <property>
+                            <name>hAlign</name>
+                        </property>
+                    </widget>
+                    <spacer row="7"  column="1" >
+                        <property>
+                            <name>name</name>
+                            <cstring>Spacer4_2</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>orientation</name>
+                            <enum>Vertical</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>sizeType</name>
+                            <enum>Expanding</enum>
+                        </property>
+                        <property>
+                            <name>sizeHint</name>
+                            <size>
+                                <width>20</width>
+                                <height>20</height>
+                            </size>
+                        </property>
+                    </spacer>
+                    <widget row="4"  column="1" >
+                        <class>QComboBox</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wapProxyService</cstring>
+                        </property>
+                    </widget>
+                </grid>
+            </widget>
+            <widget>
+                <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>proxies</cstring>
                 </property>
                 <attribute>
                     <name>title</name>
@@ -738,13 +974,13 @@
     <connection>
         <sender>defaultroute</sender>
         <signal>toggled(bool)</signal>
-        <receiver>gatewaybox</receiver>
+        <receiver>gateway_box</receiver>
         <slot>setDisabled(bool)</slot>
     </connection>
     <connection>
         <sender>usepeerdns</sender>
         <signal>toggled(bool)</signal>
-        <receiver>dnsbox</receiver>
+        <receiver>dns_box</receiver>
         <slot>setDisabled(bool)</slot>
     </connection>
     <connection>
@@ -753,19 +989,13 @@
         <receiver>connectdelay_text</receiver>
         <slot>setNum(int)</slot>
     </connection>
-    <connection>
-        <sender>dial_manual</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>idletime</receiver>
-        <slot>setDisabled(bool)</slot>
-    </connection>
 </connections>
 <tabstops>
-    <tabstop>TabWidget2</tabstop>
     <tabstop>acname</tabstop>
     <tabstop>username</tabstop>
     <tabstop>password</tabstop>
     <tabstop>phone</tabstop>
+    <tabstop>apn</tabstop>
     <tabstop>atdial</tabstop>
     <tabstop>speed</tabstop>
     <tabstop>crtscts</tabstop>
@@ -774,10 +1004,11 @@
     <tabstop>dial_idle</tabstop>
     <tabstop>dial_demand</tabstop>
     <tabstop>idletime</tabstop>
+    <tabstop>tabs</tabstop>
     <tabstop>defaultroute</tabstop>
     <tabstop>gateway</tabstop>
     <tabstop>usepeerdns</tabstop>
-    <tabstop>dns1</tabstop>
-    <tabstop>dns2</tabstop>
+    <tabstop>dns_1</tabstop>
+    <tabstop>dns_2</tabstop>
 </tabstops>
 </UI>

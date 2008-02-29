@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -20,21 +35,23 @@
 
 #define QTOPIA_INTERNAL_MIMEEXT
 
-
 #include "resource.h"
 #include "config.h"
 #include "mimetype.h"
+#include "qpeapplication.h"
+
 #include <qdir.h>
 #include <qfile.h>
 #include <qregexp.h>
 #include <qpixmapcache.h>
 #include <qpainter.h>
 
-#include "inlinepics_p.h"
+#ifdef QTOPIA_DESKTOP
+#include <qdconfig.h>
+#endif
 
-#include "qpeapplication.h"
-
-static bool qpe_fast_findPixmap = FALSE;
+bool qpe_fast_findPixmap = FALSE;
+QStringList qpe_pathCache[Resource::AllResources + 1];
 
 /*!
   \class Resource resource.h
@@ -63,10 +80,35 @@ static bool qpe_fast_findPixmap = FALSE;
 QPixmap Resource::loadPixmap( const QString &pix )
 {
     QPixmap pm;
-    QString key="QPE_"+pix;
-    if ( !QPixmapCache::find(key,pm) ) {
-	pm.convertFromImage(loadImage(pix));
-	QPixmapCache::insert(key,pm);
+
+    // Give the pixmaps some kind of namespace in the pixmapcache
+    int index = pix.find('/');
+    QString appName1 = qApp->argv()[0];
+    appName1 = appName1.replace(QRegExp(".*/"),"");
+    QString appName2 = pix.left(index);
+
+    if ( appName2 == "" || appName2 == pix || appName2 == "icons" )
+	appName2 = "Global";
+
+    QString appKey1 = "_QPE_" + appName1 + "_" + pix;
+    QString appKey2 = "_QPE_" + appName2 + "_" + pix.mid(index+1);
+
+    if ( !QPixmapCache::find(appKey1, pm) ) {
+	if ( !QPixmapCache::find(appKey2, pm) ) {
+	    QImage img;
+	    QString f = findPixmap( pix );
+	    if ( !f.isEmpty() ) {
+		img.load(f);
+		if ( !img.isNull() ) {
+		    pm.convertFromImage(img);
+		    if ( f.contains(appName1) ) {
+			QPixmapCache::insert( appKey1, pm);
+		    } else {
+			QPixmapCache::insert( appKey2, pm);
+		    }
+		}
+	    }
+	}
     }
     return pm;
 }
@@ -82,6 +124,8 @@ QBitmap Resource::loadBitmap( const QString &pix )
     return bm;
 }
 
+#include "global_qtopiapaths.cpp"
+
 /*!
   Returns the filename of a pixmap called \a pix. You should avoid including
   any filename type extension (e.g. .png, .xpm).
@@ -90,41 +134,98 @@ QBitmap Resource::loadBitmap( const QString &pix )
 */
 QString Resource::findPixmap( const QString &pix )
 {
-    QString picsPath = QPEApplication::qpeDir() + "pics/";
-
     QString f;
+    QStringList picsPaths(qpe_pathCache[PixResource]);
+    QStringList qpepaths = global_qtopiapaths();
+    for (QStringList::ConstIterator qit=qpepaths.begin(); qit!=qpepaths.end(); ++qit)
+	picsPaths.append(*qit + "pics/");
+    QString appName = qApp->argv()[0];
+    appName.replace(QRegExp(".*/"),"");
+#ifdef QTOPIA_DESKTOP
+    // Since Qtopia Desktop runs on platforms where the binary isn't
+    // called qtopiadesktop, we need to force it here.
+    appName = "qtopiadesktop";
+    QString currentPlugin = gQtopiaDesktopConfig->currentPlugin();
+#endif
 
     // Common case optimizations...
-    f = picsPath + pix + ".png";
-    if ( QFile( f ).exists() )
-	return f;
-    f = picsPath + pix + ".xpm";
-    if ( QFile( f ).exists() )
-	return f;
+    QStringList::ConstIterator pathIt;
+    for ( pathIt = picsPaths.begin(); pathIt!=picsPaths.end(); ++pathIt ) {
+	QString prefix = *pathIt;
+	if (prefix[(int)prefix.length()-1] != '/')
+	    prefix += '/';
+#ifdef QTOPIA_DESKTOP
+	if ( ! currentPlugin.isEmpty() ) {
+	    f = prefix + currentPlugin + '/' + pix + ".png";
+	    if ( QFile::exists(f) )
+		return f;
+	}
+#endif
+	f = prefix + appName + '/' + pix + ".png";
+	if ( QFile::exists(f) )
+	    return f;
+	f = prefix + pix + ".png";
+	if ( QFile::exists(f) )
+	    return f;
+#ifdef QTOPIA_DESKTOP
+	if ( ! currentPlugin.isEmpty() ) {
+	    f = prefix + currentPlugin + '/' + pix + ".xpm";
+	    if ( QFile::exists(f) )
+		return f;
+	}
+#endif
+	f = prefix + appName + '/' +pix + ".xpm";
+	if ( QFile::exists(f) )
+	    return f;
+	f = prefix + pix + ".xpm";
+	if ( QFile::exists(f) )
+	    return f;
+    }
 
 #ifdef Q_WS_QWS
     if ( !qpe_fast_findPixmap ) {
 	qDebug( "Doing slow search for image: %s", pix.latin1() );
 	// All formats...
+	QString png_ext("png");
+	QString xpm_ext("xpm");
 	QStrList fileFormats = QImageIO::inputFormats();
 	QString ff = fileFormats.first();
 	while ( fileFormats.current() ) {
 	    QStringList exts = MimeType("image/"+ff.lower()).extensions();
 	    for ( QStringList::ConstIterator it = exts.begin(); it!=exts.end(); ++it ) {
-		QString f = picsPath + pix + "." + *it;
-		if ( QFile(f).exists() )
-		    return f;
+		if (*it == png_ext || *it == xpm_ext)	// check above.
+		    continue;
+		for ( pathIt = picsPaths.begin(); pathIt!=picsPaths.end(); ++pathIt ){
+		    QString prefix = *pathIt;
+		    if (prefix[prefix.length()-1] != '/')
+			prefix += '/';
+		    f = prefix + pix + "." + *it;
+		    if ( QFile::exists(f) )
+			return f;
+		    f = prefix + appName + "/" + pix + "." + *it;
+		    if ( QFile::exists(f) )
+			return f;
+		}
 	    }
 	    ff = fileFormats.next();
 	}
 
 	// Finally, no (or existing) extension...
-	if ( QFile( picsPath + pix ).exists() )
-	    return picsPath + pix;
+	for ( pathIt = picsPaths.begin(); pathIt!=picsPaths.end(); ++pathIt ){
+	    QString prefix = *pathIt;
+	    if (prefix[prefix.length()-1] != '/')
+		prefix += '/';
+	    f = prefix + pix;
+	    if ( QFile::exists(f) )
+		return f;
+	    f = prefix + appName + "/" + pix;
+	    if ( QFile::exists(f) )
+		return f;
+	}
     }
 #endif
 
-    //qDebug("Cannot find pixmap: %s", pix.latin1());
+    qDebug("Cannot find pixmap: %s", pix.latin1());
     return QString();
 }
 
@@ -139,11 +240,17 @@ QString Resource::findPixmap( const QString &pix )
 */
 QString Resource::findSound( const QString &name )
 {
-    QString picsPath = QPEApplication::qpeDir() + "sounds/";
+    QStringList soundPaths(qpe_pathCache[SoundResource]);
+    QStringList qpepaths = global_qtopiapaths();
+    for (QStringList::ConstIterator qit=qpepaths.begin(); qit!=qpepaths.end(); ++qit)
+	soundPaths.append(*qit + "sounds/");
 
     QString result;
-    if ( QFile( (result = picsPath + name + ".wav") ).exists() )
-	return result;
+    for ( QStringList::ConstIterator soundPrefix = soundPaths.begin(); soundPrefix!=soundPaths.end(); ++soundPrefix ){
+	result = *soundPrefix + name + ".wav";
+	if ( QFile::exists(result) )
+	    return result;
+    }
 
     return QString();
 }
@@ -153,9 +260,16 @@ QString Resource::findSound( const QString &name )
 */
 QStringList Resource::allSounds()
 {
-    QDir resourcedir( QPEApplication::qpeDir() + "sounds/" , "*.wav" );
-    QStringList entries = resourcedir.entryList();
-    QStringList result;
+    QStringList result, entries;
+    QStringList soundPaths(qpe_pathCache[SoundResource]);
+    QStringList qpepaths = global_qtopiapaths();
+    for (QStringList::ConstIterator qit=qpepaths.begin(); qit!=qpepaths.end(); ++qit)
+	soundPaths.append(*qit + "sounds/");
+    for ( QStringList::ConstIterator soundPrefix = soundPaths.begin(); soundPrefix!=soundPaths.end(); ++soundPrefix ){
+	QDir resourcedir(*soundPrefix, "*.wav");
+	entries += resourcedir.entryList();
+    }
+    
     for (QStringList::Iterator i=entries.begin(); i != entries.end(); ++i)
 	result.append((*i).replace(QRegExp("\\.wav"),""));
     return result;
@@ -165,72 +279,19 @@ QStringList Resource::allSounds()
 /*!
   Returns the QImage called \a name. You should avoid including
   any filename type extension (e.g. .png, .xpm).
-
-  For performance reasons, names ending in "_disabled" are only
-  supported as XPM or PNG files.
 */
 QImage Resource::loadImage( const QString &name)
 {
-    QImage img = qembed_findImage(name.latin1());
-    if ( img.isNull() ) {
-	// No inlined image, try file
-	// For *_disabled images, only search for XPM and PNG
-	bool disabled = name[(int)name.length()-1]=='d' && name.right(9)=="_disabled"; // No tr
-	if ( disabled )
-	    qpe_fast_findPixmap = TRUE;
-	QString f = Resource::findPixmap(name);
-	if ( !f.isEmpty() )
-	    img.load(f);
-	if ( disabled )
-	    qpe_fast_findPixmap = FALSE;
-    }
+    QImage img;
+    QString f = Resource::findPixmap(name);
+    if ( !f.isEmpty() )
+	img.load(f);
     return img;
 }
 
+#include "../qtopia1/qpe_load_iconset.cpp"
 
 QIconSet qtopia_internal_loadIconSet( const QString &pix ) 
-// DUPLICATION from Resource::loadIconSet
 {
-    static int iconSetSize = -1;
-    if ( iconSetSize < 0 ) {
-	Config config( "qpe" );
-	config.setGroup( "Appearance" );
-	iconSetSize = config.readNumEntry("IconSize",0);
-    }
-
-    if ( iconSetSize ) {
-	// Force the icon to iconSetSize for small icons and 50% larger fo large icons.
-	QImage dimg = Resource::loadImage( pix + "_disabled" );
-	QImage img = Resource::loadImage(pix);
-	QPixmap pm;
-
-	QIconSet is;
-	if ( img.height()*2 >= iconSetSize*3 ) {
-	    pm.convertFromImage(img.smoothScale(iconSetSize,iconSetSize));
-	    is.reset(pm,QIconSet::Small);
-	    pm.convertFromImage(img.smoothScale(iconSetSize*3/2,iconSetSize*3/2));
-	    is.setPixmap(pm,QIconSet::Large);
-	    if ( !dimg.isNull() ) {
-		pm.convertFromImage(dimg.smoothScale(iconSetSize,iconSetSize));
-		is.setPixmap(pm,QIconSet::Small,QIconSet::Disabled);
-		pm.convertFromImage(dimg.smoothScale(iconSetSize*3/2,iconSetSize*3/2));
-		is.setPixmap(pm,QIconSet::Large,QIconSet::Disabled);
-	    }
-	} else {
-	    pm.convertFromImage(img.smoothScale(iconSetSize,iconSetSize));
-	    is.reset(pm,QIconSet::Small);
-	    if ( !dimg.isNull() ) {
-		pm.convertFromImage(dimg.smoothScale(iconSetSize,iconSetSize));
-		is.setPixmap(pm,QIconSet::Small,QIconSet::Disabled);
-	    }
-	}
-	return is;
-    } else {
-	QPixmap dpm = Resource::loadPixmap( pix + "_disabled" );
-	QPixmap pm = Resource::loadPixmap( pix );
-	QIconSet is( pm );
-	if ( !dpm.isNull() )
-	    is.setPixmap( dpm, pm.width() <= 22 ? QIconSet::Small : QIconSet::Large, QIconSet::Disabled );
-	return is;
-    }
+    return qpe_loadIconSet(pix);
 }

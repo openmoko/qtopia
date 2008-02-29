@@ -1,5 +1,6 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -12,12 +13,12 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
-
 #include "pickboardcfg.h"
 #include "pickboardpicks.h"
 
@@ -350,10 +351,10 @@ void DictFilterConfig::doMenu(int i)
       case 300:
 	if ( input.count() == 0 ) {
 	    QMessageBox::information(0, tr("Adding Words"),
-		tr("To add words, pick the letters,\nthen "
-		"open the Add dialog. In that\ndialog, tap "
-		"the correct letters\nfrom the list "
-		"(tap twice for\ncapitals)."));
+		tr("<qt>To add words, pick the letters, then "
+		"open the Add dialog. In that dialog, tap "
+		"the correct letters from the list "
+		"(tap twice for capitals).</qt>"));
 	} else {
 	    PickboardAdd add(parent,capitalize(input));
 	    if ( add.exec() )

@@ -1,17 +1,18 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-#singleprocess:TEMPLATE	= lib
-#singleprocess:DESTDIR   = $(QPEDIR)/lib
-
-TEMPLATE	= app
-CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
+CONFIG		+= qtopiaapp
 
 HEADERS		= interface.h man.h cannon.h base.h bullet.h helicopter.h
-SOURCES		= interface.cpp man.cpp cannon.cpp base.cpp bullet.cpp helicopter.cpp
-
-multiprocess:SOURCES+=main.cpp
+SOURCES		= interface.cpp man.cpp cannon.cpp base.cpp bullet.cpp helicopter.cpp main.cpp
 
 TARGET		= parashoot
 
-TRANSLATIONS = parashoot-en_GB.ts parashoot-de.ts parashoot-ja.ts parashoot-no.ts
+TRANSLATABLES = $${HEADERS} $${SOURCES}
+
+help.files=$${QTOPIA_DEPOT_PATH}/help/html/parashoot*.html
+
+help.path=/help/html
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/parashoot.desktop
+desktop.path=/apps/Games
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/parashoot/*
+pics.path=/pics/parashoot
+INSTALLS+=desktop help
+PICS_INSTALLS+=pics

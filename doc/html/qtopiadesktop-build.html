@@ -1,0 +1,282 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/qtopiadesktop-build.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Instructions for Building Qtopia Desktop</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Instructions for Building Qtopia Desktop</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Windows
+</a>
+<li><a href="#3"> Linux
+</a>
+<li><a href="#4"> Mac OS X
+</a>
+<li><a href="#5"> Latin-Based Character Patch
+</a>
+<ul>
+<li><a href="#5-1"> Windows
+</a>
+<li><a href="#5-2"> Linux
+</a>
+<li><a href="#5-3"> Mac OS X
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document sets out instructions for the building of Qtopia Desktop.
+<p> Qtopia Desktop requires Qt 3.3.0 or later. If you want to use UTF-8 (non-latin1) filenames when sending
+Documents to Qtopia you will need apply a patch to Qt. Please see the section about the
+<a href="#latin">latin-based character patch</a> for details on how to modify your code.
+<p> <b><em>NOTE: If you build Qtopia Desktop with Qt 3.3.3 you will not be able to perform any synchronization. The exact cause of this problem is not known at this time so it is recommended that you do not use Qt 3.3.3.</em></b>
+<p> <h2> Windows
+</h2>
+<a name="2"></a><p> <ol type=1> 
+<li> Qt 3.3.0 and commercial source code for Qtopia are required to build Qtopia Desktop.
+Download and install Qt 3.3.0 for windows with default settings,
+(ie install to c:\qt&#92;3.3.0, substitute below if different)
+<li>              If QMAKESPEC has not been set, set QMAKESPEC
+appropriately for the compiler that is to be used.<br>
+For MS Visual C++:<br>
+<pre>
+                set QMAKESPEC=win32-msvc
+</pre>
+ 
+Otherwise if the newer .NET compiler is to be used:<br>
+<pre>
+                set QMAKESPEC=win32-msvc.net
+</pre>
+ 
+<p> <li>	    Compile Qt:<br>
+<pre>
+                set QTDIR=c:\qt\3.3.0
+                set PATH=%QTDIR%\bin;%PATH%
+                cd %QTDIR%
+                configure -thread -no-stl
+                nmake
+</pre>
+ 
+Build assistant.exe and qaxcontainer.dll:<br>
+<pre>
+                cd %QTDIR%\tools\assistant
+                nmake
+                cd %QTDIR%\extensions\activeqt
+                nmake
+</pre>
+ 
+Qt is now ready to be used with Qtopia Desktop
+<p> <li> Install Qtopia source to c:\qtopia&#92;2.1.0 (substitute below if different)
+<p> If QMAKESPEC has not been set, set QMAKESPEC
+appropriately for the compiler that is to be used.<br>
+For MS Visual C++:<br>
+<pre>
+                set QMAKESPEC=win32-msvc
+</pre>
+ 
+Otherwise if the newer .NET compiler is to be used:<br>
+<pre>
+                set QMAKESPEC=win32-msvc.net
+</pre>
+ 
+Qtopia also provides a spec for the Standard edition of the .NET compiler
+(reduces the number of warnings due to missing compiler features)<br>
+<pre>
+                set QMAKESPEC=win32-msvc.net_std
+</pre>
+ 
+<p> <li> Compile Qtopia Desktop and all of its plugins:<br>
+<pre>
+                set DQTDIR=c:\qt\3.3.0
+                set QPEDIR=c:\qtopia\2.1.0
+                set PATH=%QPEDIR%\bin;%DQTDIR%\bin;%PATH%
+                cd %QPEDIR%
+                scripts\mkwindows-qtopiadesktop.bat
+</pre>
+ 
+Qtopia Desktop is now "installed" in %QPEDIR%\dimage\opt\Qtopia<br>
+Please read %QPEDIR%\src\qtopiadesktop\dist\README if you wish to make an installer.<br>
+</ol>
+<p> <h2> Linux
+</h2>
+<a name="3"></a><p> <ol type=1>
+<li> Qt 3.3.0 and commercial source code for Qtopia are required to build Qtopia Desktop.
+Download and extract Qt 3.3.0 for X11.
+<li>    Compile qt:<br>
+<pre>
+                tar xfz qt-x11-commercial-3.3.0.tar.gz
+                cd qt-x11-commercial-3.3.0
+                export QTDIR=$PWD
+                export PATH=$QTDIR/bin:$PATH
+                ./configure -thread
+                make
+                cd ..
+</pre>
+ 
+<li> Extract Qtopia source package for example to ~/qtopia-source-2.1.0
+(substitute below if different)
+<li> Compile Qtopia Desktop as follows:<br>
+<pre>
+                tar xfz qtopia-source-2.1.0.tar.gz
+                cd qtopia-source-2.1.0
+                export QPEDIR=$PWD
+                export DQTDIR=$QTDIR
+                export PATH=$QPEDIR/bin:$DQTDIR/bin:$PATH
+                export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
+                ./configure -no-qtopia
+                make
+                rm -rf dimage
+                make install
+</pre>
+ 
+Qtopia Desktop is now "installed" in $QPEDIR/dimage/opt/Qtopia
+</ol>
+<p> <h2> Mac OS X
+</h2>
+<a name="4"></a><p> <ol type=1>
+<li> Qt 3.3.0 and commercial source code for Qtopia are required to build Qtopia Desktop.
+Download and extract Qt 3.3.0 for Mac OS X.
+<li>    Compile qt:<br>
+<pre>
+                tar xfz qt-mac-commercial-3.3.0.tar.gz
+                cd qt-mac-commercial-3.3.0
+                export QTDIR=$PWD
+                export PATH=$QTDIR/bin:$PATH
+                export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+                export DYLD_LIBRARY_PATH=$QTDIR/lib:$DYLD_LIBRARY_PATH
+                ./configure -thread
+                make
+                cd ..
+</pre>
+ 
+<p> If you are building Qtopia Desktop as a user that is not logged into the (GUI) console
+you will need to allow uic to talk to the Window Server.<br>
+<pre>
+                cd qt-mac-commercial-3.3.0/bin
+                sudo chown root uic
+                sudo chown 4755 uic
+                sudo install_name_tool -change libqt-mt.3.dylib /path/to/qt-mac-commercial-3.3.0/lib/libqt-mt.3.dylib uic
+</pre>
+ 
+Note that you will need to be an administrator to do this. Sudo will prompt you for your password.
+<p> <li> Extract Qtopia source package for example to ~/qtopia-source-2.1.0
+(substitute below if different)
+<li> Compile Qtopia Desktop as follows:<br>
+<pre>
+                tar xfz qtopia-source-2.1.0.tar.gz
+                cd qtopia-source-2.1.0
+                export QPEDIR=$PWD
+                export DQTDIR=$QTDIR
+                export PATH=$QPEDIR/bin:$DQTDIR/bin:$PATH
+                export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
+                export DYLD_LIBRARY_PATH=$QPEDIR/lib:$DYLD_LIBRARY_PATH
+                scripts/mkmacosx-qtopiadesktop
+</pre>
+ 
+Qtopia Desktop is now "installed" in $QPEDIR/Qtopia Desktop.app
+</ol>
+<p> <a name="latin"></a>
+<h2> Latin-Based Character Patch
+</h2>
+<a name="5"></a><p> This section only applies to customers who are building their own Qtopia Desktop release.
+<p> All versions of Qtopia Desktop built with Qt 3.3.2 or earlier cannot transfer non-latin1 files to a Qtopia device. This is of particular relevance to developers using non-latin-based alphabets. Qtopia Desktop will continue to work with Qt 3.3.2 or earlier but will not use UTF-8 for filenames.
+<p> Qtopia Desktop automatically uses UTF-8 for filenames with Qt 3.3.3 and above (Qt 3.3.4 for Windows).
+<p> Windows users with Qt 3.3.3 need to apply <a href="win32-qt333-ftp-codec.patch">win32-qt333-ftp-codec.patch</a>.
+<p> Users with Qt 3.3.2 or earlier need to apply <a href="qt330-ftp-codec.patch">qt330-ftp-codec.patch</a>. This patch was made for Qt 3.3.0 so it may need to be manually applied to 3.3.1 and 3.3.2.
+<p> When you run Qtopia Desktop it will output a line of debug saying either:
+"Qtopia Desktop can use UTF-8 filenames" or "Qtopia Desktop can only use ASCII filenames".
+<p> Windows users will need to install debugview (<a href="http://www.sysinternals.com/ntw2k/freeware/debugview.shtml">http://www.sysinternals.com/ntw2k/freeware/debugview.shtml</a>) to see the debug output.
+<p> Mac OS X users will need to open <tt>/Applications/Utilities/Console.app</tt> or view <tt>/Library/Logs/Console/&lt;username&gt;/console.log</tt> to see the debug output.
+<p> <h3> Windows
+</h3>
+<a name="5-1"></a><p> You will also need the <em>patch</em> utility. This can be downloaded from <a href="http://unxutils.sourceforge.net/">http://unxutils.sourceforge.net/</a>.
+Place <tt>patch.exe</tt> somewhere that is in your path (eg. C:\Windows).
+<p> <ul>
+<li>	    To install the Qt 3.3.2 and earlier patch:<br>
+<pre>
+                cd %QTDIR%
+                patch.exe -p1 &lt;%QPEDIR%\scripts\qt330-ftp-codec.patch
+</pre>
+ 
+<p> <li>	    To install the Qt 3.3.3 patch:<br>
+<pre>
+                cd %QTDIR%
+                patch.exe -p1 &lt;%QPEDIR%\scripts\win32-qt333-ftp-codec.patch
+</pre>
+ 
+</ul>
+<p> Qt must be rebuilt after applying the patch. The easiest way is probably to setup the Qtopia Desktop build environment and run:
+<p> <pre>
+                cd %QTDIR%
+                nmake
+                cd %QPEDIR%
+                config.status
+                nmake
+                nmake install
+</pre>
+ 
+<p> This will rebuild Qt and Qtopia Desktop.
+<p> <h3> Linux
+</h3>
+<a name="5-2"></a><p> Ensure patch is installed on your system. You might need to use your setup program to install patch.
+<p> <ul>
+<li>	    To install the Qt 3.3.2 and earlier patch:<br>
+<pre>
+                cd $QTDIR
+                patch -p1 &lt;$QPEDIR/scripts/qt330-ftp-codec.patch
+</pre>
+ 
+</ul>
+<p> <h3> Mac OS X
+</h3>
+<a name="5-3"></a><p> <ul>
+<li>	    To install the Qt 3.3.2 and earlier patch:<br>
+<pre>
+                cd $QTDIR
+                patch -p1 &lt;$QPEDIR/scripts/qt330-ftp-codec.patch
+</pre>
+ 
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
+</table></div></address></body>
+</html>

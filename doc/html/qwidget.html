@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -170,7 +172,7 @@ Inherits <a href="qobject.html">QObject</a> and <a href="qpaintdevice.html">QPai
 <li><div class="fn">virtual void <a href="#8169cb"><b>setAcceptDrops</b></a> ( bool on ) </div>
 <li><div class="fn">virtual void <a href="#efa8f9"><b>setAutoMask</b></a> ( bool ) </div>
 <li><div class="fn">bool <a href="#898d4a"><b>autoMask</b></a> () const</div>
-<li><div class="fn">enum <a href="#BackgroundOrigin"><b>BackgroundOrigin</b></a> { WidgetOrigin, ParentOrigin }</div>
+<li><div class="fn">enum <a href="#BackgroundOrigin"><b>BackgroundOrigin</b></a> { WidgetOrigin, ParentOrigin, WindowOrigin, AncestorOrigin }</div>
 <li><div class="fn">void <a href="#67b25b"><b>setBackgroundOrigin</b></a> ( BackgroundOrigin ) </div>
 <li><div class="fn">BackgroundOrigin <a href="#456fbe"><b>backgroundOrigin</b></a> () const</div>
 <li><div class="fn">virtual bool <a href="#eeb880"><b>customWhatsThis</b></a> () const</div>
@@ -530,9 +532,9 @@ If it is 0 (the default), the new widget will be a top-level window.
 If not, it will be a child of <em>parent,</em> and be constrained by <em>parent's</em> geometry (Unless you specify <code>WType_TopLevel</code> as
 widget flag).
 <li><code>const char *name = 0</code> is the widget name of the new
-widget.  You can access it using <a href="qobject.html#e90504">name</a>().  The widget name is little
+widget.  You can access it using <a href="qobject.html#53d9cc">name</a>().  The widget name is little
 used by programmers but is quite useful with GUI builders such as the
-Qt Designer (you can name a widget in the builder, and <a href="qobject.html#7f8e37">connect</a>() to
+Qt Designer (you can name a widget in the builder, and <a href="qobject.html#fbde73">connect</a>() to
 it by name in your code).  The <a href="qobject.html#c21cea">dumpObjectTree</a>() debugging function also
 uses it.
 <li><code>WFlags f = 0</code> (where available) sets the <a
@@ -639,21 +641,21 @@ the title bar and icon respectively.
 <p></ul>
 <p>See also  <a href="qevent.html">QEvent</a>, <a href="qpainter.html">QPainter</a>, <a href="qgridlayout.html">QGridLayout</a> and <a href="qboxlayout.html">QBoxLayout</a>.
 <p>Examples:
+ <a href="splitter-splitter-cpp.html#QWidget">splitter/splitter.cpp</a>
  <a href="iconview-main-cpp.html#QWidget">iconview/main.cpp</a>
- <a href="drawlines-connect-cpp.html#QWidget">drawlines/connect.cpp</a>
  <a href="mainlyQt-editor-cpp.html#QWidget">mainlyQt/editor.cpp</a>
- <a href="xform-xform-cpp.html#QWidget">xform/xform.cpp</a>
- <a href="layout-layout-cpp.html#QWidget">layout/layout.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#QWidget">scrollview/scrollview.cpp</a>
  <a href="i18n-main-cpp.html#QWidget">i18n/main.cpp</a>
- <a href="popup-popup-cpp.html#QWidget">popup/popup.cpp</a>
- <a href="menu-menu-cpp.html#QWidget">menu/menu.cpp</a>
+ <a href="drawlines-connect-cpp.html#QWidget">drawlines/connect.cpp</a>
+ <a href="layout-layout-cpp.html#QWidget">layout/layout.cpp</a>
+ <a href="forever-forever-cpp.html#QWidget">forever/forever.cpp</a>
+ <a href="customlayout-main-cpp.html#QWidget">customlayout/main.cpp</a>
  <a href="progress-progress-cpp.html#QWidget">progress/progress.cpp</a>
  <a href="qmag-qmag-cpp.html#QWidget">qmag/qmag.cpp</a>
- <a href="splitter-splitter-cpp.html#QWidget">splitter/splitter.cpp</a>
- <a href="forever-forever-cpp.html#QWidget">forever/forever.cpp</a>
+ <a href="menu-menu-cpp.html#QWidget">menu/menu.cpp</a>
+ <a href="xform-xform-cpp.html#QWidget">xform/xform.cpp</a>
+ <a href="popup-popup-cpp.html#QWidget">popup/popup.cpp</a>
  <a href="desktop-desktop-cpp.html#QWidget">desktop/desktop.cpp</a>
- <a href="scrollview-scrollview-cpp.html#QWidget">scrollview/scrollview.cpp</a>
- <a href="customlayout-main-cpp.html#QWidget">customlayout/main.cpp</a>
 
 <hr><h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="BackgroundMode">QWidget::BackgroundMode</a></h3>
@@ -766,8 +768,8 @@ implicitly by <a href="#e84bbe">setBackgroundMode</a>(), but can also be set exp
 then the return value of this function is indeterminate.
 <p>See also  <a href="#c09181">setBackgroundColor</a>(), <a href="#c9040d">foregroundColor</a>(), <a href="#d92bf4">colorGroup</a>() and <a href="#370880">palette</a>().
 <p>Examples:
- <a href="grapher-grapher-cpp.html#backgroundColor">grapher/grapher.cpp</a>
  <a href="xform-xform-cpp.html#backgroundColor">xform/xform.cpp</a>
+ <a href="grapher-grapher-cpp.html#backgroundColor">grapher/grapher.cpp</a>
 <h3 class="fn">void <a name="f146a8"></a>QWidget::backgroundColorChange ( const <a href="qcolor.html">QColor</a> &amp; oldBackgroundColor ) <code>[virtual protected]</code></h3>
 <p>This virtual function is called from <a href="#c09181">setBackgroundColor</a>().
 <em>oldBackgroundColor</em> is the previous background color; you can get the new
@@ -859,7 +861,7 @@ widget close events.
 <p>The default implementation calls e->accept(), which hides this widget.
 See the <a href="qcloseevent.html">QCloseEvent</a> documentation for more details.
 <p>See also  <a href="#6ff658">event</a>(), <a href="#410481">hide</a>(), <a href="#3d9c87">close</a>() and <a href="qcloseevent.html">QCloseEvent</a>.
-<p>Reimplemented in <a href="qdialog.html#21ef0e">QDialog</a>, <a href="qpopupmenu.html#711e61">QPopupMenu</a> and <a href="qprogressdialog.html#0d44b3">QProgressDialog</a>.
+<p>Reimplemented in <a href="qdialog.html#21ef0e">QDialog</a>, <a href="qprogressdialog.html#0d44b3">QProgressDialog</a> and <a href="qpopupmenu.html#711e61">QPopupMenu</a>.
 <h3 class="fn">const <a href="qcolorgroup.html">QColorGroup</a> &amp; <a name="d92bf4"></a>QWidget::colorGroup () const</h3>
 <p>Returns the current color group of the widget palette.
 <p>The color group is determined by the state of the widget.
@@ -922,7 +924,7 @@ mouse enters this widget.
 <p>See the <a href="dnd.html">Drag-and-drop documentation</a> for
 an overview of how to provide drag-and-drop in your application.
 <p>See also  <a href="qtextdrag.html">QTextDrag</a>, <a href="qimagedrag.html">QImageDrag</a> and <a href="qdragenterevent.html">QDragEnterEvent</a>.
-<p>Reimplemented in <a href="qmultilineedit.html#50a11a">QMultiLineEdit</a> and <a href="qlineedit.html#c806fb">QLineEdit</a>.
+<p>Reimplemented in <a href="qlineedit.html#c806fb">QLineEdit</a> and <a href="qmultilineedit.html#50a11a">QMultiLineEdit</a>.
 <h3 class="fn">void <a name="fdd48c"></a>QWidget::dragLeaveEvent ( <a href="qdragleaveevent.html">QDragLeaveEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler is called when a drag is in progress and the
 mouse leaves this widget.
@@ -1028,7 +1030,7 @@ that do not normally accept focus.)
 focus (see <a href="#3d478d">focusPolicy</a>()).  It also calls <a href="#04c503">setMicroFocusHint</a>(), hinting any
 system-specific input tools about the focus of the user's attention.
 <p>See also  <a href="#de664a">focusOutEvent</a>(), <a href="#f92b0f">setFocusPolicy</a>(), <a href="#0a4482">keyPressEvent</a>(), <a href="#4b620f">keyReleaseEvent</a>(), <a href="#6ff658">event</a>() and <a href="qfocusevent.html">QFocusEvent</a>.
-<p>Reimplemented in <a href="qlineedit.html#87c1db">QLineEdit</a>, <a href="qdial.html#d689dd">QDial</a>, <a href="qtable.html#1c075b">QTable</a>, <a href="qmenubar.html#94239f">QMenuBar</a>, <a href="qradiobutton.html#d1d657">QRadioButton</a>, <a href="qlistbox.html#71b09a">QListBox</a>, <a href="qtabbar.html#91c126">QTabBar</a>, <a href="qlistview.html#aeb5d4">QListView</a>, <a href="qpushbutton.html#19eb30">QPushButton</a>, <a href="qbutton.html#3d41e1">QButton</a>, <a href="qgroupbox.html#5b5439">QGroupBox</a>, <a href="qcombobox.html#f318de">QComboBox</a>, <a href="qpopupmenu.html#912b79">QPopupMenu</a>, <a href="qtextview.html#7dd99d">QTextView</a>, <a href="qslider.html#5be196">QSlider</a> and <a href="qmultilineedit.html#d0afd5">QMultiLineEdit</a>.
+<p>Reimplemented in <a href="qbutton.html#3d41e1">QButton</a>, <a href="qpopupmenu.html#912b79">QPopupMenu</a>, <a href="qtable.html#1c075b">QTable</a>, <a href="qmenubar.html#94239f">QMenuBar</a>, <a href="qcombobox.html#f318de">QComboBox</a>, <a href="qdial.html#d689dd">QDial</a>, <a href="qtabbar.html#91c126">QTabBar</a>, <a href="qtextview.html#7dd99d">QTextView</a>, <a href="qgroupbox.html#5b5439">QGroupBox</a>, <a href="qslider.html#5be196">QSlider</a>, <a href="qradiobutton.html#d1d657">QRadioButton</a>, <a href="qlistview.html#aeb5d4">QListView</a>, <a href="qpushbutton.html#19eb30">QPushButton</a>, <a href="qlineedit.html#87c1db">QLineEdit</a>, <a href="qlistbox.html#71b09a">QListBox</a> and <a href="qmultilineedit.html#d0afd5">QMultiLineEdit</a>.
 <h3 class="fn">bool <a name="8d74a1"></a>QWidget::focusNextPrevChild ( bool next ) <code>[virtual protected]</code></h3>
 <p>Finds a new widget to give the keyboard focus to, as appropriate for
 Tab/shift-Tab, and returns TRUE if is can find a new widget and
@@ -1044,7 +1046,7 @@ only the top-level widget will thus make the choice of where to redirect
 focus.  By overriding this method for an object, you thus gain control
 of focus traversal for all child widgets.
 <p>See also  <a href="#77742d">focusData</a>().
-<p>Reimplemented in <a href="qmultilineedit.html#e09aac">QMultiLineEdit</a>, <a href="qscrollview.html#f61ea5">QScrollView</a>, <a href="qpopupmenu.html#55b0a0">QPopupMenu</a> and <a href="qbutton.html#1568d9">QButton</a>.
+<p>Reimplemented in <a href="qscrollview.html#f61ea5">QScrollView</a>, <a href="qbutton.html#1568d9">QButton</a>, <a href="qmultilineedit.html#e09aac">QMultiLineEdit</a> and <a href="qpopupmenu.html#55b0a0">QPopupMenu</a>.
 <h3 class="fn">void <a name="de664a"></a>QWidget::focusOutEvent ( <a href="qfocusevent.html">QFocusEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 keyboard focus events (focus lost) for the widget.
@@ -1057,7 +1059,7 @@ that do not normally accept focus.)
 needs repainting.  It also calls <a href="#04c503">setMicroFocusHint</a>(), hinting any
 system-specific input tools about the focus of the user's attention.
 <p>See also  <a href="#21a4b8">focusInEvent</a>(), <a href="#f92b0f">setFocusPolicy</a>(), <a href="#0a4482">keyPressEvent</a>(), <a href="#4b620f">keyReleaseEvent</a>(), <a href="#6ff658">event</a>() and <a href="qfocusevent.html">QFocusEvent</a>.
-<p>Reimplemented in <a href="qtable.html#3bc5e9">QTable</a>, <a href="qlistbox.html#1d784e">QListBox</a>, <a href="qtextview.html#54892c">QTextView</a>, <a href="qlineedit.html#361367">QLineEdit</a>, <a href="qlistview.html#d35c06">QListView</a>, <a href="qbutton.html#2b50f0">QButton</a>, <a href="qslider.html#062221">QSlider</a>, <a href="qpushbutton.html#0953da">QPushButton</a>, <a href="qdial.html#5a764c">QDial</a>, <a href="qmultilineedit.html#e964c8">QMultiLineEdit</a>, <a href="qtabbar.html#51b4dc">QTabBar</a>, <a href="qpopupmenu.html#914706">QPopupMenu</a> and <a href="qmenubar.html#8e55b7">QMenuBar</a>.
+<p>Reimplemented in <a href="qtable.html#3bc5e9">QTable</a>, <a href="qlistview.html#d35c06">QListView</a>, <a href="qtabbar.html#51b4dc">QTabBar</a>, <a href="qpopupmenu.html#914706">QPopupMenu</a>, <a href="qtextview.html#54892c">QTextView</a>, <a href="qslider.html#062221">QSlider</a>, <a href="qlineedit.html#361367">QLineEdit</a>, <a href="qmenubar.html#8e55b7">QMenuBar</a>, <a href="qdial.html#5a764c">QDial</a>, <a href="qbutton.html#2b50f0">QButton</a>, <a href="qmultilineedit.html#e964c8">QMultiLineEdit</a>, <a href="qpushbutton.html#0953da">QPushButton</a> and <a href="qlistbox.html#1d784e">QListBox</a>.
 <h3 class="fn">QWidget::FocusPolicy <a name="3d478d"></a>QWidget::focusPolicy() const</h3>
 <p>Returns <code>QWidget::TabFocus</code> if the widget accepts focus by tabbing, <code>QWidget::ClickFocus</code> if the widget accepts focus by clicking, <code>QWidget::StrongFocus</code> if it accepts both and <code>QWidget::NoFocus</code> if it
 does not accept focus at all.
@@ -1078,9 +1080,9 @@ font for the widget class, the parent's font or - if this widget is
 a toplevel widget - the default application font.
 <p>See also  <a href="#090d60">setFont</a>(), <a href="#205244">fontInfo</a>(), <a href="#386569">fontMetrics</a>() and <a href="qapplication.html#f31495">QApplication::font</a>().
 <p>Examples:
- <a href="grapher-grapher-cpp.html#font">grapher/grapher.cpp</a>
- <a href="xform-xform-cpp.html#font">xform/xform.cpp</a>
  <a href="menu-menu-cpp.html#font">menu/menu.cpp</a>
+ <a href="xform-xform-cpp.html#font">xform/xform.cpp</a>
+ <a href="grapher-grapher-cpp.html#font">grapher/grapher.cpp</a>
 <h3 class="fn">void <a name="ac5c83"></a>QWidget::fontChange ( const <a href="qfont.html">QFont</a> &amp; oldFont ) <code>[virtual protected]</code></h3>
 <p>This virtual function is called from <a href="#090d60">setFont</a>().  <em>oldFont</em> is the
 previous font; you can get the new font from <a href="#167922">font</a>().
@@ -1090,7 +1092,7 @@ changes.  You will almost certainly need to update the widget using
 <p>The default implementation updates the widget including its
 geometry.
 <p>See also  <a href="#090d60">setFont</a>(), <a href="#167922">font</a>(), <a href="#a66a88">update</a>() and <a href="#5f7c35">updateGeometry</a>().
-<p>Reimplemented in <a href="qmenubar.html#15ea9b">QMenuBar</a>, <a href="qgroupbox.html#25b1c0">QGroupBox</a> and <a href="qlabel.html#be4345">QLabel</a>.
+<p>Reimplemented in <a href="qlabel.html#be4345">QLabel</a>, <a href="qmenubar.html#15ea9b">QMenuBar</a> and <a href="qgroupbox.html#25b1c0">QGroupBox</a>.
 <h3 class="fn"><a href="qfontinfo.html">QFontInfo</a> <a name="205244"></a>QWidget::fontInfo () const</h3>
 <p>Returns the font info for the widget's current font.
 Equivalent to QFontInto(widget-><a href="#167922">font</a>()).
@@ -1100,9 +1102,9 @@ Equivalent to QFontInto(widget-><a href="#167922">font</a>()).
 Equivalent to <a href="qfontmetrics.html">QFontMetrics</a>(widget-><a href="#167922">font</a>()).
 <p>See also  <a href="#167922">font</a>(), <a href="#205244">fontInfo</a>() and <a href="#090d60">setFont</a>().
 <p>Examples:
- <a href="xform-xform-cpp.html#fontMetrics">xform/xform.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#fontMetrics">drawdemo/drawdemo.cpp</a>
  <a href="qmag-qmag-cpp.html#fontMetrics">qmag/qmag.cpp</a>
+ <a href="xform-xform-cpp.html#fontMetrics">xform/xform.cpp</a>
 <h3 class="fn">QWidget::PropagationMode <a name="c660eb"></a>QWidget::fontPropagation() const</h3>
 <p><b>This function is obsolete.</b> It is provided to keep old source working, and will probably be removed in a future version of Qt.  We strongly advise against using it in new code.<p>
 <p>The return value is meaningless
@@ -1170,26 +1172,26 @@ if mouse tracking is disabled.
 for an overview of geometry issues with top-level widgets.
 <p>See also  <a href="#e515c8">geometry</a>(), <a href="#2edab1">width</a>() and <a href="#50b75e">size</a>().
 <p>Examples:
- <a href="grapher-grapher-cpp.html#height">grapher/grapher.cpp</a>
- <a href="xform-xform-cpp.html#height">xform/xform.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#height">drawdemo/drawdemo.cpp</a>
  <a href="qmag-qmag-cpp.html#height">qmag/qmag.cpp</a>
+ <a href="xform-xform-cpp.html#height">xform/xform.cpp</a>
+ <a href="grapher-grapher-cpp.html#height">grapher/grapher.cpp</a>
 <h3 class="fn">int <a name="1a2d58"></a>QWidget::heightForWidth ( int w ) const <code>[virtual]</code></h3>
 <p>Returns the preferred height for this widget, given the width <em>w.</em>
 The default implementation returns 0, indicating that the preferred
 height does not depend on the width.<p><b>Warning:</b> Does not look at the widget's layout.
-<p>Reimplemented in <a href="qmenubar.html#ecc869">QMenuBar</a>, <a href="qtextview.html#7b0897">QTextView</a> and <a href="qlabel.html#b651ea">QLabel</a>.
+<p>Reimplemented in <a href="qlabel.html#b651ea">QLabel</a>, <a href="qmenubar.html#ecc869">QMenuBar</a> and <a href="qtextview.html#7b0897">QTextView</a>.
 <h3 class="fn">void <a name="410481"></a>QWidget::hide () <code>[virtual slot]</code></h3>
 <p>Hides the widget.
 <p>You almost never have to reimplement this function. If you need to
 do something after a widget is hidden, use <a href="#ab7e05">hideEvent</a>() instead.
 <p>See also  isHhideEvent(), <a href="#4fdbf8">isHidden</a>(), <a href="#200ee5">show</a>(), <a href="#c10123">showMinimized</a>(), <a href="#4d2aa7">isVisible</a>() and <a href="#3d9c87">close</a>().
 <p>Examples:
+ <a href="scrollview-scrollview-cpp.html#hide">scrollview/scrollview.cpp</a>
+ <a href="progress-progress-cpp.html#QWidget::hide">progress/progress.cpp</a>
  <a href="xform-xform-cpp.html#hide">xform/xform.cpp</a>
  <a href="popup-popup-cpp.html#hide">popup/popup.cpp</a>
- <a href="progress-progress-cpp.html#QWidget::hide">progress/progress.cpp</a>
- <a href="scrollview-scrollview-cpp.html#hide">scrollview/scrollview.cpp</a>
-<p>Reimplemented in <a href="qtoolbar.html#9f9323">QToolBar</a>, <a href="qdialog.html#74d5c5">QDialog</a>, <a href="qpopupmenu.html#2d90fa">QPopupMenu</a> and <a href="qmenubar.html#64310d">QMenuBar</a>.
+<p>Reimplemented in <a href="qtoolbar.html#9f9323">QToolBar</a>, <a href="qmenubar.html#64310d">QMenuBar</a>, <a href="qdialog.html#74d5c5">QDialog</a> and <a href="qpopupmenu.html#2d90fa">QPopupMenu</a>.
 <h3 class="fn">void <a name="ab7e05"></a>QWidget::hideEvent ( <a href="qhideevent.html">QHideEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 widget hide events.
@@ -1328,7 +1330,7 @@ parent can interpret it.
 <p>The default implementation closes popup widgets if you hit
 escape.  Otherwise the event is ignored.
 <p>See also  <a href="#4b620f">keyReleaseEvent</a>(), <a href="qkeyevent.html#d9375a">QKeyEvent::ignore</a>(), <a href="#f92b0f">setFocusPolicy</a>(), <a href="#21a4b8">focusInEvent</a>(), <a href="#de664a">focusOutEvent</a>(), <a href="#6ff658">event</a>() and <a href="qkeyevent.html">QKeyEvent</a>.
-<p>Reimplemented in <a href="qtabbar.html#2e33c6">QTabBar</a>, <a href="qpopupmenu.html#eef3e4">QPopupMenu</a>, <a href="qbutton.html#029bf3">QButton</a>, <a href="qfiledialog.html#6ac082">QFileDialog</a>, <a href="qtextbrowser.html#9010ef">QTextBrowser</a>, <a href="qlineedit.html#169fc6">QLineEdit</a>, <a href="qdialog.html#8acb39">QDialog</a>, <a href="qtable.html#979515">QTable</a>, <a href="qtextview.html#bb07eb">QTextView</a>, <a href="qdial.html#5f6c63">QDial</a>, <a href="qmessagebox.html#9b0ada">QMessageBox</a>, <a href="qlistbox.html#ade87c">QListBox</a>, <a href="qmenubar.html#a93e50">QMenuBar</a>, <a href="qslider.html#c84ef2">QSlider</a>, <a href="qlistview.html#18b362">QListView</a>, <a href="qmultilineedit.html#ea13f2">QMultiLineEdit</a>, <a href="qscrollbar.html#d42206">QScrollBar</a> and <a href="qcombobox.html#a5e157">QComboBox</a>.
+<p>Reimplemented in <a href="qslider.html#c84ef2">QSlider</a>, <a href="qmultilineedit.html#ea13f2">QMultiLineEdit</a>, <a href="qmessagebox.html#9b0ada">QMessageBox</a>, <a href="qbutton.html#029bf3">QButton</a>, <a href="qtable.html#979515">QTable</a>, <a href="qpopupmenu.html#eef3e4">QPopupMenu</a>, <a href="qtabbar.html#2e33c6">QTabBar</a>, <a href="qdialog.html#8acb39">QDialog</a>, <a href="qmenubar.html#a93e50">QMenuBar</a>, <a href="qdial.html#5f6c63">QDial</a>, <a href="qscrollbar.html#d42206">QScrollBar</a>, <a href="qlistbox.html#ade87c">QListBox</a>, <a href="qtextview.html#bb07eb">QTextView</a>, <a href="qlineedit.html#169fc6">QLineEdit</a>, <a href="qcombobox.html#a5e157">QComboBox</a>, <a href="qfiledialog.html#6ac082">QFileDialog</a>, <a href="qlistview.html#18b362">QListView</a> and <a href="qtextbrowser.html#9010ef">QTextBrowser</a>.
 <h3 class="fn">void <a name="4b620f"></a>QWidget::keyReleaseEvent ( <a href="qkeyevent.html">QKeyEvent</a> * e ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 key release events for the widget.
@@ -1357,7 +1359,7 @@ widget leave events.
 <p>A leave event is sent to the widget when the mouse cursor leaves
 the widget.
 <p>See also  <a href="#5d1d18">enterEvent</a>(), <a href="#a51d92">mouseMoveEvent</a>() and <a href="#6ff658">event</a>().
-<p>Reimplemented in <a href="qlineedit.html#16e9f1">QLineEdit</a>, <a href="qspinbox.html#74af0b">QSpinBox</a>, <a href="qmenubar.html#15f36a">QMenuBar</a>, <a href="qtoolbutton.html#a3aaa6">QToolButton</a> and <a href="qmultilineedit.html#0bfb04">QMultiLineEdit</a>.
+<p>Reimplemented in <a href="qmenubar.html#15f36a">QMenuBar</a>, <a href="qmultilineedit.html#0bfb04">QMultiLineEdit</a>, <a href="qspinbox.html#74af0b">QSpinBox</a>, <a href="qtoolbutton.html#a3aaa6">QToolButton</a> and <a href="qlineedit.html#16e9f1">QLineEdit</a>.
 <h3 class="fn">void <a name="afe0aa"></a>QWidget::lower () <code>[slot]</code></h3>
 <p>Lowers the widget to the bottom of the parent widget's stack.
 <p>If there are siblings of this widget that overlap it on the screen, this
@@ -1426,7 +1428,7 @@ size if no minimum size is recommended.
 <p>The default implementation returns an invalid size if there is no layout
 for this widget, the layout's minimum size otherwise.
 <p>See also  <a href="qsize.html#7336d9">QSize::isValid</a>(), <a href="#8fcbbe">resize</a>(), <a href="#c0b5fb">setMinimumSize</a>() and <a href="#23726d">sizePolicy</a>().
-<p>Reimplemented in <a href="qlineedit.html#2ed685">QLineEdit</a>, <a href="qtabbar.html#9536f1">QTabBar</a>, <a href="qlistbox.html#31647d">QListBox</a>, <a href="qdialog.html#e53930">QDialog</a>, <a href="qmainwindow.html#4a3e2c">QMainWindow</a>, <a href="qlabel.html#83b7f9">QLabel</a>, <a href="qsplitter.html#68adc8">QSplitter</a>, <a href="qlistview.html#69946b">QListView</a>, <a href="qscrollview.html#b82dff">QScrollView</a>, <a href="qtoolbar.html#cf462a">QToolBar</a>, <a href="qmenubar.html#33423d">QMenuBar</a>, <a href="qtabwidget.html#808987">QTabWidget</a>, <a href="qslider.html#dfd60a">QSlider</a>, <a href="qdial.html#6662c3">QDial</a>, <a href="qprogressbar.html#c7a8ed">QProgressBar</a>, <a href="qiconview.html#4789a5">QIconView</a>, <a href="qwidgetstack.html#e95306">QWidgetStack</a> and <a href="qmultilineedit.html#4be07b">QMultiLineEdit</a>.
+<p>Reimplemented in <a href="qlabel.html#83b7f9">QLabel</a>, <a href="qprogressbar.html#c7a8ed">QProgressBar</a>, <a href="qwidgetstack.html#e95306">QWidgetStack</a>, <a href="qtabbar.html#9536f1">QTabBar</a>, <a href="qmultilineedit.html#4be07b">QMultiLineEdit</a>, <a href="qlistbox.html#31647d">QListBox</a>, <a href="qlistview.html#69946b">QListView</a>, <a href="qmainwindow.html#4a3e2c">QMainWindow</a>, <a href="qiconview.html#4789a5">QIconView</a>, <a href="qmenubar.html#33423d">QMenuBar</a>, <a href="qsplitter.html#68adc8">QSplitter</a>, <a href="qtoolbar.html#cf462a">QToolBar</a>, <a href="qscrollview.html#b82dff">QScrollView</a>, <a href="qlineedit.html#2ed685">QLineEdit</a>, <a href="qdialog.html#e53930">QDialog</a>, <a href="qslider.html#dfd60a">QSlider</a>, <a href="qdial.html#6662c3">QDial</a> and <a href="qtabwidget.html#808987">QTabWidget</a>.
 <h3 class="fn">int <a name="3dae47"></a>QWidget::minimumWidth () const</h3>
 <p>Returns the widget's minimum width.
 <p>See also  <a href="#b24d94">minimumSize</a>() and <a href="#f115b7">minimumHeight</a>().
@@ -1437,7 +1439,7 @@ mouse double click events for the widget.
 <p>Note that the widgets gets a <a href="#2ecc04">mousePressEvent</a>() and a <a href="#9aa77f">mouseReleaseEvent</a>()
 before the mouseDoubleClickEvent().
 <p>See also  <a href="#2ecc04">mousePressEvent</a>(), <a href="#9aa77f">mouseReleaseEvent</a>(), <a href="#a51d92">mouseMoveEvent</a>(), <a href="#6ff658">event</a>() and <a href="qmouseevent.html">QMouseEvent</a>.
-<p>Reimplemented in <a href="qlistbox.html#27ecc4">QListBox</a>, <a href="qmultilineedit.html#385d3d">QMultiLineEdit</a>, <a href="qcombobox.html#011a20">QComboBox</a> and <a href="qlineedit.html#2f50c3">QLineEdit</a>.
+<p>Reimplemented in <a href="qlistbox.html#27ecc4">QListBox</a>, <a href="qcombobox.html#011a20">QComboBox</a>, <a href="qmultilineedit.html#385d3d">QMultiLineEdit</a> and <a href="qlineedit.html#2f50c3">QLineEdit</a>.
 <h3 class="fn">QWidget * <a name="fbd34e"></a>QWidget::mouseGrabber () <code>[static]</code></h3>
 <p>Returns a pointer to the widget that is currently grabbing the
 mouse input.
@@ -1457,7 +1459,7 @@ the same as the position of the last mouse move event, but it might be
 different if the user moves and clicks the mouse fast.  This is
 a feature of the underlying window system, not Qt.
 <p>See also  <a href="#36406c">setMouseTracking</a>(), <a href="#2ecc04">mousePressEvent</a>(), <a href="#9aa77f">mouseReleaseEvent</a>(), <a href="#e36586">mouseDoubleClickEvent</a>(), <a href="#6ff658">event</a>() and <a href="qmouseevent.html">QMouseEvent</a>.
-<p>Reimplemented in <a href="qmenubar.html#50b34a">QMenuBar</a>, <a href="qheader.html#286de9">QHeader</a>, <a href="qpopupmenu.html#113f0f">QPopupMenu</a>, <a href="qlineedit.html#81136d">QLineEdit</a>, <a href="qbutton.html#ce2be0">QButton</a>, <a href="qslider.html#5ccce3">QSlider</a>, <a href="qdial.html#d76b54">QDial</a>, <a href="qsizegrip.html#e7a7d0">QSizeGrip</a>, <a href="qlistbox.html#f8ff96">QListBox</a>, <a href="qcombobox.html#4d11c4">QComboBox</a>, <a href="qmultilineedit.html#7f486b">QMultiLineEdit</a> and <a href="qscrollbar.html#7b8d5a">QScrollBar</a>.
+<p>Reimplemented in <a href="qscrollbar.html#7b8d5a">QScrollBar</a>, <a href="qlineedit.html#81136d">QLineEdit</a>, <a href="qslider.html#5ccce3">QSlider</a>, <a href="qpopupmenu.html#113f0f">QPopupMenu</a>, <a href="qlistbox.html#f8ff96">QListBox</a>, <a href="qmenubar.html#50b34a">QMenuBar</a>, <a href="qbutton.html#ce2be0">QButton</a>, <a href="qdial.html#d76b54">QDial</a>, <a href="qcombobox.html#4d11c4">QComboBox</a>, <a href="qmultilineedit.html#7f486b">QMultiLineEdit</a>, <a href="qheader.html#286de9">QHeader</a> and <a href="qsizegrip.html#e7a7d0">QSizeGrip</a>.
 <h3 class="fn">void <a name="2ecc04"></a>QWidget::mousePressEvent ( <a href="qmouseevent.html">QMouseEvent</a> * e ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 mouse press events for the widget.
@@ -1469,12 +1471,12 @@ location and maybe more.
 when you click outside the window. For other widget types it does
 nothing.
 <p>See also  <a href="#9aa77f">mouseReleaseEvent</a>(), <a href="#e36586">mouseDoubleClickEvent</a>(), <a href="#a51d92">mouseMoveEvent</a>(), <a href="#6ff658">event</a>() and <a href="qmouseevent.html">QMouseEvent</a>.
-<p>Reimplemented in <a href="qheader.html#0598ab">QHeader</a>, <a href="qscrollbar.html#bde2f8">QScrollBar</a>, <a href="qcombobox.html#14ceab">QComboBox</a>, <a href="qslider.html#baae36">QSlider</a>, <a href="qpopupmenu.html#10529b">QPopupMenu</a>, <a href="qlistbox.html#93fa52">QListBox</a>, <a href="qsizegrip.html#f762fd">QSizeGrip</a>, <a href="qtabbar.html#39000e">QTabBar</a>, <a href="qmultilineedit.html#142b11">QMultiLineEdit</a>, <a href="qbutton.html#c7dcb7">QButton</a>, <a href="qdial.html#6a9724">QDial</a>, <a href="qlineedit.html#6b9b18">QLineEdit</a> and <a href="qmenubar.html#8a5755">QMenuBar</a>.
+<p>Reimplemented in <a href="qscrollbar.html#bde2f8">QScrollBar</a>, <a href="qcombobox.html#14ceab">QComboBox</a>, <a href="qmenubar.html#8a5755">QMenuBar</a>, <a href="qslider.html#baae36">QSlider</a>, <a href="qlineedit.html#6b9b18">QLineEdit</a>, <a href="qmultilineedit.html#142b11">QMultiLineEdit</a>, <a href="qpopupmenu.html#10529b">QPopupMenu</a>, <a href="qbutton.html#c7dcb7">QButton</a>, <a href="qtabbar.html#39000e">QTabBar</a>, <a href="qsizegrip.html#f762fd">QSizeGrip</a>, <a href="qlistbox.html#93fa52">QListBox</a>, <a href="qdial.html#6a9724">QDial</a> and <a href="qheader.html#0598ab">QHeader</a>.
 <h3 class="fn">void <a name="9aa77f"></a>QWidget::mouseReleaseEvent ( <a href="qmouseevent.html">QMouseEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 mouse release events for the widget.
 <p>See also  mouseReleaseEvent(), <a href="#e36586">mouseDoubleClickEvent</a>(), <a href="#a51d92">mouseMoveEvent</a>(), <a href="#6ff658">event</a>() and <a href="qmouseevent.html">QMouseEvent</a>.
-<p>Reimplemented in <a href="qscrollbar.html#c9f0c5">QScrollBar</a>, <a href="qlineedit.html#46e737">QLineEdit</a>, <a href="qdial.html#454939">QDial</a>, <a href="qlistbox.html#5653aa">QListBox</a>, <a href="qmultilineedit.html#5868c6">QMultiLineEdit</a>, <a href="qbutton.html#b1eb12">QButton</a>, <a href="qcombobox.html#7dbbb8">QComboBox</a>, <a href="qpopupmenu.html#565164">QPopupMenu</a>, <a href="qslider.html#600888">QSlider</a>, <a href="qmenubar.html#3c5f28">QMenuBar</a>, <a href="qtabbar.html#d2f1fa">QTabBar</a> and <a href="qheader.html#af0d56">QHeader</a>.
+<p>Reimplemented in <a href="qlineedit.html#46e737">QLineEdit</a>, <a href="qslider.html#600888">QSlider</a>, <a href="qpopupmenu.html#565164">QPopupMenu</a>, <a href="qmultilineedit.html#5868c6">QMultiLineEdit</a>, <a href="qbutton.html#b1eb12">QButton</a>, <a href="qheader.html#af0d56">QHeader</a>, <a href="qdial.html#454939">QDial</a>, <a href="qlistbox.html#5653aa">QListBox</a>, <a href="qtabbar.html#d2f1fa">QTabBar</a>, <a href="qmenubar.html#3c5f28">QMenuBar</a>, <a href="qscrollbar.html#c9f0c5">QScrollBar</a> and <a href="qcombobox.html#7dbbb8">QComboBox</a>.
 <h3 class="fn">void <a name="39930b"></a>QWidget::move ( int x, int y ) <code>[virtual slot]</code></h3>
 <p>Moves the widget to the position <em>(x,y)</em> relative to the parent widget and
 including the window frame.
@@ -1487,19 +1489,19 @@ may see infinite recursion.
 <p>See the <a href="geometry.html">Window Geometry documentation</a>
 for an overview of geometry issues with top-level widgets.
 <p>See also  <a href="#2691c9">pos</a>(), <a href="#8fcbbe">resize</a>(), <a href="#9ede68">setGeometry</a>() and <a href="#3f1b15">moveEvent</a>().
+<p>Reimplemented in <a href="qdialog.html#9c89b3">QDialog</a> and <a href="qsemimodal.html#7d084a">QSemiModal</a>.
+<h3 class="fn">void <a name="f753ed"></a>QWidget::move ( const <a href="qpoint.html">QPoint</a> &amp; ) <code>[slot]</code></h3>
+<p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <p>Examples:
  <a href="drawdemo-drawdemo-cpp.html#move">drawdemo/drawdemo.cpp</a>
  <a href="popup-popup-cpp.html#move">popup/popup.cpp</a>
-<p>Reimplemented in <a href="qdialog.html#9c89b3">QDialog</a>, <a href="qsemimodal.html#7d084a">QSemiModal</a> and <a href="qpushbutton.html#ede724">QPushButton</a>.
-<h3 class="fn">void <a name="f753ed"></a>QWidget::move ( const <a href="qpoint.html">QPoint</a> &amp; ) <code>[slot]</code></h3>
-<p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <h3 class="fn">void <a name="3f1b15"></a>QWidget::moveEvent ( <a href="qmoveevent.html">QMoveEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 widget move events.  When the widget receives this event, it is
 already at the new position.
 <p>The old position is accessible through <a href="qmoveevent.html#d57210">QMoveEvent::oldPos</a>().
 <p>See also  <a href="#7d375f">resizeEvent</a>(), <a href="#6ff658">event</a>(), <a href="#39930b">move</a>() and <a href="qmoveevent.html">QMoveEvent</a>.
-<p>Reimplemented in <a href="qxtwidget.html#562e6b">QXtWidget</a> and <a href="qtoolbutton.html#4023e0">QToolButton</a>.
+<p>Reimplemented in <a href="qtoolbutton.html#4023e0">QToolButton</a> and <a href="qxtwidget.html#562e6b">QXtWidget</a>.
 <h3 class="fn">bool <a name="dd9a8a"></a>QWidget::ownCursor () const</h3>
 <p>Returns whether the widget uses its own cursor or its parent
 widget's cursor.
@@ -1529,7 +1531,7 @@ of the <a href="qpaintevent.html">QPaintEvent</a> to avoid slow update.
 clipped to at most the area covered by the update region.
 <p><a href="#a66a88">update</a>() and repaint() can be used to force a paint event.
 <p>See also  <a href="#6ff658">event</a>(), <a href="#7569b1">repaint</a>(), <a href="#a66a88">update</a>(), <a href="qpainter.html">QPainter</a>, <a href="qpixmap.html">QPixmap</a> and <a href="qpaintevent.html">QPaintEvent</a>.
-<p>Reimplemented in <a href="qcombobox.html#f737b9">QComboBox</a>, <a href="qslider.html#d7e45a">QSlider</a>, <a href="qgroupbox.html#9ff0d8">QGroupBox</a>, <a href="qglwidget.html#660c7a">QGLWidget</a>, <a href="qscrollbar.html#772efb">QScrollBar</a>, <a href="qtabbar.html#f42e48">QTabBar</a>, <a href="qframe.html#963e1a">QFrame</a>, <a href="qheader.html#bd2f39">QHeader</a>, <a href="qlineedit.html#646620">QLineEdit</a>, <a href="qsizegrip.html#a329ca">QSizeGrip</a>, <a href="qstatusbar.html#98074a">QStatusBar</a>, <a href="qtableview.html#5343f7">QTableView</a>, <a href="qpopupmenu.html#46c526">QPopupMenu</a>, <a href="qdial.html#e69a38">QDial</a>, <a href="qtabdialog.html#0da949">QTabDialog</a>, <a href="qtoolbar.html#76ae69">QToolBar</a>, <a href="qmainwindow.html#8070de">QMainWindow</a> and <a href="qbutton.html#2b7b2a">QButton</a>.
+<p>Reimplemented in <a href="qgroupbox.html#9ff0d8">QGroupBox</a>, <a href="qslider.html#d7e45a">QSlider</a>, <a href="qdial.html#e69a38">QDial</a>, <a href="qglwidget.html#660c7a">QGLWidget</a>, <a href="qcombobox.html#f737b9">QComboBox</a>, <a href="qpopupmenu.html#46c526">QPopupMenu</a>, <a href="qtabbar.html#f42e48">QTabBar</a>, <a href="qsizegrip.html#a329ca">QSizeGrip</a>, <a href="qscrollbar.html#772efb">QScrollBar</a>, <a href="qlineedit.html#646620">QLineEdit</a>, <a href="qstatusbar.html#98074a">QStatusBar</a>, <a href="qtoolbar.html#76ae69">QToolBar</a>, <a href="qmainwindow.html#8070de">QMainWindow</a>, <a href="qtableview.html#5343f7">QTableView</a>, <a href="qframe.html#963e1a">QFrame</a>, <a href="qbutton.html#2b7b2a">QButton</a>, <a href="qtabdialog.html#0da949">QTabDialog</a> and <a href="qheader.html#bd2f39">QHeader</a>.
 <h3 class="fn">const <a href="qpalette.html">QPalette</a> &amp; <a name="370880"></a>QWidget::palette () const</h3>
 <p>Returns the widget palette.
 <p>As long as no special palette has been set, this is either a special
@@ -1585,10 +1587,10 @@ rect() equals <a href="qrect.html">QRect</a>(0,0,<a href="#2edab1">width</a>(),<
 for an overview of geometry issues with top-level widgets.
 <p>See also  <a href="#50b75e">size</a>().
 <p>Examples:
- <a href="grapher-grapher-cpp.html#rect">grapher/grapher.cpp</a>
- <a href="menu-menu-cpp.html#rect">menu/menu.cpp</a>
- <a href="desktop-desktop-cpp.html#rect">desktop/desktop.cpp</a>
  <a href="picture-picture-cpp.html#rect">picture/picture.cpp</a>
+ <a href="menu-menu-cpp.html#rect">menu/menu.cpp</a>
+ <a href="grapher-grapher-cpp.html#rect">grapher/grapher.cpp</a>
+ <a href="desktop-desktop-cpp.html#rect">desktop/desktop.cpp</a>
 <h3 class="fn">void <a name="0fadfc"></a>QWidget::releaseKeyboard ()</h3>
 <p>Releases the keyboard grab.
 <p>See also  <a href="#6830ee">grabKeyboard</a>(), <a href="#5bdd5f">grabMouse</a>() and <a href="#369707">releaseMouse</a>().
@@ -1609,8 +1611,8 @@ from paintEvent(), you may see infinite recursion. The update() function
 never generates recursion.
 <p>See also  <a href="#a66a88">update</a>(), <a href="#e3d821">paintEvent</a>(), <a href="#b37820">setUpdatesEnabled</a>() and <a href="#10cf79">erase</a>().
 <p>Examples:
- <a href="xform-xform-cpp.html#repaint">xform/xform.cpp</a>
  <a href="qmag-qmag-cpp.html#repaint">qmag/qmag.cpp</a>
+ <a href="xform-xform-cpp.html#repaint">xform/xform.cpp</a>
 <h3 class="fn">void <a name="898fb1"></a>QWidget::repaint ( int x, int y, int w, int h, bool erase=TRUE ) <code>[slot]</code></h3>
 <p>Repaints the widget directly by calling <a href="#e3d821">paintEvent</a>() directly,
 unless updates are disabled or the widget is hidden.
@@ -1627,13 +1629,13 @@ never generates recursion.
 <h3 class="fn">void <a name="d5cfc3"></a>QWidget::repaint () <code>[slot]</code></h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <p>This version erases and repaints the entire widget.
-<p>Examples:
- <a href="grapher-grapher-cpp.html#repaint">grapher/grapher.cpp</a>
 <h3 class="fn">void <a name="d8ac68"></a>QWidget::repaint ( bool erase ) <code>[slot]</code></h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <p>This version repaints the entire widget.
 <h3 class="fn">void <a name="138c7b"></a>QWidget::repaint ( const <a href="qrect.html">QRect</a> &amp; r, bool erase=TRUE ) <code>[slot]</code></h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
+<p>Examples:
+ <a href="grapher-grapher-cpp.html#repaint">grapher/grapher.cpp</a>
 <h3 class="fn">void <a name="4591aa"></a>QWidget::reparent ( QWidget * parent, WFlags f, const <a href="qpoint.html">QPoint</a> &amp; p, bool showIt=FALSE ) <code>[virtual]</code></h3>
 <p>Reparents the widget.  The widget gets a new <em>parent,</em> new widget
 flags (<em>f,</em> but as usual, use 0) at a new position in its new
@@ -1655,7 +1657,7 @@ on a higher abstraction level, <a href="qwizard.html">QWizard</a>.
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <p>A convenience version of reparent that does not take widget
 flags as argument.
-<p>Calls <a href="#4591aa">reparent</a>(<em>parent,</em> <a href="#825ef3">getWFlags</a>()&~WType_Mask, <em>p, showit</em> ).
+<p>Calls <a href="#4591aa">reparent</a>(<em>parent,</em> <a href="#825ef3">getWFlags</a>()&~WType_Mask, <em>p, showIt</em> ).
 <h3 class="fn">void <a name="8fcbbe"></a>QWidget::resize ( int w, int h ) <code>[virtual slot]</code></h3>
 <p>Resizes the widget to size <em>w</em> by <em>h</em> pixels.
 <p>If the widget is visible, it receives a <a href="#7d375f">resize
@@ -1667,32 +1669,32 @@ implementations call it.<p><b>Warning:</b> If you call resize() or <a href="#9ed
 you may see infinite recursion.
 <p>See also  <a href="#50b75e">size</a>(), <a href="#39930b">move</a>(), <a href="#9ede68">setGeometry</a>(), <a href="#7d375f">resizeEvent</a>(), <a href="#b24d94">minimumSize</a>() and <a href="#fe9f6b">maximumSize</a>().
 <p>Examples:
+ <a href="qwerty-main-cpp.html#resize">qwerty/main.cpp</a>
  <a href="aclock-main-cpp.html#resize">aclock/main.cpp</a>
- <a href="checklists-main-cpp.html#resize">checklists/main.cpp</a>
  <a href="buttongroups-main-cpp.html#resize">buttongroups/main.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#resize">drawdemo/drawdemo.cpp</a>
+ <a href="checklists-main-cpp.html#resize">checklists/main.cpp</a>
  <a href="qmag-qmag-cpp.html#resize">qmag/qmag.cpp</a>
- <a href="qwerty-main-cpp.html#resize">qwerty/main.cpp</a>
  <a href="rot13-rot13-cpp.html#resize">rot13/rot13.cpp</a>
-<p>Reimplemented in <a href="qsemimodal.html#ab35c9">QSemiModal</a> and <a href="qdialog.html#d7e510">QDialog</a>.
+<p>Reimplemented in <a href="qdialog.html#d7e510">QDialog</a> and <a href="qsemimodal.html#ab35c9">QSemiModal</a>.
 <h3 class="fn">void <a name="ff9d07"></a>QWidget::resize ( const <a href="qsize.html">QSize</a> &amp; ) <code>[slot]</code></h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <p>Examples:
- <a href="rangecontrols-main-cpp.html#resize">rangecontrols/main.cpp</a>
- <a href="themes-main-cpp.html#resize">themes/main.cpp</a>
  <a href="listviews-main-cpp.html#resize">listviews/main.cpp</a>
- <a href="dclock-main-cpp.html#resize">dclock/main.cpp</a>
- <a href="mainlyXt-editor-cpp.html#resize">mainlyXt/editor.cpp</a>
- <a href="drawdemo-drawdemo-cpp.html#resize">drawdemo/drawdemo.cpp</a>
- <a href="popup-popup-cpp.html#resize">popup/popup.cpp</a>
- <a href="fileiconview-main-cpp.html#resize">fileiconview/main.cpp</a>
- <a href="scribble-main-cpp.html#resize">scribble/main.cpp</a>
- <a href="qmag-qmag-cpp.html#resize">qmag/qmag.cpp</a>
+ <a href="rangecontrols-main-cpp.html#resize">rangecontrols/main.cpp</a>
  <a href="mainlyMotif-editor-cpp.html#resize">mainlyMotif/editor.cpp</a>
- <a href="richtext-main-cpp.html#resize">richtext/main.cpp</a>
+ <a href="dclock-main-cpp.html#resize">dclock/main.cpp</a>
  <a href="scrollview-scrollview-cpp.html#resize">scrollview/scrollview.cpp</a>
+ <a href="drawdemo-drawdemo-cpp.html#resize">drawdemo/drawdemo.cpp</a>
+ <a href="themes-main-cpp.html#resize">themes/main.cpp</a>
+ <a href="richtext-main-cpp.html#resize">richtext/main.cpp</a>
+ <a href="fileiconview-main-cpp.html#resize">fileiconview/main.cpp</a>
+ <a href="mainlyXt-editor-cpp.html#resize">mainlyXt/editor.cpp</a>
  <a href="qfd-qfd-cpp.html#resize">qfd/qfd.cpp</a>
+ <a href="qmag-qmag-cpp.html#resize">qmag/qmag.cpp</a>
  <a href="listboxcombo-main-cpp.html#resize">listboxcombo/main.cpp</a>
+ <a href="popup-popup-cpp.html#resize">popup/popup.cpp</a>
+ <a href="scribble-main-cpp.html#resize">scribble/main.cpp</a>
 <h3 class="fn">void <a name="7d375f"></a>QWidget::resizeEvent ( <a href="qresizeevent.html">QResizeEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 widget resize events. When resizeEvent() is called, the widget
@@ -1709,7 +1711,7 @@ this handler.
 has <a href="#efa8f9">automatic masking</a>
 enabled.
 <p>See also  <a href="#3f1b15">moveEvent</a>(), <a href="#6ff658">event</a>(), <a href="#8fcbbe">resize</a>(), <a href="qresizeevent.html">QResizeEvent</a> and <a href="#e3d821">paintEvent</a>().
-<p>Reimplemented in <a href="qtableview.html#cc633e">QTableView</a>, <a href="qmessagebox.html#66e6d5">QMessageBox</a>, <a href="qtabbar.html#3e8389">QTabBar</a>, <a href="qslider.html#7d7415">QSlider</a>, <a href="qlabel.html#ece710">QLabel</a>, <a href="qprogressdialog.html#dec31b">QProgressDialog</a>, <a href="qtable.html#6ff380">QTable</a>, <a href="qframe.html#51ee66">QFrame</a>, <a href="qpushbutton.html#5ccda2">QPushButton</a>, <a href="qsplitter.html#a09069">QSplitter</a>, <a href="qworkspace.html#9b6347">QWorkspace</a>, <a href="qscrollview.html#89deb7">QScrollView</a>, <a href="qlineedit.html#230378">QLineEdit</a>, <a href="qlistbox.html#375cf7">QListBox</a>, <a href="qtabwidget.html#feb1c6">QTabWidget</a>, <a href="qwidgetstack.html#d9c7e2">QWidgetStack</a>, <a href="qstatusbar.html#ca8893">QStatusBar</a>, <a href="qmainwindow.html#68a974">QMainWindow</a>, <a href="qmenubar.html#6b5ce9">QMenuBar</a>, <a href="qmultilineedit.html#18e638">QMultiLineEdit</a>, <a href="qglwidget.html#d2994f">QGLWidget</a>, <a href="qgroupbox.html#1a7b01">QGroupBox</a>, <a href="qtoolbar.html#73bd54">QToolBar</a>, <a href="qscrollbar.html#a12286">QScrollBar</a>, <a href="qcheckbox.html#806122">QCheckBox</a>, <a href="qlistview.html#ce5fcf">QListView</a>, <a href="qdial.html#f42a62">QDial</a>, <a href="qtextview.html#586ea1">QTextView</a>, <a href="qtabdialog.html#d1aeb0">QTabDialog</a>, <a href="qspinbox.html#c6bce4">QSpinBox</a>, <a href="qdialog.html#fc5201">QDialog</a>, <a href="qradiobutton.html#1feff9">QRadioButton</a>, <a href="qcombobox.html#4631c5">QComboBox</a>, <a href="qxtwidget.html#71ff15">QXtWidget</a> and <a href="qfiledialog.html#06bc57">QFileDialog</a>.
+<p>Reimplemented in <a href="qtabdialog.html#d1aeb0">QTabDialog</a>, <a href="qmenubar.html#6b5ce9">QMenuBar</a>, <a href="qstatusbar.html#ca8893">QStatusBar</a>, <a href="qlistbox.html#375cf7">QListBox</a>, <a href="qcombobox.html#4631c5">QComboBox</a>, <a href="qmessagebox.html#66e6d5">QMessageBox</a>, <a href="qmainwindow.html#68a974">QMainWindow</a>, <a href="qmultilineedit.html#18e638">QMultiLineEdit</a>, <a href="qglwidget.html#d2994f">QGLWidget</a>, <a href="qlistview.html#ce5fcf">QListView</a>, <a href="qgroupbox.html#1a7b01">QGroupBox</a>, <a href="qfiledialog.html#06bc57">QFileDialog</a>, <a href="qtabwidget.html#feb1c6">QTabWidget</a>, <a href="qpushbutton.html#5ccda2">QPushButton</a>, <a href="qtabbar.html#3e8389">QTabBar</a>, <a href="qcheckbox.html#806122">QCheckBox</a>, <a href="qlineedit.html#230378">QLineEdit</a>, <a href="qsplitter.html#a09069">QSplitter</a>, <a href="qspinbox.html#c6bce4">QSpinBox</a>, <a href="qslider.html#7d7415">QSlider</a>, <a href="qscrollbar.html#a12286">QScrollBar</a>, <a href="qdialog.html#fc5201">QDialog</a>, <a href="qtoolbar.html#73bd54">QToolBar</a>, <a href="qdial.html#f42a62">QDial</a>, <a href="qtableview.html#cc633e">QTableView</a>, <a href="qxtwidget.html#71ff15">QXtWidget</a>, <a href="qwidgetstack.html#d9c7e2">QWidgetStack</a>, <a href="qprogressdialog.html#dec31b">QProgressDialog</a>, <a href="qtable.html#6ff380">QTable</a>, <a href="qframe.html#51ee66">QFrame</a>, <a href="qradiobutton.html#1feff9">QRadioButton</a>, <a href="qscrollview.html#89deb7">QScrollView</a>, <a href="qtextview.html#586ea1">QTextView</a>, <a href="qworkspace.html#9b6347">QWorkspace</a> and <a href="qlabel.html#ece710">QLabel</a>.
 <h3 class="fn">void <a name="d7aad8"></a>QWidget::scroll ( int dx, int dy, const <a href="qrect.html">QRect</a> &amp; r )</h3>
 <p>Scrolls <em>r dx</em> pixels to the right and <em>dy</em> downwards.  Both
 <em>dx</em> and <em>dy</em> may be negative.
@@ -1803,13 +1805,13 @@ is e.g. "./yourapp -bg paleblue".  On Windows, you have to use the
 control panel.)
 <p>See also  <a href="#d7e4b9">setPalette</a>(), <a href="qapplication.html#63c60d">QApplication::setPalette</a>(), <a href="#d5be64">backgroundColor</a>(), <a href="#7e417f">setBackgroundPixmap</a>() and <a href="#e84bbe">setBackgroundMode</a>().
 <p>Examples:
- <a href="drawlines-connect-cpp.html#setBackgroundColor">drawlines/connect.cpp</a>
- <a href="xform-xform-cpp.html#setBackgroundColor">xform/xform.cpp</a>
- <a href="drawdemo-drawdemo-cpp.html#setBackgroundColor">drawdemo/drawdemo.cpp</a>
- <a href="splitter-splitter-cpp.html#setBackgroundColor">splitter/splitter.cpp</a>
- <a href="desktop-desktop-cpp.html#setBackgroundColor">desktop/desktop.cpp</a>
  <a href="hello-main-cpp.html#setBackgroundColor">hello/main.cpp</a>
+ <a href="splitter-splitter-cpp.html#setBackgroundColor">splitter/splitter.cpp</a>
+ <a href="drawdemo-drawdemo-cpp.html#setBackgroundColor">drawdemo/drawdemo.cpp</a>
+ <a href="drawlines-connect-cpp.html#setBackgroundColor">drawlines/connect.cpp</a>
  <a href="customlayout-main-cpp.html#setBackgroundColor">customlayout/main.cpp</a>
+ <a href="xform-xform-cpp.html#setBackgroundColor">xform/xform.cpp</a>
+ <a href="desktop-desktop-cpp.html#setBackgroundColor">desktop/desktop.cpp</a>
 <h3 class="fn">void <a name="e84bbe"></a>QWidget::setBackgroundMode ( <a href="qwidget.html#BackgroundMode">BackgroundMode</a> m )</h3>
 <p>Tells the window system how to clear this widget when sending a
 paint event.  In other words, this decides how the widgets looks
@@ -1858,53 +1860,53 @@ in combination with size increments. See <a href="#16748e">setSizeIncrement</a>(
 <p>Sets the window caption (title) to <em>caption.</em>
 <p>See also  <a href="#f852bc">caption</a>(), <a href="#504fc4">setIcon</a>() and <a href="#2f0f0d">setIconText</a>().
 <p>Examples:
- <a href="showimg-main-cpp.html#setCaption">showimg/main.cpp</a>
- <a href="action-main-cpp.html#setCaption">action/main.cpp</a>
- <a href="rangecontrols-main-cpp.html#setCaption">rangecontrols/main.cpp</a>
- <a href="iconview-main-cpp.html#setCaption">iconview/main.cpp</a>
- <a href="validator-main-cpp.html#setCaption">validator/main.cpp</a>
- <a href="themes-main-cpp.html#setCaption">themes/main.cpp</a>
- <a href="listviews-main-cpp.html#setCaption">listviews/main.cpp</a>
- <a href="aclock-main-cpp.html#setCaption">aclock/main.cpp</a>
- <a href="checklists-main-cpp.html#setCaption">checklists/main.cpp</a>
- <a href="drawlines-connect-cpp.html#setCaption">drawlines/connect.cpp</a>
- <a href="dclock-main-cpp.html#setCaption">dclock/main.cpp</a>
- <a href="wizard-main-cpp.html#setCaption">wizard/main.cpp</a>
- <a href="xform-xform-cpp.html#setCaption">xform/xform.cpp</a>
- <a href="application-main-cpp.html#setCaption">application/main.cpp</a>
+ <a href="qwerty-main-cpp.html#setCaption">qwerty/main.cpp</a>
+ <a href="movies-main-cpp.html#setCaption">movies/main.cpp</a>
  <a href="cursor-cursor-cpp.html#setCaption">cursor/cursor.cpp</a>
- <a href="layout-layout-cpp.html#setCaption">layout/layout.cpp</a>
- <a href="tetrix-tetrix-cpp.html#setCaption">tetrix/tetrix.cpp</a>
- <a href="helpviewer-main-cpp.html#setCaption">helpviewer/main.cpp</a>
+ <a href="aclock-main-cpp.html#setCaption">aclock/main.cpp</a>
+ <a href="hello-main-cpp.html#setCaption">hello/main.cpp</a>
+ <a href="splitter-splitter-cpp.html#setCaption">splitter/splitter.cpp</a>
+ <a href="listviews-main-cpp.html#setCaption">listviews/main.cpp</a>
  <a href="buttongroups-main-cpp.html#setCaption">buttongroups/main.cpp</a>
- <a href="life-main-cpp.html#setCaption">life/main.cpp</a>
- <a href="i18n-main-cpp.html#setCaption">i18n/main.cpp</a>
+ <a href="validator-main-cpp.html#setCaption">validator/main.cpp</a>
+ <a href="iconview-main-cpp.html#setCaption">iconview/main.cpp</a>
+ <a href="rangecontrols-main-cpp.html#setCaption">rangecontrols/main.cpp</a>
+ <a href="wizard-main-cpp.html#setCaption">wizard/main.cpp</a>
+ <a href="dclock-main-cpp.html#setCaption">dclock/main.cpp</a>
+ <a href="tabdialog-main-cpp.html#setCaption">tabdialog/main.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#setCaption">scrollview/scrollview.cpp</a>
+ <a href="tooltip-main-cpp.html#setCaption">tooltip/main.cpp</a>
+ <a href="listbox-main-cpp.html#setCaption">listbox/main.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#setCaption">drawdemo/drawdemo.cpp</a>
  <a href="lineedits-main-cpp.html#setCaption">lineedits/main.cpp</a>
- <a href="popup-popup-cpp.html#setCaption">popup/popup.cpp</a>
- <a href="listbox-main-cpp.html#setCaption">listbox/main.cpp</a>
- <a href="menu-menu-cpp.html#setCaption">menu/menu.cpp</a>
- <a href="progress-progress-cpp.html#setCaption">progress/progress.cpp</a>
- <a href="scribble-main-cpp.html#setCaption">scribble/main.cpp</a>
- <a href="tabdialog-main-cpp.html#setCaption">tabdialog/main.cpp</a>
- <a href="splitter-splitter-cpp.html#setCaption">splitter/splitter.cpp</a>
+ <a href="picture-picture-cpp.html#setCaption">picture/picture.cpp</a>
+ <a href="i18n-main-cpp.html#setCaption">i18n/main.cpp</a>
+ <a href="drawlines-connect-cpp.html#setCaption">drawlines/connect.cpp</a>
+ <a href="themes-main-cpp.html#setCaption">themes/main.cpp</a>
  <a href="progressbar-main-cpp.html#setCaption">progressbar/main.cpp</a>
- <a href="tooltip-main-cpp.html#setCaption">tooltip/main.cpp</a>
- <a href="richtext-main-cpp.html#setCaption">richtext/main.cpp</a>
- <a href="qwerty-main-cpp.html#setCaption">qwerty/main.cpp</a>
- <a href="forever-forever-cpp.html#setCaption">forever/forever.cpp</a>
- <a href="rot13-rot13-cpp.html#setCaption">rot13/rot13.cpp</a>
  <a href="xml-tagreader-with-features-tagreader-cpp.html#setCaption">xml/tagreader-with-features/tagreader.cpp</a>
- <a href="scrollview-scrollview-cpp.html#setCaption">scrollview/scrollview.cpp</a>
+ <a href="helpviewer-main-cpp.html#setCaption">helpviewer/main.cpp</a>
+ <a href="life-main-cpp.html#setCaption">life/main.cpp</a>
+ <a href="layout-layout-cpp.html#setCaption">layout/layout.cpp</a>
+ <a href="richtext-main-cpp.html#setCaption">richtext/main.cpp</a>
+ <a href="mdi-main-cpp.html#setCaption">mdi/main.cpp</a>
+ <a href="action-main-cpp.html#setCaption">action/main.cpp</a>
+ <a href="checklists-main-cpp.html#setCaption">checklists/main.cpp</a>
+ <a href="tetrix-tetrix-cpp.html#setCaption">tetrix/tetrix.cpp</a>
+ <a href="forever-forever-cpp.html#setCaption">forever/forever.cpp</a>
  <a href="qfd-qfd-cpp.html#setCaption">qfd/qfd.cpp</a>
  <a href="addressbook-main-cpp.html#setCaption">addressbook/main.cpp</a>
- <a href="movies-main-cpp.html#setCaption">movies/main.cpp</a>
- <a href="picture-picture-cpp.html#setCaption">picture/picture.cpp</a>
- <a href="hello-main-cpp.html#setCaption">hello/main.cpp</a>
- <a href="listboxcombo-main-cpp.html#setCaption">listboxcombo/main.cpp</a>
- <a href="tictac-main-cpp.html#setCaption">tictac/main.cpp</a>
  <a href="customlayout-main-cpp.html#setCaption">customlayout/main.cpp</a>
- <a href="mdi-main-cpp.html#setCaption">mdi/main.cpp</a>
+ <a href="progress-progress-cpp.html#setCaption">progress/progress.cpp</a>
+ <a href="listboxcombo-main-cpp.html#setCaption">listboxcombo/main.cpp</a>
+ <a href="menu-menu-cpp.html#setCaption">menu/menu.cpp</a>
+ <a href="tictac-main-cpp.html#setCaption">tictac/main.cpp</a>
+ <a href="xform-xform-cpp.html#setCaption">xform/xform.cpp</a>
+ <a href="showimg-main-cpp.html#setCaption">showimg/main.cpp</a>
+ <a href="popup-popup-cpp.html#setCaption">popup/popup.cpp</a>
+ <a href="rot13-rot13-cpp.html#setCaption">rot13/rot13.cpp</a>
+ <a href="application-main-cpp.html#setCaption">application/main.cpp</a>
+ <a href="scribble-main-cpp.html#setCaption">scribble/main.cpp</a>
  <a href="dirview-main-cpp.html#setCaption">dirview/main.cpp</a>
 <h3 class="fn">void <a name="9b6e22"></a>QWidget::setCursor ( const <a href="qcursor.html">QCursor</a> &amp; cursor ) <code>[virtual]</code></h3>
 <p>Sets the widget cursor shape to <em>cursor.</em>
@@ -2007,16 +2009,13 @@ widget.
     setFont( f );
 </pre>
 <p>See also  <a href="#167922">font</a>(), <a href="#ac5c83">fontChange</a>(), <a href="#205244">fontInfo</a>(), <a href="#386569">fontMetrics</a>(), <a href="#27a4a2">unsetFont</a>() and <a href="#aa1cc8">ownFont</a>().
-<p>Examples:
- <a href="grapher-grapher-cpp.html#setFont">grapher/grapher.cpp</a>
- <a href="xform-xform-cpp.html#setFont">xform/xform.cpp</a>
-<p>Reimplemented in <a href="qwizard.html#98ce4e">QWizard</a>, <a href="qpopupmenu.html#3e68bb">QPopupMenu</a>, <a href="qtabdialog.html#632ea3">QTabDialog</a> and <a href="qfontdialog.html#24344f">QFontDialog</a>.
 <h3 class="fn">void <a name="090d60"></a>QWidget::setFont ( const <a href="qfont.html">QFont</a> &amp; font, bool )</h3>
 <p><b>This function is obsolete.</b> It is provided to keep old source working, and will probably be removed in a future version of Qt.  We strongly advise against using it in new code.<p>
 <p>Use setFont( const <a href="qfont.html">QFont</a>& font) instead.
 <p>Examples:
- <a href="xform-xform-cpp.html#setFont">xform/xform.cpp</a>
  <a href="hello-main-cpp.html#setFont">hello/main.cpp</a>
+ <a href="xform-xform-cpp.html#setFont">xform/xform.cpp</a>
+ <a href="grapher-grapher-cpp.html#setFont">grapher/grapher.cpp</a>
 <h3 class="fn">void <a name="b2c696"></a>QWidget::setFontPropagation ( <a href="qwidget.html#PropagationMode">PropagationMode</a> )</h3>
 <p><b>This function is obsolete.</b> It is provided to keep old source working, and will probably be removed in a future version of Qt.  We strongly advise against using it in new code.<p>
 <p>Calling this function has no effect.
@@ -2032,14 +2031,14 @@ receive appropriate events before it actually becomes visible.
 implementations call it.<p><b>Warning:</b> If you call setGeometry() from <a href="#7d375f">resizeEvent</a>() or <a href="#3f1b15">moveEvent</a>(),
 you may see infinite recursion.
 <p>See also  <a href="#e515c8">geometry</a>(), <a href="#39930b">move</a>(), <a href="#8fcbbe">resize</a>(), <a href="#3f1b15">moveEvent</a>(), <a href="#7d375f">resizeEvent</a>(), <a href="#b24d94">minimumSize</a>() and <a href="#fe9f6b">maximumSize</a>().
+<p>Examples:
+ <a href="drawdemo-drawdemo-cpp.html#setGeometry">drawdemo/drawdemo.cpp</a>
+ <a href="i18n-main-cpp.html#setGeometry">i18n/main.cpp</a>
+ <a href="qmag-qmag-cpp.html#setGeometry">qmag/qmag.cpp</a>
+ <a href="popup-popup-cpp.html#setGeometry">popup/popup.cpp</a>
 <p>Reimplemented in <a href="qdialog.html#e54a1a">QDialog</a>.
 <h3 class="fn">void <a name="5e9ab1"></a>QWidget::setGeometry ( const <a href="qrect.html">QRect</a> &amp; ) <code>[virtual slot]</code></h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
-<p>Examples:
- <a href="i18n-main-cpp.html#setGeometry">i18n/main.cpp</a>
- <a href="drawdemo-drawdemo-cpp.html#setGeometry">drawdemo/drawdemo.cpp</a>
- <a href="popup-popup-cpp.html#setGeometry">popup/popup.cpp</a>
- <a href="qmag-qmag-cpp.html#setGeometry">qmag/qmag.cpp</a>
 <p>Reimplemented in <a href="qdialog.html#bba7b0">QDialog</a>.
 <h3 class="fn">void <a name="504fc4"></a>QWidget::setIcon ( const <a href="qpixmap.html">QPixmap</a> &amp; pixmap ) <code>[virtual slot]</code></h3>
 <p>Sets the window icon to <em>pixmap.</em>
@@ -2123,9 +2122,9 @@ size is smaller.
 not by setMinimumSize, unless you set the layouts resize mode to QLayout::FreeResize.
 <p>See also  <a href="#b24d94">minimumSize</a>(), <a href="#c78dce">setMaximumSize</a>(), <a href="#16748e">setSizeIncrement</a>(), <a href="#8fcbbe">resize</a>(), <a href="#50b75e">size</a>() and <a href="qlayout.html#e750be">QLayout::setResizeMode</a>().
 <p>Examples:
- <a href="menu-menu-cpp.html#setMinimumSize">menu/menu.cpp</a>
- <a href="qmag-qmag-cpp.html#setMinimumSize">qmag/qmag.cpp</a>
  <a href="splitter-splitter-cpp.html#setMinimumSize">splitter/splitter.cpp</a>
+ <a href="qmag-qmag-cpp.html#setMinimumSize">qmag/qmag.cpp</a>
+ <a href="menu-menu-cpp.html#setMinimumSize">menu/menu.cpp</a>
 <h3 class="fn">void <a name="68f09f"></a>QWidget::setMinimumSize ( const <a href="qsize.html">QSize</a> &amp; size )</h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <h3 class="fn">void <a name="893704"></a>QWidget::setMinimumWidth ( int w )</h3>
@@ -2142,8 +2141,8 @@ the mouse is being moved.
 even if no buttons are pressed down.
 <p>See also  <a href="#2831c6">hasMouseTracking</a>(), <a href="#a51d92">mouseMoveEvent</a>() and <a href="qapplication.html#978595">QApplication::setGlobalMouseTracking</a>().
 <p>Examples:
- <a href="popup-popup-cpp.html#setMouseTracking">popup/popup.cpp</a>
  <a href="qmag-qmag-cpp.html#setMouseTracking">qmag/qmag.cpp</a>
+ <a href="popup-popup-cpp.html#setMouseTracking">popup/popup.cpp</a>
 <p>Reimplemented in <a href="qglwidget.html#5a8a07">QGLWidget</a>.
 <h3 class="fn">void <a name="2d71e0"></a>QWidget::setName ( const char * name ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
@@ -2250,45 +2249,45 @@ change some settings before a widget is shown, use <a href="#542dc0">showEvent</
 instead. If you need to do some delayed initialization use <a href="#c14a09">polish</a>().
 <p>See also  <a href="#542dc0">showEvent</a>(), <a href="#410481">hide</a>(), <a href="#c10123">showMinimized</a>(), <a href="#b6e000">showMaximized</a>(), <a href="#8a8f06">showNormal</a>(), <a href="#4d2aa7">isVisible</a>() and <a href="#c14a09">polish</a>().
 <p>Examples:
- <a href="showimg-main-cpp.html#show">showimg/main.cpp</a>
- <a href="rangecontrols-main-cpp.html#show">rangecontrols/main.cpp</a>
- <a href="validator-main-cpp.html#show">validator/main.cpp</a>
- <a href="listviews-main-cpp.html#show">listviews/main.cpp</a>
- <a href="aclock-main-cpp.html#show">aclock/main.cpp</a>
- <a href="checklists-main-cpp.html#show">checklists/main.cpp</a>
- <a href="drawlines-connect-cpp.html#show">drawlines/connect.cpp</a>
- <a href="dclock-main-cpp.html#show">dclock/main.cpp</a>
- <a href="xform-xform-cpp.html#show">xform/xform.cpp</a>
+ <a href="qwerty-main-cpp.html#show">qwerty/main.cpp</a>
+ <a href="movies-main-cpp.html#show">movies/main.cpp</a>
  <a href="cursor-cursor-cpp.html#show">cursor/cursor.cpp</a>
- <a href="layout-layout-cpp.html#show">layout/layout.cpp</a>
- <a href="tetrix-tetrix-cpp.html#show">tetrix/tetrix.cpp</a>
+ <a href="aclock-main-cpp.html#show">aclock/main.cpp</a>
+ <a href="hello-main-cpp.html#show">hello/main.cpp</a>
+ <a href="splitter-splitter-cpp.html#show">splitter/splitter.cpp</a>
+ <a href="listviews-main-cpp.html#show">listviews/main.cpp</a>
  <a href="buttongroups-main-cpp.html#show">buttongroups/main.cpp</a>
- <a href="life-main-cpp.html#show">life/main.cpp</a>
- <a href="i18n-main-cpp.html#show">i18n/main.cpp</a>
+ <a href="biff-main-cpp.html#show">biff/main.cpp</a>
+ <a href="validator-main-cpp.html#show">validator/main.cpp</a>
+ <a href="rangecontrols-main-cpp.html#show">rangecontrols/main.cpp</a>
+ <a href="dclock-main-cpp.html#show">dclock/main.cpp</a>
+ <a href="scrollview-scrollview-cpp.html#show">scrollview/scrollview.cpp</a>
+ <a href="tooltip-main-cpp.html#show">tooltip/main.cpp</a>
+ <a href="listbox-main-cpp.html#show">listbox/main.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#show">drawdemo/drawdemo.cpp</a>
  <a href="lineedits-main-cpp.html#show">lineedits/main.cpp</a>
- <a href="popup-popup-cpp.html#show">popup/popup.cpp</a>
- <a href="listbox-main-cpp.html#show">listbox/main.cpp</a>
- <a href="menu-menu-cpp.html#show">menu/menu.cpp</a>
+ <a href="picture-picture-cpp.html#show">picture/picture.cpp</a>
+ <a href="i18n-main-cpp.html#show">i18n/main.cpp</a>
+ <a href="drawlines-connect-cpp.html#show">drawlines/connect.cpp</a>
+ <a href="progressbar-main-cpp.html#show">progressbar/main.cpp</a>
+ <a href="xml-tagreader-with-features-tagreader-cpp.html#show">xml/tagreader-with-features/tagreader.cpp</a>
+ <a href="life-main-cpp.html#show">life/main.cpp</a>
+ <a href="layout-layout-cpp.html#show">layout/layout.cpp</a>
+ <a href="richtext-main-cpp.html#show">richtext/main.cpp</a>
+ <a href="checklists-main-cpp.html#show">checklists/main.cpp</a>
+ <a href="tetrix-tetrix-cpp.html#show">tetrix/tetrix.cpp</a>
+ <a href="forever-forever-cpp.html#show">forever/forever.cpp</a>
+ <a href="customlayout-main-cpp.html#show">customlayout/main.cpp</a>
  <a href="progress-progress-cpp.html#show">progress/progress.cpp</a>
  <a href="qmag-qmag-cpp.html#show">qmag/qmag.cpp</a>
- <a href="splitter-splitter-cpp.html#show">splitter/splitter.cpp</a>
- <a href="progressbar-main-cpp.html#show">progressbar/main.cpp</a>
- <a href="tooltip-main-cpp.html#show">tooltip/main.cpp</a>
- <a href="richtext-main-cpp.html#show">richtext/main.cpp</a>
- <a href="qwerty-main-cpp.html#show">qwerty/main.cpp</a>
- <a href="forever-forever-cpp.html#show">forever/forever.cpp</a>
- <a href="rot13-rot13-cpp.html#show">rot13/rot13.cpp</a>
- <a href="xml-tagreader-with-features-tagreader-cpp.html#show">xml/tagreader-with-features/tagreader.cpp</a>
- <a href="scrollview-scrollview-cpp.html#show">scrollview/scrollview.cpp</a>
- <a href="movies-main-cpp.html#show">movies/main.cpp</a>
- <a href="picture-picture-cpp.html#show">picture/picture.cpp</a>
- <a href="hello-main-cpp.html#show">hello/main.cpp</a>
  <a href="listboxcombo-main-cpp.html#show">listboxcombo/main.cpp</a>
- <a href="biff-main-cpp.html#show">biff/main.cpp</a>
+ <a href="menu-menu-cpp.html#show">menu/menu.cpp</a>
  <a href="tictac-main-cpp.html#show">tictac/main.cpp</a>
- <a href="customlayout-main-cpp.html#show">customlayout/main.cpp</a>
-<p>Reimplemented in <a href="qtoolbar.html#63ffb3">QToolBar</a>, <a href="qsemimodal.html#ad1549">QSemiModal</a>, <a href="qprogressbar.html#d35c1b">QProgressBar</a>, <a href="qwidgetstack.html#657e43">QWidgetStack</a>, <a href="qtabbar.html#7cf229">QTabBar</a>, <a href="qpopupmenu.html#50a0ef">QPopupMenu</a>, <a href="qtableview.html#9789c1">QTableView</a>, <a href="qdialog.html#bfe29c">QDialog</a>, <a href="qlistview.html#a21cde">QListView</a>, <a href="qmenubar.html#572327">QMenuBar</a>, <a href="qmainwindow.html#eb53e3">QMainWindow</a>, <a href="qscrollview.html#45ec27">QScrollView</a>, <a href="qtabdialog.html#46b852">QTabDialog</a> and <a href="qwizard.html#5a4c78">QWizard</a>.
+ <a href="xform-xform-cpp.html#show">xform/xform.cpp</a>
+ <a href="showimg-main-cpp.html#show">showimg/main.cpp</a>
+ <a href="popup-popup-cpp.html#show">popup/popup.cpp</a>
+ <a href="rot13-rot13-cpp.html#show">rot13/rot13.cpp</a>
+<p>Reimplemented in <a href="qsemimodal.html#ad1549">QSemiModal</a>, <a href="qwidgetstack.html#657e43">QWidgetStack</a>, <a href="qprogressbar.html#d35c1b">QProgressBar</a>, <a href="qscrollview.html#45ec27">QScrollView</a>, <a href="qmenubar.html#572327">QMenuBar</a>, <a href="qdialog.html#bfe29c">QDialog</a>, <a href="qlistview.html#a21cde">QListView</a>, <a href="qtableview.html#9789c1">QTableView</a>, <a href="qtabdialog.html#46b852">QTabDialog</a>, <a href="qtabbar.html#7cf229">QTabBar</a>, <a href="qtoolbar.html#63ffb3">QToolBar</a>, <a href="qmainwindow.html#eb53e3">QMainWindow</a>, <a href="qpopupmenu.html#50a0ef">QPopupMenu</a> and <a href="qwizard.html#5a4c78">QWizard</a>.
 <h3 class="fn">void <a name="542dc0"></a>QWidget::showEvent ( <a href="qshowevent.html">QShowEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>This event handler can be reimplemented in a subclass to receive
 widget show events.
@@ -2296,7 +2295,7 @@ widget show events.
 shown. Spontaneous show events of toplevel widgets are delivered
 afterwards, naturally.
 <p>See also  <a href="#6ff658">event</a>() and <a href="qshowevent.html">QShowEvent</a>.
-<p>Reimplemented in <a href="qtable.html#b916da">QTable</a>, <a href="qprogressdialog.html#618c04">QProgressDialog</a>, <a href="qheader.html#0b45ec">QHeader</a>, <a href="qtextbrowser.html#e33c57">QTextBrowser</a>, <a href="qworkspace.html#296c1a">QWorkspace</a>, <a href="qlistview.html#678e3d">QListView</a>, <a href="qtabwidget.html#aa4593">QTabWidget</a>, <a href="qlistbox.html#ec89a6">QListBox</a> and <a href="qtextview.html#6e56d6">QTextView</a>.
+<p>Reimplemented in <a href="qlistbox.html#ec89a6">QListBox</a>, <a href="qtextview.html#6e56d6">QTextView</a>, <a href="qprogressdialog.html#618c04">QProgressDialog</a>, <a href="qworkspace.html#296c1a">QWorkspace</a>, <a href="qtextbrowser.html#e33c57">QTextBrowser</a>, <a href="qlistview.html#678e3d">QListView</a>, <a href="qtable.html#b916da">QTable</a>, <a href="qtabwidget.html#aa4593">QTabWidget</a> and <a href="qheader.html#0b45ec">QHeader</a>.
 <h3 class="fn">void <a name="1ac501"></a>QWidget::showFullScreen () <code>[slot]</code></h3>
 <p>Shows the widget in full-screen mode.
 <p>Calling this function has no effect for other than top-level
@@ -2328,9 +2327,9 @@ managers. See the <a href="geometry.html">Window Geometry
 documentation</a> for details on why.
 <p>See also  <a href="#8a8f06">showNormal</a>(), <a href="#c10123">showMinimized</a>(), <a href="#200ee5">show</a>(), <a href="#410481">hide</a>() and <a href="#4d2aa7">isVisible</a>().
 <p>Examples:
+ <a href="qwerty-main-cpp.html#showMaximized">qwerty/main.cpp</a>
  <a href="helpviewer-main-cpp.html#showMaximized">helpviewer/main.cpp</a>
  <a href="scribble-main-cpp.html#showMaximized">scribble/main.cpp</a>
- <a href="qwerty-main-cpp.html#showMaximized">qwerty/main.cpp</a>
 <h3 class="fn">void <a name="c10123"></a>QWidget::showMinimized () <code>[virtual slot]</code></h3>
 <p>Shows the widget minimized, as an icon.
 <p>Calling this function has no effect for other than <a href="#17338a">top-level widgets</a>.
@@ -2348,7 +2347,7 @@ no size is recommended.
 <p>The default implementation returns an invalid size if there is no layout
 for this widget, the layout's preferred size otherwise.
 <p>See also  <a href="qsize.html#7336d9">QSize::isValid</a>(), <a href="#553e08">minimumSizeHint</a>(), <a href="#23726d">sizePolicy</a>(), <a href="#c0b5fb">setMinimumSize</a>() and <a href="#5f7c35">updateGeometry</a>().
-<p>Reimplemented in <a href="qtable.html#c688ed">QTable</a>, <a href="qmenubar.html#62f3bb">QMenuBar</a>, <a href="qsizegrip.html#12d816">QSizeGrip</a>, <a href="qhbox.html#975d84">QHBox</a>, <a href="qradiobutton.html#69cd2a">QRadioButton</a>, <a href="qpopupmenu.html#934139">QPopupMenu</a>, <a href="qgroupbox.html#d7a142">QGroupBox</a>, <a href="qtoolbutton.html#4aebd5">QToolButton</a>, <a href="qcheckbox.html#6a1396">QCheckBox</a>, <a href="qwidgetstack.html#e499fd">QWidgetStack</a>, <a href="qtabbar.html#735cb5">QTabBar</a>, <a href="qgrid.html#bc77a9">QGrid</a>, <a href="qlistbox.html#5a33a9">QListBox</a>, <a href="qscrollview.html#a1d9a6">QScrollView</a>, <a href="qdial.html#585d6d">QDial</a>, <a href="qlabel.html#f40fcc">QLabel</a>, <a href="qtabwidget.html#1eea21">QTabWidget</a>, <a href="qslider.html#76e58f">QSlider</a>, <a href="qlineedit.html#820576">QLineEdit</a>, <a href="qlcdnumber.html#4c2c33">QLCDNumber</a>, <a href="qsplitter.html#bbe7f8">QSplitter</a>, <a href="qworkspace.html#c81fde">QWorkspace</a>, <a href="qpushbutton.html#53cdcb">QPushButton</a>, <a href="qspinbox.html#ffd3ee">QSpinBox</a>, <a href="qheader.html#225d11">QHeader</a>, <a href="qiconview.html#157488">QIconView</a>, <a href="qscrollbar.html#364175">QScrollBar</a>, <a href="qprogressdialog.html#e825e9">QProgressDialog</a>, <a href="qcanvasview.html#81579f">QCanvasView</a>, <a href="qcombobox.html#dd19df">QComboBox</a>, <a href="qlistview.html#4c21f2">QListView</a>, <a href="qprogressbar.html#507616">QProgressBar</a>, <a href="qframe.html#905576">QFrame</a>, <a href="qmainwindow.html#ef581c">QMainWindow</a>, <a href="qdialog.html#864e60">QDialog</a> and <a href="qmultilineedit.html#3f22f6">QMultiLineEdit</a>.
+<p>Reimplemented in <a href="qsplitter.html#bbe7f8">QSplitter</a>, <a href="qscrollview.html#a1d9a6">QScrollView</a>, <a href="qdialog.html#864e60">QDialog</a>, <a href="qlineedit.html#820576">QLineEdit</a>, <a href="qhbox.html#975d84">QHBox</a>, <a href="qdial.html#585d6d">QDial</a>, <a href="qtabbar.html#735cb5">QTabBar</a>, <a href="qiconview.html#157488">QIconView</a>, <a href="qcanvasview.html#81579f">QCanvasView</a>, <a href="qlistbox.html#5a33a9">QListBox</a>, <a href="qframe.html#905576">QFrame</a>, <a href="qgrid.html#bc77a9">QGrid</a>, <a href="qtoolbutton.html#4aebd5">QToolButton</a>, <a href="qradiobutton.html#69cd2a">QRadioButton</a>, <a href="qmenubar.html#62f3bb">QMenuBar</a>, <a href="qslider.html#76e58f">QSlider</a>, <a href="qprogressdialog.html#e825e9">QProgressDialog</a>, <a href="qpushbutton.html#53cdcb">QPushButton</a>, <a href="qlcdnumber.html#4c2c33">QLCDNumber</a>, <a href="qgroupbox.html#d7a142">QGroupBox</a>, <a href="qcombobox.html#dd19df">QComboBox</a>, <a href="qwidgetstack.html#e499fd">QWidgetStack</a>, <a href="qlabel.html#f40fcc">QLabel</a>, <a href="qprogressbar.html#507616">QProgressBar</a>, <a href="qspinbox.html#ffd3ee">QSpinBox</a>, <a href="qworkspace.html#c81fde">QWorkspace</a>, <a href="qlistview.html#4c21f2">QListView</a>, <a href="qpopupmenu.html#934139">QPopupMenu</a>, <a href="qtabwidget.html#1eea21">QTabWidget</a>, <a href="qsizegrip.html#12d816">QSizeGrip</a>, <a href="qscrollbar.html#364175">QScrollBar</a>, <a href="qheader.html#225d11">QHeader</a>, <a href="qmultilineedit.html#3f22f6">QMultiLineEdit</a>, <a href="qcheckbox.html#6a1396">QCheckBox</a>, <a href="qtable.html#c688ed">QTable</a> and <a href="qmainwindow.html#ef581c">QMainWindow</a>.
 <h3 class="fn"><a href="qsize.html">QSize</a> <a name="12fe89"></a>QWidget::sizeIncrement () const</h3>
 <p>Returns the widget size increment.
 <p>See also  <a href="#16748e">setSizeIncrement</a>(), <a href="#b24d94">minimumSize</a>() and <a href="#fe9f6b">maximumSize</a>().
@@ -2358,7 +2357,7 @@ for this widget, the layout's preferred size otherwise.
 policy specified by that layout is used. If there is no such
 QLayout, the result of this function is used.
 <p>See also  <a href="#9230b0">setSizePolicy</a>(), <a href="#4511d1">sizeHint</a>(), <a href="qlayout.html">QLayout</a>, <a href="qsizepolicy.html">QSizePolicy</a> and <a href="#5f7c35">updateGeometry</a>().
-<p>Reimplemented in <a href="qtoolbutton.html#2b363a">QToolButton</a>, <a href="qlineedit.html#dfeeb1">QLineEdit</a>, <a href="qframe.html#42d709">QFrame</a>, <a href="qlcdnumber.html#952385">QLCDNumber</a>, <a href="qsizegrip.html#e156ec">QSizeGrip</a>, <a href="qsplitter.html#c4be56">QSplitter</a>, <a href="qradiobutton.html#1183af">QRadioButton</a>, <a href="qpushbutton.html#cb4f7a">QPushButton</a>, <a href="qworkspace.html#4f113d">QWorkspace</a>, <a href="qtabbar.html#d9f8d3">QTabBar</a>, <a href="qheader.html#14be66">QHeader</a>, <a href="qslider.html#ab8a04">QSlider</a>, <a href="qscrollview.html#31f6fc">QScrollView</a>, <a href="qiconview.html#9a6404">QIconView</a>, <a href="qtabwidget.html#4cce2c">QTabWidget</a>, <a href="qmultilineedit.html#88c28d">QMultiLineEdit</a>, <a href="qcheckbox.html#d27352">QCheckBox</a>, <a href="qscrollbar.html#32b2d6">QScrollBar</a>, <a href="qlabel.html#00bbd8">QLabel</a>, <a href="qspinbox.html#3dd6ad">QSpinBox</a> and <a href="qprogressbar.html#9165fc">QProgressBar</a>.
+<p>Reimplemented in <a href="qradiobutton.html#1183af">QRadioButton</a>, <a href="qtabwidget.html#4cce2c">QTabWidget</a>, <a href="qsizegrip.html#e156ec">QSizeGrip</a>, <a href="qpushbutton.html#cb4f7a">QPushButton</a>, <a href="qlabel.html#00bbd8">QLabel</a>, <a href="qspinbox.html#3dd6ad">QSpinBox</a>, <a href="qlcdnumber.html#952385">QLCDNumber</a>, <a href="qheader.html#14be66">QHeader</a>, <a href="qscrollbar.html#32b2d6">QScrollBar</a>, <a href="qcheckbox.html#d27352">QCheckBox</a>, <a href="qlineedit.html#dfeeb1">QLineEdit</a>, <a href="qiconview.html#9a6404">QIconView</a>, <a href="qsplitter.html#c4be56">QSplitter</a>, <a href="qtabbar.html#d9f8d3">QTabBar</a>, <a href="qframe.html#42d709">QFrame</a>, <a href="qslider.html#ab8a04">QSlider</a>, <a href="qprogressbar.html#9165fc">QProgressBar</a>, <a href="qmultilineedit.html#88c28d">QMultiLineEdit</a>, <a href="qtoolbutton.html#2b363a">QToolButton</a>, <a href="qworkspace.html#4f113d">QWorkspace</a> and <a href="qscrollview.html#31f6fc">QScrollView</a>.
 <h3 class="fn">void <a name="e1aab1"></a>QWidget::stackUnder ( QWidget * w ) <code>[slot]</code></h3>
 <p>Places the widget under <em>w</em> in the parent widget's stack.
 <p>To make this work, the widget itself and <em>w</em> have to be siblings.
@@ -2376,7 +2375,7 @@ using <a href="#a66a88">update</a>().
 <p>The default implementation updates the widget including its
 geometry.
 <p>See also  <a href="qapplication.html#e52522">QApplication::setStyle</a>(), <a href="#027381">style</a>(), <a href="#a66a88">update</a>() and <a href="#5f7c35">updateGeometry</a>().
-<p>Reimplemented in <a href="qscrollview.html#5d82c4">QScrollView</a>, <a href="qpopupmenu.html#2ac016">QPopupMenu</a>, <a href="qslider.html#40a71b">QSlider</a>, <a href="qtabwidget.html#d2da51">QTabWidget</a>, <a href="qprogressbar.html#af690e">QProgressBar</a>, <a href="qspinbox.html#09dd94">QSpinBox</a>, <a href="qlistview.html#fc63a6">QListView</a>, <a href="qiconview.html#26f923">QIconView</a>, <a href="qmainwindow.html#325b45">QMainWindow</a>, <a href="qtabdialog.html#f110be">QTabDialog</a>, <a href="qtoolbar.html#1675f6">QToolBar</a>, <a href="qcombobox.html#150d68">QComboBox</a>, <a href="qprogressdialog.html#f9ff0a">QProgressDialog</a>, <a href="qsplitter.html#a31a72">QSplitter</a>, <a href="qscrollbar.html#8c09a1">QScrollBar</a>, <a href="qtabbar.html#6a2bd4">QTabBar</a> and <a href="qmenubar.html#9d6d66">QMenuBar</a>.
+<p>Reimplemented in <a href="qtoolbar.html#1675f6">QToolBar</a>, <a href="qspinbox.html#09dd94">QSpinBox</a>, <a href="qtabwidget.html#d2da51">QTabWidget</a>, <a href="qsplitter.html#a31a72">QSplitter</a>, <a href="qtabbar.html#6a2bd4">QTabBar</a>, <a href="qlistview.html#fc63a6">QListView</a>, <a href="qscrollview.html#5d82c4">QScrollView</a>, <a href="qtabdialog.html#f110be">QTabDialog</a>, <a href="qmainwindow.html#325b45">QMainWindow</a>, <a href="qmenubar.html#9d6d66">QMenuBar</a>, <a href="qiconview.html#26f923">QIconView</a>, <a href="qpopupmenu.html#2ac016">QPopupMenu</a>, <a href="qcombobox.html#150d68">QComboBox</a>, <a href="qprogressdialog.html#f9ff0a">QProgressDialog</a>, <a href="qscrollbar.html#8c09a1">QScrollBar</a>, <a href="qslider.html#40a71b">QSlider</a> and <a href="qprogressbar.html#af690e">QProgressBar</a>.
 <h3 class="fn">bool <a name="be9b50"></a>QWidget::testWFlags ( WFlags f ) const</h3>
 <p>Returns TRUE if any of the widget flags in <em>f</em> are set.
 <p>Widget flags are a combination of <a href="qt.html#WidgetFlags">Qt::WidgetFlags</a>.
@@ -2415,8 +2414,8 @@ event.
 its contents.
 <p>See also  <a href="#7569b1">repaint</a>(), <a href="#e3d821">paintEvent</a>(), <a href="#b37820">setUpdatesEnabled</a>(), <a href="#10cf79">erase</a>() and <a href="#9dd055">setWFlags</a>().
 <p>Examples:
- <a href="grapher-grapher-cpp.html#update">grapher/grapher.cpp</a>
  <a href="scrollview-scrollview-cpp.html#update">scrollview/scrollview.cpp</a>
+ <a href="grapher-grapher-cpp.html#update">grapher/grapher.cpp</a>
 <h3 class="fn">void <a name="a66a88"></a>QWidget::update ( int x, int y, int w, int h ) <code>[slot]</code></h3>
 <p>Updates a rectangle (<em>x, y, w, h)</em> inside the widget
 unless updates are disabled or the widget is hidden.
@@ -2431,10 +2430,10 @@ If <em>h</em> is negative, it is replaced width <code><a href="#e3c588">height</
 its contents.
 <p>See also  <a href="#7569b1">repaint</a>(), <a href="#e3d821">paintEvent</a>(), <a href="#b37820">setUpdatesEnabled</a>() and <a href="#10cf79">erase</a>().
 <p>Examples:
- <a href="drawlines-connect-cpp.html#update">drawlines/connect.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#update">drawdemo/drawdemo.cpp</a>
- <a href="desktop-desktop-cpp.html#update">desktop/desktop.cpp</a>
  <a href="picture-picture-cpp.html#update">picture/picture.cpp</a>
+ <a href="drawlines-connect-cpp.html#update">drawlines/connect.cpp</a>
+ <a href="desktop-desktop-cpp.html#update">desktop/desktop.cpp</a>
 <h3 class="fn">void <a name="3e43cd"></a>QWidget::update ( const <a href="qrect.html">QRect</a> &amp; r ) <code>[slot]</code></h3>
 <p>This is an overloaded member function, provided for convenience.  It differs from the above function only in what argument(s) it accepts.
 <h3 class="fn">void <a name="5f7c35"></a>QWidget::updateGeometry ()</h3>
@@ -2448,7 +2447,7 @@ layout system will be notified as soon as the widget is shown.
 transparent widgets. It is supposed to be called whenever a widget
 changes state in a way that the shape mask has to be recalculated.
 <p>See also  <a href="#efa8f9">setAutoMask</a>(), updateMask(), <a href="#3aa0a1">setMask</a>() and <a href="#0b7ae4">clearMask</a>().
-<p>Reimplemented in <a href="qpushbutton.html#22ade4">QPushButton</a>, <a href="qgroupbox.html#ee7c67">QGroupBox</a>, <a href="qframe.html#e77612">QFrame</a>, <a href="qtabbar.html#6c9c68">QTabBar</a>, <a href="qcheckbox.html#b02b2f">QCheckBox</a>, <a href="qslider.html#867b6f">QSlider</a>, <a href="qradiobutton.html#65ba96">QRadioButton</a>, <a href="qcombobox.html#eebc58">QComboBox</a> and <a href="qtabwidget.html#686be6">QTabWidget</a>.
+<p>Reimplemented in <a href="qgroupbox.html#ee7c67">QGroupBox</a>, <a href="qradiobutton.html#65ba96">QRadioButton</a>, <a href="qpushbutton.html#22ade4">QPushButton</a>, <a href="qcheckbox.html#b02b2f">QCheckBox</a>, <a href="qslider.html#867b6f">QSlider</a>, <a href="qcombobox.html#eebc58">QComboBox</a>, <a href="qtabbar.html#6c9c68">QTabBar</a>, <a href="qtabwidget.html#686be6">QTabWidget</a> and <a href="qframe.html#e77612">QFrame</a>.
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="a93076"></a>QWidget::visibleRect () const</h3>
 <p>Returns the currently visible rectangle of the widget. This function
 is in particular useful to optimize immediate repainting of a
@@ -2466,18 +2465,18 @@ wheel events for the widget.
 that the widget's parent can interpret it.
 <p>The default implementation ignores the event.
 <p>See also  <a href="qwheelevent.html#e00588">QWheelEvent::ignore</a>(), <a href="qwheelevent.html#33c440">QWheelEvent::accept</a>(), <a href="#6ff658">event</a>() and <a href="qwheelevent.html">QWheelEvent</a>.
-<p>Reimplemented in <a href="qslider.html#5eae2c">QSlider</a>, <a href="qscrollbar.html#d7fe47">QScrollBar</a>, <a href="qspinbox.html#1c7d68">QSpinBox</a>, <a href="qscrollview.html#8244c7">QScrollView</a>, <a href="qmultilineedit.html#6f5398">QMultiLineEdit</a> and <a href="qdial.html#b2bac3">QDial</a>.
+<p>Reimplemented in <a href="qscrollview.html#8244c7">QScrollView</a>, <a href="qmultilineedit.html#6f5398">QMultiLineEdit</a>, <a href="qslider.html#5eae2c">QSlider</a>, <a href="qspinbox.html#1c7d68">QSpinBox</a>, <a href="qdial.html#b2bac3">QDial</a> and <a href="qscrollbar.html#d7fe47">QScrollBar</a>.
 <h3 class="fn">int <a name="2edab1"></a>QWidget::width () const</h3>
 <p>Returns the width of the widget, excluding the window frame.
 <p>See the <a href="geometry.html">Window Geometry documentation</a>
 for an overview of geometry issues with top-level widgets.
 <p>See also  <a href="#e515c8">geometry</a>(), <a href="#e3c588">height</a>() and <a href="#50b75e">size</a>().
 <p>Examples:
- <a href="grapher-grapher-cpp.html#width">grapher/grapher.cpp</a>
- <a href="xform-xform-cpp.html#width">xform/xform.cpp</a>
  <a href="drawdemo-drawdemo-cpp.html#width">drawdemo/drawdemo.cpp</a>
- <a href="menu-menu-cpp.html#width">menu/menu.cpp</a>
  <a href="qmag-qmag-cpp.html#width">qmag/qmag.cpp</a>
+ <a href="menu-menu-cpp.html#width">menu/menu.cpp</a>
+ <a href="xform-xform-cpp.html#width">xform/xform.cpp</a>
+ <a href="grapher-grapher-cpp.html#width">grapher/grapher.cpp</a>
 <h3 class="fn">WId <a name="653917"></a>QWidget::winId () const</h3>
 <p>Returns the window system identifier of the widget.
 <p>Portable in principle, but if you use it you are probably about to do
@@ -2519,7 +2518,7 @@ for an overview of geometry issues with top-level widgets.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -2527,5 +2526,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

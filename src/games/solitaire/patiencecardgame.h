@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -26,14 +41,15 @@
 #include <qintdict.h>
 #include <qcanvas.h>
 #include "canvascardgame.h"
+#include "canvascardpile.h"
 #include "cardmetrics.h"
 
 
-class PatienceFaceDownDeck : public CardPile, public CanvasRoundRect
+class PatienceFaceDownDeck : public CanvasCardPile
 {
 public:
-    PatienceFaceDownDeck(int x, int y, QCanvas *canvas)
-        : CardPile(x, y), CanvasRoundRect(x, y, canvas) { }
+    PatienceFaceDownDeck(QPoint p, QString name, QCanvas *canvas)
+        : CanvasCardPile(p, name, canvas) { }
     virtual bool isAllowedOnTop(Card *card) {
 	Q_UNUSED(card);
 	// Need to check it is from the faceUpDealingPile
@@ -46,14 +62,17 @@ public:
 	    return TRUE;
         return FALSE;	
     }
+    virtual bool isSelectable(Card *card) {
+	return card->isFacing();
+    }
 };
 
 
-class PatienceFaceUpDeck : public CardPile, public CanvasRoundRect
+class PatienceFaceUpDeck : public CanvasCardPile
 {
 public:
-    PatienceFaceUpDeck(int x, int y, QCanvas *canvas)
-        : CardPile(x, y), CanvasRoundRect(x, y, canvas) { }
+    PatienceFaceUpDeck(QPoint p, QString name, QCanvas *canvas)
+        : CanvasCardPile(p, name, canvas) { }
     virtual bool isAllowedOnTop(Card *card) {
 	Q_UNUSED(card);
 	// Need to check it is from the faceDownDealingPile
@@ -66,23 +85,26 @@ public:
 	    return TRUE;
         return FALSE;	
     }
+    virtual bool isSelectable(Card *card) {
+	return card == cardOnTop();
+    }
 };
 
 
-class PatienceDiscardPile : public CardPile, public CanvasRoundRect
+class PatienceDiscardPile : public CanvasCardPile
 {
 public:
-    PatienceDiscardPile(int x, int y, QCanvas *canvas)
-        : CardPile(x, y), CanvasRoundRect(x, y, canvas) { }
+    PatienceDiscardPile(QPoint p, QString name, QCanvas *canvas)
+        : CanvasCardPile(p, name, canvas) { }
     virtual bool isAllowedOnTop(Card *card) {
-	if ( card->isFacing() && ( card->getCardPile()->cardInfront(card) == NULL ) &&
-	   ( ( ( cardOnTop() == NULL ) && ( card->getValue() == ace ) ) ||
+	if ( card->isFacing() && ( card->cardPile()->cardInfront(card) == NULL ) &&
+	   ( ( ( cardOnTop() == NULL ) && ( card->value() == Card::ace ) ) ||
 	     ( ( cardOnTop() != NULL ) &&
 //#define CHEAT_TEST_MODE
 #ifndef CHEAT_TEST_MODE
-	       ( (int)card->getValue() == (int)cardOnTop()->getValue() + 1 ) &&
+	       ( (int)card->value() == (int)cardOnTop()->value() + 1 ) &&
 #endif
-	       ( card->getSuit() == cardOnTop()->getSuit() ) ) ) )
+	       ( card->suit() == cardOnTop()->suit() ) ) ) )
 	    return TRUE;
         return FALSE;	
     }
@@ -91,35 +113,66 @@ public:
 	    return TRUE;
         return FALSE;	
     }
+    virtual bool isSelectable(Card *card) {
+	return card == cardOnTop();
+    }
+    virtual void drawShape(QPainter &p) {
+	int ix = (int)x();
+	int iy = (int)y();
+	int w = width();
+	int h = height();
+	int rankW = CardMetrics::rankWidth();
+	int rankH = CardMetrics::rankHeight();
+	int picturesW = CardMetrics::picturePixmap()->width() / 12;
+	int picturesH = CardMetrics::picturePixmap()->height();
+	int vmarg = (h - picturesH * 2) / 2; 
+	int hmarg = (w - picturesW) / 2;
+	int r1x = (hmarg - rankW) / 2;
+	Q_UNUSED(vmarg);
+#ifndef QTOPIA_PHONE
+	int r1y = r1x + 2;
+#else
+	int r1y = r1x + 1;
+#endif
+	p.drawPixmap( ix + r1x, iy + r1y, *CardMetrics::rankPixmap(), 0, 0, rankW, rankH );
+#ifndef QTOPIA_PHONE
+	int r2x = w - r1x - rankW;
+	int r2y = h - r1y - rankH;
+	p.drawPixmap( ix + r2x, iy + r2y, *CardMetrics::rankIPixmap(), rankW*12, 0, rankW, rankH );
+#endif
+	CanvasRoundRect::drawShape(p);
+    }
 };
 
 
-class PatienceWorkingPile : public CardPile, public CanvasRoundRect
+class PatienceWorkingPile : public CanvasCardPile
 {
 public:
-    PatienceWorkingPile(int x, int y, QCanvas *canvas)
-        : CardPile(x, y), CanvasRoundRect(x, y, canvas), top(x, y) { }
+    PatienceWorkingPile(QPoint p, QString name, QCanvas *canvas)
+        : CanvasCardPile(p, name, canvas), top(p) { }
     virtual bool isAllowedOnTop(Card *card) {
 	if ( card->isFacing() &&
-	     ( ( ( cardOnTop() == NULL ) && (card->getValue() == king) ) ||
+	     ( ( ( cardOnTop() == NULL ) && (card->value() == Card::king) ) ||
 	       ( ( cardOnTop() != NULL ) &&
 #ifndef CHEAT_TEST_MODE
- 	         ( (int)card->getValue() + 1 == (int)cardOnTop()->getValue() ) &&
+ 	         ( (int)card->value() + 1 == (int)cardOnTop()->value() ) &&
 #endif
 	         ( card->isRed() != cardOnTop()->isRed() ) ) ) )
 	    return TRUE;
-        return FALSE;	
+        return FALSE;
     }
     virtual bool isAllowedToBeMoved(Card *card) {
 	if ( card->isFacing() )
 	    return TRUE;
         return FALSE;	
     }
+    virtual bool isSelectable(Card *card) {
+	return card->isFacing();
+    }
     virtual void cardAddedToTop(Card *card) {
 	Q_UNUSED(card);
-	top = getCardPos(NULL);
-	setNextX( top.x() );
-	setNextY( top.y() );
+	top = cardPos(NULL);
+	setNextPos( top );
     }
     virtual void cardRemoved(Card *card) {
 	Q_UNUSED(card);
@@ -127,42 +180,41 @@ public:
 	Card *newTopCard = cardOnTop();
 
 	if ( !newTopCard ) {
-	    top = QPoint( pileX, pileY );
-	    setNextX( pileX );
-    	    setNextY( pileY );
-	    return;
+	    top = pos();
 	} else {
-	    top = getCardPos(NULL);
+	    top = cardPos(NULL);
 	    if ( newTopCard->isFacing() == FALSE ) {
 		int offsetDown = CardMetrics::offsetDown();
 		// correct the position taking in to account the card is not
     		// yet flipped, but will become flipped
-    		top = QPoint( top.x() - 1, top.y() - 3 );
-		((CanvasCard*)newTopCard)->flipTo( top.x(), top.y(), 400 );
+		if ( CardMetrics::width() > 22 )
+		    top = QPoint( top.x() - 1, top.y() - 3 );
+		else
+		    top = QPoint( top.x(), top.y() - 3 );
+		newTopCard->flipTo(top, 400);
 		top = QPoint( top.x(), top.y() + offsetDown );
 	    }
-    	    setNextX( top.x() );
-	    setNextY( top.y() );
 	}
+	setNextPos( top );
     }
-    virtual QPoint getCardPos(Card *c) {
-	int x = pileX, y = pileY;
+    virtual QPoint cardPos(Card *c) const {
+	int x = pos().x(), y = pos().y();
 	Card *card = cardOnBottom();
 	while ((card != c) && (card != NULL)) {
 	    if (card->isFacing()) {
 		int offsetDown = CardMetrics::offsetDown();
 		y += offsetDown; 
 	    } else {
-		x += 1;    
+		if ( CardMetrics::width() > 22 )
+		    x += 1;
 		y += 3;
 	    }
 	    card = cardInfront(card); 
 	}
 	return QPoint( x, y );
     }
-    virtual QPoint getHypertheticalNextCardPos(void) {
+    virtual QPoint hypertheticalNextCardPos(void) const {
 	return top;
-	// return QPoint( getNextX(), getNextY() );
     }
 private:
     QPoint top;
@@ -172,29 +224,39 @@ private:
 
 class PatienceCardGame : public CanvasCardGame
 {
+    Q_OBJECT
 public:
-    PatienceCardGame(QCanvas *c, bool snap, QWidget *parent = 0);
+    PatienceCardGame(QCanvas *c, QCanvasView *view, bool snap, bool casinoRules);
     virtual ~PatienceCardGame();
+    virtual QString gameName() const { return QObject::tr("Patience"); }
     virtual void deal(void);
-    virtual bool haveWeWon() { 
+    virtual bool haveWeWon() const { 
 	return ( discardPiles[0]->kingOnTop() &&
 		 discardPiles[1]->kingOnTop() &&
 		 discardPiles[2]->kingOnTop() &&
-		 discardPiles[3]->kingOnTop() );;
+		 discardPiles[3]->kingOnTop() );
     }
-    virtual void mousePress(QPoint p);
-    virtual void mouseRelease(QPoint p) { Q_UNUSED(p); }
-//    virtual void mouseMove(QPoint p);
-    virtual bool mousePressCard(Card *card, QPoint p);
-    virtual void mouseReleaseCard(Card *card, QPoint p) { Q_UNUSED(card); Q_UNUSED(p); }
-//    virtual void mouseMoveCard(Card *card, QPoint p) { Q_UNUSED(card); Q_UNUSED(p); }
-    bool canTurnOverDeck(void) { return (numberOfTimesThroughDeck != 3); }
+
+    void flipOverCards();
+    void turnOverDeck();
+
+    virtual int pileForKey(int curPile, int key);
+    virtual bool cardSelected(Card *card);
+    virtual bool pileSelected(CardPile *pile);
+    bool canTurnOverDeck(void) { return !casinoRules() || numberOfTimesThroughDeck < 3; }
+    virtual void casinoRulesChanged() {
+	setCircleCrossState();
+    }
     void throughDeck(void) {
 	numberOfTimesThroughDeck++;
-	if (numberOfTimesThroughDeck == 3)
+	setCircleCrossState();
+    }
+    void setCircleCrossState() {
+	if (canTurnOverDeck())
+    	    circleCross->setCircle();
+	else
     	    circleCross->setCross();
     }
-    bool snapOn;
     virtual void writeConfig( Config& cfg );
     virtual void readConfig( Config& cfg );
 private:

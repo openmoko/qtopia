@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/src/server/serverinterface.cpp:155 -->
+<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/server/serverinterface.cpp:171 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,13 +14,21 @@ body { background: #ffffff; color: black; }
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
 </td>
-<td align="right"><a href=../index.html><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>ServerInterface Class Reference</h1>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>ServerInterface Class Reference</h1>
 
 <p>The ServerInterface class provides an interface for Qtopia
 custom launchers.
@@ -31,13 +39,14 @@ custom launchers.
 <ul>
 <li><div class=fn>virtual <b>~ServerInterface</b> ()</div></li>
 <li><div class=fn>virtual void <a href="#createGUI"><b>createGUI</b></a> () = 0</div></li>
+<li><div class=fn>virtual void <a href="#showGUI"><b>showGUI</b></a> () = 0</div></li>
 <li><div class=fn>virtual void <a href="#destroyGUI"><b>destroyGUI</b></a> () = 0</div></li>
 <li><div class=fn>virtual void <a href="#typeAdded"><b>typeAdded</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;QString&nbsp;&amp;&nbsp;name, const&nbsp;QPixmap&nbsp;&amp;&nbsp;pixmap, const&nbsp;QPixmap&nbsp;&amp;&nbsp;bgPixmap ) = 0</div></li>
 <li><div class=fn>virtual void <a href="#typeRemoved"><b>typeRemoved</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type ) = 0</div></li>
 <li><div class=fn>virtual void <a href="#applicationAdded"><b>applicationAdded</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;AppLnk&nbsp;&amp;&nbsp;app ) = 0</div></li>
 <li><div class=fn>virtual void <a href="#applicationRemoved"><b>applicationRemoved</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;AppLnk&nbsp;&amp;&nbsp;app ) = 0</div></li>
 <li><div class=fn>virtual void <a href="#allApplicationsRemoved"><b>allApplicationsRemoved</b></a> () = 0</div></li>
-<li><div class=fn>enum <a href="#ApplicationState-enum"><b>ApplicationState</b></a> { Launching, Running, Terminated }</div></li>
+<li><div class=fn>enum <a href="#ApplicationState-enum"><b>ApplicationState</b></a> { Launching, Running, Terminated, Raised }</div></li>
 <li><div class=fn>virtual void <a href="#applicationStateChanged"><b>applicationStateChanged</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name, ApplicationState&nbsp;state ) = 0</div></li>
 <li><div class=fn>virtual void <a href="#documentAdded"><b>documentAdded</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;doc ) = 0</div></li>
 <li><div class=fn>virtual void <a href="#documentRemoved"><b>documentRemoved</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;doc ) = 0</div></li>
@@ -54,6 +63,7 @@ custom launchers.
 <ul>
 <li><div class=fn>const AppLnkSet &amp; <a href="#appLnks"><b>appLnks</b></a> ()</div></li>
 <li><div class=fn>void <a href="#dockWidget"><b>dockWidget</b></a> ( QWidget&nbsp;*&nbsp;w, DockArea&nbsp;placement )</div></li>
+<li><div class=fn>void <b>dockWidget</b> ( QWidget&nbsp;*&nbsp;w, DockArea&nbsp;placement, const&nbsp;QSize&nbsp;&amp;&nbsp;s )</div></li>
 </ul>
 <hr><a name="details"></a><h2>Detailed Description</h2>
  
@@ -133,6 +143,7 @@ to show launch notification and update a list of running applications.
 </h3>
 
 <p> Implement this function to create the custom launcher UI.
+<p> <p>See also <a href="#showGUI">showGUI</a>().
 
 <h3 class=fn>void <a name="destroyGUI"></a>ServerInterface::destroyGUI ()<tt> [pure virtual]</tt>
 </h3>
@@ -194,6 +205,12 @@ applications.
 <p> Return TRUE if the custom launcher requires the server to scan for
 documents.
 
+<h3 class=fn>void <a name="showGUI"></a>ServerInterface::showGUI ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Implement this function to show the custom launcher UI for
+the first time. Will be called after <a href="#createGUI">createGUI</a>().
+
 <h3 class=fn>void <a name="storageChanged"></a>ServerInterface::storageChanged ( const QList&lt;FileSystem&gt; &amp; )<tt> [pure virtual]</tt>
 </h3>
 
@@ -219,11 +236,13 @@ card containing a non-standard category is inserted or removed.
 
 <!-- eof -->
 <hr><p>
-This file is part of the <a href="../index.html">Qtopia</a> platform,
-copyright &copy; 1995-2003
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2003 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2004
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2004 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.0</div>
 </table></div></address></body>
 </html>

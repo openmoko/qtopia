@@ -1,7 +1,10 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
 [Global]
-Name = Gray
-Name[ja] = グレー
+Name[]=Gray
 [Colors]
-Background = #E0E0E0
-Button = #D0D0D0
-Highlight = #52719C
+Background=#EFEFEF
+Button=#D0D0D0
+Highlight=#707070
+AlternateBase=#EFEFEF

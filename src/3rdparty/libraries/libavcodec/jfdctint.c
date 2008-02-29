@@ -23,6 +23,11 @@
  * scaled fixed-point arithmetic, with a minimal number of shifts.
  */
 
+/**
+ * @file jfdctint.c
+ * Independent JPEG Group's slow & accurate dct.
+ */
+ 
 #include <stdlib.h>
 #include <stdio.h>
 #include "common.h"
@@ -78,7 +83,7 @@
  * they are represented to better-than-integral precision.  These outputs
  * require BITS_IN_JSAMPLE + PASS1_BITS + 3 bits; this fits in a 16-bit word
  * with the recommended scaling.  (For 12-bit sample data, the intermediate
- * array is INT32 anyway.)
+ * array is int32_t anyway.)
  *
  * To avoid overflow of the 32-bit intermediate results in pass 2, we must
  * have BITS_IN_JSAMPLE + CONST_BITS + PASS1_BITS <= 26.  Error analysis
@@ -101,18 +106,18 @@
  */
 
 #if CONST_BITS == 13
-#define FIX_0_298631336  ((INT32)  2446)	/* FIX(0.298631336) */
-#define FIX_0_390180644  ((INT32)  3196)	/* FIX(0.390180644) */
-#define FIX_0_541196100  ((INT32)  4433)	/* FIX(0.541196100) */
-#define FIX_0_765366865  ((INT32)  6270)	/* FIX(0.765366865) */
-#define FIX_0_899976223  ((INT32)  7373)	/* FIX(0.899976223) */
-#define FIX_1_175875602  ((INT32)  9633)	/* FIX(1.175875602) */
-#define FIX_1_501321110  ((INT32)  12299)	/* FIX(1.501321110) */
-#define FIX_1_847759065  ((INT32)  15137)	/* FIX(1.847759065) */
-#define FIX_1_961570560  ((INT32)  16069)	/* FIX(1.961570560) */
-#define FIX_2_053119869  ((INT32)  16819)	/* FIX(2.053119869) */
-#define FIX_2_562915447  ((INT32)  20995)	/* FIX(2.562915447) */
-#define FIX_3_072711026  ((INT32)  25172)	/* FIX(3.072711026) */
+#define FIX_0_298631336  ((int32_t)  2446)	/* FIX(0.298631336) */
+#define FIX_0_390180644  ((int32_t)  3196)	/* FIX(0.390180644) */
+#define FIX_0_541196100  ((int32_t)  4433)	/* FIX(0.541196100) */
+#define FIX_0_765366865  ((int32_t)  6270)	/* FIX(0.765366865) */
+#define FIX_0_899976223  ((int32_t)  7373)	/* FIX(0.899976223) */
+#define FIX_1_175875602  ((int32_t)  9633)	/* FIX(1.175875602) */
+#define FIX_1_501321110  ((int32_t)  12299)	/* FIX(1.501321110) */
+#define FIX_1_847759065  ((int32_t)  15137)	/* FIX(1.847759065) */
+#define FIX_1_961570560  ((int32_t)  16069)	/* FIX(1.961570560) */
+#define FIX_2_053119869  ((int32_t)  16819)	/* FIX(2.053119869) */
+#define FIX_2_562915447  ((int32_t)  20995)	/* FIX(2.562915447) */
+#define FIX_3_072711026  ((int32_t)  25172)	/* FIX(3.072711026) */
 #else
 #define FIX_0_298631336  FIX(0.298631336)
 #define FIX_0_390180644  FIX(0.390180644)
@@ -129,7 +134,7 @@
 #endif
 
 
-/* Multiply an INT32 variable by an INT32 constant to yield an INT32 result.
+/* Multiply an int32_t variable by an int32_t constant to yield an int32_t result.
  * For 8-bit samples with the recommended scaling, all the variable
  * and constant values involved are no more than 16 bits wide, so a
  * 16x16->32 bit multiply can be used instead of a full 32x32 multiply.
@@ -143,16 +148,10 @@
 #endif
 
 
-/*
- * Perform the forward DCT on one block of samples.
- */
-
-GLOBAL(void)
-ff_jpeg_fdct_islow (DCTELEM * data)
-{
-  INT32 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-  INT32 tmp10, tmp11, tmp12, tmp13;
-  INT32 z1, z2, z3, z4, z5;
+static always_inline void row_fdct(DCTELEM * data){
+  int_fast32_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+  int_fast32_t tmp10, tmp11, tmp12, tmp13;
+  int_fast32_t z1, z2, z3, z4, z5;
   DCTELEM *dataptr;
   int ctr;
   SHIFT_TEMPS
@@ -220,6 +219,23 @@ ff_jpeg_fdct_islow (DCTELEM * data)
     
     dataptr += DCTSIZE;		/* advance pointer to next row */
   }
+}
+
+/*
+ * Perform the forward DCT on one block of samples.
+ */
+
+GLOBAL(void)
+ff_jpeg_fdct_islow (DCTELEM * data)
+{
+  int_fast32_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+  int_fast32_t tmp10, tmp11, tmp12, tmp13;
+  int_fast32_t z1, z2, z3, z4, z5;
+  DCTELEM *dataptr;
+  int ctr;
+  SHIFT_TEMPS
+
+  row_fdct(data);
 
   /* Pass 2: process columns.
    * We remove the PASS1_BITS scaling, but leave the results scaled up
@@ -288,5 +304,70 @@ ff_jpeg_fdct_islow (DCTELEM * data)
 					   CONST_BITS+PASS1_BITS);
     
     dataptr++;			/* advance pointer to next column */
+  }
+}
+
+/*
+ * The secret of DCT2-4-8 is really simple -- you do the usual 1-DCT
+ * on the rows and then, instead of doing even and odd, part on the colums
+ * you do even part two times.
+ */
+GLOBAL(void)
+ff_fdct248_islow (DCTELEM * data)
+{
+  int_fast32_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+  int_fast32_t tmp10, tmp11, tmp12, tmp13;
+  int_fast32_t z1;
+  DCTELEM *dataptr;
+  int ctr;
+  SHIFT_TEMPS
+
+  row_fdct(data);
+
+  /* Pass 2: process columns.
+   * We remove the PASS1_BITS scaling, but leave the results scaled up
+   * by an overall factor of 8.
+   */
+
+  dataptr = data;
+  for (ctr = DCTSIZE-1; ctr >= 0; ctr--) {
+     tmp0 = dataptr[DCTSIZE*0] + dataptr[DCTSIZE*1];
+     tmp1 = dataptr[DCTSIZE*2] + dataptr[DCTSIZE*3];
+     tmp2 = dataptr[DCTSIZE*4] + dataptr[DCTSIZE*5];
+     tmp3 = dataptr[DCTSIZE*6] + dataptr[DCTSIZE*7];
+     tmp4 = dataptr[DCTSIZE*0] - dataptr[DCTSIZE*1];
+     tmp5 = dataptr[DCTSIZE*2] - dataptr[DCTSIZE*3];
+     tmp6 = dataptr[DCTSIZE*4] - dataptr[DCTSIZE*5];
+     tmp7 = dataptr[DCTSIZE*6] - dataptr[DCTSIZE*7];
+      
+     tmp10 = tmp0 + tmp3;
+     tmp11 = tmp1 + tmp2;
+     tmp12 = tmp1 - tmp2;
+     tmp13 = tmp0 - tmp3;
+     
+     dataptr[DCTSIZE*0] = (DCTELEM) DESCALE(tmp10 + tmp11, PASS1_BITS);
+     dataptr[DCTSIZE*4] = (DCTELEM) DESCALE(tmp10 - tmp11, PASS1_BITS);
+     
+     z1 = MULTIPLY(tmp12 + tmp13, FIX_0_541196100);
+     dataptr[DCTSIZE*2] = (DCTELEM) DESCALE(z1 + MULTIPLY(tmp13, FIX_0_765366865),
+				            CONST_BITS+PASS1_BITS);
+     dataptr[DCTSIZE*6] = (DCTELEM) DESCALE(z1 + MULTIPLY(tmp12, - FIX_1_847759065),
+				            CONST_BITS+PASS1_BITS);
+
+     tmp10 = tmp4 + tmp7;
+     tmp11 = tmp5 + tmp6;
+     tmp12 = tmp5 - tmp6;
+     tmp13 = tmp4 - tmp7;
+
+     dataptr[DCTSIZE*1] = (DCTELEM) DESCALE(tmp10 + tmp11, PASS1_BITS);
+     dataptr[DCTSIZE*5] = (DCTELEM) DESCALE(tmp10 - tmp11, PASS1_BITS);
+     
+     z1 = MULTIPLY(tmp12 + tmp13, FIX_0_541196100);
+     dataptr[DCTSIZE*3] = (DCTELEM) DESCALE(z1 + MULTIPLY(tmp13, FIX_0_765366865),
+				            CONST_BITS+PASS1_BITS);
+     dataptr[DCTSIZE*7] = (DCTELEM) DESCALE(z1 + MULTIPLY(tmp12, - FIX_1_847759065),
+				            CONST_BITS+PASS1_BITS);
+    
+     dataptr++;			/* advance pointer to next column */
   }
 }

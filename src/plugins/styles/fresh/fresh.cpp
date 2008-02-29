@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -21,6 +36,7 @@
 #include <qtopia/qpeapplication.h>
 #include <qpushbutton.h>
 #include <qpainter.h>
+#include <qimage.h>
 #include <qfontmetrics.h>
 #include <qpalette.h>
 #include <qdrawutil.h>
@@ -61,6 +77,16 @@ void FreshStyle::polish ( QPalette & )
 {
 }
 
+class QStyleHackWidget : public QWidget {
+public:
+    static void setGlobalBrushOrigin(QWidget *w) {
+	((QStyleHackWidget*)w)->setWState(WState_GlobalBrushOrigin);
+    }
+    static void clearGlobalBrushOrigin(QWidget *w) {
+	((QStyleHackWidget*)w)->clearWState(WState_GlobalBrushOrigin);
+    }
+};
+
 void FreshStyle::polish( QWidget *w )
 {
     if ( w->inherits( "QListBox" ) ||
@@ -71,6 +97,7 @@ void FreshStyle::polish( QWidget *w )
 	f->setFrameShape( QFrame::StyledPanel );
 	f->setLineWidth( 1 );
     }
+    QStyleHackWidget::setGlobalBrushOrigin(w);
 }
 
 void FreshStyle::unPolish( QWidget *w )
@@ -83,6 +110,7 @@ void FreshStyle::unPolish( QWidget *w )
 	f->setFrameShape( QFrame::StyledPanel );
 	f->setLineWidth( 2 );
     }
+    QStyleHackWidget::clearGlobalBrushOrigin(w);
 }
 
 int FreshStyle::defaultFrameWidth() const
@@ -394,10 +422,11 @@ void FreshStyle::drawScrollBarControls( QPainter* p, const QScrollBar* sb, int s
 		     addPageR.height(), g.brush( QColorGroup::Mid ));
     if ( controls & Slider ) {
 	QPoint bo = p->brushOrigin();
-	p->setBrushOrigin(sliderR.topLeft());
-	drawBevelButton( p, sliderR.x(), sliderR.y(),
-			 sliderR.width(), sliderR.height(), g,
-			 FALSE, &g.brush( QColorGroup::Button ) );
+	if ( !sb->testWState(WState_GlobalBrushOrigin) )
+	    p->setBrushOrigin(sliderR.topLeft());
+        drawBevelButton( p, sliderR.x(), sliderR.y(),
+                         sliderR.width(), sliderR.height(), g,
+                         FALSE, &g.brush( QColorGroup::Button ) );
 	p->setBrushOrigin(bo);
 	drawRiffles( p, sliderR.x(), sliderR.y(),
 		     sliderR.width(), sliderR.height(), g, HORIZONTAL );
@@ -529,6 +558,23 @@ void FreshStyle::drawTab( QPainter *p, const QTabBar *tb, QTab *t, bool selected
 	    p->fillRect( QRect( r.left()+1, r.top()+2, r.width()-2, r.height()-3),
 			 tb->colorGroup().brush( QColorGroup::Button ));
 
+#if defined(_WS_QWS_)
+	    QPixmap pm;
+	    QColor bg = tb->colorGroup().button();
+	    int n = (r.height() / 2) - 1;
+	    QImage img( 1, n, 32 );
+	    for ( int j = 0; j < n; j++ )
+		*(unsigned int *)img.scanLine(j) = (j*15) << 24;
+	    img.setAlphaBuffer(true);
+	    pm.convertFromImage(img);
+	    int x1 = r.left()+1;
+	    int x2 = r.right()-1;
+	    int y = r.bottom()-n+1;
+	    QPoint po = p->brushOrigin();
+	    p->setBrushOrigin( x1, y );
+	    p->fillRect( x1, y, x2-x1, n-1, QBrush(Qt::white, pm) );
+	    p->setBrushOrigin( po );
+#else
 	    //do shading; will not work for pixmap brushes
 	    QColor bg = tb->colorGroup().button(); 
 	    //	    int h,s,v;
@@ -538,11 +584,12 @@ void FreshStyle::drawTab( QPainter *p, const QTabBar *tb, QTab *t, bool selected
 	    for ( int i = 1; i < n; i++ ) {
 		dark = (dark * (100+(i*15)/n) )/100;
 		p->setPen( bg.dark( dark ) );
-		int y = r.bottom()-n+i;
+		int y = r.bottom()-n+1;
 		int x1 = r.left()+1;
 		int x2 = r.right()-1;
 		p->drawLine( x1, y, x2, y );
 	    }
+#endif
 	}
 
 	p->setPen( tb->colorGroup().light() );

@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*********************************************************************
  *                
  * Filename:      obex_const.h
@@ -6,7 +27,7 @@
  * Status:        Stable.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon May 08 15:03:03 2000
- * CVS ID:        $Id: obex_const.h,v 1.13 2000/12/06 21:31:31 pof Exp $
+ * CVS ID:        $Id: obex_const.h,v 1.20 2002/11/15 09:08:54 holtmann Exp $
  * 
  *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
  *      
@@ -30,21 +51,21 @@
 #ifndef OBEX_CONST_H
 #define OBEX_CONST_H
 
-#include <glib.h>
+#include <stdint.h>
 
 typedef union {
-	guint32 bq4;
-	guint8 bq1;
-	const guint8 *bs;
+	uint32_t bq4;
+	uint8_t bq1;
+	const uint8_t *bs;
 } obex_headerdata_t;
 
 typedef struct {
-	gint (*connect)(obex_t *handle, gpointer userdata);
-	gint (*disconnect)(obex_t *handle, gpointer userdata);
-	gint (*listen)(obex_t *handle, gpointer userdata);
-	gint (*write)(obex_t *handle, gpointer userdata, guint8 *buf, gint buflen);
-	gint (*handleinput)(obex_t *handle, gpointer userdata, gint timeout);
-	gpointer userdata;
+	int (*connect)(obex_t *handle, void * customdata);
+	int (*disconnect)(obex_t *handle, void * customdata);
+	int (*listen)(obex_t *handle, void * customdata);
+	int (*write)(obex_t *handle, void * customdata, uint8_t *buf, int buflen);
+	int (*handleinput)(obex_t *handle, void * customdata, int timeout);
+	void * customdata;
 } obex_ctrans_t;
 
 #define	OBEX_CLIENT		0
@@ -61,6 +82,7 @@ typedef struct {
 #define OBEX_EV_ABORT		7	/* Request was aborted */
 #define OBEX_EV_STREAMEMPTY	8	/* Need to feed more data when sending a stream */
 #define OBEX_EV_STREAMAVAIL	9	/* Time to pick up data when receiving a stream */
+#define OBEX_EV_UNEXPECTED	10	/* Unexpected data, not fatal */
 
 /* For OBEX_Init() */
 #define OBEX_FL_KEEPSERVER	0x02	/* Keep the server alive */
@@ -76,7 +98,10 @@ typedef struct {
 /* Transports */
 #define OBEX_TRANS_IRDA		1
 #define OBEX_TRANS_INET		2
-#define OBEX_TRANS_CUST		3
+#define OBEX_TRANS_CUST		3	/* Fixme: This will go away in future */
+#define OBEX_TRANS_CUSTOM	3
+#define OBEX_TRANS_BLUETOOTH	4
+#define OBEX_TRANS_FD		5
 
 /* Standard headers */
 #define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */
@@ -124,5 +149,17 @@ typedef struct {
 #define OBEX_RSP_NOT_IMPLEMENTED	0x51
 #define OBEX_RSP_DATABASE_FULL		0x60
 #define OBEX_RSP_DATABASE_LOCKED	0x61
+
+/* Min, Max and default transport MTU */
+#define OBEX_DEFAULT_MTU	1024
+#define OBEX_MINIMUM_MTU	255      
+#define OBEX_MAXIMUM_MTU	32768
+/* In theory max MTU is (64k-1), but that's quite big. */
+
+/* Optimum MTU for various transport (optimum for throughput).
+ * The user/application has to set them via OBEX_SetTransportMTU().
+ * If you are worried about safety or latency, stick with the current
+ * default... - Jean II */
+#define OBEX_IRDA_OPT_MTU	(7 * 2039)	/* 7 IrLAP frames */
 
 #endif

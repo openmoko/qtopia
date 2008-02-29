@@ -94,6 +94,8 @@ rs_result rs_job_free(rs_job_t *job)
 
 static rs_result rs_job_s_complete(rs_job_t *job)
 {
+    job = job; //shutup compiler
+
     rs_fatal("should not be reached");
     return RS_INTERNAL_ERROR;
 }
@@ -142,7 +144,7 @@ rs_result rs_job_iter(rs_job_t *job, rs_buffers_t *buffers)
     result = rs_job_work(job, buffers);
 
     if (result == RS_BLOCKED  ||  result == RS_DONE) 
-        if ((orig_in == buffers->avail_in)  &&  (orig_out == buffers->avail_out)
+        if ((orig_in == (rs_long_t)buffers->avail_in)  &&  (orig_out == (rs_long_t)buffers->avail_out)
             && orig_in && orig_out) {
             rs_log(RS_LOG_ERR, "internal error: job made no progress "
                    "[orig_in=%.0f, orig_out=%.0f, final_in=%.0f, final_out=%.0f]",

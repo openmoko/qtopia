@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -28,6 +43,8 @@
 #include <qfile.h>
 #include <qpushbutton.h>
 #include <qobject.h>
+#include <qtimer.h>
+#include <qheader.h>
 
 #include "categoryedit_p.h"
 #include "categoryselect.h"
@@ -67,6 +84,17 @@
   \ingroup qtopiaemb
 */
 
+class CategoryCheckListItem : public QCheckListItem {
+public:
+    CategoryCheckListItem(QListView* parent, const QString& l, int i) :
+	QCheckListItem(parent, l, CheckBox),
+	id(i)
+    {
+    }
+
+    const int id;
+};
+
 class CategoryComboPrivate
 {
 public:
@@ -78,7 +106,7 @@ public:
 };
 
 CategoryCombo::CategoryCombo( QWidget *parent, const char *name , int width)
-    : QComboBox( parent, name )
+    : QComboBox( FALSE, parent, name )
 {
     QSizePolicy p = sizePolicy();
     p.setHorData(QSizePolicy::Expanding);
@@ -93,6 +121,9 @@ void CategoryCombo::initCombo( const QArray<int> &recCats,
 {
     initCombo( recCats, appName, appName );
 }
+
+void qpe_translateLabels(QStringList& strs);
+QString qpe_translateLabel(const QString& s);
 
 void CategoryCombo::initCombo( const QArray<int> &recCats,
 			       const QString &appName,
@@ -109,44 +140,19 @@ void CategoryCombo::initCombo( const QArray<int> &recCats,
     slApp = d->mCats.labels( d->mStrAppName, TRUE, Categories::UnfiledLabel );
 
     d->mAppCats = d->mCats.ids( d->mStrAppName, slApp);
+    qpe_translateLabels(slApp);
 
-    int i,
-	j,
-	saveMe,
-	recCount;
-    QStringList::Iterator it;
-    // now add in all the items...
-    recCount = recCats.count();
-    saveMe = -1;
-    if ( recCount > 1 && loadOk ) {
-	it = slApp.begin();
-	for ( j = 0; j< (int)(slApp.count()-1); ++it, j++ ) {
-	    // grr... we have to go through and compare...
-	    if ( j < int(d->mAppCats.size()) ) {
-		for ( i = 0; i < recCount; i++ ) {
-		    if ( recCats[i] == d->mAppCats[j] ) {
-			(*it).append( tr(" (multi.)","short 'multiple'") );
-			if ( saveMe < 0 )
-			    saveMe = j;
-			// no need to continue through the list.
-			break;
-		    }
-		}
-	    }
-	    insertItem( *it );
-	}
-	insertItem( *it );
-    } else
-	insertStringList( slApp );
+    int recCount = recCats.count();
+    insertStringList( slApp );
 
-    if ( recCount > 0 && loadOk ) {
-	for ( i = 0; i < int(d->mAppCats.size()); i++ ) {
+    if ( recCount == 1 && loadOk ) {
+	for ( int i = 0; i < int(d->mAppCats.size()); i++ ) {
 	    if ( d->mAppCats[i] == recCats[0] ) {
 		setCurrentItem( i );
 		break;
 	    }
 	}
-    } else {
+    } else if (recCount == 0 || !loadOk) {
 	setCurrentItem( slApp.count()-1 );  // unfiled
     }
 
@@ -172,6 +178,7 @@ QArray<int> CategoryCombo::initComboWithRefind( const QArray<int> &recCats,
     slApp = d->mCats.labels( d->mStrAppName, TRUE, Categories::UnfiledLabel );
 
     d->mAppCats = d->mCats.ids( d->mStrAppName, slApp);
+    qpe_translateLabels(slApp);
 
     // addition part
     // make new recCats
@@ -201,47 +208,21 @@ QArray<int> CategoryCombo::initComboWithRefind( const QArray<int> &recCats,
     }
     // addition end
 
-    int i,
-	j,
-	saveMe,
-	recCount;
-    QStringList::Iterator it;
-    // now add in all the items...
-    recCount = results.count();
-    saveMe = -1;
-    if ( recCount > 1 && loadOk ) {
-	it = slApp.begin();
-	for ( j = 0; j< (int)(slApp.count()-1); ++it, j++ ) {
+    int recCount = results.count();
+    insertStringList( slApp );
 
-	    // grr... we have to go through and compare...
-	    if ( j < int(d->mAppCats.size()) ) {
-		for ( i = 0; i < recCount; i++ ) {
-		    if ( results[i] == d->mAppCats[j] ) {
-			(*it).append( tr(" (multi.)","short 'multiple'") );
-			if ( saveMe < 0 )
-			    saveMe = j;
-			// no need to continue through the list.
-			break;
-		    }
-		}
-	    }
-	    insertItem( *it );
-	}
-	insertItem( *it );
-    } else
-	insertStringList( slApp );
-
-    if ( recCount > 0 && loadOk ) {
-	for ( i = 0; i < int(d->mAppCats.size()); i++ ) {
+    if ( recCount == 1 && loadOk ) {
+	for ( int i = 0; i < int(d->mAppCats.size()); i++ ) {
 	    if ( d->mAppCats[i] == results[0] ) {
 		setCurrentItem( i );
 		break;
 	    }
 	}
-    } else
-    {
+    } else if (recCount == 0 || !loadOk) {
 	setCurrentItem( slApp.count()-1 );  // unfiled
-    }
+    } // else handled later in CategorySelect::setCategories,
+    //which calls this function
+
 /*
     QObject::connect( this, SIGNAL(activated(int)),
 		      this, SLOT(slotValueChanged(int)) );
@@ -265,7 +246,7 @@ int CategoryCombo::currentCategory() const
     else if ( i > (int)d->mAppCats.count() )  // only happen on "All"
 	r = -2;
     else
-	r =  d->mAppCats[i];
+	r = d->mAppCats[i];
 
     return r;
 }
@@ -307,28 +288,28 @@ class CategorySelectPrivate : public QObject
 {
     Q_OBJECT
 public:
-    CategorySelectPrivate( QObject *parent, bool all )
-	: QObject(parent, "CategorySelectPrivate" ), mRec(),
-	  usingAll( all ), mVisibleName(), editMode( FALSE ),
+    CategorySelectPrivate( QObject *parent )
+	: QObject(parent, "CategorySelectPrivate" ), mChosen(),
+	  usingAll( FALSE ), mVisibleName(), editMode( FALSE ),
 	  canEdit( TRUE ), type( CategorySelect::ComboBox ), container( 0 ),
-	  layout(0), fixedWidth(0), catSelector( 0 )
+	  layout(0), fixedWidth(0), pendingCategorySets( 0 ), catSelector( 0 )
     {
 	setType();
     }
 
     void setType()
-	{
+    {
 #ifndef QTOPIA_DESKTOP
-	    type = CategorySelect::ComboBox;
+	type = CategorySelect::ComboBox;
 #else
-	    if ( qApp->desktop()->height() >= 600 && !usingAll )
-		type = CategorySelect::ListView;
-	    else
-		type = CategorySelect::ComboBox;
+	if ( qApp->desktop()->height() >= 600 && !usingAll )
+	    type = CategorySelect::ListView;
+	else
+	    type = CategorySelect::ComboBox;
 #endif
-	}
+    }
 
-    QArray<int> mRec;
+    QArray<int> mChosen; // The checked categories.
     bool usingAll;
     QString mVisibleName;
     bool editMode;
@@ -337,58 +318,102 @@ public:
     QWidget *container;
     QGridLayout *layout;
     int fixedWidth;
+    int lastCat;
+    int pendingCategorySets;
 
-    // so far, the CheckedListView is used only for Qtopia Desktop
+    // so far, the QListView is used only for Qtopia Desktop
     // but could be used for bigger PDA screen sizes
 
     // the following methods and variables are used only when
     // type == ComboBox
-    CheckedListView *catSelector;
+    QListView *catSelector;
     QPushButton *editButton;
     Categories cats;
     QString appName;
 
-    void reloadCatSelector( const QStringList &checked )
-	{
-	    catSelector->clear();
-	    catSelector->addCheckableList( cats.labels( appName ) );
-	    catSelector->setChecked( checked );
+    void reloadCatSelector( const QArray<int>& checked )
+    {
+	catSelector->clear();
+
+	QStringList sl = cats.labels( appName );
+
+	// Qtopia2:
+	//QArray<int> id = cats.ids( appName );
+	// Qtopia0:
+	QArray<int> id = cats.ids( appName, sl );
+
+	qpe_translateLabels(sl);
+	int i=0;
+	for (QStringList::ConstIterator it=sl.begin(); it!=sl.end(); ++it,++i) {
+	    CategoryCheckListItem *item = new CategoryCheckListItem(catSelector,*it,id[i]);
+	    if ( checked.find(id[i])>=0 )
+		item->setOn(TRUE);
 	}
+    }
 
     void reloadCatSelector()
-	{
-	    // labels() from qtopia1
-	    QStringList strs = cats.globalGroup().labels( mRec );
-	    strs += cats.appGroupMap()[appName].labels( mRec );
-	    reloadCatSelector( strs );
-	}
-    void pruneDeletedCats()
-	{
-	    QArray<int> checkedCats;
-	    for ( int i = 0; i < (int) mRec.count();++i )
-		if ( cats.label( appName, mRec[i] ) != QString::null ) {
-		    checkedCats.resize( i+1 );
-		    checkedCats[i] = mRec[i];
-		}
+    {
+	reloadCatSelector( mChosen );
+    }
+    void pruneDeletedCats(QArray<int>& l)
+    {
+	QArray<int> checkedCats;
+	for ( int i = 0; i < (int) l.count();++i )
+	    if ( cats.label( appName, l[i] ) != QString::null ) {
+		checkedCats.resize( i+1 );
+		checkedCats[i] = l[i];
+	    }
 
-	    mRec = checkedCats;
-	}
+	l = checkedCats;
+    }
+
+    void setComboItem( QComboBox *combo, int item )
+    {
+	pendingCategorySets++;
+	combo->setCurrentItem( item );
+	QTimer::singleShot( 0, this, SLOT( turnOnEditDialog() ) );
+    }
 
 public slots:
-    void itemClicked( QListViewItem * )
-	{
-	    mRec = cats.ids( appName, catSelector->checked() );
+    void itemClicked( QListViewItem *i )
+    {
+	if ( i == 0 )
+	    return;
+	CategoryCheckListItem* item = (CategoryCheckListItem*)i;
+	int id = item->id;
+	if ( item->isOn() ) {
+	    if ( mChosen.count() == 0 || mChosen.find(id) < 0 ) {
+		mChosen.resize(mChosen.size()+1);
+		mChosen[(int)mChosen.size()-1] = id;
+	    }
+	} else {
+	    if ( mChosen.count() > 0 ) {
+		int i = mChosen.find(id);
+		if ( i >= 0 ) {
+		    int t = mChosen[(int)mChosen.size()-1];
+		    mChosen[i] = t;
+		    mChosen.resize(mChosen.size()-1);
+		}
+	    }
 	}
+    }
 
+    void turnOnEditDialog()
+    {
+	pendingCategorySets--;
+    }
 };
 
 
 /*!
   \overload
 
-  This constructor accepts an array \a vl of integers representing Categories.
-  \a visibleName is the string used when the name of this widget is required
-  to be displayed. \a width is an integer used as the fixed width of the widget.
+  This constructor accepts an array \a vl of integers representing Categories
+  for application \a appName.
+  \a visibleName is the string used when the name of this application is required
+  to be displayed.
+    \a width is an integer used as the fixed width of the widget.
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 CategorySelect::CategorySelect( const QArray<int> &vl,
 				const QString &appName,
@@ -407,6 +432,8 @@ CategorySelect::CategorySelect( const QArray<int> &vl,
   \overload
   This constructor accepts an array \a vl of integers representing Categories.
   \a appName is used as the visible name string.
+    \a width is an integer used as the fixed width of the widget.
+    The \a parent and \a name parameters are the standard Qt parent parameters.
 */
 
 CategorySelect::CategorySelect( const QArray<int> &vl,
@@ -446,6 +473,8 @@ CategorySelect::~CategorySelect()
 {
 }
 
+// ===========================================================================
+
 class EditDlg : public QDialog
 {
     Q_OBJECT
@@ -454,10 +483,29 @@ public:
 	    const QArray<int> &vlRecs, const QString &appName, const QString &visibleName)
 	: QDialog(parent, name, modal)
     {
-	setCaption( tr("Edit Categories") );
+	setCaption( tr("Categories") );
 	QVBoxLayout *vb = new QVBoxLayout( this );
 	ce = new CategoryEdit( vlRecs, appName, visibleName, this );
 	vb->addWidget( ce );
+
+#ifdef QTOPIA_DESKTOP
+	QWidget *buttons = new QWidget( this );
+	QGridLayout *gl = new QGridLayout( buttons );
+
+	QSpacerItem *spacer = new QSpacerItem( 0, 0, QSizePolicy::Expanding );
+	QPushButton *ok = new QPushButton( tr("OK"), buttons );
+	QPushButton *cancel = new QPushButton( tr("Cancel"), buttons );
+	gl->addItem( spacer, 0, 0 );
+	gl->addWidget( ok, 0, 1 );
+	gl->addWidget( cancel, 0, 2 );
+
+	vb->addWidget( buttons );
+
+	connect( ok, SIGNAL(clicked()), this, SLOT(accept()) );
+	connect( cancel, SIGNAL(clicked()), this, SLOT(reject()) );
+
+	setCaption( tr("Edit Categories") );
+#endif
     }
 
     QArray<int> newCategories() { return ce->newCategories(); };
@@ -475,25 +523,45 @@ private:
     CategoryEdit *ce;
 };
 
+// ===========================================================================
+
 /*!
   This slot is called when the user pushes the button to edit Categories.
 */
-
 void CategorySelect::slotDialog()
 {
-    EditDlg editDlg( this, "categories", TRUE, d->mRec, mStrAppName, d->mVisibleName ); // No tr
-#ifndef QTOPIA_DESKTOP
+#ifdef QTOPIA_DESKTOP
+    emit editCategoriesClicked(this);
+    categoriesChanged();
+#else
+    EditDlg editDlg( this, "categories", TRUE, d->mChosen, mStrAppName, d->mVisibleName ); // No tr
     editDlg.showMaximized();
-    // need to add OKAY, CANCEL button
-#endif
 
     d->editMode = TRUE;
     if ( editDlg.exec() ) {
-	d->mRec = editDlg.newCategories();
-	cmbCat->initCombo( d->mRec, mStrAppName, d->mVisibleName );
-	if ( d->usingAll )
-	    cmbCat->insertItem( tr( "All" ), cmbCat->count() );
+	d->mChosen = editDlg.newCategories();
+	if ( d->type == ComboBox ) {
+	    cmbCat->initCombo( d->mChosen, mStrAppName, d->mVisibleName );
+	    if ( d->usingAll ) {
+		cmbCat->insertItem( tr( "All" ), cmbCat->count() );
+	    } else {
+		if ( d->mChosen.count() > 1 ) {
+		    cmbCat->insertItem( tr( "(multi) ..." ), cmbCat->count() );
+		    d->setComboItem( cmbCat, cmbCat->count() - 1 );
+		} else
+		    cmbCat->insertItem( tr( "..." ), cmbCat->count() );
+	    }
+	    d->lastCat = cmbCat->currentItem();
+	} else {
+	    QArray<int> t = d->mChosen;
+	    d->cats.load( categoryFileName() );
+	    d->pruneDeletedCats(t);
+	    d->reloadCatSelector( t );
+	}
+    } else if ( !d->usingAll ) {
+	d->setComboItem( cmbCat, d->lastCat );
     }
+#endif
 }
 
 /*!
@@ -507,12 +575,17 @@ void CategorySelect::categoriesChanged()
 	// as it will be handled in slotDialog
 	d->editMode = FALSE;
     } else {
-
 	if ( d->type == ComboBox ) {
 	    int prevCat = cmbCat->currentCategory();
-	    cmbCat->initComboWithRefind( d->mRec, mStrAppName );
+	    cmbCat->initComboWithRefind( d->mChosen, mStrAppName );
 	    if ( d->usingAll ) {
 		cmbCat->insertItem( tr( "All" ), cmbCat->count() );
+	    } else {
+		if ( d->mChosen.count() > 1 ) {
+		    cmbCat->insertItem( tr( "(multi) ..." ), cmbCat->count() );
+		    d->setComboItem( cmbCat, cmbCat->count() - 1 );
+		} else
+		    cmbCat->insertItem( tr( "..." ), cmbCat->count() );
 	    }
 	    cmbCat->setCurrentCategory( prevCat );
 
@@ -523,122 +596,135 @@ void CategorySelect::categoriesChanged()
 	    }
 	}
 	else {
-	    QStringList current = d->catSelector->checked();
+	    QArray<int> t = d->mChosen;
 	    d->cats.load( categoryFileName() );
-	    d->pruneDeletedCats();
-	    d->reloadCatSelector( current );
+	    d->pruneDeletedCats(t);
+	    d->reloadCatSelector( t );
 	}
     }
 }
 
 /*!
-  This slot is called when a new Category is available.
+  This slot is called when a new Category is available,
+  passing the \a newUid created.
 */
 
 void CategorySelect::slotNewCat( int newUid )
 {
-    if ( newUid != -1 ) {
+    if ( !d->usingAll ) {
+	// This is for handling the '...' entry
+	if ( newUid == -2 ) {
+	    if ( d->pendingCategorySets == 0 ) {
+		slotDialog();
+	    }
+	    return;
+	}
+	d->lastCat = cmbCat->currentItem();
+    }
+
+    if ( newUid != -1 && newUid != -2 ) {
 	bool alreadyIn = false;
-	for ( uint it = 0; it < d->mRec.count(); ++it ) {
-	    if ( d->mRec[(int)it] == newUid ) {
+	for ( uint it = 0; it < d->mChosen.count(); ++it ) {
+	    if ( d->mChosen[(int)it] == newUid ) {
 		alreadyIn = true;
 		break;
 	    }
 	}
 	if ( !alreadyIn ) {
-	    d->mRec.resize( 1 );
-	    d->mRec[ 0 ] = newUid;
+	    d->mChosen.resize( 1 );
+	    d->mChosen[ 0 ] = newUid;
 	}
     } else
-    d->mRec.resize(0);  // now Unfiled.
+    d->mChosen.resize(0);  // now Unfiled.
     emit signalSelected( currentCategory() );
 }
 
 /*!
   \overload
 
-  Resets the CategorySelect to select the \a vlCats for
-  the Categories assoicated with \a appName.
+  Resets the CategorySelect to select \a cats as
+  the Categories associated with \a appName.
 
   This function should only be called if <i>filtering</i>
   on Categories and not selecting and therefore possibly
   allowing the user to edit Categories.
 */
-QString CategorySelect::setCategories( const QArray<int> &rec,
+QString CategorySelect::setCategories( const QArray<int> &cats,
 				    const QString &appName )
 {
-    return setCategories( rec, appName, appName );
+    return setCategories( cats, appName, appName );
 }
 
 
 /*!
-  Resets the CategorySelect to select the \a vlCats for
+  Resets the CategorySelect to select the \a cals for
   the Categories assoicated with \a appName and displays
   the \a visibleName if the user is selecting and therefore editing
   new Categories.
  */
-QString CategorySelect::setCategories( const QArray<int> &rec,
+QString CategorySelect::setCategories( const QArray<int> &cals,
 				    const QString &appName,
 				    const QString &visibleName )
 {
     d->mVisibleName = visibleName;
     mStrAppName = appName;
     d->appName = appName;
-    if ( d->type == ComboBox )
-	d->mRec = cmbCat->initComboWithRefind( rec, appName );
-    else {
-	d->mRec = rec.copy();
+    if ( d->type == ComboBox ) {
+	d->mChosen = cmbCat->initComboWithRefind( cals, appName );
+	if ( d->usingAll ) {
+	    cmbCat->insertItem( tr( "All" ), cmbCat->count() );
+	} else {
+	    if ( d->mChosen.count() > 1 ) {
+		cmbCat->insertItem( tr( "(multi) ..." ), cmbCat->count() );
+		d->setComboItem( cmbCat, cmbCat->count() - 1 );
+	    } else
+		cmbCat->insertItem( tr( "..." ), cmbCat->count() );
+	}
+	d->lastCat = cmbCat->currentItem();
+    } else {
+	d->mChosen = cals.copy();
 	d->reloadCatSelector();
     }
-    return Qtopia::Record::idsToString(d->mRec);
+    return Qtopia::Record::idsToString(d->mChosen);
 }
 
-#ifdef QTOPIA_DESKTOP
-void CategorySelect::init(int width, bool usingAll )
-{
-#else
 void CategorySelect::init(int width)
 {
-    const bool usingAll = FALSE;
-#endif
     if ( d ) {
 	delete d->layout;
 	delete d->container;
-	d->usingAll = usingAll;
 	d->setType();
     } else {
-	d = new CategorySelectPrivate( this, usingAll );
+	d = new CategorySelectPrivate( this );
     }
-    d->container = new QWidget( this, "CategorySelect container" ); // No tr
+    d->container = new QWidget( this ); // No tr
 
     if ( d->type == ComboBox ) {
 	d->layout = new QGridLayout( d->container );
 
-	delete cmbCat;
-	cmbCat = new CategoryCombo( d->container, "category combo", width); // No tr
+	cmbCat = new CategoryCombo( d->container, 0, width); // No tr
 	d->layout->addWidget( cmbCat, 0, 0 );
 	QObject::connect( cmbCat, SIGNAL(sigCatChanged(int)),
 			  this, SLOT(slotNewCat(int)) );
 
-	if ( d->canEdit ) {
-	    cmdCat = new QToolButton( d->container, "category button" ); // No tr
+	if ( d->canEdit && d->usingAll ) {
+	    cmdCat = new QToolButton( d->container ); // No tr
 	    d->layout->addWidget( cmdCat, 0, 1 );
 
 	    cmdCat->setTextLabel( "...", FALSE );
 	    cmdCat->setFocusPolicy( TabFocus );
 	    cmdCat->setFixedHeight( cmbCat->sizeHint().height() );
 	    cmdCat->setUsesTextLabel( true );
-	    QObject::connect( cmdCat, SIGNAL(clicked()), this, SIGNAL(editCategoriesClicked()) );
 	    QObject::connect( cmdCat, SIGNAL(clicked()), this, SLOT(slotDialog()) );
 	}
-    }
-    else {
+    } else {
 	d->layout = new QGridLayout( d->container, 2, 2 );
 	d->cats.load( categoryFileName() );
-	d->catSelector = (CheckedListView *) new QListView( d->container, "catSelector" );
+	d->catSelector = new QListView( d->container, "catSelector" );
 	d->catSelector->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 	d->catSelector->addColumn( tr("Categories") );
 	d->catSelector->setSelectionMode( QListView::NoSelection );
+	d->catSelector->header()->hide();
 	d->layout->addMultiCellWidget( d->catSelector, 0, 0, 0, 1 );
 
 	QSpacerItem *horiSpacer = new QSpacerItem( 1, 1, QSizePolicy::Expanding,
@@ -648,14 +734,9 @@ void CategorySelect::init(int width)
 	d->editButton = new QPushButton( tr("Edit Categories"), d->container );
 	d->layout->addWidget( d->editButton, 1, 1 );
 
-	connect( d->catSelector, SIGNAL( clicked( QListViewItem *) ), d, SLOT( itemClicked( QListViewItem *) ) );
-	connect( d->catSelector, SIGNAL( spacePressed( QListViewItem *) ), d, SLOT( itemClicked( QListViewItem *) ) );
-	connect( d->editButton, SIGNAL( clicked() ),
-		 this, SIGNAL( editCategoriesClicked() ) );
-#ifndef QTOPIA_DESKTOP
-	connect( d->editButton, SIGNAL( clicked() ),
-		 SLOT( slotDialog() ) );
-#endif
+	connect( d->catSelector, SIGNAL( clicked(QListViewItem*) ), d, SLOT( itemClicked(QListViewItem*) ) );
+	connect( d->catSelector, SIGNAL( spacePressed(QListViewItem*) ), d, SLOT( itemClicked(QListViewItem*) ) );
+	connect( d->editButton, SIGNAL( clicked() ), SLOT( slotDialog() ) );
     }
 
 #ifndef QTOPIA_DESKTOP
@@ -678,9 +759,18 @@ int CategorySelect::currentCategory() const
 
 void CategorySelect::setCurrentCategory( int newCatUid )
 {
-    if ( d->type == ComboBox )
+    if ( d->type == ComboBox ) {
 	cmbCat->setCurrentCategory( newCatUid );
-    else d->catSelector->setChecked( d->cats.label( mStrAppName, newCatUid ) );
+    } else {
+	CategoryCheckListItem *i = (CategoryCheckListItem*)d->catSelector->firstChild();
+	while (i) {
+	    if ( i->id == newCatUid ) {
+		i->setOn(TRUE);
+		break;
+	    }
+	    i = (CategoryCheckListItem*)i->nextSibling();
+	}
+    }
 }
 
 /*!
@@ -688,7 +778,7 @@ void CategorySelect::setCurrentCategory( int newCatUid )
  */
 const QArray<int> &CategorySelect::currentCategories() const
 {
-    return d->mRec;
+    return d->mChosen;
 }
 
 /*!
@@ -719,33 +809,29 @@ void CategorySelect::setAllCategories( bool all )
 
     bool createCmb = FALSE;
     bool reinit = FALSE;
-    if ( !d->usingAll && all && d->catSelector ) {
-	createCmb = TRUE;
+    if ( d->usingAll != all ) {
 	reinit = TRUE;
+	if ( d->catSelector )
+	    createCmb = TRUE;
     }
-    else if ( d->usingAll && !all && !d->catSelector )
-	reinit = TRUE;
 
     if ( reinit ) {
-#ifdef QTOPIA_DESKTOP
-	init( d->fixedWidth, all );
-#else
-	init( d->fixedWidth );
 	d->usingAll = all;
-#endif
-	setCategories( d->mRec, d->appName, d->mVisibleName );
+	init( d->fixedWidth );
+	setCategories( d->mChosen, d->appName, d->mVisibleName );
     }
 
     if ( cmdCat ) {
+	QString qpe_translateLabel(const QString&);
+	QString allcat = qpe_translateLabel("_All");
 	if ( all ) {
-	    cmbCat->insertItem( tr( "All" ), cmbCat->count() );
-	    cmbCat->setCurrentItem( cmbCat->count() - 1 );
-	} else if ( !createCmb && cmbCat->text( cmbCat->count()-1) == tr("All") ) {
+	    cmbCat->insertItem( allcat, cmbCat->count() );
+	} else if ( !createCmb && cmbCat->text( cmbCat->count()-1) == allcat ) { // ugly
 	    cmbCat->removeItem( cmbCat->count() - 1 );
 	}
     }
-
-    d->usingAll = all;
+    if ( all )
+	cmbCat->setCurrentItem( cmbCat->count() - 1 );
 }
 
 // 01.12.21 added

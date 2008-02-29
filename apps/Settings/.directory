@@ -1,7 +1,6 @@
+[Translation]
+File=QtopiaApps
+Context=Settings
 [Desktop Entry]
-Name=Settings
-Name[ja]=設定
-Name[no]=Innstillinger
-Name[de]=Einstellungen
-Icon=SettingsIcon
-Name[hu]=Beállítások
+Name[]=Settings
+Icon=qpe/SettingsIcon

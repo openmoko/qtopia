@@ -1,27 +1,43 @@
-singleprocess:singleprocess=true
 TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
-win32:CONFIG	+= dll
-win32:DEFINES += QTOPIA_MAKEDLL QT_DLL
+CONFIG		+= qtopia singleexec
+
+TARGET		= qtopiacalc
+DESTDIR		= $$(QPEDIR)/lib
 
 # library files
-HEADERS = calculator.h engine.h data.h instruction.h stdinputwidgets.h
-SOURCES = calculator.cpp engine.cpp data.cpp instruction.cpp stdinputwidgets.cpp
+HEADERS = calculator.h engine.h data.h instruction.h display.h stdinputwidgets.h\
+	integerdata.h integerinstruction.h plugininterface.h qtopiacalcwinexport.h
+SOURCES = calculator.cpp engine.cpp data.cpp instruction.cpp display.cpp stdinputwidgets.cpp
 
-# data types
+# double type
 HEADERS += doubledata.h
 SOURCES += doubledata.cpp
 
-# instructions
-HEADERS += doubleinstruction.h
-SOURCES += doubleinstruction.cpp
+PHONEPATH = ../../plugins/calculator/phone
+SIMPLEPATH = ../../plugins/calculator/simple
 
-static:SOURCES += $(QPEDIR)/src/plugins/calculator/simple/simple.cpp
-static:HEADERS += $(QPEDIR)/src/plugins/calculator/simple/simple.h
-static:LIBS	+= -lqpe
+FRACTION_HEADERS = fractiondata.h fractioninstruction.h doubleinstruction.h
+FRACTION_SOURCES = fractiondata.cpp fractioninstruction.cpp doubleinstruction.cpp
+PHONE_HEADERS = $${PHONEPATH}/phone.h $${PHONEPATH}/instructions.h \
+                doubleinstruction.h $${SIMPLEPATH}/simple.h
+PHONE_SOURCES = $${PHONEPATH}/phone.cpp $${PHONEPATH}/instructions.cpp \
+                doubleinstruction.cpp $${SIMPLEPATH}/simple.cpp
 
-TARGET		= qtopiacalc
-DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
-win32:DLLDESTDIR = $(QPEDIR)/bin
-VERSION		= 1.7.0
+TRANSLATABLES = $${HEADERS} \
+                $${FRACTION_HEADERS} \
+                $${SOURCES} \
+                $${FRACTION_SOURCES} \
+                $${PHONE_HEADERS} \
+                $${PHONE_SOURCES}
+!QTOPIA_PHONE {
+    DEFINES+=ENABLE_FRACTION
+    HEADERS += $${FRACTION_HEADERS}
+    SOURCES += $${FRACTION_SOURCES}
+} else {
+    CONFIG+=staticlib
+
+    VPATH+=$${PHONEPATH} $${SIMPLEPATH}
+    HEADERS+= $${PHONE_HEADERS}
+    SOURCES+= $${PHONE_SOURCES}
+}
 

@@ -11,13 +11,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -185,7 +187,7 @@ are drawn in one row below the menu bar.
 <p>Destructs the object and frees any allocated resources.
 <h3 class="fn">void <a name="f16744"></a>QMainWindow::addToolBar ( <a href="qtoolbar.html">QToolBar</a> * toolBar, <a href="qmainwindow.html#ToolBarDock">ToolBarDock</a> edge = Top, bool newLine = FALSE )</h3>
 <p>Adds <em>toolBar</em> to this the end of <em>edge</em> and makes it start a
-new line of tool bars if <em>nl</em> is TRUE.
+new line of tool bars if <em>newLine</em> is TRUE.
 <p>If <em>toolBar</em> is already managed by some main window, it is first
 removed from that window.
 <h3 class="fn">void <a name="cf504f"></a>QMainWindow::addToolBar ( <a href="qtoolbar.html">QToolBar</a> * toolBar, const <a href="qstring.html">QString</a> &amp; label, <a href="qmainwindow.html#ToolBarDock">ToolBarDock</a> edge = Top, bool newLine = FALSE )</h3>
@@ -332,17 +334,17 @@ widget's <a href="#a5fd40">usesTextLabelChanged</a>() signal.
 <h3 class="fn">void <a name="eb53e3"></a>QMainWindow::show () <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Examples:
- <a href="action-main-cpp.html#show">action/main.cpp</a>
- <a href="themes-main-cpp.html#show">themes/main.cpp</a>
  <a href="mainlyQt-editor-cpp.html#show">mainlyQt/editor.cpp</a>
- <a href="application-main-cpp.html#show">application/main.cpp</a>
- <a href="helpviewer-main-cpp.html#show">helpviewer/main.cpp</a>
  <a href="i18n-main-cpp.html#show">i18n/main.cpp</a>
+ <a href="themes-main-cpp.html#show">themes/main.cpp</a>
+ <a href="helpviewer-main-cpp.html#show">helpviewer/main.cpp</a>
+ <a href="mdi-main-cpp.html#show">mdi/main.cpp</a>
  <a href="fileiconview-main-cpp.html#show">fileiconview/main.cpp</a>
- <a href="scribble-main-cpp.html#show">scribble/main.cpp</a>
+ <a href="action-main-cpp.html#show">action/main.cpp</a>
  <a href="qfd-qfd-cpp.html#show">qfd/qfd.cpp</a>
  <a href="addressbook-main-cpp.html#show">addressbook/main.cpp</a>
- <a href="mdi-main-cpp.html#show">mdi/main.cpp</a>
+ <a href="application-main-cpp.html#show">application/main.cpp</a>
+ <a href="scribble-main-cpp.html#show">scribble/main.cpp</a>
 <p>Reimplemented from <a href="qwidget.html#200ee5">QWidget.</a>
 <h3 class="fn"><a href="qsize.html">QSize</a> <a name="ef581c"></a>QMainWindow::sizeHint () const <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
@@ -389,14 +391,14 @@ relevant widgets must connect to this signal.
 main window object. This way it can be easily used for popup menus
 as in the code fragment:
 <p><pre>    <a href="qpopupmenu.html">QPopupMenu</a> * help = new <a href="qpopupmenu.html">QPopupMenu</a>( this );
-    help-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( "What's &amp;This", this , SLOT(whatsThis()), SHIFT+Key_F1);
+    help-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( "What's &amp;This", this , SLOT(whatsThis()), SHIFT+Key_F1);
 </pre>
 <p>See also  <a href="qwhatsthis.html#db29e1">QWhatsThis::enterWhatsThisMode</a>().
 <hr><p>
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.7"><nobr>
+<input type=hidden name="version" value="2.3.9"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -404,5 +406,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

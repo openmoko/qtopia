@@ -1,3 +1,24 @@
+/**********************************************************************
+** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
 /*
  * RTSP definitions
  * Copyright (c) 2002 Fabrice Bellard.
@@ -34,6 +55,7 @@ enum RTSPProtocol {
 
 #define RTSP_DEFAULT_PORT   554
 #define RTSP_MAX_TRANSPORTS 8
+#define RTSP_TCP_MAX_PACKET_SIZE 1472
 
 typedef struct RTSPTransportField {
     int interleaved_min, interleaved_max;  /* interleave ids, if TCP transport */
@@ -41,7 +63,7 @@ typedef struct RTSPTransportField {
     int client_port_min, client_port_max; /* RTP ports */
     int server_port_min, server_port_max; /* RTP ports */
     int ttl; /* ttl value */
-    UINT32 destination; /* destination IP address */
+    uint32_t destination; /* destination IP address */
     enum RTSPProtocol protocol;
 } RTSPTransportField;
 
@@ -63,7 +85,7 @@ enum RTSPCallbackAction {
 };
 
 typedef struct RTSPActionServerSetup {
-    UINT32 ipaddr;
+    uint32_t ipaddr;
     char transport_option[512];
 } RTSPActionServerSetup;
 
@@ -77,10 +99,13 @@ void rtsp_set_callback(FFRTSPCallback *rtsp_cb);
 int rtsp_init(void);
 void rtsp_parse_line(RTSPHeader *reply, const char *buf);
 
-extern int rtsp_abort_req;
 extern int rtsp_default_protocols;
 extern int rtsp_rtp_port_min;
 extern int rtsp_rtp_port_max;
 extern FFRTSPCallback *ff_rtsp_callback;
+extern AVInputFormat rtsp_demux;
+
+int rtsp_pause(AVFormatContext *s);
+int rtsp_resume(AVFormatContext *s);
 
 #endif /* RTSP_H */

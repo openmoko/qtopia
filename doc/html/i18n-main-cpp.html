@@ -13,13 +13,15 @@ a:visited { color: #672967; text-decoration: none }body { background: white; col
 <img width="100" height="100" src="qtlogo.png"
 alt="Home" border="0"><img width="100"
 height="100" src="face.png" alt="Home" border="0">
-</a><td valign=top><div align=right><img src="dochead.png" width="472" height="27"><br>
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
 <a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
+- <a href="annotated.html">Annotated</a>
 - <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b></a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
 </div>
 </table>
 
@@ -36,7 +38,7 @@ height="100" src="face.png" alt="Home" border="0">
   <hr>
 
   Header file: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/i18n/mywidget.h   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/i18n/mywidget.h   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -75,7 +77,7 @@ private:
   <hr>
 
   Implementation: <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/i18n/mywidget.cpp   2.3.7   edited 2001-01-26 $
+** &#36;Id&#58; qt/examples/i18n/mywidget.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -109,7 +111,7 @@ MyWidget::MyWidget( <a href="qwidget.html">QWidget</a>* parent, const char* name
     <a href="qmainwindow.html#fce9ba">setCentralWidget</a>(central);
 
     <a href="qpopupmenu.html">QPopupMenu</a>* file = new <a href="qpopupmenu.html">QPopupMenu</a>(this);
-    file-&gt;<a href="qmenudata.html#0076cb">insertItem</a>( <a href="qobject.html#2418a9">tr</a>("E&amp;xit"), qApp, SLOT(quit()),
+    file-&gt;<a href="qmenudata.html#deddb9">insertItem</a>( <a href="qobject.html#2418a9">tr</a>("E&amp;xit"), qApp, SLOT(quit()),
             <a href="qaccel.html#3ff091">QAccel::stringToKey</a>(<a href="qobject.html#2418a9">tr</a>("Ctrl+Q")) );
     <a href="qmainwindow.html#0eb7bc">menuBar</a>()-&gt;insertItem( <a href="qobject.html#2418a9">tr</a>("&amp;File"), file );
 
@@ -126,7 +128,7 @@ MyWidget::MyWidget( <a href="qwidget.html">QWidget</a>* parent, const char* name
     (void)new <a href="qradiobutton.html">QRadioButton</a>( <a href="qobject.html#2418a9">tr</a>( "Isometric" ), gbox ); 
     (void)new <a href="qradiobutton.html">QRadioButton</a>( <a href="qobject.html#2418a9">tr</a>( "Oblique" ), gbox ); 
 
-    <a href=#189>initChoices</a>(central); 
+    <a href=#86>initChoices</a>(central); 
 }
 
 static const char* choices[] = {
@@ -136,14 +138,14 @@ static const char* choices[] = {
     0
 }; 
 
-void <a name="189"></a>MyWidget::initChoices(<a href="qwidget.html">QWidget</a>* parent)
+void <a name="86"></a>MyWidget::initChoices(<a href="qwidget.html">QWidget</a>* parent)
 {
     <a href="qlistbox.html">QListBox</a>* lb = new <a href="qlistbox.html">QListBox</a>( parent ); 
     for ( int i = 0; choices[i]; i++ )
         lb-&gt;<a href="qlistbox.html#04a671">insertItem</a>( <a href="qobject.html#2418a9">tr</a>( choices[i] ) ); 
 }
 
-void <a name="190"></a>MyWidget::closeEvent(<a href="qcloseevent.html">QCloseEvent</a>* e)
+void <a name="87"></a>MyWidget::closeEvent(<a href="qcloseevent.html">QCloseEvent</a>* e)
 {
     <a href="qwidget.html#c04094">QWidget::closeEvent</a>(e);
     emit closed();
@@ -155,7 +157,7 @@ void <a name="190"></a>MyWidget::closeEvent(<a href="qcloseevent.html">QCloseEve
 
   Main:
 <pre>/****************************************************************************
-** &#36;Id&#58; qt/examples/i18n/main.cpp   2.3.7   edited 2001-06-12 $
+** &#36;Id&#58; qt/examples/i18n/main.cpp   2.3.9   edited 2004-12-13 $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -292,7 +294,7 @@ int main( int argc, char** argv )
 
                     if( w == 0 ) exit( 0 );
                     <a name="QObject::connect"></a><a href="qobject.html#7f8e37">QObject::connect</a>(w, SIGNAL(closed()), qApp, SLOT(quit()));
-                    w-&gt;<a name="setGeometry"></a><a href="qwidget.html#5e9ab1">setGeometry</a>(x,y,197,356);
+                    w-&gt;<a name="setGeometry"></a><a href="qwidget.html#9ede68">setGeometry</a>(x,y,197,356);
                     w-&gt;<a name="show"></a><a href="qmainwindow.html#eb53e3">show</a>();
                     if ( tight ) {
                         x += 8;
@@ -328,5 +330,5 @@ int main( int argc, char** argv )
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.7</div>
+<td align="right"><div align="right">Qt version 2.3.9</div>
 </table></div></address></body></html>

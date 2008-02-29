@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -55,9 +70,14 @@
 
 #include <qtopia/qcopenvelope_qws.h>
 #include <qtopia/applnk.h>
+#include <qtopia/stringutil.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/config.h>
 #include <qtopia/global.h>
+
+#ifndef Q_OS_WIN32
+#include <qtopia/qprocess.h>
+#endif
 
 #include "applauncher.h"
 #include "documentlist.h"
@@ -66,47 +86,35 @@ const int AppLauncher::RAISE_TIMEOUT_MS = 5000;
 
 //---------------------------------------------------------------------------
 
-static AppLauncher* appLauncherPtr;
+AppLauncher *AppLauncher::appLauncherPtr = 0;
 
-const int appStopEventID = 1290;
-
-class AppStoppedEvent : public QCustomEvent
-{
-public:
-    AppStoppedEvent(int pid, int status)
-	: QCustomEvent( appStopEventID ), mPid(pid), mStatus(status) { }
-    
-    int pid() { return mPid; }
-    int status() { return mStatus; }
-
-private:
-    int mPid, mStatus;
-};
+bool AppLauncher::wasCritMemKill = FALSE;
 
 AppLauncher::AppLauncher(QObject *parent, const char *name)
-    : QObject(parent, name), qlPid(0), qlReady(FALSE),
+    : QObject(parent, name), qlProc(0), qlPid(0), qlReady(FALSE),
       appKillerBox(0)
 {
     connect(qwsServer, SIGNAL(newChannel(const QString&)), this, SLOT(newQcopChannel(const QString&)));
     connect(qwsServer, SIGNAL(removedChannel(const QString&)), this, SLOT(removedQcopChannel(const QString&)));
     QCopChannel* channel = new QCopChannel( "QPE/System", this );
-    connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
-	     this, SLOT(received(const QCString&, const QByteArray&)) );
+    connect( channel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(received(const QCString&,const QByteArray&)) );
 
     channel = new QCopChannel( "QPE/Server", this );
-    connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
-	     this, SLOT(received(const QCString&, const QByteArray&)) );
+    connect( channel, SIGNAL(received(const QCString&,const QByteArray&)),
+	     this, SLOT(received(const QCString&,const QByteArray&)) );
     
-#ifndef Q_OS_WIN32
-    signal(SIGCHLD, signalHandler);
-#else
+#ifdef Q_OS_WIN32
     runningAppsProc.setAutoDelete( TRUE );
 #endif
     QString tmp = qApp->argv()[0];
     int pos = tmp.findRev('/');
     if ( pos > -1 )
 	tmp = tmp.mid(++pos);
-    runningApps[::getpid()] = tmp;
+    RunningApp app;
+    app.name = tmp;
+    app.proc = 0;
+    runningApps[::getpid()] = app;
     
     appLauncherPtr = this;
 
@@ -116,9 +124,6 @@ AppLauncher::AppLauncher(QObject *parent, const char *name)
 AppLauncher::~AppLauncher()
 {
     appLauncherPtr = 0;
-#ifndef Q_OS_WIN32
-    signal(SIGCHLD, SIG_DFL);
-#endif
     if ( qlPid ) {
 	int status;
 	::kill( qlPid, SIGTERM );
@@ -159,20 +164,60 @@ void AppLauncher::removedQcopChannel(const QString& channelName)
     }
 }
 
+
+bool AppLauncher::mDelayMessages = FALSE;
+
+void AppLauncher::delayMessages(bool b)
+{
+    if (mDelayMessages != b) {
+	mDelayMessages = b;
+	if (!b) {
+	    appLauncherPtr->sendQueuedMessages();
+	}
+    }
+}
+
+void AppLauncher::queueMessage(const QCString &msg, const QByteArray &data)
+{
+    qDebug("store message");
+    QueuedItem it;
+    it.msg = msg;
+    it.data = data;
+    qmessages.append(it);
+}
+
+void AppLauncher::sendQueuedMessages() {
+    //check for queued messages
+    qDebug("send messages");
+
+    QValueList<QueuedItem>::Iterator it = qmessages.begin();
+    for(; it != qmessages.end(); ++it) {
+	received((*it).msg, (*it).data);
+    }
+
+    qmessages.clear();
+}
+
+
 void AppLauncher::received(const QCString& msg, const QByteArray& data)
 {
     QDataStream stream( data, IO_ReadOnly );
-    if ( msg == "execute(QString)" ) {
+    if ( msg == "execute(QString)" ) { // from QPE/Server
 	QString t;
 	stream >> t;
 	if ( !executeBuiltin( t, QString::null ) )
 	    execute(t, QString::null);
-    } else if ( msg == "execute(QString,QString)" ) {
+    } else if ( msg == "execute(QString,QString)" ) { // from QPE/Server
 	QString t,d;
 	stream >> t >> d;
 	if ( !executeBuiltin( t, d ) )
 	    execute( t, d );
     } else if ( msg == "processQCop(QString)" ) { // from QPE/Server
+	// will queue instead
+	if (mDelayMessages) {
+	    queueMessage(msg, data);
+	    return;
+	}
 	QString t;
 	stream >> t;
 	if ( !executeBuiltin( t, QString::null ) )
@@ -181,6 +226,9 @@ void AppLauncher::received(const QCString& msg, const QByteArray& data)
 	QString appName;
 	stream >> appName;
 
+	/*
+	** DUPLICATED from execute()
+	*/
 	if ( !executeBuiltin( appName, QString::null ) ) {
 	    if ( !waitingHeartbeat.contains( appName ) && appKillerName != appName ) {
 		//qDebug( "Raising: %s", appName.latin1() );
@@ -188,7 +236,7 @@ void AppLauncher::received(const QCString& msg, const QByteArray& data)
 		channel += appName.latin1();
 
 		// Need to lock it to avoid race conditions with QPEApplication::processQCopFile
-		QFile f("/tmp/qcop-msg-" + appName);
+		QFile f( Global::tempDir() + "qcop-msg-" + appName);
 		if ( f.open(IO_WriteOnly | IO_Append) ) {
 #ifndef Q_OS_WIN32
 		    flock(f.handle(), LOCK_EX);
@@ -212,9 +260,9 @@ void AppLauncher::received(const QCString& msg, const QByteArray& data)
 	}
     } else if ( msg == "sendRunningApps()" ) {
 	QStringList apps;
-	QMap<int,QString>::Iterator it;
+	QMap<int,RunningApp>::Iterator it;
         for( it = runningApps.begin(); it != runningApps.end(); ++it )
-	    apps.append( *it );
+	    apps.append( (*it).name );
 	QCopEnvelope e( "QPE/Desktop", "runningApps(QStringList)" );
 	e << apps;
     } else if ( msg == "appRaised(QString)" ) {
@@ -234,33 +282,10 @@ void AppLauncher::received(const QCString& msg, const QByteArray& data)
 	    appKillerBox = 0;
 	    appKillerName = QString::null;
 	}
+	runningList.remove(appName);
+	runningList.prepend(appName);
+	emit raised(appName);
     }
-}
-
-void AppLauncher::signalHandler(int)
-{
-#ifndef Q_OS_WIN32
-    int status;
-    pid_t pid = waitpid(-1, &status, WNOHANG);
-/*    if (pid == 0 || &status == 0 ) {
-	qDebug("hmm, could not get return value from signal");
-    }
-*/
-    QApplication::postEvent(appLauncherPtr, new AppStoppedEvent(pid, status) );
-#else
-    qDebug("Unhandled signal see by AppLauncher::signalHandler(int)");
-#endif
-}
-
-bool AppLauncher::event(QEvent *e)
-{
-    if ( e->type() == appStopEventID ) {
-	AppStoppedEvent *ae = (AppStoppedEvent *) e;
-	sigStopped(ae->pid(), ae->status() );
-	return TRUE;
-    }
-    
-    return QObject::event(e);
 }
 
 void AppLauncher::timerEvent( QTimerEvent *e )
@@ -278,11 +303,11 @@ void AppLauncher::timerEvent( QTimerEvent *e )
 
 	    // qDebug("Checking in on %s", appKillerName.latin1());
 
-	    // We store this incase the application responds while we're
+	    // We store this in case the application responds while we're
 	    // waiting for user input so we know not to delete ourselves.
 	    appKillerBox = new QMessageBox(tr("Application Problem"),
-		    tr("<p>%1 is not responding.</p>").arg(appKillerName) +
-		    tr("<p>Would you like to force the application to exit?</p>"), 
+		    tr("<qt>%1 is not responding. Would you like to "
+		       "force the application to exit?</qt>").arg(appKillerName),
 		    QMessageBox::Warning, QMessageBox::Yes, 
 		    QMessageBox::No | QMessageBox::Default, 
 		    QMessageBox::NoButton);
@@ -302,131 +327,10 @@ void AppLauncher::timerEvent( QTimerEvent *e )
     QObject::timerEvent( e );
 }
 
-#ifndef Q_OS_WIN32 
-void AppLauncher::sigStopped(int sigPid, int sigStatus)
-{
-    int exitStatus = 0;
-    
-    bool crashed = WIFSIGNALED(sigStatus);
-    if ( !crashed ) {
-	if ( WIFEXITED(sigStatus) )
-	    exitStatus = WEXITSTATUS(sigStatus);
-    } else {
-	exitStatus  = WTERMSIG(sigStatus);
-    }
-
-    QMap<int,QString>::Iterator it = runningApps.find( sigPid );
-    if ( it == runningApps.end() ) {
-	if ( sigPid == qlPid ) {
-	    qDebug( "quicklauncher stopped" );
-	    qlPid = 0;
-	    qlReady = FALSE;
-	    QFile::remove("/tmp/qcop-msg-quicklauncher" );
-	    QTimer::singleShot( 2000, this, SLOT(createQuickLauncher()) );
-	}
-/*
-	if ( sigPid == -1 )
-	    qDebug("non-qtopia application exited (disregarded)");
-	else
-	    qDebug("==== no pid matching %d in list, definite bug", sigPid);
-*/
-	return;
-    }
-    QString appName = *it;
-    runningApps.remove(it);
-
-    QMap<QString,int>::Iterator hbit = waitingHeartbeat.find(appName);
-    if ( hbit != waitingHeartbeat.end() ) {
-	killTimer( *hbit );
-	waitingHeartbeat.remove( hbit );
-    }
-    if ( appName == appKillerName ) {
-	appKillerName = QString::null;
-	delete appKillerBox;
-	appKillerBox = 0;
-    }
-
-    /* we must disable preload for an app that crashes as the system logic relies on preloaded apps
-       actually being loaded.  If eg. the crash happened in the constructor, we can't automatically reload
-       the app (withouth some timeout value for eg. 3 tries (which I think is a bad solution)
-    */
-    bool preloadDisabled = FALSE;
-    if ( !DocumentList::appLnkSet ) return;
-    const AppLnk* app = DocumentList::appLnkSet->findExec( appName );
-    if ( !app ) return; // QCop messages processed to slow?
-    if ( crashed && app->isPreloaded() ) {
-	Config cfg("Launcher");
-	cfg.setGroup("Preload");
-	QStringList apps = cfg.readListEntry("Apps",',');
-	QString exe = app->exec();
-	apps.remove(exe);
-	cfg.writeEntry("Apps",apps,',');
-	preloadDisabled = TRUE;
-    }
-
-    // clean up 
-    if ( exitStatus ) {
-	QCopEnvelope e("QPE/System", "notBusy(QString)");
-	e << app->exec();
-    }
-/*    
-    // debug info
-    for (it = runningApps.begin(); it != runningApps.end(); ++it) {
-	qDebug("running according to internal list: %s, with pid %d", (*it).data(), it.key() );
-    }
-*/
-
-#ifdef QTOPIA_PROGRAM_MONITOR
-    if ( crashed ) {
-	QString sig;
-	switch( exitStatus ) {
-	    case SIGABRT: sig = "SIGABRT"; break;
-	    case SIGALRM: sig = "SIGALRM"; break;
-	    case SIGBUS: sig = "SIGBUS"; break;
-	    case SIGFPE: sig = "SIGFPE"; break;
-	    case SIGHUP: sig = "SIGHUP"; break;
-	    case SIGILL: sig = "SIGILL"; break;
-	    case SIGKILL: sig = "SIGKILL"; break;
-	    case SIGPIPE: sig = "SIGPIPE"; break;
-	    case SIGQUIT: sig = "SIGQUIT"; break;
-	    case SIGSEGV: sig = "SIGSEGV"; break;
-	    case SIGTERM: sig = "SIGTERM"; break;
-	    case SIGTRAP: sig = "SIGTRAP"; break;
-	    default: sig = QString("Unkown %1").arg(exitStatus);
-	}
-	if ( preloadDisabled )
-	    sig += tr("<qt><p>Fast loading has been disabled for this application.  Tap and hold the application icon to reenable it.</qt>");
-	
-	QString str = tr("<qt><b>%1</b> was terminated due to signal code %2</qt>").arg( app->name() ).arg( sig );
-	QMessageBox::information(0, tr("Application terminated"), str );
-    } else {
-	if ( exitStatus == 255 ) {  //could not find app (because global returns -1)
-	    QMessageBox::information(0, tr("Application not found"), tr("<qt>Could not locate application <b>%1</b></qt>").arg( app->exec() ) );
-	} else  {
-	    QFileInfo fi(Global::tempDir() + "qcop-msg-" + appName);
-	    if ( fi.exists() && fi.size() ) {
-		emit terminated(sigPid, appName);
-		execute( appName, QString::null );
-		return;
-	    }
-	}
-    }
-
-#endif
-    
-    emit terminated(sigPid, appName);
-}
-#else
-void AppLauncher::sigStopped(int sigPid, int sigStatus)
-{
-    qDebug("Unhandled signal : AppLauncher::sigStopped(int sigPid, int sigStatus)");
-}
-#endif // Q_OS_WIN32
-
 bool AppLauncher::isRunning(const QString &app)
 {
-    for (QMap<int,QString>::ConstIterator it = runningApps.begin(); it != runningApps.end(); ++it) {
-	if ( *it == app ) {
+    for (QMap<int,RunningApp>::ConstIterator it = runningApps.begin(); it != runningApps.end(); ++it) {
+	if ( (*it).name == app ) {
 #ifdef Q_OS_UNIX
 	    pid_t t = ::__getpgid( it.key() );
 	    if ( t == -1 ) {
@@ -447,7 +351,7 @@ bool AppLauncher::executeBuiltin(const QString &c, const QString &document)
     Global::Command* builtin = Global::builtinCommands();
     QGuardedPtr<QWidget> *running = Global::builtinRunning();
     
-    // Attempt to execute the app using a builtin class for the app
+    // Attempt to execute the app using a built-in class for the app
     if (builtin) {
 	for (int i = 0; builtin[i].file; i++) {
 	    if ( builtin[i].file == c ) {
@@ -469,7 +373,7 @@ bool AppLauncher::executeBuiltin(const QString &c, const QString &document)
 	}
     }
 
-    // Convert the command line in to a list of arguments
+    // Convert the command line into a list of arguments
     QStringList list = QStringList::split(QRegExp("  *"),c);
     QString ap=list[0];
 
@@ -483,6 +387,12 @@ bool AppLauncher::executeBuiltin(const QString &c, const QString &document)
 
 bool AppLauncher::execute(const QString &c, const QString &docParam, bool noRaise)
 {
+/*
+    // debug info
+    for (QMap<int,QString>::Iterator it = runningApps.begin(); it != runningApps.end(); ++it) {
+	qDebug("execute: running according to internal list: %s, with pid %d", (*it).data(), it.key() );
+    }
+*/
     // Convert the command line in to a list of arguments
     QStringList list = QStringList::split(QRegExp("  *"),c);
     if ( !docParam.isEmpty() )
@@ -528,7 +438,7 @@ bool AppLauncher::execute(const QString &c, const QString &docParam, bool noRais
     }
 
 #ifdef QT_NO_QWS_MULTIPROCESS
-    QMessageBox::warning( 0, tr("Error"), tr("Could not find the application %1").arg(c),
+    QMessageBox::warning( 0, tr("Error"), tr("<qt>Could not find the application %1</qt>").arg(c),
 	tr("OK"), 0, 0, 0, 1 );
 #else
 
@@ -543,7 +453,16 @@ bool AppLauncher::execute(const QString &c, const QString &docParam, bool noRais
     args[j] = NULL;
 
 #ifndef Q_OS_WIN32
-    if ( qlPid && qlReady && QFile::exists( QPEApplication::qpeDir()+"plugins/application/lib"+args[0] + ".so" ) ) {
+#ifdef SINGLE_EXEC
+    QPEAppMap *qpeAppMap();
+#endif
+    if ( qlPid && qlReady && 
+#ifndef SINGLE_EXEC
+        QFile::exists( QPEApplication::qpeDir()+"plugins/application/lib"+args[0] + ".so" )
+#else
+	qpeAppMap()->contains(args[0] )
+#endif
+	    ) {
 	qDebug( "Quick launching: %s", args[0] );
 	if ( getuid() == 0 )
 	    setpriority( PRIO_PROCESS, qlPid, 0 );
@@ -551,57 +470,66 @@ bool AppLauncher::execute(const QString &c, const QString &docParam, bool noRais
 	qlch += QString::number(qlPid);
 	QCopEnvelope env( qlch, "execute(QStrList)" );
 	env << slist;
-	runningApps[qlPid] = QString(args[0]);
-	emit launched(qlPid, QString(args[0]));
-	QCopEnvelope e("QPE/System", "busy()");
+	QTOPIA_PROFILE("sending qcop to quicklauncher");
+	appLaunched(qlProc, args[0]);
+	qlProc = 0;
 	qlPid = 0;
 	qlReady = FALSE;
 	QTimer::singleShot( getuid() == 0 ? 800 : 1500, this, SLOT(createQuickLauncher()) );
-    } else {
-	int pid = ::vfork();
-	if ( !pid ) {
-	    for ( int fd = 3; fd < 100; fd++ )
-		::close( fd );
-	    ::setpgid( ::getpid(), ::getppid() );
-	    // Try bindir first, so that foo/bar works too
-	    ::execv( QPEApplication::qpeDir()+"bin/"+args[0], (char * const *)args );
-	    ::execvp( args[0], (char * const *)args );
-	    _exit( -1 );
-	}
+	delete [] args;
+	return TRUE;
+    }
+#endif // Q_OS_WIN32
 
-	runningApps[pid] = QString(args[0]);
-	emit launched(pid, QString(args[0]));
-	QCopEnvelope e("QPE/System", "busy()");
-    }
-#else
     QProcess *proc = new QProcess(this);
-    if (proc){
-	for (int i=0; i < slist.count(); i++)
+    // Try bindir first, so that foo/bar works too
+    proc->setCommunication(0);
+    proc->addArgument(QPEApplication::qpeDir()+"bin/"+args[0]);
+    for (int i=1; i < (int)slist.count(); i++)
+	proc->addArgument(args[i]);
+    connect(proc, SIGNAL(processExited()), this, SLOT(processExited()));
+    bool started = proc->start();
+    if (!started) {
+	proc->clearArguments();
+	for (int i=0; i < (int)slist.count(); i++)
 	    proc->addArgument(args[i]);
-	connect(proc, SIGNAL(processExited()), this, SLOT(processExited()));
-	if (!proc->start()){
-	    qDebug("Unable to start application %s", args[0]);
-	}else{
-	    PROCESS_INFORMATION *procInfo = (PROCESS_INFORMATION *)proc->processIdentifier();
-	    if (procInfo){
-		DWORD pid = procInfo->dwProcessId;
-		runningApps[pid] = QString(args[0]);		
-		runningAppsProc.append(proc);
-		emit launched(pid, QString(args[0]));
-		QCopEnvelope e("QPE/System", "busy()");
-	    }else{
-		qDebug("Unable to read process inforation #1 for %s", args[0]);
-	    }
-	}
-    }else{
-	qDebug("Unable to create process for application %s", args[0]);
-	return FALSE;
+	started = proc->start();
     }
-#endif
+
+    if (!started) {
+	qDebug("Unable to start application %s", args[0]);
+	delete proc;
+    } else {
+# ifndef Q_OS_WIN32
+	appLaunched(proc, args[0]);
+# else
+	PROCESS_INFORMATION *procInfo = (PROCESS_INFORMATION *)proc->processIdentifier();
+	if (procInfo) {
+	    DWORD pid = procInfo->dwProcessId;
+	    runningAppsProc.append(proc);
+	    appLaunched(proc, args[0]);
+	} else {
+	    qDebug("Unable to read process inforation #1 for %s", args[0]);
+	}
+# endif
+    }
 #endif //QT_NO_QWS_MULTIPROCESS
 
     delete [] args;
-    return TRUE;
+    return started;
+}
+
+void AppLauncher::appLaunched(QProcess *proc, const QString &appName)
+{
+    RunningApp app;
+    app.name = appName;
+    app.proc = proc;
+    int pid = (int)proc->processIdentifier();
+    runningApps[pid] = app;
+    runningList.remove(appName);
+    runningList.prepend(appName);
+    emit launched(pid, appName);
+    QCopEnvelope e("QPE/System", "busy()");
 }
 
 void AppLauncher::kill( int pid )
@@ -622,9 +550,9 @@ int AppLauncher::pidForName( const QString &appName )
 {
     int pid = -1;
 
-    QMap<int, QString>::Iterator it;
+    QMap<int, RunningApp>::Iterator it;
     for (it = runningApps.begin(); it!= runningApps.end(); ++it) {
-	if (*it == appName) {
+	if ((*it).name == appName) {
 	    pid = it.key();
 	    break;
 	}
@@ -636,38 +564,169 @@ int AppLauncher::pidForName( const QString &appName )
 void AppLauncher::createQuickLauncher()
 {
     qlReady = FALSE;
-    qlPid = ::vfork();
-    if ( !qlPid ) {
-	char **args = new char *[2];
-	args[0] = "quicklauncher";
-	args[1] = 0;
-	for ( int fd = 3; fd < 100; fd++ )
-	    ::close( fd );
-	::setpgid( ::getpid(), ::getppid() );
-	// Try bindir first, so that foo/bar works too
-	setenv( "LD_BIND_NOW", "1", 1 );
-	::execv( QPEApplication::qpeDir()+"bin/quicklauncher", args );
-	::execvp( "quicklauncher", args );
-	_exit( -1 );
-    } else if ( qlPid == -1 ) {
-	qlPid = 0;
-    } else {
-	if ( getuid() == 0 )
+    qlProc = new QProcess(this);
+    qlProc->setCommunication(0);
+    connect(qlProc, SIGNAL(processExited()), this, SLOT(processExited()));
+    qlProc->addArgument(QPEApplication::qpeDir()+"bin/quicklauncher");
+    setenv( "LD_BIND_NOW", "1", 1 );
+    bool started = qlProc->start();
+    if (!started) {
+	qlProc->clearArguments();
+	qlProc->addArgument("quicklauncher");
+	started = qlProc->start();
+    }
+    if (started) {
+	qlPid = (int)qlProc->processIdentifier();
+	if (getuid() == 0)
 	    setpriority( PRIO_PROCESS, qlPid, 19 );
+    } else {
+	delete qlProc;
+	qlProc = 0;
+	qlPid = 0;
     }
 }
 
-// Used only by Win32
 void AppLauncher::processExited()
 {
-#ifdef Q_OS_WIN32
-    qDebug("AppLauncher::processExited()");
-    bool found = FALSE;
+    // get the process that exited.
     QProcess *proc = (QProcess *) sender();
     if (!proc){
-	qDebug("Interanl error NULL proc");
+	qDebug("Internal error NULL proc");
 	return;
     }
+
+#ifndef Q_OS_WIN32
+    if ( proc == qlProc ) {
+	// Unexpected quicklauncher exit.
+	qDebug( "quicklauncher stopped" );
+	delete qlProc;
+	qlProc = 0;
+	qlPid = 0;
+	qlReady = FALSE;
+	QFile::remove(Global::tempDir() + "qcop-msg-quicklauncher" );
+	QTimer::singleShot( 2000, this, SLOT(createQuickLauncher()) );
+	return;
+    }
+
+    int pid = 0;
+    QString appName;
+    QMap<int,RunningApp>::Iterator it;
+    for (it = runningApps.begin(); it != runningApps.end(); ++it ) {
+	if ((*it).proc == proc) {
+	    appName = (*it).name;
+	    pid = it.key();
+	    break;
+	}
+    }
+
+    if (!pid) {
+	qWarning("Unknown process exited");
+	delete proc;
+	return;
+    }
+    
+    int status = proc->exitStatus();
+#ifndef W_EXITCODE
+    #ifdef __W_EXITCODE
+	#define	W_EXITCODE(ret,sig)	__W_EXITCODE((ret), (sig))
+    #else
+	#define	W_EXITCODE(ret,sig)	((ret) << 8 | (sig))
+    #endif
+#endif
+    if ( !proc->normalExit() )
+	status = W_EXITCODE(status, SIGSEGV);   // XXX
+    else
+	status = W_EXITCODE(status, 0);
+
+    int exitStatus = 0;
+    
+    bool crashed = WIFSIGNALED(status);
+    if ( !crashed ) {
+	if ( WIFEXITED(status) )
+	    exitStatus = WEXITSTATUS(status);
+    } else {
+	exitStatus  = WTERMSIG(status);
+    }
+
+    delete proc;
+    runningApps.remove(it);
+    runningList.remove(appName);
+
+    QMap<QString,int>::Iterator hbit = waitingHeartbeat.find(appName);
+    if ( hbit != waitingHeartbeat.end() ) {
+	killTimer( *hbit );
+	waitingHeartbeat.remove( hbit );
+    }
+    if ( appName == appKillerName ) {
+	appKillerName = QString::null;
+	delete appKillerBox;
+	appKillerBox = 0;
+    }
+
+    /* we must disable preload for an app that crashes as the system logic relies on preloaded apps
+       actually being loaded.  If eg. the crash happened in the constructor, we can't automatically reload
+       the app (without some timeout value for eg. 3 tries -which I think is a bad solution).
+    */
+    bool preloadDisabled = FALSE;
+    if ( !DocumentList::appLnkSet ) return;
+    const AppLnk* app = DocumentList::appLnkSet->findExec( appName );
+    if ( !app ) return; // QCop messages processed to slow?
+    if ( crashed && app->isPreloaded() ) {
+	Config cfg("Launcher");
+	cfg.setGroup("Preload");
+	QStringList apps = cfg.readListEntry("Apps",',');
+	QString exe = app->exec();
+	apps.remove(exe);
+	cfg.writeEntry("Apps",apps,',');
+	preloadDisabled = TRUE;
+    }
+
+    // clean up 
+    if ( exitStatus ) {
+	QCopEnvelope e("QPE/System", "notBusy(QString)");
+	e << app->exec();
+    }
+
+/*
+    // debug info
+    for (QMap<int,QString>::Iterator it = runningApps.begin(); it != runningApps.end(); ++it) {
+	qDebug("running according to internal list: %s, with pid %d", (*it).data(), it.key() );
+    }
+*/
+
+# ifdef QTOPIA_PROGRAM_MONITOR
+    if ( crashed ) {
+	QString appname = Qtopia::dehyphenate(app->name());
+        QString str;
+        if (wasCritMemKill) {
+            str = tr("<qt><b>%1</b> was terminated due to insufficient memory.</qt>").arg(appname);
+            wasCritMemKill = FALSE;
+        } else 
+	    str = tr("<qt><b>%1</b> was terminated due to application error (%2).</qt>").arg(appname).arg( exitStatus );
+	if ( preloadDisabled )
+	    str += tr(" (Fast loading has been disabled for this application. "
+		      "Tap and hold the application icon to reenable it.)");
+	QMessageBox::information(0, tr("Application terminated"), str );
+    } else {
+	if ( exitStatus == 255 ) {  //could not find app (because global returns -1)
+	    QMessageBox::information(0, tr("Application not found"),
+		    tr("<qt>Unable to locate application <b>%1</b></qt>").arg( app->exec() ) );
+	} else  {
+	    QFileInfo fi(Global::tempDir() + "qcop-msg-" + appName);
+	    if ( fi.exists() && fi.size() ) {
+		emit terminated(pid, appName);
+		execute( appName, QString::null );
+		return;
+	    }
+	}
+    }
+
+# endif
+    
+    emit terminated(pid, appName);
+
+#else //Q_OS_WIN32
+    bool found = FALSE;
 
     QString appName = proc->arguments()[0];
     qDebug("Removing application %s", appName.latin1());
@@ -694,6 +753,7 @@ void AppLauncher::processExited()
     }
 
     if (found){
+	runningList.remove(it.key());
 	emit terminated(it.key(), it.data());
 	runningApps.remove(it.key());
     }else{
@@ -703,3 +763,12 @@ void AppLauncher::processExited()
 #endif
 }
 
+void AppLauncher::criticalKill(const QString &app) 
+{   
+    if (!wasCritMemKill) {
+        wasCritMemKill = TRUE;
+        int pid = pidForName(app);
+        kill(pid);
+        emit terminated(pid, app);
+    }
+}

@@ -1,16 +1,31 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
@@ -34,40 +49,43 @@
 static const int canvasCardId = 2434321;
 
 
-class CanvasCard : public Card, public AnimatedCanvasItem, public QCanvasRectangle
+class CanvasCard : public Card, public AnimatedItem, public QCanvasRectangle
 {
 public:
-    CanvasCard( eValue v, eSuit s, bool f, QCanvas *canvas );
+    CanvasCard(Value v, Suit s, bool f, QCanvas *canvas);
     virtual ~CanvasCard() { canvas()->removeItem(this); }
 
-    int rtti () const { return canvasCardId; }
-    void move(QPoint p) { QCanvasItem::move( p.x(), p.y() ); }
-    void move(int x, int y) { QCanvasItem::move( x, y ); }
-    void animatedMove(int x, int y, int msecs );
-    void animatedMove() { animatedMove( savedX, savedY, 1500 ); }
-    void savePos(void) { savedX = (int)x(); savedY = (int)y(); }
-    void moveToPile(int p) { Q_UNUSED(p); }
     void cardBackChanged();
-    
-    void flipTo(int x, int y, int msecs );
-    void setPos( int x, int y, int z ) { setX( x ); setY( y ); setZ( z ); }
-    void showCard(void) { show(); }
-    void redraw(void) { hide(); show(); }
     void draw(QPainter &p);
-    void updatePosition( double percent );
 
-protected:
-    void flip(void) { redraw(); }
+    virtual int rtti() const { return canvasCardId; }
+
+    virtual void updatePosition(double percent);
+
+    virtual void setPos(QPoint p) { move(p.x(), p.y()); }
+    virtual QPoint pos() const { return QPoint((int)x(), (int)y()); }
+
+    virtual void setHeight(int z) { setZ(z); }
+    virtual int height() const { return (int)z(); }
+
+    virtual void setVisible(bool b) { QCanvasRectangle::setVisible(b); } 
+    virtual bool isVisible() const { return visible(); }
+
+    virtual void moveTo(QPoint p, int duration = 0);
+    virtual void flipTo(QPoint p, int duration = 0);
+
+    bool isFlipping() { return flipping; }
 
 private:
-    int destX, destY;
-    double deltaX, deltaY;
-    bool origFace;
+    void animatedMove(QPoint p, int msecs);
 
+    QPoint offset;
+    QPoint dest;
+    QPoint delta;
+    int origHeight;
+    bool origFace;
     bool flipping;
-    int savedX, savedY;
     double scaleX, scaleY;
-    int xOff, yOff;
     QPixmap cachedPixmap;
     bool haveCache;
 };
