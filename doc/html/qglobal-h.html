@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>
-Qt Toolkit - qglobal.h include file
 </title><style type="text/css"><!--
 h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
@@ -32,7 +30,7 @@ remains with Trolltech.
 <hr>
 <pre>
 /****************************************************************************
-** &#36;Id&#58; qt/src/tools/qglobal.h   2.3.9   edited 2004-12-13 $
+** &#36;Id&#58; qt/src/tools/qglobal.h   2.3.10 $
 **
 ** Global type declarations and definitions
 **
@@ -72,8 +70,11 @@ remains with Trolltech.
 #define QGLOBAL_H
 
 
-#define QT_VERSION      239
-#define QT_VERSION_STR  "2.3.9"
+// NOTE: 
+// to allow for a two digit patch release number we have jumped from 239 to 2310
+// for future reference, if we ever release a Qt 2.4.0 the version number will jump to 2400, i.e. 2.4.00
+#define QT_VERSION      231
+#define QT_VERSION_STR  "2.3.10"
 
 
 //
@@ -399,10 +400,6 @@ remains with Trolltech.
 #define Q_HAS_BOOL_TYPE
 #endif
 
-#if (QT_VERSION &gt;= 300)
-#error "Use an enum for bool"
-#endif
-
 #if !defined(Q_HAS_BOOL_TYPE)
 #if defined(_CC_MSVC_)
 #define _CC_BOOL_DEF_
@@ -703,6 +700,6 @@ Q_EXPORT void qObsolete( const char *message );
 </pre>
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.9</div>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.10</div>
 </table></div></address></body></html>

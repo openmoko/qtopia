@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -523,9 +523,9 @@ TodoView* TodoWindow::todoView()
 void TodoWindow::createNewEntry()
 {
 #ifdef QTOPIA_PHONE
-    TaskDialog e( -2, this, "edit", TRUE );
+    TaskDialog e( -2, this, "edit-screen", TRUE );
 #else
-    TaskDialog e( catSelect->currentCategory(), this, "edit", TRUE );
+    TaskDialog e( catSelect->currentCategory(), this, "edit-screen", TRUE );
 #endif
     e.setCaption( tr( "New Task" ) );
 
@@ -599,7 +599,7 @@ void TodoWindow::editCurrentEntry()
 {
     PimTask todo = table->currentEntry();
 
-    TaskDialog e( todo, this, "edit", TRUE );
+    TaskDialog e( todo, this, "edit-screen", TRUE );
     e.setCaption( tr( "Edit Task" ) );
 
     int ret = QPEApplication::execDialog(&e);
@@ -607,6 +607,8 @@ void TodoWindow::editCurrentEntry()
     if ( ret == QDialog::Accepted ) {
         todo = e.todoEntry();
 	table->updateEntry( todo );
+	if (table->currentEntry().uid() != todo.uid())
+	    showListView();
 	if ( centralWidget() == todoView() ) {
 	    todoView()->init( table->currentEntry() );
 	    tView->setFocus();  //To avoid events being passed to QTable

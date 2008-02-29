@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -399,22 +399,36 @@ QMakeProject::parse(const QString &t, QMap<QString, QStringList> &place)
 	}
 	doVariableReplace(func[0], place);
 	doVariableReplace(func[1], place);
-	bool global = FALSE, case_sense = TRUE;
+	bool global = FALSE, case_sense = TRUE, no_re = FALSE;
 	if(func.count() == 4) {
 	    doVariableReplace(func[3], place);
 	    global = func[3].find('g') != -1;
 	    case_sense = func[3].find('i') == -1;
+	    no_re = func[3].find('q') != -1;
 	}
-	QRegExp regexp(func[1], case_sense);
-	for(QStringList::Iterator varit = varlist.begin();
-	    varit != varlist.end(); ++varit) {
-	    if((*varit).contains(regexp)) {
-		(*varit) = (*varit).replace(regexp, func[2]);
-		doVariableReplace((*varit), place);
-		if(!global)
-		    break;
-	    }
-	}
+        if ( no_re ) {
+            QString regexp(func[1]);
+            for(QStringList::Iterator varit = varlist.begin();
+                varit != varlist.end(); ++varit) {
+                if((*varit).contains(regexp)) {
+                    (*varit) = (*varit).replace(regexp, func[2]);
+                    doVariableReplace((*varit), place);
+                    if(!global)
+                        break;
+                }
+            }
+        } else {
+            QRegExp regexp(func[1], case_sense);
+            for(QStringList::Iterator varit = varlist.begin();
+                varit != varlist.end(); ++varit) {
+                if((*varit).contains(regexp)) {
+                    (*varit) = (*varit).replace(regexp, func[2]);
+                    doVariableReplace((*varit), place);
+                    if(!global)
+                        break;
+                }
+            }
+        }
     } else {
 	if(op == "=") {
 	    if(!varlist.isEmpty())

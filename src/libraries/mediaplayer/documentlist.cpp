@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -436,6 +436,7 @@ void AppDocumentList::systemMessage( const QCString &msg, const QByteArray &data
 	QDataStream stream( data, IO_ReadOnly );
         QString arg;
         stream >> arg;
+	DocLnk doclnk( arg );
 	qDebug( "linkchanged( %s )", arg.latin1() );
 	pause();
 	const QList<DocLnk> &list = d->dls.children();
@@ -444,7 +445,8 @@ void AppDocumentList::systemMessage( const QCString &msg, const QByteArray &data
 	    DocLnk *doc = it.current();
 	    ++it;
 	    if ( ( doc->linkFileKnown() && doc->linkFile() == arg )
-		|| ( doc->fileKnown() && doc->file() == arg ) ) {
+		|| ( doc->fileKnown() && doc->file() == arg )
+		|| ( doc->file() == doclnk.file() ) ) {
 		qDebug( "found old link" );
 		DocLnk* dl = new DocLnk( arg );
 		// add new one if it exists and matches the mimetype

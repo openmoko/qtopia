@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/debug-with-gdb.doc:1 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Debugging Qtopia Application With Gdb</title>
@@ -55,13 +53,10 @@ body { background: #ffffff; color: black; }
 <p> The rest of this page provides instructions how to debug Qtopia applications using gdb in a Linux environment.
 <p> <h2> Rebuild the application with Debug symbols
 </h2>
-<a name="2"></a><p> This is done by changing the .pro file CONFIG settings:
+<a name="2"></a><p> This is done by passing <tt>-debug</tt> to configure. Alternatively,
+by adding 'debug' the .pro file CONFIG settings:
 <p> <PRE>
-CONFIG = qt warn_on debug
-</PRE>
-<p> Then rebuild the makefiles:
-<PRE>
-$ tmake -o Makefile thefile.pro
+CONFIG += debug
 </PRE>
 <p> And rebuild the application and install the application binary into the /opt/Qtopia/bin directory (/bin):
 <PRE>
@@ -109,8 +104,8 @@ $ gdb theapplication core
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

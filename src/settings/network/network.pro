@@ -12,8 +12,8 @@ desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/netsetup.desktop
 desktop.path=/apps/Settings
 
 help.files=$${QTOPIA_DEPOT_PATH}/help/html/qppp-*
+help.files+=$${QTOPIA_DEPOT_PATH}/help/html/netsetup*
 QTOPIA_PHONE {
-    help.files+=$${QTOPIA_DEPOT_PATH}/help/html/netsetup*
     omaservice.files=$${QTOPIA_DEPOT_PATH}/services/Push/application/vnd.wap.connectivity-wbxml/netsetup
     omaservice.path=/services/Push/application/vnd.wap.connectivity-wbxml
     otaconfig.files=$${QTOPIA_DEPOT_PATH}/etc/network/OTAGPRS.conf

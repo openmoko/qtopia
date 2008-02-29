@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -70,10 +70,10 @@ void AlarmDialog::init()
 #endif
 }
 
-AlarmDialog::Button AlarmDialog::exec(const PimEvent &e)
+AlarmDialog::Button AlarmDialog::exec(const Occurrence &e)
 {
-    lblDescription->setText( e.description() );
-    lblLocation->setText( e.location() );
+    lblDescription->setText( e.event().description() );
+    lblLocation->setText( e.event().location() );
     lblApptTime->setText( TimeString::localHM( e.start().time() ) );
     lblApptDate->setText( TimeString::localYMD( e.start().date() ) );
 

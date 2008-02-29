@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -248,8 +248,9 @@ bool SyncAuthentication::checkPassword( const QString& password )
 	unrecbox.setButtonText(QMessageBox::Yes, tr("Allow"));
 	unrecbox.setButtonText(QMessageBox::No, tr("Deny"));
 
+	int result = unrecbox.exec();
 	if ( (denials > 2 && now < lastdenial+600)
-	    || unrecbox.exec() == QMessageBox::No )
+	    || result == QMessageBox::No || result == QDialog::Rejected )
 	{
 	    denials++;
 	    lastdenial=now;
@@ -334,8 +335,10 @@ ServerPI::ServerPI( int socket, QObject *parent, const char* name )
 ServerPI::~ServerPI()
 {
     close();
-    dtp->close();
-    delete dtp;
+    if ( dtp ) {
+	dtp->close();
+	delete dtp;
+    }
     delete serversocket;
 }
 

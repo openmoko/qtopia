@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -234,6 +234,7 @@ void MediaSelector::showItemProperties( QListViewItem *i )
     if ( item ) {
 	MediaFileInfoWidget *infoWidget = new MediaFileInfoWidget( item->file(), this );
 	QPEApplication::execDialog( infoWidget );
+        delete infoWidget;
     }
 }
 

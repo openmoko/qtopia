@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qt Toolkit - QStyle Class</title><style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
 a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
 --></style>
@@ -274,16 +272,21 @@ currently pressed down.
 <p>Reimplemented in <a href="qsgistyle.html#28a824">QSGIStyle</a>.
 <h3 class="fn">void <a name="11145c"></a>QStyle::drawSlider ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a>, bool tickAbove, bool tickBelow ) <code>[virtual]</code></h3>
 <p>Draws a slider.
+<p>Reimplemented in <a href="qmotifplusstyle.html#454011">QMotifPlusStyle</a>, <a href="qmotifstyle.html#f452a7">QMotifStyle</a>, <a href="qwindowsstyle.html#79d326">QWindowsStyle</a>, <a href="qsgistyle.html#bb3ec7">QSGIStyle</a>, <a href="qplatinumstyle.html#59e413">QPlatinumStyle</a> and <a href="qinterlacestyle.html#1458f2">QInterlaceStyle</a>.
 <h3 class="fn">void <a name="c3fcb9"></a>QStyle::drawSliderGroove ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, QCOORD c, <a href="qt.html#Orientation">Orientation</a> ) <code>[virtual]</code></h3>
 <p>Draws a slider groove.
+<p>Reimplemented in <a href="qinterlacestyle.html#9bad38">QInterlaceStyle</a>, <a href="qplatinumstyle.html#da9eba">QPlatinumStyle</a>, <a href="qmotifstyle.html#1326cb">QMotifStyle</a>, <a href="qwindowsstyle.html#9884f4">QWindowsStyle</a>, <a href="qmotifplusstyle.html#1051b2">QMotifPlusStyle</a> and <a href="qsgistyle.html#cfc4ba">QSGIStyle</a>.
 <h3 class="fn">void <a name="dc005d"></a>QStyle::drawSliderGrooveMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, QCOORD c, <a href="qt.html#Orientation">Orientation</a> ) <code>[virtual]</code></h3>
 <p>Draws the mask of a slider groove.
+<p>Reimplemented in <a href="qcommonstyle.html#f802ae">QCommonStyle</a>, <a href="qinterlacestyle.html#86465c">QInterlaceStyle</a> and <a href="qsgistyle.html#bad987">QSGIStyle</a>.
 <h3 class="fn">void <a name="ee7ad4"></a>QStyle::drawSliderMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, <a href="qt.html#Orientation">Orientation</a>, bool, bool ) <code>[virtual]</code></h3>
 <p>Draws the mask of a slider.
+<p>Reimplemented in <a href="qcommonstyle.html#bc73f0">QCommonStyle</a>, <a href="qinterlacestyle.html#a24424">QInterlaceStyle</a>, <a href="qwindowsstyle.html#6ff546">QWindowsStyle</a>, <a href="qsgistyle.html#29d4b1">QSGIStyle</a> and <a href="qplatinumstyle.html#8d7531">QPlatinumStyle</a>.
 <h3 class="fn">void <a name="acbd66"></a>QStyle::drawSplitter ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a> orient ) <code>[virtual]</code></h3>
 <p>Draws a splitter handle in the rectangle described by <em>x, y, w, h</em> using painter <em>p</em> and color group <em>g.</em> The orientation
 is <em>orient.</em>
 <p>See also  <a href="#e7d3e3">splitterWidth</a>().
+<p>Reimplemented in <a href="qwindowsstyle.html#6d7c47">QWindowsStyle</a>, <a href="qsgistyle.html#2a08db">QSGIStyle</a>, <a href="qmotifstyle.html#f915c3">QMotifStyle</a> and <a href="qinterlacestyle.html#653dda">QInterlaceStyle</a>.
 <h3 class="fn">void <a name="e7983d"></a>QStyle::drawToolBarHandle ( <a href="qpainter.html">QPainter</a> * p, const <a href="qrect.html">QRect</a> &amp; r, <a href="qt.html#Orientation">Qt::Orientation</a> orientation, bool highlight, const <a href="qcolorgroup.html">QColorGroup</a> &amp; cg, bool drawBorder = FALSE )</h3>
 <p>Draws the handle for the toolbar using the painter <em>p</em> with the toolbar coordinates
 <em>r. orientation</em> gives the orientation of the toolbar, and the handle is drawn
@@ -462,13 +465,13 @@ them again.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.9"><nobr>
+<input type=hidden name="version" value="2.3.10"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2001
+copyright &copy; 1995-2005
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.9</div>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.10</div>
 </table></div></address></body></html>

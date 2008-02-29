@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/qvfb-customize.doc:2 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Customizing a Skin for QVFB</title>
@@ -72,19 +70,7 @@ in production libraries.
 <p> You can examine <tt>SmartPhone.skin</tt> and <tt>SmartPhone2.skin</tt> in $QTDIR/tools/QVFB to get an idea of how it all works.
 <p> <h3> defaultbuttons.conf
 </h3>
-<a name="2-2"></a><p> You can also include a <tt>defaultbuttons.conf</tt> file. This file customizes the launch screen applications and the ordering of the soft keys. There are also input method hints in this file.  If you include a <tt>defaultbuttons.conf</tt> file you will need to be aware of a few caveats for building and running Qtopia.
-<p> <ul>
-<li> QVFB makes <tt>$QPEDIR/etc/defaultbuttons.conf</tt> a symlink to the <tt>defaultbuttons.conf</tt> from the chosen skin.
-<li> configure will clobber this file unless you pass <tt>-no-defaultbuttons</tt>.
-<li> make install copies the contents of <tt>$QPEDIR/etc/defaultbuttons.conf</tt> into the image. If you subsequently change the file from the depot, you will need to make install before the image is updated.
-</ul>
-<p> If you run QVFB when <tt>$QPEDIR</tt> points to your image, the depot version of <tt>defaultbuttons.conf</tt> will not be updated and make install will clobber what's in the image.  Here is how you can get around this:
-<p> <ul>
-<li> always configure with <tt>-no-defaultbuttons</tt>
-<li> run QVFB and select your skin from a normal building environment
-<li> make install now copies the correct <tt>defaultbuttons.conf</tt> file into the image.
-<li> do not run QVFB from your image environment.
-</ul>
+<a name="2-2"></a><p> You can also include a <tt>defaultbuttons.conf</tt> file. This file customizes the launch screen applications and the ordering of the soft keys. There are also input method hints in this file.
 <p> <h2> Specifying Screen Size Independent of Skin
 </h2>
 <a name="3"></a><p> QVFB allows the screen size to be specified independently of the skin. For example, you can use the SmartPhone.skin but specify a screen size of 240x320 pixels. The skin (if command-line arguments are used) or screen (if Configure is used) will be scaled accordingly. For example:
@@ -97,8 +83,8 @@ in production libraries.
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

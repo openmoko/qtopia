@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -70,7 +70,11 @@
 
 TaskDialog::TaskDialog( const PimTask& task, QWidget *parent,
 			      const char *name, bool modal, WFlags fl )
-    : QDialog( parent, name, modal, fl ),
+    : QDialog( parent, name, modal, fl
+#ifdef QTOPIA_DESKTOP
+    | WStyle_Customize | WStyle_DialogBorder | WStyle_Title
+#endif
+    ),
       todo( task ), sv(0)
 {
     init();
@@ -118,7 +122,11 @@ TaskDialog::TaskDialog( const PimTask& task, QWidget *parent,
  */
 TaskDialog::TaskDialog( int id, QWidget* parent,  const char* name, bool modal,
 			      WFlags fl )
-    : QDialog( parent, name, modal, fl )
+    : QDialog( parent, name, modal, fl
+#ifdef QTOPIA_DESKTOP
+    | WStyle_Customize | WStyle_DialogBorder | WStyle_Title
+#endif
+    )
 {
     if ( id != -1 && id != -2 ) {
 	QArray<int> ids( 1 );
@@ -233,6 +241,9 @@ void TaskDialog::init()
     taskdetail->inputDescription->setFocus();
 
     resize( 300, 300 );
+#ifdef QTOPIA_DESKTOP
+    setMaximumSize( sizeHint()*2 );
+#endif
 }
 
 //void TaskDialog::resizeEvent(QResizeEvent *e)

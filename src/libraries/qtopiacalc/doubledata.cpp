@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -80,6 +80,11 @@ bool DoubleData::push(char c, bool commit) {
     if (formattedOutput == "0" && c == '0')
 	return !edited;
 
+    //when +/- is pressed while no number has been entered
+    //return to !edited mode
+    if (formattedOutput == "0" && edited) 
+        edited = !edited;
+
     QString tmpString = formattedOutput;
     if (!edited) {
 	if (c == '.') 
@@ -119,7 +124,8 @@ bool DoubleData::del() {
 	if (ok) {
 	    formattedOutput = tmpString;
 	    dbl = tmp;
-	}
+	} else
+            return TRUE;
     }
     return FALSE;
 }

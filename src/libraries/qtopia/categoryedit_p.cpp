@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -717,6 +717,22 @@ int CategoryEdit::tryRename(const QString &newName, bool global)
 	success = d->mCategories.renameCategory( d->mStrApp, d->orgName, newName );
     }
     if ( !success ) {
+        //append number to cat name until we find a name that doesn't exist yet
+        int version = 2;
+        QString tmpName;
+        while (!success) {
+            tmpName = newName;
+            tmpName += QString::number(version);
+            if (global) {
+	        success = d->mCategories.renameGlobalCategory( d->orgName, tmpName );
+            } else {
+	        success = d->mCategories.renameCategory( d->mStrApp, d->orgName, tmpName );
+            }
+            if (success) 
+                d->orgName = tmpName;
+            version++;
+        }
+
 	QMessageBox::warning( d->w, tr("Duplicate categories"),
 			      tr("<qt>There is already a category named "
 				 "%1. Please choose another name, or delete "

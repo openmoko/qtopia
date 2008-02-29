@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -1060,9 +1060,9 @@ QImage::Endian QImage::systemByteOrder()
 
 
 #if defined(Q_WS_X11)
-#include <X11/Xlib.h>				// needed for systemBitOrder
-#include <X11/Xutil.h>
-#include <X11/Xos.h>
+//#include <X11/Xlib.h>				// needed for systemBitOrder
+//#include <X11/Xutil.h>
+//#include <X11/Xos.h>
 #if defined(Q_OS_WIN32)
 #undef open
 #undef close

@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -234,7 +234,7 @@ class AbDetailEditor : public QDialog
 public:
     AbDetailEditor( QWidget *parent = 0, const char *name = 0, WFlags fl = 
 #ifdef QTOPIA_DESKTOP
-    WStyle_Customize | WStyle_Dialog | WStyle_Title 
+    WStyle_Customize | WStyle_DialogBorder | WStyle_Title 
 #else
     0
 #endif    
@@ -331,7 +331,7 @@ class AbEditor : public QDialog
 public:
     AbEditor( QWidget* parent = 0, const char* name = 0,  WFlags fl = 
 #ifdef QTOPIA_DESKTOP
-    WStyle_Customize | WStyle_Dialog | WStyle_Title 
+    WStyle_Customize | WStyle_DialogBorder | WStyle_Title 
 #else
     0
 #endif    

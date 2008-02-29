@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -233,6 +233,7 @@ MediaFileInfoWidget::MediaFileInfoWidget( const DocLnk& fileInfo, QWidget *paren
     QTabWidget *tw = new QTabWidget( this );
 
     tw->addTab( d->prop = new GeneralInfoView( tw, &d->docLnk ), tr("General") );
+    connect( d->prop->prop, SIGNAL( done() ), this, SLOT( reject() ) );
 
     QFileInfo fi( fileInfo.file() );
     if ( fi.extension( FALSE ).upper() == "MP3" ) 

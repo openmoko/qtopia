@@ -8,7 +8,10 @@ QTOPIA_PHONE {
     INTERFACES	= appearancesettingsbase.ui
 }
 
-TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
+TRANSLATABLES = $${HEADERS} $${SOURCES} appearancesettingsbase.ui \
+                    appearancesettingsbasephone.ui
+    
+
 
 !QTOPIA_PHONE {
     HEADERS += samplewindow.h

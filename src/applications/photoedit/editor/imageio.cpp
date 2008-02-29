@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -89,11 +89,12 @@ ImageIO::Status ImageIO::load( const QImage& image, int levels )
     }
         
     // For each level after the first
-    for( int i = 1; i< levels; ++i ) {
+    for( int i = 1; i < levels; ++i ) {
         // Load image half the size of the previous image
         QImage *prev_sample = image_samples + i - 1;
-        image_samples[ i ] = prev_sample->smoothScale(
-            prev_sample->width() / 2, prev_sample->height() / 2 );
+        int width = prev_sample->width() / 2;
+        int height = prev_sample->height() / 2;
+        image_samples[ i ] = prev_sample->smoothScale( width ? width : 1, height ? height : 1 );
     }
         
     // Notify of change to image

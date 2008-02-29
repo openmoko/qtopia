@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -56,16 +56,17 @@ public:
     bool contains(const QString&) const;
     int countWords() const;
 
-    // Unicode 0..3FFF; an offset can be used for other ranges
     enum {nodebits = 18};
 
     class Node {
 	friend class QDawgPrivate;
-	uint let:(30-nodebits);
+	uint let:16;
+        uint a : 14 ; //not used
 	uint isword:1;
 	uint islast:1;
 	int offset:nodebits;
-	Node() { }
+        int b : 14 ; //not used
+	Node() { a = b = 0; /*set zero for better compression*/ }
     public:
 	QChar letter() const { return QChar((ushort)let); }
 	bool isWord() const { return isword; }

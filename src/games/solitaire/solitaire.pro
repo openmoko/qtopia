@@ -30,7 +30,8 @@ SOURCES		= canvasitemtimer.cpp \
 QTOPIA_PHONE:INTERFACES	= phone_settings.ui
 !QTOPIA_PHONE:INTERFACES = pda_settings.ui
 
-TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
+TRANSLATABLES = $${HEADERS} $${SOURCES} \
+                    phone_settings.ui pda_settings.ui
 
 TARGET		= solitaire
 

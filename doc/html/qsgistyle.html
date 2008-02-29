@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qt Toolkit - QSGIStyle Class</title><style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
 a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
 --></style>
@@ -51,11 +49,8 @@ Inherits <a href="qmotifstyle.html">QMotifStyle</a>.
 <li><div class="fn">virtual void <a href="#b7a62f"><b>drawExclusiveIndicatorMask</b></a> ( QPainter * p, int x, int y, int w, int h, bool on ) </div>
 <li><div class="fn">virtual void <a href="#5b1f90"><b>drawComboButton</b></a> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, bool sunken = FALSE, bool editable = FALSE, bool enabled = TRUE, const QBrush * fill = 0 ) </div>
 <li><div class="fn">virtual void <a href="#961016"><b>drawScrollBarControls</b></a> ( QPainter * p, const QScrollBar *, int sliderStart, uint controls, uint activeControl ) </div>
-<li><div class="fn">void <b>drawSlider</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, Orientation orient, bool tickAbove, bool tickBelow ) </div>
-<li><div class="fn">void <b>drawSliderMask</b> ( QPainter * p, int x, int y, int w, int h, Orientation orient, bool tickAbove, bool tickBelow ) </div>
-<li><div class="fn">void <b>drawSliderGroove</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, QCOORD c, Orientation orient ) </div>
-<li><div class="fn">void <b>drawSliderGrooveMask</b> ( QPainter * p, int x, int y, int w, int h, QCOORD c, Orientation orient ) </div>
-<li><div class="fn">void <b>drawSplitter</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, Orientation orient ) </div>
+<li><div class="fn">virtual void <a href="#bb3ec7"><b>drawSlider</b></a> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, Orientation orient, bool tickAbove, bool tickBelow ) </div>
+<li><div class="fn">virtual void <a href="#cfc4ba"><b>drawSliderGroove</b></a> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, QCOORD c, Orientation orient ) </div>
 </ul>
 <h2>Protected Members</h2>
 <ul>
@@ -138,6 +133,21 @@ used by a checkbox.
 <h3 class="fn">void <a name="28a824"></a>QSGIStyle::drawSeparator ( <a href="qpainter.html">QPainter</a> * p, int x1, int y1, int x2, int y2, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, bool sunken = TRUE, int = 1, int = 0 ) <code>[virtual]</code></h3>
 <p>Draws a line to separate parts of the visual interface.
 <p>Reimplemented from <a href="qstyle.html#cf53b2">QStyle.</a>
+<h3 class="fn">void <a name="bb3ec7"></a>QSGIStyle::drawSlider ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a> orient, bool, bool ) <code>[virtual]</code></h3>
+<p>Draws the sliding element of a slider-widget.
+<p>Reimplemented from <a href="qstyle.html#11145c">QStyle.</a>
+<h3 class="fn">void <a name="cfc4ba"></a>QSGIStyle::drawSliderGroove ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, QCOORD, <a href="qt.html#Orientation">Orientation</a> ) <code>[virtual]</code></h3>
+<p>Draws the groove of a slider widget.
+<p>Reimplemented from <a href="qstyle.html#c3fcb9">QStyle.</a>
+<h3 class="fn">void <a name="bad987"></a>QSGIStyle::drawSliderGrooveMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, QCOORD c, <a href="qt.html#Orientation">Orientation</a> orient ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#dc005d">QStyle.</a>
+<h3 class="fn">void <a name="29d4b1"></a>QSGIStyle::drawSliderMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, <a href="qt.html#Orientation">Orientation</a> orient, bool tickAbove, bool tickBelow ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#ee7ad4">QStyle.</a>
+<h3 class="fn">void <a name="2a08db"></a>QSGIStyle::drawSplitter ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a> orient ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#acbd66">QStyle.</a>
 <h3 class="fn">void <a name="f6f7ad"></a>QSGIStyle::drawTab ( <a href="qpainter.html">QPainter</a> * p, const <a href="qtabbar.html">QTabBar</a> * tb, <a href="qtab.html">QTab</a> * t, bool selected )</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <h3 class="fn">void <a name="6fa231"></a>QSGIStyle::drawTabMask ( <a href="qpainter.html">QPainter</a> * p, const <a href="qtabbar.html">QTabBar</a> * tb, <a href="qtab.html">QTab</a> * t, bool selected )</h3>
@@ -179,13 +189,13 @@ the SGI-effect of glowing buttons.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.9"><nobr>
+<input type=hidden name="version" value="2.3.10"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2001
+copyright &copy; 1995-2005
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.9</div>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.10</div>
 </table></div></address></body></html>

@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/devices.doc:1 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Qtopia - Customizing Qtopia for a Device</title>
@@ -81,6 +79,8 @@ body { background: #ffffff; color: black; }
 <li><a href="#11-2"> AMR Encoder
 </a>
 </ul>
+<li><a href="#12"> GSM Module Integratation
+</a>
 </ul>
 <!-- endtoc -->
 
@@ -154,7 +154,7 @@ and enable it for the associated events.
 its brightness.
 <li> If the device has any special LEDs to indicate status to the user, Qtopia will need to know how to
 set the LEDs.
-<li> If the device has or supports a camera, a Video4Linux kernel driver
+<li> If the device has or supports a camera, a Video4Linux (version 1) kernel driver
 has to be provided so that the Qtopia Camera application can use it.
 <li> If the device has or supports phone hardware, a serial device that
 supports <a href="gsm.html">GSM</a> AT-commands should be provided, so that Qtopia Phone can use it.
@@ -195,6 +195,7 @@ file will be compiled and linked to provide any custom functions that are requir
 <li> void PowerStatusManager::getStatus(); - This function must be implemented to query the power status. The PowerStatus class in qtopia/power.h defines the power status abstraction. See the custom-linux-generic-g++.cpp file for details of a default implementation.
 </ul>
 <p> For reference implementations of the device specific code, the existing <tt>custom-*.*</tt> files found in src/libraries/qtopia/ may be of guidance.
+<p> <!-- index Non-installed Components --><a name="Non-installed-Components"></a>
 <p> <h2> Non-installed Components
 </h2>
 <a name="4"></a><p> There are a number of applications/features supplied with Qtopia that are
@@ -327,6 +328,7 @@ second screensaver level (already known from the PDA edition) Qtopia Phone
 automatically closes applications and returns to the home screen. Background
 activities (like time/date updates and the execution of the battery monitor) are
 reduced to ensure that the CPU consumption is at the lowest possible level.
+<p> <!-- index removable storage cards --><a name="removable-storage-cards"></a>
 <p> <h2> Removable Storage Cards
 </h2>
 <a name="8"></a><p> Files from external devices such as SD and CF cards
@@ -405,6 +407,7 @@ directories can be searched in multiple places:
 <p> <h2> MMS Client
 </h2>
 <a name="11"></a><p> The Qtopia Phone Edition includes MMS functionality in the messages client.
+<p> <!-- index WAP stack integration --><a name="WAP-stack-integration"></a>
 <p> <h3> WAP Stack Integration
 </h3>
 <a name="11-1"></a><p> Qtopia does not include a WAP stack with the MMS client.  Instead, an
@@ -412,7 +415,12 @@ interface is provided which allows any WAP stack to be integrated.  The
 <a href="mmscomms.html">MmsComms class</a> must be subclassed and the
 virtual functions implemented and signals emitted as appropriate.
 The MmsCommsHttp class provides a sample implementation using HTTP over
-TCP/IP.
+TCP/IP see : $QPEDIR/src/applications/qtmail/mmscomms_http.{cpp,h} 
+<p> To choose an alternate WAP stack connection method 
+<ul>
+<li> modify the MmsClient::setAccount function in $QPEDIR/src/applications/qtmail/mmsclient.cpp to choose your MmsComms implementation
+<li> modify  MMSCOMMS_HEADERS and MSCOMMS_SOURCES in $QPEDIR/src/applications/qtmail/qtmail.pri to list the source/header files for your MmsComms implementation.
+</ul>
 <p> <h3> AMR Encoder
 </h3>
 <a name="11-2"></a><p> The AMR encoder included with Qtopia is a reference implementation only.
@@ -420,13 +428,29 @@ It is recommended that an encoder optimized for the target platform
 be installed.  The media recorder plugin interface provides a convenient
 method of integrating the codec.
 See <a href="mediarecorderencoder.html">MediaRecorderEncoder class</a>.
+<p> <!-- index <a href="gsm.html">GSM</a> module integratation --><a name="GSM-module-integratation"></a>
+<p> <h2> GSM Module Integratation
+</h2>
+<a name="12"></a><p> We have found that the implementation of the GSM specification varies from GSM module to GSM module. 
+It is therefore highly likely that there will be a need to modify at least $QPEDIR/src/libraries/qtopiaphone/{muxdevice.*, atchat.*}
+to ensure that the GSM subset that the module supports is being used.
+<p> To support a GSM module the follow guide may be used:
+<ol type=1>
+<li> Check the AT commands that Qtopia requires (see <a href="phonelibrary.html">phonelibrary.html</a> )
+and determine which ones your GSM module does and does not support.
+<li> Determine the appropriate alternative AT commands suited to your GSM module and modify the phonelibrary as required.
+<li> Run Qtopia.
+<li> Check the error/message log for commands that are reported as error.
+<li> Using the error log modify the phonelibrary so that the modem's supported AT command parameters are used. For example, <tt>AT+CMUX=1,0,5</tt> vs <tt>AT+CMUX=0,0,5</tt> .
+<li> Repeat from step 3 until <a href="gsm.html">GSM</a> calls are possible, SIM details are being read etc ...
+</ol>
 <p> 
 <!-- eof -->
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

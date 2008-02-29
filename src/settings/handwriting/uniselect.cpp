@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -41,6 +41,7 @@
 #include <qlayout.h>
 #include <qpainter.h>
 #include <qvaluelist.h>
+#include <qtopia/global.h>
 #include <qtopia/fontmanager.h>
 
 typedef struct BlockMap {
@@ -165,6 +166,7 @@ protected slots:
     void updateSelectedSet(int x, int y);
 
 protected:
+    void keyPressEvent(QKeyEvent *e);
     void setSetForIndex(int ind);
 
     void drawContents(QPainter *p, int x, int y, int w, int h);
@@ -191,9 +193,11 @@ private:
 	QScrollView::ensureVisible(r.x(), r.y(), r.width(), r.height());
     }
 
-    QRect bounds( int );
-    int index( const QPoint & );
-    bool isNonPrinting(int row);
+    QRect bounds( int ) const;
+    int index( const QPoint & ) const;
+
+    void coordToIndex(int row, int col, int &ind) const;
+    void indexToCoord(int ind, int &srow, int &scol) const;
 
     void fillMap();
 
@@ -220,9 +224,15 @@ UScrollView::UScrollView(UniSelect *parent)
     updatingCurrent(FALSE)
 
 {
+#ifdef QTOPIA_PHONE
+    if (!Global::mousePreferred())
+	QFrame::setMargin(2);
+#endif
     fillMap();
     layoutGlyphs();
     connect(this, SIGNAL(contentsMoving(int, int)), this, SLOT(updateSelectedSet(int, int)));
+
+    setFocusPolicy(StrongFocus);
 }
 
 void UScrollView::layoutGlyphs()
@@ -270,6 +280,62 @@ void UScrollView::setIndex(int ind)
 	}
 	if (oldindex != -1)
 	    updateCellForIndex(oldindex);
+    }
+}
+
+void UScrollView::keyPressEvent(QKeyEvent *e)
+{
+#ifdef QTOPIA_PHONE
+    if( !Global::mousePreferred() ) {
+	if (!isModalEditing()) {
+	    if (e->key() == Key_Select) {
+		setModalEditing(TRUE);
+		updateCellForIndex(mCurrent);
+	    } else {
+		e->ignore();
+	    }
+	    return;
+	}
+    }
+#endif
+    int srow,scol;
+    indexToCoord(mCurrent, srow, scol);
+    int row = srow;
+    int col = scol;
+    switch(e->key()) {
+	case Key_Up:
+	    if (row > 0)
+		row--;
+	    break;
+	case Key_Down:
+	    if (row < glyphsPerCol + (int)mSpecials.count())
+		row++;
+	    break;
+	case Key_Left:
+	    if (col > 0)
+		col--;
+	    break;
+	case Key_Right:
+	    if (col < glyphsPerRow-1)
+		col++;
+	    break;
+#ifdef QTOPIA_PHONE
+	case Key_Space:
+	case Key_Select:
+	    if( !Global::mousePreferred() ) {
+		setModalEditing(FALSE);
+		updateCellForIndex(mCurrent);
+	    }
+	    break;
+#endif
+	default:
+	    e->ignore();
+    }
+    if (srow != row || scol != col) {
+	int ind;
+	coordToIndex(row, col, ind);
+	if (ind != -1)
+	    setIndex(ind);
     }
 }
 
@@ -336,21 +402,36 @@ void UScrollView::drawContents(QPainter *p, int x, int y, int w, int h)
     }
 }
 
-void UScrollView::drawCell(QPainter *p, const QRect &bounds,
+void UScrollView::drawCell(QPainter *p, const QRect &b,
 	const QString &text, int glyphindex)
 {
+    QRect bounds = b;
     if (glyphindex == mCurrent) {
 	p->setBrush(colorGroup().text()); 
-	p->setPen(colorGroup().base()); 
+#ifdef QTOPIA_PHONE
+	if (!Global::mousePreferred() && isModalEditing()) {
+	    p->setPen(colorGroup().highlight()); 
+	    p->drawRect(bounds);
+	    bounds.setRect(bounds.x()+1, bounds.y()+1, 
+		    bounds.width()-2,bounds.height()-2);
+	    p->drawRect(bounds);
+	    p->setPen(colorGroup().base()); 
+	} else
+#endif
+	{
+	    p->setPen(colorGroup().base()); 
+	    p->drawRect(bounds);
+	}
     } else if (glyphindex == mHighlighted) {
 	p->setBrush(colorGroup().highlight()); 
 	p->setPen(colorGroup().highlightedText()); 
+	p->drawRect(bounds);
     } else {
 	p->setBrush(colorGroup().base()); 
 	p->setPen(colorGroup().text()); 
+	p->drawRect(bounds);
     }
 
-    p->drawRect(bounds);
     p->drawText(bounds, AlignCenter, text);
 }
 
@@ -359,7 +440,7 @@ void UScrollView::updateCellForIndex(int ind)
     updateContents(bounds(ind));
 }
 
-QRect UScrollView::bounds(int ind)
+QRect UScrollView::bounds(int ind) const
 {
     if (ind < (int)mSpecials.count())
 	return QRect(0, ind*glyphSize, glyphSize*glyphsPerRow, glyphSize);
@@ -371,7 +452,8 @@ QRect UScrollView::bounds(int ind)
 	return QRect(scol*glyphSize, srow*glyphSize, glyphSize, glyphSize);
     }
 }
-int UScrollView::index(const QPoint &pos)
+
+int UScrollView::index(const QPoint &pos) const
 {
     int row = pos.y() ? pos.y() / glyphSize : 0;
     int col = pos.x() ? pos.x() / glyphSize : 0;
@@ -385,20 +467,50 @@ int UScrollView::index(const QPoint &pos)
     }
 }
 
+void UScrollView::coordToIndex(int row, int col, int &ind) const
+{
+    if (col >= glyphsPerRow) {
+	ind = -1;
+    } else if (row < (int)mSpecials.count()) {
+	ind = row;
+    } else {
+	row -= mSpecials.count();
+	ind = (row*glyphsPerRow)+col+mSpecials.count();
+    }
+    if (ind < 0 || ind >= (int)(mGlyphMap.count() + mSpecials.count()))
+	ind = -1;
+}
+
+void UScrollView::indexToCoord(int ind, int &srow, int &scol) const
+{
+    if (ind < (int)mSpecials.count()) {
+	srow = ind;
+	scol = 0;
+    } else {
+	ind -= mSpecials.count();
+	srow = ind ? ind / glyphsPerRow : 0;
+	scol = ind ? ind % glyphsPerRow : 0;
+	srow += mSpecials.count();
+    }
+}
+
 void UScrollView::contentsMousePressEvent(QMouseEvent *e)
 {
     setHighlighted(index(e->pos()));
+    QScrollView::contentsMousePressEvent(e);
 }
 
 void UScrollView::contentsMouseMoveEvent(QMouseEvent *e)
 {
     setHighlighted(index(e->pos()));
+    QScrollView::contentsMouseMoveEvent(e);
 }
 
 void UScrollView::contentsMouseReleaseEvent(QMouseEvent *e)
 {
     setHighlighted(-1);
     setIndex(index(e->pos()));
+    QScrollView::contentsMouseReleaseEvent(e);
 }
 
 void UScrollView::resizeEvent(QResizeEvent *)

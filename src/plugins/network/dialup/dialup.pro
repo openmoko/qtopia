@@ -15,7 +15,8 @@ QTOPIA_PHONE{
 
 !buildSingleexec:INTERFACES += ../proxiespagebase_p.ui
 
-bin.files	= $${QTOPIA_DEPOT_PATH}/bin/qtopia-dial-internal
+bin.files	= $${QTOPIA_DEPOT_PATH}/bin/qtopia-dial-internal \
+		  $${QTOPIA_DEPOT_PATH}/bin/qtopia-stop-internal
 bin.path	= /bin
 !QTOPIA_PHONE:conf.files = \
 	$${QTOPIA_DEPOT_PATH}/etc/network/DialUpIR.conf \

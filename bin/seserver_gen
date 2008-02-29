@@ -1,0 +1,123 @@
+#!/usr/bin/perl
+
+use strict;
+
+use Getopt::Long;
+
+my $opt_help;
+my $opt_file;
+my $opt_include;
+my $opt_target;
+my $opt_id;
+my $opt_depot="$ENV{QPEDIR}";
+my $opt_uidir;
+
+my @order;
+my $libsorder_prefix = "# Ordered library ";
+
+sub usage
+{
+die "usage: $0 -help
+       $0 -f libs     [-i] [-d <depot>] -s <src> -t <target>
+       $0 -f apps     [-i] [-d <depot>] -s <src> 
+       $0 -f includes [-i] -s <src> -u <uidir>
+
+    -help                Shows this information.
+    -insert              Whether component should be included or not.
+    -file       <file>   Which singleexec_server_file to modify.
+                         Valid choices are: libs includes apps.
+    -target     <binary> The name of the target binary or library.
+    -src        <path>   The path of the component source relative to QPEDIR.
+    -depotdir   <path>   The absolute path of the source depot.
+                         Only required if differs from QPEDIR.
+    -uidir      <path>   The location of the ui dir for a component.
+";
+}
+
+sub filter_append
+{
+    #id is optional.
+    my ($file, $line, $append, $id) = @_;
+
+    my @afterids;
+    if ($id) {
+	my $found;
+	for my $dep (@order) {
+	    chomp $dep;
+	    next if ($dep =~ /^\s*$/);
+	    if ($dep eq $id) {
+		$found = 1;
+		last;
+	    }
+	    push @afterids, $dep;
+	}
+	unless ($found) {
+	    undef $id;
+	}
+    }
+
+    open(FILE, "<$file");
+    my @lines = <FILE>;
+    close FILE;
+
+    open(FILE, ">$file");
+    for my $item (@lines) {
+	chomp $item;
+	if ($append) {
+	    if ($id) {
+		if ($item =~ /^$libsorder_prefix(.+)$/ and grep /^$1$/, @afterids ) {
+		    print FILE "$libsorder_prefix$id\n";
+		    print FILE "$line\n";
+		    undef $append;
+		}
+	    } else {
+		if ($item =~ /^$libsorder_prefix/) {
+		    print FILE "$line\n";
+		    undef $append;
+		}
+	    }
+	}
+	print FILE "$item\n" unless ($item =~ /^\Q$line\E$/ or $item =~ /^$/ or $item =~ /^\Q$libsorder_prefix$id\E$/);
+    }
+    if ($append) {
+	print FILE "$libsorder_prefix$id\n" if ($id);
+	print FILE "$line\n";
+    }
+    close FILE;
+}
+
+
+GetOptions(
+"help" => \$opt_help,
+"file=s" => \$opt_file,
+"insert" => \$opt_include,
+"target=s" => \$opt_target,
+"src=s" => \$opt_id,
+"depotdir=s" => \$opt_depot,
+"uidir=s" => \$opt_uidir
+);
+
+usage() if ($opt_help or !$opt_file);
+
+# read order.config
+
+if ($opt_file =~ /libs/) {
+
+    open(ORDER, "<$opt_depot/src/order.cfg") or die "Could not open order.cfg, is depotdir defined correctly?\n";
+    @order = <ORDER>;
+    close ORDER;
+
+    usage() unless (defined($opt_target) and defined($opt_id));
+    filter_append( "$ENV{QPEDIR}/src/server/singleexec_server_libs.pri", "LIBS+=-l$opt_target", $opt_include, $opt_id);
+} elsif ($opt_file =~ /includes/) {
+    usage() unless (defined($opt_uidir) and ($opt_id));
+    filter_append( "$ENV{QPEDIR}/src/server/singleexec_server_includes.pri", "INCLUDEPATH+=$ENV{QPEDIR}/src/$opt_id", $opt_include);
+    filter_append( "$ENV{QPEDIR}/src/server/singleexec_server_includes.pri", "INCLUDEPATH+=$ENV{QPEDIR}/src/$opt_id/$opt_uidir", $opt_include);
+} elsif ($opt_file =~ /apps/) {
+    usage() unless (defined($opt_id));
+    filter_append( "$ENV{QPEDIR}/src/server/singleexec_server_apps.cpp", "#include \"$opt_depot/src/$opt_id/main.cpp\"", $opt_include);
+} else {
+    print STDERR "unknown file type $opt_file\n";
+    usage();
+}
+

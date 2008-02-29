@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -421,6 +421,8 @@ bool DialupImpl::writeSystemFiles( QWidget *parent, Config& cfg )
 #ifdef QTOPIA_PHONE
 	opt << "connect '" // No tr
 	    << QPEApplication::qpeDir() << "/bin/qtopia-dial-internal'\n";
+	opt << "disconnect '" // No tr
+	    << QPEApplication::qpeDir() << "/bin/qtopia-stop-internal'\n";
 #else
 	opt << "connect '/usr/sbin/chat " // No tr
 		"-s -v "

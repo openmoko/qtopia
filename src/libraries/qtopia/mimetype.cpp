@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -361,7 +361,10 @@ void MimeType::loadExtensions(const QString& filename)
 	QTextStream in(&file);
 	QRegExp space("[ \t]+");
 	while (!in.atEnd()) {
-	    QStringList tokens = QStringList::split(space, in.readLine());
+	    QString line = in.readLine();
+	    if (line.isEmpty() || line[0] == '#')
+		continue;
+	    QStringList tokens = QStringList::split(space, line);
 	    QStringList::ConstIterator it = tokens.begin();
 	    if ( it != tokens.end() ) {
 		QString id = *it; ++it;

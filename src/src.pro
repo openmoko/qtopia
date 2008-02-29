@@ -34,7 +34,7 @@ for i in \
 ;do \
     echo Installing files listed in \$$i;\
     FILELIST=`grep "^Files:" \$$i | sed -e 's/^Files://'`;\
-    for j in \$$FILELIST; do \
+    [ -z "\$$FILELIST" ] || for j in \$$FILELIST; do \
 	dir=`dirname \$$j`;\
 	mkdir -p "$(INSTALL_ROOT)/\$$dir";\
 	eval install -c "$$(QPEDIR)/\$$j" "$(INSTALL_ROOT)/\$$dir";\
@@ -65,8 +65,8 @@ buildQtopia {
     fonts.files+=fixed
     fonts.path=/lib/fonts
     fonts.commands=$${COMMAND_HEADER}\
-	for rt in $${fonts.rotations}; do\
-	    for f in $${fonts.files}; do\
+	[ -z "$$fonts.rotations" ] || for rt in $${fonts.rotations}; do\
+	    [ -z "$$fonts.files" ] || for f in $${fonts.files}; do\
 		for file in $${QTEDIR}/lib/fonts/\$${f}_$${fonts.sizes}_\$${rt}.qpf; do\
 		    if [ -f \$$file ]; then\
 			install -c \$$file $(INSTALL_ROOT)$${fonts.path};\

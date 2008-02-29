@@ -5,7 +5,7 @@ QMAKE_LINK	= @true
 win32:QMAKE_LINK = echo
 
 lupdate.command_override=\
-    for lang in $$TRANSLATIONS; do\
+    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; do\
 	$${DQTDIR}/bin/lupdate $${QTEDIR}/src/*/*.cpp -ts qt-\$$lang.ts;\
     done
 

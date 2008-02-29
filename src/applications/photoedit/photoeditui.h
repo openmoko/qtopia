@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -178,7 +178,7 @@ private:
     bool only_editor, service_requested;
     
 #ifdef QTOPIA_PHONE
-    bool was_fullscreen, edit_canceled, close_ok;
+    bool was_fullscreen, edit_canceled, close_ok, editor_state_changed;
 #endif
     
     DocLnk service_lnk;

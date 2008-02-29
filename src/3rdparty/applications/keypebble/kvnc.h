@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** Copyright (C) 2000-2005 Trolltech AS and its licensors.
 ** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
@@ -42,7 +42,7 @@ class KVNC : public QMainWindow
 {
   Q_OBJECT
 public:
-  KVNC( const char *name = 0 );
+  KVNC( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );  
   ~KVNC();
 
 public slots:

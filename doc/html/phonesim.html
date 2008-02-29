@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/phonesim.doc:1 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Qtopia Phone Simulator</title>
@@ -62,6 +60,7 @@ The phone simulator is by no means a full replacement for a fully functional pho
 Normally this can simply be set to "localhost".
 <p> The special phone number "199" can be used to initiate a "dial back".
 The simulator will immediately hang up and then dial the user back after a few seconds.  This can be used to test incoming connections in a single-user environment.
+<p> <em>Filename</em> points to the <a href="phonesim.html#XML-response-file">XML response file</a> that the phone simulator should use.
 <p> <h2> Peer connections
 </h2>
 <a name="3"></a><p> The phone simulator can support "peer" connections.  That is, a user running the phone simulator can "call" another user running their own copy of the phone simulator.  This is useful for testing incoming calls.
@@ -74,7 +73,7 @@ To use multiplexing, you only need to set the following environment variable:
 <p> export QTOPIA_PHONE_DEVICE=sim:localhost
 <p> There is no longer any need to set QTOPIA_PHONE_DEVICE_LOW.  Be aware that if you do set both variables, then the simulator will use separate connections rather than GSM 07.10 multiplexing.
 <p> Using GSM 07.10 with the phone simulator has the advantage that the high-priority and low-priority channels will share the same state (i.e. state modification commands on one will affect the answer on the other).  This is not the case with dual connections.
-<p> <h2> XML response file format
+<p> <!-- index XML response file --><a name="XML-response-file"></a><h2> XML response file format
 </h2>
 <a name="5"></a><p> The responses are defined by an XML file (e.g. "troll.xml"), with the following format:
 <p> <center><table cellpadding="4" cellspacing="2" border="0">
@@ -164,8 +163,8 @@ an application running inside the SIM.
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

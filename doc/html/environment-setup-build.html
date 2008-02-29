@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Setting up the Build Environment</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="qtopiaclasses.html">Classes</a>
+ - <a href="qtopiahierarchy.html">Hierachy</a>
+ - <a href="qtopiaannotated.html">Annotated</a>
+ - <a href="qtopiafunctions.html">Functions</a>
+ - <a href="qtindex.html">Qt Embedded</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Setting up the Build Environment</h1>
+
+
+<p> 
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Environment Variables
+</a>
+<li><a href="#2"> Creating the custom configuration files
+</a>
+<li><a href="#3"> Acceptable directory characters
+</a>
+<ul>
+<li><a href="#3-1"> <em>Regular expression</em> characters
+</a>
+<li><a href="#3-2"> Spaces
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Environment Variables
+</h2>
+<a name="1"></a><p> Building Qtopia applications on a target system requires that environment variables, such as QTDIR, are set. In some cases you may want to move between various versions of Qt and have the environment variables pointing to various library configurations.
+<p> One way to do this is to store the settings in a file and enable them by running the source command. In the case of Linux (default bash shell) the file could contain the following values:
+<p> <pre>
+$ cat qtopia
+export QPEDIR=/opt/Qtopia
+export QTDIR=/opt/Qtopia
+export PATH=$QTDIR/bin:$PATH
+export TMAKEPATH=/opt/Qtopia/tmake/lib/qws/linux-generic-g++
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+</pre><p> If you have an alias (in your .bashrc file) you could quickly enable these new environment values:
+<p> <pre>
+alias qtopia='source ~/bin/qtopia'
+</pre><p> This assumes that the earlier file was placed in a bin directory in your home directory.
+<p> <!-- index Creating the custom configs files --><a name="Creating-the-custom-configs-files"></a><h2> Creating the custom configuration files
+</h2>
+<a name="2"></a><p> It is through the following configuration files that compilation tools to use and extra global defines are specified. For example a new arm based device might create a qws/linux-myarm-g++ tool chain configuration based on a qws/linux-arm-g++ : eg
+<p> <pre>
+cp -r $TMAKEDIR/lib/qws/linux-arm-g++ $TMAKEDIR/lib/qws/linux-myarm-g++
+cp -r $QTEDIR/configs/linux-arm-g++-shared $QTEDIR/configs/linux-myarm-g++-shared
+cp -r $QPEDIR/mkspecs/qws/linux-arm-g++ $QPEDIR/mkspecs/qws/linux-myarm-g++
+</pre>
+ 
+<p> <h2> Acceptable directory characters
+</h2>
+<a name="3"></a><p> <h3> <em>Regular expression</em> characters
+</h3>
+<a name="3-1"></a><p> Qtopia 1.9.x and Qtopia 2.0.0 - 2.1.0 require that the characters in any directory the Qtopia build system
+will access do not contain <em>regular expression</em> characters. Specifically, any special character or
+character sequence that is recognised by QRegExp may cause problems.
+<p> Note: The . character seems to be ok, since it matches itself.
+<p> If you are using any of the affected Qtopia versions, you should avoid <em>regular expression</em>
+characters in your directory names. These characters include (but are not limited to)
++ . ? * [ ] &#92; ( ) ^ $ { }
+<p> A patch to remove this limitation exists for Qtopia 2.1.0. Qtopia 2.1.1 and higher do not have this limitation.
+<p> <h3> Spaces
+</h3>
+<a name="3-2"></a><p> The Qtopia buildsystem does not support spaces in directory names. This limitation will not fixed in the
+forseable future. Please ensure that no spaces appear in the directories that the Qtopia buildsystem
+accesses and the paths leading to those directories.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2001-2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
+</table></div></address></body>
+</html>

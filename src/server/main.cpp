@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -651,8 +651,6 @@ int initApplication( int argc, char ** argv )
 # endif
 #endif
 
-    AlarmServer::initialize();
-
 #if defined(QT_QWS_LOGIN)
     for( int i=0; i<a.argc(); i++ )
       if( strcmp( a.argv()[i], "-login" ) == 0 ) { // No tr
@@ -681,6 +679,8 @@ int initApplication( int argc, char ** argv )
 #else
     s->show();
 #endif
+
+    AlarmServer::initialize();
 
     int rv =  a.exec();
 

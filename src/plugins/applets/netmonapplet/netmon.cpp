@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -251,10 +251,6 @@ void NetMonitorApplet::netMessage( const QCString &msg, const QByteArray &d )
 	    netmon->setStatus("");
 	    netmon->netFailed();
 	}
-    } else if ( msg == "choicesChanged()" ) {
-	//qDebug( "QCOP: choicesChanged()" );
-	if ( netmon )
-	    netmon->setServices(services);
     }
 }
 

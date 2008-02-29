@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -156,7 +156,7 @@ QString HelpPreProcessor::text()
 	    int var1close = line.find("}");
 	    QString key = line.mid( 1, var1close - 1 );
 	    QString value = line.mid( var1close + 3, matchLen - var1close - 4);
-	    qDebug( "setting varible %s to %s", key.latin1(), value.latin1() );
+	    //qDebug( "setting varible %s to %s", key.latin1(), value.latin1() );
 	    replace[key] = value;
 	    continue;
 	}
@@ -169,7 +169,7 @@ QString HelpPreProcessor::text()
 	matchLen = 0;
 	while ( (offset = varNorm.match( line, offset + matchLen, &matchLen, FALSE )) != -1 ) {
 	    QString key = line.mid( offset + 4, matchLen - 5 );
-	    qDebug( "matched %s", key.latin1() );
+	    //qDebug( "matched %s", key.latin1() );
 	    line.replace( offset + 1, matchLen - 1, replace[key] );
 	}
 	offset = 0;

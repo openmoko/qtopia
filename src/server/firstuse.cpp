@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -279,7 +279,7 @@ settingsTable[] =
 
 FirstUse::FirstUse(QWidget *parent, const char *name, WFlags f)
     : QDialog(parent, name, TRUE, f), currDlgIdx(-1), currDlg(0),
-	needCalibrate(FALSE), needRestart(FALSE)
+	needCalibrate(FALSE), needRestart(TRUE)
 {
     ServerApplication::allowRestart = FALSE;
     // we force our height beyound the maximum (which we set anyway)

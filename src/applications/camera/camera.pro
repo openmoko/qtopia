@@ -16,10 +16,8 @@ TRANSLATABLES   =   $$HEADERS \
 
 i18n.path=$${INSTALL_PREFIX}/i18n
 i18n.commands=$${COMMAND_HEADER}\
-    for lang in $$TRANSLATIONS; \
-    do \
-	for pkg in Categories-camera; \
-	do \
+    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; do \
+	for pkg in Categories-camera; do \
 	    $${DQTDIR}/bin/lrelease $${QTOPIA_DEPOT_PATH}/i18n/\$$lang/\$$pkg.ts \
 		-qm $(INSTALL_ROOT)/i18n/\$$lang/\$$pkg.qm; \
 	done; \
@@ -36,7 +34,7 @@ service.files=$${QTOPIA_DEPOT_PATH}/services/GetValue/image/camera
 service.path=/services/GetValue/image
 INSTALLS+=desktop service help
 PICS_INSTALLS+=pics
-!isEmpty(DQTDIR):!isEmpty(TRANSLATIONS):INSTALLS+=i18n
+!isEmpty(DQTDIR):INSTALLS+=i18n
 
 INTERFACES=camerabase.ui camerasettings.ui
 

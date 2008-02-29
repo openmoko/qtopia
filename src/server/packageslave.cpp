@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -35,6 +35,7 @@
 
 #include "packageslave.h"
 #include <qtopia/qprocess.h>
+#include <qtopia/qpeapplication.h>
 
 #ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>
@@ -127,6 +128,9 @@ void PackageHandler::installPackage( const QString &package, const QString &dest
 	cmd << "-d" << dest;
     }
     cmd << "install" << package;
+#ifndef QPE_HAVE_DIRECT_ACCESS
+    QPEApplication::setTempScreenSaverMode(QPEApplication::DisableSuspend);
+#endif
     currentProcess = new QProcess( cmd ); // No tr
     connect( currentProcess, SIGNAL( processExited() ), SLOT( iProcessExited() ) );
     connect( currentProcess, SIGNAL( readyReadStdout() ), SLOT( readyReadStdout() ) );
@@ -299,6 +303,9 @@ void PackageHandler::prepareInstall( const QString& size, const QString& path )
 
 void PackageHandler::iProcessExited()
 {
+#ifndef QPE_HAVE_DIRECT_ACCESS
+    QPEApplication::setTempScreenSaverMode(QPEApplication::Enable);
+#endif
     if ( currentProcess->normalExit() && currentProcess->exitStatus() == 0 )
 	sendReply( "installDone(QString)", currentPackage );
     else {

@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -80,7 +80,7 @@ long Config::timeStamp(const QString& name, Domain domain)
 */
 QStringList Config::allGroups() const
 {
-#if QT_VERSION > 300
+#if QT_VERSION > 0x030000
     return groups.keys();
 #else
     QStringList res;

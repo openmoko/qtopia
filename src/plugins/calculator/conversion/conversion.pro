@@ -11,10 +11,8 @@ LIBS   +=-lqtopiacalc
 
 i18n.path=$${INSTALL_PREFIX}/i18n
 i18n.commands=$${COMMAND_HEADER}\
-    for lang in $$TRANSLATIONS; \
-    do \
-	for pkg in CalcDistConv CalcAreaConv CalcWeightConv CalcVolConv; \
-	do \
+    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; do \
+	for pkg in CalcDistConv CalcAreaConv CalcWeightConv CalcVolConv; do \
 	    $${DQTDIR}/bin/lrelease $${QTOPIA_DEPOT_PATH}/i18n/\$$lang/\$$pkg.ts \
 		-qm $(INSTALL_ROOT)/i18n/\$$lang/\$$pkg.qm; \
 	done; \
@@ -23,4 +21,4 @@ i18n.commands=$${COMMAND_HEADER}\
 unitconfs.files=$${QTOPIA_DEPOT_PATH}/etc/calculator/*.conf
 unitconfs.path=/etc/calculator/
 INSTALLS+=unitconfs
-!isEmpty(DQTDIR):!isEmpty(TRANSLATIONS):INSTALLS+=i18n
+!isEmpty(DQTDIR):INSTALLS+=i18n

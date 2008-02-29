@@ -94,22 +94,41 @@ SERVER_SOURCES	+= main.cpp \
 		  serverapp.cpp \
 		  qrr.cpp 
 
+
+FIRSTUSE_HEADERS += ../settings/language/languagesettings.h \
+            ../settings/systemtime/settime.h
+
+FIRSTUSE_SOURCES += ../settings/language/language.cpp \
+            ../settings/systemtime/settime.cpp
+
+FIRSTUSE_INTERFACES += ../settings/language/languagesettingsbase.ui
+
 !QTOPIA_PHONE{
     !buildSingleExec {
-	FIRSTUSE_HEADERS += ../settings/language/languagesettings.h \
-			    ../settings/systemtime/settime.h
-	FIRSTUSE_SOURCES += ../settings/language/language.cpp \
-			    ../settings/systemtime/settime.cpp
-	FIRSTUSE_INTERFACES += ../settings/language/languagesettingsbase.ui
+        SERVER_HEADERS	+= $${FIRSTUSE_HEADERS}
+        SERVER_SOURCES	+= $${FIRSTUSE_SOURCES}
+        INTERFACES	+= $${FIRSTUSE_INTERFACES}
+    }
+    buildSingleExec:!contains(APP_PROJECTS, settings/language) {
 
-	SERVER_HEADERS	+= $${FIRSTUSE_HEADERS}
-	SERVER_SOURCES	+= $${FIRSTUSE_SOURCES}
-	INTERFACES		+= $${FIRSTUSE_INTERFACES}
+        FIRSTUSE_HEADERS -= ../settings/systemtime/settime.h
+        FIRSTUSE_SOURCES -= ../settings/systemtime/settime.cpp
+        SERVER_HEADERS	+= $${FIRSTUSE_HEADERS}
+        SERVER_SOURCES	+= $${FIRSTUSE_SOURCES}
+        INTERFACES	+= $${FIRSTUSE_INTERFACES}
+
+    }
+    buildSingleExec:!contains(APP_PROJECTS, settings/systemtime) {
+	SERVER_HEADERS += ../settings/systemtime/settime.h
+	SERVER_SOURCES += ../settings/systemtime/settime.cpp
     }
 }
 
+
+
 INTERFACES += shutdown.ui 
-TRANSLATABLES += $${SERVER_HEADERS} $${SERVER_SOURCES} $${INTERFACES}
+TRANSLATABLES += $${SERVER_HEADERS} $${SERVER_SOURCES} $${INTERFACES} \
+                $${FIRSTUSE_HEADERS} $${FIRSTUSE_SOURCES} $${FIRSTUSE_INTERFACES}
 
 sdk_server_headers.files=$${SERVER_HEADERS}
 sdk_server_headers.path=/src/server/
@@ -360,10 +379,12 @@ QTOPIA_PHONE {
     callhistorydesktop.path=/apps/Applications/
     callhistorypics.files=$${QTOPIA_DEPOT_PATH}/pics/callhistory/*
     callhistorypics.path=/pics/callhistory/
+    callhistoryservice.files=$${QTOPIA_DEPOT_PATH}/services/callhistory/qpe
+    callhistoryservice.path=/services/callhistory/
     defaultpics.files=$${QTOPIA_DEPOT_PATH}/pics/themes/default*
     defaultpics.path=/pics/themes
 
-    INSTALLS+=cameradesktop profilesettings defaultalerts callhistorydesktop
+    INSTALLS+=cameradesktop profilesettings defaultalerts callhistorydesktop callhistoryservice
     PICS_INSTALLS+=phonepics globalphonepics contextbarpics callhistorypics defaultpics
 
     CONFIG+=builtin_theme

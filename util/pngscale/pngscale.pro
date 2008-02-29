@@ -1,4 +1,4 @@
-include($(QPEDIR)/src/config.pri)
+include($$(QPEDIR)/src/config.pri)
 TEMPLATE	= app
 CONFIG          -= qt debug
 CONFIG		+= release

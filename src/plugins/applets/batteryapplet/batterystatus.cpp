@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -97,7 +97,7 @@ QString BatteryStatus::statusText() const
     QString text;
     if ( ps->batteryStatus() == PowerStatus::Charging ) {
 	text = tr("Charging");
-    } else if ( ps->batteryPercentAccurate() ) {
+    } else if ( ps->batteryPercentAccurate() && percent > -1  ) {
 	text.sprintf( tr("Percentage battery remaining") + ": %i%%", percent );
     } else {
 	text = tr("Battery status: ");
@@ -118,13 +118,15 @@ QString BatteryStatus::statusText() const
 		text += tr("Unknown");
 	}
     }
-    if ( ps->acStatus() == PowerStatus::Backup )
-	text += "\n\n" + tr("On backup power");
-    else if ( ps->acStatus() == PowerStatus::Online )
-	text += "\n\n" + tr("Power on-line");
-    else if ( ps->acStatus() == PowerStatus::Offline )
-	text += "\n\n" + tr("External power disconnected");
-
+    
+    if (PowerStatusManager::APMEnabled()) {
+        if ( ps->acStatus() == PowerStatus::Backup )
+            text += "\n\n" + tr("On backup power");
+        else if ( ps->acStatus() == PowerStatus::Online )
+            text += "\n\n" + tr("Power on-line");
+        else if ( ps->acStatus() == PowerStatus::Offline )
+            text += "\n\n" + tr("External power disconnected");
+    }
     if ( ps->batteryTimeRemaining() >= 0 ) {
 	text += "\n\n" + QString().sprintf( tr("Battery time remaining") +
 		": %im %02is", // No tr
@@ -153,8 +155,6 @@ void BatteryStatus::drawContents( QPainter *p )
 	darkc = c.dark(280);
 	lightc = c.light(140);
     }
-    if ( percent < 0 )
-	return;
 
     int length = percent * (width()-30) / 100;
     p->setPen( black );

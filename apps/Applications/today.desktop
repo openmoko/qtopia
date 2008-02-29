@@ -7,3 +7,4 @@ Exec=today
 Icon=TodayApp
 Type=Application
 Name[]=To­day
+CanFastload=0

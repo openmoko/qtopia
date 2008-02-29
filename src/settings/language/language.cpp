@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -35,10 +35,6 @@
 
 #include "languagesettings.h"
 
-#ifdef QTOPIA_PHONE
-#include "../../3rdparty/plugins/inputmethods/pkim/pkimmatcher.h"
-#endif
-
 #include <qtopia/global.h>
 #include <qtopia/fontmanager.h>
 #include <qtopia/config.h>
@@ -52,6 +48,7 @@
 #include <qtopia/contextbar.h>
 #include <qtopia/contextmenu.h>
 #endif
+#include <qtopia/resource.h>
 
 #include <qlabel.h>
 #include <qaction.h>
@@ -82,35 +79,72 @@
 //#endif
 #include <stdlib.h>
 
-class FontedItem : public QListBoxText {
+class FontedItem : public QListBoxPixmap {
 public:
-    FontedItem(const QString& langName,const QFont& font) :
-	QListBoxText(langName),
-	fnt(font)
+    FontedItem(const QPixmap& pxm, const QString& langName,const QFont& font) :
+	QListBoxPixmap(pxm, langName),
+	fnt(font), showPixmap(FALSE)
     {
     }
 
     int height( const QListBox * ) const
     {
-	return QFontMetrics(fnt).lineSpacing();
+	return QMAX(QFontMetrics(fnt).lineSpacing(), pixmap()->height());
     }
 
     int width( const QListBox * ) const
     {
-	return QFontMetrics(fnt).width(text());
+	return QMAX(QFontMetrics(fnt).width(text()), pixmap()->width());
     }
 
-
-protected:
-    void paint(QPainter* p)
+    void setSelected(bool active)
     {
-	p->setFont(fnt);
-	QListBoxText::paint(p);
+        showPixmap = active;
+    }
+
+    bool selected() { return showPixmap; }
+    
+protected:
+    void paint(QPainter* painter)
+    {
+	painter->setFont(fnt);
+        if (showPixmap)
+            painter->drawPixmap( 3, 0, *pixmap() );
+        if ( !text().isEmpty() ) {
+	    QFontMetrics fm = painter->fontMetrics();
+            if (showPixmap) {
+                int yPos;			// vertical text position
+                if ( pixmap()->height() < fm.height() )
+                    yPos = fm.ascent() + fm.leading()/2;
+                else
+                    yPos = pixmap()->height()/2 - fm.height()/2 + fm.ascent();
+                painter->drawText( pixmap()->width() + 5, yPos, text() );
+            } else {
+                painter->drawText( 3, fm.ascent() + fm.leading()/2, text() );
+            }
+        }
     }
 
 private:
     QFont fnt;
+    bool showPixmap;
 };
+
+
+//remove dependency on pkim
+QStringList LanguageSettings::langs;
+
+QStringList LanguageSettings::dictLanguages()
+{
+    if ( langs.isEmpty() ) {
+	QDir dir(QPEApplication::qpeDir() + "etc/dict", "words-*.dawg");
+	for (int i=0; i<(int)dir.count(); i++) {
+	    QString f = dir[i];
+	    langs.append(f.mid(6,f.length()-11)); // words-*.dawg
+	}
+    }
+    return langs;
+}
 
 #include "langname.h"
 
@@ -122,10 +156,7 @@ LanguageSettings::LanguageSettings( QWidget* parent,  const char* name, WFlags f
        languages->setFont(FontManager::unicodeFont(FontManager::Proportional));
 #endif
 
-//#ifndef QTOPIA_DESKTOP
-    //QPEApplication::setMenuLike( this, TRUE );
-//#endif
-
+    QPixmap pix = Resource::loadPixmap("selectedDict");
     QStringList qpepaths = Global::qtopiaPaths();
     for (QStringList::Iterator qit=qpepaths.begin(); qit != qpepaths.end(); ++qit ) {
 	QString tfn = *qit+"i18n/";
@@ -140,7 +171,7 @@ LanguageSettings::LanguageSettings( QWidget* parent,  const char* name, WFlags f
 		    langAvail.append(id);
 		    QFont font = languages->font();
 		    QString langName = languageName(id, &font);
-		    languages->insertItem( new FontedItem(langName,font) );
+		    languages->insertItem( new FontedItem(pix, langName,font) );
 		}
 	    }
 	}
@@ -158,9 +189,10 @@ LanguageSettings::LanguageSettings( QWidget* parent,  const char* name, WFlags f
 
     ContextMenu *menu = new ContextMenu(this);
     a_input->addTo(menu);
-
-    updateActions();
+#else
+    connect(languages,SIGNAL(selected(int)), this, SLOT(inputToggled()));
 #endif
+    updateActions();
 }
 
 LanguageSettings::~LanguageSettings()
@@ -174,20 +206,38 @@ void LanguageSettings::setConfirm(bool c)
 
 void LanguageSettings::inputToggled()
 {
-#ifdef QTOPIA_PHONE
-    QString lang = langAvail.at( languages->currentItem() );
+    int index = languages->currentItem();
+    QString lang = langAvail.at( index );
     inputLanguages.remove(lang);
+#ifdef QTOPIA_PHONE
     if ( a_input->isOn() )
 	inputLanguages.prepend(lang);
+#else
+    FontedItem* item = (FontedItem*) languages->item(index);
+    if (!item->selected()) {
+	inputLanguages.prepend(lang);
+        item->setSelected(FALSE);
+    } else 
+        item->setSelected(TRUE);
 #endif
+    updateActions();
 }
 
-#ifdef QTOPIA_PHONE
 void LanguageSettings::updateActions()
 {
-    QString lang = langAvail.at( languages->currentItem() );
+    int numEntries = languages->numRows();
+    QString lang;
+    for(int index = 0; index < numEntries; index++) {
+        FontedItem* item = (FontedItem* ) languages->item(index);
+        lang = langAvail.at(index);
+        item->setSelected(dictLanguages().contains(lang) && 
+                inputLanguages.contains(lang));
+    }
+    languages->triggerUpdate(FALSE);
+#ifdef QTOPIA_PHONE 
+    lang = langAvail.at( languages->currentItem() );
     a_input->setOn(inputLanguages.contains(lang));
-    a_input->setEnabled(PkIMMatcher::languages().contains(lang));
+#endif
 }
 
 void LanguageSettings::forceChosen()
@@ -195,7 +245,7 @@ void LanguageSettings::forceChosen()
     // For simplicity, make primary reading language also primary writing language.
     QString l = chosenLanguage;
     while (1) {
-	if ( PkIMMatcher::languages().contains(l) )
+	if ( dictLanguages().contains(l) )
 	    break;
 	int e = l.findRev(QRegExp("[._]"));
 	if ( e >= 0 ) {
@@ -209,12 +259,10 @@ void LanguageSettings::forceChosen()
     inputLanguages.remove(l);
     inputLanguages.prepend(l);
 }
-#endif
 
 void LanguageSettings::accept()
 {
     chosenLanguage = langAvail.at( languages->currentItem() );
-    qDebug("accept");
     Config config("locale");
     config.setGroup( "Language" );
     QString lang = config.readEntry( "Language" );
@@ -233,13 +281,8 @@ void LanguageSettings::accept()
     }
 
     config.writeEntry( "Language", chosenLanguage );
-#ifdef QTOPIA_PHONE
     forceChosen();
-#else
-    inputLanguages = chosenLanguage;
-#endif
     config.writeEntry( "InputLanguages", inputLanguages, ' ' );
-    qDebug("write");
     config.write();
 
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
@@ -255,9 +298,7 @@ void LanguageSettings::accept()
 void LanguageSettings::applyLanguage()
 {
     chosenLanguage = langAvail.at( languages->currentItem() );
-#ifdef QTOPIA_PHONE
     updateActions();
-#endif
 }
 
 
@@ -276,9 +317,7 @@ void LanguageSettings::reset()
     if(l.isEmpty()) l = "en_US"; // No tr
     chosenLanguage = l;
     inputLanguages = config.readListEntry( "InputLanguages", ' ' );
-#ifdef QTOPIA_PHONE
     forceChosen();
-#endif
 
     int n = langAvail.find( l );
     languages->setCurrentItem( n );

@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -137,6 +137,9 @@ void ContextMenu::init()
     ContextBar::setLabel(this, key(), ContextBar::Options, ContextBar::ModalAndNonModal);
 }
 
+/*!
+    Destructs the ContextMenu
+*/
 ContextMenu::~ContextMenu()
 {
     QMap<QWidget*, QWidget*>::Iterator it = d->focusWidgetMap.begin();
@@ -163,7 +166,7 @@ void ContextMenu::setEnableHelp(bool b)
 /*!
   Adds this ContextMenu to widget \a w for modal editing state \a state.
 
-  \sa removeFrom
+  \sa removeFrom()
 */
 void ContextMenu::addTo(QWidget *w, int state)
 {
@@ -194,7 +197,7 @@ void ContextMenu::addTo(QWidget *w, int state)
 /*!
   Removes this ContextMenu from widget \a w for modal editing state \a state.
 
-  \sa addTo
+  \sa addTo()
 */
 void ContextMenu::removeFrom(QWidget *w, int state)
 {
@@ -229,7 +232,7 @@ void ContextMenu::removeFrom(QWidget *w, int state)
 /*!
   Inserts action \a a at position \a idx in the menu.
 
-  \sa addAction
+  \sa addAction()
 */
 void ContextMenu::insertAction(QAction *a, int idx)
 {
@@ -264,7 +267,7 @@ void ContextMenu::insertAction(QAction *a, int idx)
 /*!
   Adds action \a a to the end of the menu.
 
-  \sa insertAction
+  \sa insertAction()
 */
 void ContextMenu::addAction(QAction *a)
 {

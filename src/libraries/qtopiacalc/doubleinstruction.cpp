@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -326,6 +326,7 @@ void iDoubleSquare::doEvalI(DoubleData *acc) {
 void iDoubleNegate::doEvalI(DoubleData *acc) {
     DoubleData *result = new DoubleData();
     result->set( 0 - acc->get() );
+    result->setEdited(TRUE);
     systemEngine->putData(result);
 }
 
@@ -486,7 +487,7 @@ iDoubleCubeRoot::iDoubleCubeRoot():BaseDoubleInstruction() {
     name = "Cube root"; // No tr
 }
 iDoubleXRootY::iDoubleXRootY():BaseDoubleInstruction() {
-    name = "X root y"; // No tr
+    name = "X root Y"; // No tr
     precedence = 20;
     displayString = "to the root";
     argCount = 2;

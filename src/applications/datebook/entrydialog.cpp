@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -121,7 +121,11 @@ static void addOrPick( QComboBox* combo, const QString& t )
 
 EntryDialog::EntryDialog( bool startOnMonday, const QDateTime &start, const QDateTime &end,
 			  QWidget *parent, const char *name, bool modal, WFlags f )
-    : QDialog( parent, "edit-event", modal, f ),
+    : QDialog( parent, name, modal, f 
+#ifdef QTOPIA_DESKTOP
+    | WStyle_Customize | WStyle_DialogBorder | WStyle_Title
+#endif
+    ),
     startWeekOnMonday( startOnMonday )
 {
     Q_UNUSED(name);
@@ -131,7 +135,11 @@ EntryDialog::EntryDialog( bool startOnMonday, const QDateTime &start, const QDat
 
 EntryDialog::EntryDialog( bool startOnMonday, const PimEvent &event,
 			  QWidget *parent, const char *name, bool modal, WFlags f )
-    : QDialog( parent, "edit-event", modal, f ),
+    : QDialog( parent, name, modal, f
+#ifdef QTOPIA_DESKTOP
+    | WStyle_Customize | WStyle_DialogBorder | WStyle_Title
+#endif
+    ),
     mEvent(event), mOrigEvent( event ), startWeekOnMonday( startOnMonday )
 {
     Q_UNUSED(name);
@@ -342,6 +350,10 @@ void EntryDialog::init()
     connect( buttonOk, SIGNAL(clicked()), this, SLOT(accept()) );
     connect( buttonCancel, SIGNAL(clicked()), this, SLOT(reject()) );
 #endif
+
+#ifdef QTOPIA_DESKTOP
+    setMaximumSize( sizeHint()*2 );
+#endif
 }
 
 /*
@@ -399,7 +411,7 @@ void EntryDialog::slotRepeat()
     RepeatEntry *e;
 
     event(); // update of the shown values;
-    e = new RepeatEntry( startWeekOnMonday, mEvent, this);
+    e = new RepeatEntry( startWeekOnMonday, mEvent, this );
 
     if ( QPEApplication::execDialog(e) ) {
 	 mEvent = e->event();
@@ -565,6 +577,7 @@ void EntryDialog::updateCategories()
 //#define ACCEPT_DEBUG
 void EntryDialog::accept()
 {
+    hide();
     event();
     PrEvent &oe = (PrEvent&)mOrigEvent;
     PrEvent &ne = (PrEvent&)mEvent;
@@ -633,7 +646,7 @@ void EntryDialog::accept()
 	QDialog::accept();
     } else {
 	qDebug( "Event not modified" );
-	QDialog::reject();
+        QDialog::reject();
     }
 }
 

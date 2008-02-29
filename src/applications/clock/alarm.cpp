@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -253,7 +253,7 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
 	alarmCount = 0;
 	alarmt->start( 5000 );
 	if ( !alarmDlg ) {
-	    alarmDlg = new QDialog( this, 0, TRUE,
+	    alarmDlg = new QDialog( this->isVisible() ? this : 0, 0, TRUE,
 		    WStyle_Customize | WStyle_StaysOnTop |
 		    WStyle_NormalBorder | WStyle_Title );
 

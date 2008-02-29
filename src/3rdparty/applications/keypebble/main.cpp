@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** Copyright (C) 2000-2005 Trolltech AS and its licensors.
 ** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
@@ -19,19 +19,9 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qurl.h>
 #include <qtopia/qpeapplication.h>
 #include "kvnc.h"
 
-int main( int argc, char **argv )
-{
-  QPEApplication app( argc, argv );
-  KVNC *view = new KVNC( "Keypebble" );
-  app.showMainWidget( view );
-
-  if ( argc > 1 )
-    view->openURL( QUrl(argv[1]) );
-
-  return app.exec();
-}
+QTOPIA_ADD_APPLICATION("keypebble",KVNC);
+QTOPIA_MAIN
 

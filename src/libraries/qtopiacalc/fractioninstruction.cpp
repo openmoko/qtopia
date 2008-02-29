@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -167,6 +167,7 @@ void iDivideFractionFraction::doEval (FractionData *f,FractionData *fractionNum)
 void iNegateFractionFraction::doEval (FractionData *f) {
     FractionData *result = new FractionData();
     result->set( -f->getNumerator(), f->getDenominator() );
+    result->setEdited(TRUE);
     systemEngine->putData(result);
 }
 

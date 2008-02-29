@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -286,11 +286,14 @@ void StorageMonitor::checkAvailStorage()
 
     sinfo->update();
     const FileSystem *fs;
+    bool haveWritableFS = FALSE;
     fs = sinfo->fileSystemOf(QPEApplication::documentDir());
     if (fs == 0) {
         qDebug( "No file systems found for %s",QPEApplication::documentDir().local8Bit().data());
         return;
     }
+    if( fs->isWritable() )
+	haveWritableFS = TRUE;
 
     long availStorage = fileSystemMetrics(fs);
    
@@ -302,9 +305,14 @@ void StorageMonitor::checkAvailStorage()
     {
         if ((*iter)->isRemovable()) {
             availStorage += fileSystemMetrics(*iter);
+	    if( (*iter)->isWritable() )
+		haveWritableFS = TRUE;
         }
     }
 
+    if( !haveWritableFS )
+	return; // no writable filesystems, lack of free space is irrelevant
+    
     //qDebug(QString("Free storage: %1 kB").arg(availStorage));
     
     //for now read config file each time until we have notification in place

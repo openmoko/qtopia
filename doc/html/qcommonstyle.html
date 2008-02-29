@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qt Toolkit - QCommonStyle Class</title><style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
 a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
 --></style>
@@ -36,8 +34,6 @@ Inherits <a href="qstyle.html">QStyle</a>.
 <h2>Public Members</h2>
 <ul>
 <li><div class="fn">ScrollControl <b>scrollBarPointOver</b> ( const QScrollBar * sb, int sliderStart, const QPoint &amp; p ) </div>
-<li><div class="fn">virtual void <b>drawSliderMask</b> ( QPainter * p, int x, int y, int w, int h, Orientation, bool tickAbove, bool tickBelow ) </div>
-<li><div class="fn">virtual void <b>drawSliderGrooveMask</b> ( QPainter * p, int x, int y, int w, int h, QCOORD c, Orientation ) </div>
 <li><div class="fn">void <b>drawMenuBarItem</b> ( QPainter * p, int x, int y, int w, int h, QMenuItem * mi, QColorGroup &amp; g, bool enabled, bool active ) </div>
 </ul>
 <hr><h2><a name="details"></a>Detailed Description</h2>
@@ -65,6 +61,12 @@ that is common to all GUI styles provided and shipped as part of Qt.
 <h3 class="fn">void <a name="a9befe"></a>QCommonStyle::drawPushButtonLabel ( <a href="qpushbutton.html">QPushButton</a> * btn, <a href="qpainter.html">QPainter</a> * p ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qstyle.html#1fa16e">QStyle.</a>
+<h3 class="fn">void <a name="f802ae"></a>QCommonStyle::drawSliderGrooveMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, QCOORD c, <a href="qt.html#Orientation">Orientation</a> orient ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#dc005d">QStyle.</a>
+<h3 class="fn">void <a name="bc73f0"></a>QCommonStyle::drawSliderMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, <a href="qt.html#Orientation">Orientation</a>, bool, bool ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#ee7ad4">QStyle.</a>
 <h3 class="fn">void <a name="483bf7"></a>QCommonStyle::drawTab ( <a href="qpainter.html">QPainter</a> * p, const <a href="qtabbar.html">QTabBar</a> * tb, <a href="qtab.html">QTab</a> * t, bool selected )</h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <h3 class="fn">void <a name="535b8f"></a>QCommonStyle::drawTabMask ( <a href="qpainter.html">QPainter</a> * p, const <a href="qtabbar.html">QTabBar</a> *, <a href="qtab.html">QTab</a> * t, bool )</h3>
@@ -84,13 +86,13 @@ that is common to all GUI styles provided and shipped as part of Qt.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.9"><nobr>
+<input type=hidden name="version" value="2.3.10"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2001
+copyright &copy; 1995-2005
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.9</div>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.10</div>
 </table></div></address></body></html>

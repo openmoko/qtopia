@@ -10,6 +10,7 @@
 #@EXPORT = qw(&debugMsg &symlink_file &rmrf);
 #1;
 
+
 # Print a message if user requested to see extra messages
 sub debugMsg
 {
@@ -108,6 +109,40 @@ sub configopt
 	return 1;
     }
     return 0;
+}
+
+sub needCopy
+{
+    my ( $srcfile, $dest ) = @_;
+    my $src_s = stat($srcfile);
+    my $dest_s = stat($dest);
+    return ( ! -f $srcfile || ! -f $dest || !defined($src_s) || !defined($dest_s) || $src_s->mtime > $dest_s->mtime );
+}
+
+sub script_name
+{
+    my ( $script ) = @_;
+    $script = basename($script);
+    my $len = length $script;
+    my $compiled_code = (index(basename($script), ".exe") != -1);
+    if ( $compiled_code ) {
+	$len -= 4;
+    }
+    return substr($script, 0, $len);
+}
+
+sub check_script
+{
+    my ( $script, $path, $arg ) = @_;
+    #print "check_script $script $path ".defined($arg)?$arg:""."\n";
+    my $compiled_code = (index(basename($script), ".exe") != -1);
+    if ( $compiled_code && defined($arg) && $arg eq "-nop" ) {
+	exit 0;
+    }
+    if ( configopt("depot") && $compiled_code && !defined($ENV{QTOPIA_NO_PERL}) ) {
+	my $ret = system("perl", "$path/".script_name($script), @ARGV);
+	exit $ret;
+    }
 }
 
 # Make this file require()able

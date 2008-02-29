@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/mediaplayer/audiodevice_qss.cpp:42 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>AudioDevice Class</title>
@@ -38,7 +36,7 @@ body { background: #ffffff; color: black; }
 <ul>
 <li><div class=fn><a href="#AudioDevice"><b>AudioDevice</b></a> ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</div></li>
 <li><div class=fn><a href="#~AudioDevice"><b>~AudioDevice</b></a> ()</div></li>
-<li><div class=fn>void <b>open</b> ( unsigned&nbsp;int&nbsp;freq = 44000, unsigned&nbsp;int&nbsp;channels = 2, unsigned&nbsp;int&nbsp;bytesPerSample = 2, bool&nbsp;needCompletedSignal = true )</div></li>
+<li><div class=fn>void <a href="#open"><b>open</b></a> ( unsigned&nbsp;int&nbsp;f = 44000, unsigned&nbsp;int&nbsp;chs = 2, unsigned&nbsp;int&nbsp;bps = 2, bool&nbsp;needCompletedSignal = true )</div></li>
 <li><div class=fn>void <b>close</b> ()</div></li>
 <li><div class=fn>unsigned int <a href="#canWrite"><b>canWrite</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#write"><b>write</b></a> ( char&nbsp;*&nbsp;buffer, unsigned&nbsp;int&nbsp;length )</div></li>
@@ -81,10 +79,8 @@ versions.
 <hr><h2>Member Function Documentation</h2>
 <h3 class=fn><a name="AudioDevice"></a>AudioDevice::AudioDevice ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
 </h3>
-Constructs an AudioDevice using <em>f</em> as the frequency, <em>chs</em> as the channels,
-and <em>bps</em> as the number of bytes per sample of data written.
-Volume for the mediaplayer is read in.
-<p> <p>See also <a href="#write">write</a>().
+Constructs an AudioDevice with <em>parent</em> and <em>name</em>.
+<p> <p>See also <a href="#write">write</a>() and <a href="#open">open</a>().
 
 <h3 class=fn><a name="~AudioDevice"></a>AudioDevice::~AudioDevice ()
 </h3>
@@ -124,28 +120,37 @@ Returns the frequency data is to be formatted in, as set in the constructor.
 Returns if muting is enabled.
 <p> <p>See also <a href="#setMuted">setMuted</a>().
 
+<h3 class=fn>void <a name="open"></a>AudioDevice::open ( unsigned&nbsp;int&nbsp;f = 44000, unsigned&nbsp;int&nbsp;chs = 2, unsigned&nbsp;int&nbsp;bps = 2, bool&nbsp;needCompletedSignal = true )
+</h3>
+Opens the AudioDevice using <em>f</em> as the frequency, <em>chs</em> as the channels,
+and <em>bps</em> as the number of bytes per sample of data written.
+If <em>needCompletedSignal</em> then the completedIO() signal will be emitted 
+when the AudioDevice is ready for more data.    
+Volume for the mediaplayer is read in from its configuration file.
+
 <h3 class=fn>void <a name="setMuted"></a>AudioDevice::setMuted ( bool&nbsp;m )<tt> [static]</tt>
 </h3>
-Sets muting.
+Sets device to be muted if <em>m</em>  is true.
 <p> <p>See also <a href="#muted">muted</a>().
 
 <h3 class=fn>void <a name="setVolume"></a>AudioDevice::setVolume ( int&nbsp;left, int&nbsp;right )<tt> [static]</tt>
 </h3>
-Sets the volume. Volume ranges for setting are from 0 to 65536.
+Sets the volume for the <em>left</em> and <em>right</em> channels. Volume ranges for setting are from 0 to 65536.
 <p> <p>See also <a href="#volume">volume</a>().
 
 <h3 class=fn>void <a name="volume"></a>AudioDevice::volume ( int&nbsp;&amp;&nbsp;left, int&nbsp;&amp;&nbsp;right )<tt> [static]</tt>
 </h3>
-Retrieves the volume.
+Retrieves the volume for the <em>left</em> and <em>right</em> channels.
 <p> <p>See also <a href="#setVolume">setVolume</a>().
 
 <h3 class=fn>void <a name="volumeChanged"></a>AudioDevice::volumeChanged ( bool&nbsp;muted )<tt> [slot]</tt>
 </h3>
-Slot to notify AudioDevice of change in global mute setting.
+Slot to notify AudioDevice of change in global mute setting. 
+Device is muted if <em>muted</em> is true.
 
 <h3 class=fn>bool <a name="write"></a>AudioDevice::write ( char&nbsp;*&nbsp;buffer, unsigned&nbsp;int&nbsp;length )
 </h3>
-Sends /a length bytes from /a buffer to the audio device. The data is
+Sends <em>length</em> bytes from <em>buffer</em> to the audio device. The data is
 to be formatted with the set frequency, channels and bytes per sample.
 The latency depends on implementation, currently QWSSoundClient has
 approximately a latency of 100ms.
@@ -158,8 +163,8 @@ copyright &copy; 1995-2004
 <a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

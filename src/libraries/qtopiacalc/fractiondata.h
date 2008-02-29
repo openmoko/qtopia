@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -42,6 +42,9 @@ public:
     FractionData(){clear();};
     ~FractionData(){};
     QString getType(){return "Fraction";};
+    void setEdited(bool edit) {
+        edited = edit;
+    };
 
     bool push(char,bool);
     bool del();

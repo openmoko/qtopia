@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -60,8 +60,9 @@ PowerStatusManager::PowerStatusManager()
 
 const PowerStatus &PowerStatusManager::readStatus()
 {
-    if ( !powerManager )
+    if ( !powerManager ) {
 	(void)new PowerStatusManager;
+    }
 
     powerManager->getStatus();
 
@@ -135,7 +136,13 @@ bool PowerStatusManager::getProcApmStatus( int &ac, int &bs, int &bf, int &pc, i
 	ps->secsRemain = sec;
 
 	ok = true;
+    } else {
+       ps->bs = PowerStatus::NotPresent;
+       pc = sec = -1;
+       ps->percentRemain = -1;
+       ps->secsRemain = -1;
     }
+    
 
     return ok;
 }

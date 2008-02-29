@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** Copyright (C) 2000-2005 Trolltech AS and its licensors.
 ** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
@@ -44,14 +44,6 @@
   \brief The Pickboard class provides an input method
   based on a virtual keyboard combined with word-completion.
 
-  This version of Pickboard is Dual Licensed Software. However, for you to be
-  able to license the technology to others, you may require licensing from
-  input method patent holders.
-
-  \legalese
-  This version of Pickboard is Dual Licensed Software. However, for you to be
-  able to license the technology to others, you may require licensing from
-  input method patent holders.
 */
 
 /* XPM */

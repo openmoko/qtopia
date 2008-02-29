@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -439,6 +439,10 @@ void MediaSelectorWidget::scanProgress(int percent)
             else
                 ContextBar::setLabel( this, Key_Select, ContextBar::NoLabel );
 #endif
+            d->tbSelect->setEnabled( count );
+            d->tbAdd->setEnabled( count );
+            d->tbShuffle->setEnabled( count );
+            d->tbSort->setEnabled( count );
 	    d->tbPlay->setEnabled( count );
 	    d->tbInfo->setEnabled( count );
 	    d->tbUp->setEnabled( count > 1 );
@@ -556,6 +560,7 @@ void MediaSelectorWidget::showInfo()
     if ( cur ) {
 	MediaFileInfoWidget *infoWidget = new MediaFileInfoWidget( *cur, this );
 	QPEApplication::execDialog( infoWidget );
+        delete infoWidget;
     }
 }
 

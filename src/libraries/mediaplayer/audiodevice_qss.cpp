@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -120,6 +120,7 @@ void AudioDevicePrivate::error(int i)
     qDebug("AudioDevice recieved %i error from QSS", i);
     AutoLockUnlockMutex lock(&mutex);
     ready = false;
+    emit deviceOpenError();
 }
 
 
@@ -223,7 +224,7 @@ AudioDevicePrivate::~AudioDevicePrivate()
 
 
 /*!
-  Retrieves the volume.
+  Retrieves the volume for the \a left and \a right channels.
 
   \sa setVolume()
 */
@@ -236,7 +237,7 @@ void AudioDevice::volume(int &left, int &right)
 
 
 /*!
-  Sets the volume. Volume ranges for setting are from 0 to 65536.
+  Sets the volume for the \a left and \a right channels. Volume ranges for setting are from 0 to 65536.
 
   \sa volume()
 */
@@ -270,7 +271,7 @@ bool AudioDevice::muted()
 
 
 /*!
-  Sets muting.
+  Sets device to be muted if \a m  is true.
 
   \sa muted()
 */
@@ -288,11 +289,9 @@ void AudioDevice::setMuted(bool m)
 
 
 /*!
-  Constructs an AudioDevice using \a f as the frequency, \a chs as the channels,
-  and \a bps as the number of bytes per sample of data written.
-  Volume for the mediaplayer is read in.
+  Constructs an AudioDevice with \a parent and \a name.
 
-  \sa write()
+  \sa write(), open()
 */
 AudioDevice::AudioDevice(QObject *parent, const char *name) : QObject(parent, name), d(0)
 {
@@ -311,7 +310,13 @@ AudioDevice::~AudioDevice()
     //AutoLockUnlockMutex lock(&AudioDevicePrivate::mutex);
 }
 
-
+/*!
+  Opens the AudioDevice using \a f as the frequency, \a chs as the channels,
+  and \a bps as the number of bytes per sample of data written.
+  If \a needCompletedSignal then the completedIO() signal will be emitted 
+      when the AudioDevice is ready for more data.    
+  Volume for the mediaplayer is read in from its configuration file.
+*/
 void AudioDevice::open(unsigned int f, unsigned int chs, unsigned int bps, bool needCompletedSignal)
 {
     d = new AudioDevicePrivate(this, f, chs, bps, needCompletedSignal);
@@ -359,7 +364,8 @@ void AudioDevice::close()
 
 
 /*!
-  Slot to notify AudioDevice of change in global mute setting.
+  Slot to notify AudioDevice of change in global mute setting. 
+    Device is muted if \a muted is true.
 */
 void AudioDevice::volumeChanged(bool muted)
 {
@@ -368,7 +374,7 @@ void AudioDevice::volumeChanged(bool muted)
 
 
 /*!
-  Sends /a length bytes from /a buffer to the audio device. The data is
+  Sends \a length bytes from \a buffer to the audio device. The data is
   to be formatted with the set frequency, channels and bytes per sample.
   The latency depends on implementation, currently QWSSoundClient has
   approximately a latency of 100ms.

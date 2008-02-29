@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -85,11 +85,7 @@ ZoneMap::ZoneMap( QWidget *parent, const char* name )
       ox( 0 ),
       oy( 0 ),
       minMovement( 1 ),
-      maxMovement( 360 ),
-      minLonSecs(-648000),
-      minLatSecs(-324000),
-      maxLonSecs(648000),
-      maxLatSecs(324000),
+      maxMovement( 4 ),
       drawableW( -1 ),
       drawableH( -1 ),
       bZoom( FALSE ),
@@ -252,6 +248,11 @@ void ZoneMap::keyPressEvent( QKeyEvent *ke )
     }
 #endif
     switch ( ke->key() ) {
+#ifdef TEST_ACCESS_TO_CITIES
+	case Key_T:
+	    testAccess();
+	    break;
+#endif
 	case Key_Left:
 	    if (!ke->isAutoRepeat() && accelHori == 0) {
 		accelHori = -1;
@@ -268,14 +269,14 @@ void ZoneMap::keyPressEvent( QKeyEvent *ke )
 	    break;
 	case Key_Up:
 	    if (!ke->isAutoRepeat() && accelVert == 0) {
-		accelVert = 1;
+		accelVert = -1;
 		cursorTimer->changeInterval(500);
 		updateCursor();
 	    }
 	    break;
 	case Key_Down:
 	    if (!ke->isAutoRepeat() && accelVert == 0) {
-		accelVert = -1;
+		accelVert = 1;
 		cursorTimer->changeInterval(500);
 		updateCursor();
 	    }
@@ -329,14 +330,14 @@ void ZoneMap::keyReleaseEvent( QKeyEvent *ke )
 
 /* accelerating cursor movement */
 void ZoneMap::cursorTimeout() {
-    if (accelHori < 0 && accelHori > -25)
-	accelHori = -25;
-    else if (accelHori > 0 && accelHori < 25)
-	accelHori = 25;
-    if (accelVert < 0 && accelVert > -25)
-	accelVert = -25;
-    else if (accelVert > 0 && accelVert < 25)
-	accelVert = 25;
+    if (accelHori < 0 && accelHori > -5)
+	accelHori = -5;
+    else if (accelHori > 0 && accelHori < 5)
+	accelHori = 5;
+    if (accelVert < 0 && accelVert > -5)
+	accelVert = -5;
+    else if (accelVert > 0 && accelVert < 5)
+	accelVert = 5;
     updateCursor();
     cursorTimer->changeInterval(100);
 }
@@ -375,28 +376,26 @@ void ZoneMap::updateCursor()
 	// horizontal movement
 	if (accelHori < 0) {
 	    nx -= mx;
-	    if (nx < minLonSecs)
-		nx = minLonSecs;
+	    if (nx < 0)
+		nx = 0;
 	} else if (accelHori > 0) {
 	    nx += mx;
-	    if (nx > maxLonSecs)
-		nx = maxLonSecs;
+	    if (nx > contentsWidth())
+		nx = contentsWidth();
 	}
 	// vertical movement
 	if (accelVert < 0) {
 	    ny -= my;
-	    if (ny < maxLatSecs) 
-		ny = maxLatSecs;
+	    if (ny < 0) 
+		ny = 0; 
 	} else if (accelVert > 0) {
 	    ny += my;
-	    if (ny > minLatSecs)
-		ny = minLatSecs; 
+	    if (ny > contentsHeight())
+		ny = contentsHeight();
 	}
 
-	int cx, cy;
 	setCursorPoint(nx, ny);
-	zoneToWin(m_cursor_x, m_cursor_y, cx, cy);
-	ensureVisible( cx, cy );
+	ensureVisible(nx, ny);
     }
 }
 
@@ -420,24 +419,22 @@ QRect expandTo(const QRect &in, const QPoint &p) {
 void ZoneMap::setCursorPoint(int ox, int oy)
 {
     if (ox != m_cursor_x || oy != m_cursor_y) {
-	// Old Cursor Window Coords
-	int ocwx, ocwy;
-	zoneToWin(m_cursor_x, m_cursor_y, ocwx, ocwy);
-	// New Cursor Window Coords
-	int ncwx, ncwy;
-	zoneToWin(ox, oy, ncwx, ncwy);
 	// Old Location Window Coords
 	int olwx, olwy;
 	zoneToWin( m_cursor.lon(), m_cursor.lat(), olwx, olwy);
 	// New Location Window Coords
 	int nlwx, nlwy;
 
-	QRect bounds(ocwx, ocwy, 1,1);
-	bounds = expandTo(bounds, QPoint(ncwx, ncwy));
+	QRect bounds(m_cursor_x, m_cursor_y, 1,1);
+	bounds = expandTo(bounds, QPoint(ox, oy));
 	bounds = expandTo(bounds, QPoint(olwx, olwy));
 
 	m_cursor_x = ox;
 	m_cursor_y = oy;
+
+	// zone coords x and y.
+	int zx, zy;
+	winToZone( m_cursor_x, m_cursor_y, zx, zy);
 
 	long lDistance;
 	long lClosest = LONG_MAX;
@@ -446,7 +443,7 @@ void ZoneMap::setCursorPoint(int ox, int oy)
 	for ( unsigned i = 0; i < cities.count(); i++ ) {
 	    CityPos *cp = cities[i];
 	    // use the manhattenLength, a good enough of an appoximation here
-	    lDistance = QABS(m_cursor_y - cp->lat) + QABS(m_cursor_x - cp->lon);
+	    lDistance = QABS(zy - cp->lat) + QABS(zx - cp->lon);
 	    // first to zero wins!
 	    if ( lDistance < lClosest ) {
 		lClosest = lDistance;	    
@@ -518,66 +515,22 @@ void ZoneMap::setCursorPoint(int ox, int oy)
     }
 }
 
-
-const TimeZone ZoneMap::findCityNear( const TimeZone &city, int key )
-{
-    initCities();
-
-    long ddist = LONG_MAX;
-    QCString closestZone;
-    for ( unsigned i = 0; i < cities.count(); i++ ) {
-	CityPos *cp = cities[i];
-	long dy = (cp->lat - city.lat())/100;
-	long dx = (cp->lon - city.lon())/100;
-	switch ( key ) {
-	    case Key_Right:
-	    case Key_Left:
-		if ( key == Key_Left )
-		    dx = -dx;
-		if ( dx > 0 ) {
-		    long dist = QABS(dy)*4 + dx;
-		    if ( dist < ddist ) {
-			ddist = dist;
-			closestZone = cp->id;
-		    }
-		}
-		break;
-	    case Key_Down:
-	    case Key_Up:
-		if ( key == Key_Down )
-		    dy = -dy;
-		if ( dy > 0 ) {
-		    long dist = QABS(dx)*4 + dy;
-		    if ( dist < ddist ) {
-			ddist = dist;
-			closestZone = cp->id;
-		    }
-		}
-		break;
-	}
-    }
-    
-    TimeZone nearCity( closestZone );
-//    nearCity.dump();
-    return nearCity;
-}
-
 void ZoneMap::slotFindCity( const QPoint &pos )
 {
     initCities();
 
     int tmpx, tmpy;
     viewportToContents(pos.x(), pos.y(), tmpx, tmpy);
-    int mx, my;
 
-    winToZone(tmpx, tmpy, mx, my);
-    setCursorPoint(mx, my);
+    setCursorPoint(tmpx, tmpy);
 }
 
 void ZoneMap::showCity( const TimeZone &city )
 {
     // use set cursor point to erase old point if need be.
-    setCursorPoint(city.lon(), city.lat());
+    int mx, my;
+    zoneToWin(city.lon(), city.lat(), mx, my);
+    setCursorPoint(mx, my);
 }
 
 void ZoneMap::resizeEvent( QResizeEvent *e )
@@ -716,8 +669,6 @@ void ZoneMap::makeMap( int w, int h )
     pixCurr->convertFromImage( imgOrig.smoothScale(w, h),
                                QPixmap::ThresholdDither );
 
-    winToZone(0, 0, minLonSecs, minLatSecs);
-    winToZone(wImg, hImg, maxLonSecs, maxLatSecs);
     // should also work out max accell, or accell rates for this zoom.
     maxMovement=wImg*90;
 }
@@ -725,16 +676,14 @@ void ZoneMap::makeMap( int w, int h )
 void ZoneMap::drawCity( QPainter *p, const TimeZone &city )
 {
     int x, y;
-    int cx, cy;
 
     p->setPen( red );
     zoneToWin( city.lon(), city.lat(), x, y );
-    zoneToWin( m_cursor_x, m_cursor_y, cx, cy );
     if (m_cursor_x != -1 && m_cursor_y != -1) {
-	p->drawLine( cx, cy, x, y);
+	p->drawLine( m_cursor_x, m_cursor_y, x, y);
 
     }
-    p->drawRect( cx - iCITYOFFSET, cy - iCITYOFFSET, iCITYSIZE, iCITYSIZE );
+    p->drawRect( m_cursor_x - iCITYOFFSET, m_cursor_y - iCITYOFFSET, iCITYSIZE, iCITYSIZE );
 }
 
 void ZoneMap::drawContents( QPainter *p, int cx, int cy, int cw, int ch )
@@ -777,6 +726,8 @@ void ZoneMap::slotZoom( bool setZoom )
 	return;
 
     bZoom = setZoom;
+    int cx, cy;
+    winToZone(m_cursor_x, m_cursor_y, cx, cy);
     if ( bZoom ) {
 	makeMap( 2 * wImg , 2 * hImg );
 	resizeContents( wImg, hImg );
@@ -784,10 +735,8 @@ void ZoneMap::slotZoom( bool setZoom )
 	makeMap( drawableW, drawableH );
 	resizeContents( drawableW, drawableH );
     }
-
-    // scale cursor accordingly
-    int cx, cy;
-    zoneToWin(m_cursor_x, m_cursor_y, cx, cy);
+    zoneToWin(cx, cy, cx, cy);
+    setCursorPoint(cx, cy);
 
     ensureVisible(cx, cy);
     int lx, ly;
@@ -880,8 +829,41 @@ void ZoneMap::initCities()
 	    }
 	}
     }
-    if (lClosest < UINT_MAX && lClosest > 2)
-	minMovement = (lClosest >> 1);
-    else 
-	minMovement = 1;
 }
+
+#ifdef TEST_ACCESS_TO_CITIES
+void ZoneMap::testAccess()
+{
+    qDebug("test access");
+    initCities();
+    for ( unsigned i = 0; i < cities.count(); i++ ) {
+	CityPos *cp = cities[i];
+	// check if pixel for this city and or pixels around this city can
+	// be accessed.
+	int lat, lon, x, y, cx, cy;
+	lat = cp->lat;
+	lon = cp->lon;
+	zoneToWin(lon, lat, x, y);
+	bool found = false;
+	QCString id = cp->id;
+	for (cx = x-1; cx <= x+1; ++cx) {
+	    for (cy = y-1; cy <= y+1; ++cy) {
+		setCursorPoint(cx,cy);
+		if (m_cursor.id() == id) {
+		    found = true;
+		    break;
+		}
+	    }
+	}
+	if (!found) {
+	    qDebug("couldn't find city %s", (const char *)id);
+	    for (cx = x-1; cx <= x+1; ++cx) {
+		for (cy = y-1; cy <= y+1; ++cy) {
+		    setCursorPoint(cx,cy);
+		    qDebug("\t%d:%d got %s instead", cx, cy, (const char *)m_cursor.id());
+		}
+	    }
+	}
+    }
+}
+#endif

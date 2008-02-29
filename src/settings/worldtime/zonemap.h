@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -44,6 +44,7 @@
 #include <qstring.h>
 #include <qvector.h>
 
+//#define TEST_ACCESS_TO_CITIES
 extern const int iCITYOFFSET;
 
 class QImage;
@@ -100,9 +101,11 @@ private slots:
     void cursorTimeout();
 
 private:
+#ifdef TEST_ACCESS_TO_CITIES
+    void testAccess();
+#endif
     void updateCursor();
     void setCursorPoint( int, int );
-    const TimeZone findCityNear( const TimeZone &city, int key );
     void showCity( const TimeZone &city );
     void drawCities( QPainter *p );	// put all the cities on the map (ugly)
     void drawCity( QPainter *p, const TimeZone &pCity ); // draw the given city on the map
@@ -124,10 +127,6 @@ private:
     int oy;
     uint minMovement;
     uint maxMovement;
-    int minLonSecs;
-    int minLatSecs;
-    int maxLonSecs;
-    int maxLatSecs;
 
     // the drawable area of the map...
     int drawableW;

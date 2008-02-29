@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -1406,9 +1406,6 @@ QString DayView::header2Text(const QDate &d) const
 
 void DayView::selectedDates( QDateTime &start, QDateTime &end )
 {
-    start.setDate( cDate );
-    end.setDate( cDate );
-
     int sh = view->startHour();
     int eh = view->endHour();
 

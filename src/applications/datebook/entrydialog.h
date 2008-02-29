@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -89,13 +89,11 @@ private slots:
     void setEndDate(const QDate &);
     void tabChanged( QWidget *tab );
 
-protected:
-    void accept();
-
 private:
     void init();
     void setDates( const QDateTime& s, const QDateTime& e );
     void setRepeatLabel();
+    void accept();
 
     PimEvent mEvent;
     PimEvent mOrigEvent;

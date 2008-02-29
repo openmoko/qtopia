@@ -15,7 +15,8 @@ nocompat {
     include($$QTOPIA_DEPOT_PATH/src/libraries/qtopia2/qtopia2.pro)
 }
 
-QTOPIA_SOURCES+=$$(QPEDIR)/src/libraries/qtopia/custom-qtopia.cpp
+QTOPIA_CUSTOM = $$(QPEDIR)/src/libraries/qtopia/custom-qtopia.cpp
+QTOPIA_SOURCES+= $${QTOPIA_CUSTOM}
 
 # Qt/Embedded only
 QTOPIA_HEADERS += fontmanager.h \
@@ -98,6 +99,16 @@ HEADERS+=$${QTOPIA_HEADERS} $${QTOPIA_PRIVATE_HEADERS}\
 SOURCES+=$${QTOPIA_SOURCES} $${QTOPIA_BACKEND_SOURCES}
 INTERFACES+=$${QTOPIA_INTERFACES}
 TRANSLATABLES*=$$INTERFACES $$HEADERS $$SOURCES
+TRANSLATABLES-= $${QTOPIA_CUSTOM}
+
+lupdate.command_override=\
+    TRANSFILES=;\
+    [ -z "$(TRANSLATABLES)" ] || for transfile in $(TRANSLATABLES); do\
+        [ -f \$$transfile ] && TRANSFILES="\$$TRANSFILES \$$transfile";\
+    done;\
+    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; do\
+	$${DQTDIR}/bin/lupdate \$$TRANSFILES $${QTOPIA_CUSTOM} -ts libqpe-\$$lang.ts;\
+    done
 
 sdk_qtopia_headers.files=$${QTOPIA_HEADERS} custom*.h
 sdk_qtopia_headers.path=/include/qtopia

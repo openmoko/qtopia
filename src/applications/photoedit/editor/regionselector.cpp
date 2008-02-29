@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -37,6 +37,7 @@
 
 #include "imageui.h"
 
+#include <qtopia/global.h>
 #include <qtopia/resource.h>
 #include <qtopia/contextbar.h>
 
@@ -47,20 +48,15 @@
 
 RegionSelector::RegionSelector( ImageUI* iui, const char* name, WFlags f )
     : QWidget( iui, name, f | Qt::WResizeNoErase | Qt::WRepaintNoErase ), 
-    image_ui( iui ), enabled( false ), current_state( MARK )
+    image_ui( iui ), enabled( false )
 {
 #ifdef QTOPIA_PHONE
-    // Construct context menu
-    context_menu = new ContextMenu( this );
-    
-    // Construct cancel item
-    context_menu->insertItem( Resource::loadIconSet( "reset" ),
-        tr( "Reset" ), this, SLOT( reset() ) );
-    
-    // Diable context menu
-    context_menu->removeFrom( this );
+    if( Global::mousePreferred() ) {
 #endif
-
+        current_state = MARK;
+#ifdef QTOPIA_PHONE
+    } else current_state = MOVE;
+#endif
     // Update display when image ui updated
     connect( image_ui, SIGNAL( updated() ), this, SLOT( update() ) );
 }
@@ -80,15 +76,20 @@ void RegionSelector::setEnabled( bool b )
     enabled = b;
     
 #ifdef QTOPIA_PHONE
-    // If selection enabled, enable context menu and context bar
-    // Otherwise, disable context menu and context bar
+    // If selection enabled, add labels to context bar
+    // Otherwise, remove labels from context bar
     if( enabled ) {
-        context_menu->addTo( this );
-        ContextBar::setLabel( this, Qt::Key_Select, ContextBar::Select );
+        if( Global::mousePreferred() ) {
+            // Disable context menu
+            ContextBar::setLabel( this, ContextMenu::key(), ContextBar::NoLabel );
+        } else {
+            setStateLabel();
+            ContextBar::setLabel( this, Qt::Key_Select, ContextBar::Select );
+        }
         ContextBar::setLabel( this, Qt::Key_Back, ContextBar::Cancel );
     } else {
-        context_menu->removeFrom( this );
-        ContextBar::clearLabel( this, Qt::Key_Select );
+        ContextBar::clearLabel( this, ContextMenu::key() );
+        if( !Global::mousePreferred() ) ContextBar::clearLabel( this, Qt::Key_Select );
         ContextBar::clearLabel( this, Qt::Key_Back );
     }
 #endif
@@ -96,63 +97,115 @@ void RegionSelector::setEnabled( bool b )
 
 void RegionSelector::reset()
 {
+#define DEFAULT_WIDTH 100
+#define DEFAULT_HEIGHT 100
+
     // Reset region
-    region_start = QPoint();
-    _region = QRect();
 #ifdef QTOPIA_PHONE
-    // Move crosshair position to center of widget
-    crosshair_position = QPoint( width() / 2, height() / 2 );
+    if( Global::mousePreferred() ) {
 #endif
-    current_state = MARK;
+        region_start = QPoint();
+        _region = QRect();
+        current_state = MARK;
+#ifdef QTOPIA_PHONE
+    } else {
+        // Set default region
+        _region = QRect( 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT );
+        _region.moveCenter( rect().center() );
+        // Set current state to move
+        current_state = MOVE;
+        // If enabled toggle state label
+        if( enabled ) setStateLabel();
+    }
+#endif
 }
 
 void RegionSelector::paintEvent( QPaintEvent* )
 {
 #ifdef QTOPIA_PHONE
-static const char *mark_crosshair_xpm[] = {
-    "15 15 2 1",
+static const char *top_left_xpm[] = {
+    "7 7 2 1",
     "x c #ffffff",
     ". c None",
-    "...xxxxxxxxx...",
-    "..xxxxxxxxxxx..",
-    ".xxxxxxxxxxxxx.",
-    "xxx.........xxx",
-    "xxx.........xxx",
-    "xxx.........xxx",
-    "xxx....x....xxx",
-    "xxx...xxx...xxx",
-    "xxx....x....xxx",
-    "xxx.........xxx",
-    "xxx.........xxx",
-    "xxx.........xxx",
-    ".xxxxxxxxxxxxx.",
-    "..xxxxxxxxxxx..",
-    "...xxxxxxxxx...",
+    "xxxxxxx",
+    "xxxxxx.",
+    "xxxxx..",
+    "xxxx...",
+    "xxx....",
+    "xx.....",
+    "x......"
 };
 
-static const char *moving_crosshair_xpm[] = {
+static const char *top_right_xpm[] = {
+    "7 7 2 1",
+    "x c #ffffff",
+    ". c None",
+    "xxxxxxx",
+    ".xxxxxx",
+    "..xxxxx",
+    "...xxxx",
+    "....xxx",
+    ".....xx",
+    "......x"
+};
+
+static const char *bottom_left_xpm[] = {
+    "7 7 2 1",
+    "x c #ffffff",
+    ". c None",
+    "x......",
+    "xx.....",
+    "xxx....",
+    "xxxx...",
+    "xxxxx..",
+    "xxxxxx.",
+    "xxxxxxx"
+};
+
+static const char *bottom_right_xpm[] = {
+    "7 7 2 1",
+    "x c #ffffff",
+    ". c None",
+    "......x",
+    ".....xx",
+    "....xxx",
+    "...xxxx",
+    "..xxxxx",
+    ".xxxxxx",
+    "xxxxxxx"
+};
+
+static const char *crosshair_xpm[] = {
     "15 15 2 1",
     "x c #ffffff",
     ". c None",
-    "...xxx...xxx...",
-    "...xxx...xxx...",
-    "...xxx...xxx...",
-    "xxxxxx...xxxxxx",
-    "xxxxxx...xxxxxx",
-    "xxxxxx...xxxxxx",
-    "...............",
-    "...............",
-    "...............",
-    "xxxxxx...xxxxxx",
-    "xxxxxx...xxxxxx",
-    "xxxxxx...xxxxxx",
-    "...xxx...xxx...",
-    "...xxx...xxx...",
-    "...xxx...xxx...",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    "xxxxxxxxxxxxxxx",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
+    ".......x.......",
 };
-static const QPixmap mark_crosshair( mark_crosshair_xpm );
-static const QPixmap moving_crosshair( moving_crosshair_xpm );
-#define CROSSHAIR_CENTER 8
+
+static const QPixmap top_left( top_left_xpm );
+static const QPixmap top_right( top_right_xpm );
+static const QPixmap bottom_left( bottom_left_xpm );
+static const QPixmap bottom_right( bottom_right_xpm );
+static const QPixmap crosshair( crosshair_xpm );
+
+#define CROSSHAIR_CENTER 7
+#define CORNER_WIDTH 7
+#define CORNER_HEIGHT 7
+#define INSET 1
 #endif
 
 #define PAINTER_COLOR Qt::white
@@ -167,41 +220,34 @@ static const QPixmap moving_crosshair( moving_crosshair_xpm );
         painter.begin( &buffer );
         painter.setPen( PAINTER_COLOR );
         painter.setRasterOp( Qt::XorROP );
-
-#ifdef QTOPIA_PHONE
-        QPixmap crosshair;
         
-        switch( current_state ) {
-        case MARK:
-            crosshair = mark_crosshair;
-            break;
-        case MOVING:
-            crosshair = moving_crosshair;
-            break;
+        // Draw box around current selection region
+        painter.drawRect( _region.normalize() );
+        
+#ifdef QTOPIA_PHONE
+        if( !Global::mousePreferred() ) {
+            QPoint center( _region.center() );
+            switch( current_state ) {
+            // If current state is move, draw crosshair in center of region
+            case MOVE:
+                painter.drawPixmap( center.x() - CROSSHAIR_CENTER, center.y() - CROSSHAIR_CENTER, crosshair );
+                break;
+            // If current state is size, draw corners around inner edge of region
+            case SIZE:
+                painter.drawPixmap( _region.left() + INSET, _region.top() + INSET, top_left );
+                painter.drawPixmap( _region.right() - CORNER_WIDTH, _region.top() + INSET, top_right );
+                painter.drawPixmap( _region.left() + INSET, _region.bottom() - CORNER_HEIGHT, bottom_left );
+                painter.drawPixmap( _region.right() - CORNER_WIDTH, _region.bottom() - CORNER_HEIGHT, bottom_right );
+                break;
+            default:
+                // Ignore
+                break;
+            }
         }
-
-        // Draw crosshair
-        painter.drawPixmap( crosshair_position.x() - CROSSHAIR_CENTER,
-            crosshair_position.y() - CROSSHAIR_CENTER, crosshair );
-
-#endif   
-       // Draw box around current selection region
-       painter.drawRect( _region.normalize() );
-        
-#ifdef QTOPIA_PHONE
-        QRect crosshair_region( crosshair.rect() );
-        crosshair_region.moveBy( crosshair_position.x() - CROSSHAIR_CENTER,
-            crosshair_position.y() - CROSSHAIR_CENTER );
 #endif
-        
-        painter.setClipRegion( 
-            QRegion( image_ui->region().subtract( _region.normalize() )            
-#ifdef QTOPIA_PHONE
-            .subtract( crosshair_region )
-#endif
-            ) );
+        painter.setClipRegion( image_ui->region().subtract( _region.normalize() ) );
         painter.setClipping( true );
-        
+
         // Gray out area surrounding current selection region
         painter.fillRect( rect(), QBrush( PAINTER_COLOR, SPACE_FILL_PATTERN ) );
         painter.end();
@@ -217,60 +263,84 @@ static const QPixmap moving_crosshair( moving_crosshair_xpm );
 #ifdef QTOPIA_PHONE
 void RegionSelector::keyPressEvent( QKeyEvent* e )
 {
-#define MOVE_STEP 5
+#define STEP 4
 
-    // If selection enabled
-    if( enabled ) {
-        switch( e->key() ) {
-        // If left key pressed, move current position one unit left
-        case Key_Left:
-            moveCrosshairBy( -MOVE_STEP, 0 );
-            if( current_state == MOVING ) 
-                _region = QRect( region_start, crosshair_position );
-            update();
-            break;
-        // If right key pressed, move current position one unit right
-        case Key_Right:
-            moveCrosshairBy( MOVE_STEP, 0 );
-            if( current_state == MOVING )
-                _region = QRect( region_start, crosshair_position );
-            update();
-            break;
-        // If up key pressed, move current position one unit up
-        case Key_Up:
-            moveCrosshairBy( 0, -MOVE_STEP );
-            if( current_state == MOVING )
-                _region = QRect( region_start, crosshair_position );
-            update();
-            break;
-        // If down key pressed, move current position one unit down
-        case Key_Down:
-            moveCrosshairBy( 0, MOVE_STEP );
-            if( current_state == MOVING )
-                _region = QRect( region_start, crosshair_position );
-            update();
-            break;
-        // If select key pressed
-        case Key_Select:
+    if( enabled && !Global::mousePreferred() ) {
+        if( e->key() == ContextMenu::key() ) {
+            // Toggle current state
             switch( current_state ) {
-            // If region is being marked
-            case MARK:
-                // Update region start and end position with current position
-                region_start = crosshair_position;
-                _region = QRect( region_start, region_start );
-                current_state = MOVING;
+            case MOVE:
+                current_state = SIZE;
+                setStateLabel();
                 update();
                 break;
-            // If region is moving, emit selected
-            case MOVING:
-                emit selected();
+            case SIZE:
+                current_state = MOVE;
+                setStateLabel();
+                update();
+                break;
+            default:
+                // Ignore
                 break;
             }
-            break;
-        default:
-            // Ignore
-            e->ignore();
-            break;
+        } else if( e->key() == Key_Select ) {
+            emit selected();
+        } else {
+            switch( current_state ) {
+            // Move region
+            case MOVE:
+                switch( e->key() ) {
+                case Key_Left:
+                    moveBy( -STEP, 0 );
+                    update();
+                    break;
+                case Key_Right:
+                    moveBy( STEP, 0 );
+                    update();
+                    break;
+                case Key_Up:
+                    moveBy( 0, -STEP );
+                    update();
+                    break;
+                case Key_Down:
+                    moveBy( 0, STEP );
+                    update();
+                    break;
+                default:
+                    // Ignore
+                    e->ignore();
+                    break;
+                }
+                break;
+            // Size region
+            case SIZE:
+                switch( e->key() ) {
+                case Key_Left:
+                    sizeBy( -STEP, 0 );
+                    update();
+                    break;
+                case Key_Right:
+                    sizeBy( STEP, 0 );
+                    update();
+                    break;
+                case Key_Up:
+                    sizeBy( 0, STEP );
+                    update();
+                    break;
+                case Key_Down:
+                    sizeBy( 0, -STEP );
+                    update();
+                    break;
+                default:
+                    // Ignore
+                    e->ignore();
+                    break;
+                }
+                break;
+            default:
+                // Ignore
+                break;
+            }
         }
     } else {
         if( e->key() == Qt::Key_Back ) emit pressed();
@@ -283,15 +353,6 @@ void RegionSelector::mousePressEvent( QMouseEvent* e )
 {
 #define LAG 15
 
-#ifdef QTOPIA_PHONE
-    // Update crosshair position
-    crosshair_position = e->pos();
-    if( current_state == MOVING )
-        _region = QRect( region_start, crosshair_position );
-    
-    // Update display
-    update();
-#else
     switch( e->button() ) {
     // If stylus has been pressed
     case Qt::LeftButton:
@@ -307,10 +368,8 @@ void RegionSelector::mousePressEvent( QMouseEvent* e )
         // Ignore
         break;
     }
-#endif
 }
 
-#ifndef QTOPIA_PHONE
 void RegionSelector::mouseReleaseEvent( QMouseEvent* e )
 {
     if( enabled ) {
@@ -326,12 +385,13 @@ void RegionSelector::mouseReleaseEvent( QMouseEvent* e )
         case MOVING:
             current_state = MARK;
             break;
+        default:
+            // Ignore
+            break;
         }
     }
 }
-#endif
 
-#ifndef QTOPIA_PHONE
 void RegionSelector::mouseMoveEvent( QMouseEvent* e )
 {
     if( enabled ) {
@@ -341,6 +401,7 @@ void RegionSelector::mouseMoveEvent( QMouseEvent* e )
             if( !lag_area.contains( e->pos() ) ) current_state = MOVING;
             break;
         case MOVING:
+            {
             // Update region
             int x = e->pos().x(), y = e->pos().y();
     
@@ -352,28 +413,77 @@ void RegionSelector::mouseMoveEvent( QMouseEvent* e )
     
             // Update region end with current stylus position
             _region = QRect( region_start, QPoint( x, y ) );
-
+            }
             // Update display
             update();
+            break;
+        default:
+            // Ignore
             break;
         }
     }
 }
-#endif
 
 #ifdef QTOPIA_PHONE
-void RegionSelector::moveCrosshairBy( int x, int y )
+void RegionSelector::setStateLabel()
 {
-    crosshair_position.setX( crosshair_position.x() + x );
-    crosshair_position.setY( crosshair_position.y() + y );
+    switch( current_state ) {
+    case MOVE:
+        ContextBar::setLabel( this, ContextMenu::key(), "photoedit/resize", QString::null );
+        break;
+    case SIZE:
+        ContextBar::setLabel( this, ContextMenu::key(), "photoedit/move", QString::null );
+        break;
+    default:
+        // Ignore
+        break;
+    }
+}
+
+void RegionSelector::moveBy( int dx, int dy )
+{
+    // Contain region within widget
+    if( _region.left() + dx < rect().left() )
+        dx = rect().left() - _region.left();
+    if( _region.right() + dx > rect().right() )
+        dx = rect().right() - _region.right();
+    if( _region.top() + dy < rect().top() )
+        dy = rect().top() - _region.top();
+    if( _region.bottom() + dy > rect().bottom() )
+        dy = rect().bottom() - _region.bottom();
+        
+    _region.moveBy( dx, dy );
+}
+
+void RegionSelector::sizeBy( int dw, int dh )
+{
+#define MIN_WIDTH 20
+#define MIN_HEIGHT 20
+
+    _region.setLeft( _region.left() - dw );
+    _region.setRight( _region.right() + dw );
+    _region.setTop( _region.top() - dh );
+    _region.setBottom( _region.bottom() + dh );
     
-    if( crosshair_position.x() < 0 ) crosshair_position.setX( 0 );
-    else if( crosshair_position.x() > width() ) 
-        crosshair_position.setX( width() );
-    
-    if( crosshair_position.y() < 0 ) crosshair_position.setY( 0 );
-    else if( crosshair_position.y() > height() ) 
-        crosshair_position.setY( height() );
+    // Limit to minimum
+    if( _region.width() < MIN_WIDTH ) {
+        _region.setLeft( _region.left() + dw );
+        _region.setRight( _region.right() - dw );
+    }
+    if( _region.height() < MIN_HEIGHT ) {
+        _region.setTop( _region.top() + dh );
+        _region.setBottom( _region.bottom() - dh );
+    }
+     
+    // Contain region within widget
+    if( _region.left() < rect().left() )
+        _region.setLeft( rect().left() );
+    if( _region.right() > rect().right() )
+        _region.setRight( rect().right() );
+    if( _region.top() < rect().top() )
+        _region.setTop( rect().top() );
+    if( _region.bottom() > rect().bottom() )
+        _region.setBottom( rect().bottom() );
 }
 #endif
 

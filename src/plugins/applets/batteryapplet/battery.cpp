@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -103,11 +103,13 @@ bool BatteryMeter::updateBatteryViewGeometry()
 
 void BatteryMeter::timerEvent( QTimerEvent * )
 {
+    static bool first_update = TRUE;
     PowerStatus prev = *ps;
-
+    
     *ps = PowerStatusManager::readStatus();
-
-    if ( prev != *ps ) {
+    if ( prev != *ps || first_update ) {
+        if (first_update)
+            first_update = FALSE;
 	percent = ps->batteryPercentRemaining();
 	if ( !charging && ps->batteryStatus() == PowerStatus::Charging && percent < 0 ) {
 	    percent = 0;
@@ -179,7 +181,7 @@ void BatteryMeter::paintEvent( QPaintEvent* )
     band_width = (w-2) / 4;
     if ( band_width < 1 )
 	band_width = 1;
-
+    
     batt_width = 4 * band_width + 2;	// +2 for 1 pixel border on both sides
     batt_height = height()-2;
     batt_xoffset = (width() - batt_width) / 2;

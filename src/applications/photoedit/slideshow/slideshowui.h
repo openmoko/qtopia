@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -71,10 +71,8 @@ protected:
     void keyPressEvent( QKeyEvent* );
 #endif
 
-#ifndef QTOPIA_PHONE
     // Transform stylus presses into signals
     void mousePressEvent( QMouseEvent* );
-#endif
     
 private:
     // Reduce long names to fit on display 

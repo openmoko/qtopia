@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -47,6 +47,10 @@ class TodoAccessPrivate;
 class QTOPIAPIM_EXPORT PimTask : public PimRecord
 {
     friend class TodoAccessPrivate;
+#ifdef QTOPIA_DESKTOP
+    friend class TodoList;
+#endif
+
 public:
     enum TaskStatus {
 	NotStarted = 0,
@@ -144,6 +148,8 @@ private:
     static TaskStatus xmlToStatus(const QString &s);
     static QString statusToXml(TaskStatus);
     static void initMaps();
+    // This is here so that TodoList in Qtopia Desktop can re-init the map for an Opie device.
+    static void initMaps( bool isOpieDevice );
     
 private:
     bool mDue;

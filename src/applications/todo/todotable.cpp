@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -983,7 +983,11 @@ QString TodoTable::categoryLabel( int id )
 	return tr( "Unfiled" );
     else if ( id == -2 )
 	return tr( "All" );
-    return mCat.label( "Todo List", id ); // No tr
+
+    QArray<int> ids( 1 );
+    ids[0] = id;
+    
+    return mCat.displaySingle( "Todo List", ids, Categories::ShowFirst ); //No tr
 }
 
 void TodoTable::cornerButtonClicked()

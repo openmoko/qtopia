@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/compile_run_examples.doc:1 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Compile and Run SDK Example Application</title>
@@ -84,6 +82,7 @@ For the <em>Qtopia SDK</em> use
 <pre>
    export QPEDIR=/opt/Qtopia
    export QTDIR=$QPEDIR
+   export DQTDIR=$QPEDIR
    export PATH=$QPEDIR/bin:$PATH
    export QMAKESPEC=qws/linux-generic-g++
    export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
@@ -160,23 +159,7 @@ For the <em>Qtopia SDK</em> use
    export PATH=$QPEDIR/bin:/usr/local/arm/bin:$PATH
 </pre>
  
-otherwise the following example may be used:
-<pre>
-   cd ~/dev
-   export QTOPIA_PREFIX=$PWD
-   export QPEDIR=`echo $QTOPIA_PREFIX/arm/qtopia-*2.*.0`
-   if ! test -d "$QPEDIR";then echo 'A Qtopia directory was not found!';fi
-   export QTDIR="$QTOPIA_PREFIX/qt-2.3.2"
-   export QTEDIR="$QTOPIA_PREFIX/arm/qt-2.3.9"
-   if ! test -d "$QTEDIR";then echo 'Qt/Embedded directory was not found!';fi
-   export PATH=$QPEDIR/bin/:$QTEDIR/bin:$QTDIR/bin:/usr/local/arm:$PATH
-   export QMAKESPEC=qws/linux-sharp-g++
-   export QTDIR=$QTEDIR
-   export DQTDIR=`echo $QTOPIA_PREFIX/qt-x11-*3.3.0`
-   if ! test -d "$DQTDIR";then echo 'Qt/X11-3.3 directory was not found!';fi
-</pre>
- 
-where  ~/dev is replaced by the path where all packages that Qtopia depends on were extracted to for the target device.
+replace /usr/local/arm/bin with the location of your ARM cross compiler.
 <p> <li> Rebuild the makefile (<tt>$QMAKESPEC</tt> has changed) above:
 <pre>
    make clean
@@ -188,7 +171,7 @@ where  ~/dev is replaced by the path where all packages that Qtopia depends on w
    make
 </pre>
  
-<p> <li> Install it (note that this is now going into the <tt>/opt/Qtopia/sharp/</tt> directory):
+<p> <li> Install it (note that this is now going into the <tt>/opt/Qtopia/arm/</tt> directory):
 <pre>
    su # root privileges required to install
    make install INSTALL_ROOT=$QPEDIR
@@ -230,6 +213,8 @@ QTOPIA_PHONE {
 }
 TRANSLATABLES+=$$PHONE_SOURCES $$PHONE_HEADERS # Add this now so we don't forget later
 
+...
+
 TRANSLATABLES*=$$HEADERS $$SOURCES # The * avoids duplicates
 </pre>
  
@@ -246,8 +231,8 @@ mentioned above) includes a complete tutorial.
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

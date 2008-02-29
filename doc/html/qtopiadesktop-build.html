@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/qtopiadesktop-build.doc:1 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Instructions for Building Qtopia Desktop</title>
@@ -99,7 +97,7 @@ Build assistant.exe and qaxcontainer.dll:<br>
 </pre>
  
 Qt is now ready to be used with Qtopia Desktop
-<p> <li> Install Qtopia source to c:\qtopia&#92;2.1.0 (substitute below if different)
+<p> <li> Install Qtopia source to c:\qtopia&#92;2.1.1 (substitute below if different)
 <p> If QMAKESPEC has not been set, set QMAKESPEC
 appropriately for the compiler that is to be used.<br>
 For MS Visual C++:<br>
@@ -121,7 +119,7 @@ Qtopia also provides a spec for the Standard edition of the .NET compiler
 <p> <li> Compile Qtopia Desktop and all of its plugins:<br>
 <pre>
                 set DQTDIR=c:\qt\3.3.0
-                set QPEDIR=c:\qtopia\2.1.0
+                set QPEDIR=c:\qtopia\2.1.1
                 set PATH=%QPEDIR%\bin;%DQTDIR%\bin;%PATH%
                 cd %QPEDIR%
                 scripts\mkwindows-qtopiadesktop.bat
@@ -146,12 +144,12 @@ Download and extract Qt 3.3.0 for X11.
                 cd ..
 </pre>
  
-<li> Extract Qtopia source package for example to ~/qtopia-source-2.1.0
+<li> Extract Qtopia source package for example to ~/qtopia-source-2.1.1
 (substitute below if different)
 <li> Compile Qtopia Desktop as follows:<br>
 <pre>
-                tar xfz qtopia-source-2.1.0.tar.gz
-                cd qtopia-source-2.1.0
+                tar xfz qtopia-source-2.1.1.tar.gz
+                cd qtopia-source-2.1.1
                 export QPEDIR=$PWD
                 export DQTDIR=$QTDIR
                 export PATH=$QPEDIR/bin:$DQTDIR/bin:$PATH
@@ -192,12 +190,12 @@ you will need to allow uic to talk to the Window Server.<br>
 </pre>
  
 Note that you will need to be an administrator to do this. Sudo will prompt you for your password.
-<p> <li> Extract Qtopia source package for example to ~/qtopia-source-2.1.0
+<p> <li> Extract Qtopia source package for example to ~/qtopia-source-2.1.1
 (substitute below if different)
 <li> Compile Qtopia Desktop as follows:<br>
 <pre>
-                tar xfz qtopia-source-2.1.0.tar.gz
-                cd qtopia-source-2.1.0
+                tar xfz qtopia-source-2.1.1.tar.gz
+                cd qtopia-source-2.1.1
                 export QPEDIR=$PWD
                 export DQTDIR=$QTDIR
                 export PATH=$QPEDIR/bin:$DQTDIR/bin:$PATH
@@ -275,8 +273,8 @@ Place <tt>patch.exe</tt> somewhere that is in your path (eg. C:\Windows).
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -80,6 +80,14 @@ static QPixmap *pm_uninstalled=0;
 static QPixmap *pm_installed=0;
 static QPixmap *pm_uninstall=0;
 static QPixmap *pm_install=0;
+
+//#define IPKGSIM
+
+#ifdef IPKGSIM
+static const char *ipkg_name = "ipkgsim";
+#else
+static const char *ipkg_name = "ipkg";
+#endif
 
 static QString packageId(const QString& name_or_file)
 {
@@ -749,12 +757,15 @@ void PackageWizard::insertLocalPackageItems()
     Global::findDocuments(&docs,"application/ipkg");
     for (QListIterator<DocLnk> it(docs.children()); it.current(); ++it) {
 	const DocLnk& lnk = **it;
-	PackageItem* item = new PackageItem(packagelist,lnk,
-	    installed.find(packageId(lnk.file())));
-	if ( !item->parseInfo() ) {
-	    infoPending.append(item);
-	    if ( infoPending.count() == 1 )
-		startInfoProcess();
+	// only show un-installed packages.
+	if (!installed.find(packageId(lnk.file()))) {
+	    PackageItem* item = new PackageItem(packagelist,lnk,
+		    FALSE);
+	    if ( !item->parseInfo() ) {
+		infoPending.append(item);
+		if ( infoPending.count() == 1 )
+		    startInfoProcess();
+	    }
 	}
     }
 }
@@ -1241,7 +1252,7 @@ QStringList PackageWizard::linksInPackage(const QString& pkg, const QString & ro
 {
     QString files;
     QStringList cmd;
-    cmd << "ipkg";
+    cmd << ipkg_name;
     if ( root != "/" )
 	cmd << "-d" << root;
     cmd << "files" << pkg;  // No tr
@@ -1394,7 +1405,7 @@ bool PackageWizard::commitWithIpkg()
 QString PackageWizard::ipkgStatusOutput()
 {
     if ( cachedIpkgStatusOutput.isEmpty() ) {
-	Process ipkg_status( QStringList() << "ipkg" << "status" ); // No tr
+	Process ipkg_status( QStringList() << ipkg_name << "status" ); // No tr
 	cachedIpkgStatusOutput.detach();
 	ipkg_status.exec( 0, cachedIpkgStatusOutput );
 	
@@ -1405,9 +1416,13 @@ QString PackageWizard::ipkgStatusOutput()
 	for ( ; (fs=sit.current()); ++sit ) {
 	    //qDebug( "looking at %s", fs->path().latin1() );
 	    if ( fs->path() != "/" && 
-		 QFile::exists( fs->path() + "/usr/lib/ipkg/status" ) ) {
+		 QFile::exists( fs->path() +
+#ifdef IPKGSIM
+		     QPEApplication::qpeDir() +
+#endif
+		     "/usr/lib/ipkg/status" ) ) {
 		QCString subOut;
-		Process ipkg2( QStringList() << "ipkg" << "-d" 
+		Process ipkg2( QStringList() << ipkg_name << "-d" 
 			       << fs->path() << "status" ); // No tr
 		ipkg2.exec( 0, subOut );
 		//qDebug( "  result %s", subOut.data() );
@@ -1421,7 +1436,7 @@ QString PackageWizard::ipkgStatusOutput()
 QString PackageWizard::ipkgInfoOutput()
 {
     if ( cachedIpkgInfoOutput.isEmpty() ) {
-	Process ipkg_info( QStringList() << "ipkg" << "info" );
+	Process ipkg_info( QStringList() << ipkg_name << "info" );
 	cachedIpkgInfoOutput.detach();
 	ipkg_info.exec( 0, cachedIpkgInfoOutput );
     }
@@ -1449,6 +1464,7 @@ void PackageWizard::startRun()
 
 void PackageWizard::endRun()
 {
+    QPEApplication::setTempScreenSaverMode(QPEApplication::Enable);
     progress()->hide();
     progress()->reset();
     setEnabled(TRUE);
@@ -1464,11 +1480,13 @@ bool PackageWizard::runIpkg(const QStringList& args, QString& out)
 	startRun();
     }
     QStringList cmd;
-    cmd += "ipkg";
+    cmd += ipkg_name;
     if ( !ipkg_old )
 	cmd += "-force-defaults";
     cmd += args;
+    qDebug("runn comand %s", (const char *)cmd.join(" ").local8Bit());
     qApp->processEvents();
+    QPEApplication::setTempScreenSaverMode(QPEApplication::DisableSuspend);
     Process ipkg_status(cmd);
     bool r = ipkg_status.exec("",out);
     //qDebug( "RESULT %s", out.latin1() );

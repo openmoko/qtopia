@@ -30,7 +30,9 @@ help.files=$${QTOPIA_DEPOT_PATH}/help/html/keypebble*
 help.path=/help/html
 pics.files=$${QTOPIA_DEPOT_PATH}/pics/keypebble/*
 pics.path=/pics/keypebble
-INSTALLS+=help
+desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/keypebble.desktop
+desktop.path=/apps/Applications
+INSTALLS+=help desktop
 PICS_INSTALLS+=pics
 
 INTERFACES	= vncoptionsbase.ui

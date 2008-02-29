@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Qt Toolkit -  Installing Qt/Embedded</title><style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
 a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
 --></style></head><body bgcolor="#ffffff">
 <p>
@@ -27,7 +25,7 @@ to be modified for other platforms.
 <h2>Required packages</h2>
 <p>
 To install and build Qt/Embedded you need several packages. These packages are: 
-<pre> <a href="qt.html">Qt</a>/Embedded 2.3.9 (or higher, but always a 2.3 version) Qt 2.3.2 for X11 (for emulated desktop development)
+<pre> <a href="qt.html">Qt</a>/Embedded 2.3.10 (or higher, but always a 2.3 version) Qt 2.3.2 for X11 (for emulated desktop development)
 tmake 1.13 (or higher)
 </pre>
 <p>
@@ -63,8 +61,8 @@ We assume you have the commercial Qt/Embedded package. If you use the free packa
 you should adjust the filenames accordingly.
 <p>
 <pre>cd ~/dev
-tar -xzf qt-embedded-2.3.9-commercial.tar.gz
-export QTEDIR=$PWD/qt-2.3.9
+tar -xzf qt-embedded-2.3.10-commercial.tar.gz
+export QTEDIR=$PWD/qt-2.3.10
 </pre>
 <p>
 You should now have installed all required packages. As long as you have set the environment variables for the other packages correctly you need not worry about them.
@@ -76,7 +74,7 @@ You should have the following environment variables set:
 <p>
 <pre>TMAKEDIR : points to the Tmake tool used for building Qt-Embedded 
 QT2DIR : points to the Qt-X11 2.3.2 directory 
-QTEDIR : points to the Qt-Embedded 2.3.9 directory
+QTEDIR : points to the Qt-Embedded 2.3.10 directory
 </pre>
 <p>
 After you have installed all packages you no longer need the tar files. These files 
@@ -101,7 +99,7 @@ cp bin/uic $QTEDIR/bin/
 <p>
 <h3>Build QVfb</h3>
 <p>
-In this step we build and link the qvfb sources from Qt/Embedded 2.3.9 against the static Qt library from Qt 2.3.2.
+In this step we build and link the qvfb sources from Qt/Embedded 2.3.10 against the static Qt library from Qt 2.3.2.
 <p>
 <pre>export TMAKEPATH=$TMAKEDIR/lib/linux-g++
 export QTDIR=$QT2DIR
@@ -270,6 +268,6 @@ The Qt/Embedded library can be reduced in size by <a href=features.html>removing
 
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.9</div>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.10</div>
 </table></div></address></body></html>

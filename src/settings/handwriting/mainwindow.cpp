@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -53,8 +53,9 @@
 #include <qlistview.h>
 #include <qheader.h>
 
-class ProfileItem : public QListViewItem
+class ProfileItem : public QObject, public QListViewItem
 {
+    Q_OBJECT
 public:
     ProfileItem(ProfileItem *parent, const QString &name, QIMPenCharSet *s)
 	: QListViewItem(parent, name), mSet(s), mProf(0)
@@ -64,9 +65,19 @@ public:
 	{ QListViewItem::setOpen(TRUE); }
     ~ProfileItem() {}
 
-    void setOpen(bool) {}
+
+    ProfileItem *parent() {return (ProfileItem*)QListViewItem::parent();}
+
+    void setOpen(bool)
+    {
+	emit selected(this);
+    }
+
     QIMPenCharSet *set() const { return mSet; }
     QIMPenProfile *profile() const { return mProf; }
+
+signals:
+    void selected(QListViewItem *);
 
 private:
     QIMPenCharSet *mSet;
@@ -126,7 +137,6 @@ bool QIMPenProfileEdit::loadProfiles()
     }
     // add items in list (and their parts) to view
     for ( int i = 0; i < (int)profileList.count(); i++ ) {
-	qDebug("item");
 	QIMPenProfile *prof = profileList.at(i);
 
 	ProfileItem *pi = new ProfileItem(lv, prof->name(), prof);
@@ -134,10 +144,15 @@ bool QIMPenProfileEdit::loadProfiles()
 	QStringList cSets = prof->charSets();
 	QStringList::Iterator it;
 	for (it = cSets.begin(); it != cSets.end(); ++it) {
-	    new ProfileItem(pi, prof->title(*it), prof->charSet(*it));
+	    ProfileItem *si = new ProfileItem(pi, prof->title(*it), prof->charSet(*it));
+	    connect(si, SIGNAL(selected(QListViewItem *)), this, SLOT(editItem(QListViewItem *)));
 	}
 	pi->setOpen(TRUE);
+	connect(pi, SIGNAL(selected(QListViewItem *)), this, SLOT(editItem(QListViewItem *)));
     }
+
+    if (lv->firstChild() != 0)
+	lv->setCurrentItem(lv->firstChild());
 
     // still interesting to know the 'default'
     return TRUE;
@@ -187,14 +202,14 @@ void QIMPenProfileEdit::editItem(QListViewItem *i)
 	    cdiag = new CharSetDlg(this, "chng", TRUE);
 	}
 	cdiag->setCharSet(pi->set());
+	cdiag->setIsFS(((ProfileItem *)pi->parent())->profile()->canIgnoreStroke());
 
 	if (QPEApplication::execDialog(cdiag)) {
 	    // need to save the changes
 	    pi->set()->save();
 	    QCopEnvelope e("QPE/Handwriting", "settingsChanged()"); // no tr
 	} else {
-	    // load that char set again.
-	    pi->set()->load();
+	    loadProfiles(); // only way to get combining data as well in set.
 	}
 
     } else if (pi->profile()) {
@@ -233,3 +248,5 @@ void QIMPenProfileEdit::editItem(QListViewItem *i)
 	}
     }
 }
+
+#include "mainwindow.moc"

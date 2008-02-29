@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -65,7 +65,7 @@ signals:
     // Only emitted when selection is enabled
     void selected();
     
-    // Only Qtopia PDA
+    // Only when mouse preferred
     // Selection has been canceled
     // Only emitted when selection is enabled
     void canceled();
@@ -86,37 +86,39 @@ protected:
     // Control region selector
     void mousePressEvent( QMouseEvent* );
     
-#ifndef QTOPIA_PHONE
     // Control region selector
     void mouseReleaseEvent( QMouseEvent* );
 
     // Control region selector
     void mouseMoveEvent( QMouseEvent* );
-#endif
     
 private:
 #ifdef QTOPIA_PHONE
-    // Move crosshair position limiting by widget dimensions
-    void moveCrosshairBy( int x, int y );
+    // Only keypad mode
+    // Set state label in context bar to current state
+    void setStateLabel();
+
+    // Only keypad mode
+    // Move region center limited to widget dimensions
+    void moveBy( int dx, int dy );
+    
+    // Only keypad mode
+    // Size region limited to widget dimensions
+    void sizeBy( int dw, int dh );
 #endif
 
     ImageUI *image_ui;
-
-#ifdef QTOPIA_PHONE
-    ContextMenu *context_menu;
-#endif
     
     bool enabled;
-    enum { MARK, MOVING } current_state;
-    
-#ifdef QTOPIA_PHONE
-    QPoint crosshair_position;
-#else
-    QRect lag_area;
-#endif
+    enum {
+        // Stylus operation 
+        MARK, MOVING,
+        // Keypad operation
+        MOVE, SIZE
+    } current_state;
 
     QPoint region_start;
-    QRect _region;
+    QRect lag_area, _region;
 };
 
 #endif

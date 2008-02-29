@@ -8,6 +8,8 @@ CONFIG+=pimlib
 
 service.files=$${QTOPIA_DEPOT_PATH}/services/Tasks/todolist
 service.path=/services/Tasks
+recservice.files=$${QTOPIA_DEPOT_PATH}/services/Receive/text/x-vCalendar-Tasks/todolist
+recservice.path=/services/Receive/text/x-vCalendar-Tasks
 qdlservice.files=$${QTOPIA_DEPOT_PATH}/services/qdl/todolist
 qdlservice.path=/services/qdl
 desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/todolist.desktop
@@ -16,7 +18,7 @@ help.files=$${QTOPIA_DEPOT_PATH}/help/html/todo*
 help.path=/help/html
 pics.files=$${QTOPIA_DEPOT_PATH}/pics/todolist/*
 pics.path=/pics/todolist
-INSTALLS+=service qdlservice desktop help
+INSTALLS+=service recservice qdlservice desktop help
 PICS_INSTALLS+=pics
 
 PACKAGE_NAME=qpe-todo

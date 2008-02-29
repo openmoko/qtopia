@@ -65,6 +65,8 @@ bin/at
 bin/common.pm
 bin/installpic
 bin/ipkg
+bin/linstall
+bin/linstall.exe
 bin/mkPackages
 bin/mkipks
 bin/nct_lupdate
@@ -73,10 +75,14 @@ bin/qpe-refresh-links
 bin/qpe-reorgfiles
 bin/qpe.sh
 bin/qtopia-addmimetype
-bin/qtopia-linstall
+bin/qtopia-stop-internal
+bin/seserver_gen
+bin/setupfeatures
+bin/setupfeatures.exe
 bin/syncqtopia
 bin/targunzip
 bin/targzip
+changes
 configure
 doc/
 doc/html/
@@ -121,6 +127,7 @@ doc/html/bearings.png
 doc/html/biff-main-cpp.html
 doc/html/book.png
 doc/html/bughowto.html
+doc/html/build-from-source.html
 doc/html/buildsystem.html
 doc/html/buttongroup-m.png
 doc/html/buttongroup-w.png
@@ -221,7 +228,7 @@ doc/html/drawlines-connect-cpp.html
 doc/html/easteregg.html
 doc/html/easteregg2.html
 doc/html/embedclasses.html
-doc/html/environment-build.html
+doc/html/environment-setup-build.html
 doc/html/environment.html
 doc/html/environments-other.html
 doc/html/envvars.html
@@ -1533,6 +1540,7 @@ doc/html/release-1.9.0.html
 doc/html/release-1.9.0_EAR.html
 doc/html/release-2.0.0.html
 doc/html/release-2.1.0.html
+doc/html/release-2.1.1.html
 doc/html/release-index.html
 doc/html/removed20.html
 doc/html/resource-h.html
@@ -1562,6 +1570,7 @@ doc/html/shclass.html
 doc/html/showimg-main-cpp.html
 doc/html/signalsandslots.html
 doc/html/simple-application.html
+doc/html/single_exec.html
 doc/html/smooth.png
 doc/html/sound-h.html
 doc/html/sound-members.html
@@ -1573,6 +1582,10 @@ doc/html/stack.png
 doc/html/storage-h.html
 doc/html/storageinfo-members.html
 doc/html/storageinfo.html
+doc/html/styleguide-app-design.html
+doc/html/styleguide-naming.html
+doc/html/styleguide-online-help.html
+doc/html/styleguide-widgets.html
 doc/html/styleguide.html
 doc/html/styleinterface-h.html
 doc/html/styleinterface-members.html
@@ -1732,6 +1745,10 @@ etc/calculator/area.conf
 etc/calculator/distance.conf
 etc/calculator/volume.conf
 etc/calculator/weight.conf
+etc/categories/
+etc/categories/camera.conf
+etc/categories/mediarecorder.conf
+etc/categories/qtopia.conf
 etc/colors/
 etc/colors/Blues.scheme
 etc/colors/Bright.scheme
@@ -1760,6 +1777,7 @@ etc/dict/words-en_US
 etc/dict/words-en_US.dawg
 etc/dict/words-fr
 etc/dict/words-fr.dawg
+etc/dict/words-pt_BR
 etc/im/
 etc/im/pkim/
 etc/im/pkim/named_email.conf
@@ -3397,6 +3415,7 @@ pics/keypebble/
 pics/keypebble/vnc.png
 pics/language/
 pics/language/Language.png
+pics/language/selectedDict.png
 pics/launchersettings/
 pics/launchersettings/launcher.png
 pics/light-and-power/
@@ -3537,9 +3556,20 @@ pics/pkim/dict-en_GB-lc.png
 pics/pkim/dict-en_GB-uc.png
 pics/pkim/dict-en_US-lc.png
 pics/pkim/dict-en_US-uc.png
+pics/pkim/dict-es-lc.png
+pics/pkim/dict-es-uc.png
+pics/pkim/dict-fr-lc.png
+pics/pkim/dict-fr-uc.png
+pics/pkim/dict-it-lc.png
+pics/pkim/dict-it-uc.png
+pics/pkim/dict-ja-lc.png
 pics/pkim/dict-lang.png
 pics/pkim/dict-lc.png
+pics/pkim/dict-pt_BR-lc.png
+pics/pkim/dict-pt_BR-uc.png
 pics/pkim/dict-uc.png
+pics/pkim/dict-zh_CN-lc.png
+pics/pkim/dict-zh_CN-uc.png
 pics/pkim/ext-lc.png
 pics/pkim/ext-uc.png
 pics/pluginmanager/
@@ -4068,7 +4098,6 @@ scripts/
 scripts/build_qtopia
 scripts/checksymbols
 scripts/hpp
-scripts/mkinclude
 services/
 services/Alarm.service
 services/Alarm/

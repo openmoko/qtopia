@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -33,4 +33,4 @@
 **
 **********************************************************************/
 
-#define QPE_VERSION "2.1.0"
+#define QPE_VERSION "2.1.1"

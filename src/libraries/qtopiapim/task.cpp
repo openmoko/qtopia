@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -794,11 +794,32 @@ static const QtopiaPimMapEntry todolistentries[] = {
     { "StartedDate", QT_TRANSLATE_NOOP("PimTask", "Started Date"), PimTask::StartedDate, 50 },
     { "CompletedDate", QT_TRANSLATE_NOOP("PimTask", "Completed Date"), PimTask::CompletedDate, 0 },
     { "Notes", QT_TRANSLATE_NOOP("PimTask", "Notes"), PimTask::Notes, 0 },
+    { 0, 0, 0, 0 }
+};
 
+static const QtopiaPimMapEntry todolistentries_opie[] = {
+    { "HasDate", NULL, PimTask::HasDate, 0 },
+    { "Summary", // No tr
+	    QT_TRANSLATE_NOOP("PimTask", "Description"), PimTask::Description, 50 },
+    { "Priority", QT_TRANSLATE_NOOP("PimTask", "Priority"), PimTask::Priority, 0 },
+    { "Completed", QT_TRANSLATE_NOOP("PimTask", "Completed"), PimTask::CompletedField, 0},
+    { "PercentCompleted", QT_TRANSLATE_NOOP("PimTask", "Percent Completed"), PimTask::PercentCompleted, 0},
+    { "DateYear", NULL, PimTask::DueDateYear, 0 },
+    { "DateMonth", NULL, PimTask::DueDateMonth, 0 },
+    { "DateDay", NULL, PimTask::DueDateDay, 0 },
+    { "Status", QT_TRANSLATE_NOOP("PimTask", "Status"), PimTask::Status, 0 },
+    { "StartedDate", QT_TRANSLATE_NOOP("PimTask", "Started Date"), PimTask::StartedDate, 50 },
+    { "CompletedDate", QT_TRANSLATE_NOOP("PimTask", "Completed Date"), PimTask::CompletedDate, 0 },
+    { "Description", QT_TRANSLATE_NOOP("PimTask", "Notes"), PimTask::Notes, 0 },
     { 0, 0, 0, 0 }
 };
 
 void PimTask::initMaps()
+{
+    PimTask::initMaps( FALSE );
+}
+
+void PimTask::initMaps( bool isOpieDevice )
 {
     delete keyToIdentifierMapPtr;
     keyToIdentifierMapPtr = new QMap<int, QCString>;
@@ -812,8 +833,8 @@ void PimTask::initMaps()
     delete uniquenessMapPtr;
     uniquenessMapPtr = new QMap<int, int>;
 
-    PimRecord::initMaps("PimTask", todolistentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
-			*trFieldsMapPtr );
+    PimRecord::initMaps("PimTask", (isOpieDevice?todolistentries_opie:todolistentries),
+	    *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr, *trFieldsMapPtr );
 }
 
 /*!

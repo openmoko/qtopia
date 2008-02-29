@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -53,7 +53,7 @@ class QIMPenInputCharDlg : public QDialog
     Q_OBJECT
 public:
     QIMPenInputCharDlg( QWidget *parent = 0, const char *name = 0,
-	    bool modal = FALSE, int WFlags = 0 );
+	    bool modal = FALSE, bool fs = FALSE, int WFlags = 0 );
 
     unsigned int unicode() const { return uni; }
 
@@ -63,7 +63,7 @@ protected slots:
     void setCharacter( uint sp );
 
 private:
-    void addSpecial();
+    void addSpecial(bool isFS );
     uint uni;
     UniSelect *u;
 };
@@ -81,6 +81,10 @@ public:
     QIMPenCharSet *charSet() const;
 
     void checkStoreMatch();
+
+    void setIsFS(bool b) {
+	mIsFS=b;
+    }
 protected:
     void fillCharList();
     void enableButtons();
@@ -124,6 +128,7 @@ protected:
     bool addFlag;
     uint matchCount;
     uint matchIndex;
+    bool mIsFS;
 };
 
 class CharSetDlg : public QDialog
@@ -138,6 +143,9 @@ public:
 
     QIMPenCharSet *charSet() const;
 
+    void setIsFS(bool b) {
+	edit->setIsFS(b);
+    }
 protected:
     void accept();
     void reject();

@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -124,12 +124,10 @@ void SlideShowUI::keyPressEvent( QKeyEvent* e )
 }
 #endif
 
-#ifndef QTOPIA_PHONE
 void SlideShowUI::mousePressEvent( QMouseEvent* )
 {
     emit pressed();
 }
-#endif
 
 void SlideShowUI::calculateFittedName()
 {

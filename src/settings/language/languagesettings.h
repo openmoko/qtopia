@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -41,7 +41,6 @@
 #include "languagesettingsbase.h"
 
 class QPEDialogListener;
-class PkIMMatcher;
 class QAction;
 
 class LanguageSettings : public LanguageSettingsBase
@@ -67,10 +66,8 @@ private slots:
     void inputToggled();
 
 private:
-#ifdef QTOPIA_PHONE
     void updateActions();
     void forceChosen();
-#endif
 
     QString chosenLanguage;
     QStringList inputLanguages;
@@ -78,8 +75,9 @@ private:
 
     QPEDialogListener *dl;
 
+    static QStringList langs;
+    static QStringList dictLanguages();
 #ifdef QTOPIA_PHONE
-    PkIMMatcher *matcher;
     QAction *a_input;
 #endif
 };

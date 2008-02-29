@@ -122,6 +122,7 @@ video/dl			dl
 video/fli			fli
 video/gl			gl
 video/mpeg			mpeg mp2 mpe mpg
+video/mp4			mp4 m4v
 video/quicktime			mov qt
 video/x-msvideo			avi
 video/x-sgi-movie		movie

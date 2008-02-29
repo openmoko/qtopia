@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -601,7 +601,7 @@ void DateBook::editOccurrence( const Occurrence &ev, bool preview )
 	asException = FALSE;
     }
 
-    EntryDialog editDlg( onMonday, e, parentWidget, 0, TRUE );
+    EntryDialog editDlg( onMonday, e, parentWidget->isVisible() ? parentWidget : 0, "edit-event", TRUE );
     if ( preview )
 	editDlg.showSummary();
     // workaround added for text input.
@@ -828,7 +828,7 @@ void DateBook::editCurrentEvent()
 	hideEventDetails();
     if (eventSelected())
 	editOccurrence(currentOccurrence());
-    if ( inViewMode )
+    if ( inViewMode && eventSelected() )
 	showEventDetails();
 }
 
@@ -1007,43 +1007,22 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 
 	    // if alarm in past, (or nearly in the past) go off.
 	    if (current.addSecs(60) >= when) {
-		QString msg;
 		bool bSound = FALSE;
 		int stopTimer = 0;
-		msg += "<CENTER><B>" + item.event().description() + "</B>"
-		    + "<BR>" + item.event().location() + "<BR>";
 
-		if (item.event().timeZone().isValid()) {
-		    QString tzText = item.event().timeZone().id();
-		    int i = tzText.find('/');
-		    tzText = tzText.mid( i + 1 );
-		    tzText = tzText.replace(QRegExp("_"), " ");
-
-		    msg += "<B>" + tr("Time zone: ") + "</B>" + tzText + "<BR>";
-		}
-
-
-		msg += TimeString::localYMDHMS(item.event().start())
-		    + (warn
-			    ? " " + tr("(in %1 minutes)").arg(warn)
-			    : QString(""))
-		    + "<BR>"
-		    + item.event().notes() + "</CENTER>";
 		if ( item.event().alarmSound() != PimEvent::Silent ) {
 		    bSound = TRUE;
 		    Sound::soundAlarm();
 		    stopTimer = startTimer( 5000 );
 		}
 
-		QWidget *parent = parentWidget;
-		if ( !parent->isVisible() )
-		    parent = 0;
-		AlarmDialog dlg( parent, 0, TRUE );
-		switch ( dlg.exec(item.event()) ) {
+		AlarmDialog dlg( parentWidget->isVisible() ? parentWidget : 0, 0, TRUE );
+		switch ( dlg.exec(item) ) {
 		    case AlarmDialog::Details:
 			needShow = TRUE;
 			break;
 		    default:
+                        //close();
 			needShow = FALSE;
 			break;
 		}
@@ -1379,11 +1358,12 @@ void DateBook::newEvent( const QString &description )
     int mod = QTime(0,0,0).secsTo(current.time()) % 900;
     if (mod != 0)  {
 	mod = 900 - mod;
-	current.setTime( current.time().addSecs( mod ) );
+        current = current.addSecs( mod );
     }
 
     start.setTime(current.time());
-    end.setTime(start.time().addSecs(3600));
+    start.setDate(current.date());
+    end = current.addSecs( 3600 );
 
     newEvent(start,end,description,QString::null);
 }
@@ -1424,7 +1404,7 @@ bool DateBook::newEvent(const QDateTime& dstart,const QDateTime& dend,const QStr
 	int mod = QTime(0,0,0).secsTo(current.time()) % 900;
 	if (mod != 0)  {
 	    mod = 900 - mod;
-	    current.setTime( current.time().addSecs( mod ) );
+            current = current.addSecs( mod );
 	}
 
 	// default start
@@ -1445,7 +1425,7 @@ bool DateBook::newEvent(const QDateTime& dstart,const QDateTime& dend,const QStr
     if ( aPreset )
 	ev.setAlarm( presetTime, PimEvent::Loud );
 
-    EntryDialog e( onMonday, ev, parentWidget, 0, TRUE );
+    EntryDialog e( onMonday, ev, parentWidget->isVisible() ? parentWidget : 0, "new-event", TRUE );
     e.setCaption( EntryDetails::tr("New Event") );
 
 #ifdef QTOPIA_DESKTOP
@@ -1498,7 +1478,7 @@ bool DateBook::receiveFile( const QString &filename )
     QString msg = tr("<P>%1 new events.<p>Do you want to add them to your Calendar?").
 	arg(tl.count());
 
-    if ( QMessageBox::information(parentWidget->isVisible() ? parentWidget : 0, tr("New Events"),
+    if ( QMessageBox::information(parentWidget, tr("New Events"),
 	    msg, QMessageBox::Ok, QMessageBox::Cancel)==QMessageBox::Ok ) {
 	QDateTime from,to;
 	for( QValueList<PimEvent>::Iterator it = tl.begin(); it != tl.end(); ++it ) {
@@ -1667,7 +1647,7 @@ void DateBook::raiseWidget( QWidget *widget )
 
 void DateBook::slotPurge()
 {
-    QDialog dlg( parentWidget, "purge", TRUE );
+    QDialog dlg( parentWidget->isVisible() ? parentWidget : 0, "purge", TRUE );
 #ifdef QTOPIA_PHONE
     dlg.setCaption( tr("Purge") );
 #else
@@ -1704,7 +1684,7 @@ void DateBook::purgeEvents( const QDate &date, bool prompt )
     if (date.isNull())
         return;
 #ifndef QTOPIA_DESKTOP
-    QDialog *wait = new QDialog( parentWidget, 0, TRUE, WStyle_Customize | WStyle_NoBorder );
+    QDialog *wait = new QDialog( parentWidget->isVisible() ? parentWidget : 0, 0, TRUE, WStyle_Customize | WStyle_NoBorder );
     QVBox *vb = new QVBox( wait );
     QLabel *l = new QLabel( tr("<b>Please Wait</b>"), vb );
     l->setAlignment( AlignCenter|AlignVCenter );

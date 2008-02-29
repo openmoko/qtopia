@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -259,7 +259,12 @@ void TimerReceiverObject::resetTimer()
     // from now in milliseconds
     //
     qDebug("AlarmServer waiting %d seconds",secs);
+
+    static bool startup = TRUE;
+    if (secs < 5 && startup)   // To delay the alarm when Qtopia first starts.
+	secs = 5;
     startTimer( 1000 * secs + 500 );
+    startup = FALSE;
 }
 
 void TimerReceiverObject::timerEvent( QTimerEvent * )

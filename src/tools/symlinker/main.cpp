@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -33,7 +33,7 @@
 **
 **********************************************************************/
 
-#include <qapplication.h>
+#include <qtopia/qpeapplication.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qdir.h>
@@ -47,12 +47,22 @@
 #include <sys/vfs.h>
 #include <mntent.h>
 
+//#define IPKGSIM
+
+#ifdef IPKGSIM
+static const char *mainDir = QPEApplication::qpeDir() + "/usr/lib/ipkg";
+static const char *infoDir = QPEApplication::qpeDir() + "/usr/lib/ipkg/info/";
+static const char *listDir = QPEApplication::qpeDir() + "/usr/lib/ipkg/externinfo/";
+#else
+static const char *mainDir = "/usr/lib/ipkg";
+static const char *infoDir = "/usr/lib/ipkg/info/";
 static const char *listDir = "/usr/lib/ipkg/externinfo/";
+#endif
 
 static void createSymlinks( const QString &location, const QString &package )
 {
-    QFile inFile( location + "/usr/lib/ipkg/info/" + package + ".list" );
-    mkdir( "/usr/lib/ipkg", 0777 );
+    QFile inFile( location + infoDir + package + ".list" );
+    mkdir( mainDir, 0777 );
     mkdir( listDir, 0777 );
 
     QFile outFile( listDir + package + ".list");
@@ -142,7 +152,7 @@ static void updateSymlinks()
 	    if ( root == "/" ) 
 		continue;
 
-	    QString info = root + "/usr/lib/ipkg/info";
+	    QString info = root + infoDir;
 	    QDir infoDir( info );
 	    //qDebug( "looking at %s", info.ascii() );
 	    if ( infoDir.isReadable() ) {

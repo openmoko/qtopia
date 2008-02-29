@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -44,8 +44,10 @@ static void qpe_show_dialog( QDialog* d, bool nomax )
 {
     QSize sh = d->sizeHint();
 
+#ifndef QTOPIA_PHONE
     if ( d->parentWidget() && !d->parentWidget()->topLevelWidget()->isMaximized() )
 	nomax = TRUE;
+#endif
 
 #ifndef Q_WS_QWS
 	QSize s(qApp->desktop()->width(), qApp->desktop()->height() );

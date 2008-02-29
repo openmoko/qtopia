@@ -13,6 +13,7 @@ use strict;
 package main;
 
 use English;
+use File::stat;
 use File::Basename;
 use File::Copy;
 use File::Glob;
@@ -33,13 +34,31 @@ my $QTDIR = $ENV{"QTDIR"};
 my $includedir = $outpath."/include/qtopia";
 
 my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
-my $depotpath = dirname($0);
-$depotpath = dirname($depotpath);
+
+# Find the depot path
+my $depotpath = undef;
+open IN, "$outpath/src/config.pri" or die "Cannot open $outpath/src/config.pri\n";
+while ( defined($_ = <IN>) ) {
+    if ( /QTOPIA_DEPOT_PATH=(.*)/ ) {
+	$depotpath = $1;
+	last;
+    }
+}
+close IN;
+if ( !defined($depotpath) ) {
+    die "Can't find the depot path in $outpath/src/config.pri\n";
+}
 
 # Load some subs
-open IN, "$depotpath/bin/common.pm";
-eval join("\n", <IN>);
+open IN, "$depotpath/bin/common.pm" or die "Cannot open $depotpath/bin/common.pm\n";
+eval join("", <IN>) or die "Error while evaluating common.pm: $!\n$@\n";
 close IN;
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, "$depotpath/bin", $ARGV[0]);
+}
+
 
 if ( -d "/System/Library/Frameworks" ) {
     $force_relative = 1;

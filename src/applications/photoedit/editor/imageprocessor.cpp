@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -288,49 +288,29 @@ QImage ImageProcessor::transform( const QImage& image, const QRect& area ) const
     int bottom = QMIN( area.bottom() + 1, image.height() );
     int right = QMIN( area.right() + 1, image.width() );
     
-    if( buffer.hasAlphaBuffer() ) {
-        for( int j = area.top(); j < bottom; ++j ) {
-            int x = area.left() * transformation_matrix.a() +
-                j * transformation_matrix.c() - space.x();
-            int y = area.left() * transformation_matrix.b() +
-                j * transformation_matrix.d() - space.y();
-            for( int i = area.left(); i < right; ++i ) {
-                // Determine location of pixel after transformations applied
-                // Apply transfromations and store in image buffer
-                QRgb pixel = src[ j ][ i ];
-                int r = qRed( pixel ) + brightness;
-                int g = qGreen( pixel ) + brightness; 
-                int b = qBlue( pixel ) + brightness;
-                int a = qAlpha( pixel );
-                dest[ y ][ x ] = 
-                    qRgba( LIMIT( r, RGB_MIN, RGB_MAX ), 
-                    LIMIT( g, RGB_MIN, RGB_MAX ),
-                    LIMIT( b, RGB_MIN, RGB_MAX ), a );
-                x += transformation_matrix.a();
-                y += transformation_matrix.b();
-            }
+    // xd = a*x + c*y + dx
+    // yd = b*x + d*y + dy
+    int cx = area.left() * transformation_matrix.a() + area.top() * transformation_matrix.c() - space.x();
+    int cy = area.left() * transformation_matrix.b() + area.top() * transformation_matrix.d() - space.y();
+    for( int j = area.top(); j < bottom; ++j ) {
+        int x = cx;
+        int y = cy;
+        for( int i = area.left(); i < right; ++i ) {
+            // Determine location of pixel after transformations applied
+            // Apply transfromations and store in image buffer
+            QRgb pixel = src[ j ][ i ];
+            int r = qRed( pixel ) + brightness;
+            int g = qGreen( pixel ) + brightness; 
+            int b = qBlue( pixel ) + brightness;
+            dest[ y ][ x ] = ( pixel & 0xff000000 ) | 
+                ( LIMIT( r, RGB_MIN, RGB_MAX ) << 16 ) | 
+                ( LIMIT( g, RGB_MIN, RGB_MAX ) << 8 ) |
+                LIMIT( b, RGB_MIN, RGB_MAX );
+            x += transformation_matrix.a();
+            y += transformation_matrix.b();
         }
-    } else {
-        for( int j = area.top(); j < bottom; ++j ) {
-            int x = area.left() * transformation_matrix.a() +
-                j * transformation_matrix.c() - space.x();
-            int y = area.left() * transformation_matrix.b() +
-                j * transformation_matrix.d() - space.y();
-            for( int i = area.left(); i < right; ++i ) {
-                // Determine location of pixel after transformations applied
-                // Apply transfromations and store in image buffer
-                QRgb pixel = src[ j ][ i ];
-                int r = qRed( pixel ) + brightness;
-                int g = qGreen( pixel ) + brightness; 
-                int b = qBlue( pixel ) + brightness;
-                dest[ y ][ x ] = 
-                    qRgb( LIMIT( r, RGB_MIN, RGB_MAX ), 
-                    LIMIT( g, RGB_MIN, RGB_MAX ),
-                    LIMIT( b, RGB_MIN, RGB_MAX ) );
-                x += transformation_matrix.a();
-                y += transformation_matrix.b();
-            }
-        }
+        cx += transformation_matrix.c();
+        cy += transformation_matrix.d();
     }
     
     return buffer;

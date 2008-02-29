@@ -21,7 +21,7 @@ TRANSLATABLES   = $$HEADERS \
 
 i18n.path=$${INSTALL_PREFIX}/i18n
 i18n.commands=$${COMMAND_HEADER}\
-    for lang in $$TRANSLATIONS; \
+    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; \
     do \
 	for pkg in Categories-mediarecorder; \
 	do \
@@ -39,6 +39,6 @@ service.files=$${QTOPIA_DEPOT_PATH}/services/GetValue/audio/mediarecorder
 service.path=/services/GetValue/audio
 INSTALLS+=desktop help service
 PICS_INSTALLS+=pics
-!isEmpty(DQTDIR):!isEmpty(TRANSLATIONS):INSTALLS+=i18n
+!isEmpty(DQTDIR):INSTALLS+=i18n
 
 PACKAGE_DESCRIPTION=The multimedia recorder for the Qtopia environment.

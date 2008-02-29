@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS and its licensors.
+** Copyright (C) 2000-2005 Trolltech AS and its licensors.
 ** All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
@@ -86,7 +86,8 @@ const int StatusTextId = 0;
 
 /*! \a name */
 
-KVNC::KVNC( const char *name ) : QMainWindow( 0, name )
+KVNC::KVNC( QWidget* parent, const char* name, WFlags fl) :
+QMainWindow( parent, name, fl )
 {
     setCaption( tr("VNC Viewer") );
     fullscreen = false;
@@ -110,7 +111,11 @@ KVNC::KVNC( const char *name ) : QMainWindow( 0, name )
     connect( cornerButton, SIGNAL(pressed()), this, SLOT(showMenu()) );
     canvas->setCornerWidget( cornerButton );
 
+    if ( qApp->argc() > 1 ) {
+        openURL( QUrl( qApp->argv()[1]) );
+    } else {
     QTimer::singleShot( 0, canvas, SLOT(openConnection()) );
+    }
 }
 
 /*! */

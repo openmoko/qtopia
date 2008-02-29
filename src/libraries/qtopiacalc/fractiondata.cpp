@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -42,6 +42,8 @@ bool FractionData::push(char c, bool commit) {
 	return FALSE;
     if ( numerator == 0 && c == '0' )
         return !edited;
+    if (edited && numerator == 0)
+        edited = FALSE;
     
     if (!edited) {
         numerator = 0;
@@ -63,6 +65,7 @@ bool FractionData::push(char c, bool commit) {
 	    denominator = 0;
 	    dEdited = TRUE;
             edited = TRUE;
+            dString.truncate(0);
 	    buildFormattedString();
 	}
 	return TRUE;
@@ -119,31 +122,35 @@ void FractionData::buildFormattedString() {
 	formattedOutput.append('0');
 }
 bool FractionData::del() {
-    bool ok = TRUE;
     if (!edited)
         return TRUE;
 
     if (dEdited) {
 	if (dString.length())  {
 	    dString.truncate(dString.length()-1);
+            bool ok = TRUE;
 	    denominator=dString.toInt(&ok);
+            if (!ok) {
+                denominator = 1;
+                dEdited = FALSE;
+            }
 	} else {
 	    dEdited = FALSE;
 	}
     } else {
-        if (formattedOutput.length() == 1) {
+        if (formattedOutput.length() == 1 || 
+                (formattedOutput.length() == 2) && formattedOutput[0] == '-') {
             nString.truncate(0);
             nString.append("0");
             edited = FALSE;
             numerator = 0;
+            return TRUE;
         } else 
 	    nString.truncate(nString.length()-1);
     }
 
-    if (ok)
-	buildFormattedString();
-
-    return ok;
+    buildFormattedString();
+    return FALSE;
 }
 void FractionData::clear() {
     edited = FALSE;

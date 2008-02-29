@@ -8,9 +8,13 @@
 # things on your own, by all means go ahead.
 #
 # To run the script, please do the following:
-# - export environment variables for TMAKEDIR, QT2DIR, QT3DIR, QTEDIR and QPEDIR.
+# - export environment variables for TMAKEDIR, QT2DIR, DQTDIR, QTEDIR and QPEDIR.
 # - run this script e.g.
 #    $QPEDIR/scripts/build_qtopia
+# 
+# Set EXTRA_QTOPIA_LIB_PATH to an extra library path for use when building Qtopia
+#
+#or libs to Qtopia see 
 #
 # Please be advised that we cannot give a 100% guarantee that
 # it will work on your system. Systems are too different for that, but in
@@ -27,6 +31,22 @@
 # this script as complete as possible. We hope that this provides you with
 # some help and enables you to solve problems.
 
+make()
+{
+    command make "$@"
+}
+
+dbgmake()
+{
+    command make "$@" >"$BUILD_LOG"
+}
+
+
+    if test -z "$DQTDIR" -a -n "$QT3DIR" ; then
+	echo "WARNING:"
+	echo "  Using \$QT3DIR is deprecated, use \$DQTDIR instead"
+	export DQTDIR=$QT3DIR
+    fi
 
     echo " "
     echo "***********************************"
@@ -35,30 +55,47 @@
     # We start with logging some environment values
     # These are essential when you encounter problems and ask for our support
     echo " "
-    echo "QTEDIR="$QTEDIR
+    echo "QTEDIR=$QTEDIR"
     echo " "
-    echo "QT3DIR="$QT3DIR
+    echo "DQTDIR=$DQTDIR"
     echo " "
-    echo "QT2DIR="$QT2DIR
+    echo "QT2DIR=$QT2DIR"
     echo " "
-    echo "QPEDIR="$QPEDIR
+    echo "QPEDIR=$QPEDIR"
     echo " "
-    echo "TMAKEDIR="$TMAKEDIR
+    echo "TMAKEDIR=$TMAKEDIR"
     echo " "
-    echo "QMAKESPEC="$QMAKESPEC
+    echo "QMAKESPEC=$QMAKESPEC"
     echo " "
-    echo "PATH="$PATH
+    echo "PATH=$PATH"
     echo " "
-    echo "LD_LIBRARY_PATH="$LD_LIBRARY_PATH
+    echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
     echo " "
-    echo "PWD="$PWD
-    echo " "
-    echo "df"
-    df
-    echo "ls -la"
-    ls -la
+    echo "PWD=$PWD"
+    echo ""
+    echo "EXTRA_QTOPIA_LIB_PATH=$EXTRA_QTOPIA_LIB_PATH"
 
-    export QTOPIA_BASE_PATH=$PATH
+    if test -n "$EXTRA_QTOPIA_LIB_PATH"; then
+	EXTRA_QTOPIA_LIB_PATH_EVAL="-L \"$EXTRA_QTOPIA_LIB_PATH\" -R \"$EXTRA_QTOPIA_LIB_PATH\""
+	echo "Will add $EXTRA_QTOPIA_LIB_PATH_EVAL to Qtopia's configure line"
+    fi
+
+    echo " "
+    if test -z "$BUILD_LOG"; then
+	echo "df"
+	df
+	echo "ls -la"
+	ls -la
+	export LOG_FILE_SPEC=""
+	alias make=make
+	echo "Building Qtopia normally as \$BUILD_LOG is not set"
+    else
+	echo "Building Qtopia quietly as \$BUILD_LOG is set. Compile output will be sent to file $BUILD_LOG "
+	alias make=dbgmake
+	:> "$BUILD_LOG"
+    fi
+
+    export QTOPIA_BASE_PATH="$PATH"
 
     # before doing any build stuff we are going to check every env variable
     echo " "
@@ -67,13 +104,13 @@
     echo "***********************************"
 
     # check if QPEDIR exists
-    if test -z $QPEDIR; then
+    if test -z "$QPEDIR"; then
         echo "PROBLEM:"
         echo "  QPEDIR is not set."
         echo "  Please set QPEDIR to the location where the Qtopia sources are installed."
         exit
     fi
-    if ! test -d $QPEDIR; then
+    if ! test -d "$QPEDIR"; then
         echo "PROBLEM:"
         echo "  QPEDIR doesn't exist."
         echo "  Please set QPEDIR to the location where the Qtopia sources are installed."
@@ -81,23 +118,23 @@
     fi
 
     # check if we can find qpeapplication.cpp. If we can't find that file something is absolutely wrong.
-    if ! test -f $QPEDIR/src/libraries/qtopia/qpeapplication.cpp; then
+    if ! test -f "$QPEDIR/src/libraries/qtopia/qpeapplication.cpp"; then
         echo "PROBLEM:"
         echo "  QPEDIR exists, but it doesn't seem to contain the required source files."
-        echo "  QPEDIR is set to: "$QPEDIR
+        echo "  QPEDIR is set to: $QPEDIR "
         echo "  Please check QPEDIR to verify that it points to the location where the Qtopia sources are installed."
         exit
     fi
     echo "QPEDIR  : OK"
 
     # check if QTEDIR exists
-    if test -z $QTEDIR; then
+    if test -z "$QTEDIR"; then
         echo "PROBLEM:"
         echo "  QTEDIR is not set."
         echo "  Please set QTEDIR to the location where the Qt-embedded sources are installed."
         exit
     fi
-    if ! test -d $QTEDIR; then
+    if ! test -d "$QTEDIR"; then
         echo "PROBLEM:"
         echo "  QTEDIR doesn't exist."
         echo "  Please set QTEDIR to the location where the Qt-embedded sources are installed."
@@ -105,48 +142,48 @@
     fi
 
     # check if we can find qapplication.cpp. If we can't find that file something is absolutely wrong.
-    if ! test -f $QTEDIR/src/kernel/qapplication.cpp; then
+    if ! test -f "$QTEDIR/src/kernel/qapplication.cpp"; then
         echo "PROBLEM:"
         echo "  QTEDIR exists, but it doesn't seem to contain the required source files."
-        echo "  QTEDIR is set to: "$QTEDIR
+        echo "  QTEDIR is set to: $QTEDIR "
         echo "  Please check QTEDIR to verify that it points to the location where the Qt-embedded sources are installed."
         exit
     fi
     echo "QTEDIR  : OK"
 
-    # check if QT3DIR exists
-    if test -z $QT3DIR; then
+    # check if DQTDIR exists
+    if test -z "$DQTDIR"; then
         echo "PROBLEM:"
-        echo "  QT3DIR is not set."
-        echo "  Please set QT3DIR to the location where the Qt-X11 3.3 sources are installed."
+        echo "  DQTDIR is not set."
+        echo "  Please set DQTDIR to the location where the Qt-X11 3.3 sources are installed."
         exit
     fi
-    if ! test -d $QT3DIR; then
+    if ! test -d "$DQTDIR"; then
         echo "PROBLEM:"
-        echo "  QT3DIR doesn't exist."
-        echo "  Please set QT3DIR to the location where the Qt-X11 3.3 sources are installed."
+        echo "  DQTDIR doesn't exist."
+        echo "  Please set DQTDIR to the location where the Qt-X11 3.3 sources are installed."
         exit
     fi
 
     # check if we can find qapplication.cpp. If we can't find that file something is absolutely wrong.
-    # also check if we can find qmake. If we can't find that directory then QT3DIR is not pointing to a Qt 3 version.
-    if ! test -f $QT3DIR/src/kernel/qapplication.cpp || ! test -d $QT3DIR/qmake; then
+    # also check if we can find qmake. If we can't find that directory then DQTDIR is not pointing to a Qt 3 version.
+    if (! test -f "$DQTDIR/src/kernel/qapplication.cpp" || ! test -d "$DQTDIR/qmake") && test -f "$QTDIR/bi/uic" ; then
         echo "PROBLEM:"
-        echo "  QT3DIR exists, but it doesn't seem to contain the required source files."
-        echo "  QT3DIR is set to: "$QT3DIR
-        echo "  Please check QT3DIR to verify that it points to the location where the Qt-X11 3.3 sources are installed."
+        echo "  DQTDIR exists, but it doesn't seem to contain the required source files."
+        echo "  DQTDIR is set to: $DQTDIR "
+        echo "  Please check DQTDIR to verify that it points to the location where the Qt-X11 3.3 sources are installed."
         exit
     fi
-    echo "QT3DIR  : OK"
+    echo "DQTDIR  : OK"
 
     # check if QT2DIR exists
-    if test -z $QT2DIR; then
+    if test -z "$QT2DIR"; then
         echo "PROBLEM:"
         echo "  QT2DIR is not set."
         echo "  Please set QT2DIR to the location where the Qt-X11 2.3.2 sources are installed."
         exit
     fi
-    if ! test -d $QT2DIR; then
+    if ! test -d "$QT2DIR"; then
         echo "PROBLEM:"
         echo "  QT2DIR doesn't exist."
         echo "  Please set QT2DIR to the location where the Qt-X11 2.3.2 sources are installed."
@@ -155,23 +192,23 @@
 
     # check if we can find qapplication.cpp. If we can't find that file something is absolutely wrong.
     # also check that we CAN'T find qmake in here.
-    if ! test -f $QT2DIR/src/kernel/qapplication.cpp || test -d $QT2DIR/qmake; then
+    if (! test -f "$QT2DIR/src/kernel/qapplication.cpp" || test -d "$QT2DIR/qmake") && ! test -f "$QT2DIR/bin/uic" ; then
         echo "PROBLEM:"
         echo "  QT2DIR exists, but it doesn't seem to contain the required source files."
-        echo "  QT2DIR is set to: "$QT2DIR
+        echo "  QT2DIR is set to: $QT2DIR"
         echo "  Please check QT2DIR to verify that it points to the location where the Qt-X11 2.3.2 sources are installed."
         exit
     fi
     echo "QT2DIR  : OK"
 
     # check if TMAKEDIR exists
-    if test -z $TMAKEDIR; then
+    if test -z "$TMAKEDIR"; then
         echo "PROBLEM:"
         echo "  TMAKEDIR is not set."
         echo "  Please set TMAKEDIR to the location where the TMake sources are installed."
         exit
     fi
-    if ! test -d $TMAKEDIR; then
+    if ! test -d "$TMAKEDIR"; then
         echo "PROBLEM:"
         echo "  TMAKEDIR doesn't exist."
         echo "  Please set TMAKEDIR to the location where the TMake sources are installed."
@@ -179,19 +216,19 @@
     fi
 
     # check if we can find . If we can't find that file something is absolutely wrong.
-    if ! test -f $TMAKEDIR/bin/tmake || ! test -d $TMAKEDIR/lib/linux-g++; then
+    if ! test -f "$TMAKEDIR/bin/tmake" || ! test -d "$TMAKEDIR/lib/linux-g++"; then
         echo "PROBLEM:"
         echo "  TMAKEDIR exists, but it doesn't seem to contain the required TMake files."
-        echo "  TMAKEDIR is set to: "$TMAKEDIR
+        echo "  TMAKEDIR is set to: $TMAKEDIR"
         echo "  Please check TMAKEDIR to verify that it points to the location where the TMake files are installed."
         exit
     fi
     echo "TMAKEDIR: OK"
 
-    if test -d $QPEDIR/src/libraries/qtopiaphone; then
+    if test -d "$QPEDIR/src/libraries/qtopiaphone"; then
         echo " "
         echo "Building Qtopia: Phone"
-    elif test -d $QPEDIR/src/libraries/qtopiapim; then
+    elif test -d "$QPEDIR/src/libraries/qtopiapim"; then
         echo " "
         echo "Building Qtopia: PDA"
     else
@@ -199,112 +236,118 @@
         echo "Building Qtopia: Core"
     fi
 
-    export TMAKEPATH=$TMAKEDIR/lib/qws/linux-x86-g++
-    export QTOPIA_BASE_PATH=$TMAKEDIR/bin:$QTOPIA_BASE_PATH
+    export TMAKEPATH="$TMAKEDIR/lib/qws/linux-x86-g++"
+    export QTOPIA_BASE_PATH="$TMAKEDIR/bin:$QTOPIA_BASE_PATH"
 
     echo " "
     echo "***********************************"
     echo "******** Build Qt/Embedded ********"
     echo "***********************************"
-    export QTDIR=$QTEDIR
-    cd $QTDIR
-    export PATH=$QTDIR/bin:$QTOPIA_BASE_PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    cp $QPEDIR/src/qt/qconfig-qpe.h src/tools/
-    if test -d $QPEDIR/src/libraries/qtopiaphone; then
+    export QTDIR="$QTEDIR"
+    cd "$QTDIR"
+    export PATH="$QTDIR/bin:$QTOPIA_BASE_PATH"
+    export LD_LIBRARY_PATH="$QTDIR/lib:$LD_LIBRARY_PATH"
+    cp "$QPEDIR/src/qt/qconfig-qpe.h" src/tools/
+    if test -d "$QPEDIR/src/libraries/qtopiaphone"; then
         echo yes | ./configure -qconfig qpe -qvfb -depths 4,8,16,32 -keypad-mode -system-jpeg -gif
     else
         echo yes | ./configure -qconfig qpe -qvfb -depths 4,8,16,32 -system-jpeg -gif -D QT_TRANSFORM_VFB
     fi
-
     make sub-src
-
+    
+    export QTDIR="$QT2DIR"
+    export PATH="$QTDIR/bin:$QTOPIA_BASE_PATH"
+    export LD_LIBRARY_PATH="$QTDIR/lib:$LD_LIBRARY_PATH"
     echo " "
-    echo "***********************************"
-    echo "******* Build Qt/X11 2.3.2 ******"
-    echo "***********************************"
-    export QTDIR=$QT2DIR
-    cd $QTDIR
-    export PATH=$QTDIR/bin:$QTOPIA_BASE_PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    echo yes | ./configure -no-opengl -no-xft
-    make sub-src
-    cd tools/designer/util
-    make
-    cd ../uic
-    make
-    cp $QTDIR/bin/uic $QTEDIR/bin
+
+    # Build Qt/2's tools if needed
+    if ! test -f "$QT2DIR/bin/uic"; then
+	echo "***********************************"
+	echo "******* Build Qt/X11 2.3.2 ******"
+	echo "***********************************"
+	cd "$QTDIR"
+	echo yes | ./configure -no-opengl -no-xft
+	make  sub-src 
+	cd tools/designer/util
+	make 
+	cd ../uic
+	make 
+    else
+	echo "*****************************************"
+	echo "******* Qt/X11 2.3.2 already built ******"
+	echo "*****************************************"
+    fi
+    cp "$QTDIR/bin/uic" "$QTEDIR/bin"
 
     echo " "
     echo "***********************************"
     echo "********** Build QVFB *************"
     echo "***********************************"
     # You will need to build qvfb using the libraries from qt-x11-2.3.2 and the source
-    # from your qt-embedded-2.3.8 directory.  Make sure QTDIR still points to the location of qt-x11-2.3.2.
-    cd $QTEDIR
-    export TMAKEPATH=$TMAKEDIR/lib/linux-g++
+    # from your qt-embedded-2.3.10 directory.  Make sure QTDIR still points to the location of qt-x11-2.3.2.
+    cd "$QTEDIR"
+    export TMAKEPATH="$TMAKEDIR/lib/linux-g++"
     cd tools/qvfb
     tmake qvfb.pro > Makefile
-    make
-    cp qvfb $QTEDIR/bin
+    make  
+    cp qvfb "$QTEDIR/bin"
     cd ../../..
 
+
     echo " "
-    echo "***********************************"
-    echo "******** Build Qt X11 3.3 *********"
-    echo "***********************************"
-    export QTDIR=$QT3DIR
-    cd $QTDIR
-    export PATH=$QTDIR/bin:$QTOPIA_BASE_PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    echo yes | ./configure -fast -thread
-    make sub-src
-    cd tools/linguist/lrelease
-    make
-    cd ../lupdate
-    make
-    cd ../../designer/uilib
-    make
-    cd ../uic
-    make
+    export QTDIR="$DQTDIR"
+    cd "$QTDIR"
+    export PATH="$QTDIR/bin:$QTOPIA_BASE_PATH"
+    export LD_LIBRARY_PATH="$QTDIR/lib:$LD_LIBRARY_PATH"
+
+    # Build Qt/3's tools if needed
+    if ! test -f "$DQTDIR/bin/uic"; then 
+	echo "***********************************"
+	echo "******** Build Qt X11 3.3 *********"
+	echo "***********************************"
+	echo yes | ./configure -fast -thread
+	make  sub-src
+	cd tools/linguist/lrelease
+	make  
+	cd ../lupdate
+	make  
+	cd ../../designer/uilib
+	make  
+	cd ../uic
+	make  
+    else
+	echo "*******************************************"
+	echo "******** Qt X11 3.3 already built *********"
+	echo "*******************************************"
+    fi
 
     echo " "
     echo "***********************************"
     echo "**** Build and install Qtopia *****"
     echo "***********************************"
-    cd $QPEDIR
-    export QTDIR=$QTEDIR
-    export PATH=$QPEDIR/bin:$QTOPIA_BASE_PATH
-    if test -d $QPEDIR/src/libraries/qtopiaphone; then
-        ./configure -edition phone -no-qtopiadesktop -displaysize 176x208 -dqt $QT3DIR
-    elif test -d $QPEDIR/src/libraries/qtopiapim; then
-        ./configure -edition pda -no-qtopiadesktop -displaysize 240x320 -dqt $QT3DIR
+    cd "$QPEDIR"
+    export QTDIR="$QTEDIR"
+    export PATH="$QPEDIR/bin:$DQTDIR/bin:$QTOPIA_BASE_PATH"
+    export LD_LIBRARY_PATH="$QPEDIR/lib:$DQTDIR/lib:$LD_LIBRARY_PATH"
+    if test -d "$QPEDIR/src/libraries/qtopiaphone"; then
+        ./configure -edition phone -qtopiadesktop -displaysize 176x208 $EXTRA_QTOPIA_LIB_PATH_EVAL
+    elif test -d "$QPEDIR/src/libraries/qtopiapim"; then
+        ./configure -edition pda -qtopiadesktop -displaysize 240x320  $EXTRA_QTOPIA_LIB_PATH_EVAL
     else
-        ./configure -edition core -no-qtopiadesktop -displaysize 240x320 -dqt $QT3DIR
-    fi
-    make
-    if test -d $QPEDIR/src/libraries/qtopiaphone; then
-        cd src/tools/phonesim
-        make
-        cd ../../..
-    fi
-    make install
-    prefix=`awk -F= '/^PREFIX/{print $2}' $QPEDIR/src/Makefile`
-    if test -d $QPEDIR/src/libraries/qtopiaphone; then
-        cp src/tools/phonesim/troll.xml $prefix/etc
-        cp src/tools/phonesim/peers.xml $prefix/etc
+        ./configure -edition core -no-qtopiadesktop -displaysize 240x320 $EXTRA_QTOPIA_LIB_PATH_EVAL
     fi
 
-    if test -d $QPEDIR/src/libraries/qtopiapim; then
-	echo "***********************************"
-	echo "**** Build and install Desktop ****"
-	echo "***********************************"
-	cd $QPEDIR
-	export PATH=$QPEDIR/bin:$QT3DIR/bin:$QTOPIA_BASE_PATH
-	export LD_LIBRARY_PATH=$QPEDIR/lib:$QT3DIR/lib:$LD_LIBRARY_PATH
-	./configure -no-qtopia -qtopiadesktop -dqt $QT3DIR
-	make
-	make install
+    make  
+    if test -d "$QPEDIR/src/libraries/qtopiaphone"; then
+        cd src/tools/phonesim
+        make 
+        cd ../../..
+    fi
+    make  install
+    prefix=`awk -F= '/^PREFIX/{print $2}' $QPEDIR/src/Makefile`
+    if test -d "$QPEDIR/src/libraries/qtopiaphone"; then
+        cp src/tools/phonesim/troll.xml "$prefix/etc"
+        cp src/tools/phonesim/peers.xml "$prefix/etc"
     fi
 
     # hmm, well actually we have done all the checking before,
@@ -313,9 +356,26 @@
     echo "***********************************"
     echo "***** Check (some) binaries *******"
     echo "***********************************"
-    echo "libqte    : OK"
-    echo "libqtopia : OK"
-    echo "qpe       : OK"
+    if test -f "$QTEDIR/bin/qvfb"; then 
+	echo "qvfb       : OK"
+    else
+	echo "qvfb       : Failed"
+    fi
+    if test -f "$QPEDIR/image/opt/Qtopia/lib/libqte.so"; then 
+	echo "libqte	: OK"
+    else
+	echo "libqte	: Failed"
+    fi
+    if test -f "$QPEDIR/image/opt/Qtopia/lib/libqtopia.so"; then 
+	echo "libqtopia : OK"
+    else
+	echo "libqtopia	: Failed"
+    fi
+    if test -f "$QPEDIR/image/opt/Qtopia/bin/qpe"; then 
+	echo "qpe       : OK"
+    else
+	echo "qpe       : Failed"
+    fi
 
     echo " "
     echo "***********************************"

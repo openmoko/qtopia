@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -227,10 +227,10 @@ QString DateFormat::wordDate(const QDate &d, int v) const
 	        } else {
 		    date += QString().sprintf("%2d",d.day());
 		    if (separator()=='.') // 2002/1/11 
-		        sep = ".";
+		        sep = ". ";
 		    else 
-		        sep = "";
-	            sep += TimeStringFormat::tr(" ","day-date separator");
+		        sep = " ";
+	            //sep += TimeStringFormat::tr(" ","day-date separator");
 		}
 		break;
 	    case 0x0002: // Month
@@ -259,7 +259,7 @@ QString DateFormat::wordDate(const QDate &d, int v) const
                     }
 		    date += monthName;
 		}
-		sep = TimeStringFormat::tr(" ","month-date separator");
+		sep = " ";//TimeStringFormat::tr(" ","month-date separator");
 		break;
 	    case 0x0004: // Year
 		{

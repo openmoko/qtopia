@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -230,7 +230,23 @@ QTrie* TrieList::findAdd(QChar c)
     return p.p;
 }
 
-static const char* dawg_sig = "QDAWG100";
+static const char* dawg_sig32 = "QDAWG100"; //32 bit Node
+static const char* dawg_sig64 = "QDAWG200"; //64 bit Node
+
+class Node32 { //old QDawg Node (32 bit size) - for compatibility only 
+	friend class QDawgPrivate;
+	uint let:12;
+	uint isword:1;
+	uint islast:1;
+	int offset:18;
+	Node32() { }
+    public:
+	QChar letter() const { return QChar((ushort)let); }
+	bool isWord() const { return isword; }
+	bool isLast() const { return islast; }
+	const Node32* next() const { return islast ? 0 : this+1; }
+	const Node32* jump() const { return offset ? this+offset : 0; }
+};
 
 class QDawgPrivate {
 public:
@@ -240,11 +256,31 @@ public:
 	QDataStream ds(dev);
 	char sig[8];
 	ds.readRawBytes(sig,8);
-	if ( !strncmp(dawg_sig,sig,8) ) {
+        if ( !strncmp(dawg_sig32,sig,8) ) { 
+            qDebug("QDawg: Reading old dawg file format");
+            uint n;
+            char * nn;
+            ds.readBytes(nn,n);
+
+            Node32* node32 = (Node32*)nn;
+            nodes = n / sizeof(Node32);
+            //convert to QDawg::Node
+            node = new QDawg::Node[nodes];
+            for (int index = 0; index<nodes; index++) {
+                QDawg::Node* node40 = &(node[index]);
+                node40->let = node32[index].let;
+                node40->isword = node32[index].isword;
+                node40->islast = node32[index].islast;
+                node40->offset = node32[index].offset;
+            }
+            delete[] node32;
+            
+        } else if ( !strncmp(dawg_sig64,sig,8) ) {
+            qDebug("QDawg: Reading new dawg file format");
 	    uint n;
 	    char* nn;
 	    ds.readBytes(nn,n);
-
+            
 	    // #### endianness problem ignored.
 	    node = (QDawg::Node*)nn;
 	    nodes = n / sizeof(QDawg::Node);
@@ -273,17 +309,45 @@ public:
 	memoryFile = new QMemoryFile(fileName);
 	if (memoryFile)
 	    mem = (uchar*)memoryFile->data();
+        
+        if (mem) {
+            if (!strncmp(dawg_sig32, (char*)mem,8)) {
+                qDebug("QDawg: Reading old dawg file format");
+                mem += 8;
+                
+    	        //int n = ((mem[0]*256+mem[1])*256+mem[2])*256+mem[3];
+                int n = memoryFile->size() - 12; // 8 bytes signature, 4 bytes file size
+    	        mem += 4;
+                Node32* node32 = (Node32*)((char*)mem);
+                nodes = n / sizeof(Node32);
+                //convert to QDawg::Node
+                node = new QDawg::Node[nodes];
+                for (int index = 0; index<nodes; index++) {
+                    QDawg::Node* node40 = &(node[index]);
+                    node40->let = node32[index].let;
+                    node40->isword = node32[index].isword;
+                    node40->islast = node32[index].islast;
+                    node40->offset = node32[index].offset;
+                }
+            } else if (!strncmp(dawg_sig64, (char*)mem, 8)) {
+                qDebug("QDawg: Reading new dawg file format");
+                mem += 8;
+                int n = memoryFile->size() - 12;
+    	        mem += 4;
+                /*char * a = (char*)mem;
+                for (int i = 0; i < memoryFile->size()-12; i++) {
+                    if ((i % 8) == 0)
+                        printf("\n");
+                    printf(" %x ", (unsigned char)*a);
+                    a++;
+                }
+                printf("\n");*/
 
-	if (mem && !strncmp(dawg_sig, (char*)mem,8) ) {
-	    mem += 8;
-
-	    int n = ((mem[0]*256+mem[1])*256+mem[2])*256+mem[3];
-	    mem += 4;
-
-	    // #### endianness problem ignored.
-	    node = (QDawg::Node*)((char*)mem);
-	    nodes = n / sizeof(QDawg::Node);
-	}
+	        // #### endianness problem ignored.
+	        node = (QDawg::Node*)((char*)mem);
+	        nodes = n / sizeof(QDawg::Node);
+            }
+        }
     }
 
     QDawgPrivate(QTrie* t) // destroys the QTrie.
@@ -308,9 +372,19 @@ public:
     bool write(QIODevice* dev)
     {
 	QDataStream ds(dev);
-	ds.writeRawBytes(dawg_sig,8);
+	ds.writeRawBytes(dawg_sig64,8);
 	// #### endianness problem ignored.
+        //always write new style
 	ds.writeBytes((char*)node,sizeof(QDawg::Node)*nodes);
+        /*char * a = (char*)node;
+        for (int i = 0; i < sizeof(QDawg::Node)*nodes; i++) {
+            if ((i % 8) == 0)
+                printf("\n");
+            printf(" %x ", (unsigned char)*a);
+            a++;
+        }*/
+
+        
 	return dev->state() == IO_Ok;
     }
 
@@ -377,8 +451,9 @@ public:
 	do {
 	    QDawg::Node& n = node[nid+i];
 	    s[next] = QChar((ushort)n.let);
-	    if ( n.isword )
+	    if ( n.isword )  {
 		list.append(s);
+            }
 	    if ( n.offset )
 		appendAllWords(list, n.offset+nid+i, s);
 	} while (!node[nid+i++].islast);
@@ -497,7 +572,7 @@ bool QDawg::createFromWords(QIODevice* dev)
     QTrie* trie = new QTrie;
     int n=0;
     while (!i.atEnd()) {
-	trie->insertWord(QString::fromUtf8(i.readLine()));
+	trie->insertWord(i.readLine());
 	n++;
     }
     if ( n )
@@ -517,6 +592,8 @@ void QDawg::createFromWords(const QStringList& list)
     if ( list.count() ) {
 	QTrie* trie = new QTrie;
 	for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
+            QString word = (*it).utf8();
+	    //trie->insertWord(word);
 	    trie->insertWord(*it);
 	}
 	d = new QDawgPrivate(trie);

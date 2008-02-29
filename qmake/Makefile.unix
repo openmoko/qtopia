@@ -43,15 +43,14 @@ LFLAGS=@QMAKE_LFLAGS@
 	@$(CXX) -o $@ $(OBJS) $(QOBJS) $(LFLAGS)
 
 clean::
-	rm -f $(OBJS) $(QOBJS)
+	@rm -f $(OBJS) $(QOBJS)
 
 distclean:: clean
-	rm -rf @DESTDIR@/bin/qmake .deps
+	@rm -rf @DESTDIR@/bin/qmake .deps
 
 depend:
-	makedepend $(CXXFLAGS) -D__MAKEDEPEND__ $(DEPEND_SRC)
+	@makedepend $(CXXFLAGS) -D__MAKEDEPEND__ $(DEPEND_SRC)
 
-# don't use optimization for these
 qtextstream.o: @SOURCE_PATH@/src/tools/qtextstream.cpp
 	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qtextstream.cpp >/dev/null 2>&1
 	@echo -n .

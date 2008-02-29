@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qt Toolkit - QInterlaceStyle Class</title><style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
 a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
 --></style>
@@ -37,11 +35,6 @@ Inherits <a href="qmotifstyle.html">QMotifStyle</a>.
 <li><div class="fn"><a href="#7b6eb7"><b>QInterlaceStyle</b></a> () </div>
 <li><div class="fn">int <b>defaultFrameWidth</b> () const</div>
 <li><div class="fn">void <b>drawButtonMask</b> ( QPainter * p, int x, int y, int w, int h ) </div>
-<li><div class="fn">void <b>drawSlider</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, Orientation, bool tickAbove, bool tickBelow ) </div>
-<li><div class="fn">void <b>drawSliderMask</b> ( QPainter * p, int x, int y, int w, int h, Orientation, bool tickAbove, bool tickBelow ) </div>
-<li><div class="fn">void <b>drawSliderGroove</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, QCOORD c, Orientation ) </div>
-<li><div class="fn">void <b>drawSliderGrooveMask</b> ( QPainter * p, int x, int y, int w, int h, QCOORD c, Orientation ) </div>
-<li><div class="fn">void <b>drawSplitter</b> ( QPainter * p, int x, int y, int w, int h, const QColorGroup &amp; g, Orientation orient ) </div>
 </ul>
 <hr><h2><a name="details"></a>Detailed Description</h2>
 Look and Feel suitable for interlaced displays
@@ -93,6 +86,21 @@ that does not flicker.
 <h3 class="fn">void <a name="629ecc"></a>QInterlaceStyle::drawScrollBarControls ( <a href="qpainter.html">QPainter</a> * p, const <a href="qscrollbar.html">QScrollBar</a> * sb, int sliderStart, uint controls, uint activeControl ) <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qstyle.html#e3d23d">QStyle.</a>
+<h3 class="fn">void <a name="1458f2"></a>QInterlaceStyle::drawSlider ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a> orient, bool, bool ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#11145c">QStyle.</a>
+<h3 class="fn">void <a name="9bad38"></a>QInterlaceStyle::drawSliderGroove ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, QCOORD, <a href="qt.html#Orientation">Orientation</a> o ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#c3fcb9">QStyle.</a>
+<h3 class="fn">void <a name="86465c"></a>QInterlaceStyle::drawSliderGrooveMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, QCOORD c, <a href="qt.html#Orientation">Orientation</a> o ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#dc005d">QStyle.</a>
+<h3 class="fn">void <a name="a24424"></a>QInterlaceStyle::drawSliderMask ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, <a href="qt.html#Orientation">Orientation</a>, bool, bool ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#ee7ad4">QStyle.</a>
+<h3 class="fn">void <a name="653dda"></a>QInterlaceStyle::drawSplitter ( <a href="qpainter.html">QPainter</a> * p, int x, int y, int w, int h, const <a href="qcolorgroup.html">QColorGroup</a> &amp; g, <a href="qt.html#Orientation">Orientation</a> orient ) <code>[virtual]</code></h3>
+<p>Reimplemented for internal reasons; the API is not affected.
+<p>Reimplemented from <a href="qstyle.html#acbd66">QStyle.</a>
 <h3 class="fn"><a href="qsize.html">QSize</a> <a name="6ddb9a"></a>QInterlaceStyle::exclusiveIndicatorSize () const <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qstyle.html#d71caa">QStyle.</a>
@@ -121,13 +129,13 @@ that does not flicker.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.9"><nobr>
+<input type=hidden name="version" value="2.3.10"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2001
+copyright &copy; 1995-2005
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.9</div>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.10</div>
 </table></div></address></body></html>

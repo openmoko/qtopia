@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -64,7 +64,7 @@
 #include <qtopia/resource.h>
 
 QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
-	bool modal, int WFlags)
+	bool modal, bool isFS, int WFlags)
     : QDialog( parent, name, modal, WFlags )
 {
     setCaption( tr("New character") );
@@ -102,7 +102,6 @@ QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
 #endif
 
     u = new UniSelect(this);
-    setCharacter(u->character());
     vb->addWidget(u);
 
     connect(u, SIGNAL(selected(const QString &)),
@@ -116,7 +115,8 @@ QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
 #endif
 
     u->setFocus();
-    addSpecial( );
+    addSpecial( isFS );
+    setCharacter(u->character());
     currentChar->setText(u->text());
 }
 
@@ -127,30 +127,48 @@ const int comboSel[] = {
     Qt::Key_Backspace,
     Qt::Key_Return,
     QIMPenChar::Caps,
-    QIMPenChar::CapsLock,
-    QIMPenChar::Shortcut,
+    Qt::Key_unknown
+};
+
+const int popupComboSel[] = {
+    QIMPenChar::CapsLock, // popup only
     QIMPenChar::Punctuation,
-    QIMPenChar::Symbol,
-#ifdef QTOPIA_PHONE
+    QIMPenChar::Symbol, // popup only
+    Qt::Key_unknown
+};
+
+const int fsComboSel[] = {
     //Qt::Key_Left,
     //Qt::Key_Right,
     //Qt::Key_Up,
     //Qt::Key_Down,
-    QIMPenChar::NextWord,
-    QIMPenChar::WordPopup,
-    QIMPenChar::SymbolPopup,
-    QIMPenChar::ModePopup,
-#endif
+    QIMPenChar::Punctuation,
+    QIMPenChar::NextWord, // fs only
+    QIMPenChar::WordPopup, // fs only
+    QIMPenChar::SymbolPopup, // fs only
+    QIMPenChar::ModePopup, // fs only
     Qt::Key_unknown
 };
 
 
-void QIMPenInputCharDlg::addSpecial( )
+void QIMPenInputCharDlg::addSpecial( bool isFS )
 {
     int i = 0;
     while ( comboSel[i] != Key_unknown ) {
 	QIMPenChar c;
 	c.setCharacter(comboSel[i] << 16);
+	u->addSpecial(c.character(), c.name());
+	i++;
+    }
+    const int *extraSel;
+    if (isFS)
+	extraSel = fsComboSel;
+    else
+	extraSel = popupComboSel;
+    i = 0;
+    while ( extraSel[i] != Key_unknown ) {
+	QIMPenChar c;
+	c.setCharacter(extraSel[i] << 16);
 	u->addSpecial(c.character(), c.name());
 	i++;
     }
@@ -199,7 +217,7 @@ QIMPenCharSet *CharSetDlg::charSet() const
 
 CharSetEdit::CharSetEdit( QWidget *parent, const char *name )
     : CharSetEditBase( parent, name ), currentSet(0),
-	    lastCs(1), lastCh(0), addFlag(FALSE)
+	    lastCs(1), lastCh(0), addFlag(FALSE), mIsFS(FALSE)
 {
     init();
 }
@@ -357,6 +375,17 @@ void CharSetEdit::setCurrentChar( QIMPenChar *pc )
 	if (currentChar->testFlag(QIMPenChar::System)) {
 	    delCharBtn->setEnabled(FALSE);
 	    resetCharBtn->setEnabled(FALSE);
+
+	    bool haveMissing = FALSE;
+	    QIMPenCharIterator it(currentSet->characters() );
+	    for ( ; it.current(); ++it ) {
+		if ( it.current()->character() == currentCode &&
+			it.current()->testFlag( QIMPenChar::Deleted ) ) {
+		    haveMissing = TRUE;
+		    break;
+		}
+	    }
+	    resetCharBtn->setEnabled(haveMissing);
 	} else {
 	    bool haveSystem = FALSE;
 	    QIMPenCharIterator it(currentSet->characters() );
@@ -540,7 +569,7 @@ void CharSetEdit::addChar()
 {
     checkStoreMatch();
     //if ( !inputChar->isEmpty() ) {
-    QIMPenInputCharDlg dlg( 0, "newchar", TRUE );
+    QIMPenInputCharDlg dlg( 0, "newchar", TRUE , mIsFS );
     if (QPEApplication::execDialog(&dlg)) {
 	currentCode = dlg.unicode();
 	// update combo now?  disable combo?

@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -431,8 +431,6 @@ void Engine::pushInstruction(QString name) {
     // Immediate instructions
     if (!i->precedence) {
 	executeInstructionOnStack(i);
-	if (state != sError)
-	    changeState(sStart);
 	emit(stackChanged());
 	return;
     }
@@ -497,7 +495,8 @@ void Engine::push(char c) {
     emit(stackChanged());
 }
 void Engine::push(QString s) {
-//    softReset();
+    if (state == sAppend && dStack.count() >= 1)
+            dStack.top()->clear();
     for (uint i=0;i < s.length();i++)
 	push(s[(int)i].latin1());
 }
@@ -516,9 +515,14 @@ void Engine::delChar() {
 		hardReset();
 	    } else if (dStack.count() > 1) {
 		delete dStack.pop();
-		if (iStack.count() >= 1 && *iStack.top() == "EvaluateLine") {
+                if (iStack.count() >= 1) {
+		    if (*iStack.top() == "EvaluateLine" || 
+                            *iStack.top() != "Open brace impl") {
+		        changeState(sAppend);
+                    } else {
+                        changeState(sStart);
+                    }
 		    delete iStack.pop();
-		    changeState(sAppend);
 		} else {
 		    changeState(sStart);
 		}

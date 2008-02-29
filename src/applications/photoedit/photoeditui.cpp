@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -35,6 +35,7 @@
 
 #include "photoeditui.h"
 
+#include <qtopia/global.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/contextbar.h>
 #include <qtopia/docproperties.h>
@@ -64,6 +65,7 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, const char* name, WFlags f )
     was_fullscreen = false;
     edit_canceled = false;
     close_ok = false;
+    editor_state_changed = false;
 #endif
 
     setCaption( tr( "Pictures" ) );
@@ -189,11 +191,15 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, const char* name, WFlags f )
     // Construct region selector
     region_selector = new RegionSelector( image_ui );
     box->addWidget( region_selector );
-#ifndef QTOPIA_PHONE
-    connect( region_selector, SIGNAL( pressed() ), 
-        this, SLOT( exitCurrentEditorState() ) );
-    connect( region_selector, SIGNAL( canceled() ),
-        this, SLOT( exitCurrentEditorState() ) );
+#ifdef QTOPIA_PHONE
+    if( Global::mousePreferred() ) {
+#endif
+        connect( region_selector, SIGNAL( pressed() ), 
+            this, SLOT( exitCurrentEditorState() ) );
+        connect( region_selector, SIGNAL( canceled() ),
+            this, SLOT( exitCurrentEditorState() ) );
+#ifdef QTOPIA_PHONE
+    }
 #endif
     connect( region_selector, SIGNAL( selected() ), 
         this, SLOT( cropImage() ) );
@@ -559,8 +565,10 @@ void PhotoEditUI::enterFullScreen()
     image_ui->showFullScreen();
     navigator->setFocus();
 #ifdef QTOPIA_PHONE
-    connect( region_selector, SIGNAL( pressed() ), 
-        this, SLOT( exitCurrentEditorState() ) );
+    if( !Global::mousePreferred() ) {
+        connect( region_selector, SIGNAL( pressed() ), 
+            this, SLOT( exitCurrentEditorState() ) );
+    }
 #endif
     editor_state = FULL_SCREEN;
 }
@@ -675,22 +683,29 @@ void PhotoEditUI::exitCurrentEditorState()
     switch( editor_state ) {
     // If in view, no change
     case VIEW:
-        // Ignore
+#ifdef QTOPIA_PHONE
+        editor_state_changed = false;
+#endif
         break;
     // If in full screen, return from full screen
     case FULL_SCREEN:
 #ifdef QTOPIA_PHONE
-        disconnect( region_selector, SIGNAL( pressed() ), 
-            this, SLOT( exitCurrentEditorState() ) );
+        if( !Global::mousePreferred() ) {
+            disconnect( region_selector, SIGNAL( pressed() ), 
+                this, SLOT( exitCurrentEditorState() ) );
+        }
 #endif
         // Set editor central widget to editor view
         image_ui->reparent( editor_ui, QPoint( 0, 0 ) );
         editor_ui->setCentralWidget( image_ui );
         editor_ui->setFocus();
 #ifdef QTOPIA_PHONE
-        was_fullscreen = true;
+        if( !Global::mousePreferred() ) was_fullscreen = true;
 #endif
         editor_state = VIEW;
+#ifdef QTOPIA_PHONE
+        editor_state_changed = true;
+#endif
         break;
     // If in zoom, hide zoom control
     case ZOOM:
@@ -701,6 +716,9 @@ void PhotoEditUI::exitCurrentEditorState()
         navigator->setFocus();
 #endif
         editor_state = VIEW;
+#ifdef QTOPIA_PHONE
+        editor_state_changed = true;
+#endif
         break;
     // If in brightness, hide brightness control
     case BRIGHTNESS:
@@ -711,6 +729,9 @@ void PhotoEditUI::exitCurrentEditorState()
         navigator->setFocus();
 #endif
         editor_state = VIEW;
+#ifdef QTOPIA_PHONE
+        editor_state_changed = true;
+#endif
         break;
     // If in crop, disable region selector and show navigator
     case CROP:
@@ -720,6 +741,9 @@ void PhotoEditUI::exitCurrentEditorState()
         navigator->show();
         navigator->setFocus();
         editor_state = VIEW;
+#ifdef QTOPIA_PHONE
+        editor_state_changed = true;
+#endif
         break;
     };
 }
@@ -797,13 +821,20 @@ void PhotoEditUI::linkChanged( const QString& file )
 void PhotoEditUI::closeEvent( QCloseEvent* e )
 {
 #ifdef QTOPIA_PHONE
-    if( was_fullscreen ) was_fullscreen = false;
-    else {
-        if( ui_state == EDITOR && editor_state != VIEW ) 
-            exitCurrentEditorState();
-        else {
+    if( Global::mousePreferred() ) {
+        if( ui_state != EDITOR || ( editor_state == VIEW && !editor_state_changed ) || edit_canceled ) {
             exitCurrentUIState();
             if( close_ok ) e->accept();
+        }
+    } else {
+        if( was_fullscreen ) was_fullscreen = false;
+        else {
+            if( ui_state == EDITOR && editor_state != VIEW ) 
+                exitCurrentEditorState();
+            else {
+                exitCurrentUIState();
+                if( close_ok ) e->accept();
+            }
         }
     }
 #else

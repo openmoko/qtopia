@@ -23,14 +23,12 @@ help.path=/help/html
 
 i18n.path=$${INSTALL_PREFIX}/i18n
 i18n.commands=$${COMMAND_HEADER}\
-    for lang in $$TRANSLATIONS; \
-    do \
-	for pkg in QtopiaHandwriting; \
-	do \
+    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; do\
+	for pkg in QtopiaHandwriting; do\
 	    $${DQTDIR}/bin/lrelease $${QTOPIA_DEPOT_PATH}/i18n/\$$lang/\$$pkg.ts \
 		-qm $(INSTALL_ROOT)/i18n/\$$lang/\$$pkg.qm; \
 	done; \
     done
  
 INSTALLS+= desktop pics help
-!isEmpty(DQTDIR):!isEmpty(TRANSLATIONS):INSTALLS+=i18n
+!isEmpty(DQTDIR):INSTALLS+=i18n

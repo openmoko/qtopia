@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
 use strict;
+package main;
+
 use File::stat;
 use File::Glob;
 use File::Copy;
@@ -10,10 +12,37 @@ use File::Path;
 use constant OUTPUT => 1;
 use constant DEBUG => 0;
 
-# None of this stuff is used although it may provide a speed boost on non-Windows platforms
-my $INSTALL_FILE = defined($ENV{'INSTALL_FILE'}) ? $ENV{'INSTALL_FILE'} : "install -c";
-my $MKDIR = defined($ENV{'MKDIR'}) ? $ENV{'MKDIR'} : "mkdir -p";
-my $COPY = defined($ENV{'COPY'}) ? $ENV{'COPY'} : "cp -f";
+my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
+
+# Dummy variables (used in common.pm)
+my $opt_verbose = 0;
+my $shadow = 0;
+my $outpath = $ENV{QPEDIR};
+
+# Find the depot path
+my $depotpath = undef;
+open IN, "$outpath/src/config.pri" or die "Cannot open $outpath/src/config.pri\n";
+while ( defined($_ = <IN>) ) {
+    if ( /QTOPIA_DEPOT_PATH=(.*)/ ) {
+	$depotpath = $1;
+	last;
+    }
+}
+close IN;
+if ( !defined($depotpath) ) {
+    die "Can't find the depot path in $outpath/src/config.pri\n";
+}
+
+# Load some subs
+open IN, "$depotpath/bin/common.pm" or die "Cannot open $depotpath/bin/common.pm\n";
+eval join("", <IN>) or die "Error while evaluating common.pm: $!\n";
+close IN;
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, "$depotpath/bin", $ARGV[0]);
+}
+
 
 my @SIZEDIRS = ();
 
@@ -43,9 +72,7 @@ exit 0;
 
 sub usage
 {
-    my $app = $0;
-    $app =~ s,.*/(.*),$1,;
-    print "Usage:  $app <size1> ... [sizen] <pics dest> <pics>\n";
+    print "Usage:  ".script_name($0)." <size1> ... [sizen] <pics dest> <pics>\n";
     exit 2;
 }
 
@@ -79,11 +106,11 @@ sub installpic
     if ( ! -d $srcfile ) {
 	DEBUG and print "installing picture $srcfile\n";
 	if ( ! -d dirname($dest) ) {
-	    OUTPUT and print "$MKDIR dirname($dest)\n";
+	    OUTPUT and print "mkdir ".dirname($dest)."\n";
 	    mkpath(dirname($dest));
 	}
 	if ( needCopy($srcfile, $dest) ) {
-	    OUTPUT and print "$INSTALL_FILE $srcfile $dest\n";
+	    OUTPUT and print "install -c $srcfile $dest\n";
 	    copy($srcfile, $dest);
 	}
 	return;
@@ -191,12 +218,3 @@ sub copyallpics
 	}
     }
 }
-
-sub needCopy
-{
-    my ( $srcfile, $dest ) = @_;
-    my $src_s = stat($srcfile);
-    my $dest_s = stat($dest);
-    return ( ! -f $srcfile || ! -f $dest || $src_s->mtime > $dest_s->mtime );
-}
-

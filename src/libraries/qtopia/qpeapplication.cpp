@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -102,7 +102,7 @@
 #endif
 
 #include <qtopia/qpeapplication.h>
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 #  include <qstylefactory.h>
 #else
 #  include <qwindowsstyle.h>
@@ -785,8 +785,8 @@ public:
             }
 #else
             //no need to suspend in Phone Edition -> do nothing 
-#endif
 	    return TRUE;
+#endif
 	    break;
 	}
 	return FALSE;
@@ -2174,9 +2174,7 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	if ( type() == GuiServer ) {
 	    int old = disable_suspend;
 	    stream >> disable_suspend;
-	    //qDebug("setScreenSaverMode(%d)", disable_suspend );
-	    if ( disable_suspend > old )
-		setScreenSaverInterval( -1 );
+	    qwsServer->restartScreenSaverTimer();
 	}
     } else if ( msg == "getMarkedText()" ) {
 	if ( type() == GuiServer ) {
@@ -2469,7 +2467,7 @@ void QPEApplication::internalSetStyle( const QString &style )
 	config.setGroup( "Appearance" );
 	// For the Pixmap style we must remove the existing style here for theme changes to take effect
 	setStyle( new QWindowsStyle );
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
 	if ( d->styleIface )
 	    d->styleLoader.releaseInterface( d->styleIface );
 	d->styleIface = 0;
@@ -2478,7 +2476,7 @@ void QPEApplication::internalSetStyle( const QString &style )
 
     QStyle *newStyle = 0;
 
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
     if ( style == "QPE"  || style == "Qtopia" ) {
 	newStyle = new QPEStyle;
     } else {
@@ -2524,7 +2522,7 @@ void QPEApplication::internalSetStyle( const QString &style )
 	setStyle( newStyle );
 
 
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
     // cleanup old plugin.
     if ( oldIface )
 	d->styleLoader.releaseInterface( oldIface );

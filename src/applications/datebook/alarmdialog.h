@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2004 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 ** 
@@ -49,7 +49,7 @@ public:
     void init();
 
     enum Button { Snooze, Details, Cancel };
-    Button exec(const PimEvent &e);
+    Button exec(const Occurrence &e);
     Button result();
 
     int snoozeLength();

@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/doc/system-integrators-guide.doc:1 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>System Integrators' Guide</title>
@@ -39,41 +37,131 @@ body { background: #ffffff; color: black; }
 </a>
 <li><a href="#2"> Getting Qtopia Running
 </a>
-<li><a href="#3"> Serial Proxy
+<ul>
+<li><a href="#2-1"> Customizing power, backlighting control and keyboard scancodes
 </a>
+<li><a href="#2-2"> Create a keyboard handler in Qt
+</a>
+<li><a href="#2-3"> Compiling required libs for yor device.
+</a>
+<ul>
+<li><a href="#2-3-1"> Compiling libjpeg for your device
+</a>
+<li><a href="#2-3-2"> Compiling libuuid for your device
+</a>
+</ul>
+<li><a href="#2-4"> Configuring Qt/Embedded to suit device
+</a>
+<li><a href="#2-5"> Configuring Qtopia to suit device
+</a>
+<li><a href="#2-6"> Create and install the Qtopia image for the target device
+</a>
+<li><a href="#2-7"> Configuring environment variables on the device to suit Qtopia
+</a>
+<li><a href="#2-8"> Initial tests on Qtopia on the device
+</a>
+<li><a href="#2-9"> Customize Qtopia to suit GSM module (Qtopia Phone edition only)
+</a>
+<li><a href="#2-10">  Selecting components to install
+</a>
+<li><a href="#2-11"> Configure serial proxy (Qtopia Phone only)
+</a>
+<li><a href="#2-12">  Install extra fonts
+</a>
+<li><a href="#2-13"> Customize apprearance 
+</a>
+</ul>
 </ul>
 <!-- endtoc -->
 
 <p> <h2> Introduction
 </h2>
-<a name="1"></a><p> This document is for System Integrators and those who who are going to install Qtopia onto a new device.
+<a name="1"></a><p> This document is for System Integrators and those who who are going to install Qtopia onto a new device. The various aspects of 
+device integration are drawn together in one place and a suggested order of progression is provided.
 <p> See Also:
 <ul>
 <li> devices.html located at <a href="devices.html">devices.html</a> and at $QPEDIR/doc/html/devices.html.
 <li> features.html located at <a href="features.html">features.html</a> and at $QTEDIR/doc/html/features.html.
+<li> meeting Qtopia prerequists see : <a href="getting-started.html#QtopiaDependencies">Qtopia Dependencies / Prerequisites</a>
 </ul>
 <p> <h2> Getting Qtopia Running
 </h2>
-<a name="2"></a><p> Getting Qtopia running on target device involves:
-<p> <ol type=1>
-<p> <li> Creating the custom configs files if needed. It through these configuration files that compilation tools to use and extra global defines are specified. For example a new arm based device might create a qws/linux-myarm-g++ tool chain configuration based on a qws/linux-arm-g++ : eg
-<p> <pre>
-cp -r $TMAKEDIR/lib/qws/linux-arm-g++ $TMAKEDIR/lib/qws/linux-myarm-g++
-cp -r $QTEDIR/configs/linux-arm-g++-shared $QTEDIR/configs/linux-myarm-g++-shared
-cp -r $QPEDIR/mkspecs/qws/linux-arm-g++ $QPEDIR/mkspecs/qws/linux-myarm-g++
-</pre>
- 
-<p> <li> Customizing Qtopia as needed  (for power, backlighting control keyboard scancodes) : eg to create a new custom.cpp based on the one that suits an ipaq:
-<p> <pre>
+<a name="2"></a><p> This following lists the suggested order in which to work on the various aspects of device integration:
+<ol type=1>
+<li> <a href="environment-setup-build.html#Creating-the-custom-configs-files">Create custom configuration files</a>
+<li> <a href="system-integrators-guide.html#Customizing-power-backlighting-control-and-keyboard-scancodes">Customizing power, backlighting control and keyboard scancodes</a>
+<li> <a href="system-integrators-guide.html#Create-a-keyboard-handler-in-Qt">Create a keyboard handler in Qt</a>
+<li> <a href="system-integrators-guide.html#Configuring-Qte-to-suit-device">Configuring Qt/Embedded to suit device</a>
+<li> <a href="system-integrators-guide.html#Configuring-Qtopia-to-suit-device">Configuring Qtopia to suit device</a>
+<li> <a href="system-integrators-guide.html#Create-and-install-the-Qtopia-image-for-the-target-device">Create and install the Qtopia image for the target device</a>
+<li> <a href="system-integrators-guide.html#Configuring-environment-variables-on-the-device-to-suit-Qtopia">Configuring environment variables on the device to suit Qtopia</a>
+<li> <a href="system-integrators-guide.html#Initial-tests-of-Qtopia-on-the-device">Initial tests of Qtopia on the device</a>
+<li> <a href="devices.html#8">Selecting storage devices</a>
+<li> <a href="system-integrators-guide.html#Customize-Qtopia-to-suit-GSM-module">Customize Qtopia to suit GSM module (Qtopia Phone only)</a>
+<li> <a href="system-integrators-guide.html#Selecting-components-to-install">Selecting components to install</a>
+<li> <a href="qtopia-plugins.html">Create plugins needed</a>
+<li> <a href="system-integrators-guide.html#Install-extra-fonts">Install extra fonts</a>
+<li> <a href="system-integrators-guide.html#Customize-apprearance">Customize appearance</a>
+</ol>
+<p> <!-- index Customizing power, backlighting control and keyboard scancodes --><a name="Customizing-power-backlighting-control-and-keyboard-scancodes"></a>
+<p> <h3> Customizing power, backlighting control and keyboard scancodes
+</h3>
+<a name="2-1"></a><p> There are several choices on what to base a new custom.cpp. These choices include:
+<ul>
+<li> generic
+<li> innovator
+<li> ipaq
+<li> sharp
+</ul>
+<p> The following example creates a new custom.cpp based on the one that supports the ipaq platform.
+<pre>
 cp $QPEDIR/src/libraries/qtopia/custom-linux-ipaq-g++.cpp $QPEDIR/src/libraries/qtopia/custom-linux-myarm-g++.cpp
 cp $QPEDIR/src/libraries/qtopia/custom-linux-ipaq-g++.h $QPEDIR/src/libraries/qtopia/custom-linux-myarm-g++.h
 </pre>
  
-<p> Note: keyboard scancode customization via Qtopia is only available in a release later than Qtopia Phone beta 1 with a Qte greater than the version 2.3.8. For earlier Qtopia Phone releases customize $QTDIR/src/kernel/qkeyboard_qws.cpp to change the Qt keycode to scancode mapping.
-<p> <li> Create a keyboard handler in Qt if none of the existing drivers suits : see $QTDIR/src/kernel/qkeyboard_qws.cpp
-<p> <li> Configuring Qte to suit your device when : see <a href="devices.html">devices.html</a> and <a href="features.html">features.html</a>. Following example above you need to have added
+<p> For more details on keyboard scancode and button support see <a href="devices-keys-buttons.html">devices-keys-buttons.html</a>
+<p> <p style="text-decoration:underline;">Hints</p>
+<ul>
+<li> To support a calibrated touch screen QPE_NEED_CALIBRATION must be defined by your custom.h 
+</ul>
+<p> <!-- index Create a keyboard handler in Qt --><a name="Create-a-keyboard-handler-in-Qt"></a><h3> Create a keyboard handler in Qt
+</h3>
+<a name="2-2"></a><p> For an oveview on character input in Qt/Embedded see : <a href="charinput-qws.html">charinput-qws.html</a> 
+<p> To add a new driver it is necessary to modify : <tt>$QTDIR/src/kernel/qkeyboard_qws.cpp</tt> see : <a href="qwskeyboardhandler.html">qwskeyboardhandler.html</a>
+<p> <a name="xcclibs"></a>
+<h3> Compiling required libs for yor device.
+</h3>
+<a name="2-3"></a><p> These instructions are a guide only. Your device may require specific options not mentioned here.
+Please see the documentation for each package to determine how it is best configured.
+<p> Note: You should ensure that the correct compiler is used when building these libraries.
+Checking the output of the build stage will verify that the correct compiler was used.
+You can also use the <tt>file</tt> utility to show the architecture fro which a particular library is compiled.
+<p> <h4> Compiling libjpeg for your device
+</h4>
+<a name="2-3-1"></a><p> JPEG source can be downloaded from <a href="http://www.ijg.org/">http://www.ijg.org/</a>
+<p> You should configure <em>libjpeg</em> with the <tt>--target=arch</tt> option.
+If <tt>libjpeg.so</tt> is not copied to <tt>$QTDIR</tt> you will need to use the <tt>-L</tt> option when running Qt/Embedded's configure. For example:
+<pre>
+cd $QTDIR
+./configure -L/path/that/libjpeg/lives/in
+</pre>
+ 
+<p> <h4> Compiling libuuid for your device
+</h4>
+<a name="2-3-2"></a><p> <em>libuuid</em> is part of the <em>e2fsprogs</em> package which can be downloaded from
+<a href="http://e2fsprogs.sourceforge.net/">http://e2fsprogs.sourceforge.net/</a>
+<p> You should configure libuuid with the <tt>--target=arch</tt> and <tt>--enable-elf-shlibs</tt> options.
+If <tt>libuuid.so</tt> is not copied to <tt>$QTDIR</tt> or <tt>$QPEDIR</tt> you will need to use the <tt>-L</tt> option when running Qtopia's configure. For example:
+<pre>
+cd $QPEDIR
+./configure -L/path/that/libuuid/lives/in
+</pre>
+ 
+<p> <!-- index Configuring Qte to suit device --><a name="Configuring-Qte-to-suit-device"></a><h3> Configuring Qt/Embedded to suit device
+</h3>
+<a name="2-4"></a><p> Following on from the above, it is necessary to have added
 <pre> -xplatform linux-myarm-g++</pre>
-  as parameters to Qte's configure.
+  as parameters to Qt/Embedded's configure.
 <p> <p style="text-decoration:underline;">Hints</p>
 <p> <ul>
 <li> It is a good idea to have Qte for x86 and Qte for target device in different directories
@@ -81,21 +169,25 @@ cp $QPEDIR/src/libraries/qtopia/custom-linux-ipaq-g++.h $QPEDIR/src/libraries/qt
 <pre> $QTDIR/configure --help</pre>
  
 </ul>
-</ol>
 <p> <center><table cellpadding="4" cellspacing="2" border="0">
 <tr bgcolor="#a2c511"> <th valign="top">Macros defined at Qte compile time <th valign="top">Mouse device used
 <tr bgcolor="#f0f0f0">
-<td valign="top">QT_QWS_IPAQ and QT_QWS_IPAQ_RAW
-<td valign="top">/dev/h3600_tsraw
+<td valign="top"><tt>QT_QWS_IPAQ</tt> and <tt>QT_QWS_IPAQ_RAW</tt>
+<td valign="top"><tt>/dev/h3600_tsraw</tt>
 <tr bgcolor="#d0d0d0">
-<td valign="top">QT_QWS_IPAQ
-<td valign="top">/dev/h3600_ts
+<td valign="top"><tt>QT_QWS_IPAQ</tt>
+<td valign="top"><tt>/dev/h3600_ts</tt>
 <tr bgcolor="#f0f0f0">
-<td valign="top">QT_QWS_SL5XXX
-<td valign="top">/dev/ts
+<td valign="top"><tt>QT_QWS_SL5XXX</tt>
+<td valign="top"><tt>/dev/ts</tt>
 </table></center>
-<p> <ol type=1 start=5>
-<p> <li> Configuring Qtopia to suit your device when : see <a href="devices.html">$QPEDIR/doc/html/devices.html</a>.  Following example above you need to have added:
+<p> <p style="text-decoration:underline;">Hints</p>
+<ul>
+<li> For information about adding a new mouse driver see : <a href="pointer-qws.html">pointer-qws.html</a>
+</ul>
+<p> <!-- index Configuring Qtopia to suit device --><a name="Configuring-Qtopia-to-suit-device"></a><h3> Configuring Qtopia to suit device
+</h3>
+<a name="2-5"></a><p> Continuing the example above there is need to have added:
 <pre> -xplatform linux-myarm-g++</pre>
   as parameters to Qtopia's configure.
 <p> <p style="text-decoration:underline;">Hints</p>
@@ -104,17 +196,20 @@ cp $QPEDIR/src/libraries/qtopia/custom-linux-ipaq-g++.h $QPEDIR/src/libraries/qt
 <pre> $QPEDIR/configure --help</pre>
  
 <li> When cross compiling it is preferable to use different directories to keep the x86 and cross complied files.
+<li> To support a calibrated touch screen PrimaryInput=Touchscreen must included in the [Device] group of the $QPEDIR/etc/default-buttons.conf
+<li> To start the calibration process on Qtopia phone device  using a calibrated touchscreen driver run:
+<pre> qcop "QPE/System" "execute(QString)" "calibrate" </pre>
+ 
 </ul>
-<p> <li> Meeting Qtopia prerequists:
+<p> <!-- index Create and install the Qtopia image for the target device --><a name="Create-and-install-the-Qtopia-image-for-the-target-device"></a>
+<p> <h3> Create and install the Qtopia image for the target device
+</h3>
+<a name="2-6"></a><p> When configuring Qtopia for the target device the $QPEDIR/image is the default prefix for the image that Qtopia will create. After building Qtopia and running make install an example of  getting the image onto the device is to:
 <ul>
-<li> Linux with framebuffer support
-</ul>
-<p> <li> Create and install the Qtopia image for the target device. When configuring Qtopia for the target device the $QPEDIR/image is the default prefix for the image that Qtopia will create. After building Qtopia and running make install an example of  getting the image onto the device is to:
-<ul>
-<li> tar up $QPEDIR/image on your compilation host eg:
+<li> tar up $QPEDIR/image on the compilation host eg:
 <pre>
         cd $QPEDIR/image
-        tar -cf   $HOME/qtopiaimage.tar $QPEDIR/image
+        tar -cf   $HOME/qtopiaimage.tar .
         </pre>
  
 <li> copy/mount the file onto the target device  eg:
@@ -129,8 +224,10 @@ cp $QPEDIR/src/libraries/qtopia/custom-linux-ipaq-g++.h $QPEDIR/src/libraries/qt
         </pre>
  
 </ul>
-<p> <li> Configuring environment variables on the device to suit Qtopia.
-Set QPEDIR and QTDIR to where Qtopia was installed, and add Qtopia's programs and libraries to the system paths eg:
+<p> <!-- index Configuring environment variables on the device to suit Qtopia --><a name="Configuring-environment-variables-on-the-device-to-suit-Qtopia"></a>
+<p> <h3> Configuring environment variables on the device to suit Qtopia
+</h3>
+<a name="2-7"></a><p> Set QPEDIR and QTDIR to where Qtopia was installed, and add Qtopia's programs and libraries to the system paths eg:
 <pre>
         export QPEDIR=/opt/Qtopia
         export QTDIR=$QPEDIR
@@ -139,35 +236,46 @@ Set QPEDIR and QTDIR to where Qtopia was installed, and add Qtopia's programs an
         export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
         </pre>
  
-<p> <li> Initial tests on Qtopia on the device:
-<ul>
-<li> run
-<pre>
-        textedit -qws
-        </pre>
- 
-</ul>
-<p style="text-decoration:underline;">Hints</p>
-<ul>
-<li> For running Qtopia <p>See also <a href="running-qtopia.html">running-qtopia.html</a>.
-
-<p> </ul>
-<li> and confirm that:
+<p> See also  <a href="running-qtopia.html">running-qtopia.html</a>
+<p> <!-- index Initial tests of Qtopia on the device --><a name="Initial-tests-of-Qtopia-on-the-device"></a>
+<p> <h3> Initial tests on Qtopia on the device
+</h3>
+<a name="2-8"></a><p> Run the following command : <tt>textedit</tt> -qws
+<p> Confirm that:
 <ul>
 <li> the framebuffer is used
 <li> no warnings are shown indicate file reading/writing problems
 <li> Qtopia is working with the installed keyboard. For Qtopia Phone edition check that any softkeys defined work
-<li> run
-<pre>
-        qpe
-        </pre>
- 
-<li> and confirm that you can launch a program eg: Notes and that new text documents created appear in the "Documents" tab
+<li> run <tt>qpe</tt>
+and confirm that a program can launched eg: Notes . When using Notes check that new text documents can be created and created appear in the "Documents" tab. 
 </ul>
+<p> <p style="text-decoration:underline;">Hints</p>
+<ul>
+<li> For running Qtopia <p>See also <a href="running-qtopia.html">running-qtopia.html</a>.
+
+<p> </ul>
+<p> <!-- index Customize Qtopia to suit <a href="gsm.html">GSM</a> module --><a name="Customize-Qtopia-to-suit-GSM-module"></a>
+<p> <h3> Customize Qtopia to suit GSM module (Qtopia Phone edition only)
+</h3>
+<a name="2-9"></a><p> Before starting this step ensure that Qtopia is able to communicate to your GSM module and that you can dial and connect normal calls. 
+Also it is highly recommended that you first test your modems ability make GRPS calls just using pppd.
+<p> The following is the suggested order in integrating a GSM module into Qtopia
+<ol type=1>
+<li> <a href="devices.html#GSM-module-integratation">GSM module integratation</a>
+<li> <a href="devices.html#WAP-stack-integration">WAP stack integration</a>
+<li> <a href="system-integrators-guide.html#Configure-serial-proxy">Configure the serial proxy</a>
 </ol>
-<p> <h2> Serial Proxy
-</h2>
-<a name="3"></a><p> Most modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications.
+<p> <!-- index Selecting components to install --><a name="Selecting-components-to-install"></a>
+<p> <h3>  Selecting components to install
+</h3>
+<a name="2-10"></a><p> Choosing not to build a component, eg Todo, can easily be done via editing $QPEDIR/src/custom.pri and
+re-configuring Qtopia. For example add the following to the custom.pri
+<tt>APP_PROJECTS-=applications/todo</tt>
+<p> See $QPEDIR/src/custom.pri for extra hints, see also <a href="buildsystem.html">buildsystem.html</a>
+<p> <!-- index Configure serial proxy --><a name="Configure-serial-proxy"></a>
+<p> <h3> Configure serial proxy (Qtopia Phone only)
+</h3>
+<a name="2-11"></a><p> Most modern phones have an external serial interface, which is used to connect to a computer for the purposes of data calls, FAX transmissions, or synchronization with desktop applications.
 <p> The SerialProxy class assists with this process.  It sets up a proxy connection between the external serial interface and an internal <a href="gsm.html">GSM</a> 07.10 capable modem.  The serial interface may be RS-232, USB, Bluetooth, or any other suitable connection protocol.
 <p> We assume that the cable that connects the phone to the computer is wired like a null modem, even if the "cable" is USB, Bluetooth, etc:
 <p> <center><table cellpadding="4" cellspacing="2" border="0">
@@ -187,13 +295,30 @@ ExternalAccessSpeed=115200
 </pre>
  
 <p> The <tt>Phone.conf</tt> file needs to be placed under the "etc/default" directory on a vendor's system.
+<p> <p style="text-decoration:underline;">Warning</p>
+Using a serial proxy is not possible when connecting Qtopia to a serial port on a phone such as the T39M. In such a case ensure that
+<tt>Phone.conf</tt> file does not contain an entry for "ExternalAccessDevices".
+<p> <!-- index Install extra fonts --><a name="Install-extra-fonts"></a>
+<p> <h3>  Install extra fonts
+</h3>
+<a name="2-12"></a><p> To make extra fonts available to Qtopia it is likely that the makeqpf ultility will need to be run. For more details see : <a href="makeqpf.html">makeqpf</a>
+<p> <!-- index Customize apprearance --><a name="Customize-apprearance"></a>
+<p> <h3> Customize apprearance 
+</h3>
+<a name="2-13"></a><p> Qtopia's appearance can be modified on several ways
+<ul>
+<li> Customizing the current theme see : <a href="qtopiathemeing.html">qtopiathemeing.html</a>  
+<li> Modifying color schemes : see $QPEDIR/etc/colors/*.scheme
+<li> Changing icons : see $QPEDIR/pics
+<li> Selecting a different font and color : Changed by running the Appearance application
+</ul>
 <p> 
 <!-- eof -->
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>

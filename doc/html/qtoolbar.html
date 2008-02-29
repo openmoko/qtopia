@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qt Toolkit - QToolBar Class</title><style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
 a:link { color: #004faf; text-decoration: none }
 a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
 --></style>
@@ -39,8 +37,8 @@ Inherits <a href="qwidget.html">QWidget</a>.
 <li><div class="fn"><a href="#fb9a67"><b>QToolBar</b></a> ( QMainWindow * parent = 0, const char * name = 0 ) </div>
 <li><div class="fn"><a href="#5a009b"><b>~QToolBar</b></a> () </div>
 <li><div class="fn">void <a href="#af219d"><b>addSeparator</b></a> () </div>
-<li><div class="fn">virtual void <b>setOrientation</b> ( Orientation ) </div>
-<li><div class="fn">Orientation <b>orientation</b> () const</div>
+<li><div class="fn">virtual void <a href="#3e90be"><b>setOrientation</b></a> ( Orientation ) </div>
+<li><div class="fn">Orientation <a href="#2a30ec"><b>orientation</b></a> () const</div>
 <li><div class="fn">QMainWindow* <a href="#8c931d"><b>mainWindow</b></a> () </div>
 <li><div class="fn">virtual void <a href="#7b948e"><b>setStretchableWidget</b></a> ( QWidget * ) </div>
 <li><div class="fn">void <a href="#29d728"><b>setHorizontalStretchable</b></a> ( bool b ) </div>
@@ -53,7 +51,7 @@ Inherits <a href="qwidget.html">QWidget</a>.
 </ul>
 <h2>Signals</h2>
 <ul>
-<li><div class="fn">void <b>orientationChanged</b> ( Orientation ) </div>
+<li><div class="fn">void <a href="#ad18fa"><b>orientationChanged</b></a> ( Orientation ) </div>
 </ul>
 <h2>Protected Members</h2>
 <ul>
@@ -97,9 +95,9 @@ outside the visible area of the mainwindow.
 <a href="#7b948e">setStretchableWidget</a>() you can advise the main window to expand
 the toolbar to fill all available width in the specified orientation.
 <p>The tool bar arranges its buttons either horizontally or vertically
-(see <a href="#e6b734">setOrientation</a>() for details). Generally, QMainWindow will set
+(see <a href="#3e90be">setOrientation</a>() for details). Generally, QMainWindow will set
 the orientation correctly for you. The toolbar emits a signal
-<a href="#a8175f">orientationChanged</a>() each time the orientation changes, in case some
+<a href="#ad18fa">orientationChanged</a>() each time the orientation changes, in case some
 child widgets need adjustments.
 <p>To remove all items from a toolbar, you can use the <a href="#c9e0ef">clear</a>() method.
 <p>See also  <a href="qtoolbutton.html">QToolButton</a>, <a href="qmainwindow.html">QMainWindow</a>, <a href="http://www.iarchitect.com/visual.htm">Parts of Isys on Visual Design</a> and <a href="guibooks.html#fowler">GUI Design Handbook: Tool Bar.</a>
@@ -155,6 +153,11 @@ non-stretchable toolbar usually gets just the space it needs.
 <h3 class="fn"><a href="qsize.html">QSize</a> <a name="cf462a"></a>QToolBar::minimumSizeHint () const <code>[virtual]</code></h3>
 <p>Reimplemented for internal reasons; the API is not affected.
 <p>Reimplemented from <a href="qwidget.html#553e08">QWidget.</a>
+<h3 class="fn"><a href="qt.html#Orientation">Orientation</a> <a name="2a30ec"></a>QToolBar::orientation () const</h3>
+<p>Returns the current orientation of the toolbar.
+<h3 class="fn">void <a name="ad18fa"></a>QToolBar::orientationChanged ( <a href="qt.html#Orientation">Orientation</a> newOrientation ) <code>[signal]</code></h3>
+<p>This signal is emitted when the toolbar changed its orientation to
+<em>newOrientation.</em>
 <h3 class="fn">void <a name="76ae69"></a>QToolBar::paintEvent ( <a href="qpaintevent.html">QPaintEvent</a> * ) <code>[virtual protected]</code></h3>
 <p>Paint the handle.  The Motif style is rather close to Netscape
 and even closer to KDE.
@@ -174,6 +177,11 @@ non-stretchable toolbar usually gets just the space it needs.
 currently used; it will be used in a forthcoming tool bar
 configuration dialog.
 <p>See also  <a href="#78b177">label</a>().
+<h3 class="fn">void <a name="3e90be"></a>QToolBar::setOrientation ( <a href="qt.html#Orientation">Orientation</a> newOrientation ) <code>[virtual]</code></h3>
+<p>Sets this toolbar to organize its content vertically if <em>newOrientation</em> is <code>Vertical</code> and horizontally if <em>newOrientation</em>
+is <code>Horizontal.</code>
+<p>Emits the <a href="#ad18fa">orientationChanged</a>() signal.
+<p>See also  <a href="#2a30ec">orientation</a>().
 <h3 class="fn">void <a name="7b948e"></a>QToolBar::setStretchableWidget ( <a href="qwidget.html">QWidget</a> * w ) <code>[virtual]</code></h3>
 <p>Sets <em>w</em> to be expanded if this toolbar is requested to stretch
 (because <a href="qmainwindow.html">QMainWindow</a> right-justifies the dock it's in or <a href="#5d0986">isVerticalStretchable</a>()
@@ -198,13 +206,13 @@ non-stretchable toolbar usually gets just the space it needs.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.9"><nobr>
+<input type=hidden name="version" value="2.3.10"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2001
+copyright &copy; 1995-2005
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.9</div>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.10</div>
 </table></div></address></body></html>

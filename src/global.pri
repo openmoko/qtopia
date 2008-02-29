@@ -52,14 +52,14 @@
 	}
 	SRCDIR=$${QTOPIA_ID}
 	depotProject {
-	    QTOPIA_ID~=s,$${TMPQPEDIR}/src/,,
-	    QTOPIA_ID~=s,$${TMPQPEDIR}src/,,
+	    QTOPIA_ID~=s,$${TMPQPEDIR}/src/,,q
+	    QTOPIA_ID~=s,$${TMPQPEDIR}src/,,q
 	    QTOPIA_PKG_ID=$$QTOPIA_ID
 	    equals(QTOPIA_ID, $$SRCDIR) {
 		# Not a Qtopia project, check if it's a theme
 		THEME_QTOPIA_ID=$$QTOPIA_ID
-		THEME_QTOPIA_ID~=s,$${TMPQPEDIR}/etc/themes/,,
-		THEME_QTOPIA_ID~=s,$${TMPQPEDIR}etc/themes/,,
+		THEME_QTOPIA_ID~=s,$${TMPQPEDIR}/etc/themes/,,q
+		THEME_QTOPIA_ID~=s,$${TMPQPEDIR}etc/themes/,,q
 		contains(THEME_PROJECTS, $$THEME_QTOPIA_ID) {
 		    # It is a theme
 		    QTOPIA_ID=$$THEME_QTOPIA_ID
@@ -171,12 +171,11 @@
 		DESTDIR=$$(QPEDIR)/lib
 		DEFINES+=QTOPIA_PLUGIN_TYPE=\"$${QTOPIA_PROJECT_TYPE}\"
 		DEFINES+=QTOPIA_PLUGIN_NAME=\"$${OLD_TARGET}\"
-		#LIBS-=-lqtopia2 -lqpepim1
-		# server LIBS+=
-		S_S=$$(QPEDIR)/src/server/singleexec_server_libs.pri
-		exists($${S_S}):system(cat $${S_S} | sed -e 's?LIBS+=-l$${TARGET}??g' | sed -e 's?^$??' > $${S_S}.tmp;mv $${S_S}.tmp $${S_S})
+		S_S=$${QTOPIA_DEPOT_PATH}/bin/seserver_gen -f libs -d $${QTOPIA_DEPOT_PATH} -s $${QTOPIA_ID} -t $${TARGET}
 		contains(ALL_PROJECTS,$${QTOPIA_ID}) {
-		    system(echo LIBS+=-l$${TARGET} >> $${S_S})
+		    system( $${S_S} -i )
+		} else {
+		    system( $${S_S} )
 		}
 	    } else {
 		!qtopiadesktop {
@@ -216,24 +215,25 @@
 			TARGET=app_$${TARGET}
 			DESTDIR=$$(QPEDIR)/lib
 			# server LIBS+=
-			S_S=$$(QPEDIR)/src/server/singleexec_server_libs.pri
-			exists($${S_S}):system(cat -s $${S_S} | sed -e 's,LIBS+=-l$${TARGET},,g' | sed -e 's?^$??' > $${S_S}.tmp;mv $${S_S}.tmp $${S_S})
-			contains(ALL_PROJECTS,$${QTOPIA_ID}):\
-			    system(echo LIBS+=-l$${TARGET} >> $${S_S})
-			# server INCLUDEPATH+=
-			S_S=$$(QPEDIR)/src/server/singleexec_server_includes.pri
-			exists($${S_S}):system(cat -s $${S_S} | sed -e 's,INCLUDEPATH+=$$(QPEDIR)/src/$${QTOPIA_ID}.*,,g' | sed -e 's?^$??' > $${S_S}.tmp;mv $${S_S}.tmp $${S_S})
+			S_S=$${QTOPIA_DEPOT_PATH}/bin/seserver_gen -f libs -d $${QTOPIA_DEPOT_PATH} -s $${QTOPIA_ID} -t $${TARGET}
 			contains(ALL_PROJECTS,$${QTOPIA_ID}) {
-			    !isEmpty($$list($${INTERFACES})) {
-				system(echo "INCLUDEPATH+=$$(QPEDIR)/src/$${QTOPIA_ID}" >> $${S_S})
-				system(echo "INCLUDEPATH+=$$(QPEDIR)/src/$${QTOPIA_ID}/$${UI_HEADERS_DIR}" >> $${S_S})
-			    }
+			    system( $${S_S} -i )
+			} else {
+			    system( $${S_S} )
 			}
-			# server #include "*/main.cpp"
-			S_S=$$(QPEDIR)/src/server/singleexec_server_apps.cpp
-			exists($${S_S}):system(cat -s $${S_S} | sed -e 's?$${LITERAL_HASH}include\ \"$${QTOPIA_DEPOT_PATH}/src/$${QTOPIA_ID}/main\.cpp\"??g' | sed -e 's?^$??' > $${S_S}.tmp;mv $${S_S}.tmp $${S_S})
-			contains(ALL_PROJECTS,$${QTOPIA_ID}):\
-			    system(echo '$${LITERAL_HASH}include' \"$${QTOPIA_DEPOT_PATH}/src/$${QTOPIA_ID}/main.cpp\" >> $${S_S})
+			# server INCLUDEPATH+=
+			S_S=$${QTOPIA_DEPOT_PATH}/bin/seserver_gen -f includes -u $${UI_HEADERS_DIR} -s $${QTOPIA_ID}
+			contains(ALL_PROJECTS,$${QTOPIA_ID}) {
+			    system( $${S_S} -i )
+			} else {
+			    system( $${S_S} )
+			}
+			S_S=$${QTOPIA_DEPOT_PATH}/bin/seserver_gen -f apps -d $${QTOPIA_DEPOT_PATH} -s $${QTOPIA_ID}
+			contains(ALL_PROJECTS,$${QTOPIA_ID}) {
+			    system( $${S_S} -i )
+			} else {
+			    system( $${S_S} )
+			}
 		    } else {
 			TEMPLATE=app
 			target.path=/bin
@@ -254,7 +254,15 @@
 		CONFIG+=dll
 		DEFINES+=EXPORT_$${TARGET}=__decl(dllexport)
 	    }
-	    buildStaticlib:CONFIG+=staticlib
+	    buildStaticlib {
+		CONFIG+=staticlib
+		S_S=$${QTOPIA_DEPOT_PATH}/bin/seserver_gen -f libs -d $$QTOPIA_DEPOT_PATH -s $${QTOPIA_ID} -t $${TARGET}
+		contains(ALL_PROJECTS,$${QTOPIA_ID}) {
+		    system( $${S_S} -i )
+		} else {
+		    system( $${S_S} )
+		}
+	    }
 	    !staticlib:isEmpty(target.path) {
 		win32:target.path=/
 		!win32:target.path=/lib
@@ -276,35 +284,20 @@
 	        TRTARGET=lib$${OLD_TARGET}
 	    }
         }
+	DEFINES+=QTOPIA_TARGET=\"$$TARGET\"
+	DEFINES+=QTOPIA_TRTARGET=\"$$TRTARGET\"
 	OPTQTOPIA=$(INSTALL_ROOT)
-	qtopiadesktop:OPTQTOPIA=$$OPTQTOPIA/qtopiadesktop
-
-	# trtarget is saved to a variable because otherwise the last line would
-	# get screwed up by qmake when it did the substitutions below.
+	!win32:qtopiadesktop:OPTQTOPIA=$$OPTQTOPIA/qtopiadesktop
 	LINSTALL_TEMPLATE=$${COMMAND_HEADER}\
-	    cd $${SRCDIR};\
-	    trtarget=TRTARGET;\
-	    for lang in $${TRANSLATIONS}; do\
-		mkdir -p $${OPTQTOPIA}/i18n/\$$lang;\
-		tsfiles=;\
-		for target in TRTARGET PDATARGETS; do\
-		    test -f \$$target-\$$lang.ts && tsfiles="\$$tsfiles \$$target-\$$lang.ts";\
-		done;\
-		if [ -z "\$$tsfiles" ]; then\
-		    echo "No .ts files found. Please run make lupdate in $${SRCDIR}.";\
-		    exit 1; \
-		else\
-		    echo $${DQTDIR}/bin/lrelease \$$tsfiles -qm $${OPTQTOPIA}/i18n/\$$lang/\$$trtarget.qm;\
-		    $${DQTDIR}/bin/lrelease \$$tsfiles -qm $${OPTQTOPIA}/i18n/\$$lang/\$$trtarget.qm;\
-		fi;\
-	    done
+	    $${QTOPIA_DEPOT_PATH}/bin/linstall "TRTARGET" "$${TRANSLATIONS}" "PDATARGETS" "$${DQTDIR}"\
+		"$$OPTQTOPIA" "$${SRCDIR}"
 	linstall.commands=$${LINSTALL_TEMPLATE}
-	linstall.commands~=s,TRTARGET,$${TRTARGET},g
-	linstall.commands~=s,PDATARGETS,$${PDATARGETS},g
-	win32:linstall.commands=$${COMMAND_HEADER}echo "this needs to be implemented"
+	linstall.commands~=s,TRTARGET,$${TRTARGET},gq
+	linstall.commands~=s,PDATARGETS,$${PDATARGETS},gq
+	win32:linstall.commands~=s,/,\\,g
 	linstall.CONFIG=no_path
 	isEmpty(DQTDIR):linstall.commands=$${COMMAND_HEADER}echo "Can't install translations because Qt 3 is not available"
-	!win32:!isEmpty(TRANSLATIONS):INSTALLS+=linstall
+	!isEmpty(TRANSLATIONS):INSTALLS+=linstall
 	!isEmpty(lupdate.command_override) {
 	    # some pro files need to define lupdate.commands
 	    # differently.  Such as src/qt/qt.pro
@@ -315,22 +308,30 @@
 	} else {
 	    lupdate.commands=$${COMMAND_HEADER}\
 		cd $${SRCDIR};\
-		for lang in $$TRANSLATIONS; do\
-		    $${DQTDIR}/bin/lupdate $(TRANSLATABLES) -ts $${TRTARGET}-\$$lang.ts;\
+                TRANSFILES=;\
+                [ -z "$(TRANSLATABLES)" ] || for transfile in $(TRANSLATABLES); do\
+                    [ -f \$$transfile ] && TRANSFILES="\$$TRANSFILES \$$transfile";\
+                done;\
+		[ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; do\
+		    $${DQTDIR}/bin/lupdate \$$TRANSFILES -ts $${TRTARGET}-\$$lang.ts;\
 		done
 	}
 
 	# Special translation install
-	!win32:!isEmpty(TRANSLATIONS):!isEmpty(NON_CODE_TRANSLATABLES):!isEmpty(NON_CODE_TRTARGETS) {
+	!win32:!isEmpty(NON_CODE_TRANSLATABLES):!isEmpty(NON_CODE_TRTARGETS) {
 	    nct_lupdate.commands=$${COMMAND_HEADER}\
 		cd $${SRCDIR};\
-		$${QTOPIA_DEPOT_PATH}/bin/nct_lupdate "$${TRANSLATIONS}" $${NON_CODE_TRANSLATABLES}
+                TRANSFILES=;\
+                [ -z "$${NON_CODE_TRANSLATABLES}" ] || for transfile in $${NON_CODE_TRANSLATABLES}; do\
+                    [ -f \$$transfile ] && TRANSFILES="\$$TRANSFILES \$$transfile";\
+                done;\
+		$${QTOPIA_DEPOT_PATH}/bin/nct_lupdate "$${TRANSLATIONS}" \$$TRANSFILES
 	    QMAKE_EXTRA_UNIX_TARGETS+=nct_lupdate
 	    lupdate.depends+=nct_lupdate
 	    contains(INSTALLS, linstall) {
 		nct_linstall.commands=$${LINSTALL_TEMPLATE}
-		nct_linstall.commands~=s,TRTARGET,$$NON_CODE_TRTARGETS,g
-		nct_linstall.commands~=s,PDATARGETS,,g
+		nct_linstall.commands~=s,TRTARGET,$$NON_CODE_TRTARGETS,gq
+		nct_linstall.commands~=s,PDATARGETS,,gq
 		nct_linstall.CONFIG=no_path
 		isEmpty(DQTDIR):nct_linstall.commands=$${COMMAND_HEADER}echo "Can't install translations because Qt 3 is not available"
 		INSTALLS+=nct_linstall
@@ -369,7 +370,7 @@
 		    echo "Package $${PACKAGE_NAME}_$${PACKAGE_VERSION}_$${QTOPIA_ARCH}.ipk already exists!";\
 		    exit 0;\
 		fi;\
-		for i in $${IPK_GROUP_PROJECTS};do\
+		[ -z "$$IPK_GROUP_PROJECTS" ] || for i in $${IPK_GROUP_PROJECTS};do\
 		    make -C $$(QPEDIR)/src/\$$i -f Makefile.target unix_mkipk_deps INSTALL_ROOT=$${DATA_PATH}/$${QTOPIA_PATH} || exit \$$?;\
 		done;\
 		# This is now a function since it gets called many times
@@ -428,7 +429,7 @@
 			done`;\
 		};\
 		# Create packages for the languages that depend on the package being created now
-		for lang in $${LANGUAGES}; do\
+		[ -z "$$LANGUAGES" ] || for lang in $${LANGUAGES}; do\
 		    make_ipk_file \$$lang;\
 		done;\
 		# remove i18n stuff so it doesn't get in the regular package
@@ -477,7 +478,7 @@
     } else {
 
 	GENERIC_SUBDIRS_COMMAND=$${COMMAND_HEADER}\
-	    for i in $${SUBDIRS}; do\
+	    [ -z "$$SUBDIRS" ] || for i in $${SUBDIRS}; do\
 		if [ -e \$$i/Makefile ]; then\
 		    (\
 			cd \$$i;\
@@ -503,6 +504,7 @@
 
     }
 
+    sdk.depends+=install
     devsdk.depends+=sdk
     QMAKE_EXTRA_UNIX_TARGETS+=packages sdk devsdk
     !isEmpty(DQTDIR):QMAKE_EXTRA_UNIX_TARGETS+=lupdate

@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/edba/dist/qtopia/2-latest/qtopia/src/libraries/qtopia/contextmenu.cpp:79 -->
-<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>ContextMenu Class</title>
@@ -39,7 +37,7 @@ context button.
 <ul>
 <li><div class=fn>enum <b>EditingState</b> { Modal = 1, NonModal = 2 }</div></li>
 <li><div class=fn><a href="#ContextMenu"><b>ContextMenu</b></a> ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;state = 0 )</div></li>
-<li><div class=fn><b>~ContextMenu</b> ()</div></li>
+<li><div class=fn><a href="#~ContextMenu"><b>~ContextMenu</b></a> ()</div></li>
 <li><div class=fn>void <a href="#setEnableHelp"><b>setEnableHelp</b></a> ( bool&nbsp;b )</div></li>
 <li><div class=fn>void <a href="#addTo"><b>addTo</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )</div></li>
 <li><div class=fn>void <a href="#removeFrom"><b>removeFrom</b></a> ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )</div></li>
@@ -82,15 +80,19 @@ widget <em>parent</em> has focus and is in modal editing state <em>state</em>.
 The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
 <p> <p>See also <a href="contextbar.html">ContextBar</a>.
 
+<h3 class=fn><a name="~ContextMenu"></a>ContextMenu::~ContextMenu ()
+</h3>
+Destructs the ContextMenu
+
 <h3 class=fn>void <a name="addAction"></a>ContextMenu::addAction ( QAction&nbsp;*&nbsp;a )
 </h3>
 Adds action <em>a</em> to the end of the menu.
-<p> <p>See also insertAction.
+<p> <p>See also <a href="#insertAction">insertAction</a>().
 
 <h3 class=fn>void <a name="addTo"></a>ContextMenu::addTo ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )
 </h3>
 Adds this ContextMenu to widget <em>w</em> for modal editing state <em>state</em>.
-<p> <p>See also removeFrom.
+<p> <p>See also <a href="#removeFrom">removeFrom</a>().
 
 <h3 class=fn>void <a name="help"></a>ContextMenu::help ()<tt> [virtual slot]</tt>
 </h3>
@@ -105,7 +107,7 @@ Returns whether help exists for the parent widget.
 <h3 class=fn>void <a name="insertAction"></a>ContextMenu::insertAction ( QAction&nbsp;*&nbsp;a, int&nbsp;idx = -1 )
 </h3>
 Inserts action <em>a</em> at position <em>idx</em> in the menu.
-<p> <p>See also addAction.
+<p> <p>See also <a href="#addAction">addAction</a>().
 
 <h3 class=fn>int <a name="key"></a>ContextMenu::key ()<tt> [static]</tt>
 </h3>
@@ -128,7 +130,7 @@ Opens the popup menu at <em>pos</em>.
 <h3 class=fn>void <a name="removeFrom"></a>ContextMenu::removeFrom ( QWidget&nbsp;*&nbsp;w, int&nbsp;state = 0 )
 </h3>
 Removes this ContextMenu from widget <em>w</em> for modal editing state <em>state</em>.
-<p> <p>See also addTo.
+<p> <p>See also <a href="#addTo">addTo</a>().
 
 <h3 class=fn>void <a name="setEnableHelp"></a>ContextMenu::setEnableHelp ( bool&nbsp;b )
 </h3>
@@ -141,8 +143,8 @@ copyright &copy; 1995-2004
 <a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0">
 <tr>
-<td>Copyright &copy; 2001-2004 Trolltech
+<td>Copyright &copy; 2001-2005 Trolltech
 <td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.0</div>
+<td align="right"><div align="right">Qtopia version 2.1.1</div>
 </table></div></address></body>
 </html>
