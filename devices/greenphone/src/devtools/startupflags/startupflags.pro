@@ -18,15 +18,11 @@ script.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/startupflags/st
 script.path=/bin
 script.hint=script
 
-help.source=$$QTOPIA_DEPOT_PATH/help
-help.files=*.html
-help.hint=help
-
-pics.files=pics/*
+pics.files=$$PWD/pics/*
 pics.path=/pics/startupflags
 pics.hint=pics
 
-INSTALLS+=desktop conf script help pics
+INSTALLS+=desktop conf script pics
 
 pkg.desc=Startup flags editor for Qtopia.
 pkg.domain=window

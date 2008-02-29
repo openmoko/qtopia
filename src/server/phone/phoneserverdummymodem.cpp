@@ -21,6 +21,7 @@
 
 #include "phoneserverdummymodem.h"
 #include <qvaluespace.h>
+#include <QSignalSourceProvider>
 #include <qtimer.h>
 
 QPhoneCallDummy::QPhoneCallDummy
@@ -357,9 +358,9 @@ QTelephonyServiceDummy::QTelephonyServiceDummy
 {
     if ( service == "modem" ) {
         // Fake out signal quality values if this is the modem service.
-        QValueSpaceObject *obj = new QValueSpaceObject
-            ( "/Telephony/Status/SignalLevel", this );
-        obj->setAttribute( "modem", 100 );
+        QSignalSourceProvider* prov = new QSignalSourceProvider( QLatin1String("modem"),  QLatin1String("modem"), this );
+        prov->setAvailability( QSignalSource::Available );
+        prov->setSignalStrength( 100 );
     }
 }
 

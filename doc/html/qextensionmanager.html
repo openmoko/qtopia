@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/tools/designer/src/lib/extension/qextensionmanager.cpp -->
 <head>
   <title>Qt 4.2: QExtensionManager Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -69,7 +70,7 @@
 <p>The QExtensionManager is not intended to be instantiated directly. You can retrieve an interface to <i>Qt Designer</i>'s extension manager using the <a href="qdesignerformeditorinterface.html#extensionManager">QDesignerFormEditorInterface::extensionManager</a>() function. A pointer to <i>Qt Designer</i>'s current <a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a> object (<tt>formEditor</tt> in the example above) is provided by the <a href="qdesignercustomwidgetinterface.html#initialize">QDesignerCustomWidgetInterface::initialize</a>() function's parameter. When implementing a custom widget plugin, you must subclass the <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> to expose your plugin to <i>Qt Designer</i>.</p>
 <p>Then, when an extension is required, <i>Qt Designer</i>'s extension manager will run through all its registered factories calling <a href="qextensionfactory.html#createExtension">QExtensionFactory::createExtension</a>() for each until the first one that is able to create the requested extension for the selected object, is found. This factory will then make an instance of the extension.</p>
 <p>There are four available types of extensions in <i>Qt Designer</i>: <a href="qdesignercontainerextension.html">QDesignerContainerExtension</a> , <a href="qdesignermembersheetextension.html">QDesignerMemberSheetExtension</a>, <a href="qdesignerpropertysheetextension.html">QDesignerPropertySheetExtension</a> and <a href="qdesignertaskmenuextension.html">QDesignerTaskMenuExtension</a>. <i>Qt Designer</i>'s behavior is the same whether the requested extension is associated with a container, a member sheet, a property sheet or a task menu.</p>
-<p>For a complete example using the QExtensionManager class, see the Task Menu Extension example. The example shows how to create a custom widget plugin for Qt Designer, and how to to use the <a href="qdesignertaskmenuextension.html">QDesignerTaskMenuExtension</a> class to add custom items to <i>Qt Designer</i>'s task menu.</p>
+<p>For a complete example using the QExtensionManager class, see the <a href="designer-taskmenuextension.html">Task Menu Extension example</a>. The example shows how to create a custom widget plugin for Qt Designer, and how to to use the <a href="qdesignertaskmenuextension.html">QDesignerTaskMenuExtension</a> class to add custom items to <i>Qt Designer</i>'s task menu.</p>
 <p>See also <a href="qextensionfactory.html">QExtensionFactory</a> and <a href="qabstractextensionmanager.html">QAbstractExtensionManager</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -111,6 +112,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

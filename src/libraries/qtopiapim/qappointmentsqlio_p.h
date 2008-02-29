@@ -41,9 +41,11 @@ public:
 
     QIcon icon() const; // default empty
     QString description() const;
+    using QAppointmentContext::title;
     QString title() const;
 
     // better to be flags ?
+    using QAppointmentContext::editable;
     bool editable() const; // default true
 
     QPimSource defaultSource() const;
@@ -52,6 +54,7 @@ public:
     QSet<QPimSource> sources() const;
     QUuid id() const;
 
+    using QAppointmentContext::exists;
     bool exists(const QUniqueId &) const;
     QPimSource source(const QUniqueId &) const;
 
@@ -60,8 +63,8 @@ public:
     QUniqueId addAppointment(const QAppointment &, const QPimSource &);
 
     bool removeOccurrence(const QUniqueId &original, const QDate &);
-    QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &);
-    QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &);
+    QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &, const QDate&);
+    QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &, const QDate&);
 private:
     QAppointmentSqlIO *mAccess;
 };
@@ -87,9 +90,9 @@ public:
     bool removeOccurrence(const QUniqueId &original,
             const QDate &);
     QUniqueId replaceOccurrence(const QUniqueId &original,
-            const QOccurrence &);
+            const QOccurrence &, const QDate &);
     QUniqueId replaceRemaining(const QUniqueId &original,
-            const QAppointment &);
+            const QAppointment &, const QDate &);
 
     QUuid contextId() const;
 
@@ -105,8 +108,23 @@ public:
     void setContextFilter(const QSet<int> &);
     QSet<int> contextFilter() const;
 
+    bool startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime) { return QPimSqlIO::startSync(sources, syncTime); }
+    bool abortSyncTransaction() { return QPimSqlIO::abortSync(); }
+    bool commitSyncTransaction() { return QPimSqlIO::commitSync(); }
+
+    QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+    { return QPimSqlIO::removed(sources, timestamp); }
+
+    QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+    { return QPimSqlIO::added(sources, timestamp); }
+
+    QList<QUniqueId> modified(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+    { return QPimSqlIO::modified(sources, timestamp); }
+
     QAppointment appointment(const QUniqueId &) const;
     QAppointment appointment(int row) const;
+
+    QVariant appointmentField(int row, QAppointmentModel::Field k) const;
 
     int count() const { return QPimSqlIO::count(); }
     bool exists(const QUniqueId & id) const { return !appointment(id).uid().isNull(); }
@@ -119,9 +137,9 @@ public:
 
     bool nextAlarm(QDateTime &when, QUniqueId &) const;
 
-    bool updateExtraTables(const QByteArray &, const QPimRecord &);
-    bool insertExtraTables(const QByteArray &, const QPimRecord &);
-    bool removeExtraTables(const QByteArray &);
+    bool updateExtraTables(uint, const QPimRecord &);
+    bool insertExtraTables(uint, const QPimRecord &);
+    bool removeExtraTables(uint);
 
     /* subclased from sql io */
     void bindFields(const QPimRecord &r, QSqlQuery &) const;
@@ -131,17 +149,27 @@ public:
     // forces re-read of data and view reset.
     void refresh();
 
-    void checkAdded(const QAppointment &);
+    void checkAdded(const QUniqueId &);
     void checkRemoved(const QUniqueId &);
     void checkRemoved(const QList<QUniqueId> &);
-    void checkUpdated(const QAppointment &);
+    void checkUpdated(const QUniqueId &);
 private:
+    QAppointment appointment(const QUniqueId &, bool minimal) const;
+
     void invalidateCache();
 
     QStringList currentFilters() const;
 
-    mutable bool appointmentByRowValid;
+    enum AppointmentCacheStatus {
+        Empty = 0,
+        Minimal = 1,
+        Full = 2
+    };
+
+    mutable AppointmentCacheStatus lastAppointmentStatus;
     mutable QAppointment lastAppointment;
+    mutable int lastRow;
+
     mutable QDateTime mAlarmStart;
 
     QDateTime rStart;
@@ -152,6 +180,11 @@ private:
     const QString catTable;
     const QString customTable;
     const QString exceptionTable;
+
+    // Saved queries
+    mutable QPreparedSqlQuery appointmentQuery;
+    mutable QPreparedSqlQuery exceptionsQuery;
+    mutable QPreparedSqlQuery parentQuery;
 };
 
 #endif

@@ -36,7 +36,6 @@
 class QTaskData : public QSharedData
 {
 public:
-    bool mDue;
     QDate mDueDate;
     int mPriority;
     QString mDesc;
@@ -139,7 +138,7 @@ QString QTask::description() const { return d->mDesc; }
 
   \sa setDueDate()
 */
-void QTask::clearDueDate() { d->mDue = false; }
+void QTask::clearDueDate() { d->mDueDate = QDate(); }
 
 /*!
   If \a b is true marks the task as completed.  Otherwise marks the task as
@@ -179,7 +178,7 @@ QDate QTask::dueDate() const { return d->mDueDate; }
 
   \sa dueDate(), setDueDate(), clearDueDate()
 */
-bool QTask::hasDueDate() const { return d->mDue; }
+bool QTask::hasDueDate() const { return !d->mDueDate.isNull(); }
 
 /*!
   Returns the date the task was started.  If the task has not yet been started, the returned
@@ -272,7 +271,6 @@ const QMap<QString, QString> &QTask::customFieldsRef() const { return d->customM
 QTask::QTask() : QPimRecord()
 {
     d = new QTaskData();
-    d->mDue = false;
     d->mDueDate = QDate::currentDate();
     d->mPriority = Normal;
     d->mStatus = NotStarted;
@@ -285,7 +283,7 @@ QTask::QTask() : QPimRecord()
 bool QTask::operator==(const QTask &other) const
 {
     if (!(QPimRecord::operator==(other))) return false;
-    if (d->mDue != other.d->mDue) return false;
+    if (d->mDueDate != other.d->mDueDate) return false;
     if (d->mPriority != other.d->mPriority) return false;
     if (d->mDesc != other.d->mDesc) return false;
     if (status() != other.status()) return false;
@@ -396,7 +394,6 @@ QString QTask::statusToText(Status s)
 void QTask::setDueDate( const QDate &date )
 {
     d->mDueDate = date;
-    d->mDue = !(date.isNull());
 }
 
 /*!
@@ -432,7 +429,7 @@ void QTask::setPercentCompleted( uint percent )
         d->mPercentCompleted = 0;
     } else {
         QTask::Status s = status();
-        if (s == NotStarted || Completed)
+        if (s == NotStarted || s == Completed)
             setStatus(InProgress);
         d->mPercentCompleted = percent;
     }
@@ -469,7 +466,7 @@ bool QTask::match ( const QRegExp &r ) const
     bool match = false;
     if ( QString::number( d->mPriority ).contains( r ) )
         match = true;
-    else if ( d->mDue && d->mDueDate.toString().contains( r ) )
+    else if ( d->mDueDate.isValid() && d->mDueDate.toString().contains( r ) )
         match = true;
     else if ( d->mDesc.contains( r ) )
         match = true;
@@ -680,6 +677,50 @@ void QTask::writeVCalendar( const QString &filename, const QTask &task)
 }
 
 /*!
+   Writes the task as a vCalendar object to the file specified
+   by \a filename.
+
+   Returns true on success, false on fail.
+
+   \sa readVCalendar()
+*/
+void QTask::writeVCalendar( const QString &filename ) const
+{
+    writeVCalendar(filename, *this);
+}
+
+/*!
+   \overload
+
+   Writes the task as a vCalendar object to the given \a file,
+   which must be already open for writing.
+
+   \sa readVCalendar()
+*/
+void QTask::writeVCalendar( QFile &file ) const
+{
+    QDataStream stream( &file );
+    writeVCalendar( &stream );
+
+}
+
+/*!
+   \overload
+
+   Writes the task as a vCalendar object to the given \a stream,
+   which must be writable.
+
+   \sa readVCalendar()
+*/
+void QTask::writeVCalendar( QDataStream *stream ) const
+{
+    VObject *obj = createVObject(*this);
+    writeVObject( stream, obj );
+    cleanVObject( obj );
+    cleanStrTbl();
+}
+
+/*!
   Reads the file specified by \a filename as a list of vCalendar objects
   and returns the list of near equivalent tasks.
 
@@ -688,7 +729,11 @@ void QTask::writeVCalendar( const QString &filename, const QTask &task)
 QList<QTask> QTask::readVCalendar( const QString &filename )
 {
     VObject *obj = Parse_MIME_FromFileName( (const char *)filename.toUtf8() );
+    return readVCalendarData(obj);
+}
 
+QList<QTask> QTask::readVCalendarData( VObject *obj )
+{
     QList<QTask> tasks;
 
     qpe_startVObjectInput();
@@ -717,6 +762,29 @@ QList<QTask> QTask::readVCalendar( const QString &filename )
 }
 
 /*!
+  Reads the \a data of \a len byets as a list of vCalendar objects
+  and returns the list of near equivalent tasks.
+
+  \sa writeVCalendar()
+*/
+QList<QTask> QTask::readVCalendarData( const char *data, unsigned long len )
+{
+    VObject *obj = Parse_MIME( data, len );
+    return readVCalendarData(obj);
+}
+
+/*!
+  Reads the given VCalendar data in \a vcal and returns the list of
+  near equivalent tasks.
+
+  \sa writeVCalendar()
+*/
+QList<QTask> QTask::readVCalendar( const QByteArray &vcal )
+{
+    return readVCalendarData( Parse_MIME( (const char*)vcal, vcal.count() ) );
+}
+
+/*!
   Returns a rich text formatted QString of the QTask.
 */
 QString QTask::toRichText() const
@@ -724,7 +792,7 @@ QString QTask::toRichText() const
     QString text;
 
     text = "<center><b>" + Qt::escape(d->mDesc) + "</b></center><br>"; // No tr
-    if ( d->mDue )
+    if ( !d->mDueDate.isNull() )
         text += "<b>" + qApp->translate("QtopiaPim", "Due:") + "</b> " +
             QTimeString::localYMD( d->mDueDate, QTimeString::Long ) + "<br>";
     if ( !d->mStartedDate.isNull() && status() != NotStarted)
@@ -763,9 +831,10 @@ template <typename Stream> void QTask::deserialize(Stream &s)
     s >> d->mCategories;
     s >> d->customMap;
     quint8 val;
-    s >> val;
-    d->mDue = val == 0 ? false : true;
+    s >> val; // old mDue field, for compat
     s >> d->mDueDate;
+    if (!val)
+        d->mDueDate = QDate();
     s >> val; // stream left to maintain compat, value ignored.
     //c.d->mCompleted = val == 0 ? false : true;
     qint32 p;
@@ -791,7 +860,7 @@ template <typename Stream> void QTask::serialize(Stream &s) const
     s << d->mUid;
     s << d->mCategories;
     s << d->customMap;
-    s << (d->mDue ? (uchar)1 : (uchar)0);
+    s << (uchar) (d->mDueDate.isNull() ? 0 : 1);
     s << d->mDueDate;
     s << (isCompleted() ? (uchar)1 : (uchar)0);
     s << d->mPriority;

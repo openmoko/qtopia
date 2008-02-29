@@ -67,7 +67,6 @@ QCommDeviceSession_Private::QCommDeviceSession_Private(const QByteArray &devId,
 
     QByteArray p("/Hardware/Devices/");
     p.append(m_devId);
-    p.append("/");
 
     m_valueSpace = new QValueSpaceItem(p);
 
@@ -187,7 +186,6 @@ void QCommDeviceSession_Private::readyRead()
 /*!
     \class QCommDeviceSession
     \brief The QCommDeviceSession class provides facilities to initiate a device session.
-    \ingroup communication
 
     The QCommDeviceSession class provides facilities to initiate a new session on a hardware
     device.  The system will attempt to keep the device open for the duration of the open

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>PIM Library: Class Overview</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>PIM Library: Class Overview</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -25,44 +24,44 @@
 <li>Model classes</li>
 <li>GUI classes.</li>
 </ol>
-<p>Each type of PIM data will have one or more of each of these classes. For detailed class information refer to: PIM Classes.</p>
+<p>Each type of PIM data will have one or more of each of these classes. For detailed class information refer to: <a href="pim.html">PIM Classes</a>.</p>
 <a name="record-classes"></a>
 <h3>Record Classes</h3>
-<p>The Record class is the class used to pass around data for the particular kind of PIM data. For example the <tt>QAppointment</tt> class is used to get the description of an appointment, and determine when the appointment will next occur. This class is also used to pass data between applications. Changes to the PIM data will not be reflected in Record classes already constructed, and to get updated records they must be retrieved again from the appropriate Model class.</p>
+<p>The Record class is the class used to pass around data for the particular kind of PIM data. For example the <a href="qappointment.html">QAppointment</a> class is used to get the description of an appointment, and determine when the appointment will next occur. This class is also used to pass data between applications. Changes to the PIM data will not be reflected in Record classes already constructed, and to get updated records they must be retrieved again from the appropriate Model class.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Application</th><th>Class</th></tr></thead>
-<tr valign="top" class="odd"><td>Appointments</td><td><tt>QAppointment</tt> and <tt>QOccurrence</tt></td></tr>
-<tr valign="top" class="even"><td>Contacts</td><td><tt>QContact</tt></td></tr>
-<tr valign="top" class="odd"><td>Tasks</td><td><tt>QTask</tt></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Application</th><th>Class</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Appointments</td><td><a href="qappointment.html">QAppointment</a> and <a href="qoccurrence.html">QOccurrence</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Contacts</td><td><a href="qcontact.html">QContact</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Tasks</td><td><a href="qtask.html">QTask</a></td></tr>
 </table></p>
 <a name="model-classes"></a>
 <h3>Model Classes</h3>
-<p>The Model class is used to access the PIM data. The Model classes are subclasses of <tt>QAbstractItemModel</tt> and are used in <tt>QListView</tt> and <tt>QTableView</tt>. Any change made by the application or another process using the Qtopia PIM library will be reflected in the Model class. The model class will also signal changes made by the applications or other processes so the application and its views can be updated.</p>
+<p>The Model class is used to access the PIM data. The Model classes are subclasses of <a href="qabstractitemmodel.html">QAbstractItemModel</a> and are used in <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a>. Any change made by the application or another process using the Qtopia PIM library will be reflected in the Model class. The model class will also signal changes made by the applications or other processes so the application and its views can be updated.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Application</th><th>Class</th></tr></thead>
-<tr valign="top" class="odd"><td>Appointments</td><td><tt>QAppointmentModel</tt> and <tt>QOccurrenceModel</tt></td></tr>
-<tr valign="top" class="even"><td>Contacts</td><td><tt>QContactModel</tt></td></tr>
-<tr valign="top" class="odd"><td>Tasks</td><td><tt>QTaskModel</tt></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Application</th><th>Class</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Appointments</td><td><a href="qappointmentmodel.html">QAppointmentModel</a> and <a href="qoccurrencemodel.html">QOccurrenceModel</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Contacts</td><td><a href="qcontactmodel.html">QContactModel</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Tasks</td><td><a href="qtaskmodel.html">QTaskModel</a></td></tr>
 </table></p>
 <a name="gui-classes"></a>
 <h3>GUI Classes</h3>
 <p>GUI classes are provided to create a consistent look and feel between applications. It is not necessary to use them when accessing the PIM data, however they do make development simpler and ensure consistency with Qtopia.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Application</th><th>Class</th></tr></thead>
-<tr valign="top" class="odd"><td>Appointments</td><td><tt>QAppointmentDelegate</tt></td></tr>
-<tr valign="top" class="even"><td>Contacts</td><td><ul>
-<li><tt>QContactListView</tt></li>
-<li><tt>QContactSelector</tt></li>
-<li><tt>QPhoneTypeSelector</tt></li>
-<li><tt>QContactDelegate</tt></li>
+<tr valign="top" bgcolor="#a2c511"><th>Application</th><th>Class</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Appointments</td><td>QAppointmentDelegate</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Contacts</td><td><ul>
+<li><a href="qcontactlistview.html">QContactListView</a></li>
+<li><a href="qcontactselector.html">QContactSelector</a></li>
+<li><a href="qphonetypeselector.html">QPhoneTypeSelector</a></li>
+<li><a href="qcontactdelegate.html">QContactDelegate</a></li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td>Tasks</td><td><tt>QTaskDelegate</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Tasks</td><td><a href="qtaskdelegate.html">QTaskDelegate</a></td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

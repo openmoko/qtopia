@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Internationalization</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Internationalization</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -59,14 +58,14 @@
 <p>Create the directory <tt>$QPEDIR/i18n/&lt;new-lang&gt;</tt> for the new language. Qtopia will save all translation files in this directory. If this directory hasn't been created by the time the command <tt>make lupdate</tt> is executed the build system will create this directory.</p>
 <p>Running <tt>make lupdate</tt> will generate server specific translation files(e.g. <tt>QtopiaApplications.ts</tt> which contain the translated names for Qtopia applications) in the above mentioned directory and generates translation files for each language specified via Qtopia's configure option <tt>languages</tt>. The general naming convention for these files is <tt>&lt;appname&gt;-&lt;your-lang&gt;.ts</tt> (e.g. <tt>sysinfo-zh_CN.ts</tt>).</p>
 <p>In addition to these automatically generated files every language needs a <tt>.directory</tt> file that serves as a description for the language itself. For example, the German <tt>.directory</tt> in <tt>$QPEDIR/i18n/de</tt> looks like this:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaI18N
     Context=German
     [Desktop Entry]
     Name[]=German</pre>
 <p>It contains the name of the language itself as it is presented to the user. To incorporate the new <tt>.directory</tt> file into all translations it is necessary to run make lupdate for a second time. Alternatively you may create the <tt>$QPEDIR/i18n/&lt;your-lang&gt;</tt> directory manually, add the new <tt>.directory</tt> file and run <tt>make lupdate</tt> afterwards.</p>
 <p>As the last step of <tt>make lupdate</tt> the script <tt>$QPEDIR/bin/nct_lupdate</tt> is executed in order to generate translation files for those strings that cannot be found in source code. This includes most config and desktop files in the <tt>$QPEDIR</tt> directory. Each of these config/desktop files must have a Translation group similar to the following one which can be found in <tt>$QPEDIR/apps/Applications/clock.desktop</tt>:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaApplications</pre>
 <p>This causes the generation of the file <tt>QtopiaApplications.ts</tt> in <tt>$QPEDIR/i18n/&lt;your-lang&gt;</tt>. If this file already exists it will be updated without the loss of any existing content.</p>
 <a name="translate"></a><a name="translating-qtopia-using-linguist"></a>
@@ -80,7 +79,7 @@
 <h2>Fonts</h2>
 <p>Qtopia uses Helvetica as the default font, however this font does not specify the characters for languages such as Chinese.</p>
 <p>The configuration file <tt>$QPEDIR/etc/default/FontMap.conf</tt> has to be translated so that the correct font family and size is used for each language. It defines the font which can be selected by users within Qtopia. If this configuration file is empty, Qtopia will use Helvetica font as the default font. Therefore, a valid <tt>FontMap.conf</tt> and <tt>QtopiaDefaults.ts</tt> file is required to suppress Helvetica as the preferred choice. The original <tt>FontMap.conf</tt> looks like this:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaDefaults
     Context=FontMap
     [Map]
@@ -94,7 +93,7 @@
 <li>font size.</li>
 </ol>
 <p>This configuration file is marked for translation. When executing <tt>make lupdate</tt> the build system will create: <tt>$QPEDIR/i18n/&lt;your-lang&gt;/QtopiaDefaults.ts</tt>. Due to its special meaning, the string &quot;small,helvetica,12&quot; cannot be translated as a normal string, for example, a French translation may look like this:</p>
-<pre>    &lt;name&gt;FontMap&lt;/name&gt;
+<pre>&nbsp;   &lt;name&gt;FontMap&lt;/name&gt;
     &lt;message encoding=&quot;UTF-8}{
             &lt;source&gt;Small,helvetica,10&lt;/source&gt;
             &lt;translation&gt;Petit,unifont,11&lt;/translation&gt;
@@ -117,7 +116,7 @@
 <a name="desktop-configuration-file-internationalization"></a>
 <h2>Desktop &amp; Configuration File Internationalization</h2>
 <p>Desktop/Config files (eg. <tt>/opt/Qtopia/apps/Application/&lt;appname&gt;.desktop</tt>) can also be translated. For example, the <tt>texteditor.desktop</tt> file begins with:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaApplications
     Context=Notes
     [Desktop Entry]
@@ -176,6 +175,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

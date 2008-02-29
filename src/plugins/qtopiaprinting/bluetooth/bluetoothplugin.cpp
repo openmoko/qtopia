@@ -26,7 +26,7 @@
 #include <QtopiaIpcEnvelope>
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothlocaldevicemanager.h>
-#include <qbluetoothdeviceselector.h>
+#include <qbluetoothremotedevicedialog.h>
 #include <QPrintEngine>
 #include <QDebug>
 
@@ -67,9 +67,9 @@ public:
             return;
         }
 
-        QBluetoothAddress addr = QBluetoothDeviceSelector::getRemoteDevice(
-                m_deviceSelectorProfiles, m_deviceSelectorFilter );
-        if ( addr.valid() ) {
+        QBluetoothAddress addr = QBluetoothRemoteDeviceDialog::getRemoteDevice(
+                0, m_deviceSelectorProfiles, m_deviceDialogFilter );
+        if ( addr.isValid() ) {
             m_agent = new QBluetoothObexAgent( QBluetoothRemoteDevice( addr ) );
             m_agent->setAutoDelete( true );
             m_agent->send( fileName, mimeType );
@@ -96,9 +96,9 @@ public:
             return;
         }
 
-        QBluetoothAddress addr = QBluetoothDeviceSelector::getRemoteDevice(
-                m_deviceSelectorProfiles, m_deviceSelectorFilter );
-        if ( addr.valid() ) {
+        QBluetoothAddress addr = QBluetoothRemoteDeviceDialog::getRemoteDevice(
+                0, m_deviceSelectorProfiles, m_deviceDialogFilter );
+        if ( addr.isValid() ) {
             m_agent = new QBluetoothObexAgent( QBluetoothRemoteDevice( addr ) );
             m_agent->setAutoDelete( true );
             m_agent->sendHtml( html );
@@ -126,7 +126,7 @@ public:
     }
 
     QBluetoothLocalDevice *m_localDevice;
-    QBluetoothDeviceSelectorFilter m_deviceSelectorFilter;
+    QBluetoothRemoteDeviceDialogFilter m_deviceDialogFilter;
     QSet<SDPProfile> m_deviceSelectorProfiles;
     QBluetoothObexAgent *m_agent;
     QCommDeviceSession *m_session;
@@ -158,7 +158,7 @@ private:
         // show only imaging devices with object push profile
         QSet<QBluetooth::DeviceMajor> devMajors;
         devMajors.insert( Imaging );
-        m_deviceSelectorFilter.setAcceptedDeviceMajors( devMajors );
+        m_deviceDialogFilter.setAcceptedDeviceMajors( devMajors );
         m_deviceSelectorProfiles.insert( ObjectPushProfile );
     }
 };

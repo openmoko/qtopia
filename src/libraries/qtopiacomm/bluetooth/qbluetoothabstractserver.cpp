@@ -52,6 +52,7 @@ public:
 
     bool m_isListening;
     QBluetoothAbstractServer::ServerError m_error;
+    QString m_errorString;
     int m_maxConnections;
     QList<QBluetoothAbstractSocket *> m_pendingConnections;
 
@@ -66,7 +67,8 @@ QBluetoothAbstractServerPrivate::QBluetoothAbstractServerPrivate(QBluetoothAbstr
 {
     m_parent = parent;
     m_isListening = false;
-    m_error = QBluetoothAbstractServer::UnknownError;
+    m_error = QBluetoothAbstractServer::NoError;
+    m_errorString = QString();
     m_maxConnections = 1;
     m_readNotifier = 0;
 }
@@ -124,7 +126,7 @@ void QBluetoothAbstractServerPrivate::incomingConnection()
     QBluetoothAbstractSocket in QBluetoothAbstractSocket::ConnectedState that you can
     use for communicating with the client.
 
-    If an error occurs, lastError() returns the type of error that has occurred.
+    If an error occurs, error() returns the type of error that has occurred.
 
     Calling close() makes the QBluetoothAbstractServer stop listening for incoming
     connections.
@@ -174,7 +176,7 @@ QBluetoothAbstractServer::~QBluetoothAbstractServer()
     server socket that will be used for accepting connections.  The
     \a socket parameter contains the socket file descriptor, the
     \a addr parameter contains the sockaddr structure of the address
-    to bind and listen on.  The \a len contains the length of
+    to bind and listen on and the \a len parameter contains the length of
     the \a addr structure.
 
     \sa isListening()
@@ -189,16 +191,18 @@ bool QBluetoothAbstractServer::initiateListen(int socket, sockaddr *addr, int le
     ::fcntl(m_data->m_fd, F_SETFD, FD_CLOEXEC);
 
     if (bind(m_data->m_fd, addr, len) < 0) {
-        qWarning("QBluetoothScoServer::listen couldn't bind server...");
+        qWarning("QBluetoothAbstractServer::listen couldn't bind server...");
         ::close(m_data->m_fd);
-        m_data->m_error = QBluetoothAbstractServer::BindError;
+        m_data->m_fd = -1;
+        setError(QBluetoothAbstractServer::BindError);
         return false;
     }
 
     if (::listen(m_data->m_fd, 1) < 0) {
-        qWarning("QBluetoothScoServer::listen Couldn't listen... %d %s", errno, strerror(errno));
+        qWarning("QBluetoothAbstractServer::listen Couldn't listen... %d %s", errno, strerror(errno));
         ::close(m_data->m_fd);
-        m_data->m_error = QBluetoothAbstractServer::ListenError;
+        m_data->m_fd = -1;
+        setError(QBluetoothAbstractServer::ListenError);
         return false;
     }
 
@@ -247,9 +251,17 @@ void QBluetoothAbstractServer::close()
 /*!
     Returns the last error that has occurred.
  */
-QBluetoothAbstractServer::ServerError QBluetoothAbstractServer::lastError() const
+QBluetoothAbstractServer::ServerError QBluetoothAbstractServer::error() const
 {
     return m_data->m_error;
+}
+
+/*!
+    Returns a human-readable description of the last device error that occurred.
+*/
+QString QBluetoothAbstractServer::errorString() const
+{
+    return m_data->m_errorString;
 }
 
 /*!
@@ -265,7 +277,7 @@ int QBluetoothAbstractServer::maxPendingConnections() const
 
 /*!
     Sets the maximum number of pending accepted connections to \a
-    numConnections. QBluetoothScoServer will accept no more than \a
+    numConnections. QBluetoothAbstractServer will accept no more than \a
     numConnections incoming connections before
     nextPendingConnection() is called. By default, the limit is 1
     pending connection.
@@ -291,7 +303,7 @@ bool QBluetoothAbstractServer::hasPendingConnections() const
     object.
 
     The socket is created as a child of the server, which means that
-    it is automatically deleted when the QBluetoothScoServer object is
+    it is automatically deleted when the QBluetoothAbstractServer object is
     destroyed. It is still a good idea to delete the object
     explicitly when you are done with it, to avoid wasting memory.
 
@@ -365,7 +377,7 @@ bool QBluetoothAbstractServer::waitForNewConnection(int msecs, bool *timedOut)
                 if (rv == EINTR)
                     continue;
                 // Otherwise, close the socket
-                m_data->m_error = QBluetoothAbstractServer::UnknownError;
+                setError(QBluetoothAbstractServer::UnknownError);
                 close();
                 return false;
         }
@@ -373,11 +385,34 @@ bool QBluetoothAbstractServer::waitForNewConnection(int msecs, bool *timedOut)
 }
 
 /*!
-    Sets the last error that has occurred to \a error.
+    Sets the last error that has occurred to \a serverError.
 */
-void QBluetoothAbstractServer::setError(const QBluetoothAbstractServer::ServerError &error)
+void QBluetoothAbstractServer::setError(QBluetoothAbstractServer::ServerError serverError)
 {
-    m_data->m_error = error;
+    m_data->m_error = serverError;
+
+    switch (serverError) {
+        case NoError:
+            m_data->m_errorString = QString();
+            break;
+
+        case ResourceError:
+            m_data->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothAbstractServer", "Out of resources"));
+            break;
+
+        case ListenError:
+            m_data->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothAbstractServer", "Could not listen on socket"));
+            break;
+
+        case BindError:
+            m_data->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothAbstractServer", "Could not bind socket"));
+            break;
+
+        default:
+            m_data->m_errorString = QLatin1String(QT_TRANSLATE_NOOP("QBluetoothAbstractServer",
+                    "Unknown error"));
+            break;
+    };
 }
 
 /*!

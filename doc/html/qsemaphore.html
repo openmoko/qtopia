@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/thread/qsemaphore.cpp -->
 <head>
   <title>Qt 4.2: QSemaphore Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -47,9 +48,9 @@
 
  sem.tryAcquire(1);      <span class="comment">// sem.available() == 9, returns true</span>
  sem.tryAcquire(250);    <span class="comment">// sem.available() == 9, returns false</span></pre>
-<p>A typical application of semaphores is for controlling access to a circular buffer shared by a producer thread and a consumer thread. The Semaphores example shows how to use QSemaphore to solve that problem.</p>
+<p>A typical application of semaphores is for controlling access to a circular buffer shared by a producer thread and a consumer thread. The <a href="threads-semaphores.html">Semaphores</a> example shows how to use QSemaphore to solve that problem.</p>
 <p>A non-computing example of a semaphore would be dining at a restaurant. A semaphore is initialized with the number of chairs in the restaurant. As people arrive, they want a seat. As seats are filled, <a href="qsemaphore.html#available">available</a>() is decremented. As people leave, the <a href="qsemaphore.html#available">available</a>() is incremented, allowing more people to enter. If a party of 10 people want to be seated, but there are only 9 seats, those 10 people will wait, but a party of 4 people would be seated (taking the available seats to 5, making the party of 10 people wait longer).</p>
-<p>See also <a href="qmutex.html">QMutex</a>, <a href="qwaitcondition.html">QWaitCondition</a>, <a href="qthread.html">QThread</a>, and Semaphores Example.</p>
+<p>See also <a href="qmutex.html">QMutex</a>, <a href="qwaitcondition.html">QWaitCondition</a>, <a href="qthread.html">QThread</a>, and <a href="threads-semaphores.html">Semaphores Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QSemaphore"></a>QSemaphore::QSemaphore ( int <i>n</i> = 0 )</h3>
@@ -83,6 +84,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

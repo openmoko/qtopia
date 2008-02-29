@@ -53,7 +53,7 @@ KILLPROGS="qpe quicklauncher qss mediaplayer sipagent phonebounce modem_keep_ali
 
 touch /tmp/restart-qtopia
 while [ -e /tmp/restart-qtopia ]; do
-    killall $KILLPROGS 2>/dev/null
+    kill $( pidof $KILLPROGS ) 2>/dev/null
 
     # load startup flags from conf file
     eval `startupflags.sh`
@@ -89,7 +89,8 @@ while [ -e /tmp/restart-qtopia ]; do
 
     chvol SYSTEM 100
     chvol CALL 60
-    qpe 2>&1 | logger -t 'Qtopia'
+
+    qpe 2>&1 | logger -p local5.notice -t 'Qtopia'
 done
 
 gifanim $QTOPIA_TOOLS/splash-shutdown-exit.gif &

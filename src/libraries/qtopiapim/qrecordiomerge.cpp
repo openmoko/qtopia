@@ -26,6 +26,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QStringList>
+#include <QDebug>
 
 #include <qtopiasql.h>
 
@@ -85,237 +86,6 @@ bool lessThan(const QVariant &left, const QVariant &right) {
     return false;
 }
 
-/*!
-  \internal
-  \class QRecordIOMerge
-  \module qpepim
-  \ingroup pim
-  \brief The QRecordIOMerge class provides a way of merging records from multiple
-  subclasses of QRecordIO.
-
-  The QRecordIOMerge class provides a way of merging records from multiple
-  subclasses of QRecordIO.  It does this in a not biased way and with much
-  caching.
-
-  Caching is incremental.  Not recommended if any QRecordIO is likely to exceed
-  10000 items, but is useful for multiple medium level lists.
-*/
-
-/*!
-  Construct an QRecordIOMerge object with parent \a parent.
-*/
-QRecordIOMerge::QRecordIOMerge(QObject *parent)
-    : QObject(parent), mCount(0), mIndexed(0)
-{
-    cachingTimer = new QTimer(this);
-    cachingTimer->setSingleShot(true);
-    connect(cachingTimer, SIGNAL(timeout()), this, SLOT(indexNext()));
-}
-
-/*!
-  \internal
-  Destroy the QRecordIOMerge object.
-*/
-QRecordIOMerge::~QRecordIOMerge()
-{
-}
-
-/*!
-  \internal
-  Add model \a m to the list of storage models to merge between.
-*/
-void QRecordIOMerge::addModel(const QRecordIO *m)
-{
-    QVector<int> r2i(m->count());
-    rowToIndex.insert(m, r2i);
-    mModelIndexed.insert(m, 0);
-
-    connect(m, SIGNAL(recordsUpdated()),
-            this, SLOT(clearIndex()));
-
-    // NOTE: can use reserve and capacity to
-    // fine tune vector memory allocation.
-    // for now, trust QVector.
-    mCount = mCount + r2i.size();
-
-    indToRow.resize(mCount);
-    clearIndex();
-
-    indexNext();
-}
-
-/*!
-  \internal
-  Removes model \a m from the list of storage models to merge between.
-*/
-void QRecordIOMerge::removeModel(const QRecordIO *m)
-{
-    if (mModelIndexed.contains(m)) {
-        // don't assume m->count == cached count.
-        mCount -= rowToIndex[m].size();
-
-        mModelIndexed.remove(m);
-        rowToIndex.remove(m);
-        indToRow.resize(mCount);
-        clearIndex();
-
-        indexNext();
-    }
-}
-
-/*!
-  \internal
-  Returns the model for which the record at \a index is stored.
-*/
-const QRecordIO *QRecordIOMerge::model(int index) const
-{
-    //assert(index >= 0);
-    if (index < mIndexed)
-        return indToRow[index].model;
-    return 0;
-}
-
-/*!
-  \internal
-  Returns the row in the model for which the record at \a index is stored.
-*/
-int QRecordIOMerge::row(int index) const
-{
-    if (index < mIndexed)
-        return indToRow[index].row;
-    return -1;
-}
-
-/*!
-  \internal
-  Returns the index that the record at \a row in model \a m is shown at
-  when merged.
-*/
-int QRecordIOMerge::index(const QRecordIO *m, int row) const
-{
-    if (row < 0)
-        return -1;
-
-    QVector<int> itr = rowToIndex[m];
-    int idto = mModelIndexed[m];
-    if (row >= idto)
-        return -1;
-
-    return itr[row];
-}
-
-/*!
-  \internal
-  Returns the index that the record with identity \a id is shown at.
-*/
-int QRecordIOMerge::index(const QUniqueId &id) const
-{
-    QMapIterator<const QRecordIO*, int> it(mModelIndexed);
-    while(it.hasNext()) {
-        it.next();
-        const QRecordIO *m = it.key();
-        if (m->contains(id))
-            return index(m, m->row(id));
-    }
-    return -1;
-}
-
-/*!
-  \internal
-  clears the index cache and starts re-caching.
-*/
-void QRecordIOMerge::clearIndex()
-{
-    mIndexed = 0;
-    QMutableMapIterator<const QRecordIO*, int> it(mModelIndexed);
-    while(it.hasNext()) {
-        it.next();
-        it.setValue(0);
-    }
-    if (mCount > 0)
-        indexNext();
-    else
-        emit reset();
-}
-
-/*!
-  Starts caching next set of indexes
-*/
-void QRecordIOMerge::indexNext()
-{
-    int to = mIndexed + cacheincrement;
-    int from = mIndexed;
-    if (to > indToRow.size())
-        to = indToRow.size();
-
-    // one of the items at mModelIndexed will be least.
-    // it'd be nice to have an order.
-    QList<const QRecordIO *> orderedModels;
-    // create list of ordered models
-
-    QMapIterator<const QRecordIO*, int> it(mModelIndexed);
-    while(it.hasNext()) {
-        it.next();
-        const QRecordIO *m = it.key();
-        int r = it.value();
-        if (r >= rowToIndex[m].size())
-            continue;
-        QMutableListIterator<const QRecordIO *> lit(orderedModels);
-        QVariant key = m->key(r);
-        while(lit.hasNext()) {
-            const QRecordIO *compare = lit.next();
-            int cr = mModelIndexed[compare];
-            QVariant ckey = compare->key(cr);
-            if (lessThan(key, ckey) || (ckey == key && m->id(r) < compare->id(cr))) {
-                lit.previous();
-                break;
-            }
-        }
-        lit.insert(m);
-    }
-
-    // pull front.
-    // index,
-    // pull next from front model
-    // insert into list
-    // repeat.
-
-    while (mIndexed < to) {
-        // pull front
-        const QRecordIO *m = orderedModels.takeFirst();
-        int r = mModelIndexed[m];
-        // index
-        indToRow[mIndexed].row = r;
-        indToRow[mIndexed].model = m;
-        rowToIndex[m][r] = mIndexed;
-        mIndexed++;
-        r++;
-        mModelIndexed[m] = r;
-
-        if (r >= rowToIndex[m].size())
-            continue;
-
-        QVariant key = m->key(r);
-
-        QMutableListIterator<const QRecordIO *> lit(orderedModels);
-        while(lit.hasNext()) {
-            const QRecordIO *compare = lit.next();
-            int cr = mModelIndexed[compare];
-            QVariant ckey = compare->key(cr);
-            if (lessThan(key, ckey) || (ckey == key && m->id(r) < compare->id(cr))) {
-                lit.previous();
-                break;
-            }
-        }
-        lit.insert(m);
-    }
-
-    if (to < indToRow.size())
-        cachingTimer->start(0);
-
-    emit rowsChanged(from, to);
-}
-
 //////////////////////////
 // QBiasedRecordIOMerge
 /////////////////////////
@@ -344,7 +114,8 @@ void QRecordIOMerge::indexNext()
   Construct a QBiasedRecordIOMerge object with parent \a parent.
 */
 QBiasedRecordIOMerge::QBiasedRecordIOMerge(QObject *parent)
-    : QObject(parent), mPrimary(0), lastIndex(-1), lastRow(-1), lastModel(0)
+    : QObject(parent), mPrimary(0), lastIndex(-1), lastRow(-1), lastModel(0),
+    modelChanged(false)
 {
     rebuildTimer = new QTimer(this);
     rebuildTimer->setSingleShot(true);
@@ -366,7 +137,7 @@ QBiasedRecordIOMerge::~QBiasedRecordIOMerge()
   \internal
   Sets the primary model to \a model.
 */
-void QBiasedRecordIOMerge::setPrimaryModel(const QRecordIO *model)
+void QBiasedRecordIOMerge::setPrimaryModel(QRecordIO *model)
 {
     if (mPrimary)
         removePrimaryModel();
@@ -374,6 +145,8 @@ void QBiasedRecordIOMerge::setPrimaryModel(const QRecordIO *model)
     mPrimary = model;
 
     connect(mPrimary, SIGNAL(recordsUpdated()),
+            this, SLOT(updateCacheNow()));
+    connect(mPrimary, SIGNAL(filtersUpdated()),
             this, SLOT(updateCache()));
     updateCache();
 }
@@ -387,6 +160,8 @@ void QBiasedRecordIOMerge::removePrimaryModel()
 {
     if (mPrimary) {
         disconnect(mPrimary, SIGNAL(recordsUpdated()),
+                this, SLOT(updateCacheNow()));
+        disconnect(mPrimary, SIGNAL(filtersUpdated()),
                 this, SLOT(updateCache()));
         mPrimary = 0;
         updateCache();
@@ -398,12 +173,14 @@ void QBiasedRecordIOMerge::removePrimaryModel()
   Adds the secondary model \a model.  Count for the model should be
   under 1000 items.
 */
-void QBiasedRecordIOMerge::addSecondaryModel(const QRecordIO *model)
+void QBiasedRecordIOMerge::addSecondaryModel(QRecordIO *model)
 {
     QVector<int> lookup(model->count());
     mSecondaries.insert(model, lookup);
-    connect(model, SIGNAL(recordsUpdated()),
+    connect(model, SIGNAL(filtersUpdated()),
             this, SLOT(updateCache()));
+    connect(model, SIGNAL(recordsUpdated()),
+            this, SLOT(updateCacheNow()));
     updateCache();
 }
 
@@ -411,10 +188,12 @@ void QBiasedRecordIOMerge::addSecondaryModel(const QRecordIO *model)
   \internal
   Removes the secondary model \a model.
 */
-void QBiasedRecordIOMerge::removeSecondaryModel(const QRecordIO *model)
+void QBiasedRecordIOMerge::removeSecondaryModel(QRecordIO *model)
 {
-    disconnect(model, SIGNAL(recordsUpdated()),
+    disconnect(model, SIGNAL(filtersUpdated()),
             this, SLOT(updateCache()));
+    disconnect(model, SIGNAL(recordsUpdated()),
+            this, SLOT(updateCacheNow()));
     mSecondaries.remove(model);
     updateCache();
 }
@@ -423,9 +202,9 @@ void QBiasedRecordIOMerge::removeSecondaryModel(const QRecordIO *model)
 /*!
   Returns the list of models stored used for merging.
 */
-QList<const QRecordIO*> QBiasedRecordIOMerge::models() const
+QList<QRecordIO*> QBiasedRecordIOMerge::models() const
 {
-    QList<const QRecordIO *> result;
+    QList<QRecordIO *> result;
     if (mPrimary)
         result.append(mPrimary);
 
@@ -443,8 +222,8 @@ int QBiasedRecordIOMerge::count() const
         count = mPrimary->count();
     else
         count = 0;
-    QList<const QRecordIO *> others = mSecondaries.keys();
-    foreach(const QRecordIO *model, others) {
+    QList<QRecordIO *> others = mSecondaries.keys();
+    foreach(QRecordIO *model, others) {
         count += model->count();
     }
     return count;
@@ -454,7 +233,7 @@ int QBiasedRecordIOMerge::count() const
   \internal
   Returns the model for which the record at \a index is stored.
 */
-const QRecordIO *QBiasedRecordIOMerge::model(int index) const
+QRecordIO *QBiasedRecordIOMerge::model(int index) const
 {
     if (lastIndex == index)
         return lastModel;
@@ -472,8 +251,8 @@ void QBiasedRecordIOMerge::lookupRowModel(int index) const
 
     /* for each model, work out how many are at or before index
        That gives offset into primary for last compare */
-    QMapIterator<const QRecordIO *, QVector<int> > it(mSecondaries);
-    QMap<const QRecordIO *, int> eqivs;
+    QMapIterator<QRecordIO *, QVector<int> > it(mSecondaries);
+    QMap<QRecordIO *, int> eqivs;
     int earlier = 0;
     while(it.hasNext()) {
         it.next();
@@ -516,7 +295,7 @@ int QBiasedRecordIOMerge::row(int index) const
   Returns the index that the record at \a row in model \a m is shown at
   when merged.
 */
-int QBiasedRecordIOMerge::index(const QRecordIO *model, int r) const
+int QBiasedRecordIOMerge::index(QRecordIO *model, int r) const
 {
     if (mSecondaries.contains(model))
         return mSecondaries[model][r];
@@ -551,10 +330,10 @@ int QBiasedRecordIOMerge::index(const QUniqueId &id) const
     if (mPrimary && mPrimary->contains(id))
         return index(mPrimary, mPrimary->row(id));
 
-    QMapIterator<const QRecordIO*, QVector<int> > it(mSecondaries);
+    QMapIterator<QRecordIO*, QVector<int> > it(mSecondaries);
     while(it.hasNext()) {
         it.next();
-        const QRecordIO *m = it.key();
+        QRecordIO *m = it.key();
         if (m->contains(id))
             return index(m, m->row(id));
     }
@@ -569,11 +348,24 @@ int QBiasedRecordIOMerge::index(const QUniqueId &id) const
 
   This is because rebuilds can be expensive and if all models
   change will result in unnecessary rebuilds
-*/
+ */
 void QBiasedRecordIOMerge::updateCache()
 {
+    modelChanged = true;
     if (!rebuildTimer->isActive())
         rebuildTimer->start();
+}
+
+/*!
+  \internal
+  Forces the index merge cache to be rebuilt immediately.
+
+  This can be expensive.
+ */
+void QBiasedRecordIOMerge::updateCacheNow()
+{
+    modelChanged = true;
+    rebuildCache();
 }
 
 /*!
@@ -584,16 +376,18 @@ void QBiasedRecordIOMerge::updateCache()
 */
 void QBiasedRecordIOMerge::rebuildCache()
 {
-    if (rebuildTimer->isActive())
-        rebuildTimer->stop();
+    if (!modelChanged)
+        return;
+    modelChanged = false;
+    rebuildTimer->stop();
 
     lastIndex = -1;
     lastRow = -1;
     lastModel = 0;
     mSkips.clear();
 
-    QMutableMapIterator<const QRecordIO *, QVector<int> > it(mSecondaries);
-    QMap<const QRecordIO *,int> orderedRows;
+    QMutableMapIterator<QRecordIO *, QVector<int> > it(mSecondaries);
+    QMap<QRecordIO *,int> orderedRows;
     while(it.hasNext()) {
         it.next();
         QVector<int> v = it.value();
@@ -602,21 +396,21 @@ void QBiasedRecordIOMerge::rebuildCache()
         orderedRows.insert(it.key(), 0);
     }
 
-    QList<const QRecordIO *> orderedModels;
+    QList<QRecordIO *> orderedModels;
 
     it.toFront();
     while(it.hasNext()) {
         it.next();
-        const QRecordIO *m = it.key();
+        QRecordIO *m = it.key();
         int r = orderedRows[m];
         if (r >= mSecondaries[m].count()) {
             continue;
         }
 
-        QMutableListIterator<const QRecordIO *> lit(orderedModels);
+        QMutableListIterator<QRecordIO *> lit(orderedModels);
         QVariant key = m->key(r);
         while(lit.hasNext()) {
-            const QRecordIO *compare = lit.next();
+            QRecordIO *compare = lit.next();
             int cr = orderedRows[compare];
             QVariant ckey = compare->key(cr);
             if (lessThan(key, ckey) || (ckey == key && m->id(r) < compare->id(cr))) {
@@ -634,7 +428,7 @@ void QBiasedRecordIOMerge::rebuildCache()
     int skipped = 0;
     while (orderedModels.count()) {
         // pull front
-        const QRecordIO *m = orderedModels.takeFirst();
+        QRecordIO *m = orderedModels.takeFirst();
         int r = orderedRows[m];
 
         QVariant key = m->key(r);
@@ -657,9 +451,9 @@ void QBiasedRecordIOMerge::rebuildCache()
 
         key = m->key(r);
 
-        QMutableListIterator<const QRecordIO *> lit(orderedModels);
+        QMutableListIterator<QRecordIO *> lit(orderedModels);
         while(lit.hasNext()) {
-            const QRecordIO *compare = lit.next();
+            QRecordIO *compare = lit.next();
             int cr = orderedRows[compare];
             QVariant ckey = compare->key(cr);
             if (lessThan(key, ckey) || (ckey == key && m->id(r) < compare->id(cr))) {
@@ -796,6 +590,19 @@ bool QBiasedRecordIOMerge::compare(const QVariant &left, const QVariant &right)
   \fn void QRecordIO::recordsUpdated()
   \internal
 
-  This signal should be emitted whenever the filtered contents of
-  the QRecordIO are changed.
+  This signal should be emitted whenever an actual record is
+  updated (via add, remove, update etc).
+
+  \sa filtersUpdated()
+ */
+
+/*!
+  \fn void QRecordIO::filtersUpdated()
+  \internal
+
+  This signal should be emitted whenever the set of filtered
+  records of the QRecordIO are changed (via changing filters,
+  sources or ranges etc).
+
+  \sa recordsUpdated()
 */

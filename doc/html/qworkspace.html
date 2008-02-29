@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qworkspace.cpp -->
 <head>
   <title>Qt 4.2: QWorkspace Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -48,7 +49,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -90,14 +91,19 @@
 <p>The QWorkspace widget provides a workspace window that can be used in an MDI application.</p>
 <p>Multiple Document Interface (MDI) applications are typically composed of a main window containing a menu bar, a toolbar, and a central QWorkspace widget. The workspace itself is used to display a number of child windows, each of which is a widget.</p>
 <p>The workspace itself is an ordinary Qt widget. It has a standard constructor that takes a parent widget. Workspaces can be placed in any layout, but are typically given as the central widget in a <a href="qmainwindow.html">QMainWindow</a>:</p>
-<pre>     ...</pre>
+<pre> MainWindow::MainWindow()
+ {
+     workspace = new QWorkspace;
+     setCentralWidget(workspace);
+     ...
+ }</pre>
 <p>Child windows (MDI windows) are standard Qt widgets that are inserted into the workspace with <a href="qworkspace.html#addWindow">addWindow</a>(). As with top-level widgets, you can call functions such as <a href="qwidget.html#show">show</a>(), <a href="qwidget.html#hide">hide</a>(), <a href="qwidget.html#showMaximized">showMaximized</a>(), and <a href="qwidget.html#windowTitle-prop">setWindowTitle</a>() on a child window to change its appearance within the workspace. You can also provide widget flags to determine the layout of the decoration or the behavior of the widget itself.</p>
 <p>To change or retrieve the geometry of a child window, you must operate on its <a href="qwidget.html#parentWidget">parentWidget</a>(). The <a href="qwidget.html#parentWidget">parentWidget</a>() provides access to the decorated frame that contains the child window widget. When a child window is maximised, its decorated frame is hidden. If the top-level widget contains a menu bar, it will display the maximised window's operations menu to the left of the menu entries, and the window's controls to the right.</p>
 <p>A child window becomes active when it gets the keyboard focus, or when <a href="qwidget.html#setFocus">setFocus</a>() is called. The user can activate a window by moving focus in the usual ways, for example by clicking a window or by pressing Tab. The workspace emits a signal <a href="qworkspace.html#windowActivated">windowActivated</a>() when the active window changes, and the function <a href="qworkspace.html#activeWindow">activeWindow</a>() returns a pointer to the active child window, or 0 if no window is active.</p>
 <p>The convenience function <a href="qworkspace.html#windowList">windowList</a>() returns a list of all child windows. This information could be used in a popup menu containing a list of windows, for example. This feature is also available as part of the <a href="http://www.trolltech.com/products/qt/addon/solutions/catalog/4/Widgets/qtwindowlistmenu/">Window Menu</a> Solution.</p>
 <p>QWorkspace provides two built-in layout strategies for child windows: <a href="qworkspace.html#cascade">cascade</a>() and <a href="qworkspace.html#tile">tile</a>(). Both are slots so you can easily connect menu entries to them.</p>
 <p align="center"><img src="images/qworkspace-arrange.png" /></p><p>If you want your users to be able to work with child windows larger than the visible workspace area, set the <a href="qworkspace.html#scrollBarsEnabled-prop">scrollBarsEnabled</a> property to true.</p>
-<p>See also <a href="porting4.html#qdockwindow">QDockWindow</a> and MDI Example.</p>
+<p>See also <a href="porting4.html#qdockwindow">QDockWindow</a> and <a href="mainwindows-mdi.html">MDI Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="WindowOrder-enum"></a>enum QWorkspace::WindowOrder</h3>
@@ -180,6 +186,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

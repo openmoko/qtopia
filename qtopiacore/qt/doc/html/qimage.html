@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/image/qimage.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/image/qimage.cpp -->
 <head>
   <title>Qt 4.2: QImage Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -108,7 +108,7 @@
 <li><div class="fn"/>bool <b><a href="qimage.html#operator-eq-eq">operator==</a></b> ( const QImage &amp; <i>image</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -120,8 +120,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qimage.html#operator-lt-lt-66">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QImage &amp; <i>image</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qimage.html#operator-gt-gt-36">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QImage &amp; <i>image</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qimage.html#operator-lt-lt-67">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QImage &amp; <i>image</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qimage.html#operator-gt-gt-37">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QImage &amp; <i>image</i> )</li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -244,7 +244,7 @@
 <tr valign="top" class="even"><td><a href="qimage.html#setColorTable">setColorTable</a>()</td><td>Sets the color table used to translate color indexes. Only monochrome and 8-bit formats.</td></tr>
 <tr valign="top" class="odd"><td><a href="qimage.html#setNumColors">setNumColors</a>()</td><td>Resizes the color table. Only monochrome and 8-bit formats.</td></tr>
 </table></p>
-<p>See also <a href="qimagereader.html">QImageReader</a>, <a href="qimagewriter.html">QImageWriter</a>, <a href="qpixmap.html">QPixmap</a>, <a href="qsvgrenderer.html">QSvgRenderer</a>, Image Composition Example, Image Viewer Example, Scribble Example, and Pixelator Example.</p>
+<p>See also <a href="qimagereader.html">QImageReader</a>, <a href="qimagewriter.html">QImageWriter</a>, <a href="qpixmap.html">QPixmap</a>, <a href="qsvgrenderer.html">QSvgRenderer</a>, <a href="painting-imagecomposition.html">Image Composition Example</a>, <a href="widgets-imageviewer.html">Image Viewer Example</a>, <a href="widgets-scribble.html">Scribble Example</a>, and <a href="itemviews-pixelator.html">Pixelator Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Format-enum"></a>enum QImage::Format</h3>
@@ -553,6 +553,12 @@
 <p>Sets the image text to the given <i>text</i> and associate it with the given <i>key</i>.</p>
 <p>If you just want to store a single text block (i.e., a &quot;comment&quot; or just a description), you can either pass an empty key, or use a generic key like &quot;Description&quot;.</p>
 <p>The image text is embedded into the image data when you call <a href="qimage.html#save">save</a>() or <a href="qimagewriter.html#write">QImageWriter::write</a>().</p>
+<p>Not all image formats support embedded text. You can find out if a specific image or format supports embedding text by using <a href="qimagewriter.html#supportsOption">QImageWriter::supportsOption</a>(). We give an example:</p>
+<pre>         QImageWriter writer;
+         writer.setFormat(&quot;png&quot;);
+         if (writer.supportsOption(QImageIOHandler::Description))
+             qDebug() &lt;&lt; &quot;Png supports embedded text&quot;;</pre>
+<p>You can use <a href="qimagewriter.html#supportedImageFormats">QImageWriter::supportedImageFormats</a>() to find out which image formats are available to you.</p>
 <p>See also <a href="qimage.html#text">text</a>() and <a href="qimage.html#textKeys">textKeys</a>().</p>
 <h3 class="fn"><a name="size"></a><a href="qsize.html">QSize</a> QImage::size () const</h3>
 <p>Returns the size of the image, i.e. its <a href="qimage.html#width">width</a>() and <a href="qimage.html#height">height</a>().</p>
@@ -601,11 +607,11 @@
 <p>See also <a href="qimage.html#operator-eq">operator=</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-66"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QImage &amp; <i>image</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-67"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QImage &amp; <i>image</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given <i>image</i> to the given <i>stream</i> as a PNG image, or as a BMP image if the stream's version is 1. Note that writing the stream to a file will not produce a valid image file.</p>
 <p>See also <a href="qimage.html#save">QImage::save</a>() and <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-36"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QImage &amp; <i>image</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-37"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QImage &amp; <i>image</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads an image from the given <i>stream</i> and stores it in the given <i>image</i>.</p>
 <p>See also <a href="qimage.html#load">QImage::load</a>() and <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
@@ -783,6 +789,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -56,6 +56,7 @@ public:
     void showInputMethod(bool);
     void setInputMethod(const QString &);
     void setInputMethod(QtopiaInputMethod *);
+    void setNextInputMethod();
 
     void sort();
     uint count() const { return list.count(); }
@@ -68,6 +69,7 @@ public slots:
     void updateIMMenuAction(bool addToCurrentMenu);
     void refreshIMMenuAction();
     void showChoice( bool ); //not the preferred way to activate the selector
+    void showList();
 signals:
     // some are auto activated, dep on type.
     void activated(QtopiaInputMethod *);
@@ -75,7 +77,6 @@ signals:
     void inputWidgetShown(bool);
 
 private slots:
-    void showList();
     void focusChanged(QWidget* old, QWidget* now);
 
 private:
@@ -99,6 +100,7 @@ class InputMethods : public QWidget
     Q_OBJECT
 public:
     enum IMType { Any=0, Mouse=1, Keypad=2 };
+    enum SystemMenuItemId { NextInputMethod =-2, ChangeInputMethod =-3};
 
     InputMethods( QWidget *, IMType=Any );
     ~InputMethods();
@@ -118,6 +120,8 @@ public slots:
     void showInputMethod(const QString& id);
     void showInputMethod();
     void hideInputMethod();
+    void setNextInputMethod();
+    void changeInputMethod();
 signals:
     void inputToggled( bool on );
     void visibilityChanged();
@@ -166,6 +170,9 @@ public slots:
     void hideInputMethod();
     void showInputMethod();
     void activateMenuItem(int v);
+    void setInputMethod(const QString &inputMethodName);
+    void setNextInputMethod();
+    void changeInputMethod();
 
 private:
     InputMethods *parent;

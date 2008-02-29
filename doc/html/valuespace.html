@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qtopia Value Space</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Qtopia Value Space</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -19,7 +18,7 @@
 <a name="overview"></a>
 <h3>Overview</h3>
 <p>The Qtopia Value Space unifies various sources of hierarchical data into a single consistent model. Conceptually the Value Space is a hierarchical tree of which each node or leaf can optionally contain a <a href="qvariant.html">QVariant</a> value. A serialized version of a simple example Value Space might look like this.</p>
-<pre>    /Device/Buttons = 3
+<pre>&nbsp;   /Device/Buttons = 3
     /Device/Buttons/1/Name = Context
     /Device/Buttons/1/Usable = true
     /Device/Buttons/2/Name = Select
@@ -49,7 +48,7 @@
 <p>The INI layer maps INI files from disk into the Value Space. The INI layer supports arbitrary mappings, fallback paths and partial change notification.</p>
 <p>As the unified path structure of the Value Space doesn't allow the INI layer to transparently determine which INI file to access off disk, a INI layer configuration file (an INI file itself) is used to dictate how INI files are located. The INI file identified by <tt>Trolltech/IniValueSpace</tt> using the <a href="qsettings.html">QSettings</a> resolution rules is used for this purpose.</p>
 <p>The general form of the INI layer configuration file is:</p>
-<pre>    [General]
+<pre>&nbsp;   [General]
     Translations=&lt;Directory to INI translations&gt;
     LanguageItem=&lt;Value Space Item for current language&gt;
     Mappings=&lt;Number of mappings that follow&gt;
@@ -64,19 +63,19 @@
 <p>The <tt>General/Mappings</tt> key simply specifies the number of mappings that follow, which are grouped as <tt>Mapping0</tt> - <tt>Mapping&lt;n&gt;</tt>. Each mapping consists of a single required field, <tt>ValueSpacePath</tt>, and a number of optional and interdependant keys.</p>
 <p>The {ValueSpacePath} key specifies the point of mapping in the value space. This is called a &quot;terminal&quot; point. There may be only a single mapping for each distinct terminal point. Two <tt>/Device</tt> mappings are not allowed, but a <tt>/Device</tt> and a <tt>/Device/Buttons</tt> mapping is fine. Each terminal mapping is either a &quot;depth mapping&quot; or a &quot;file mapping&quot;.</p>
 <p>File mappings are identified by the lack of the <tt>FileSystemExtension</tt> and <tt>DirectoryDepth</tt> keys. File mappings map a single INI file to a single Value Space node. For example, in following mapping</p>
-<pre>    [Mapping0]
+<pre>&nbsp;   [Mapping0]
     ValueSpacePath=/Device/Buttons
     FileSystemPath=/opt/Qtopia/etc/defaultbuttons.conf</pre>
 <p>if the <tt>/opt/Qtopia/etc/defaultbuttons.conf</tt> file contained a <tt>Mode/Type</tt> key, the corresponding Value Space item <tt>/Device/Buttons/Mode/Type</tt> would exist.</p>
 <p>Using the FileSystemPaths list, fallback file mappings may be created. For example</p>
-<pre>    [Mapping0]
+<pre>&nbsp;   [Mapping0]
     ValueSpacePath=/Device/Buttons
     FileSystemPaths=2
     FileSystemPath0=/tmp/qtembedded-0/defaultbuttons.conf
     FileSystemPath1=/opt/Qtopia/etc/defaultbuttons.conf</pre>
 <p>will first attempt to map <tt>/tmp/qtembedded-0/defaultbuttons.conf</tt> and then, if this doesn't exist, <tt>/opt/Qtopia/etc/defaultbuttons.conf</tt>. Fallback mappings completely obscure each other. That is, the two files <tt>/tmp/qtembedded-0/defaultbuttons.conf</tt> and <tt>/opt/Qtopia/etc/defaultbuttons.conf</tt> are not unified, but whichever exists is used and the other ignored. Fallbacks are monitored for change, so if the <tt>/tmp/qtembedded-0/defaultbuttons.conf</tt> file is created sometime later the INI layer will update accordingly.</p>
 <p>Depth mappings allow groups of ini files to be mapped into the Value Space dynamically. Depth mappings are identified by the presence of the <tt>FileExtension</tt> key. In the case of depth mappings, the <tt>ValueSpacePath</tt> point specifies the beginning of the mapping. The next <tt>DirectoryDepth</tt> sub-paths are treated as directory specifiers, and the subsequent sub-path a file name with the <tt>FileSystemExtension</tt> extension. For example</p>
-<pre>    [Mapping0]
+<pre>&nbsp;   [Mapping0]
     ValueSpacePath=/Applications
     FileSystemPath=/opt/Qtopia/apps
     FileSystemExtension=desktop
@@ -89,7 +88,7 @@
     DirectoryDepth=0</pre>
 <p>creates two mappings. In the above both the Value Space items <tt>/Applications/Games/parashoot</tt> and <tt>/GamesApplications/parashoot</tt> map to the <tt>/opt/Qtopia/apps/Games/parashoot.desktop</tt> INI file. Thus if this file contained <tt>Desktop Entry/Name</tt>, the corresponding Value Space paths <tt>/Applications/Games/parashoot/Desktop Entry/Name</tt> and <tt>/GamesApplications/parashoot/Desktop Entry/Name</tt> would also exist.</p>
 <p>As with file mappings, depth mapping support fallback paths. For example</p>
-<pre>    [Mapping0]
+<pre>&nbsp;   [Mapping0]
     ValueSpacePath=/Settings
     FileSystemPaths=2
     FileSystemPath0=/home/akennedy/.config
@@ -98,7 +97,7 @@
     DirectoryDepth=1</pre>
 <p>will map <tt>/Settings/Trolltech/qpe</tt> first to <tt>/home/akennedy/.config/Trolltech/qpe.conf</tt> and then to <tt>/etc/Trolltech/qpe.conf</tt>. Like file mappings, the fallback paths are monitored in case the file is later created.</p>
 <p>Keys within an INI file can be marked as translatable by appending the &quot;[]&quot; token to them. For example, the following file contains one translatable key, <tt>/Example/Translatable</tt> and one non-translatable key, <tt>/Example/NonTranslatable</tt>.</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=ExampleTranslation
     Context=ExampleContext
 
@@ -109,28 +108,22 @@
 <p>INI translation files must be stored under a directory structure rooted at the <tt>General/Translations</tt> directory provided in the INI layer's configuration file. If this configuration entry is omitted, translation is disabled. To provide accurate translations, the INI layer also needs to know the current system language. This information is accesses through the Value Space itself, from the item path specified by <tt>General/LanguageItem</tt>. Together the translations directory, and the current system language are combined to form the root under which the INI layer looks for translations files.</p>
 <p>INI files that include translatable keys, must also include the special <tt>Translation</tt> INI group that dictates how the INI layer locates translations for the key's value. The <tt>Translation/File</tt> key specifies the file to open under the translations root directory discussed above, and the <tt>Translation/Context</tt> key the Qt translation context to use within that file. The INI layer supports change notifications on language change.</p>
 <p>Currently the INI layer only supports partial change notification. Change notifications will occur for keys that exist within mapped INI files, but these notifications will not be propagated up the Value Space tree. For example with the previous mapping, should the <tt>qpe.conf</tt> file change,</p>
-<pre><span class="comment">    // Will emit QValueSpaceItem::contentsChanged()</span>
+<pre>&nbsp;   // Will emit QValueSpaceItem::contentsChanged()
     QValueSpaceItem item(&quot;/Settings/Trolltech/qpe/Desktop Entry/Name&quot;);
 
-<span class="comment">    // Will emit QValueSpaceItem::contentsChanged()</span>
+    // Will emit QValueSpaceItem::contentsChanged()
     QValueSpaceItem item2(&quot;/Settings/Trolltech/qpe&quot;);
 
-<span class="comment">    // Will NOT emit QValueSpaceItem::contentsChanged()</span>
+    // Will NOT emit QValueSpaceItem::contentsChanged()
     QValueSpaceItem item3(&quot;/Settings/Trolltech&quot;);</pre>
 <p>.</p>
 <p>This limitation may be removed in future versions.</p>
 <a name="classes"></a>
 <h3>Classes</h3>
-<p><table width="100%" class="annotated">
-<tr valign="top" class="odd"><th><a href="ivaluespacelayer.html">IValueSpaceLayer</a></th><td>Support for adding new logical data layers to the Qtopia Value Space</td></tr>
-<tr valign="top" class="even"><th><a href="qvaluespace.html">QValueSpace</a></th><td>Methods that are useful to Value Space layer implementors</td></tr>
-<tr valign="top" class="odd"><th><a href="qvaluespaceitem.html">QValueSpaceItem</a></th><td>Allows access to Value Space items</td></tr>
-<tr valign="top" class="even"><th><a href="qvaluespaceobject.html">QValueSpaceObject</a></th><td>Allows applications to add entries to the Value Space</td></tr>
-</table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

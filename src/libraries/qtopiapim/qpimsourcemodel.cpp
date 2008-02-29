@@ -37,8 +37,10 @@ public:
   \class QPimSourceModel
   \module qpepim
   \ingroup pim
+  \brief The QPimSourceModel class provides a Model class for managing the set of QPimSource
+  objects of a PIM Model. 
 
-  QPimSourceModel is an aid to creating widget for applications to manage PIM
+  The QPimSourceModel class is an aid to creating widget for applications to manage PIM
   data from multiple sources.  It provides sorting of the sources, accessing
   translated strings for source titles, and the ability to check and uncheck
   items for use with setting the set of visible sources for one of the pim

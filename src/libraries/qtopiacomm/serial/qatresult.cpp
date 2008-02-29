@@ -24,7 +24,7 @@
 /*!
     \class QAtResult
     \brief The QAtResult class provides access to the results of an AT modem command
-    \ingroup communication
+    \ingroup telephony::serial
 
     The QAtResult class provides access to the results of an AT
     modem command that was executed via the QAtChat class.

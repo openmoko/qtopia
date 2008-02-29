@@ -39,9 +39,12 @@ public:
 
     QIcon icon() const; // default empty
     QString description() const;
+
+    using QTaskContext::title;
     QString title() const;
 
     // better to be flags ?
+    using QTaskContext::editable;
     bool editable() const; // default true
 
     QPimSource defaultSource() const;
@@ -50,6 +53,7 @@ public:
     QSet<QPimSource> sources() const;
     QUuid id() const;
 
+    using QTaskContext::exists;
     bool exists(const QUniqueId &) const;
     QPimSource source(const QUniqueId &) const;
 
@@ -83,6 +87,19 @@ class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
 
   void setContextFilter(const QSet<int> &);
   QSet<int> contextFilter() const;
+
+  bool startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime) { return QPimSqlIO::startSync(sources, syncTime); }
+  bool abortSyncTransaction() { return QPimSqlIO::abortSync(); }
+  bool commitSyncTransaction() { return QPimSqlIO::commitSync(); }
+
+  QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+  { return QPimSqlIO::removed(sources, timestamp); }
+
+  QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+  { return QPimSqlIO::added(sources, timestamp); }
+
+  QList<QUniqueId> modified(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+  { return QPimSqlIO::modified(sources, timestamp); }
 
   bool completedFilter() const;
   void setCompletedFilter(bool);
@@ -122,6 +139,10 @@ class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
   int nextSearchItem() { return -1; }
   void clearSearch() { }
 
+  void checkAdded(const QUniqueId &) { invalidateCache(); }
+  void checkRemoved(const QUniqueId &) { invalidateCache(); }
+  void checkRemoved(const QList<QUniqueId> &) { invalidateCache(); }
+  void checkUpdated(const QUniqueId &) { invalidateCache(); }
  protected:
   void bindFields(const QPimRecord &, QSqlQuery &) const;
   void invalidateCache();

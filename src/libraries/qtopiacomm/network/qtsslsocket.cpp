@@ -403,6 +403,7 @@ void QtSslSocketPrivate::initializeConnection(QTcpSocket *socket)
 }
 
 /*!
+  \internal
     \class QtSslSocket
     \brief The QtSslSocket class provides a TCP socket with SSL
     encryption support.

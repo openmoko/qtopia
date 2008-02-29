@@ -69,7 +69,7 @@ qdsservice.path=/etc/qds
 qdsphoneservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/ContactsPhone
 qdsphoneservice.path=/etc/qds
 INSTALLS+=service receiveservice desktop help pics im qdlservice qdsservice
-phone {
+enable_cell {
     INSTALLS+=phoneservice qdsphoneservice
 }
 

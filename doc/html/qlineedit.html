@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qlineedit.cpp -->
 <head>
   <title>Qt 4.2: QLineEdit Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -105,7 +106,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -197,7 +198,7 @@
 <tr valign="top" class="even"><td><img src="images/windows-lineedit.png" alt="Screenshot of a Windows XP style line edit" /></td><td>A line edit shown in the <a href="gallery-windowsxp.html">Windows XP widget style</a>.</td></tr>
 <tr valign="top" class="odd"><td><img src="images/plastique-lineedit.png" alt="Screenshot of a Plastique style line edit" /></td><td>A line edit shown in the <a href="gallery-plastique.html">Plastique widget style</a>.</td></tr>
 </table></p>
-<p>See also <a href="qtextedit.html">QTextEdit</a>, <a href="qlabel.html">QLabel</a>, <a href="qcombobox.html">QComboBox</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Field, Entry</a>, and Line Edits Example.</p>
+<p>See also <a href="qtextedit.html">QTextEdit</a>, <a href="qlabel.html">QLabel</a>, <a href="qcombobox.html">QComboBox</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Field, Entry</a>, and <a href="widgets-lineedits.html">Line Edits Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="EchoMode-enum"></a>enum QLineEdit::EchoMode</h3>
@@ -509,10 +510,10 @@
 <p>Reimplemented from <a href="qwidget.html#sizeHint-prop">QWidget</a>.</p>
 <h3 class="fn"><a name="textChanged"></a>void QLineEdit::textChanged ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the text changes. The <i>text</i> argument is the new text.</p>
-<p>Unlike <a href="qlineedit.html#textEdited">textEdited</a>(), this signal is also emitted when programmatically setting the text via <a href="qlineedit.html#text-prop">setText</a>().</p>
+<p>Unlike <a href="qlineedit.html#textEdited">textEdited</a>(), this signal is also emitted when the text is changed programmatically, for example, by calling <a href="qlineedit.html#text-prop">setText</a>().</p>
 <h3 class="fn"><a name="textEdited"></a>void QLineEdit::textEdited ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the text is edited. The <i>text</i> argument is the next text.</p>
-<p>Unlike <a href="qlineedit.html#textChanged">textChanged</a>(), this signal is <i>not</i> emitted when programmatically setting the text via <a href="qlineedit.html#text-prop">setText</a>().</p>
+<p>Unlike <a href="qlineedit.html#textChanged">textChanged</a>(), this signal is not emitted when the text is changed programmatically, for example, by calling <a href="qlineedit.html#text-prop">setText</a>().</p>
 <h3 class="fn"><a name="undo"></a>void QLineEdit::undo ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Undoes the last operation if undo is <a href="qlineedit.html#undoAvailable-prop">available</a>. Deselects any current selection, and updates the selection start to the current cursor position.</p>
 <h3 class="fn"><a name="validator"></a>const <a href="qvalidator.html">QValidator</a> * QLineEdit::validator () const</h3>
@@ -581,6 +582,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

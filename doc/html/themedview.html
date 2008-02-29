@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>ThemedView Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>ThemedView Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ThemedView Class Reference</h1>
 <p>The ThemedView widget constructs, manages and displays themed views in Qtopia. <a href="#details">More...</a></p>
-<pre>    #include &lt;ThemedView&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
+<pre>#include &lt;ThemedView&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
 <p>Inherited by <a href="contextlabel.html">ContextLabel</a> and <a href="phoneheader.html">PhoneHeader</a>.</p>
 <ul>
 <li><a href="themedview-members.html">List of all members, including inherited members</a></li>
@@ -46,7 +45,7 @@
 <ul>
 <li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>22 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -94,7 +93,7 @@
 <p>A Qtopia theme is made up of multiple themed views, each described by an XML document called the themed view XML. You construct a new ThemedView by passing a themed view XML file to the <a href="themedview.html#loadSource">ThemedView::loadSource</a>() function. The ThemedView widget parses the XML, creates the theme item tree and renders it to the widget.</p>
 <p>The theme item tree is the run-time representation of a themed view. Each node in the tree derives from ThemeItem and implements some specific functionality eg. <a href="themetextitem.html">ThemeTextItem</a> displays text, <a href="themerectitem.html">ThemeRectItem</a> draws rectangles, <a href="themelayoutitem.html">ThemeLayoutItem</a> positions and sizes other items etc. The ThemedView widget manages the theme item tree, instructing items to layout and paint themselves at the appropriate times.</p>
 <p>As the ThemedView is basically a customizeable user interface component, a core part of a themed view is its ability to display data to the user. There are 2 different methods of getting data into a themed view for display to the user. 1. Using the <a href="themedview.html#findItem">ThemedView::findItem</a>() function, you can get access to theme items in the tree and set data on them directly. Eg.</p>
-<pre>    ThemedView* view;
+<pre>&nbsp;   ThemedView* view;
     ..
     ThemeTextItem* myTextItem = static_cast&lt;ThemeTextItem*&gt;(view-&gt;findItem(&quot;myTextItem&quot;, ThemedView::Text);
     if(myTextItem != 0)
@@ -185,6 +184,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QBluetoothObexServer Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QBluetoothObexServer Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothObexServer Class Reference</h1>
 <p>The QBluetoothObexServer class listens for OBEX client connections. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothObexServer&gt;</pre><p>Inherits <a href="qobexserver.html">QObexServer</a>.</p>
+<pre>#include &lt;QBluetoothObexServer&gt;</pre><p>Inherits <a href="qobexserver.html">QObexServer</a>.</p>
 <ul>
 <li><a href="qbluetoothobexserver-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -21,9 +20,8 @@
 <ul>
 <li><div class="fn"/><b><a href="qbluetoothobexserver.html#QBluetoothObexServer">QBluetoothObexServer</a></b> ( quint8 <i>channel</i>, const QBluetoothAddress &amp; <i>local</i> = QBluetoothAddress::any, QObject * <i>parent</i> = 0 )</li>
 <li><div class="fn"/><b><a href="qbluetoothobexserver.html#dtor.QBluetoothObexServer">~QBluetoothObexServer</a></b> ()</li>
-<li><div class="fn"/>bool <b><a href="qbluetoothobexserver.html#authenticated">authenticated</a></b> () const</li>
-<li><div class="fn"/>bool <b><a href="qbluetoothobexserver.html#encrypted">encrypted</a></b> () const</li>
-<li><div class="fn"/>virtual QObexSocket * <b><a href="qbluetoothobexserver.html#nextPendingConnection">nextPendingConnection</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothobexserver.html#isAuthenticated">isAuthenticated</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothobexserver.html#isEncrypted">isEncrypted</a></b> () const</li>
 <li><div class="fn"/>QBluetooth::SecurityOptions <b><a href="qbluetoothobexserver.html#securityOptions">securityOptions</a></b> () const</li>
 <li><div class="fn"/>const QBluetoothAddress &amp; <b><a href="qbluetoothobexserver.html#serverAddress">serverAddress</a></b> () const</li>
 <li><div class="fn"/>qint16 <b><a href="qbluetoothobexserver.html#serverChannel">serverChannel</a></b> () const</li>
@@ -33,15 +31,6 @@
 <li><div class="fn"/>5 public functions inherited from <a href="qobexserver.html#public-functions">QObexServer</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
-<a name="protected-functions"></a>
-<h3>Protected Functions</h3>
-<ul>
-<li><div class="fn"/>virtual void * <b><a href="qbluetoothobexserver.html#registerServer">registerServer</a></b> ()</li>
-</ul>
-<ul>
-<li><div class="fn"/>2 protected functions inherited from <a href="qobexserver.html#protected-functions">QObexServer</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
@@ -50,6 +39,8 @@
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected functions inherited from <a href="qobexserver.html#protected-functions">QObexServer</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
 </ul>
@@ -64,17 +55,10 @@
 <p>Constructs a new Bluetooth OBEX Server. The <i>channel</i> parameter specifies the rfcomm channel to listen on. If a parameter <i>local</i> is provided, then the server will only listen on requests addressed to a specific device. Otherwise it will listen for requests on all devices. The <i>parent</i> parameter specifies the <tt>QObject</tt> parent of the server.</p>
 <h3 class="fn"><a name="dtor.QBluetoothObexServer"></a>QBluetoothObexServer::~QBluetoothObexServer ()</h3>
 <p>Deconstructs a Bluetooth OBEX Server.</p>
-<h3 class="fn"><a name="authenticated"></a>bool QBluetoothObexServer::authenticated () const</h3>
+<h3 class="fn"><a name="isAuthenticated"></a>bool QBluetoothObexServer::isAuthenticated () const</h3>
 <p>Returns true if the server authentication security option is set. This method will always return false if the server is not actively listening for connections.</p>
-<h3 class="fn"><a name="encrypted"></a>bool QBluetoothObexServer::encrypted () const</h3>
+<h3 class="fn"><a name="isEncrypted"></a>bool QBluetoothObexServer::isEncrypted () const</h3>
 <p>Returns true if the server encryption security option is set. This method will always return false if the server is not actively listening for connections.</p>
-<h3 class="fn"><a name="nextPendingConnection"></a>QObexSocket * QBluetoothObexServer::nextPendingConnection ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the next pending connection if there are pending connections, otherwise returns NULL value. It is responsibility of the caller to make sure the socket is deleted.</p>
-<p>Reimplemented from <a href="qobexserver.html#nextPendingConnection">QObexServer</a>.</p>
-<h3 class="fn"><a name="registerServer"></a>void * QBluetoothObexServer::registerServer ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This function starts attempts to open a server socket and register itself with the OBEX protocol handler.</p>
-<p>Returns a valid QObexHandle if the registration was completed successfully, and an invalid one otherwise.</p>
-<p>Reimplemented from <a href="qobexserver.html#registerServer">QObexServer</a>.</p>
 <h3 class="fn"><a name="securityOptions"></a><a href="qbluetooth.html#SecurityOption-enum">QBluetooth::SecurityOptions</a> QBluetoothObexServer::securityOptions () const</h3>
 <p>Returns the security options of the server. If the server is not listening, 0 is returned.</p>
 <p>See also <a href="qbluetoothobexserver.html#setSecurityOptions">setSecurityOptions</a>().</p>
@@ -82,15 +66,16 @@
 <p>Returns the address the server is listening on. If the server is not listening it will return an invalid Bluetooth address.</p>
 <p>See also <a href="qobexserver.html#listen">listen</a>().</p>
 <h3 class="fn"><a name="serverChannel"></a>qint16 QBluetoothObexServer::serverChannel () const</h3>
-<p>Returns the channel the server is currently listening on. If the server is not listening, returns -1</p>
+<p>Returns the channel the server is currently listening on. If the server is not listening, returns -1.</p>
 <h3 class="fn"><a name="setSecurityOptions"></a>bool QBluetoothObexServer::setSecurityOptions ( <a href="qbluetooth.html#SecurityOption-enum">QBluetooth::SecurityOptions</a> <i>options</i> )</h3>
 <p>Sets the security <i>options</i> of the server. This method can be called at any time after the server has entered the listening state.</p>
 <p>The security options specify whether the server should mandate to the remote clients whether the connection will be authenticated, encrypted or both.</p>
+<p>Returns true if the security options were successfully set. Security options cannot be set while listening for connections.</p>
 <p>See also <a href="qbluetoothobexserver.html#securityOptions">securityOptions</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

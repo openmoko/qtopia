@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/text/qtextdocument.cpp -->
 <head>
   <title>Qt 4.2: QTextDocument Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -284,7 +285,7 @@
 <h3 class="fn"><a name="dtor.QTextDocument"></a>QTextDocument::~QTextDocument ()</h3>
 <p>Destroys the document.</p>
 <h3 class="fn"><a name="addResource"></a>void QTextDocument::addResource ( int <i>type</i>, const <a href="qurl.html">QUrl</a> &amp; <i>name</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>resource</i> )</h3>
-<p>Adds the resource <i>resource</i> to the resource cache, using <i>type</i> and <i>name</i> as identifiers.</p>
+<p>Adds the resource <i>resource</i> to the resource cache, using <i>type</i> and <i>name</i> as identifiers. <i>type</i> should be a value from <a href="qtextdocument.html#ResourceType-enum">QTextDocument::ResourceType</a>.</p>
 <h3 class="fn"><a name="adjustSize"></a>void QTextDocument::adjustSize ()</h3>
 <p>Adjusts the document to a reasonable size.</p>
 <p>This function was introduced in Qt 4.2.</p>
@@ -415,18 +416,20 @@
 <p>Returns the plain text contained in the document. If you want formatting information use a <a href="qtextcursor.html">QTextCursor</a> instead.</p>
 <p>See also <a href="qtextdocument.html#toHtml">toHtml</a>().</p>
 <h3 class="fn"><a name="undo"></a>void QTextDocument::undo ( <a href="qtextcursor.html">QTextCursor</a> * <i>cursor</i> )</h3>
-<p>Undoes the last editing operation on the document if <a href="qtextdocument.html#isUndoAvailable">undo is available</a>.</p>
-<p>The provided <i>cursor</i> is positioned at the end of the location where the edition operation was undone.</p>
+<p>Undoes the last editing operation on the document if undo is available. The provided <i>cursor</i> is positioned at the end of the location where the edition operation was undone.</p>
+<p>See the <a href="qundo.html">Qt Undo Framework</a> documentation for details.</p>
 <p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qtextdocument.html#undoAvailable">undoAvailable</a>() and <a href="qtextdocument.html#undoRedoEnabled-prop">isUndoRedoEnabled</a>().</p>
 <h3 class="fn"><a name="undo-2"></a>void QTextDocument::undo ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Undoes the last editing operation on the document if <a href="qtextdocument.html#isUndoAvailable">undo is available</a>.</p>
 <h3 class="fn"><a name="undoAvailable"></a>void QTextDocument::undoAvailable ( bool <i>available</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever undo operations become available (<i>available</i> is true) or unavailable (<i>available</i> is false).</p>
+<p>See the <a href="qundo.html">Qt Undo Framework</a> documentation for details.</p>
+<p>See also <a href="qtextdocument.html#undo">undo</a>() and <a href="qtextdocument.html#undoRedoEnabled-prop">isUndoRedoEnabled</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

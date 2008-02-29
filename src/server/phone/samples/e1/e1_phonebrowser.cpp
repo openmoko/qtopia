@@ -75,7 +75,7 @@ private:
 E1PhoneTelephonyBar::E1PhoneTelephonyBar(QWidget *parent)
 : E1Bar(parent),
   time("/UI/DisplayTime/Time"),
-  signal("/Telephony/Status/SignalLevel/modem"),
+  signal("/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength"),
   batteryPixmap(":image/samples/e1_bat"),
   signalPixmap(":image/samples/e1_signal")
 {

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: Creating an Application</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Tutorial: Creating an Application</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -18,20 +17,20 @@
 <h2>Install and Run the Example Application</h2>
 <p>This is the chronological list of commands required to install and run the application called <i>Example</i>, provided in <tt>/opt/Qtopia/examples/application</tt> using an X86 configuration and an SDK package. The application will be built in the directory <tt>/home/apptest</tt>.</p>
 <ol type="1">
-<li>Set up the environment:<pre>    cd /home/apptest
+<li>Set up the environment:<pre>&nbsp;   cd /home/apptest
     export QPEDIR=/opt/Qtopia</pre>
 </li>
-<li>Copy the application files to <tt>/home/apptest</tt> and set file permissions:<pre>    cp -r $QPEDIR/examples/application .
+<li>Copy the application files to <tt>/home/apptest</tt> and set file permissions:<pre>&nbsp;   cp -r $QPEDIR/examples/application .
     chmod +w application/*</pre>
 </li>
-<li>Move to the <tt>application</tt> directory and build the application:<pre>    cd application
+<li>Move to the <tt>application</tt> directory and build the application:<pre>&nbsp;   cd application
     $QPEDIR/bin/qtopiamake
     make
     su root
     make install
     exit</pre>
 </li>
-<li>Move to the <tt>bin</tt> directory and start the desktop display:<pre>    cd $QPEDIR/bin
+<li>Move to the <tt>bin</tt> directory and start the desktop display:<pre>&nbsp;   cd $QPEDIR/bin
     ./runqtopia</pre>
 </li>
 </ol>
@@ -41,11 +40,11 @@
 <p>To create your own application using existing sources it is recommended to follow these steps:</p>
 <ol type="1">
 <li>Create a <tt>.pro</tt> file for the application<p>To create the initial <tt>.pro</tt> file use the command:</p>
-<pre>    $QPEDIR/bin/qtopiamake -project</pre>
+<pre>&nbsp;   $QPEDIR/bin/qtopiamake -project</pre>
 <p>The <tt>.pro</tt> project file created can then be edited as required. To see also how to add install hints to a <tt>.pro</tt> file refer to: <a href="buildsystem-reference.html#install-hints">Install Hints</a>.</p>
 </li>
 <li>Create a <tt>.desktop</tt> file for the application. For more information about what a <tt>.desktop</tt> file may contain refer to: <a href="files.html#desktop-file-standard">Desktop File Standard</a></li>
-<li>Create the <tt>Makefile</tt> for the application using <tt>qtopiamake</tt> and build the application using:<pre>    $QPEDIR/bin/qtopiamake
+<li>Create the <tt>Makefile</tt> for the application using <tt>qtopiamake</tt> and build the application using:<pre>&nbsp;   $QPEDIR/bin/qtopiamake
     make
     su root
     make install
@@ -56,6 +55,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

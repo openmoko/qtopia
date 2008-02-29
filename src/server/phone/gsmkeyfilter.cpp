@@ -55,7 +55,7 @@
 */
 
 /*!
-    \enum GsmKeyFilter::Flags
+    \enum GsmKeyFilter::Flag
     Flags that modify the filtering of keys for GSM control actions.
 
     \value Send The GSM \c SEND function has been selected.  Usually this
@@ -237,6 +237,11 @@ void GsmKeyFilter::addAction
     be the type of action to be taken, and the second parameter will
     be the list of \c{*}-separated parameters that were supplied
     to the action, starting with the service code.
+
+    The \a flags modifies when the action will be accepted or ignored.
+    For example, setting \c Send will require that the \c SEND key be
+    pressed to terminate the sequence; setting \c Incoming will require
+    that there be an incoming call.  All specified flags must be present.
 */
 void GsmKeyFilter::addService
     ( const QString& code, QObject *target, const char *slot,
@@ -352,7 +357,8 @@ void GsmKeyFilter::addService
 
     Signal that is emitted when the \c{4*NUM SEND} key sequence is encountered
     when there was an incoming call, which indicates that the incoming call
-    should be deflected to \c NUM.
+    should be deflected to \c NUM.  The \c NUM value is supplied in the
+    \a number parameter to the signal.
 */
 
 void GsmKeyFilter::releaseId( const QString& id )

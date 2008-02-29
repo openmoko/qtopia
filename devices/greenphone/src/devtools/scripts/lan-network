@@ -128,54 +128,59 @@ install()
             echo "GATEWAY=$4" >> $NET_OPTIONS
             ;;
         wireless)
+            echo "lan-network wireless $@"
             # no implementation required if wireless lan not used
+
+            mkdir -p $HOME/Settings/Network/wireless
+            NET_OPTIONS=$HOME/Settings/Network/wireless/$IFACE
+            echo > $NET_OPTIONS
+
             while [ $# -gt 0 ]; do
                 case "$1" in 
                     -mode)
                         shift;
-                        ## ADD CODE HERE ##
+                        echo "WIRELESS_MODE='$1'" >> $NET_OPTIONS
                         ;;
                     -essid)
                         shift;
-                        ## ADD CODE HERE ##
+                        WIRELESS_ESSID=$1
+                        echo "WIRELESS_ESSID=$1" >> $NET_OPTIONS
                         ;;
                     -ap)
-                        ## ADD CODE HERE ##
                         shift;
-                        echo "WIRELESS_AP=$1" >> $TMP_FILE;
+                        echo "WIRELESS_AP=$1" >> $NET_OPTIONS
                         ;;
                     -bitrate)
                         shift;
                         if [ "$1" = "0" ]; then
-                            ## ADD CODE HERE ##
+                            echo "WIRELESS_BITRATE='auto'" >> $NET_OPTIONS
                             echo "auto detect bitrate"
                         else
-                            ## ADD CODE HERE ##
+                            echo "WIRELESS_BITRATE='$1'" >> $NET_OPTIONS
                             echo "use given bitrate";
                         fi  
                         ;;
                     -nick)
                         shift;
-                        ## ADD CODE HERE ##
+                        echo "WIRELESS_NICK='$1'" >> $NET_OPTIONS
                         ;;
                     -channel)
                         shift;
                         if [ "$1" = "0" ]; then
-                            ## ADD CODE HERE ##
+                            echo "WIRELESS_CHANNEL=''" >> $NET_OPTIONS
                             echo "auto detect channel";
                         else
-                            ## ADD CODE HERE ##
+                            echo "WIRELESS_CHANNEL='$1'" >> $NET_OPTIONS
                             echo "use given channel";
                         fi
                         ;;
                     -keylength)
                         shift;
-                        ## ADD CODE HERE ##
+                        echo "WIRELESS_KEY_LENGTH='$1'" >> $NET_OPTIONS
                         ;;
                     -authmode)
-                        ## ADD CODE HERE ##
                         shift;
-                        local mode="";
+                        echo "WIRELESS_AUTH_MODE=$1" >> $NET_OPTIONS
                         case "$1" in 
                             open|shared|none)
                                 ## ADD CODE HERE ##
@@ -198,11 +203,11 @@ install()
                                     # read all 4 keys and determine which is default
                                 fi
                                 ;;
-                            WPA_PSK)
+                            WPA-PSK)
                                 shift;
-                                ## ADD CODE HERE ##
+                                echo "WIRELESS_PSK=$1" >> $NET_OPTIONS
                                 ;;
-                            WPA_EAP)
+                            WPA-EAP)
                                 shift;
                                 ## ADD CODE HERE ##
                                 ;;
@@ -214,7 +219,7 @@ install()
                         ;;
                    
                 esac;
-                shift;
+                [ $# -gt 0 ] && shift;
             done
             ;;
         *)
@@ -234,6 +239,55 @@ start()
 
     . $HOME/Settings/Network/$1
 
+    if [ -r $HOME/Settings/Network/wireless/$1 ]; then
+        echo "Starting wireless"
+        set -x
+        . $HOME/Settings/Network/wireless/$1
+        
+        # Generating wpa_supplicant.conf
+        [ -d /var/lib/wpa_supplicant ] || mkdir -p /var/lib/wpa_supplicant
+        WPACONF=/var/lib/wpa_supplicant/wpa_supplicant.conf
+        echo "network={" > $WPACONF
+        [ -n "$WIRELESS_ESSID" ] && echo "    ssid=\"$WIRELESS_ESSID\"" >> $WPACONF
+        echo "    proto=WPA2 WPA RSN" >> $WPACONF
+        [ -n "$WIRELESS_AUTH_MODE" ] && echo "    key_mgmt=$WIRELESS_AUTH_MODE" >> $WPACONF
+        echo "    pairwise=CCMP TKIP" >> $WPACONF
+        echo "    group=CCMP TKIP" >> $WPACONF
+        [ -n "$WIRELESS_PSK" ] && echo "    psk=\"$WIRELESS_PSK\"" >> $WPACONF
+        echo "}" >> $WPACONF
+        
+        ifconfig $1 down
+        ifconfig $1 up
+
+        if [ "$WIRELESS_ESSID" != "" ]; then
+            iwconfig $1 essid $WIRELESS_ESSID
+        else
+            iwconfig $1 essid any
+        fi
+
+        if [ "$WIRELESS_AP" != "" ]; then
+            iwconfig $1 ap $WIRELESS_AP
+        else
+            iwconfig $1 ap any
+        fi
+
+        if [ "$WIRELESS_BITRATE" != "" ] && [ "$WIRELESS_BITRATE" != "auto" ]; then
+            iwconfig $1 rate ${WIRELESS_BITRATE}M auto
+        else
+            iwconfig $1 rate auto
+        fi
+
+        iwconfig $1 nick "$WIRELESS_NICK"
+
+        if [ "$WIRELESS_CHANNEL" != "" ]; then
+            iwconfig $1 channel $WIRELESS_CHANNEL
+        fi
+        
+        if [ "$WIRELESS_AUTH_MODE" = "WPA-PSK" ]; then
+            /sbin/wpa_supplicant -i $1 -D socketcf -c $WPACONF -B
+        fi
+    fi
+    
     case $MODE in
         dhcp)
             /sbin/udhcpc -i $1
@@ -255,6 +309,15 @@ stop()
 {
     print_debug "stopping interface $1";
 
+    # stop udhcpc for interface
+    DHCP_PIDS=$( ps | grep "[u]dhcpc -i $1" | awk '{print $1}' )
+    [ -n "$DHCP_PIDS" ] && kill $DHCP_PIDS 2>&1 >/dev/null
+
+    # stop wpa_supplicant for interface
+    WPASUP_PIDS=$( ps | grep "[w]pa_supplicant -i $1" | awk '{print $1}' )
+    [ -n "$WPASUP_PIDS" ] && kill $WPASUP_PIDS 2>&1 >/dev/null
+    
+    # bring down interface
     /sbin/ifconfig $1 down
 }
 

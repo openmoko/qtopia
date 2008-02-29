@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -352,6 +362,9 @@ void QDockWidgetPrivate::mousePressEvent(QMouseEvent *event)
 {
 #if !defined(QT_NO_MAINWINDOW)
     Q_Q(QDockWidget);
+
+    qApp->setActiveWindow(q);
+
     if (event->button() != Qt::LeftButton)
         return;
 
@@ -359,9 +372,6 @@ void QDockWidgetPrivate::mousePressEvent(QMouseEvent *event)
         return;
     // check if the tool window is movable... do nothing if it is not
     if (!::hasFeature(q, QDockWidget::DockWidgetMovable))
-        return;
-
-    if (!::hasFeature(q, QDockWidget::DockWidgetFloatable))
         return;
 
     if (qobject_cast<QMainWindow*>(q->parentWidget()) == 0)
@@ -415,7 +425,11 @@ void QDockWidgetPrivate::mouseMoveEvent(QMouseEvent *event)
             state->widgetItem = new QWidgetItem(q);
             state->ownWidgetItem = true;
         }
+#ifdef Q_OS_WIN
+        grabMouseWhileInWindow();
+#else
         q->grabMouse();
+#endif
         state->dragging = true;
     }
 
@@ -448,14 +462,19 @@ void QDockWidgetPrivate::mouseReleaseEvent(QMouseEvent *event)
             layout->plug(state->widgetItem, state->pathToGap);
         } else {
             layout->restore();
+            if (::hasFeature(q, QDockWidget::DockWidgetFloatable)) {
+                if (state->ownWidgetItem)
+                    delete state->widgetItem;
 
-            if (state->ownWidgetItem)
-                delete state->widgetItem;
-
-            q->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-            updateButtons();
-            resizer->setActive(QWidgetResizeHandler::Resize, true);
-            q->show();
+                q->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+                updateButtons();
+                resizer->setActive(QWidgetResizeHandler::Resize, true);
+                q->show();
+                qApp->setActiveWindow(q);
+            } else {
+                q->setFloating(false);
+                q->raise();
+            }
         }
     }
 

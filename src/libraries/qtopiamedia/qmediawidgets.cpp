@@ -157,7 +157,54 @@ private:
 
 QString Millisecond::toString() const
 {
-    return QString( "%1:%2%3" ).arg( m_min ).arg( m_minr / 10 ).arg( m_minr % 10 );
+    static const QString TIME_TEMPLATE = QString( "%1:%2%3" );
+
+    return TIME_TEMPLATE.arg( m_min ).arg( m_minr / 10 ).arg( m_minr % 10 );
+}
+
+class SimpleLabel : public QWidget
+{
+public:
+    SimpleLabel( QWidget* parent = 0, Qt::WindowFlags f = 0 )
+        : QWidget( parent, f ), m_alignment( Qt::AlignLeft )
+    { }
+
+    void setText( const QString& text );
+
+    void setAlignment( Qt::Alignment alignment ) { m_alignment = alignment; }
+    Qt::Alignment alignment() const { return m_alignment; }
+
+    void setSize( const QSize& size ) { m_size = size; }
+
+    // QWidget
+    QSize sizeHint() const;
+
+protected:
+    // QWidget
+    void paintEvent( QPaintEvent* e );
+
+private:
+    QString m_text;
+    Qt::Alignment m_alignment;
+    QSize m_size;
+};
+
+void SimpleLabel::setText( const QString& text )
+{
+    m_text = text;
+
+    update();
+}
+
+QSize SimpleLabel::sizeHint() const
+{
+    return m_size;
+}
+
+void SimpleLabel::paintEvent( QPaintEvent* e )
+{
+    QPainter painter( this );
+    painter.drawText( rect(), m_alignment, m_text );
 }
 
 /*!
@@ -221,7 +268,7 @@ QString Millisecond::toString() const
 class QMediaProgressLabelPrivate
 {
 public:
-    QLabel *time;
+    SimpleLabel *time;
 };
 
 /*!
@@ -239,8 +286,25 @@ QMediaProgressLabel::QMediaProgressLabel( Type type, QWidget* parent )
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin( 0 );
 
-    m_d->time = new QLabel;
+    m_d->time = new SimpleLabel;
     layout->addWidget( m_d->time );
+
+    // ### HACK Suitable only for media player
+    switch( m_type )
+    {
+    case ElapsedTime:
+        m_d->time->setSize( fontMetrics().boundingRect( "00:00" ).size() );
+        m_d->time->setAlignment( Qt::AlignLeft );
+        break;
+    case ElapsedTotalTime:
+        m_d->time->setSize( fontMetrics().boundingRect( "00:00 / 00:00" ).size() );
+        m_d->time->setAlignment( Qt::AlignRight );
+        break;
+    case RemainingTime:
+        m_d->time->setSize( fontMetrics().boundingRect( "-00:00" ).size() );
+        m_d->time->setAlignment( Qt::AlignRight );
+        break;
+    }
 
     setLayout( layout );
 
@@ -354,18 +418,21 @@ void QMediaProgressLabel::deactivate()
 
 void QMediaProgressLabel::updateProgress()
 {
+    static const QString ELAPSED_TOTAL_TEMPLATE = QString( "%1 / %2" );
+    static const QString REMAINING_TEMPLATE = QString( "-%1" );
+
     switch( m_type )
     {
     case ElapsedTime:
         m_d->time->setText( Millisecond( m_elapsed ).toString() );
         break;
     case ElapsedTotalTime:
-        m_d->time->setText( QString( "%1 / %2" )
+        m_d->time->setText( ELAPSED_TOTAL_TEMPLATE
             .arg( Millisecond( m_elapsed ).toString() )
             .arg( Millisecond( m_total ).toString() ) );
         break;
     case RemainingTime:
-        m_d->time->setText( QString( "-%1" )
+        m_d->time->setText( REMAINING_TEMPLATE
             .arg( Millisecond( m_total - m_elapsed ).toString() ) );
         break;
     }
@@ -693,50 +760,74 @@ void QMediaVolumeLabel::resizeEvent( QResizeEvent* )
 }
 
 static const int VOLUME_MAX = 100;
-static const int VOLUME_MIN = 1;
+static const int VOLUME_MIN = 2;
 
 class VolumeTask : public IterativeTask
 {
+    Q_OBJECT
 public:
     enum Type { IncreaseVolume, DecreaseVolume };
 
-    VolumeTask( Type type, QMediaControl* control )
-        : IterativeTask( ITERATIVE_TASK_INTERVAL ), m_type( type ), m_control( control )
-    { }
+    VolumeTask( Type type, QMediaControl* control, QProgressBar* progress );
+
+    ~VolumeTask();
 
     // IterativeTask
     void execute();
 
+signals:
+    void iterationComplete();
+
 private:
-    Type m_type;
     QMediaControl *m_control;
+    QProgressBar *m_progress;
+    int m_volume, m_delta;
 };
 
-void VolumeTask::execute()
+VolumeTask::VolumeTask( Type type, QMediaControl* control, QProgressBar* progress )
+    : IterativeTask( ITERATIVE_TASK_INTERVAL ), m_control( control ), m_progress( progress )
 {
     static const int STEP = 2;
 
-    // Increase/decrease volume
-    int volume = m_control->volume();
-    switch( m_type )
+    switch( type )
     {
     case IncreaseVolume:
-        volume += STEP;
-        if( volume < VOLUME_MAX ) {
-            m_control->setVolume( volume );
-        } else {
-            m_control->setVolume( VOLUME_MAX );
-        }
+        m_delta = STEP;
         break;
     case DecreaseVolume:
-        volume -= STEP;
-        if( volume > VOLUME_MIN ) {
-            m_control->setVolume( volume );
-        } else {
-            m_control->setVolume( VOLUME_MIN );
-        }
+        m_delta = -STEP;
         break;
     }
+
+    m_volume = m_control->volume();
+}
+
+VolumeTask::~VolumeTask()
+{
+    m_control->setVolume( m_volume );
+}
+
+void VolumeTask::execute()
+{
+    if( m_delta ) {
+        // Increase/decrease volume
+        m_volume += m_delta;
+
+        if( m_volume < VOLUME_MIN || m_volume > VOLUME_MAX ) {
+            if( m_delta < 0 ) {
+                m_volume = VOLUME_MIN;
+            } else {
+                m_volume = VOLUME_MAX;
+            }
+
+            m_delta = 0;
+        }
+
+        if( !(m_volume % 4) ) m_control->setVolume( m_volume );
+        m_progress->setValue( m_volume );
+    }
+
+    emit iterationComplete();
 }
 
 /*!
@@ -770,6 +861,7 @@ class QMediaVolumeWidgetPrivate
 public:
     Task *task;
     SlimlineProgress *progress;
+    ActivityMonitor *monitor;
 };
 
 /*!
@@ -780,6 +872,8 @@ public:
 QMediaVolumeWidget::QMediaVolumeWidget( QWidget* parent )
     : QWidget( parent ), m_control( 0 )
 {
+    static const int VOLUME_SUSPEND = 2000;
+
     m_d = new QMediaVolumeWidgetPrivate;
     m_d->task = 0;
 
@@ -794,6 +888,10 @@ QMediaVolumeWidget::QMediaVolumeWidget( QWidget* parent )
 
     layout->addWidget( m_d->progress );
     setLayout( layout );
+
+    m_d->monitor = new ActivityMonitor( VOLUME_SUSPEND, this );
+    connect( m_d->monitor, SIGNAL(active()), this, SLOT(suspend()) );
+    connect( m_d->monitor, SIGNAL(inactive()), this, SLOT(resume()) );
 
     m_notifier = new QMediaControlNotifier( QMediaControl::name(), this );
     connect( m_notifier, SIGNAL(valid()), this, SLOT(activate()) );
@@ -857,6 +955,20 @@ void QMediaVolumeWidget::deactivate()
     m_d->progress->reset();
 }
 
+void QMediaVolumeWidget::suspend()
+{
+    disconnect( m_control, SIGNAL(volumeChanged(int)),
+        this, SLOT(setVolume(int)) );
+}
+
+void QMediaVolumeWidget::resume()
+{
+    connect( m_control, SIGNAL(volumeChanged(int)),
+        this, SLOT(setVolume(int)) );
+
+    setVolume( m_control->volume() );
+}
+
 /*!
     \reimp
 */
@@ -868,14 +980,16 @@ void QMediaVolumeWidget::keyPressEvent( QKeyEvent* e )
     {
     case Qt::Key_Left:
         {
-        VolumeTask *increasevolume = new VolumeTask( VolumeTask::IncreaseVolume, m_control );
+        VolumeTask *increasevolume = new VolumeTask( VolumeTask::IncreaseVolume, m_control, m_d->progress );
+        connect( increasevolume, SIGNAL(iterationComplete()), m_d->monitor, SLOT(update()) );
         m_d->task = increasevolume;
         m_d->task->start();
         }
         break;
     case Qt::Key_Right:
         {
-        VolumeTask *decreasevolume = new VolumeTask( VolumeTask::DecreaseVolume, m_control );
+        VolumeTask *decreasevolume = new VolumeTask( VolumeTask::DecreaseVolume, m_control, m_d->progress );
+        connect( decreasevolume, SIGNAL(iterationComplete()), m_d->monitor, SLOT(update()) );
         m_d->task = decreasevolume;
         m_d->task->start();
         }
@@ -904,9 +1018,9 @@ void QMediaVolumeWidget::keyReleaseEvent( QKeyEvent* e )
     }
 }
 
-class SeekTask : public IterativeTask,
-    public Subject
+class SeekTask : public IterativeTask
 {
+    Q_OBJECT
 public:
     enum Type { SeekForward, SeekBackward };
 
@@ -917,6 +1031,9 @@ public:
 
     // IterativeTask
     void execute();
+
+signals:
+    void iterationComplete();
 
 private:
     Type m_type;
@@ -951,7 +1068,7 @@ void SeekTask::execute()
     }
 
     // Inform observers
-    notify();
+    emit iterationComplete();
 }
 
 class SeekProgress : public SlimlineProgress
@@ -1076,19 +1193,15 @@ void SeekProgress::paintEvent( QPaintEvent* e )
     if( !m_istracking ) {
         // Paint silhouette
         QStylePainter painter( this );
-        QStyleOptionProgressBarV2 opt;
+        QStyleOptionProgressBar opt;
         opt.init( this );
 
         opt.minimum = minimum();
         opt.maximum = maximum();
-        opt.textAlignment = alignment();
-        opt.textVisible = isTextVisible();
-        opt.text = text();
-        opt.orientation = orientation();
-        opt.invertedAppearance = invertedAppearance();
-        opt.bottomToTop = (textDirection() == QProgressBar::BottomToTop);
+        opt.textVisible = false;
 
         opt.progress = m_silhouette;
+        opt.state = QStyle::State_Sunken;
 
         QColor color = opt.palette.color( QPalette::Highlight ).dark( 125 );
         color.setAlpha( SILHOUETTE_ALPHA );
@@ -1279,7 +1392,7 @@ QMediaSeekWidget::~QMediaSeekWidget()
 */
 QMediaContent* QMediaSeekWidget::content() const
 {
-    m_context->content();
+    return m_context->content();
 }
 
 /*!
@@ -1302,7 +1415,7 @@ void QMediaSeekWidget::keyPressEvent( QKeyEvent* e )
     case Qt::Key_Left:
         {
         SeekTask *seekbackward = new SeekTask( SeekTask::SeekBackward, m_d->progress );
-        seekbackward->attach( m_d->monitor );
+        connect( seekbackward, SIGNAL(iterationComplete()), m_d->monitor, SLOT(update()) );
         m_d->task = seekbackward;
         m_d->task->start();
         }
@@ -1310,7 +1423,7 @@ void QMediaSeekWidget::keyPressEvent( QKeyEvent* e )
     case Qt::Key_Right:
         {
         SeekTask *seekforward = new SeekTask( SeekTask::SeekForward, m_d->progress );
-        seekforward->attach( m_d->monitor );
+        connect( seekforward, SIGNAL(iterationComplete()), m_d->monitor, SLOT(update()) );
         m_d->task = seekforward;
         m_d->task->start();
         }

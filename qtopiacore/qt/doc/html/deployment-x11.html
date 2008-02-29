@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/deployment.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/deployment.qdoc -->
 <head>
   <title>Qt 4.2: Deploying an Application on Qt/X11</title>
   <link rel="contents" href="deployment.html" />
@@ -33,7 +33,7 @@
 <li><a href="#qt-plugins">Qt Plugins</a></li>
 </ul>
 </ul>
-<p>This documentation will describe how to determine which files you should include in your distribution, and how to make sure that the application will find them at run-time. We will demonstrate the procedures in terms of deploying the Plug &amp; Paint application that is provided in Qt's examples directory.</p>
+<p>This documentation will describe how to determine which files you should include in your distribution, and how to make sure that the application will find them at run-time. We will demonstrate the procedures in terms of deploying the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application that is provided in Qt's examples directory.</p>
 <a name="static-linking"></a>
 <h2>Static Linking</h2>
 <p>Static linking is often the safest and easiest way to distribute an application on Unix since it relieves you from the task of distributing the Qt libraries and ensuring that they are located in the default search path for libraries on the target system.</p>
@@ -61,16 +61,16 @@
 <p>Verify that the Qt libraries are not mentioned in the output.</p>
 <p>Now, provided that everything compiled and linked without any errors, we should have a <tt>plugandpaint</tt> file that is ready for deployment. One easy way to check that the application really can be run stand-alone is to copy it to a machine that doesn't have Qt or any Qt applications installed, and run it on that machine.</p>
 <p>Remember that if your application depends on compiler specific libraries, these must still be redistributed along with your application. For more information, see the <a href="#application-dependencies">Application Dependencies</a> section.</p>
-<p>The Plug &amp; Paint example consists of several components: The core application (Plug &amp; Paint), and the Basic Tools and Extra Filters plugins. Since we cannot deploy plugins using the static linking approach, the executable we have prepared so far is incomplete. The application will run, but the functionality will be disabled due to the missing plugins. To deploy plugin-based applications we should use the shared library approach.</p>
+<p>The <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example consists of several components: The core application (<a href="tools-plugandpaint.html">Plug &amp; Paint</a>), and the <a href="tools-plugandpaintplugins-basictools.html">Basic Tools</a> and <a href="tools-plugandpaintplugins-extrafilters.html">Extra Filters</a> plugins. Since we cannot deploy plugins using the static linking approach, the executable we have prepared so far is incomplete. The application will run, but the functionality will be disabled due to the missing plugins. To deploy plugin-based applications we should use the shared library approach.</p>
 <a name="shared-libraries"></a>
 <h2>Shared Libraries</h2>
-<p>We have two challenges when deploying the Plug &amp; Paint application using the shared libraries approach: The Qt runtime has to be correctly redistributed along with the application executable, and the plugins have to be installed in the correct location on the target system so that the application can find them.</p>
+<p>We have two challenges when deploying the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application using the shared libraries approach: The Qt runtime has to be correctly redistributed along with the application executable, and the plugins have to be installed in the correct location on the target system so that the application can find them.</p>
 <a name="building-qt-as-a-shared-library"></a>
 <h3>Building Qt as a Shared Library</h3>
 <p>We assume that you already have installed Qt as a shared library, which is the default when installing Qt, in the <tt>/path/to/Qt</tt> directory. For more information on how to build Qt, see the <a href="installation.html">Installation</a> documentation.</p>
 <a name="linking-the-application-to-qt-as-a-shared-library"></a>
 <h3>Linking the Application to Qt as a Shared Library</h3>
-<p>After ensuring that Qt is built as a shared library, we can build the Plug &amp; Paint application. First, we must go into the directory that contains the application:</p>
+<p>After ensuring that Qt is built as a shared library, we can build the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application. First, we must go into the directory that contains the application:</p>
 <pre> cd /path/to/Qt/examples/tools/plugandpaint</pre>
 <p>Now run qmake to create a new makefile for the application, and do a clean build to create the dynamically linked executable:</p>
 <pre> make clean
@@ -96,13 +96,16 @@
 <pre> #!/bin/sh
  appname=`basename $0 | sed s,\.sh$,,`
  dirname=`dirname $0`
- LD_LIBRARY_PATH=$PWD/$dirname
+ if [ &quot;${dirname:0:1}&quot; != &quot;/&quot; ]; then
+ dirname=$PWD/$dirname
+ fi
+ LD_LIBRARY_PATH=$dirname
  export LD_LIBRARY_PATH
- $PWD/$dirname/$appname $*</pre>
+ $dirname/$appname $*</pre>
 <p>By running this script instead of the executable, you are sure that the Qt libraries will be found by the dynamic linker. Note that you only have to rename the script to use it with other applications.</p>
 <p>When looking for plugins, the application searches in a plugins subdirectory inside the directory of the application executable. Either you have to manually copy the plugins into the <tt>plugins</tt> directory, or you can set the <tt>DESTDIR</tt> in the plugins' project files:</p>
 <pre> DESTDIR = /path/to/Qt/plugandpaint/plugins</pre>
-<p>An archive distributing all the Qt libraries, and all the plugins, required to run the Plug &amp; Paint application, would have to include the following files:</p>
+<p>An archive distributing all the Qt libraries, and all the plugins, required to run the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application, would have to include the following files:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Component</th><th colspan="2" rowspan=" 1">File Name</th></tr></thead>
 <tr valign="top" class="odd"><td>The executable</td><td colspan="2" rowspan=" 1"><tt>plugandpaint</tt></td></tr>
@@ -144,6 +147,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

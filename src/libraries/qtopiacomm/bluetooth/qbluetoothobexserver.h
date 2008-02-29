@@ -45,8 +45,8 @@ public:
     qint16 serverChannel() const;
     const QBluetoothAddress & serverAddress() const;
 
-    bool encrypted() const;
-    bool authenticated() const;
+    bool isEncrypted() const;
+    bool isAuthenticated() const;
     QBluetooth::SecurityOptions securityOptions() const;
     bool setSecurityOptions(QBluetooth::SecurityOptions options);
 

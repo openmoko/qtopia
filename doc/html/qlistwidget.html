@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qlistwidget.cpp -->
 <head>
   <title>Qt 4.2: QListWidget Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -72,7 +73,7 @@
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -155,7 +156,7 @@
 <tr valign="top" class="odd"><td><img src="images/windowsxp-listview.png" alt="Screenshot of a Windows XP style list widget" /></td><td><img src="images/macintosh-listview.png" alt="Screenshot of a Macintosh style table widget" /></td><td><img src="images/plastique-listview.png" alt="Screenshot of a Plastique style table widget" /></td></tr>
 <tr valign="top" class="even"><td>A <a href="gallery-windowsxp.html">Windows XP style</a> list widget.</td><td>A <a href="gallery-macintosh.html">Macintosh style</a> list widget.</td><td>A <a href="gallery-plastique.html">Plastique style</a> list widget.</td></tr>
 </table></p>
-<p>See also <a href="qlistwidgetitem.html">QListWidgetItem</a>, <a href="qlistview.html">QListView</a>, <a href="qtreeview.html">QTreeView</a>, <a href="model-view-programming.html">Model/View Programming</a>, and Config Dialog Example.</p>
+<p>See also <a href="qlistwidgetitem.html">QListWidgetItem</a>, <a href="qlistview.html">QListView</a>, <a href="qtreeview.html">QTreeView</a>, <a href="model-view-programming.html">Model/View Programming</a>, and <a href="dialogs-configdialog.html">Config Dialog Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="count-prop"></a>count : const int</h3>
@@ -192,6 +193,7 @@
 <h3 class="fn"><a name="addItem-2"></a>void QListWidget::addItem ( <a href="qlistwidgetitem.html">QListWidgetItem</a> * <i>item</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Inserts the <i>item</i> at the the end of the list widget.</p>
+<p><b>Warning:</b> A <a href="qlistwidgetitem.html">QListWidgetItem</a> can only be added to one <a href="qlistwidget.html">QListWidget</a>. Behavior is undefined if you do.</p>
 <p>See also <a href="qlistwidget.html#insertItem">insertItem</a>().</p>
 <h3 class="fn"><a name="addItems"></a>void QListWidget::addItems ( const <a href="qstringlist.html">QStringList</a> &amp; <i>labels</i> )</h3>
 <p>Inserts items with the text <i>labels</i> at the end of the list widget.</p>
@@ -303,6 +305,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

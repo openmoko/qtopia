@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Build System Internals</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Build System Internals</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -53,31 +52,31 @@
 </ul>
 <p>The following table displays the variables that are set by <tt>configure</tt> and <tt>Makefile</tt>:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Variable</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>QMAKEFEATURES</tt></td><td><ul>
+<tr valign="top" bgcolor="#a2c511"><th>Variable</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QMAKEFEATURES</tt></td><td><ul>
 <li>Set to <tt>$PROJECT_ROOT/features:$QTOPIA_DEPOT_PATH/src/build</tt>.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>QTDIR</tt></td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QTDIR</tt></td><td><ul>
 <li>Set to <tt>$QPEDIR/qtopiacore/host</tt> for projects built for the host machine.</li>
 <li>Set to <tt>$QPEDIR/qtopiacore/target</tt> for projects built for the target machine.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td><tt>PREFIX</tt></td><td><ul>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>PREFIX</tt></td><td><ul>
 <li>Set to <tt>$QPEDIR/image/Qtopia</tt>.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>DPREFIX</tt></td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>DPREFIX</tt></td><td><ul>
 <li>Set to <tt>$QPEDIR/dimage/Qtopia</tt>.</li>
 </ul>
 </td></tr>
 </table></p>
 <p>The following table describes the variables that <tt>Makefile</tt> allows you to override:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Variable</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>PREFIX</tt></td><td>Change where Qtopia is installed to.</td></tr>
-<tr valign="top" class="even"><td><tt>DPREFIX</tt></td><td>Change where Qtopia Desktop is installed to.</td></tr>
-<tr valign="top" class="odd"><td><tt>D</tt></td><td>See <a href="#debugging-qmake">Debugging qmake</a> for details.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Variable</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>PREFIX</tt></td><td>Change where Qtopia is installed to.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>DPREFIX</tt></td><td>Change where Qtopia Desktop is installed to.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>D</tt></td><td>See <a href="#debugging-qmake">Debugging qmake</a> for details.</td></tr>
 </table></p>
 <a name="build-steps"></a>
 <h2>Build Steps</h2>
@@ -171,32 +170,32 @@
 </li>
 </ul>
 <p><b>Note:</b> When adding a new <tt>.prf</tt> file that matches one of the global files, to the project root features directory, be sure to load the global file unless you completely replace its functionality. For example:</p>
-<pre>    # $QPEDIR/tests/features/qtopiadesktop.prf
+<pre>&nbsp;   # $QPEDIR/tests/features/qtopiadesktop.prf
     load(qtopiadesktop) # get the Qtopia one
 
     # override something that we didn't like</pre>
 <p>The following table describes features that can be loaded after a project's <tt>.pro</tt> file . <b>Note:</b> Some of these files are described in more detail later:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Feature</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>common.prf</tt></td><td><ul>
+<tr valign="top" bgcolor="#a2c511"><th>Feature</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>common.prf</tt></td><td><ul>
 <li>Set defaults (if not already set).</li>
 <li>Add the include path to the depend path (so that other places don't need to worry about this).</li>
 <li>Strange stuff to help the Qt switchover.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>depends.prf</tt></td><td>Process commands from projects that are dependencies.</td></tr>
-<tr valign="top" class="odd"><td><tt>i18n.prf</tt></td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>depends.prf</tt></td><td>Process commands from projects that are dependencies.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>i18n.prf</tt></td><td><ul>
 <li>Set up <tt>make lupdate</tt> and <tt>make linstall</tt> rules.</li>
 <li>Some of the <a href="buildsystem-user-guide.html#install-helpers">Install Helpers</a> are implemented here.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>installs.prf</tt></td><td>Most of the <a href="buildsystem-user-guide.html#install-helpers">Install Helpers</a> are implemented here.</td></tr>
-<tr valign="top" class="odd"><td><tt>packages.prf</tt></td><td>Create installable packages.</td></tr>
-<tr valign="top" class="even"><td><tt>qtopia.prf</tt></td><td>Qtopia-specific config.</td></tr>
-<tr valign="top" class="odd"><td><tt>qtopiadesktop.prf</tt></td><td>Qtopia Desktop-specific configuration.</td></tr>
-<tr valign="top" class="even"><td><tt>singleexec.prf</tt></td><td>Set up a <tt>singleexec</tt> build (Qtopia only).</td></tr>
-<tr valign="top" class="odd"><td><tt>stub.prf</tt></td><td>Set default values for stub projects.</td></tr>
-<tr valign="top" class="even"><td><tt>subdirs.prf</tt></td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>installs.prf</tt></td><td>Most of the <a href="buildsystem-user-guide.html#install-helpers">Install Helpers</a> are implemented here.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>packages.prf</tt></td><td>Create installable packages.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>qtopia.prf</tt></td><td>Qtopia-specific config.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>qtopiadesktop.prf</tt></td><td>Qtopia Desktop-specific configuration.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>singleexec.prf</tt></td><td>Set up a <tt>singleexec</tt> build (Qtopia only).</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>stub.prf</tt></td><td>Set default values for stub projects.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>subdirs.prf</tt></td><td><ul>
 <li>Check <tt>SUBDIRS</tt>.</li>
 <li>Partial tree building.</li>
 <li>Set up recursive commands (<tt>lupdate, packages, sdk, devsdk, install_target, syncqtopia</tt>).</li>
@@ -208,12 +207,12 @@
 <h2>Install Prefixes</h2>
 <p>Items are installed to different locations depending on the edition and platform you are building for.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th rowspan="2"></th><th>Qtopia</th><th colspan="3">Qtopia Desktop</th></tr>
-<tr valign="top" class="qt-style"><th>Linux</th><th>Windows</th><th>Linux</th><th>Mac OS X</th></tr></thead>
-<tr valign="top" class="odd"><td>Binaries</td><td><tt>/bin</tt></td><td>/</td><td><tt>/bin</tt></td><td>See note below</td></tr>
-<tr valign="top" class="even"><td>Libraries</td><td><tt>/lib</tt></td><td>/</td><td><tt>/lib</tt></td><td><tt>&lt;bundle&gt;/Frameworks</tt></td></tr>
-<tr valign="top" class="odd"><td>Plug-ins</td><td><tt>/plugins</tt></td><td><tt>/plugins</tt></td><td><tt>/qtopiadesktop/plugins</tt></td><td><tt>&lt;bundle&gt;/Resources/plugins</tt></td></tr>
-<tr valign="top" class="even"><td>Resources</td><td>/</td><td>/</td><td><tt>/qtopiadesktop</tt></td><td><tt>&lt;bundle&gt;/Resources</tt></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th rowspan="2"></th><th>Qtopia</th><th colspan="3">Qtopia Desktop</th></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Linux</th><th>Windows</th><th>Linux</th><th>Mac OS X</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Binaries</td><td><tt>/bin</tt></td><td>/</td><td><tt>/bin</tt></td><td>See note below</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Libraries</td><td><tt>/lib</tt></td><td>/</td><td><tt>/lib</tt></td><td><tt>&lt;bundle&gt;/Frameworks</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Plug-ins</td><td><tt>/plugins</tt></td><td><tt>/plugins</tt></td><td><tt>/qtopiadesktop/plugins</tt></td><td><tt>&lt;bundle&gt;/Resources/plugins</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Resources</td><td>/</td><td>/</td><td><tt>/qtopiadesktop</tt></td><td><tt>&lt;bundle&gt;/Resources</tt></td></tr>
 </table></p>
 <p><b>Note:</b></p>
 <ol type="1">
@@ -241,7 +240,7 @@
 <p>To display debug messages (including dependency statements) <tt>touch</tt> <tt>$QPEDIR/src/build/debug_on</tt> or <tt>export QMAKE_DEBUG_ON=1</tt>.</p>
 <p>To display <tt>qmake</tt> debug run the command: <tt>make qmake-debug</tt>. You can specify more verbosity by running <tt>make qmake-debug D=&quot;-d -d -d&quot;</tt> (more -d's indicates a more verbose debug).</p>
 <p>To display when each build system file is processed <tt>touch</tt> <tt>$QPEDIR/src/build/trace_on</tt>. The output has more information than it should but there is no easy way to fix that. The following is an annotated example, showing which parts are relevant:</p>
-<pre>    These files are not read by your project.
+<pre>&nbsp;   These files are not read by your project.
     Project MESSAGE: .qmake.cache
     Project MESSAGE: default_pre.prf
     Project MESSAGE: functions.prf
@@ -287,24 +286,24 @@
 <h2>Finding Files, Directories and Paths</h2>
 <p>The following table describes the variables available to help you locate files, directories and paths:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Variable</th><th>Descripition</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>SRCDIR</tt></td><td><ul>
+<tr valign="top" bgcolor="#a2c511"><th>Variable</th><th>Descripition</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>SRCDIR</tt></td><td><ul>
 <li>The directory containing the application <tt>.pro</tt> file.</li>
 <li>This is not available until after <tt>qtopia_project()</tt> has been called.</li>
 <li><tt>PWD</tt> can be used from the <tt>.pro</tt> file)</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>OUT_PWD</tt></td><td>Directory containing the <tt>Makefile</tt>.</td></tr>
-<tr valign="top" class="odd"><td><tt>QPEDIR</tt></td><td>Build tree.</td></tr>
-<tr valign="top" class="even"><td><tt>QTOPIA_DEPOT_PATH</tt></td><td>Source tree.</td></tr>
-<tr valign="top" class="odd"><td><tt>PWD</tt></td><td>The directory containing the currently-executing <tt>.pr[iof]</tt> file.<p><b>Note:</b> This will change as each file is read).</p>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>OUT_PWD</tt></td><td>Directory containing the <tt>Makefile</tt>.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QPEDIR</tt></td><td>Build tree.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QTOPIA_DEPOT_PATH</tt></td><td>Source tree.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>PWD</tt></td><td>The directory containing the currently-executing <tt>.pr[iof]</tt> file.<p><b>Note:</b> This will change as each file is read).</p>
 </td></tr>
-<tr valign="top" class="even"><td><tt>QTDIR</tt></td><td>Qt or Qtopia Core build tree (depending on what the current project uses).</td></tr>
-<tr valign="top" class="odd"><td><tt>QT_DEPOT_PATH</tt></td><td>Qt or Qtopia Core source tree (depending on what the current project uses).</td></tr>
-<tr valign="top" class="even"><td><tt>QTEDIR</tt></td><td>Qtopia Core build tree.</td></tr>
-<tr valign="top" class="odd"><td><tt>QTE_DEPOT_PATH</tt></td><td>Qtopia Core source tree.</td></tr>
-<tr valign="top" class="even"><td><tt>DQTDIR</tt></td><td>Qt build tree.</td></tr>
-<tr valign="top" class="odd"><td><tt>DQT_DEPOT_PATH</tt></td><td>Qt source tree.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QTDIR</tt></td><td>Qt or Qtopia Core build tree (depending on what the current project uses).</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QT_DEPOT_PATH</tt></td><td>Qt or Qtopia Core source tree (depending on what the current project uses).</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QTEDIR</tt></td><td>Qtopia Core build tree.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QTE_DEPOT_PATH</tt></td><td>Qtopia Core source tree.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>DQTDIR</tt></td><td>Qt build tree.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>DQT_DEPOT_PATH</tt></td><td>Qt source tree.</td></tr>
 </table></p>
 <p><b>Note:</b></p>
 <ol type="1">
@@ -319,7 +318,7 @@
 <li>Do not use <tt>for</tt> loops in shell, alternatively use the <tt>qmake for()</tt> function instead. Look at existing files for an example of how to do this.</li>
 <li>Do not set <tt>DESTDIR</tt> or <tt>target.path</tt> unless the default values are not acceptable.</li>
 <li>Do not set <tt>CONFIG</tt> values such as <tt>qt</tt>, <tt>debug</tt>, <tt>warn</tt>, <tt>release</tt>, <tt>static</tt> unless absolutely neccessary.</li>
-<li>Values for <tt>CONFIG</tt> should be lower case, optionally using <b><a href="fd-WorldTime.html">_</a></b> to separate words.</li>
+<li>Values for <tt>CONFIG</tt> should be lower case, optionally using <b>_</b> to separate words.</li>
 <li>Use <tt>$$VAR</tt> where possible. When followed by whitespace or <b>/</b>, you do not need the <b>{}</b> delimiters. However, there are cases where the delimiters are required, for example, <tt>$${VAR}_foo</tt>.</li>
 <li>Beware of <i>object notation</i>. Unlike most languages, <tt>qmake</tt> allows <b>.</b> to be part of a variable. For example, <tt>$$FOO.bar</tt> is the same as <tt>$${FOO.bar}</tt>, not <tt>$${FOO}.bar</tt>.</li>
 <li>Do not use <tt>$$(FOO)</tt> unless it is absolutely necessary as this will dereference an environment variable at the time the <tt>.pro</tt> file is processed.</li>
@@ -333,10 +332,10 @@
 <h2>Project Roots</h2>
 <p>The following files are expected (though optional) for each project root:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>File</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>.qmake.cache</tt></td><td>Generated by <tt>qtopiamake</tt>.</td></tr>
-<tr valign="top" class="even"><td><tt>tree_config.pri</tt></td><td>Set up initial configuration and additional keywords.</td></tr>
-<tr valign="top" class="odd"><td><tt>features/implicit_deps.prf</tt></td><td>Set up implicit dependencies.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>File</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>.qmake.cache</tt></td><td>Generated by <tt>qtopiamake</tt>.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>tree_config.pri</tt></td><td>Set up initial configuration and additional keywords.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>features/implicit_deps.prf</tt></td><td>Set up implicit dependencies.</td></tr>
 </table></p>
 <a name="building-qt-qtopia-core"></a>
 <h2>Building Qt/Qtopia Core</h2>
@@ -353,17 +352,17 @@
 <a name="command-redirection"></a>
 <h2>Command Redirection</h2>
 <p>To override <tt>qmake</tt>-generated targets name them specially. The exception to this is the <tt>all</tt> target. The structure is <tt>redirect_&lt;target&gt;</tt> for example:</p>
-<pre>    redirect_clean.commands=@echo overriding the clean target
+<pre>&nbsp;   redirect_clean.commands=@echo overriding the clean target
     QMAKE_EXTRA_TARGETS+=redirect_clean</pre>
 <p>The <tt>all</tt> target cannot be overridden but you can trigger a command to run at that time. This is mostly useful for stub projects as they do not build anything. For example:</p>
-<pre>    redirect_all.commands=@echo redirect_all
+<pre>&nbsp;   redirect_all.commands=@echo redirect_all
     ALL_DEPS+=redirect_all</pre>
 <p>There are some commands cannot be overriden:</p>
 <ul>
 <li><tt>[first_]syncqtopia</tt> (libraries only)</li>
 <li><tt>regenerate/qmake</tt> (you can hook onto this event though, see below)</li>
 </ul>
-<pre>    mytarget.commands=@echo regenerating
+<pre>&nbsp;   mytarget.commands=@echo regenerating
     QMAKE_EXTRA_TARGETS+=mytarget
     regenerate.depends+=mytarget</pre>
 <a name="how-do-i"></a>
@@ -372,7 +371,7 @@
 <h3>... add a custom compiler?</h3>
 <p>The following is an example to compile some Flex (Lex) and Bison (YACC) files. These examples are useful because <tt>qmake</tt>'s built-in support for these compilers is limited.</p>
 <p><b>Note:</b> This solution can only support one Flex and one Bison source file per project.</p>
-<pre>    FLEX_SOURCES=lexer.l
+<pre>&nbsp;   FLEX_SOURCES=lexer.l
     BISON_SOURCES=parser.y
 
     flex.commands=flex -o${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
@@ -403,12 +402,12 @@
 <a name="use-install-rules-at-other-times"></a>
 <h3>... use install rules at other times?</h3>
 <p>You need to set the following CONFIG:</p>
-<pre>    foo.CONFIG=no_default_install</pre>
+<pre>&nbsp;   foo.CONFIG=no_default_install</pre>
 <p>This makes the rule exist but does not force the install target depend on it. For example, the <a href="buildsystem-reference.html#headers">headers hint</a> uses this so that the rules for setting up the <tt>include</tt> directory do not trigger when you run <tt>make install</tt>.</p>
 <a name="run-some-commands-before-the-target-is-built"></a>
 <h3>... run some commands before the target is built?</h3>
 <p>It is somewhat tricky to get your code to run before the target is built. The easiest way is to create a compiler that outputs to the <tt>HEADERS</tt> or <tt>SOURCES</tt> variable.</p>
-<pre>    # This crap is needed to generate datasets.h
+<pre>&nbsp;   # This crap is needed to generate datasets.h
     GENERATOR=make_test_data.pl
     dataset.commands=$$COMMAND_HEADER\
         $$PWD/make_test_data.pl ${QMAKE_FILE_OUT}
@@ -421,7 +420,7 @@
 <a name="run-some-commands-after-the-target-is-built"></a>
 <h3>... run some commands after the target is built?</h3>
 <p>You can force your target to run after the target is built by depending on it. <b>Note:</b> The use of the <tt>Makefile</tt> variable.</p>
-<pre>    foo.depends+=$(TARGET)</pre>
+<pre>&nbsp;   foo.depends+=$(TARGET)</pre>
 <a name="make-my-project-get-processed-last"></a>
 <h3>... make my project get processed last?</h3>
 <p>You can use <a href="buildsystem-reference.html#depends">fake dependencies</a> to do this. However, <tt>src/build/extra</tt> already does this so you can just depend on it or put your commands in there.</p>
@@ -429,6 +428,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

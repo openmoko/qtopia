@@ -2,11 +2,11 @@
 <head><title>Power Management Help</title></head>
 <body>
 <!--#if expr="$USERGUIDE"-->
-   <h2>Power Management Help <img src=":image/light-and-power/Light"></h2>
+   <h2>Power Management</h2>
 <!--#else -->
-   <h3>Power Management Help</h3>
-<p><img src=":image/light-and-power/Light"></p>
+   <h3>Power Management</h3>
 <!--#endif -->
+<p><img src=":image/light-and-power/Light"></p>
 <p>The power management settings are used to configure the power saving functions of your <i>Qtopia</i> device according to the power source being used. The brighter the screen display, the more battery power it is using. To save power, set screen brightness to suit ambient light conditions and use the power management features.</p>
 <p>For example, when using the battery you may want the device to dim the display light after a period of inactivity thereby extending the life of the battery.</p>
 <!--#if expr="$PDASTYLE"-->
@@ -16,22 +16,27 @@
 <li>Adjust the <b>Power saving</b> settings as required.</li>
 <li>Tap <img src=":image/qpe/pda/OKButton" alt="OK"> </img> to confirm your choices, or <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to cancel.</li>
 </ul>
-<p>See Also: <a href="light-and-power-brightness.html">Brightness</a> and <a href="light-and-power-saving.html">Power Saving</a></p>
+<p>See Also: <a href="light-and-power-saving.html">Power Saving</a></p>
 <!--#endif-->
 
 <!--#if expr="$PHONESTYLE"-->
-<p>Press <img src=":icon/select"> </img> to select a feature then press the right arrow button followed by <img src=":icon/ok"> </img> to access the seconds field. Enter the seconds using the keypad. Use <img src=":icon/i18n/backspace"> </img> to backspace.</p>
-<p><b>Add to profile</b> - Add the current state to a profile so that this state can be applied when the profile is activated.</p>
-<ul>
-<li><a href="light-and-power-screensaver.html">Screensaver</a></li>
+<p>To change power saving settings, select a power source then configure the power saving values for that power source. Enter the seconds values using the keypad.</p>
+<p><b>Dim light:</b> sets the screen to dim after a set time.</p>
+<p><b>Display off:</b> sets the screen light to go off after a set time.</p>
+<p><b>Suspend:</b> sets the device to go to sleep after a set time.</p>
+<p><b>Brightness:</b> the brightness of the screen light can be controlled using
+the slider at the bottom of the <b>Power Saving</b> tab.
+<!--#if expr="$PDASTYLE || $TOUCH"-->
+Press and move the stylus along the slider to adjust the brightness of the display.</p>
+<!--#endif-->
 <!--#if expr="$KEYPAD"-->
-<li><a href="light-and-power-autolock.html">Auto Lock</a></li>
+<p>Use <img src=":icon/up"> </img> / <img src=":icon/down"> </img> to highlight the slider, then use 
+<img src=":icon/left"> </img> / <img src=":icon/right"> </img> to adjust the brightness of the display.</p>
 <!--#endif-->
-<!--#if expr="$TOUCH"-->
-<li><a href="light-and-power-autolock.html">Home screen</a></li>
-<!--#endif-->
-<li><a href="light-and-power-brightness.html">Brightness</a></li>
-</ul>
+<p>Always ensure that the screen light is adjusted to a level that allows you to read the screen without straining your eyes.</p>
+<p>In all power saving modes, the screen light returns to the configured brightness when any key is pressed.</p>
+<p><b>Add to profile</b> - The current state can be added to a profile so that this state can be applied when the profile is activated.</p>
+<p>See Also: <a href="light-and-power-autolock.html">Home Screen & Auto Lock</a>.
 <!--#endif-->
 </body>
 </html>

@@ -1,14 +1,14 @@
 The following modules can be found in this Qtopia source package
 
 devices: 
+    example
     greenphone
 etc: 
     themes: crisp, portal, qtopia
 3rdparty: 
-    applications: dbus
-    libraries: alsa, amr, bluez, dbus, dissipate2, gsm, helix, inputmatch, libtimidity, md5, openobex, openssl (crypto, ssl), qtdbus, tar, zlib
+    applications: dbus, sqlite
+    libraries: alsa, amr, dbus, gsm, helix, inputmatch, libtimidity, md5, openobex, openssl (crypto, ssl), qtdbus, sqlite, tar, zlib
     plugins: codecs (libamr, libtimidity), inputmethods (pkim)
-    tools: sdptool
 applications: 
     addressbook
     calculator
@@ -64,13 +64,13 @@ settings:
     ringprofile
     security
     serverwidgets
-    sipsettings
     speeddial
     systemtime
     words
     worldtime
 tools: 
     content_installer
+    dbmigrate
     mediaserver
     printserver
     qcop
@@ -79,6 +79,5 @@ tools:
     qtopia-dbus-launcher
     qtopiacore: moc, rcc, uic
     quicklauncher
-    sipagent
     symlinker
     vsexplorer

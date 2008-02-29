@@ -30,7 +30,7 @@ app {
         CONFIG+=no_quicklaunch
         # If we have a singleexec-compatible main(), singleexec can work anyway
         singleexec_main:DEFINES+=SINGLE_EXEC_USE_MAIN
-        else:CONFIG+=no_singleexec
+        else:enable_singleexec:!no_singleexec:error("$$self: You must declare this project with CONFIG qtopia_main, singleexec_main or no_singleexec")
     }
 
     # If quicklaunch hasn't been disabled, use it

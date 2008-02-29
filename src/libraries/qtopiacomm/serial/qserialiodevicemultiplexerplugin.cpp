@@ -25,7 +25,8 @@
 /*!
     \class QSerialIODeviceMultiplexerPluginInterface
     \brief The QSerialIODeviceMultiplexerPluginInterface class defines the interface to multiplexing plugins.
-    \ingroup communication
+    \ingroup io
+    \ingroup telephony::serial
 
     The QSerialIODeviceMultiplexerPluginInterface class defines the interface
     to multiplexer plugins.  Plugins will typically inherit from
@@ -64,7 +65,8 @@
 /*!
     \class QSerialIODeviceMultiplexerPlugin
     \brief The QSerialIODeviceMultiplexerPlugin class defines a base class for implementing multiplexing plugins.
-    \ingroup communication
+    \ingroup io
+    \ingroup telephony::serial
 
     The QSerialIODeviceMultiplexerPlugin class defines a base class for
     implementing multiplexer plugins.  The plug-in should override detect()

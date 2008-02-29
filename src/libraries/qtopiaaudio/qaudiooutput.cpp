@@ -56,6 +56,42 @@
     \ingroup multimedia
 */
 
+#ifdef USE_OSS
+
+// Conversion handler for an audio output format.  Format handlers
+// are responsible for converting from the supplied sample format
+// to the device's supported encoding.
+class AudioOutputFormatHandler
+{
+public:
+    virtual ~AudioOutputFormatHandler() { }
+
+    virtual unsigned int writeSize( unsigned int length ) = 0;
+
+    virtual int convert( short *output, const short *input, int length ) = 0;
+};
+
+class MToS16AudioOutputFormatHandler : public AudioOutputFormatHandler
+{
+public:
+    unsigned int writeSize( unsigned int length ) { return length * 2; }
+
+    int convert( short *output, const short *input, int length );
+};
+
+int MToS16AudioOutputFormatHandler::convert( short *output, const short *input, int length )
+{
+    int samples = length / 2;
+
+    for (int i = 0; i < samples; i++) {
+        output[2*i + 0] = input[i];
+        output[2*i + 1] = input[i];
+    }
+    return 2*length;
+}
+
+#endif
+
 class QAudioOutputPrivate
 {
 public:
@@ -82,6 +118,7 @@ public:
         }
 #ifdef USE_OSS
         fd = -1;
+        handler = NULL;
 #endif
 #endif
     }
@@ -167,6 +204,10 @@ public:
             perror( "SNDCTL_DSP_SPEED" );
         if ( ::ioctl( fd, SNDCTL_DSP_CHANNELS, &chans ) < 0 )
             perror( "SNDCTL_DSP_CHANNELS" );
+
+        if ( channels == 1 && chans == 2 ) {
+            handler = new MToS16AudioOutputFormatHandler;
+        }
 #endif
         return true;
     }
@@ -192,6 +233,10 @@ public:
         }
 #endif
 #ifdef USE_OSS
+        if ( handler ) {
+            delete handler;
+            handler = NULL;
+        }
         if ( fd != -1 ) {
             ::close( fd );
             fd = -1;
@@ -259,13 +304,30 @@ public:
 #else
 #ifdef USE_OSS
         if ( fd != -1 ) {
-            while ( ::write( fd, data, (int)len ) < 0 ) {
+            int convertedLen;
+            char *convertedData;
+
+            if ( handler ) {
+                convertedLen = handler->writeSize( len );
+                convertedData = new char[convertedLen];
+
+                handler->convert( (short *)convertedData, (const short *)data, len );
+            } else {
+                convertedLen = len;
+                convertedData = (char *)data;
+            }
+
+            while ( ::write( fd, convertedData, convertedLen ) < 0 ) {
                 if ( errno == EINTR || errno == EWOULDBLOCK )
                     continue;
                 perror( "write to audio device" );
                 ::close( fd );
                 fd = -1;
                 break;
+            }
+
+            if ( handler ) {
+                delete[] convertedData;
             }
         }
 #else
@@ -294,6 +356,7 @@ public:
 #endif
 #ifdef USE_OSS
     int fd;
+    AudioOutputFormatHandler *handler;
 #endif
 };
 

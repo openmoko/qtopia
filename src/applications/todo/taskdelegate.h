@@ -22,59 +22,23 @@
 #ifndef TASKDELEGATE_H
 #define TASKDELEGATE_H
 
-#include <QAbstractItemDelegate>
-#include <qtopia/pim/qtaskmodel.h>
+#include "qpimdelegate.h"
 
-class TaskTableDelegate : public QAbstractItemDelegate
+class TaskDelegate : public QPimDelegate
 {
     Q_OBJECT
 
 public:
-    TaskTableDelegate(QObject * = 0);
-    ~TaskTableDelegate();
+    TaskDelegate(QObject * = 0);
+    ~TaskDelegate();
 
-    static QRect checkBoxGeom(const QRect &cell);
+    void drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index, QList<QRect>& leadingFloats, QList<QRect>& trailingFloats) const;
+    QSize decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& textSize) const;
 
-   // drawing
-    void paint(QPainter *p, const QStyleOptionViewItem &o, const QModelIndex &i) const
-    {
-        const QTaskModel *tm = qobject_cast<const QTaskModel *>(i.model());
-        if (tm)
-            paint(p, o, tm, i);
-    }
-
-    void paint(QPainter *, const QStyleOptionViewItem &, const QTaskModel *c, const QModelIndex &) const;
-
-    // editing
-    QWidget *createEditor(QWidget *parent,
-                            const QStyleOptionViewItem &option,
-                            const QModelIndex &index) const;
-
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;
-
-    void setModelData(QWidget *editor,
-                              QAbstractItemModel *model,
-                              const QModelIndex &index) const;
-
-    // non widget editors (e.g. check boxes.
-    bool editorEvent(QEvent *event,
-                             QAbstractItemModel *model,
-                             const QStyleOptionViewItem &option,
-                             const QModelIndex &index);
-
-    QSize sizeHint(const QStyleOptionViewItem &, const QModelIndex &) const;
-    QSize sizeHint(const QStyleOptionViewItem &o, int column) const;
-
-    void updateEditorGeometry(QWidget *, const QStyleOptionViewItem &, const QModelIndex &) const;
-
-private slots:
-    void setPriority(int);
-    void cancelEdit();
-
-signals:
-    void showItem(const QModelIndex &);
-    void toggleItemCompleted(const QModelIndex &);
+    QList<StringPair> subTexts(const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
 private:
+    QString formatDate(const QDate& date) const;
 };
+
 #endif

@@ -43,14 +43,17 @@ public:
     State state() const { return m_state; }
     void setState( State state );
 
+    int volume() const { return m_volume; }
+
 signals:
     void contentChanged( QMediaContent* content );
     void stateChanged( PlayerControl::State state );
 
-private slots:
+public slots:
     void setVolume( int volume );
     void setMute( bool mute );
 
+private slots:
     void activate();
 
 private:

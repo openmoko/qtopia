@@ -405,7 +405,7 @@ QDateTime GoogleCalHandler::parseDateTime(const QString &time, const QTimeZone &
 
 QUniqueId GoogleCalHandler::parseId(const QString &gid)
 {// create and maintain list of uid->googleid mappings.
-    QSqlQuery q;
+    QSqlQuery q(QPimSqlIO::database());
     if (!q.prepare("SELECT id, gid FROM googleid WHERE gid = :g")) {
         qWarning("failed to prepare main google id lookup: %s", (const char *)q.lastError().text().toLocal8Bit());
     }
@@ -415,16 +415,16 @@ QUniqueId GoogleCalHandler::parseId(const QString &gid)
         return QUniqueId();
     }
     if (q.next())
-        return QUniqueId(q.value(0).toByteArray());
+        return QUniqueId::fromUInt(q.value(0).toUInt());
 
     // TODO stolen from QAppointmentGCalIO.  Will later need to make sure all id creation mapping
     // goes through same code, rather than pimsqlio.
     // note uid's from two different devices (e.g. desktop/pda) will not match
     static QUuid appScope("672cd357-c984-40e2-b47d-ffde5a65137c");
     QUniqueIdGenerator g(appScope); // later, same scop method as xml
-    QLocalUniqueId u = g.createUniqueId();
+    QUniqueId u = g.createUniqueId();
     q.prepare("INSERT INTO googleid (id, gid) VALUES (:i, :g)");
-    q.bindValue(":i", u.toByteArray());
+    q.bindValue(":i", u.toUInt());
     q.bindValue(":g", gid);
     // TODO error handling for sql statements.
     if (!q.exec())
@@ -440,7 +440,6 @@ QGoogleCalendarContext::QGoogleCalendarContext(QObject *parent, QObject *access)
 {
     mAccess = qobject_cast<QAppointmentSqlIO *>(access);
     syncAccountList();
-    QtopiaSql::ensureSchema("googleid", QtopiaSql::systemDatabase());
 }
 
 QIcon QGoogleCalendarContext::icon() const
@@ -587,17 +586,17 @@ bool QGoogleCalendarContext::removeOccurrence(const QUniqueId &original, const Q
     return false;
 }
 
-QUniqueId QGoogleCalendarContext::replaceOccurrence(const QUniqueId &original, const QOccurrence &occurrence)
+QUniqueId QGoogleCalendarContext::replaceOccurrence(const QUniqueId &original, const QOccurrence &occurrence, const QDate& date)
 {
     if (mAccess)
-        return mAccess->replaceOccurrence(original, occurrence);
+        return mAccess->replaceOccurrence(original, occurrence, date);
     return QUniqueId();
 }
 
-QUniqueId QGoogleCalendarContext::replaceRemaining(const QUniqueId &original, const QAppointment &r)
+QUniqueId QGoogleCalendarContext::replaceRemaining(const QUniqueId &original, const QAppointment &r, const QDate& date)
 {
     if (mAccess)
-        return mAccess->replaceRemaining(original, r);
+        return mAccess->replaceRemaining(original, r, date);
     return QUniqueId();
 }
 void QGoogleCalendarContext::syncAccountList()
@@ -1038,7 +1037,7 @@ void QGoogleCalendarFetcher::parseRemaining()
                     }
                 }
             }
-            foreach (QLocalUniqueId id, mHandler->removedAppointments()) {
+            foreach (QUniqueId id, mHandler->removedAppointments()) {
                 if (!mAccess->exists(id))
                     continue; // an appointment may have been created, then delted before syncing.
                 if (!mAccess->removeAppointment(id)) {

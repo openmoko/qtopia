@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QContentFilterModel Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QContentFilterModel Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContentFilterModel Class Reference</h1>
 <p>The QContentFilterModel class defines a model for displaying and selecting possible content filters. <a href="#details">More...</a></p>
-<pre>    #include &lt;QContentFilterModel&gt;</pre><p>Inherits <a href="qabstractitemmodel.html">QAbstractItemModel</a>.</p>
+<pre>#include &lt;QContentFilterModel&gt;</pre><p>Inherits <a href="qabstractitemmodel.html">QAbstractItemModel</a>.</p>
 <ul>
 <li><a href="qcontentfiltermodel-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -65,28 +64,28 @@
 <p>The <a href="qcontentfilter.html#FilterType-enum">QContentFilter::Directory</a> filter type will list directory filters for sub-directories of the directory given in the sub-type which contain content matching the base filter. Listed directories will contain matching content in the immediate directory, not a sub-directory. If no directory is given in the sub-type then no filters will be listed.</p>
 <p>A list of mime types can be obtained by constructing the content filter model with the <a href="qcontentfilter.html#FilterType-enum">QContentFilter::MimeType</a> filter type. If a mime major type is given as the the sub-type then only mime-types belonging to that major type will be listed, otherwise all mime types within the scope of the base filter will be listed.</p>
 <p>A content filter model listing all available mime types:</p>
-<pre>    QContentFilterModel *mimeTypes = new QContentFilterModel( QContentFilter::MimeType );</pre>
+<pre>&nbsp;   QContentFilterModel *mimeTypes = new QContentFilterModel( QContentFilter::MimeType );</pre>
 <p>Or just the image mime types:</p>
-<pre>    QContentFilterModel imageTypes = new QContentFilterModel( QContentFilter::MimeType, &quot;image&quot; );</pre>
+<pre>&nbsp;   QContentFilterModel imageTypes = new QContentFilterModel( QContentFilter::MimeType, &quot;image&quot; );</pre>
 <p>Category filter may be listed using the <a href="qcontentfilter.html#FilterType-enum">QContentFilter::Category</a> filter type where the sub-type specifies the scope of the category filters, if no sub-type is given categories belonging to the global scope will be listed.</p>
 <p>A content filter model containing global categories:</p>
-<pre>    QContentFilterModel *categories = new QContentFilterModel( QContentFilter::Category );</pre>
+<pre>&nbsp;   QContentFilterModel *categories = new QContentFilterModel( QContentFilter::Category );</pre>
 <p>Categories in the &quot;Documents&quot; scope:</p>
-<pre>    QContentFilterModel *categories = new QContentFilterModel( QContentFilter::Category, &quot;Documents&quot; );</pre>
+<pre>&nbsp;   QContentFilterModel *categories = new QContentFilterModel( QContentFilter::Category, &quot;Documents&quot; );</pre>
 <p>Content filter models which list content property values can be constructed using the <a href="qcontentfilter.html#FilterType-enum">QContentFilter::Synthetic</a> filter type with the property group and key in the sub-type, or using the <a href="qcontent.html#Property-enum">QContent::Property</a> enumeration. The property group and key used in the sub-type should be concatenated in the form &quot;[group]/[key]&quot;, if the property does not belong to a group the sub-type should be of the form &quot;none/[key]&quot;.</p>
 <p>A content filter model listing all artists:</p>
-<pre>    QContentFilterModel *artists = new QContentFilterModel( QContentFilterModel::Synthetic, &quot;none/Artist&quot; );</pre>
+<pre>&nbsp;   QContentFilterModel *artists = new QContentFilterModel( QContentFilterModel::Synthetic, &quot;none/Artist&quot; );</pre>
 <p>The same filter model using the <a href="qcontent.html#Property-enum">QContent::Property</a> enumeration.</p>
-<pre>    QContentFilterModel *artists = new QContentFilterModel( QContent::Artist );</pre>
+<pre>&nbsp;   QContentFilterModel *artists = new QContentFilterModel( QContent::Artist );</pre>
 <p>Using templates more complex filter models can be created, templates extend on the filter lists by including static labels, concatenation of multiple filter lists, and nested lists.</p>
 <p>Labels allow items to be explicitly added to a list, they may be used to select a static filter or a nested list. A label at a minimum consits of a user visible string usually combined with a a filter or a target sub-template and may include an icon. Labels are not sorted they appear in the order they are appended to a list. By default if the filter for a label does not match any known content the label will not be displayed, this can be disabled by setting the <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::ShowEmptyLabels</a> template option.</p>
 <p>A simple template using labels to select an Application or Document role filter:</p>
-<pre>    QContentFilterModel::Template role;
+<pre>&nbsp;   QContentFilterModel::Template role;
     role.addLabel( tr( &quot;Applications&quot; ), QContentFilter( QContent::Role ) );
     role.addLabel( tr( &quot;Documents&quot; ), QContentFilter( QContent::Document ) );</pre>
 <p>Templates may be nested to construct a tree model of content filters, templates are nested by specifying a target template when adding a list or label to another template. The contents of a nested template will be filtered by the filters of the its parent items and the model's base filter and the filter returned for an index in a tree model will be the filter at the index and'ed with the filters of its parents but not the model's base filter.</p>
 <p>A content filter model using a nested template to display artists with albums by an artist as children:</p>
-<pre>    QContentFilterModel::Template album( QContent::Album );
+<pre>&nbsp;   QContentFilterModel::Template album( QContent::Album );
     QContentFilterModel::Template artist( album, QContent::Artist );
 
     QContentFilterModel *model = new QContentFilterModel();
@@ -96,7 +95,7 @@
 <p>If the <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::CheckList</a> option is set a list of default filter arguments may be supplied when adding a list to a template, if the argument of a filter in that list matches one of the default arguments then that filter will will be checked when the list is first populated.</p>
 <p>A default select all option may be included in a content filter model by setting either the <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::SelectAll</a> or <a href="qcontentfiltermodel.html#TemplateOption-enum">QContentFilterModel::SelectAll</a> template options in the model template. This will include an option with the text 'All' as the first item in a list defined by a template, if <a href="qcontentfiltermodel.html#TemplateOption-enum">SelectAll</a> is set then the 'All' item will only be displayed if there are two or more items in the list, if <a href="qcontentfiltermodel.html#TemplateOption-enum">ForceAll</a> is set the 'All' item will be shown irregardless of the number of item in a list. If the 'All' item is appears in the root list of a model it will select a null filter and if in a checklist will be automatically checked if no other item is. If it is in a nested list then it will be select its parent item in single selection list or mimic its parent's check state in a multiple selection list.</p>
 <p>A template for a checklist of mime types with a select all option:</p>
-<pre>    QContentFilterModel::Template mimes(
+<pre>&nbsp;   QContentFilterModel::Template mimes(
         QContentFilter::MimeType, QString(), QContentFilterModel::SelectAll | QContentFilterModel::CheckList );</pre>
 <p>See also <a href="qcontentfilterselector.html">QContentFilterSelector</a> and <a href="qcontentfilterdialog.html">QContentFilterDialog</a>.</p>
 <hr />
@@ -145,6 +144,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

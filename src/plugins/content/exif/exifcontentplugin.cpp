@@ -68,6 +68,11 @@ bool ExifContentPlugin::installContent( const QString &filePath, QContent *conte
     return success;
 }
 
+bool ExifContentPlugin::updateContent( QContent *content )
+{
+    return installContent( content->file(), content );
+}
+
 bool ExifContentPlugin::readFile( QFile *file, QContent *content )
 {
     if( file->peek( 4 ) == "\xFF\xD8\xFF\xE1" )

@@ -69,6 +69,7 @@ protected:
 private slots:
     void timeout();
     void doGrab();
+    void menuTriggered(QAction *);
 
 private:
     void store();

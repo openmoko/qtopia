@@ -5,7 +5,7 @@
             expr:@/Accessories/Battery/VisualCharge
         </level>
         <level name="signal" rect="-48,2,21x14" src="default/signal" count="5" min="0" max="100">
-            expr:@/Telephony/Status/SignalLevel/modem
+            expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength
         </level>
     </group>
 </page>

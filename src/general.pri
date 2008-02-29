@@ -42,7 +42,9 @@ PROJECTS*=\
     3rdparty/libraries/tar\
     #obex
     3rdparty/libraries/openobex\
-    3rdparty/libraries/inputmatch
+    3rdparty/libraries/inputmatch\
+    3rdparty/libraries/sqlite\
+    3rdparty/applications/sqlite
 
 enable_ssl:PROJECTS*=\
     3rdparty/libraries/openssl/crypto\
@@ -61,16 +63,25 @@ enable_qtopiabase {
     PROJECTS-=libraries/qtopiail
 }
 
+# test tools and validator
 qtopiatest:PROJECTS*=\
     libraries/qtopiatest/qtesttools/host \
     libraries/qtopiatest/qtesttools/target \
-    libraries/qtopiatest/qunittest \
+    tools/validator \
+    tools/validator/3rdparty/qscintilla
+
+# unit test stuff
+qtopiatest:!enable_singleexec:PROJECTS*=\
+    libraries/qtopiatest/qunittest
+
+# system test stuff
+qtopiatest:PROJECTS*=\
     libraries/qtopiatest/qsystemtest \
     libraries/qtopiatest/qtestslave \
     libraries/qtopiatest/qsystemtestslave \
     libraries/qtopiatest/qtopiasystemtestslave \
-    tools/validator \
-    tools/validator/3rdparty/qscintilla
+    libraries/qtopiatest/qtopiaservertestslave \
+    libraries/qtopiatest/overrides
 
 # non-platform stuff
 !platform:!media {
@@ -117,7 +128,8 @@ PROJECTS*=\
     tools/qcop \
     tools/vsexplorer \
     tools/symlinker \
-    tools/qdawggen
+    tools/qdawggen \
+    tools/dbmigrate
 
 !build_helix:PROJECTS*=tools/qss
 
@@ -165,8 +177,6 @@ enable_infrared:PROJECTS*=\
     settings/beaming
 
 enable_bluetooth:PROJECTS*=\
-    3rdparty/libraries/bluez \
-    3rdparty/tools/sdptool \
     settings/btsettings \
     plugins/network/bluetooth
 
@@ -204,11 +214,6 @@ phone {
 
     enable_infrared:PROJECTS*=\
         settings/beaming
-
-    enable_voip:PROJECTS*=\
-        3rdparty/libraries/dissipate2\
-        tools/sipagent \
-        settings/sipsettings
 
     # Phone Themes
     THEMES*=\

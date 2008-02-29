@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/porting4-canvas.qdoc -->
 <head>
   <title>Qt 4.2: Porting to Graphics View</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -38,8 +39,8 @@
 </ul>
 <p>Qt 4.2 provides two complete examples of Q3Canvas applications ported to Graphics View:</p>
 <ul>
-<li>Ported Canvas Example, the canvas example from Qt 3.</li>
-<li>Ported Asteroids Example, the Asteroids game from the Qt 3 demo.</li>
+<li><a href="graphicsview-portedcanvas.html">Ported Canvas Example</a>, the canvas example from Qt 3.</li>
+<li><a href="graphicsview-portedasteroids.html">Ported Asteroids Example</a>, the Asteroids game from the Qt 3 demo.</li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
@@ -287,7 +288,7 @@
 <h3>Q3CanvasSprite</h3>
 <p><a href="#q3canvassprite">Q3CanvasSprite</a> is the item class that differs the most from its Q3Canvas predecessor. The closest resemblance of <a href="#q3canvassprite">Q3CanvasSprite</a> in Graphics View is <a href="qgraphicspixmapitem.html">QGraphicsPixmapItem</a>.</p>
 <p><a href="#q3canvassprite">Q3CanvasSprite</a> supports animated pixmaps; <a href="qgraphicspixmapitem.html">QGraphicsPixmapItem</a>, however, is a simple single-frame pixmap item. If all you need is a pixmap item, porting is straight-forward. If you do need the animation support, extra work is required; there is no direct porting approach.</p>
-<p>For the Ported Asteroids Example, a subclass of <a href="qgraphicspixmapitem.html">QGraphicsPixmapItem</a> is used to replace <a href="#q3canvassprite">Q3CanvasSprite</a>, storing a list of pixmaps and a frame counter. The animation is advanced in <a href="qgraphicsitem.html#advance">QGraphicsItem::advance</a>().</p>
+<p>For the <a href="graphicsview-portedasteroids.html">Ported Asteroids Example</a>, a subclass of <a href="qgraphicspixmapitem.html">QGraphicsPixmapItem</a> is used to replace <a href="#q3canvassprite">Q3CanvasSprite</a>, storing a list of pixmaps and a frame counter. The animation is advanced in <a href="qgraphicsitem.html#advance">QGraphicsItem::advance</a>().</p>
 <a name="q3canvaspixmap-q3canvaspixmaparray"></a>
 <h4>Q3CanvasPixmap, Q3CanvasPixmapArray</h4>
 <p>These classes have been removed from the API. You can use <a href="qpixmap.html">QPixmap</a> instead of Q3CanvasPixmap, and <a href="qlist.html">QList</a> instead of Q3CanvasPixmapArray.</p>
@@ -314,6 +315,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

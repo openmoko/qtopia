@@ -440,6 +440,18 @@ QIODevice *QDrmContentPlugin::createDecoder( const QString &fileName, QDrmRights
 */
 
 /*!
+    Refreshes the content data of \a content following a change to the file it references.
+
+    Returns true if the content data was out of date, false otherwise.
+ */
+bool QDrmContentPlugin::updateContent( QContent *content )
+{
+    Q_UNUSED( content );
+
+    return false;
+}
+
+/*!
     \fn QDrmContentPlugin::reactivate( const QContent &content, QDrmRights::Permission permission, QWidget *focus )
 
     Checks if the rights to render \a content with the given \a permission have expired or will expire

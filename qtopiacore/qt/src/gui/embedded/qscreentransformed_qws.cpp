@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -15,6 +25,7 @@
 #ifndef QT_NO_QWS_TRANSFORMED
 
 #include "qscreentransformed_qws.h"
+#include <qscreendriverfactory_qws.h>
 #include <qvector.h>
 #include <private/qpainter_p.h>
 #include <qmatrix.h>
@@ -155,8 +166,6 @@ void QTransformedScreenPrivate::configure()
     q->data = subscreen->base();
     q->lstep = subscreen->linestep();
     q->size = subscreen->screenSize();
-    q->physWidth = subscreen->physicalWidth();
-    q->physHeight = subscreen->physicalHeight();
 
     q->setOffset(subscreen->offset());
     // ###: works because setTransformation recalculates unconditionally
@@ -210,6 +219,15 @@ bool QTransformedScreen::connect(const QString &displaySpec)
 
     d_ptr->transformation = filterTransformation(dspec);
 
+    QString driver = dspec;
+    int colon = driver.indexOf(':');
+    if (colon >= 0)
+        driver.truncate(colon);
+
+    if (!QScreenDriverFactory::keys().contains(driver, Qt::CaseInsensitive))
+        if (!dspec.isEmpty())
+            dspec.prepend(":");
+
     const int id = getDisplayId(dspec);
     d_ptr->subscreen = qt_get_screen(id, dspec.toLatin1().constData());
     d_ptr->configure();
@@ -249,6 +267,11 @@ void QTransformedScreen::setTransformation(Transformation transformation)
     QSize s = mapFromDevice(QSize(dw, dh));
     w = s.width();
     h = s.height();
+
+    const QScreen *screen = d_ptr->subscreen;
+    s = mapFromDevice(QSize(screen->physicalWidth(), screen->physicalHeight()));
+    physWidth = s.width();
+    physHeight = s.height();
 
 #ifdef QT_REGION_DEBUG
     qDebug() << "QTransformedScreen::setTransformation" << transformation
@@ -1224,8 +1247,11 @@ QRegion QTransformedScreen::mapFromDevice(const QRegion &rgn, const QSize &s) co
 */
 void QTransformedScreen::disconnect()
 {
-    if (d_ptr->subscreen)
+    if (d_ptr->subscreen) {
         d_ptr->subscreen->disconnect();
+        delete d_ptr->subscreen;
+        d_ptr->subscreen = 0;
+    }
 }
 
 /*!

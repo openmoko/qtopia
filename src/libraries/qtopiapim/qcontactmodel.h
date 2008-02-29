@@ -30,10 +30,10 @@
 #include <qtopia/pim/qcontact.h>
 #include <qtopia/pim/qpimsource.h>
 
-#include <qcategorymanager.h>
+#include <QPimModel>
 
 class QContactModelData;
-class QTOPIAPIM_EXPORT QContactModel : public QAbstractItemModel
+class QTOPIAPIM_EXPORT QContactModel : public QPimModel
 {
     Q_OBJECT
 
@@ -122,22 +122,11 @@ public:
         StatusIconRole = Qt::UserRole+3
     };
 
-    const QList<QContactContext*> &contexts() const;
-
-    QSet<QPimSource> visibleSources() const;
-    void setVisibleSources(const QSet<QPimSource> &);
-    QSet<QPimSource> availableSources() const;
-
     QPimSource phoneSource() const;
     QPimSource simSource() const;
 
     bool mirrorToSource(const QPimSource &source, const QUniqueId &);
     bool mirrorAll(const QPimSource &source, const QPimSource &dest);
-
-    QPimSource source(const QUniqueId &) const;
-    QContactContext *context(const QUniqueId &) const;
-
-    bool sourceExists(const QPimSource &source, const QUniqueId &id) const;
 
     static QList<Field> phoneFields();
     static QStringList localeNameTitles();
@@ -149,7 +138,6 @@ public:
     static QString fieldIdentifier(Field);
     static Field identifierField(const QString &);
 
-    int rowCount(const QModelIndex & = QModelIndex()) const;
     int columnCount(const QModelIndex & = QModelIndex()) const;
 
     // overridden so can change later and provide drag-n-drop (via vcard)
@@ -160,25 +148,12 @@ public:
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
     QVariant data(const QModelIndex &index, int role) const;
-    bool setData(const QModelIndex &, const QVariant &, int) const;
-    bool setItemData(const QModelIndex &, const QMap<int,QVariant> &) const;
+    bool setData(const QModelIndex &, const QVariant &, int);
+    bool setItemData(const QModelIndex &, const QMap<int,QVariant> &);
     QMap<int,QVariant> itemData(const QModelIndex &) const;
 
     QVariant headerData(int section, Qt::Orientation orientation,
             int role = Qt::DisplayRole) const;
-
-
-    int count() const;
-    bool contains(const QModelIndex &) const;
-    bool contains(const QUniqueId &) const;
-    bool exists(const QUniqueId &) const;
-
-    QModelIndex index(const QUniqueId &) const;
-    QUniqueId id(const QModelIndex &) const;
-    QUniqueId id(int) const;
-    QModelIndex index(int r,int c = 0,const QModelIndex & = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &) const;
-    bool hasChildren(const QModelIndex & = QModelIndex()) const;
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
 
@@ -191,12 +166,15 @@ public:
 
     bool updateContact(const QContact& contact);
     bool removeContact(const QContact& contact);
+    bool removeContact(const QUniqueId& contact);
     QUniqueId addContact(const QContact& contact, const QPimSource &source = QPimSource());
-
     bool removeList(const QList<QUniqueId> &);
 
-    void setCategoryFilter(const QCategoryFilter &);
-    QCategoryFilter categoryFilter() const;
+    QUniqueId addRecord(const QByteArray &, const QPimSource &, const QString &format = QString());
+    bool updateRecord(const QUniqueId &id, const QByteArray &, const QString &format = QString());
+    QByteArray record(const QUniqueId &id, const QString &format = QString()) const;
+
+    bool removeRecord(const QUniqueId &id) { return removeContact(id); }
 
     QUniqueId personalID() const;
     QContact personalDetails() const;
@@ -207,9 +185,6 @@ public:
     bool isPersonalDetails(const QModelIndex &) const;
     bool isPersonalDetails(int r) const { return isPersonalDetails(index(r, 0, QModelIndex())); }
     bool isPersonalDetails(const QUniqueId &) const;
-
-    bool flush();
-    bool refresh();
 
     // starting at 0x0100 so can later maybe |' with
     // Qt::MatchFlags.
@@ -243,9 +218,8 @@ public:
 
     // missing function to aid in rendering searched for contact.
     // QContact renderedSearchItem(QContact &)?
-
 private slots:
-    void voidCache();
+    void pimMessage(const QString& message, const QByteArray& data);
 
 private:
     void setSortField(Field);
@@ -258,7 +232,6 @@ private:
 
     void updateBusinessCard(const QContact &cnt);
     void removeBusinessCard();
-    bool removeContact(const QUniqueId& contact);
 
     QContactModelData *d;
 };

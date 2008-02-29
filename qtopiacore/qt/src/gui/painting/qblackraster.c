@@ -1,8 +1,14 @@
 /****************************************************************************
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_3RDPARTY_LICENSE$
+** This file contains third party code which is not governed by the Qt
+** Commercial License Agreement. Please read the license headers below
+** for more information.
+** 
+** Further information about Qt licensing is available at:
+** http://www.trolltech.com/products/qt/licensing.html or by
+** contacting info@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -375,6 +381,10 @@ typedef struct TRaster_Instance_  TRaster_Instance;
 #define precision (1 << precision_bits)
 #define precision_shift (precision_bits - Pixel_Bits)
 
+/* only used for debugging */
+#define FIXED_TO_FLOAT(x) ((x)/(float) precision)
+#define INT_TO_FIXED(x) ((x) << precision_bits)
+
 /* NOTE: These operations are only valid on 2's complement processors */
 
 #define FLOOR( x )    ( (x) & -precision )
@@ -382,6 +392,8 @@ typedef struct TRaster_Instance_  TRaster_Instance;
 #define TRUNC( x )    ( (signed long)(x) >> precision_bits )
 #define FRAC( x )     ( (x) & ( precision - 1 ) )
 #define SCALED( x )   ( ( (x) << precision_shift ) )
+#define ROUND( x )    ( TRUNC((x) + precision_step) )
+#define HALF          ( (Int)(0.5 * precision) )
 
 /* Note that I have moved the location of some fields in the */
 /* structure to ensure that the most used variables are used */
@@ -824,7 +836,8 @@ Line_Up( TRaster_Instance*  raster, Long  x1,
         if (FRAC(y2) == 0 && ras.cProfile->flow == Flow_Up)
             --e2;
     }
-    QT_FT_TRACE6("Line_Up y1=%f, y2=%f, e1=%d, e2=%d f1=%d\n", y1/64.,  y2/64., e1, e2, f1);
+
+    QT_FT_TRACE6("Line_Up y1=%f, y2=%f, e1=%d, e2=%d f1=%d\n", FIXED_TO_FLOAT(y1),  FIXED_TO_FLOAT(y2), e1, e2, f1);
 
     if ( f1 > 0 )
     {
@@ -865,13 +878,13 @@ Line_Up( TRaster_Instance*  raster, Long  x1,
     top = ras.top;
 
     QT_FT_TRACE6("line_up (%f/%f)->(%f/%f), flow=%s\n",
-              x1/64., y1/64., x2/64., y2/64.,
-              ras.cProfile->flow == Flow_Up ? "Flow_Up" : "Flow_Down");
+                 FIXED_TO_FLOAT(x1), FIXED_TO_FLOAT(y1), FIXED_TO_FLOAT(x2), FIXED_TO_FLOAT(y2),
+		 ras.cProfile->flow == Flow_Up ? "Flow_Up" : "Flow_Down");
 
     while ( size > 0 )
     {
         *top++ = x1;
-        QT_FT_TRACE6("    x=%f y=%d\n", x1/64., e2+1-size);
+        QT_FT_TRACE6("    x=%f y=%d\n", FIXED_TO_FLOAT(x1), e2+1-size);
 
         x1 += Ix;
         Ax += Rx;
@@ -1005,7 +1018,7 @@ Bezier_Up( TRaster_Instance*  raster, Int        degree,
         ras.fresh = FALSE;
     }
 
-    QT_FT_TRACE6("bezier_up: y1=%f, y2=%f, e1=%f, e2=%f\n", y1/64.,  y2/64., e/64., e2/64.);
+    QT_FT_TRACE6("bezier_up: y1=%f, y2=%f, e1=%f, e2=%f\n", FIXED_TO_FLOAT(y1),  FIXED_TO_FLOAT(y2), FIXED_TO_FLOAT(e), FIXED_TO_FLOAT(e2));
 
     if ( e2 < e )
         goto Fin;
@@ -1019,7 +1032,7 @@ Bezier_Up( TRaster_Instance*  raster, Int        degree,
 
     QT_FT_TRACE6("       Flow = %s start=%ld, e=%f, e2=%f y1=%f, y2=%f\n",
               ras.cProfile->flow == Flow_Up ? "Flow_Up" : "Flow_Down",
-              ras.cProfile->start, e/64., e2/64.,y1/64.,y2/64.);
+                 ras.cProfile->start, FIXED_TO_FLOAT(e), FIXED_TO_FLOAT(e2),FIXED_TO_FLOAT(y1),FIXED_TO_FLOAT(y2));
 
     start_arc = arc;
 
@@ -1041,7 +1054,7 @@ Bezier_Up( TRaster_Instance*  raster, Int        degree,
                                                   e - y1, y2 - y1 );
                 QT_FT_TRACE6("  x=%f y=%f\n",
                           (arc[degree].x + FMulDiv( arc[0].x-arc[degree].x,
-                                                    e - y1, y2 - y1 ))/64., e/64.);
+                                                    e - y1, y2 - FIXED_TO_FLOAT(y1) )), FIXED_TO_FLOAT(e));
                 arc -= degree;
                 e   += precision;
             }
@@ -1051,7 +1064,7 @@ Bezier_Up( TRaster_Instance*  raster, Int        degree,
             if ( y2 == e )
             {
                 *top++     = arc[0].x;
-                QT_FT_TRACE6("  x=%f y=%f\n", arc[0].x/64., e/64.);
+                QT_FT_TRACE6("  x=%f y=%f\n", FIXED_TO_FLOAT(arc[0].x), FIXED_TO_FLOAT(e));
 
                 e += precision;
             }
@@ -1140,7 +1153,7 @@ Line_To( TRaster_Instance*  raster, Long  x,
          Long  y )
 {
     /* First, detect a change of direction */
-    QT_FT_TRACE6( "Line_To (%f/%f)->(%f/%f)\n", ras.lastX/64., ras.lastY/64., x/64., y/64. );
+    QT_FT_TRACE6( "Line_To (%f/%f)->(%f/%f)\n", FIXED_TO_FLOAT(ras.lastX), FIXED_TO_FLOAT(ras.lastY), FIXED_TO_FLOAT(x), FIXED_TO_FLOAT(y) );
 
     switch ( ras.state )
     {
@@ -1239,7 +1252,7 @@ Conic_To( TRaster_Instance*  raster, Long  cx,
     Long     y1, y2, y3, x3, ymin, ymax;
     TStates  state_bez;
 
-    QT_FT_TRACE6( "Conic_To (%f/%f)-(%f/%f)\n", cx/64., cy/64., x/64., y/64. );
+    QT_FT_TRACE6( "Conic_To (%f/%f)-(%f/%f)\n", FIXED_TO_FLOAT(cx), FIXED_TO_FLOAT(cy), FIXED_TO_FLOAT(x), FIXED_TO_FLOAT(y) );
 
     ras.arc      = ras.arcs;
     ras.arc[2].x = ras.lastX;
@@ -1357,7 +1370,7 @@ Cubic_To( TRaster_Instance*  raster, Long  cx1,
     TStates  state_bez;
 
     QT_FT_TRACE6( "Cubic_To (%f/%f)-(%f/%f)-(%f/%f)-(%f/%f)\n",
-               ras.lastX/64., ras.lastY/64., cx1/64., cy1/64., cx2/64., cy2/64., x/64., y/64. );
+                  FIXED_TO_FLOAT(ras.lastX), FIXED_TO_FLOAT(ras.lastY), FIXED_TO_FLOAT(cx1), FIXED_TO_FLOAT(cy1), FIXED_TO_FLOAT(cx2), FIXED_TO_FLOAT(cy2), FIXED_TO_FLOAT(x), FIXED_TO_FLOAT(y) );
 
     ras.arc      = ras.arcs;
     ras.arc[3].x = ras.lastX;
@@ -2006,7 +2019,7 @@ Draw_Sweep( TRaster_Instance*  raster )
             Q = profile_list;
             printf("y=%d ::", y);
             while (Q) {
-                printf(" %.2f", Q->X / 64.);
+                printf(" %.2f", FIXED_TO_FLOAT(Q->X));
                 Q = Q->link;
             }
             printf("\n");

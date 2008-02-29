@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/kernel/qevent.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qevent.cpp -->
 <head>
   <title>Qt 4.2: QTabletEvent Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -63,6 +63,9 @@
 <p>A tablet event contains a special accept flag that indicates whether the receiver wants the event. You should call <a href="qevent.html#accept">QTabletEvent::accept</a>() if you handle the tablet event; otherwise it will be sent to the parent widget. The exception are <a href="qevent.html#Type-enum">TabletEnterProximity</a> and <a href="qevent.html#Type-enum">TabletLeaveProximity</a> events, these are only sent to <a href="qapplication.html">QApplication</a> and don't check whether or not they are accepted.</p>
 <p>The <a href="qwidget.html#enabled-prop">QWidget::setEnabled</a>() function can be used to enable or disable mouse and keyboard events for a widget.</p>
 <p>The event handler <a href="qwidget.html#tabletEvent">QWidget::tabletEvent</a>() receives all three types of tablet events. Qt will first send a tabletEvent then, if it is not accepted, it will send a mouse event. This allows applications that don't utilize tablets to use a tablet like a mouse, while also enabling those who want to use both tablets and mouses differently.</p>
+<a name="notes-for-x11-users"></a>
+<h3>Notes for X11 Users</h3>
+<p>Qt uses the following hard-coded names to identify tablet devices from the xorg.conf file on X11 (apart from IRIX): 'stylus', 'pen', and 'eraser'. If the devices have other names, they will not be picked up Qt.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="PointerType-enum"></a>enum QTabletEvent::PointerType</h3>
@@ -160,6 +163,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

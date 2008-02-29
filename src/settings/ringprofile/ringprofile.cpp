@@ -135,6 +135,8 @@ void ProfileEditDialog::init()
     masterVolume->setTickPosition( QSlider::TicksBelow );
     masterVolume->setTickInterval( 1 );
     masterVolume->setSingleStep( 1 );
+    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
+    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
     infoLayout->addWidget( masterVolume, 1, 1 );
 
     infoTabLayout = new QVBoxLayout( infoTab );
@@ -296,6 +298,7 @@ void ProfileEditDialog::setPhoneProfile()
         profileName->setFocus();
     }
     masterVolume->setValue((int)p.volume());
+    mvOrigValue = masterVolume->value();
     vibrateAlert->setChecked(p.vibrate());
     ringType->setCurrentIndex((int)p.callAlert());
     messageType->setCurrentIndex((int)p.msgAlert());
@@ -534,7 +537,9 @@ void ProfileEditDialog::tabChanged( int index )
     }
     if ( editVolume ) {
         editVolume = !editVolume;
-        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
+        masterVolume->setEditFocus(false);
+        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
+        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
         ringTone->stopSound();
     }
 }
@@ -548,12 +553,17 @@ bool ProfileEditDialog::eventFilter( QObject *o, QEvent *e )
         bool rtl = QtopiaApplication::layoutDirection() == Qt::RightToLeft;
         switch ( ke->key() ) {
             case Qt::Key_Select:
-                if ( o == masterVolume )
+                if ( o == masterVolume ) {
                     editVolume = !editVolume;
-                if ( editVolume )
-                    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Ok);
-                else {
-                    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
+                    masterVolume->setEditFocus(!masterVolume->hasEditFocus());
+                }
+                if ( editVolume ) {
+                    mvOrigValue = masterVolume->value();
+                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::EndEdit);
+                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::RevertEdit);
+                } else {
+                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
+                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
                     ringTone->stopSound();
                 }
                 return false;
@@ -562,7 +572,9 @@ bool ProfileEditDialog::eventFilter( QObject *o, QEvent *e )
             case Qt::Key_Down:
                 if ( o == masterVolume && editVolume ) {
                     editVolume = false;
-                    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
+                    masterVolume->setEditFocus(false);
+                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
+                    QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
                     ringTone->stopSound();
                 }
                 return false;
@@ -594,6 +606,20 @@ bool ProfileEditDialog::eventFilter( QObject *o, QEvent *e )
                 return true;
                 break;
             case Qt::Key_Back:
+                if (o == masterVolume) {
+                    if ( editVolume ) {
+                        editVolume = false;
+                        masterVolume->setEditFocus(false);
+                        masterVolume->setValue(mvOrigValue);
+                        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
+                        QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
+                        e->accept();
+                    } else {
+                        e->ignore();
+                    }
+                    return true;
+                }
+                
                 if ( o != profileName ) {
                     e->ignore();
                     return true;
@@ -602,8 +628,16 @@ bool ProfileEditDialog::eventFilter( QObject *o, QEvent *e )
         }
     } else if ( e->type() == QEvent::MouseButtonPress ) {
         editVolume = o == masterVolume;
-        if ( !editVolume )
+        masterVolume->setEditFocus(editVolume);
+        if ( !editVolume ) {
             ringTone->stopSound();
+            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::Edit);
+            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::Back);
+        } else {
+            mvOrigValue = masterVolume->value();
+            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Select, QSoftMenuBar::EndEdit);
+            QSoftMenuBar::setLabel(masterVolume, Qt::Key_Back, QSoftMenuBar::RevertEdit);
+        }
         return false;
     } else if ( e->type() == QEvent::FocusIn ) {
         if ( tabWidget->currentWidget() == settingTab )
@@ -694,7 +728,7 @@ bool ProfileEditDialog::event(QEvent *e)
 //==========================================================================
 
 PhoneProfileItem::PhoneProfileItem(const QPhoneProfile &pr, QListWidget *l)
-: QListWidgetItem(pr.name(), l), cache(0), rpp(pr)
+: QListWidgetItem(pr.name(), l), rpp(pr)
 {
     if ( rpp.isSystemProfile() )
         cache = *systemowned;

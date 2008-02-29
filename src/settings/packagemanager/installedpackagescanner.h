@@ -43,13 +43,16 @@ public:
     void setLocations( const QStringList & );
     bool wasAborted() const { return aborted; }
     QString getError() const { return error; }
+    
+    bool isPackageEnabled( const QString &md5Sum ) const;
+    bool isPackageInstalled( const QString &md5Sum ) const;
 public slots:
     void cancel();
 signals:
     void progressValue( int );
     void newPackage( InstallControl::PackageInfo * );
 private:
-    void scan( const QString & );
+    InstallControl::PackageInfo scan( const QString & );
     AbstractPackageController *pkgController;
     QEventLoop *eventLoop;
     QStringList locations;

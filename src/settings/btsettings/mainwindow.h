@@ -25,7 +25,7 @@
 
 template <class T> class QList;
 class QBluetoothRemoteDevice;
-class QSDAPSearchResult;
+class QBluetoothSdpQueryResult;
 
 class BTSettings_Private;
 class QListWidgetItem;

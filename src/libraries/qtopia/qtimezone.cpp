@@ -680,7 +680,7 @@ void TimeZoneLocation::load( QHash<QByteArray,TimeZoneLocation*> &store )
     QFile file( TimeZonePrivate::zoneFile() );
     if ( !file.open( QIODevice::ReadOnly ) ) {
         qWarning( "Unable to open %s", (const char *)file.fileName().toLatin1() );
-        qWarning( "Timezone data must be installed at %s", (const char *)TimeZonePrivate::zonePath().toLatin1() );
+        qWarning( "Fatal: Timezone data must be installed at %s", (const char *)TimeZonePrivate::zonePath().toLatin1() );
         qApp->exit(1);
         return;
     }

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/painting/qpen.cpp -->
 <head>
   <title>Qt 4.2: QPen Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -51,8 +52,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpen.html#operator-lt-lt-89">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QPen &amp; <i>pen</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpen.html#operator-gt-gt-53">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QPen &amp; <i>pen</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpen.html#operator-lt-lt-90">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QPen &amp; <i>pen</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpen.html#operator-gt-gt-54">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QPen &amp; <i>pen</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -78,7 +79,7 @@
  painter.setPen(pen);</pre>
 <p>The default pen is a solid black brush with 0 width, square cap style (<a href="qt.html#PenCapStyle-enum">Qt::SquareCap</a>), and bevel join style (<a href="qt.html#PenJoinStyle-enum">Qt::BevelJoin</a>).</p>
 <p>In addition QPen provides the <a href="qpen.html#color">color</a>() and <a href="qpen.html#setColor">setColor</a>() convenience functions to extract and set the color of the pen's brush, respectively. Pens may also be compared and streamed.</p>
-<p>For more information about painting in general, see {The Paint System} documentation.</p>
+<p>For more information about painting in general, see <a href="paintsystem.html">The Paint System</a> documentation.</p>
 <ul><li><a href="#pen-style">Pen Style</a></li>
 <li><a href="#cap-style">Cap Style</a></li>
 <li><a href="#join-style">Join Style</a></li>
@@ -129,7 +130,7 @@
 <tr valign="top" class="odd"><td><img src="images/qpen-demo.png" /></td><td><b><a href="demos-pathstroke.html">The Path Stroking Demo</a></b><p>The Path Stroking demo shows Qt's built-in dash patterns and shows how custom patterns can be used to extend the range of available patterns.</p>
 </td></tr>
 </table></p>
-<p>See also <a href="qpainter.html">QPainter</a>, <a href="qbrush.html">QBrush</a>, <a href="demos-pathstroke.html">Path Stroking Demo</a>, and Scribble Example.</p>
+<p>See also <a href="qpainter.html">QPainter</a>, <a href="qbrush.html">QBrush</a>, <a href="demos-pathstroke.html">Path Stroking Demo</a>, and <a href="widgets-scribble.html">Scribble Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QPen"></a>QPen::QPen ()</h3>
@@ -138,7 +139,7 @@
 <p>Constructs a black pen with 0 width and the given <i>style</i>.</p>
 <p>See also <a href="qpen.html#setStyle">setStyle</a>().</p>
 <h3 class="fn"><a name="QPen-3"></a>QPen::QPen ( const <a href="qcolor.html">QColor</a> &amp; <i>color</i> )</h3>
-<p>Constructs a pen with 0 width and the given <i>color</i>.</p>
+<p>Constructs a solid line pen with 0 width and the given <i>color</i>.</p>
 <p>See also <a href="qpen.html#setBrush">setBrush</a>() and <a href="qpen.html#setColor">setColor</a>().</p>
 <h3 class="fn"><a name="QPen-4"></a>QPen::QPen ( const <a href="qbrush.html">QBrush</a> &amp; <i>brush</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>width</i>, <a href="qt.html#PenStyle-enum">Qt::PenStyle</a> <i>style</i> = Qt::SolidLine, <a href="qt.html#PenCapStyle-enum">Qt::PenCapStyle</a> <i>cap</i> = Qt::SquareCap, <a href="qt.html#PenJoinStyle-enum">Qt::PenJoinStyle</a> <i>join</i> = Qt::BevelJoin )</h3>
 <p>Constructs a pen with the specified <i>brush</i>, <i>width</i>, pen <i>style</i>, <i>cap</i> style and <i>join</i> style.</p>
@@ -235,11 +236,11 @@
 <p>See also <a href="qpen.html#operator-not-eq">operator!=</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-89"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QPen &amp; <i>pen</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-90"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QPen &amp; <i>pen</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given <i>pen</i> to the given <i>stream</i> and returns a reference to the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-53"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QPen &amp; <i>pen</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-54"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QPen &amp; <i>pen</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a pen from the given <i>stream</i> into the given <i>pen</i> and returns a reference to the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
@@ -247,6 +248,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

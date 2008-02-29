@@ -21,12 +21,15 @@
 #ifndef ALARMDIALOG_H
 #define ALARMDIALOG_H
 
-#include "ui_alarmdialogbase.h"
-
 #include <qtopia/pim/qappointment.h>
+#include <QDialog>
 
+class QListView;
+class QModelIndex;
+class QOccurrenceModel;
+class AlarmFilterModel;
 
-class AlarmDialog : public QDialog, public Ui::AlarmDialogBase
+class AlarmDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -35,18 +38,28 @@ public:
     void init();
 
     enum Button { Cancel = 0, Snooze, Details };
-    Button exec(const QOccurrence &e);
+    Button exec(QOccurrenceModel *m, const QDateTime& startTime, int warnDelay);
     Button result();
+    QOccurrence selectedOccurrence() const;
 
-    int snoozeLength();
-    bool getSkipDialogs();
+protected:
+    void timerEvent(QTimerEvent *e);
+    void keyPressEvent( QKeyEvent * ke);
 
-protected slots:
-    void snoozeClicked();
-    void detailsClicked();
+private slots:
+    void currentAlarmChanged(const QModelIndex& idx);
+    void alarmSelected(const QModelIndex &idx);
 
 private:
     Button mButton;
+
+    int mAlarmCount;
+    int mAlarmTimerId;
+    QOccurrenceModel* mModel;
+    AlarmFilterModel *mFilterModel;
+
+    /* Widgetty stuff */
+    QListView *mAlarmList;
 };
 
 

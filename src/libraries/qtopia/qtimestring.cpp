@@ -27,6 +27,7 @@
 #include <QPointer>
 #include <QSettings>
 #include <QLocale>
+#include <qtopialog.h>
 
 static const char *const unTranslatedFullMonthNames[] = {
     QT_TRANSLATE_NOOP( "QDate", "January" ),
@@ -360,9 +361,19 @@ QStringList QTimeString::formatOptions()
 /*!
   \deprecated
   Use \l{QDate::fromString()} instead.
+
+  This function simply logs a warning message to qLog(Time) to indicate
+  that it is deprecated.
+  The \a date, \a year. \a month and \a day parameters are all ignored.
 */
 bool QTimeString::parseDate(const QString& date, int& year, int& month, int& day)
 {
+    Q_UNUSED(date);
+    Q_UNUSED(year);
+    Q_UNUSED(month);
+    Q_UNUSED(day);
+    qLog(Time) << "QTimeString::parseDate() is deprecated use QDate::fromString() instead";
+
     return bool();
 }
 

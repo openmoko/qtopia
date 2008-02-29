@@ -6,13 +6,17 @@ CONFIG+=enable_phone_ui
 
 # DEFINES += QTOPIA_PHONEUI
 
+qtopia_performance_test {
+    SERVER_HEADERS+=performancetest.h
+    SERVER_SOURCES+=performancetest.cpp
+}
+
 SERVER_FORMS+=\
     ui/shutdown.ui
 
 SERVER_HEADERS+=\
     qabstractserverinterface.h \
     windowmanagement.h \
-    stabmon.h \
     inputmethods.h \
     systemsuspend.h \
     ui/shutdownimpl.h \
@@ -53,7 +57,9 @@ SERVER_HEADERS+=\
     qkeyboardlock.h \
     standarddevicefeatures.h \
     contentsetlauncherview.h \
-    mediaserver.h \
+    stabmonitortask.h \
+    defaultsignal.h \
+    dbmigratetask.h
 
 SERVER_SOURCES+=\
     main.cpp \
@@ -61,7 +67,6 @@ SERVER_SOURCES+=\
     windowmanagement.cpp \
     systemsuspend.cpp \
     systemsuspendtasks.cpp \
-    stabmon.cpp \
     inputmethods.cpp \
     ui/shutdownimpl.cpp \
     inputdevicesettings.cpp \
@@ -102,7 +107,10 @@ SERVER_SOURCES+=\
     vpnmanager.cpp \
     standarddevicefeatures.cpp \
     contentsetlauncherview.cpp \
-    mediaserver.cpp
+    dbmigratetask.cpp \
+    stabmonitortask.cpp \
+    applicationshutdowntask.cpp \
+    defaultsignal.cpp
 
 build_helix {
     DEFINES+=MEDIA_SERVER_PATH=$${LITERAL_ESCAPED_QUOTE}bin/mediaserver$$LITERAL_ESCAPED_QUOTE
@@ -112,10 +120,8 @@ build_helix {
     DEFINES+=MEDIA_SERVER_PATH=$${LITERAL_ESCAPED_QUOTE}bin/qss$$LITERAL_ESCAPED_QUOTE
 }
 
-!media {
-    SERVER_HEADERS+=obexservicemanager.h
-    SERVER_SOURCES+=obexservicemanager.cpp
-}
+SERVER_HEADERS+=obexservicemanager.h
+SERVER_SOURCES+=obexservicemanager.cpp
 
 equals(LAUNCH_METHOD,quicklaunch) {
     SERVER_SOURCES+=quickexeapplicationlauncher.cpp
@@ -187,7 +193,7 @@ BLUETOOTH_SOURCES=audiomanager.cpp \
                   bluetooth/hs/qbluetoothhsagserver.cpp \
                   bluetooth/hs/qbluetoothhsservice.cpp
 
-isEmpty(DEVICE_CONFIG_PATH) {
+isEmpty(DEVICE_CONFIG_PATH)|!exists($$DEVICE_CONFIG_PATH/server/scomisc.cpp) {
     BLUETOOTH_SOURCES+=bluetooth/scomisc.cpp
 }
 
@@ -237,35 +243,22 @@ pda {
     SOURCES+=$$PDA_SOURCES
 }
 
+#begin media
 MEDIA_HEADERS=\
-    media/mediaimpl.h\
-    media/medialauncher.h \
-    media/medialauncherview.h
+    media/mediaserver.h \
+    media/audiovolumemanager.h \
+    media/mediakeyservice.h \
+    media/mediaservicestask.h
 
 MEDIA_SOURCES=\
-    media/mediaimpl.cpp\
-    media/medialauncher.cpp \
-    media/medialauncherview.cpp
+    media/mediaserver.cpp \
+    media/audiovolumemanager.cpp \
+    media/mediakeyservice.cpp \
+    media/mediaservicestask.cpp  
 
-media {
-    enable_bluetooth {
-        MEDIA_HEADERS+=$$BLUETOOTH_HEADERS
-        MEDIA_SOURCES+=$$BLUETOOTH_SOURCES
-    }
-
-    HEADERS+=$$MEDIA_HEADERS
-    SOURCES+=$$MEDIA_SOURCES
-
-    !enable_qtopiabase:depends(libraries/qtopiail)
-    depends(3rdparty/libraries/openobex)
-    depends(libraries/qtopiacomm)
-
-    equals(QTOPIA_SOUND_SYSTEM,alsa) {
-    	depends(3rdparty/libraries/alsa)
-    	DEFINES+=HAVE_ALSA
-    }
-}
-
+HEADERS+=$$MEDIA_HEADERS
+SOURCES+=$$MEDIA_SOURCES
+#end media
 
 PHONE_HEADERS=\
     phone/contextlabel.h \
@@ -538,6 +531,7 @@ qtopiatest {
     depends(libraries/qtopiatest/qtesttools/target)
     depends(libraries/qtopiatest/qsystemtestslave)
     depends(libraries/qtopiatest/qtopiasystemtestslave)
+    depends(libraries/qtopiatest/qtopiaservertestslave)
 }
 
 !isEmpty(DEVICE_CONFIG_PATH) {
@@ -643,8 +637,11 @@ pics.path=/pics/qpe
 pics.hint=pics
 INSTALLS+=pics
 
-wallpaperpics.files=$$QTOPIA_DEPOT_PATH/pics/wallpaper/*
+wallpaperpics.files=$$QTOPIA_DEPOT_PATH/pics/wallpaper/*.png
 wallpaperpics.path=/pics/wallpaper
+wallpaperpics.hint=content nct
+wallpaperpics.categories=SystemWallpapers
+wallpaperpics.trtarget=QtopiaWallpapers
 INSTALLS+=wallpaperpics
 
 settings.files=\
@@ -675,17 +672,19 @@ qpe_conf.commands+=\
     > $(INSTALL_ROOT)$$qpe_conf.path/qpe.conf
 INSTALLS+=qpe_conf
 
-inputmethods.files=$$QTOPIA_DEPOT_PATH/plugins/inputmethods/.directory
-inputmethods.path=/plugins/inputmethods
-INSTALLS+=inputmethods
+!enable_singleexec {
+    inputmethods.files=$$QTOPIA_DEPOT_PATH/plugins/inputmethods/.directory
+    inputmethods.path=/plugins/inputmethods
+    INSTALLS+=inputmethods
 
-obex.files=$$QTOPIA_DEPOT_PATH/plugins/obex/.directory
-obex.path=/plugins/obex
-INSTALLS+=obex
+    obex.files=$$QTOPIA_DEPOT_PATH/plugins/obex/.directory
+    obex.path=/plugins/obex
+    INSTALLS+=obex
 
-network.files=$$QTOPIA_DEPOT_PATH/plugins/network/.directory
-network.path=/plugins/network
-INSTALLS+=network
+    network.files=$$QTOPIA_DEPOT_PATH/plugins/network/.directory
+    network.path=/plugins/network
+    INSTALLS+=network
+}
 
 speeddialsounds.files=$$QTOPIA_DEPOT_PATH/sounds/speeddial
 speeddialsounds.path=/sounds
@@ -757,6 +756,10 @@ enable_bluetooth {
     btqdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/BluetoothPush
     btqdsservice.path=/etc/qds
     INSTALLS+=btqdsservice
+
+    btservices.files=$$QTOPIA_DEPOT_PATH/etc/bluetooth/sdp/*.xml
+    btservices.path=/etc/bluetooth/sdp
+    INSTALLS+=btservices
 }
 
 phone {
@@ -772,14 +775,12 @@ phone {
 
     settings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PhoneProfile.conf
 
-    defaultalerts_w.files=$$QTOPIA_DEPOT_PATH/etc/SystemRingTones/*.wav
-    defaultalerts_w.path=/etc/SystemRingTones
-    INSTALLS+=defaultalerts_w
-
-    defaultalerts_d.files=$$QTOPIA_DEPOT_PATH/etc/SystemRingTones/*.desktop
-    defaultalerts_d.path=/etc/SystemRingTones
-    defaultalerts_d.hint=desktop
-    INSTALLS+=defaultalerts_d
+    defaultalerts.files=$$QTOPIA_DEPOT_PATH/etc/SystemRingTones/*.wav
+    defaultalerts.path=/etc/SystemRingTones
+    defaultalerts.hint=content nct
+    defaultalerts.categories=SystemRingTones
+    defaultalerts.trtarget=QtopiaRingTones
+    INSTALLS+=defaultalerts
 
     !free_package|free_plus_binaries {
         callhistorydesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/callhistory.desktop
@@ -835,9 +836,11 @@ phone {
     pdapics.hint=pics
     INSTALLS+=pdapics
 
-    applets.files=$$QTOPIA_DEPOT_PATH/plugins/applets/.directory
-    applets.path=/plugins/applets
-    INSTALLS+=applets
+    !enable_singleexec {
+        applets.files=$$QTOPIA_DEPOT_PATH/plugins/applets/.directory
+        applets.path=/plugins/applets
+        INSTALLS+=applets
+    }
 
     help.files+=\
 	categor*\
@@ -853,7 +856,35 @@ enable_sxe {
     security.commands=$$COMMAND_HEADER\
         install -c $$QTOPIA_DEPOT_PATH/etc/sxe.* $(INSTALL_ROOT)/etc $$LINE_SEP\
         chmod 0600 $(INSTALL_ROOT)/etc/sxe.* $$LINE_SEP\
-        mkdir -p $(INSTALL_ROOT)/etc/rekey
+        mkdir -p $(INSTALL_ROOT)/etc/rekey $$LINE_SEP\
+        mkdir -p $(INSTALL_ROOT)/etc/sxe_qtopia $$LINE_SEP\
+        mkdir -p $(INSTALL_ROOT)/etc/sxe_domains $$LINE_SEP
+
+    SXE_SCRIPTS=sxe_qtopia sxe_sandbox sxe_unsandbox
+    for(file,SXE_SCRIPTS) {
+        !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/sxe_qtopia/$$file) {
+            security.commands+=\
+                install -m 0500 -c $$DEVICE_CONFIG_PATH/etc/sxe_qtopia/$$file $(INSTALL_ROOT)/etc/sxe_qtopia $$LINE_SEP
+        } else {
+            security.commands+=\
+                install -m 0500 -c $$QTOPIA_DEPOT_PATH/etc/sxe_qtopia/$$file $(INSTALL_ROOT)/etc/sxe_qtopia $$LINE_SEP
+        }
+    }
+
+    security.commands+=\
+        install -m 0500 -c $$QTOPIA_DEPOT_PATH/etc/sxe_domains/* $(INSTALL_ROOT)/etc/sxe_domains $$LINE_SEP
+
+    !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/sxe_domains) {
+        security.commands+=\
+            install -m 0500 -c $$DEVICE_CONFIG_PATH/etc/sxe_domains/* $(INSTALL_ROOT)/etc/sxe_domains $$LINE_SEP
+    }
+            
+    !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/SxeMonitor.conf) {
+        settings.files+=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/SxeMonitor.conf
+    } else {
+        settings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/SxeMonitor.conf
+    }
+
     INSTALLS+=security
 }
 
@@ -921,7 +952,7 @@ QMAKE_EXTRA_TARGETS+=nct_lupdate
 
 pkg.name=qpe-taskbar
 pkg.desc=Launcher for QPE
-pkg.domain=base,launcher
+pkg.domain=base,launcher,policy,syslog,prefix
 
 # FIXME THIS SHOULD NOT BE HERE!!!
 dep(INCLUDEPATH+=$$PWD)

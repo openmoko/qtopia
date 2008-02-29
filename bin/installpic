@@ -335,29 +335,34 @@ sub installicons
                     };
                 } else {
                     my $info = $iconinfo{$icon};
-		    my ( $cwidth, $cheight ) = ( $info->{dir} =~ /(\d+)x(\d+)/ );
-                    if ( $nscalable ) {
+                    if ( $info->{dir} eq "scalable" ) {
                         # scalable icons are always preferred
-                        DEBUG and print "choose $icondir over $info->{dir} for $icon.  (scalable)\n";
-                        $info->{file} = $iconfile;
-                        $info->{dir} = $icondir;
-                    } elsif ($cheight < $height && $cwidth < $width) {
-			# if it's bigger, use it
-			if ($nheight > $cheight && $nwidth > $cwidth) {
-			    DEBUG and print "choose $icondir over $info->{dir} for $icon.  (bigger)\n";
+                        DEBUG and print "choose $info->{dir} over $icondir for $icon.  (scalable)\n";
+                    } else {
+                        my ( $cwidth, $cheight ) = ( $info->{dir} =~ /(\d+)x(\d+)/ );
+                        if ( $nscalable ) {
+                            # scalable icons are always preferred
+                            DEBUG and print "choose $icondir over $info->{dir} for $icon.  (scalable)\n";
                             $info->{file} = $iconfile;
                             $info->{dir} = $icondir;
-			}
-		    } else {
-			# current is larger or equal to match.
-			# if it's smaller, but still bigger than the target height, use it
-			if ($nheight < $cheight && $nwidth < $cwidth 
-			    && $nheight >= $height && $nwidth >= $width) {
-			    DEBUG and print "choose $icondir over $info->{dir} for $icon.  (closer)\n";
-                            $info->{file} = $iconfile;
-                            $info->{dir} = $icondir;
-			}
-		    }
+                        } elsif ($cheight < $height && $cwidth < $width) {
+                            # if it's bigger, use it
+                            if ($nheight > $cheight && $nwidth > $cwidth) {
+                                DEBUG and print "choose $icondir over $info->{dir} for $icon.  (bigger)\n";
+                                $info->{file} = $iconfile;
+                                $info->{dir} = $icondir;
+                            }
+                        } else {
+                            # current is larger or equal to match.
+                            # if it's smaller, but still bigger than the target height, use it
+                            if ($nheight < $cheight && $nwidth < $cwidth 
+                                && $nheight >= $height && $nwidth >= $width) {
+                                DEBUG and print "choose $icondir over $info->{dir} for $icon.  (closer)\n";
+                                $info->{file} = $iconfile;
+                                $info->{dir} = $icondir;
+                            }
+                        }
+                    }
 		}
 	    }
 	}
@@ -381,9 +386,7 @@ sub installicons
         $to =~ s{\d+x\d+/}{};
         $to = "$dest/$to";
 	if (-f $from) {
-            if ( $dir eq "scalable" ) {
-                OUTPUT and print "Skipping $to because there's a scalable version.\n";
-            } elsif ( needCopy($from, $to) ) {
+            if ( $dir ne "scalable" && needCopy($from, $to) ) {
 		OUTPUT and print "Generate $to from $from\n";
                 push(@files, $from, $to);
             }

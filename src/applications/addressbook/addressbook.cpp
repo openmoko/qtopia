@@ -247,14 +247,15 @@ protected:
 
 AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     : QMainWindow( parent, f ),
-      mAllowCloseEvent( false ),
-      mResetKeyChars( false ),
       mCloseAfterView( false ),
       mFindMode( false ),
       mHasSim( false ),
-      abEditor(0),
       mView(0),
       searchBar(0),
+      abFullEditor(0),
+#ifdef QTOPIA_PHONE
+      abSimEditor(0),
+#endif
       actionFind(0),
       actionPersonal(0),
       actionSetPersonal(0),
@@ -327,8 +328,8 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     abList = new QContactListView(0);
     abList->setFrameStyle(QFrame::NoFrame);
 
-    contactDelegate = new QContactDelegate(abList);
-    abList->setItemDelegate(contactDelegate);
+    abList->setItemDelegate(new QContactDelegate(abList));
+    abList->setUniformItemSizes(true);
 
     abList->setModel(contacts);
     listViewLayout->addWidget(abList);
@@ -590,7 +591,7 @@ void AddressbookWindow::createDetailedView()
     if(!mView)
     {
         mView = new AbLabel(0);
-        connect(mView, SIGNAL(externalLinkActivated()), this, SLOT(close()));
+//        connect(mView, SIGNAL(externalLinkActivated()), this, SLOT(close()));
         connect(mView, SIGNAL(highlighted(const QString&)), this,
             SLOT(setHighlightedLink(const QString&)));
         connect(mView, SIGNAL(backClicked()), this, SLOT(slotViewBack()));
@@ -756,19 +757,13 @@ void AddressbookWindow::phonebookChanged( const QString& store )
 void AddressbookWindow::keyPressEvent(QKeyEvent *e)
 {
 #ifdef QTOPIA_PHONE
-    if ( (e->key() == Qt::Key_Back || e->key() == Qt::Key_No))
+    if (e->key() == Qt::Key_Back)
     {
         e->accept();
         if ( centralView->currentIndex() == AB_CONTACTLIST)
-        {
-            mAllowCloseEvent = true;
             close();
-        }
         else
-        {
-            // slotListView();
             viewClosed();
-        }
     }
     else if ( ( e->key() == Qt::Key_Call ) &&
               (centralView->currentIndex() == AB_CONTACTLIST) )
@@ -1014,8 +1009,6 @@ AddressbookWindow::~AddressbookWindow()
         QMessageBox::information( this, tr( "Contacts" ),
                 tr("<qt>Device full.  Some changes may not be saved.</qt>"));
     writeConfig();
-    if(abEditor)
-        delete abEditor;
 }
 
 void AddressbookWindow::readConfig(void)
@@ -1163,8 +1156,6 @@ void AddressbookWindow::slotListNew()
     QContact cnt;
     if(!checkSyncing())
     {
-        createDetailedView();
-        mView->init(cnt);
         newEntry(cnt);
     }
 }
@@ -1188,7 +1179,6 @@ void AddressbookWindow::slotDetailView()
         mView->init( curEntry );
         setHighlightedLink( mView->encodeHref() );
         showView();
-        mResetKeyChars = true;
 #ifdef QTOPIA_PHONE
         if ( mFindMode )
             mFindLE->setText( QString() );
@@ -1201,13 +1191,6 @@ void AddressbookWindow::slotListView()
     mCurrentContact = QContact();
 #ifdef QTOPIA_PHONE
     abList->contactModel()->contact(abList->currentIndex());
-
-    if( mResetKeyChars )
-    {
-        //previous view was something else
-        mResetKeyChars = false;
-        // XXX abList->setKeyChars( "" );
-    }
 #endif
 
     if ( centralView->currentIndex() != AB_CONTACTLIST ) {
@@ -1347,7 +1330,6 @@ void AddressbookWindow::slotViewBack()
 {
     if (mCloseAfterView) {
         mCloseAfterView = false;
-        mAllowCloseEvent = true;
         close();
     } else {
         viewClosed();
@@ -1385,8 +1367,6 @@ void AddressbookWindow::showJustItem(const QUniqueId& uid)
     if (!isVisible())
         showMaximized();
 
-    //mResetKeyChars = true;
-    mResetKeyChars = false;
     //abList->setCurrentIndex( contacts->index(uid) );
     //slotDetailView();
     updateIcons();
@@ -1489,8 +1469,6 @@ void AddressbookWindow::createNewContact(const QString& phoneNumber)
     if (pts->exec())
     {
         pts->updateContact(cnt, phoneNumber);
-        createDetailedView();
-        mView->init(cnt);
         newEntry(cnt);
     }
 }
@@ -1593,8 +1571,6 @@ void AddressbookWindow::editPersonal()
     if (contacts->hasPersonalDetails())
     {
         QContact me = contacts->personalDetails();
-        createDetailedView();
-        mView->init( me );
         newPersonal = false;
         editEntry( me );
     }
@@ -1638,20 +1614,30 @@ void AddressbookWindow::newEntry()
     newEntry( QContact() );
 }
 
+AbEditor *AddressbookWindow::editor(const QUniqueId &id)
+{
+#ifdef QTOPIA_PHONE
+    if (contacts->isSIMCardContact(id)) {
+        if (!abSimEditor)
+            abSimEditor = new AbSimEditor;
+        return abSimEditor;
+    }
+    else
+#endif
+    {
+        if (!abFullEditor)
+            abFullEditor = new AbFullEditor;
+        return abFullEditor;
+    }
+}
+
 void AddressbookWindow::newEntry( const QContact &cnt )
 {
-    if ( abEditor != 0 )
-        return;
 
     QContact entry = cnt;
-    abEditor = new AbEditor( parentWidget() );
-    abEditor->setObjectName("edit");
-    abEditor->setModal(true);
-#ifdef QTOPIA_PHONE
-    abEditor->setEntry( entry, true, contacts->isSIMCardContact(cnt.uid()));
-#else
+    AbEditor *abEditor = editor(cnt.uid());
+
     abEditor->setEntry( entry, true );
-#endif
 
     if( abEditor->exec() == QDialog::Accepted )
     {
@@ -1665,106 +1651,40 @@ void AddressbookWindow::newEntry( const QContact &cnt )
 
         updateIcons();
     }
-
-    delete abEditor;
-    abEditor = 0;
-}
-
-AbEditor *AddressbookWindow::editor()
-{
-    if( !abEditor ) {
-        abEditor = new AbEditor( isVisible() ? this : 0);
-        abEditor->setObjectName("edit");
-        abEditor->setModal(true);
-    }
-
-    return abEditor;
 }
 
 void AddressbookWindow::editEntry( const QContact &cnt )
 {
-    if ( abEditor != 0 )
-        return;
-
     QContact entry = cnt;
-    abEditor = new AbEditor( parentWidget() );
-    abEditor->setObjectName("edit");
-    abEditor->setModal(true);
+    AbEditor *abEditor = editor(cnt.uid());
 
-#ifdef QTOPIA_PHONE
-    bool simContact = contacts->isSIMCardContact(cnt.uid());
-    abEditor->setEntry( entry, false, simContact );
-
-    if(!simContact)
-        abEditor->setNameFocus();
-#else
     abEditor->setEntry( entry );
-    abEditor->setNameFocus();
-#endif
 
     if ( abEditor->exec() )
     {
-        if ( abEditor->isEmpty() )
-        {   // Delete if empty
-            removeContactQDLLink( entry );
-            removeSpeedDial( entry );
-            sel_href = QString();
-            contacts->removeContact( entry );
-            if( mView && centralWidget() == mView )
-                viewClosed();
-            else
-                slotListView();
-        }
-        else
-        {   // Update if not empty
-            setFocus();
-            QContact editedEntry( abEditor->entry() );
+        setFocus();
+        QContact editedEntry( abEditor->entry() );
 
-            QUniqueId entryUid = editedEntry.uid();
-            if( !(entry == editedEntry) || abEditor->imageModified() )
-            {// only do update operations if the data has actually changed
-                QPixmap *cached = QPixmapCache::find( "pimcontact" +
-                    entryUid.toString() + "-cfl" );
-                if( abEditor->imageModified() && cached )
-                {
-                    //update the contact field list image cache
-                    QString photoFile( editedEntry.customField( "photofile" ) );
-                    QPixmap p;
-                    if( !photoFile.isEmpty() )
-                    {
-                        QSize pSize = QContact::portraitSize();
-                        QString baseDirStr = Qtopia::applicationFileName( "addressbook",
-                            "contactimages/" );
-                        QString pFileName( baseDirStr + photoFile  );
-                        QThumbnail thumbnail( pFileName );
-                        p = thumbnail.pixmap( pSize, Qt::KeepAspectRatioByExpanding );
-                        p = p.copy( ( pSize.width() - p.width() ) / 2,
-                                    ( pSize.height() - p.height() ) / 2,
-                                    pSize.width(), pSize.height() );
-                    }
-                    QPixmapCache::insert( "pimcontact" + entryUid.toString() + "-cfl", p );
-                }
-                //regular contact, just update
-                NameLearner learner(editedEntry);
-                contacts->updateContact(editedEntry);
-                abList->setCurrentIndex(contacts->index(entryUid));
-                mCurrentContact = editedEntry;
+        QUniqueId entryUid = editedEntry.uid();
+        if( !(entry == editedEntry))
+        {// only do update operations if the data has actually changed
+            //regular contact, just update
+            NameLearner learner(editedEntry);
+            contacts->updateContact(editedEntry);
+            abList->setCurrentIndex(contacts->index(entryUid));
+            mCurrentContact = editedEntry;
 
-                if( mView && centralView->currentIndex() == AB_DETAILVIEW )
-                {
-                    // don't call slotDetailView because with QDL that would push the same
-                    // entry onto the view stack again. just refresh
-                    // need to get entry again for contact list model data.
-                    editedEntry = contacts->contact(editedEntry.uid());
-                    mView->init( editedEntry );
-                    setHighlightedLink( mView->encodeHref() );
-                }
+            if( mView && centralView->currentIndex() == AB_DETAILVIEW )
+            {
+                // don't call slotDetailView because with QDL that would push the same
+                // entry onto the view stack again. just refresh
+                // need to get entry again for contact list model data.
+                editedEntry = contacts->contact(editedEntry.uid());
+                mView->init( editedEntry );
+                setHighlightedLink( mView->encodeHref() );
             }
         }
     }
-
-    delete abEditor;
-    abEditor = 0;
 }
 
 void AddressbookWindow::closeEvent( QCloseEvent *e )
@@ -1773,13 +1693,6 @@ void AddressbookWindow::closeEvent( QCloseEvent *e )
 #ifdef QTOPIA_CELL
     if( mSimIndicator )
         mSimIndicator->hide();
-#endif
-#ifndef AB_PDA
-    if( !mAllowCloseEvent && centralView->currentIndex() != AB_CONTACTLIST)
-    {
-        e->ignore();
-        return;
-    }
 #endif
     QMainWindow::closeEvent( e );
 }
@@ -1805,9 +1718,7 @@ void AddressbookWindow::viewOpened( const QContact &entry)
 
 void AddressbookWindow::viewClosed()
 {
-    if ( mContactViewStack.count() > 0 )
-    {
-        mAllowCloseEvent = false;
+    if ( mContactViewStack.count() > 0 ) {
         QContact prevContact = mContactViewStack.last();
         mContactViewStack.removeLast();
         if ( prevContact.uid().isNull() ) {
@@ -1817,19 +1728,11 @@ void AddressbookWindow::viewClosed()
             abList->setCurrentIndex( contacts->index( prevContact.uid() ) );
             slotDetailView();
         }
-    }
-    else if( mCloseAfterView )
-    {
+    } else if( mCloseAfterView ) {
         mCloseAfterView = false;
-        mAllowCloseEvent = true;
-        slotListView();
         close();
-    }
-    else
-    {
-        mAllowCloseEvent = false;
+    } else
         slotListView();
-    }
 }
 
 void AddressbookWindow::slotFind(bool s)
@@ -2135,7 +2038,7 @@ QDSData AddressbookWindow::contactQDLLink( QContact& contact )
     QString keyString = contact.customField( QDL::SOURCE_DATA_KEY );
 
     if ( keyString.isEmpty() ||
-         !QDSData( QLocalUniqueId( keyString ) ).isValid() )
+         !QDSData( QUniqueId( keyString ) ).isValid() )
     {
         QByteArray dataRef;
         QDataStream refStream( &dataRef, QIODevice::WriteOnly );
@@ -2147,7 +2050,7 @@ QDSData AddressbookWindow::contactQDLLink( QContact& contact )
                       "pics/addressbook/AddressBook" );
 
         QDSData linkData = link.toQDSData();
-        QLocalUniqueId key = linkData.store();
+        QUniqueId key = linkData.store();
         contact.setCustomField( QDL::SOURCE_DATA_KEY, key.toString() );
         QString keyString2 = contact.customField( QDL::SOURCE_DATA_KEY );
 
@@ -2157,7 +2060,7 @@ QDSData AddressbookWindow::contactQDLLink( QContact& contact )
     }
 
     // Get the link from the QDSDataStore
-    return QDSData( QLocalUniqueId( keyString ) );
+    return QDSData( QUniqueId( keyString ) );
 }
 
 void AddressbookWindow::removeSpeedDial( QContact& contact )
@@ -2186,7 +2089,7 @@ void AddressbookWindow::removeContactQDLLink( QContact& contact )
     QString key = contact.customField( QDL::SOURCE_DATA_KEY );
     if ( !key.isEmpty() ) {
         // Break the link in the QDSDataStore
-        QDSData linkData = QDSData( QLocalUniqueId( key ) );
+        QDSData linkData = QDSData( QUniqueId( key ) );
         QDLLink link( linkData );
         link.setBroken( true );
         linkData.modify( link.toQDSData().data() );
@@ -2473,8 +2376,6 @@ void ContactsService::updateContact(const QContact& contact)
 */
 void ContactsService::addAndEditContact(const QContact& contact)
 {
-    parent->createDetailedView();
-    parent->mView->init( contact );
     parent->newEntry( contact );
 }
 
@@ -2616,7 +2517,7 @@ void ContactsPhoneService::smsBusinessCard()
 }
 
 /*!
-    Receive a WAP push message of type \c{text/x-vcard}.
+    Receive a WAP push message \a request of type \c{text/x-vcard}.
 */
 void ContactsPhoneService::pushVCard( const QDSActionRequest& request )
 {
@@ -2627,4 +2528,3 @@ void ContactsPhoneService::pushVCard( const QDSActionRequest& request )
 #endif // QTOPIA_CELL
 
 #endif // QTOPIA_PHONE
-

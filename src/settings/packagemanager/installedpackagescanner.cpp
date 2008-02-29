@@ -24,7 +24,7 @@
 #include "packageinformationreader.h"
 
 #include <qtopialog.h>
-
+#include <qtopianamespace.h>
 #include <QBuffer>
 #include <QDir>
 #include <QFileInfo>
@@ -60,48 +60,82 @@ void InstalledPackageScanner::run()
 {
     setTerminationEnabled();
     eventLoop = new QEventLoop();
+
+    QList< InstallControl::PackageInfo> pkgList;
     for ( int i = 0; i < locations.count() && !aborted; ++i )
     {
         if ( !locations[i].endsWith("/") )
             locations[i] += "/";
-        QDir locDir( locations[i] );
-        if ( !locDir.exists() )
+        QDir controlsDir( locations[i] );
+        if ( !controlsDir.exists() )
         {
-            qLog(Package) << locDir.path() << "does not exist";
+            qLog(Package) << controlsDir.path() << "does not exist";
             continue;  // could be unmounted, not an error
         }
-        QFileInfoList flist = locDir.entryInfoList();
+        QFileInfoList flist = controlsDir.entryInfoList();
         for ( int i = 0; i < flist.count() && !aborted; ++i )
         {
-            if ( flist[i].fileName().startsWith(".")
-                    || !flist[i].isDir() ) continue;
-            scan( flist[i].filePath() );
+            if ( !flist[i].filePath().endsWith( AbstractPackageController::INFORMATION_FILE ) ) 
+                continue;
+            pkgList.append( scan( flist[i].filePath() ) );
             eventLoop->processEvents();
         }
     }
+    qSort( pkgList );
+    foreach ( InstallControl::PackageInfo pkg, pkgList )
+        pkgController->addPackage( pkg ); 
     delete eventLoop; // cant parent to this, due to thread
 }
 
 /*!
-  Scan the location for information about a package.  If the location is
-  a directory (and not "." or "..", or anything else starting with a ".")
-  then it assumed to be a package.  If the file "control" does not exist
-  in the directory then the package state will be
-  InstallControl::PartlyInstalled | InstallControl::Error
+  Scan the control file.  If the control file does not exist
+  the package state will be InstallControl::PartlyInstalled |
+  InstallControl::Error
 
   Other error states possible are described by PackageInformationReader
   and InstallControl::PackageInfo
 */
-void InstalledPackageScanner::scan( const QString &loc )
+InstallControl::PackageInfo InstalledPackageScanner::scan( const QString &controlPath )
 {
-    QString controlFile = loc + "/" + AbstractPackageController::INFORMATION_FILE;
-    qLog(Package) << "getting info for" << controlFile;
-    if ( QFile::exists( controlFile ))
-    {
-        PackageInformationReader informationReader( controlFile );
-        pkgController->addPackage( informationReader.package() );
-    }
+        PackageInformationReader informationReader( controlPath );
+        InstallControl::PackageInfo pkg = informationReader.package();
+        if ( pkg.md5Sum.isEmpty() )
+            pkg.md5Sum =controlPath.mid( controlPath.lastIndexOf("/") + 1, 32 );  
+            
+        QString md5Sum = pkg.md5Sum;
+            
+        if ( isPackageEnabled( md5Sum ) )
+            pkg.isEnabled = true;
+         else
+            pkg.isEnabled = false;
+
+        return pkg;
 }
+
+bool InstalledPackageScanner::isPackageEnabled( const QString &md5Sum ) const
+{
+    //TODO: This does not handle the case where the package is installed on a media card
+    QDir installSystemBinPath( Qtopia::packagePath() + "/bin" );
+    QFileInfoList links = installSystemBinPath.entryInfoList( QStringList(md5Sum + "*" ), QDir::System );
+    foreach( QFileInfo link, links )
+    {
+        if ( link.symLinkTarget().endsWith( InstalledPackageController::DISABLED_TAG ) )
+            return false;
+    }
+    return true;
+}
+
+bool InstalledPackageScanner::isPackageInstalled( const QString &md5Sum ) const
+{
+    QDir installSystemBinPath( Qtopia::packagePath() + "/controls" );
+    QFileInfoList links = installSystemBinPath.entryInfoList( QStringList(md5Sum + "*" ) );
+   
+    if( links.count() == 0 )
+        return false;
+    else    
+        return true;    
+}
+
 
 void InstalledPackageScanner::cancel()
 {

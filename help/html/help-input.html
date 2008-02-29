@@ -10,21 +10,18 @@
 </ul>
 <p>Tapping the input method icon alternately pops-up the input area and hides the input area.</p>
 <ul>
-<li><a href="handwriting-index.html">Handwriting</a></li>
+<li><a href="handwriting.html">Handwriting</a></li>
 <li><a href="help-keyboard.html">Keyboard</a></li>
 <li><a href="help-pickboard.html">Pickboard</a></li>
 <li><a href="help-unicode.html">Unicode</a></li>
 </ul>
 <!--#endif-->
 <!--#if expr="$TOUCH"-->
-<p>Input is via handwriting. Simply write letters on the display,
+<p>Input is via <a href="handwriting.html">Handwriting</a>. Simply write letters on the display,
 or use one of the <a href="handwriting-strokes.html">special strokes</a> for other input.</p>
-<ul>
-<li><a href="handwriting-index.html">Handwriting</a></li>
-</ul>
 <!--#endif-->
 <!--#if expr="$KEYPAD"-->
-<p> Input is via the keypad. Press the key corresponding to the
+<p>Input is via the keypad. Press the key corresponding to the
 letter you wish to type (eg. press 3 for "D", "E", or "F").
 <!--#include file="device-keys.html"-->
 <p><!--#echo var="key-punc"--> for punctuation.
@@ -37,8 +34,8 @@ letter you wish to type (eg. press 3 for "D", "E", or "F").
 </ul>
 <p><!--#echo var="key-mode-change"--> to change input mode between:
 <ul>
-<li><img src=":image/pkim/dict-lc"> </img> your primary input language,
-<li><img src=":image/pkim/abc-lc"> </img> character by character,
+<li><img src=":image/pkim/dict-lc"> </img> your primary input language.  In this mode "example" would be entered as 3926753 (one number per letter).
+<li><img src=":image/pkim/abc-lc"> </img> character by character. "example" would be entered with 33992675553.
 <li><img src=":image/pkim/ext-lc"> </img> international character by character.
 <li><img src=":image/pkim/phone"> </img> numeric, and
 <li>your other selected <a href=language.html>input languages</a> (icon differs for each language),

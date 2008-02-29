@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>List of All Members for QBluetoothRfcommSocket</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>List of All Members for QBluetoothRfcommSocket</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -53,7 +52,8 @@
 <li><div class="fn"/><a href="qobject.html#dumpObjectInfo">dumpObjectInfo</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#dumpObjectTree">dumpObjectTree</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#dynamicPropertyNames">dynamicPropertyNames</a> () const</li>
-<li><div class="fn"/><a href="qbluetoothabstractsocket.html#error">error</a> ( QBluetoothAbstractSocket::SocketError )</li>
+<li><div class="fn"/><a href="qbluetoothabstractsocket.html#error">error</a> () const : SocketError</li>
+<li><div class="fn"/><a href="qbluetoothabstractsocket.html#error-2">error</a> ( QBluetoothAbstractSocket::SocketError )</li>
 <li><div class="fn"/><a href="qiodevice.html#errorString">errorString</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#event">event</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#eventFilter">eventFilter</a> ( QObject *, QEvent * )</li>
@@ -87,11 +87,10 @@
 <li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const</li>
 <li><div class="fn"/><a href="qiodevice.html#isWritable">isWritable</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#killTimer">killTimer</a> ( int )</li>
-<li><div class="fn"/><a href="qbluetoothabstractsocket.html#lastError">lastError</a> () const : SocketError</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qbluetoothrfcommsocket.html#localAddress">localAddress</a> () const : QBluetoothAddress</li>
 <li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const</li>
 <li><div class="fn"/><a href="qiodevice.html#mode">mode</a> () const</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qobject.html#moveToThread">moveToThread</a> ( QThread * )</li>
 <li><div class="fn"/><a href="qobject.html#name">name</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#name-2">name</a> ( const char * ) const</li>
@@ -115,6 +114,7 @@
 <li><div class="fn"/><a href="qiodevice.html#readLine">readLine</a> ( char *, qint64 )</li>
 <li><div class="fn"/><a href="qiodevice.html#readLine-2">readLine</a> ( qint64 )</li>
 <li><div class="fn"/><a href="qiodevice.html#readLineData">readLineData</a> ( char *, qint64 )</li>
+<li><div class="fn"/><a href="qbluetoothabstractsocket.html#readMtu">readMtu</a> () const : int</li>
 <li><div class="fn"/><a href="qbluetoothabstractsocket.html#readSocketParameters">readSocketParameters</a> ( int ) : bool</li>
 <li><div class="fn"/><a href="qiodevice.html#readyRead">readyRead</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const</li>
@@ -128,7 +128,7 @@
 <li><div class="fn"/><a href="qbluetoothrfcommsocket.html#securityOptions">securityOptions</a> () const : QBluetooth::SecurityOptions</li>
 <li><div class="fn"/><a href="qiodevice.html#seek">seek</a> ( qint64 )</li>
 <li><div class="fn"/><a href="qobject.html#sender">sender</a> () const</li>
-<li><div class="fn"/><a href="qbluetoothabstractsocket.html#setError">setError</a> ( const QBluetoothAbstractSocket::SocketError &amp; )</li>
+<li><div class="fn"/><a href="qbluetoothabstractsocket.html#setError">setError</a> ( QBluetoothAbstractSocket::SocketError )</li>
 <li><div class="fn"/><a href="qiodevice.html#setErrorString">setErrorString</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#setName">setName</a> ( const char * )</li>
 <li><div class="fn"/><a href="qobject.html#setObjectName">setObjectName</a> ( const QString &amp; )</li>
@@ -136,8 +136,10 @@
 <li><div class="fn"/><a href="qobject.html#setParent">setParent</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#setProperty">setProperty</a> ( const char *, const QVariant &amp; )</li>
 <li><div class="fn"/><a href="qbluetoothabstractsocket.html#setReadBufferSize">setReadBufferSize</a> ( qint64 )</li>
+<li><div class="fn"/><a href="qbluetoothabstractsocket.html#setReadMtu">setReadMtu</a> ( int )</li>
 <li><div class="fn"/><a href="qbluetoothabstractsocket.html#setSocketDescriptor">setSocketDescriptor</a> ( int, QBluetoothAbstractSocket::SocketState, QIODevice::OpenMode ) : bool</li>
 <li><div class="fn"/><a href="qiodevice.html#setTextModeEnabled">setTextModeEnabled</a> ( bool )</li>
+<li><div class="fn"/><a href="qbluetoothabstractsocket.html#setWriteMtu">setWriteMtu</a> ( int )</li>
 <li><div class="fn"/><a href="qobject.html#signalsBlocked">signalsBlocked</a> () const</li>
 <li><div class="fn"/><a href="qiodevice.html#size">size</a> () const</li>
 <li><div class="fn"/><a href="qbluetoothabstractsocket.html#socketDescriptor">socketDescriptor</a> () const : int</li>
@@ -161,6 +163,7 @@
 <li><div class="fn"/><a href="qiodevice.html#writeBlock">writeBlock</a> ( const char *, quint64 )</li>
 <li><div class="fn"/><a href="qiodevice.html#writeBlock-2">writeBlock</a> ( const QByteArray &amp; )</li>
 <li><div class="fn"/><a href="qiodevice.html#writeData">writeData</a> ( const char *, qint64 )</li>
+<li><div class="fn"/><a href="qbluetoothabstractsocket.html#writeMtu">writeMtu</a> () const : int</li>
 </ul>
 </td></tr>
 </table></p>
@@ -168,6 +171,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

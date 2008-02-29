@@ -87,6 +87,8 @@ protected:
     virtual void themeLoaded(const QString &);
     virtual bool eventFilter(QObject *, QEvent *);
     QWidget *newWidget(ThemeWidgetItem* input, const QString& name);
+    void focusInEvent(QFocusEvent *);
+    void focusOutEvent(QFocusEvent *);
 
 private:
     HomeScreen(QWidget *parent = 0, Qt::WFlags f=0);
@@ -133,6 +135,7 @@ private slots:
 private:
     BasicKeyLock *keyLock;
 #ifdef QTOPIA_CELL
+    BasicEmergencyLock *emLock;
     BasicSimPinLock *simLock;
 #endif
 
@@ -141,7 +144,6 @@ private:
     QAction *actionMessages;
     QAction *actionCalls;
 #endif
-    QTimer *lockTimer;
     int lockMsgId, infoMsgId;
     int missedCalls;
     ThemedItemPlugin *bgIface;

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: How to Create a Helix Plug-in</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Tutorial: How to Create a Helix Plug-in</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -14,7 +13,7 @@
 <a name="top"></a><p>The Qtopia media player uses the Helix DNA Client multi-media engine. Information on writing plug-ins for Helix DNA Client can be found in the <a href="http://helix-client.helixcommunity.org">Helix DNA Client SDK Documentation</a>.</p>
 <p>To include your plug-in into the Helix build systems requires the following steps:</p>
 <ol type="1">
-<li>Modify <tt>build/BIF/build.bif</tt> within the Helix source directory as follows:<pre>    &lt;!-- FILESYSTEM/QTOPIA --&gt;
+<li>Modify <tt>build/BIF/build.bif</tt> within the Helix source directory as follows:<pre>&nbsp;   &lt;!-- FILESYSTEM/QTOPIA --&gt;
     &lt;module id=&quot;filesystem_qtopia&quot; name=&quot;filesystem/qtopia&quot; group=&quot;core&quot;&gt;
         &lt;cvs root=&quot;helix&quot;/&gt;
         &lt;includeplatforms&gt;
@@ -40,7 +39,7 @@
 <li><tt>name=&quot;filesystem/qtopia&quot;</tt> : points to the module source within the Helix source tree.</li>
 </ul>
 </li>
-<li>Add the plug-in to the <i>target</i> as follows:<pre>    &lt;!-- SPLAY_NODIST --&gt;
+<li>Add the plug-in to the <i>target</i> as follows:<pre>&nbsp;   &lt;!-- SPLAY_NODIST --&gt;
     &lt;module id=&quot;splay_nodist&quot; name=&quot;clientapps/simpleplayer&quot; group=&quot;core&quot;&gt;
         &lt;includeplatforms&gt;
             unix mac win32 symbian openwave wince
@@ -53,7 +52,7 @@
     &lt;/module&gt;</pre>
 <p>where the <i>target</i> is the top-level module definition that defines modules included in the build.</p>
 </li>
-<li>Create a <tt>Umakefile</tt>, for example, the following <tt>Umakefile</tt> is used for the Qtopia filesystem plug-in:<pre>    UmakefileVersion(2,1)
+<li>Create a <tt>Umakefile</tt>, for example, the following <tt>Umakefile</tt> is used for the Qtopia filesystem plug-in:<pre>&nbsp;   UmakefileVersion(2,1)
 
     project.AddModuleIncludes(&quot;common/include&quot;,
                               &quot;common/system/pub&quot;)
@@ -101,6 +100,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

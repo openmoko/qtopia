@@ -5,10 +5,12 @@ QTOPIA_IMAGE_PATH=""
 BOOTERRORS="/usr/share/booterrors"
 
 EXTRACT_ERROR=0
-NEED_REBOOT=0
+
+splash -p + Rebuilding filesystems
 
 # Make sure /mnt/user is mounted
 if ! grep '^[^ ].* /mnt/user ' /proc/mounts >/dev/null; then
+    splash -p - "Rebuilding" "/mnt/user"
     echo "TROLL: Creating filesystem on /mnt/user (/dev/tffsc)"
 
     /sbin/mkfs.ext2 /dev/tffsc
@@ -17,6 +19,7 @@ fi
 
 # Create /mnt/user
 if ! md5sum -c /mnt/user/.user_default.md5 -s 2>/dev/null; then
+    splash -p - "Rebuilding" "/mnt/user/etc"
     echo "TROLL: Extracting user_default.tgz"
 
     if tar -xzf $QTOPIA_IMAGE_PATH/user_default.tgz -C /mnt/user; then
@@ -26,11 +29,10 @@ if ! md5sum -c /mnt/user/.user_default.md5 -s 2>/dev/null; then
         /usr/local/bin/gifanim $BOOTERRORS/boot-error-userdefault.gif
         EXTRACT_ERROR=1
     fi
-
-    NEED_REBOOT=1
 fi
 
 if ! md5sum -c /mnt/user/.user_tools.md5 -s 2>/dev/null; then
+    splash -p - "Rebuilding" "/mnt/user/tools"
     echo "TROLL: Extracting user_tools.tgz"
 
     rm -rf /mnt/user/tools
@@ -41,12 +43,11 @@ if ! md5sum -c /mnt/user/.user_tools.md5 -s 2>/dev/null; then
         /usr/local/bin/gifanim $BOOTERRORS/boot-error-usertools.gif
         EXTRACT_ERROR=1
     fi
-
-    NEED_REBOOT=1
 fi
 
 # Make sure /mnt/user_local is mounted
 if ! grep '^[^ ].* /mnt/user_local ' /proc/mounts >/dev/null; then
+    splash -p - "Rebuilding" "/mnt/user_local"
     echo "TROLL: Creating filesystem on /mnt/user_local (/dev/tffsd)"
 
     /sbin/mkdosfs -F 32 /dev/tffsd
@@ -55,6 +56,7 @@ fi
 
 # Make sure /mnt/disk2 is mounted
 if ! grep '^[^ ].* /mnt/disk2 ' /proc/mounts >/dev/null; then
+    splash -p - "Rebuilding" "/mnt/disk2"
     echo "TROLL: Creating filesystem on /mnt/disk2 (/dev/tffsb)"
 
     /sbin/mkfs.ext2 /dev/tffsb
@@ -63,6 +65,7 @@ fi
 
 # Extract qtopia_default.tgz if required
 if ! md5sum -c /mnt/disk2/.qtopia_default.md5 -s 2>/dev/null; then
+    splash -p - "Rebuilding" "/mnt/disk2/Qtopia"
     echo "TROLL: Recreating writable /opt/Qtopia filesystem"
 
     rm -rf /mnt/disk2/Qtopia
@@ -76,32 +79,18 @@ if ! md5sum -c /mnt/disk2/.qtopia_default.md5 -s 2>/dev/null; then
         /usr/local/bin/gifanim $BOOTERRORS/boot-error-qtopiadefault.gif
         EXTRACT_ERROR=1
     fi
-
-    NEED_REBOOT=1
 fi
 
 # Move home directories to new location
 [ -d /mnt/disk2/home ] || mkdir -p /mnt/disk2/home
 if [ -d /mnt/user/home ] && [ ! -d /mnt/disk2/home/4.1 ]; then
     mv /mnt/user/home /mnt/disk2/home/4.1
-    NEED_REBOOT=1
 fi
 if [ -d /mnt/user/home_4.2 ] && [ ! -d /mnt/disk2/home/4.2 ]; then
     mv /mnt/user/home_4.2 /mnt/disk2/home/4.2
-    NEED_REBOOT=1
 fi
 if [ -d /mnt/user/sd_home ] && [ ! -d /mnt/disk2/home/sd ]; then
     mv /mnt/user/sd_home /mnt/disk2/home/sd
-    NEED_REBOOT=1
-fi
-
-sync
-
-# Reboot only if all tar files were extracted successfully.
-# Otherwise continue booting.
-if [ $NEED_REBOOT -eq 1 ] && [ $EXTRACT_ERROR -eq 0 ]; then
-    umount -a -r
-    reboot
 fi
 
 if [ $EXTRACT_ERROR -eq 1 ]; then

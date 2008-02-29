@@ -398,6 +398,8 @@ void ImapClient::fetchNextMail()
             return;
         }
     } else {
+	if (!mPtr)
+	    errorHandling(ErrUnknownResponse, tr( "Message not found" ) );
         emit mailTransferred( messageCount );
     }
 }

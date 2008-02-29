@@ -215,6 +215,19 @@ bool E2ServerInterface::event(QEvent *e)
     return QAbstractServerInterface::event(e);
 }
 
+void E2ServerInterface::keyPressEvent(QKeyEvent *e)
+{
+    if(e->key() == Qt::Key_Back)
+        e->accept();
+    else
+        QAbstractServerInterface::keyPressEvent(e);
+}
+
+void E2ServerInterface::closeEvent(QCloseEvent *e)
+{
+    e->ignore();
+}
+
 void E2ServerInterface::doAppointmentTimer(bool on)
 {
     if(on) {

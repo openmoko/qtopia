@@ -128,12 +128,20 @@ public:
     static int sourceContext(const QPimSource &);
     static QDateTime lastSyncTime(const QPimSource &);
     static bool setLastSyncTime(const QPimSource &, const QDateTime &);
+    static QSqlDatabase database();
 
     int context(const QUniqueId &) const;
 
+    // leave to let old code work
     bool startSync(const QPimSource &, const QDateTime &syncTime);
+
+    bool startSync(const QSet<QPimSource> &sources, const QDateTime &syncTime);
     bool abortSync();
     bool commitSync();
+
+    QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &) const;
+    QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &) const;
+    QList<QUniqueId> modified(const QSet<QPimSource> &sources, const QDateTime &) const;
 
     enum ContextFilterType {
         ExcludeContexts,
@@ -179,21 +187,17 @@ protected:
     QSqlPimTableModel model;
     QDateTime mSyncTime;
 
-    virtual bool updateExtraTables(const QByteArray &, const QPimRecord &);
-    virtual bool insertExtraTables(const QByteArray &, const QPimRecord &);
-    virtual bool removeExtraTables(const QByteArray &);
+    virtual bool updateExtraTables(uint, const QPimRecord &);
+    virtual bool insertExtraTables(uint, const QPimRecord &);
+    virtual bool removeExtraTables(uint);
 
     virtual void bindFields(const QPimRecord &r, QSqlQuery &) const = 0;
 
-    void retrieveRecord(const QByteArray &, QPimRecord &) const;
+    void retrieveRecord(uint, QPimRecord &) const;
 
-    bool updateNotes(const QByteArray &, const QString &);
-    bool addNotes(const QByteArray &, const QString &);
-    bool removeNotes(const QByteArray &);
-    QString notes(const QByteArray &) const;
+    QUniqueIdGenerator idGenerator;
 
     // yes, I do mean const.
-    const QUuid appScope;
     const QString tableText;
     const QString updateRecordText;
     const QString selectCustomText;

@@ -1,10 +1,20 @@
 /****************************************************************************)
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1658,9 +1668,9 @@ QVariant QDateTimeEditPrivate::stepBy(int sectionIndex, int steps, bool test) co
         } else {
             v = valueFromText(str);
         }
-        val = getDigit(v, sn.type);
+        val = getDigit(v, sectionIndex);
     } else {
-        val = getDigit(value, sn.type);
+        val = getDigit(value, sectionIndex);
     }
 
     val += steps;
@@ -1674,47 +1684,54 @@ QVariant QDateTimeEditPrivate::stepBy(int sectionIndex, int steps, bool test) co
         val = (wrapping ? min + val - max - 1 : max);
     }
 
+
     const int tmp = v.toDate().day();
-    setDigit(v, sn.type, val); // if this sets year or month it will make
+
+    setDigit(v, sectionIndex, val); // if this sets year or month it will make
+
     // sure that days are lowered if needed.
 
     // changing one section should only modify that section, if possible
     if (sn.type != AmPmSection && (variantCompare(v, minimum) < 0) || (variantCompare(v, maximum) > 0)) {
-        const int localmin = getDigit(minimum, sn.type);
-        const int localmax = getDigit(maximum, sn.type);
+        const int localmin = getDigit(minimum, sectionIndex);
+        const int localmax = getDigit(maximum, sectionIndex);
 
         if (wrapping) {
             // just because we hit the roof in one direction, it
             // doesn't mean that we hit the floor in the other
             if (steps > 0) {
-                setDigit(v, sn.type, min);
+                setDigit(v, sectionIndex, min);
                 if (sn.type != DaySection && sections & DateSectionMask) {
-                    int daysInMonth = v.toDate().daysInMonth();
-                    if (v.toDate().day() < tmp && v.toDate().day() < daysInMonth)
-                        setDigit(v, DaySection, qMin(tmp, daysInMonth));
+                    const int daysInMonth = v.toDate().daysInMonth();
+                    if (v.toDate().day() < tmp && v.toDate().day() < daysInMonth) {
+                        const int adds = qMin(tmp, daysInMonth);
+                        v = v.toDateTime().addDays(adds - v.toDate().day());
+                    }
                 }
 
                 if (variantCompare(v, minimum) < 0) {
-                    setDigit(v, sn.type, localmin);
+                    setDigit(v, sectionIndex, localmin);
                     if (variantCompare(v, minimum) < 0)
-                        setDigit(v, sn.type, localmin + 1);
+                        setDigit(v, sectionIndex, localmin + 1);
                 }
             } else {
-                setDigit(v, sn.type, max);
+                setDigit(v, sectionIndex, max);
                 if (sn.type != DaySection && sections & DateSectionMask) {
-                    int daysInMonth = v.toDate().daysInMonth();
-                    if (v.toDate().day() < tmp && v.toDate().day() < daysInMonth)
-                        setDigit(v, DaySection, qMin(tmp, daysInMonth));
+                    const int daysInMonth = v.toDate().daysInMonth();
+                    if (v.toDate().day() < tmp && v.toDate().day() < daysInMonth) {
+                        const int adds = qMin(tmp, daysInMonth);
+                        v = v.toDateTime().addDays(adds - v.toDate().day());
+                    }
                 }
 
                 if (variantCompare(v, maximum) > 0) {
-                    setDigit(v, sn.type, localmax);
+                    setDigit(v, sectionIndex, localmax);
                     if (variantCompare(v, maximum) > 0)
-                        setDigit(v, sn.type, localmax - 1);
+                        setDigit(v, sectionIndex, localmax - 1);
                 }
             }
         } else {
-            setDigit(v, sn.type, (steps > 0 ? localmax : localmin));
+            setDigit(v, sectionIndex, (steps > 0 ? localmax : localmin));
         }
     }
     if (!test && tmp != v.toDate().day() && sn.type != DaySection) {
@@ -1725,13 +1742,13 @@ QVariant QDateTimeEditPrivate::stepBy(int sectionIndex, int steps, bool test) co
     if (variantCompare(v, minimum) < 0) {
         if (wrapping) {
             QVariant t = v;
-            setDigit(t, sn.type, steps < 0 ? max : min);
+            setDigit(t, sectionIndex, steps < 0 ? max : min);
             int mincmp = variantCompare(t, minimum);
             int maxcmp = variantCompare(t, maximum);
             if (mincmp >= 0 && maxcmp <= 0) {
                 v = t;
             } else {
-                setDigit(t, sn.type, getDigit(steps < 0 ? maximum : minimum, sn.type));
+                setDigit(t, sectionIndex, getDigit(steps < 0 ? maximum : minimum, sectionIndex));
                 mincmp = variantCompare(t, minimum);
                 maxcmp = variantCompare(t, maximum);
                 if (mincmp >= 0 && maxcmp <= 0) {
@@ -1744,13 +1761,13 @@ QVariant QDateTimeEditPrivate::stepBy(int sectionIndex, int steps, bool test) co
     } else if (variantCompare(v, maximum) > 0) {
         if (wrapping) {
             QVariant t = v;
-            setDigit(t, sn.type, steps > 0 ? min : max);
+            setDigit(t, sectionIndex, steps > 0 ? min : max);
             int mincmp = variantCompare(t, minimum);
             int maxcmp = variantCompare(t, maximum);
             if (mincmp >= 0 && maxcmp <= 0) {
                 v = t;
             } else {
-                setDigit(t, sn.type, getDigit(steps > 0 ? minimum : maximum, sn.type));
+                setDigit(t, sectionIndex, getDigit(steps > 0 ? minimum : maximum, sectionIndex));
                 mincmp = variantCompare(t, minimum);
                 maxcmp = variantCompare(t, maximum);
                 if (mincmp >= 0 && maxcmp <= 0) {

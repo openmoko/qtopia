@@ -22,34 +22,43 @@
 #ifndef __QOBEXPUSHSERVICE_H__
 #define __QOBEXPUSHSERVICE_H__
 
-#include <qobexnamespace.h>
-
 #include <QObject>
 #include <QString>
 
 #include <qtopiaglobal.h>
 
 class QObexSocket;
-class QObexPushService_Private;
+class QObexPushServicePrivate;
 
 class QTOPIACOMM_EXPORT QObexPushService : public QObject
 {
+    friend class QObexPushServicePrivate;
     Q_OBJECT
 
-    friend class QObexPushService_Private;
-
 public:
+
+    enum State {
+        Ready,
+        Connecting,
+        Disconnecting,
+        Streaming,
+        Closed = 100
+    };
+
+    enum Error {
+        NoError,
+        LinkError,
+        Aborted,
+        UnknownError = 100
+    };
 
     explicit QObexPushService(QObexSocket *socket, QObject *parent = 0);
     ~QObexPushService();
 
     void close();
 
-    void setAutoDelete(bool enable);
-    bool autoDelete() const;
-
-    QObex::State state() const;
-    QObex::Error error() const;
+    State state() const;
+    Error error() const;
 
     void setIncomingDirectory(const QString &dir);
     const QString &incomingDirectory() const;
@@ -57,7 +66,6 @@ public:
     QObexSocket *socket();
 
     virtual QByteArray businessCard() const;
-
 
 protected:
     virtual bool acceptFile(const QString &filename, const QString &mimetype, qint64 size);
@@ -68,11 +76,10 @@ signals:
     void requestComplete(bool error);
     void done(bool error);
     void progress(qint64, qint64);
-    void stateChanged(QObex::State);
-    void aboutToDelete();
+    void stateChanged(QObexPushService::State state);
 
 private:
-    QObexPushService_Private *m_data;
+    QObexPushServicePrivate *m_data;
     Q_DISABLE_COPY(QObexPushService)
 };
 

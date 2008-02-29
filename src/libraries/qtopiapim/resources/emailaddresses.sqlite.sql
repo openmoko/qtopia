@@ -4,7 +4,7 @@
 CREATE TABLE emailaddresses (
     addr TEXT NOT NULL COLLATE NOCASE,
     label TEXT COLLATE NOCASE,
-    recid BLOB,
-    PRIMARY KEY(addr),
+    recid INTEGER,
+    UNIQUE(addr, recid),
     FOREIGN KEY(recid) REFERENCES contacts(recid)
 );

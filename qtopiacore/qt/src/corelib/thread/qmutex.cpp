@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -204,16 +214,7 @@ bool QMutex::tryLock()
 {
     ulong self = d->self();
 
-    int sentinel;
-    forever {
-        sentinel = d->lock;
-        if (d->lock.testAndSetAcquire(sentinel, sentinel + 1))
-            break;
-    }
-    if (sentinel != 0) {
-        // we're not going to wait for lock
-        d->lock.deref();
-
+    if (!d->lock.testAndSetAcquire(0, 1)) {
         if (!d->recursive || d->owner != self) {
             // some other thread has the mutex locked, or we tried to
             // recursively lock an non-recursive mutex
@@ -222,6 +223,7 @@ bool QMutex::tryLock()
     }
     d->owner = self;
     ++d->count;
+    Q_ASSERT_X(d->count != 0, "QMutex::lock", "Overflow in recursion counter");
     return true;
 }
 
@@ -281,9 +283,11 @@ void QMutex::unlock()
     difficult to debug. QMutexLocker can be used in such situations
     to ensure that the state of the mutex is always well-defined.
 
-    QMutexLocker should be created within a function where a QMutex
-    needs to be locked. The mutex is locked when QMutexLocker is
-    created, and unlocked when QMutexLocker is destroyed.
+    QMutexLocker should be created within a function where a
+    QMutex needs to be locked. The mutex is locked when QMutexLocker
+    is created. You can unlock and relock the mutex with \c unlock()
+    and \c relock(). If locked, the mutex will be unlocked when the
+    QMutexLocker is destroyed.
 
     For example, this complex function locks a QMutex upon entering
     the function and unlocks the mutex at all the exit points:
@@ -367,7 +371,7 @@ void QMutex::unlock()
     has locked the mutex has no way of unlocking the mutex before the
     exception is passed up the stack to the calling function.
 
-    QMutexLocker also provides a mutex() member function that returns
+    QMutexLocker also provides a \c mutex() member function that returns
     the mutex on which the QMutexLocker is operating. This is useful
     for code that needs access to the mutex, such as
     QWaitCondition::wait(). For example:
@@ -426,7 +430,8 @@ void QMutex::unlock()
 /*!
     \fn void QMutexLocker::unlock()
 
-    Unlocks this mutex locker.
+    Unlocks this mutex locker. You can use \c relock() to lock 
+    it again. It does not need to be locked when destroyed.
 
     \sa relock()
 */

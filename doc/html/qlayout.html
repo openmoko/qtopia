@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qlayout.cpp -->
 <head>
   <title>Qt 4.2: QLayout Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -98,9 +99,9 @@
 <p>The QLayout class is the base class of geometry managers.</p>
 <p>This is an abstract base class inherited by the concrete classes <a href="qboxlayout.html">QBoxLayout</a>, <a href="qgridlayout.html">QGridLayout</a>, and <a href="qstackedlayout.html">QStackedLayout</a>.</p>
 <p>For users of QLayout subclasses or of <a href="qmainwindow.html">QMainWindow</a> there is seldom any need to use the basic functions provided by QLayout, such as <a href="qlayout.html#sizeConstraint-prop">setSizeConstraint</a>() or <a href="qlayout.html#setMenuBar">setMenuBar</a>(). See <a href="layout.html">Layout Classes</a> for more information.</p>
-<p>To make your own layout manager, implement the functions <a href="qlayout.html#addItem">addItem</a>(), <a href="qlayoutitem.html#sizeHint">sizeHint</a>(), <a href="qlayoutitem.html#setGeometry">setGeometry</a>(), <a href="qlayout.html#itemAt">itemAt</a>() and <a href="qlayout.html#takeAt">takeAt</a>(). You should also implement <a href="qlayout.html#minimumSize">minimumSize</a>() to ensure your layout isn't resized to zero size if there is too little space. To support children whose heights depend on their widths, implement <a href="qlayoutitem.html#hasHeightForWidth">hasHeightForWidth</a>() and <a href="qlayoutitem.html#heightForWidth">heightForWidth</a>(). See the Border Layout and Flow Layout examples for more information about implementing custom layout managers.</p>
+<p>To make your own layout manager, implement the functions <a href="qlayout.html#addItem">addItem</a>(), <a href="qlayoutitem.html#sizeHint">sizeHint</a>(), <a href="qlayoutitem.html#setGeometry">setGeometry</a>(), <a href="qlayout.html#itemAt">itemAt</a>() and <a href="qlayout.html#takeAt">takeAt</a>(). You should also implement <a href="qlayout.html#minimumSize">minimumSize</a>() to ensure your layout isn't resized to zero size if there is too little space. To support children whose heights depend on their widths, implement <a href="qlayoutitem.html#hasHeightForWidth">hasHeightForWidth</a>() and <a href="qlayoutitem.html#heightForWidth">heightForWidth</a>(). See the <a href="layouts-borderlayout.html">Border Layout</a> and <a href="layouts-flowlayout.html">Flow Layout</a> examples for more information about implementing custom layout managers.</p>
 <p>Geometry management stops when the layout manager is deleted.</p>
-<p>See also <a href="qlayoutitem.html">QLayoutItem</a>, <a href="layout.html">Layout Classes</a>, Basic Layouts Example, Border Layout Example, and Flow Layout Example.</p>
+<p>See also <a href="qlayoutitem.html">QLayoutItem</a>, <a href="layout.html">Layout Classes</a>, <a href="layouts-basiclayouts.html">Basic Layouts Example</a>, <a href="layouts-borderlayout.html">Border Layout Example</a>, and <a href="layouts-flowlayout.html">Flow Layout Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="SizeConstraint-enum"></a>enum QLayout::SizeConstraint</h3>
@@ -156,7 +157,9 @@
 <p>You should generally not need to call this because it is automatically called at the most appropriate times.</p>
 <p>See also <a href="qlayout.html#update">update</a>() and <a href="qwidget.html#updateGeometry">QWidget::updateGeometry</a>().</p>
 <h3 class="fn"><a name="addChildLayout"></a>void QLayout::addChildLayout ( QLayout * <i>l</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>This function is called from <tt>addLayout()</tt> functions in subclasses to add layout <i>l</i> as a sub-layout.</p>
+<p>This function is called from <tt>addLayout()</tt> or <tt>insertLayout()</tt> functions in subclasses to add layout <i>l</i> as a sub-layout.</p>
+<p>The only scenario in which you need to call it directly is if you implement a custom layout that supports nested layouts.</p>
+<p>See also <a href="qboxlayout.html#addLayout">QBoxLayout::addLayout</a>(), <a href="qboxlayout.html#insertLayout">QBoxLayout::insertLayout</a>(), and <a href="qgridlayout.html#addLayout">QGridLayout::addLayout</a>().</p>
 <h3 class="fn"><a name="addChildWidget"></a>void QLayout::addChildWidget ( <a href="qwidget.html">QWidget</a> * <i>w</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>This function is called from <tt>addWidget()</tt> functions in subclasses to add <i>w</i> as a child widget.</p>
 <p>If <i>w</i> is already in a layout, this function will give a warning and remove <i>w</i> from the layout. This function must therefore be called before adding <i>w</i> to the layout's data structure.</p>
@@ -195,7 +198,7 @@
          for (int i = 0; i &lt; layout-&gt;count(); ++i)
              paintLayout(painter, layout-&gt;itemAt(i));
      }
-     painter-&gt;drawRect(lay-&gt;geometry());
+     painter-&gt;drawRect(layout-&gt;geometry());
  }
 
  void MyWidget::paintEvent(QPaintEvent *)
@@ -278,7 +281,7 @@
 <h3 class="fn"><a name="deleteAllItems"></a>void QLayout::deleteAllItems ()&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Removes and deletes all items in this layout.</p>
 <h3 class="fn"><a name="freeze"></a>void QLayout::freeze ( int <i>w</i> = 0, int <i>h</i> = 0 )</h3>
-<p>Sets this layout's parent widget to a fixed size with width <i>w</i> and height <i>h</i>, stopping the user form resizing it, and also prevents the layout from resizing it, even if the layout's size hint should change. Does nothing if this is not a top-level layout (i.e., if <a href="qobject.html#parent">parent</a>()-&gt;<a href="qobject.html#isWidgetType">isWidgetType</a>()).</p>
+<p>Sets this layout's parent widget to a fixed size with width <i>w</i> and height <i>h</i>, stopping the user from resizing it, and also prevents the layout from resizing it, even if the layout's size hint should change. Does nothing if this is not a top-level layout (i.e., if <a href="qobject.html#parent">parent</a>()-&gt;<a href="qobject.html#isWidgetType">isWidgetType</a>()).</p>
 <p>As a special case, if both <i>w</i> and <i>h</i> are 0, then the layout's current <a href="qlayoutitem.html#sizeHint">sizeHint</a>() is used.</p>
 <p>Use <tt>setResizeMode(Fixed)</tt> to stop the widget from being resized by the user, while still allowing the layout to resize it when the <a href="qlayoutitem.html#sizeHint">sizeHint</a>() changes.</p>
 <p>Use <tt>setResizeMode(FreeResize)</tt> to allow the user to resize the widget, while preventing the layout from resizing it.</p>
@@ -303,6 +306,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -37,8 +37,8 @@ public:
     // be set using the above values as the keys. The #define below allows the enum declerations in
     // subclass to know which ID number is starting for their use
 
-    virtual bool operator==( const QPimRecord &other ) const;
-    virtual bool operator!=( const QPimRecord &other ) const;
+    bool operator==( const QPimRecord &other ) const;
+    bool operator!=( const QPimRecord &other ) const;
 
     void setCategories( const QList<QString> &categories );
     void setCategories( const QString &id );

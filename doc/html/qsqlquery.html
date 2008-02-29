@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/sql/kernel/qsqlquery.cpp -->
 <head>
   <title>Qt 4.2: QSqlQuery Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -78,7 +79,7 @@
 <li><a href="qsqlquery.html#last">last</a>()</li>
 <li><a href="qsqlquery.html#seek">seek</a>()</li>
 </ul>
-<p>These functions allow the programmer to move forward, backward or arbitrarily through the records returned by the query. If you only need to move forward through the results, e.g. using <a href="qsqlquery.html#next">next</a>() or using <a href="qsqlquery.html#seek">seek</a>() with a positive offset, you can use <a href="qsqlquery.html#setForwardOnly">setForwardOnly</a>() and save a significant amount of memory overhead. Once an active query is positioned on a valid record, data can be retrieved using <a href="qsqlquery.html#value">value</a>(). All data is transferred from the SQL backend using QVariants.</p>
+<p>These functions allow the programmer to move forward, backward or arbitrarily through the records returned by the query. If you only need to move forward through the results (e.g., by using <a href="qsqlquery.html#next">next</a>()), you can use <a href="qsqlquery.html#setForwardOnly">setForwardOnly</a>(), which will save a significant amount of memory overhead and improve performance on some databases. Once an active query is positioned on a valid record, data can be retrieved using <a href="qsqlquery.html#value">value</a>(). All data is transferred from the SQL backend using QVariants.</p>
 <p>For example:</p>
 <pre>     QSqlQuery query(&quot;SELECT country FROM artist&quot;);
      while (query.next()) {
@@ -140,6 +141,7 @@
      query.exec();
      int i = query.boundValue(1).toInt(); <span class="comment">// i is 65</span></pre>
 <p>Note that unbound parameters will retain their values.</p>
+<p>Stored procedures that uses the return statement to return values, or return multiple result sets, are not fully supported. For specific details see <a href="sql-driver.html">SQL Database Drivers</a>.</p>
 <p>See also <a href="qsqldatabase.html">QSqlDatabase</a>, <a href="qsqlquerymodel.html">QSqlQueryModel</a>, <a href="qsqltablemodel.html">QSqlTableModel</a>, and <a href="qvariant.html">QVariant</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -333,7 +335,8 @@
 </ul>
 <p>See also <a href="qsqlquery.html#next">next</a>(), <a href="qsqlquery.html#previous">previous</a>(), <a href="qsqlquery.html#first">first</a>(), <a href="qsqlquery.html#last">last</a>(), <a href="qsqlquery.html#at">at</a>(), <a href="qsqlquery.html#isActive">isActive</a>(), and <a href="qsqlquery.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="setForwardOnly"></a>void QSqlQuery::setForwardOnly ( bool <i>forward</i> )</h3>
-<p>Sets forward only mode to <i>forward</i>. If <i>forward</i> is true, only <a href="qsqlquery.html#next">next</a>() and <a href="qsqlquery.html#seek">seek</a>() with positive values, are allowed for navigating the results. Forward only mode needs far less memory since results do not need to be cached.</p>
+<p>Sets forward only mode to <i>forward</i>. If <i>forward</i> is true, only <a href="qsqlquery.html#next">next</a>() and <a href="qsqlquery.html#seek">seek</a>() with positive values, are allowed for navigating the results.</p>
+<p>Forward only mode can be (depending on the driver) more memory efficient since results do not need to be cached. It will also improve performance on some databases. For this to be true, you must call <tt>setForwardMode()</tt> before the query is prepared or executed. Note that the constructor that takes a query and a database may execute the query.</p>
 <p>Forward only mode is off by default.</p>
 <p>See also <a href="qsqlquery.html#isForwardOnly">isForwardOnly</a>(), <a href="qsqlquery.html#next">next</a>(), and <a href="qsqlquery.html#seek">seek</a>().</p>
 <h3 class="fn"><a name="size"></a>int QSqlQuery::size () const</h3>
@@ -357,6 +360,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

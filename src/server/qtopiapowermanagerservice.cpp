@@ -108,7 +108,7 @@ void QtopiaPowerManagerService::setBacklight( int brightness )
 }
 
 /*!
-    Activate or deactivate power management.
+    Activate power management if \a on is true; otherwise deactivate power management.
 
     This slot corresponds to the QCop service message
     \c{QtopiaPowerManager::setActive(bool)}.

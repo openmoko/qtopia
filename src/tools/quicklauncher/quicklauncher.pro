@@ -18,4 +18,4 @@ equals(LAUNCH_METHOD,quicklaunch) {
 SOURCES+=main.cpp
 
 pkg.desc=Quicklauncher stub for quicklaunch enabled applications.
-pkg.domain=quicklauncher
+pkg.domain=quicklauncher,cardreader,prefix

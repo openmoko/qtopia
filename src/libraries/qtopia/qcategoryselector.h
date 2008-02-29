@@ -63,7 +63,7 @@ public:
         IncludeUnfiled = 0x08, // Adds "Unfiled" option
         ListView = 0x10,      // Forces it to appear as a list
         ComboView = 0x20,     // Forces it to appear as a combobox
-        DialogView = 0x30,    // Forces it to appear as a button that displays a dialog.
+        DialogView = 0x40,    // Forces it to appear as a button that displays a dialog.
 
         Filter = IncludeAll | IncludeUnfiled,
         Editor = IncludeUnfiled,

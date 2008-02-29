@@ -57,7 +57,7 @@
         <string>Address:</string>
        </property>
        <property name="alignment" >
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
        </property>
       </widget>
      </item>
@@ -67,7 +67,7 @@
         <string>Version:</string>
        </property>
        <property name="alignment" >
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
        </property>
       </widget>
      </item>
@@ -77,7 +77,7 @@
         <string>Vendor:</string>
        </property>
        <property name="alignment" >
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
        </property>
       </widget>
      </item>
@@ -87,7 +87,7 @@
         <string>Company:</string>
        </property>
        <property name="alignment" >
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
        </property>
       </widget>
      </item>
@@ -95,6 +95,9 @@
       <widget class="QLabel" name="addressEdit" >
        <property name="text" >
         <string/>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
        <property name="wordWrap" >
         <bool>true</bool>
@@ -106,6 +109,9 @@
        <property name="text" >
         <string/>
        </property>
+       <property name="alignment" >
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
        <property name="wordWrap" >
         <bool>true</bool>
        </property>
@@ -116,6 +122,9 @@
        <property name="text" >
         <string/>
        </property>
+       <property name="alignment" >
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
        <property name="wordWrap" >
         <bool>true</bool>
        </property>
@@ -125,6 +134,9 @@
       <widget class="QLabel" name="companyEdit" >
        <property name="text" >
         <string/>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
        <property name="wordWrap" >
         <bool>true</bool>

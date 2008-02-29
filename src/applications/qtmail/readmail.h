@@ -82,6 +82,7 @@ public:
     void update(MailListView *view);
     void updateView();
     void mailUpdated(Email *mailIn);
+    void showMail(Email *mailIn);
 #ifdef QTOPIA_PHONE
     bool eventFilter( QObject *, QEvent * );
 #endif

@@ -129,9 +129,12 @@ class PlayerStateAdvise : public IHXClientAdviseSink,
     public Subject
 {
 public:
-    PlayerStateAdvise()
-        : m_refCount( 0 ), m_state( QtopiaMedia::Stopped )
-    { }
+    PlayerStateAdvise(HelixPlayer* helixPlayer):
+        m_refCount(0),
+        m_state(QtopiaMedia::Stopped),
+        m_helixPlayer(helixPlayer)
+    {
+    }
 
     QtopiaMedia::State state() const { return m_state; }
 
@@ -155,6 +158,8 @@ public:
         { return HXR_OK; }
     STDMETHOD(OnStop) (THIS);
 
+    void forceStopEvent();
+
     // IUnknown
     STDMETHOD(QueryInterface) (THIS_
         REFIID ID,
@@ -163,9 +168,9 @@ public:
     STDMETHOD_(UINT32, Release) (THIS);
 
 private:
-    INT32 m_refCount;
-
-    QtopiaMedia::State m_state;
+    INT32               m_refCount;
+    QtopiaMedia::State  m_state;
+    HelixPlayer*        m_helixPlayer;
 };
 
 STDMETHODIMP PlayerStateAdvise::OnBegin( ULONG32 )
@@ -201,7 +206,16 @@ STDMETHODIMP PlayerStateAdvise::OnStop()
 
     notify();
 
+    m_helixPlayer->hasStopped();
+
     return HXR_OK;
+}
+
+void PlayerStateAdvise::forceStopEvent()
+{
+    m_state = QtopiaMedia::Stopped;
+
+    notify();
 }
 
 STDMETHODIMP_(ULONG32) PlayerStateAdvise::AddRef()
@@ -418,6 +432,7 @@ STDMETHODIMP PlayerErrorSink::QueryInterface( REFIID riid, void** object )
 }
 
 HelixPlayer::HelixPlayer(IHXClientEngine* engine):
+    m_stopTimerId(0),
     m_engine(engine)
 {
     if (HXR_OK == m_engine->CreatePlayer(m_player)) {
@@ -429,7 +444,7 @@ HelixPlayer::HelixPlayer(IHXClientEngine* engine):
         m_progressadvise->attach( this );
         m_player->AddAdviseSink( m_progressadvise );
 
-        m_stateadvise = new PlayerStateAdvise;
+        m_stateadvise = new PlayerStateAdvise(this);
         HX_ADDREF( m_stateadvise );
 
         m_stateadvise->attach( this );
@@ -521,6 +536,7 @@ void HelixPlayer::pause()
 void HelixPlayer::stop()
 {
     m_player->Stop();
+    m_stopTimerId = startTimer(500);    // give helix 1/2 a second to say its stopped
 }
 
 QtopiaMedia::State HelixPlayer::playerState() const
@@ -555,7 +571,8 @@ bool HelixPlayer::isMuted() const
 
 void HelixPlayer::setVolume( int volume )
 {
-    m_volume->SetVolume( volume );
+    if (volume >= 1 && volume <= 100)
+        m_volume->SetVolume( volume );
 }
 
 int HelixPlayer::volume() const
@@ -581,11 +598,10 @@ bool HelixPlayer::hasVideo() const
 QWidget* HelixPlayer::createVideoWidget()
 {
     if( m_sitesupplier->hasVideo() ) {
-        // FIXME Direct painting flickers in QVFb
         // If supported use direct painter widget
-        // if( DirectPainterVideoWidget::isSupported() ) {
-        //    return new DirectPainterVideoWidget( m_sitesupplier->site()->surface() );
-        // }
+        if( DirectPainterVideoWidget::isSupported() ) {
+            return new DirectPainterVideoWidget( m_sitesupplier->site()->surface() );
+        }
         return new GenericVideoWidget( m_sitesupplier->site()->surface() );
     }
 
@@ -650,6 +666,29 @@ void HelixPlayer::update( Subject* subject )
     }
     else {
         REPORT_ERROR( ERR_UNEXPECTED );
+    }
+}
+
+void HelixPlayer::hasStopped()
+{
+    // Helix has so generously offered to inform us of a stop event, thank you so much
+    if (m_stopTimerId != 0)
+    {
+        killTimer(m_stopTimerId);
+        m_stopTimerId = 0;
+    }
+}
+
+void HelixPlayer::timerEvent(QTimerEvent* timerEvent)
+{
+    if (timerEvent->timerId() == m_stopTimerId)
+    {
+        // Helix hasn't said its stopped, so force emit a stopped message
+        killTimer(m_stopTimerId);
+        m_stopTimerId = 0;
+
+        m_player->Stop();
+        m_stateadvise->forceStopEvent();
     }
 }
 

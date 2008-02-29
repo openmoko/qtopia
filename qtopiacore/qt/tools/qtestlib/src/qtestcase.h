@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the tools applications of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -183,6 +193,23 @@ namespace QTest
 #ifndef QTEST_NO_SPECIALIZATIONS
     template <typename T1, typename T2>
     bool qCompare(T1 const &, T2 const &, const char *, const char *, const char *, int);
+
+#if defined(QT_COORD_TYPE) || defined(__arm__)
+    template <>
+    inline bool qCompare<qreal, double>(qreal const &t1, double const &t2, const char *actual,
+                                 const char *expected, const char *file, int line)
+    {
+        return qCompare<float>(float(t1), float(t2), actual, expected, file, line);
+    }
+
+    template <>
+    inline bool qCompare<double, qreal>(double const &t1, qreal const &t2, const char *actual,
+                                 const char *expected, const char *file, int line)
+    {
+        return qCompare<float>(float(t1), float(t2), actual, expected, file, line);
+    }
+
+#endif
 
     template <typename T>
     inline bool qCompare(const T *t1, const T *t2, const char *actual, const char *expected,

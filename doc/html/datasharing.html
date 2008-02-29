@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qtopia Data Sharing (QDS)</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Qtopia Data Sharing (QDS)</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -43,7 +42,7 @@
 <li><a href="qdsserviceinfo.html">QDSServiceInfo</a></li>
 <li><a href="qdsservices.html">QDSServices</a></li>
 </ul>
-<p>As mentioned previously, the <a href="qdsdata.html">QDSData</a> store class is used to manage the sharing and transfer of temporary or persistent data. The data in an <a href="qdsdata.html">QDSData</a> object is made persistent by calling <a href="qdsdata.html#store">QDSData::store</a>(), each application which needs the data in the future must call <tt>QDSData::store()</tt>. <tt>QDSData::remove()</tt> should be called when the data is no longer required by an application. This is required to manage the data lifetime.</p>
+<p>As mentioned previously, the <a href="qdsdata.html">QDSData</a> store class is used to manage the sharing and transfer of temporary or persistent data. The data in an <a href="qdsdata.html">QDSData</a> object is made persistent by calling <a href="qdsdata.html#store">QDSData::store</a>(), each application which needs the data in the future must call <a href="qdsdata.html#store">QDSData::store</a>(). <a href="qdsdata.html#remove">QDSData::remove</a>() should be called when the data is no longer required by an application. This is required to manage the data lifetime.</p>
 <a name="finding-qds-services"></a>
 <h3>Finding QDS services</h3>
 <p>Applications use the <a href="qdsservices.html">QDSServices</a> class to search for available QDS services. The search is defined on a combination of request data type, response data type, attributes, and Qtopia service.</p>
@@ -53,14 +52,14 @@
 <p>An application uses a QDS service by constructing a <a href="qdsaction.html">QDSAction</a> object with a valid <a href="qdsserviceinfo.html">QDSServiceInfo</a> object. Depending on the suitability to the application, requests for the QDS service can then be made synchronously or asynchronously using the <a href="qdsaction.html">QDSAction</a> object.</p>
 <a name="example-of-synchronous-request"></a>
 <h4>Example of synchronous request</h4>
-<pre>    QDSServiceInfo service( &quot;getImage&quot;, &quot;ExampleService&quot; );
+<pre>&nbsp;   QDSServiceInfo service( &quot;getImage&quot;, &quot;ExampleService&quot; );
     QDSAction action( service);
     if ( action.exec() != QDSAction::Complete ) {
         qWarning() &lt;&lt; &quot;Couldn't use QDS service setImage from ExampleService&quot;;
     }</pre>
 <a name="example-of-asynchronous-request"></a>
 <h4>Example of asynchronous request</h4>
-<pre>    void MyWidget::getImage()
+<pre>&nbsp;   void MyWidget::getImage()
     {
         QDSServiceInfo service( &quot;getImage&quot;, &quot;ExampleService&quot; );
         QDSAction* action = new QDSAction( service );
@@ -86,7 +85,7 @@
 <a name="security-policy"></a>
 <h4>Security Policy</h4>
 <p>For devices which use SXE the application's project file must including <tt>qds</tt> in the package domain as well as the domain which provides access to the Qtopia service. For example file for a QDS client application is provided below:</p>
-<pre>    qtopia_project(qtopia app)
+<pre>&nbsp;   qtopia_project(qtopia app)
     TARGET=myapp
 
     HEADERS=myapp.h
@@ -107,7 +106,7 @@
 <h3>Providing QDS services</h3>
 <p>Any application can provide a number of QDS services. A public slot must be added to the application's Qtopia service class for each QDS service it provides. The slot must match the message constructed by <a href="qdsaction.html">QDSAction</a>, which is of the form <tt>void ClassName( const QDSActionRequest&amp; request )</tt>. QDS services can be made dependent on features defined in <a href="qtopiafeatures.html">QtopiaFeatures</a>, when these features are not present the service will not be available, and requests for the service will fail. For more details about service implementations see Qtopia's <a href="services.html">service documentation</a>. Finally, each QDS service should be described in the QDS service file (see <a href="qdsserviceinfo.html">QDSServiceInfo</a> for details).</p>
 <p>The example below demonstrates a server application which allows an image to set and restored.</p>
-<pre>    MyServer::MyServer( QWidget *parent, Qt::WFlags f )
+<pre>&nbsp;   MyServer::MyServer( QWidget *parent, Qt::WFlags f )
     :   QMainWindow( parent, f )
     {
         ...
@@ -168,7 +167,7 @@
 <h2>Extensibility</h2>
 <p>As <a href="qdsdata.html">QDSData</a> is typed, QDS provides an extensible API which can be used with user-defined classes by defining a MIME type for the class.</p>
 <p>The example below shows to create a <a href="qdsdata.html">QDSData</a> instance of a VCard using a streaming operator to pack the VCard into a <a href="qbytearray.html">QByteArray</a>.</p>
-<pre>    VCard vcard;
+<pre>&nbsp;   VCard vcard;
     QByteArray vCardArray;
     {
         QDataStream stream( &amp;vCardArray, QIODevice::WriteOnly );
@@ -177,12 +176,12 @@
     QDSData vCardData( vCardArray, QMimeType( &quot;text/x-vCard&quot; ) );</pre>
 <p>This allows services to be provided for <tt>text/x-vCard</tt> data assuming that there has streaming operator defined in the VCard class.</p>
 <p>For example</p>
-<pre><span class="comment">    //declare the streaming function in the VCard's header file</span>
+<pre>&nbsp;   //declare the streaming function in the VCard's header file
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard );
 
     ...
 
-<span class="comment">    //implement the streaming function in the VCard's cpp file</span>
+    //implement the streaming function in the VCard's cpp file
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard )
     {
     ...
@@ -191,6 +190,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

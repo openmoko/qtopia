@@ -24,9 +24,16 @@
 #include <qtopiaapplication.h>
 #include <QDebug>
 
+#ifdef SINGLE_EXEC
+QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,printserver)
+#define MAIN_FUNC main_printserver
+#else
+#define MAIN_FUNC main
+#endif
+
 QSXE_APP_KEY
 
-int main(int argc, char **argv)
+int MAIN_FUNC(int argc, char **argv)
 {
     QSXE_SET_APP_KEY(argv[0])
     QtopiaApplication app( argc, argv );

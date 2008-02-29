@@ -519,6 +519,8 @@ void DirectoryScanner::run()
 
 void DirectoryScanner::startScan(const QString& path, int depth)
 {
+    static const char *unknownType = "application/octet-stream";
+
     setTerminationEnabled(false);
     QString dirPath=QDir::cleanPath(path);
     qLog(DocAPI) << "thread" << QThread::currentThreadId() << "scan called for path" << dirPath << "depth" << depth;
@@ -531,23 +533,18 @@ void DirectoryScanner::startScan(const QString& path, int depth)
     for (int i = 0; i < dirModel.rowCount(); i++)
     {
         QContent content = dirModel.content(i);
-        if(content.fileKnown() && QFileInfo(content.file()).path() == dir.path())
+
+        int index = -1;
+
+        if( content.fileKnown() )
         {
-            int idx = ents.indexOf(content.file());
-            if (idx >= 0 &&
-                !(content.type() == "application/octet-stream" && QMimeType(content.file()).id() != "application/octet-stream") )
-                ents.removeAt(idx);
-        }
-        if(content.linkFileKnown() && QFileInfo(content.linkFile()).path() == dir.path())
-        {
-            if(ents.contains(content.linkFile()))
+            QFileInfo fi( content.file() );
+
+            if( fi.path() == dir.path() && (index = ents.indexOf( fi )) >= 0 )
             {
-                if( content.linkFile().endsWith(QLatin1String(".desktop"))
-                   && (content.lastUpdated() == QDateTime()
-                   || content.lastUpdated() < QFileInfo(content.linkFile()).lastModified()))
-                    /*not removing, so don't do anything*/;
-                else
-                    ents.removeAll(content.linkFile());
+                if( !content.lastUpdated().isNull() && content.lastUpdated() >= fi.lastModified() &&
+                    ( content.type() != unknownType || QMimeType( content.file() ).id() == unknownType ) )
+                    ents.removeAt( index );
             }
         }
     }

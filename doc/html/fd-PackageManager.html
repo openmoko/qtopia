@@ -1,0 +1,63 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>  Package Manager </title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Package Manager <br><small>Functional Description</small></h1>
+<p />
+Package Manager provides a number of functions relating to the management (installing, uninstalling, listing) of Qtopia .qpk packages.  Where the <a href="fd-SafeExecution.html" class="twikiLink">Safe Execution Environment</a> is enabled it further provides SXE related functionality, such as the viewing of security domains.  
+<p />
+The Package Manager fetches the Package list from remote server via HTTP, or responds to a service request from the Web Browser; then displays package information, in particular a plain English description of what SXE security domains the package is requesting.  Once a package has been selected, and downloaded the package manager will verify the SXE domains.
+<p />
+When packages are installed, if successful they are added to the launcher view for access and launching.
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+<h3><a name="Package_Download"></a> Package Download </h3>
+<p />
+The Package Manager enables an end-user to
+<p /> <ul>
+<li> browse for games in the package manager UI
+</li> <li> use a web browser which calls package manager as a service
+</li> <li> select and download a package 
+</li></ul> 
+<p />
+<h3><a name="Package_Processing"></a> Package Processing </h3>
+<p />
+Package processing functionality is automatic once the package is selected and downloaded. Functions are
+<p /> <ul>
+<li> verification, including checking that the browse-time md5sums match the downloaded package
+</li> <li> adds to Document Management system so it can be launched via the Qtopia launcher 
+</li></ul> 
+<p />
+<h4><a name="Package_Processing_SXE"></a> Package Processing SXE </h4>
+<p />
+SXE package processing functionality is available if the <a href="fd-SafeExecution.html" class="twikiLink">Safe Execution Environment</a> is enabled.  Functions are <ul>
+<li> verification, including checking that the browse-time domains match the downloaded package
+</li> <li> domains not authorized by the user cause a "package corrupt" message
+</li> <li> package install in a sand-boxed file structure and writes the MAC sandbox rules
+</li></ul> 
+<p />
+<h4><a name="Package_Build_and_Publish"></a> Package Build and Publish </h4>
+<p />
+Scripts and documentation to enable and assist <ul>
+<li> a 3rd party package developer to build Qtopia 4.x SXE compatible software
+</li> <li> build an SXE package from their sources
+</li> <li> upload packages to a server
+</li> <li> update the listing of packages available, including security domain profiles
+</li></ul> 
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
+</tr></table></div>

@@ -205,9 +205,8 @@ bool MagicTextBrowser::magic( const QString& file, const QString& name, const QS
 
 QString MagicTextBrowser::generate( const QString& name )
 {
-    QString dir = QMimeType::appsFolderName() + "/" + name[ 0 ].toUpper() + name.mid( 1 );
     QString s;
-    QContentSet lnkset( QContentFilter::Location, dir );
+    QContentSet lnkset( QContentFilter::Category, name );
     typedef QMap<QString,QContent> OrderingMap;
     OrderingMap ordered;
     QContentList linkList = lnkset.items();

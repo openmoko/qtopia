@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QtopiaAbstractService Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QtopiaAbstractService Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QtopiaAbstractService Class Reference</h1>
 <p>The QtopiaAbstractService class provides an interface to messages on a QCop service which simplifies remote slot invocations <a href="#details">More...</a></p>
-<pre>    #include &lt;QtopiaAbstractService&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QtopiaAbstractService&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <p>Inherited by <a href="alarmservice.html">AlarmService</a>, <a href="alertservice.html">AlertService</a>, <a href="calendarservice.html">CalendarService</a>, <a href="cameraservice.html">CameraService</a>, <a href="cleanupwizardservice.html">CleanupWizardService</a>, <a href="clockservice.html">ClockService</a>, <a href="contactsphoneservice.html">ContactsPhoneService</a>, <a href="contactsservice.html">ContactsService</a>, <a href="contentsetviewservice.html">ContentSetViewService</a>, <a href="dateservice.html">DateService</a>, <a href="dialerservice.html">DialerService</a>, <a href="emailservice.html">EmailService</a>, <a href="helpservice.html">HelpService</a>, <a href="mediaserver-qtopiamediaprovider.html">mediaserver::QtopiaMediaProvider</a>, <a href="packagemanagerservice.html">PackageManagerService</a>, <a href="photoeditservice.html">PhotoEditService</a>, <a href="profilesservice.html">ProfilesService</a>, <a href="qtopiaappservice.html">QtopiaAppService</a>, <a href="qtopiapowermanagerservice.html">QtopiaPowerManagerService</a>, <a href="settingsmanagerservice.html">SettingsManagerService</a>, <a href="settingsservice.html">SettingsService</a>, <a href="smsservice.html">SMSService</a>, <a href="suspendservice.html">SuspendService</a>, <a href="taskmanagerservice.html">TaskManagerService</a>, <a href="tasksservice.html">TasksService</a>, <a href="telephonyservice.html">TelephonyService</a>, <a href="timemonitorservice.html">TimeMonitorService</a>, <a href="timeservice.html">TimeService</a>, <a href="virtualkeyboardservice.html">VirtualKeyboardService</a>, <a href="voicerecordingservice.html">VoiceRecordingService</a>, and <a href="webaccessservice.html">WebAccessService</a>.</p>
 <ul>
 <li><a href="qtopiaabstractservice-members.html">List of all members, including inherited members</a></li>
@@ -50,7 +49,7 @@
 <p>The QtopiaAbstractService class provides an interface to messages on a QCop service which simplifies remote slot invocations</p>
 <p>The QtopiaAbstractService class provides an interface for publishing services for remote invocation.</p>
 <p>The use of this class will be demonstrated using the Qtopia <tt>Time</tt> service. This has a single message called <tt>editTime()</tt> which asks the service to pop up a dialog allowing the user to edit the current time.</p>
-<pre>    class TimeService : public QtopiaAbstractService
+<pre>&nbsp;   class TimeService : public QtopiaAbstractService
     {
         Q_OBJECT
     public:
@@ -67,7 +66,7 @@
     }</pre>
 <p>The call to <a href="qtopiaabstractservice.html#publishAll">publishAll</a>() causes all public slots within <tt>TimeService</tt> to be automatically registered as Service messages. This can be useful if the service has many message types.</p>
 <p>The client can send a request to the service by use of the <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> class, as in previous versions of Qtopia:</p>
-<pre>    QtopiaServiceRequest req( &quot;Time&quot;, &quot;editTime()&quot; );
+<pre>&nbsp;   QtopiaServiceRequest req( &quot;Time&quot;, &quot;editTime()&quot; );
     req.send();</pre>
 <p>See also <a href="qtopiaservice.html">QtopiaService</a>, <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>, <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a>, and <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a>.</p>
 <hr />
@@ -82,6 +81,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

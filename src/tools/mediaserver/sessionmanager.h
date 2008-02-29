@@ -51,12 +51,18 @@ public:
 
     void activeDomainChanged();
 
+    void setVolume(int volume);
+    void increaseVolume(int increment);
+    void decreaseVolume(int decrement);
+    void setMuted(bool mute);
+
 private slots:
     void rescheduleSessions();
 
 private:
     bool canStart(MediaSession* mediaSession);
-    void stopped(MediaSession* mediaSession);
+    void sessionPlaying(MediaSession* mediaSession);
+    void sessionStopped(MediaSession* mediaSession);
 
     SessionManagerPrivate*  d;
 };

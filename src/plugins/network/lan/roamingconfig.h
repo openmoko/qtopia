@@ -26,16 +26,10 @@
 #include <QMultiHash>
 #include <QWidget>
 #include <QObject>
-#include <sys/socket.h>
-#include <linux/wireless.h>
-
-//#if WIRELESS_EXT > 13
-//Automated roaming is based on scan support which requires WE14+
 
 #include <qtopianetworkinterface.h>
 
 #include "ui_roamingbase.h"
-
 
 class RoamingPage : public QWidget
 {
@@ -60,7 +54,6 @@ private:
     QMultiHash<QString, QVariant> props;
     Ui::RoamingBase ui;
 };
-//#endif // WIRELESS_EXT > 13
 
 #endif //NO_WIRELESS_LAN
 #endif //ROAMING_PAGE

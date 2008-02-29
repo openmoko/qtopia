@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/itemviews/qheaderview.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qheaderview.cpp -->
 <head>
   <title>Qt 4.2: QHeaderView Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -108,7 +108,7 @@
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -185,6 +185,7 @@
 <p>A header emits <a href="qheaderview.html#sectionMoved">sectionMoved</a>() if the user moves a section, <a href="qheaderview.html#sectionResized">sectionResized</a>() if the user resizes a section, and <a href="qheaderview.html#sectionClicked">sectionClicked</a>() and <a href="qheaderview.html#sectionHandleDoubleClicked">sectionHandleDoubleClicked</a>() in response to mouse clicks. A header also emits <a href="qheaderview.html#sectionCountChanged">sectionCountChanged</a>() and <a href="qheaderview.html#sectionAutoResize">sectionAutoResize</a>().</p>
 <p>You can identify a section using the <a href="qheaderview.html#logicalIndex">logicalIndex</a>() and <a href="qheaderview.html#logicalIndexAt">logicalIndexAt</a>() functions, or by its index position, using the <a href="qheaderview.html#visualIndex">visualIndex</a>() and <a href="qheaderview.html#visualIndexAt">visualIndexAt</a>() functions. The visual index will change if a section is moved while the logical index wont change.</p>
 <p>For a horizontal header the section is equivalent to a column in the model, and for a vertical header the section is equivalent to a row in the model.</p>
+<p><a href="qtablewidget.html">QTableWidget</a> and <a href="qtableview.html">QTableView</a> create default headers. If you want the headers to be visible, you can use <a href="qwidget.html#visible-prop">setVisible()</a>.</p>
 <p>See also <a href="model-view-programming.html">Model/View Programming</a>, <a href="qlistview.html">QListView</a>, <a href="qtableview.html">QTableView</a>, and <a href="qtreeview.html">QTreeView</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -195,7 +196,7 @@
 <tr><td valign="top"><tt>QHeaderView::Interactive</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The user can resize the section. The section can also be resized programmatically using <a href="qheaderview.html#resizeSection">resizeSection</a>(). The section size defaults to <a href="qheaderview.html#defaultSectionSize-prop">defaultSectionSize</a>. (See also <a href="qheaderview.html#cascadingSectionResizes-prop">cascadingSectionResizes</a>.)</td></tr>
 <tr><td valign="top"><tt>QHeaderView::Fixed</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The user cannot resize the section. The section can only be resized programmatically using <a href="qheaderview.html#resizeSection">resizeSection</a>(). The section size defaults to <a href="qheaderview.html#defaultSectionSize-prop">defaultSectionSize</a>.</td></tr>
 <tr><td valign="top"><tt>QHeaderView::Stretch</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top"><a href="qheaderview.html">QHeaderView</a> will automatically resize the section to fill the available space. The size cannot be changed by the user or programmatically.</td></tr>
-<tr><td valign="top"><tt>QHeaderView::ResizeToContents</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top"><a href="qheaderview.html">QHeaderView</a> will automatically resize the section to its optimal size based on the contents of the entire column or row. The size cannot be changed by the user or programmatically.</td></tr>
+<tr><td valign="top"><tt>QHeaderView::ResizeToContents</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top"><a href="qheaderview.html">QHeaderView</a> will automatically resize the section to its optimal size based on the contents of the entire column or row. The size cannot be changed by the user or programmatically. (This value was introduced in 4.2)</td></tr>
 </table></p>
 <p>The following values are obsolete:</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -456,6 +457,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

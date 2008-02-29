@@ -44,6 +44,7 @@ class QBluetoothRfcommServerPrivate
 public:
     int m_channel;
     QBluetoothAddress m_address;
+    QBluetooth::SecurityOptions m_options;
 };
 
 /*!
@@ -63,6 +64,7 @@ QBluetoothRfcommServer::QBluetoothRfcommServer(QObject *parent)
 {
     m_data = new QBluetoothRfcommServerPrivate();
     m_data->m_channel = -1;
+    m_data->m_options = 0;
 }
 
 /*!
@@ -105,11 +107,26 @@ bool QBluetoothRfcommServer::listen(const QBluetoothAddress &local, int channel)
     memcpy(&addr.rc_bdaddr, &localBdaddr, sizeof(bdaddr_t));
     addr.rc_channel = channel;
 
+    _q_setSecurityOptions(fd, m_data->m_options);
+
     bool ret = initiateListen(fd, (struct sockaddr *) &addr, sizeof(addr));
 
     if (ret) {
         m_data->m_channel = channel;
         m_data->m_address = local;
+
+        struct sockaddr_rc addr;
+        socklen_t len = sizeof(addr);
+        memset(&addr, 0, sizeof(addr));
+
+        if (::getsockname(fd, (struct sockaddr *) &addr, &len) == 0) {
+            bdaddr_t localBdaddr;
+            memcpy(&localBdaddr, &addr.rc_bdaddr, sizeof(bdaddr_t));
+            QString str = bdaddr2str(&localBdaddr);
+            m_data->m_address = QBluetoothAddress(str);
+            m_data->m_channel = channel;
+        }
+
     }
 
     return ret;
@@ -171,13 +188,12 @@ bool QBluetoothRfcommServer::isAuthenticated() const
  */
 QBluetooth::SecurityOptions QBluetoothRfcommServer::securityOptions() const
 {
-    if (!isListening())
-        return 0;
+    if (!isListening()) {
+        return m_data->m_options;
+    }
 
-    QBluetooth::SecurityOptions options;
-
-    if (_q_getSecurityOptions(socketDescriptor(), options))
-        return options;
+    if (_q_getSecurityOptions(socketDescriptor(), m_data->m_options))
+        return m_data->m_options;
 
     return 0;
 }
@@ -189,10 +205,13 @@ QBluetooth::SecurityOptions QBluetoothRfcommServer::securityOptions() const
  */
 bool QBluetoothRfcommServer::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
-    if (!isListening())
-        return false;
+    m_data->m_options = options;
 
-    return _q_setSecurityOptions(socketDescriptor(), options);
+    if (!isListening()) {
+        return true;
+    }
+
+    return _q_setSecurityOptions(socketDescriptor(), m_data->m_options);
 }
 
 /*!

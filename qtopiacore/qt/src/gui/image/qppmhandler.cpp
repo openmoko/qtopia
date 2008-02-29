@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -230,6 +240,8 @@ static bool write_pbm_image(QIODevice *out, const QImage &sourceImage, const QBy
         image = image.convertToFormat(QImage::Format_MonoLSB);
     } else if (image.depth() == 1) {
         image = image.convertToFormat(QImage::Format_Indexed8);
+    } else if (image.depth() == 16) {
+        image = image.convertToFormat(QImage::Format_RGB32);
     }
 
     if (image.depth() == 1 && image.numColors() == 2) {
@@ -329,6 +341,10 @@ static bool write_pbm_image(QIODevice *out, const QImage &sourceImage, const QBy
             }
             delete [] buf;
             }
+            break;
+
+    default:
+        return false;
     }
 
     return true;
@@ -392,7 +408,7 @@ bool QPpmHandler::read(QImage *image)
 {
     if (state == Error)
         return false;
-    
+
     if (state == Ready && !readHeader()) {
         state = Error;
         return false;

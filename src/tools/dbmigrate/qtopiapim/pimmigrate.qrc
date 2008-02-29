@@ -1,0 +1,17 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/QtopiaSql/copy/QSQLITE">
+<file alias="appointmentcategories">statements/copy/appointmentcategories.sql</file>
+<file alias="appointmentcustom">statements/copy/appointmentcustom.sql</file>
+<file alias="appointmentexceptions">statements/copy/appointmentexceptions.sql</file>
+<file alias="appointments">statements/copy/appointments.sql</file>
+<file alias="contactaddresses">statements/copy/contactaddresses.sql</file>
+<file alias="contactcategories">statements/copy/contactcategories.sql</file>
+<file alias="contactcustom">statements/copy/contactcustom.sql</file>
+<file alias="contactphonenumbers">statements/copy/contactphonenumbers.sql</file>
+<file alias="contacts">statements/copy/contacts.sql</file>
+<file alias="emailaddresses">statements/copy/emailaddresses.sql</file>
+<file alias="taskcategories">statements/copy/taskcategories.sql</file>
+<file alias="taskcustom">statements/copy/taskcustom.sql</file>
+<file alias="tasks">statements/copy/tasks.sql</file>
+</qresource>
+</RCC>

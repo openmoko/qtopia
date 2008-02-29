@@ -1834,6 +1834,8 @@ bool ApplicationLayer::startup(Type type)
     int shmId = 0;
     void * shmptr = 0;
 
+    valid = false;
+
     Q_ASSERT(!layer);
     if(Server == type) {
         if(!sserver->listen(socket())) {
@@ -1911,6 +1913,7 @@ bool ApplicationLayer::restart()
     layer = 0;
     delete lock;
     lock = 0;
+    valid = false;
 
     // restart application layer
     if(Server == type) {
@@ -1976,6 +1979,10 @@ bool ApplicationLayer::restart()
     layer = new FixedMemoryTree((char *)shmptr,
                                 APPLAYER_SIZE,
                                 (Server == type));
+
+    valid = (lock != 0) && (layer != 0);
+    if (!valid)
+        qWarning("ApplicationLayer::startup failed");
 
     return true;
 }
@@ -2450,6 +2457,8 @@ unsigned int ApplicationLayer::order()
 
 bool ApplicationLayer::remove(HANDLE handle)
 {
+    if (!valid)
+        return false;
     Q_ASSERT(layer);
     ReadHandle * rhandle = rh(handle);
 
@@ -2468,6 +2477,8 @@ bool ApplicationLayer::remove(HANDLE handle)
 
 bool ApplicationLayer::remove(HANDLE handle, const QByteArray &subPath)
 {
+    if (!valid)
+        return false;
     Q_ASSERT(layer);
     Q_ASSERT(!subPath.isEmpty());
     Q_ASSERT(*subPath.constData() == '/');
@@ -2496,6 +2507,8 @@ bool ApplicationLayer::remove(HANDLE handle, const QByteArray &subPath)
 
 bool ApplicationLayer::setValue(HANDLE handle, const QVariant &value)
 {
+    if (!valid)
+        return false;
     Q_ASSERT(layer);
     ReadHandle * rhandle = rh(handle);
 
@@ -2515,6 +2528,8 @@ bool ApplicationLayer::setValue(HANDLE handle, const QVariant &value)
 bool ApplicationLayer::setValue(HANDLE handle, const QByteArray &subPath,
                                 const QVariant &value)
 {
+    if (!valid)
+        return false;
     Q_ASSERT(layer);
     Q_ASSERT(!subPath.isEmpty());
     Q_ASSERT(*subPath.constData() == '/');
@@ -2543,6 +2558,8 @@ bool ApplicationLayer::setValue(HANDLE handle, const QByteArray &subPath,
 
 bool ApplicationLayer::value(HANDLE handle, QVariant *data)
 {
+    if (!valid)
+        return false;
     Q_ASSERT(layer);
     Q_ASSERT(data);
 
@@ -2799,7 +2816,7 @@ void ApplicationLayer::clearHandle(ReadHandle *handle)
 
 void ApplicationLayer::triggerTodo()
 {
-    if(todoTimer)
+    if(todoTimer || !valid)
         return;
     qLog(ApplicationLayer) << "Trigger todo";
     todoTimer = startTimer(0);
@@ -2958,7 +2975,7 @@ bool ApplicationLayer::doWriteItem(const QByteArray &path, const QVariant &val)
 
 bool ApplicationLayer::setWatch(NodeWatch watch, const QByteArray &path)
 {
-    if(path.count() > MAX_PATH_SIZE || path.startsWith("/.ValueSpace"))
+    if(path.count() > MAX_PATH_SIZE || path.startsWith("/.ValueSpace") || !valid)
         return false;
     Q_ASSERT(layer);
 
@@ -2993,7 +3010,7 @@ bool ApplicationLayer::doSetWatch(NodeWatch watch, const QByteArray &path)
 
 bool ApplicationLayer::remWatch(NodeWatch watch, const QByteArray &path)
 {
-    if(path.count() > MAX_PATH_SIZE)
+    if(path.count() > MAX_PATH_SIZE || !valid)
         return false;
     Q_ASSERT(layer);
 
@@ -3034,7 +3051,7 @@ bool ApplicationLayer::isValid() const
 bool ApplicationLayer::setItem(NodeOwner owner, const QByteArray &path,
                                const QVariant &val)
 {
-    if(path.count() > MAX_PATH_SIZE || path.startsWith("/.ValueSpace"))
+    if(path.count() > MAX_PATH_SIZE || path.startsWith("/.ValueSpace") || !valid)
         return false;
     Q_ASSERT(layer);
     bool changed = false;
@@ -3158,6 +3175,8 @@ bool ApplicationLayer::doSetItem(NodeOwner owner, const QByteArray &path,
 
 bool ApplicationLayer::remItems(NodeOwner owner, const QByteArray &path)
 {
+    if (!valid)
+        return false;
     bool rv = false;
 
     if(Client == type) {
@@ -3176,6 +3195,8 @@ bool ApplicationLayer::remItems(NodeOwner owner, const QByteArray &path)
 
 bool ApplicationLayer::doRemItems(NodeOwner owner, const QByteArray &path)
 {
+    if (!valid)
+        return false;
     bool rv = false;
 
     if(Client == type) {
@@ -3376,7 +3397,7 @@ void ApplicationLayer::doClientWrite(const QByteArray &path,
   \class QValueSpaceObject
   \brief The QValueSpaceObject class allows applications to add entries to the
          Value Space.
-  \ingroup ValueSpace
+  \ingroup ipc
 
   For an overview of the Qtopia Value Space, please see the \l ValueSpace 
   documentation.
@@ -3462,7 +3483,7 @@ QValueSpaceObject::QValueSpaceObject(const char *objectPath,
 {
     VS_CALL_ASSERT;
     QValueSpace::initValuespace();
-    Q_ASSERT(applicationLayer()->isValid());
+//    Q_ASSERT(applicationLayer()->isValid());
 }
 
 /*!
@@ -3478,7 +3499,7 @@ QValueSpaceObject::QValueSpaceObject(const QString &objectPath,
 {
     VS_CALL_ASSERT;
     QValueSpace::initValuespace();
-    Q_ASSERT(applicationLayer()->isValid());
+//    Q_ASSERT(applicationLayer()->isValid());
 }
 
 /*!
@@ -3491,7 +3512,7 @@ QValueSpaceObject::QValueSpaceObject(const QByteArray &objectPath,
 {
     VS_CALL_ASSERT;
     QValueSpace::initValuespace();
-    Q_ASSERT(applicationLayer()->isValid());
+//    Q_ASSERT(applicationLayer()->isValid());
 }
 
 /*!

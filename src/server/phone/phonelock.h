@@ -85,30 +85,25 @@ public:
     enum State { Open,
                  KeyLocked,
                  KeyLockIncorrect,
-                 KeyLockToComplete,
-                 PartialEmergencyNumber,
-                 EmergencyNumber };
+                 KeyLockToComplete };
     State state() const;
-    QString emergencyNumber() const;
-    bool emergency() const;
 
     bool locked() const;
 
     static Qt::Key lockKey();
     void processKeyEvent(QKeyEvent *);
-    void reset();
 
     void setStateTimeout(int);
     int stateTimeout();
 
 public slots:
+    void reset();
     void lock();
     void unlock();
 
 signals:
     void keyLockDetected();
-    void stateChanged(BasicKeyLock::State, const QString &);
-    void dialEmergency(const QString &);
+    void stateChanged(BasicKeyLock::State);
 
 protected:
     virtual void timerEvent(QTimerEvent *);
@@ -116,11 +111,41 @@ protected:
 private:
     void stopTimer();
     void startTimer();
-    void setState(State, const QString &);
+    void setState(State);
     BasicKeyLockPrivate *d;
 };
 
 #ifdef QTOPIA_CELL
+
+class BasicEmergencyLockPrivate;
+class BasicEmergencyLock : public QObject
+{
+    Q_OBJECT
+public:
+    BasicEmergencyLock(QObject *parent = 0);
+    virtual ~BasicEmergencyLock();
+
+    enum State { NoEmergencyNumber, 
+                 PartialEmergencyNumber,
+                 EmergencyNumber };
+    State state() const;
+    QString emergencyNumber() const;
+    bool emergency() const;
+
+    static Qt::Key lockKey();
+
+    bool processKeyEvent(QKeyEvent *);
+
+public slots:
+    void reset();
+
+signals:
+    void stateChanged(BasicEmergencyLock::State, const QString &);
+    void dialEmergency(const QString &);
+
+private:
+    BasicEmergencyLockPrivate *d;
+};
 
 class BasicSimPinLockPrivate;
 class BasicSimPinLock : public QObject
@@ -130,21 +155,23 @@ public:
     BasicSimPinLock(QObject *parent = 0);
     virtual ~BasicSimPinLock();
 
-    enum State { Open, Waiting, SimPinRequired, VerifyingSimPin,
-                 SimPukRequired, NewSimPinRequired, VerifyingSimPuk,
-                 PartialEmergencyNumber, EmergencyNumber };
+    enum State { Open, Waiting, SimPinRequired, VerifyingSimPin, SimPukRequired,
+                 NewSimPinRequired, VerifyingSimPuk };
 
     State state() const;
+
     QString number() const;
     bool open() const;
-    bool emergency() const;
 
     static Qt::Key lockKey();
     void processKeyEvent(QKeyEvent *);
+
+public slots:
     void reset();
+
 signals:
-    void stateChanged(BasicSimPinLock::State, const QString &);
-    void dialEmergency(const QString &);
+    void stateChanged(BasicSimPinLock::State, 
+                      const QString &);
 
 private slots:
     void cellStateChanged(CellModemManager::State newState);

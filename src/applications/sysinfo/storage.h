@@ -21,6 +21,7 @@
 #include <QWidget>
 #include <QFrame>
 #include <QList>
+#include <QHash>
 
 class QLabel;
 class GraphData;
@@ -30,6 +31,7 @@ class QFileSystem;
 class MountInfo;
 class QStorageMetaInfo;
 class QScrollArea;
+
 
 
 class StorageInfoView : public QWidget
@@ -53,6 +55,7 @@ private:
     void setVBGeom();
     QStorageMetaInfo *sinfo;
     QScrollArea *area;
+    QHash<QFileSystem*, MountInfo*> fsHash;
 };
 
 class MountInfo : public QWidget

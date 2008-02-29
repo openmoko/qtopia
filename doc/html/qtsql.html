@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qtsql.qdoc -->
 <head>
   <title>Qt 4.2: QtSql Module</title>
   <link rel="prev" href="qtopengl.html" />
@@ -254,7 +255,10 @@
 </table></p>
 <p>The screenshot on the left shows a plain <a href="qsqltablemodel.html">QSqlTableModel</a> in a <a href="qtableview.html">QTableView</a>. Foreign keys (<tt>city</tt> and <tt>country</tt>) aren't resolved to human-readable values. The screenshot on the right shows a <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a>, with foreign keys resolved into human-readable text strings.</p>
 <p>The following code snippet shows how the <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> was set up:</p>
-<pre></pre>
+<pre>     model-&gt;setTable(&quot;employee&quot;);
+
+     model-&gt;setRelation(2, QSqlRelation(&quot;city&quot;, &quot;id&quot;, &quot;name&quot;));
+     model-&gt;setRelation(3, QSqlRelation(&quot;country&quot;, &quot;id&quot;, &quot;name&quot;));</pre>
 <p>See the <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> documentation for details.</p>
 <a name="presenting-data-in-a-table-view"></a>
 <h3>Presenting Data in a Table View</h3>
@@ -265,20 +269,57 @@
      view-&gt;show();</pre>
 <p>If the model is a read-write model (e.g., <a href="qsqltablemodel.html">QSqlTableModel</a>), the view lets the user edit the fields. You can disable this by calling</p>
 <pre>     view-&gt;setEditTriggers(QAbstractItemView::NoEditTriggers);</pre>
-<p>You can use the same model as a data source for multiple views. If the user edits the model through one of the views, the other views will reflect the changes immediately. The Table Model example shows how it works.</p>
+<p>You can use the same model as a data source for multiple views. If the user edits the model through one of the views, the other views will reflect the changes immediately. The <a href="sql-tablemodel.html">Table Model</a> example shows how it works.</p>
 <p>View classes display a header at the top to label the columns. To change the header texts, call <a href="qabstractitemmodel.html#setHeaderData">setHeaderData()</a> on the model. The header's labels default to the table's field names. For example:</p>
-<pre></pre>
+<pre>     model-&gt;setHeaderData(0, Qt::Horizontal, QObject::tr(&quot;ID&quot;));
+     model-&gt;setHeaderData(1, Qt::Horizontal, QObject::tr(&quot;Name&quot;));
+     model-&gt;setHeaderData(2, Qt::Horizontal, QObject::tr(&quot;City&quot;));
+     model-&gt;setHeaderData(3, Qt::Horizontal, QObject::tr(&quot;Country&quot;));</pre>
 <p><a href="qtableview.html">QTableView</a> also has a vertical header on the left with numbers identifying the rows. If you insert rows programmatically using <a href="qsqltablemodel.html#insertRows">QSqlTableModel::insertRows</a>(), the new rows will be marked with an asterisk (*) until they are submitted using <a href="qsqltablemodel.html#submitAll">submitAll()</a> or automatically when the user moves to another record (assuming the <a href="qsqltablemodel.html#EditStrategy-enum">edit strategy</a> is <a href="qsqltablemodel.html#EditStrategy-enum">QSqlTableModel::OnRowChange</a>).</p>
 <p align="center"><img src="images/insertrowinmodelview.png" alt="Inserting a row in a model" /></p><p>Likewise, if you remove rows using <a href="qsqltablemodel.html#removeRows">removeRows()</a>, the rows will be marked with an exclamation mark (!) until the change is submitted.</p>
 <p>The items in the view are rendered using a delegate. The default delegate, <a href="qitemdelegate.html">QItemDelegate</a>, handles the most common data types (<tt>int</tt>, <a href="qstring.html">QString</a>, <a href="qimage.html">QImage</a>, etc.). The delegate is also responsible for providing editor widgets (e.g., a combobox) when the user starts editing an item in the view. You can create your own delegates by subclassing <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a> or <a href="qitemdelegate.html">QItemDelegate</a>. See <a href="model-view-programming.html">Model/View Programming</a> for more information.</p>
 <p><a href="qsqltablemodel.html">QSqlTableModel</a> is optimized to operate on a single table at a time. If you need a read-write model that operates on an arbitrary result set, you can subclass <a href="qsqlquerymodel.html">QSqlQueryModel</a> and reimplement <a href="qabstractitemmodel.html#flags">flags()</a> and <a href="qabstractitemmodel.html#setData">setData()</a> to make it read-write. The following two functions make fields 1 and 2 of a query model editable:</p>
-<pre></pre>
+<pre> Qt::ItemFlags EditableSqlModel::flags(
+         const QModelIndex &amp;index) const
+ {
+     Qt::ItemFlags flags = QSqlQueryModel::flags(index);
+     if (index.column() == 1 || index.column() == 2)
+         flags |= Qt::ItemIsEditable;
+     return flags;
+ }
+
+ bool EditableSqlModel::setData(const QModelIndex &amp;index, const QVariant &amp;value, int /* role */</span>)
+ {
+     if (index.column() &lt; 1 || index.column() &gt; 2)
+         return false;
+
+     QModelIndex primaryKeyIndex = QSqlQueryModel::index(index.row(), 0);
+     int id = data(primaryKeyIndex).toInt();
+
+     clear();
+
+     bool ok;
+     if (index.column() == 1) {
+         ok = setFirstName(id, value.toString());
+     } else {
+         ok = setLastName(id, value.toString());
+     }
+     refresh();
+     return ok;
+ }</pre>
 <p>The setFirstName() helper function is defined as follows:</p>
-<pre></pre>
-<p>The setLastName() function is similar. See the Query Model example for the complete source code.</p>
+<pre> bool EditableSqlModel::setFirstName(int personId, const QString &amp;firstName)
+ {
+     QSqlQuery query;
+     query.prepare(&quot;update person set firstname = ? where id = ?&quot;);
+     query.addBindValue(firstName);
+     query.addBindValue(personId);
+     return query.exec();
+ }</pre>
+<p>The setLastName() function is similar. See the <a href="sql-querymodel.html">Query Model</a> example for the complete source code.</p>
 <p>Subclassing a model makes it possible to customize it in many ways: You can provide tooltips for the items, change the background color, provide calculated values, provide different values for viewing and editing, handle null values specially, and more. See <a href="model-view-programming.html">Model/View Programming</a> as well as the <a href="qabstractitemview.html">QAbstractItemView</a> reference documentation for details.</p>
 <p>If all you need is to resolve a foreign key to a more human-friendly string, you can use <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a>. For best results, you should also use <a href="qsqlrelationaldelegate.html">QSqlRelationalDelegate</a>, a delegate that provides combobox editors for editing foreign keys.</p>
-<p align="center"><img src="images/relationaltable.png" alt="Editing a foreign key in a relational table" /></p><p>The Relational Table Model example illustrates how to use <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> in conjunction with <a href="qsqlrelationaldelegate.html">QSqlRelationalDelegate</a> to provide tables with foreign key support.</p>
+<p align="center"><img src="images/relationaltable.png" alt="Editing a foreign key in a relational table" /></p><p>The <a href="sql-relationaltablemodel.html">Relational Table Model</a> example illustrates how to use <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> in conjunction with <a href="qsqlrelationaldelegate.html">QSqlRelationalDelegate</a> to provide tables with foreign key support.</p>
 <p>
 [Previous: <a href="qtopengl.html">QtOpenGL Module</a>]
 [<a href="modules.html">Qt's Modules</a>]
@@ -288,6 +329,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

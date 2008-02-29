@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/tools/qbytearray.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qbytearray.cpp -->
 <head>
   <title>Qt 4.2: QByteArray Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -184,7 +184,7 @@
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-8">operator&lt;</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-9">operator&lt;</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-10">operator&lt;</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qbytearray.html#operator-lt-lt-34">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QByteArray &amp; <i>ba</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qbytearray.html#operator-lt-lt-35">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QByteArray &amp; <i>ba</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-7">operator&lt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-8">operator&lt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-9">operator&lt;=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
@@ -197,7 +197,7 @@
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-7">operator&gt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-8">operator&gt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-9">operator&gt;=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qbytearray.html#operator-gt-gt-16">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QByteArray &amp; <i>ba</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qbytearray.html#operator-gt-gt-17">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QByteArray &amp; <i>ba</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -385,9 +385,11 @@
 <span class="comment"> // ba == &quot;XX&quot;</span></pre>
 <p>See also <a href="qbytearray.html#resize">resize</a>().</p>
 <h3 class="fn"><a name="fromBase64"></a>QByteArray QByteArray::fromBase64 ( const QByteArray &amp; <i>base64</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns a decoded copy of the Base64 array <i>base64</i>. For example:</p>
-<pre> QByteArray text = QByteArray::fromBase64(&quot;UXQgaXMgZ3JlYXRcIQo=&quot;);
+<p>Returns a decoded copy of the Base64 array <i>base64</i>. Input is not checked for validity; invalid characters in the input are skipped, enabling the decoding process to continue with subsequent characters.</p>
+<p>For example:</p>
+<pre> QByteArray text = QByteArray::fromBase64(&quot;UXQgaXMgZ3JlYXQh&quot;);
  text.data();            <span class="comment">// returns &quot;Qt is great!&quot;</span></pre>
+<p>The algorithm used to decode Base64-encoded data is defined in <a href="http://www.rfc-editor.org/rfc/rfc2045.txt">RFC 2045</a>.</p>
 <p>See also <a href="qbytearray.html#toBase64">toBase64</a>().</p>
 <h3 class="fn"><a name="fromRawData"></a>QByteArray QByteArray::fromRawData ( const char * <i>data</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a <a href="qbytearray.html">QByteArray</a> that uses the first <i>size</i> characters in the array <i>data</i>. The bytes in <i>data</i> are <i>not</i> copied. The caller must be able to guarantee that <i>data</i> will not be deleted or modified as long as the <a href="qbytearray.html">QByteArray</a> (or an unmodified copy of it) exists.</p>
@@ -745,7 +747,8 @@
 <h3 class="fn"><a name="toBase64"></a>QByteArray QByteArray::toBase64 () const</h3>
 <p>Returns a copy of the byte array, encoded as Base64.</p>
 <pre> QByteArray text(&quot;Qt is great!&quot;);
- text.toBase64();        <span class="comment">// returns &quot;UXQgaXMgZ3JlYXRcIQo=&quot;</span></pre>
+ text.toBase64();        <span class="comment">// returns &quot;UXQgaXMgZ3JlYXQh&quot;</span></pre>
+<p>The algorithm used to encode Base64-encoded data is defined in <a href="http://www.rfc-editor.org/rfc/rfc2045.txt">RFC 2045</a>.</p>
 <p>See also <a href="qbytearray.html#fromBase64">fromBase64</a>().</p>
 <h3 class="fn"><a name="toDouble"></a>double QByteArray::toDouble ( bool * <i>ok</i> = 0 ) const</h3>
 <p>Returns the byte array converted to a <tt>double</tt> value.</p>
@@ -1043,7 +1046,7 @@
 <h3 class="fn"><a name="operator-lt-10"></a>bool operator&lt; ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is lexically less than byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-lt-34"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QByteArray &amp; <i>ba</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-35"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QByteArray &amp; <i>ba</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes byte array <i>ba</i> to the stream <i>out</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -1083,7 +1086,7 @@
 <h3 class="fn"><a name="operator-gt-eq-9"></a>bool operator&gt;= ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is lexically greater than or equal to byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-gt-16"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QByteArray &amp; <i>ba</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-17"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QByteArray &amp; <i>ba</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a byte array into <i>ba</i> from the stream <i>in</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -1138,6 +1141,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

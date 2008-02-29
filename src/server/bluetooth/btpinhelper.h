@@ -37,9 +37,6 @@ public:
                                const QBluetoothAddress &remoteAddr);
     virtual void release();
 
-private slots:
-    void pairingCreated(const QBluetoothAddress &addr);
-
 private:
     QPasswordDialog *m_passDialog;
 };

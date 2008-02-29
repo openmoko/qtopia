@@ -429,7 +429,7 @@ void ReadMail::updateView()
     } else {                                            // show plain txt mail
         emailView->setPlainText( normalText(mailStringSize) );
     }
-    //force an extra resize to fire so scrollbars are acutally sized properly on the first go
+    //force an extra resize to fire so scrollbars are actually sized properly on the first go
     //Bug in QTextEdit
     emailView->append("");
 }
@@ -1249,6 +1249,32 @@ void ReadMail::mailUpdated(Email *mailIn)
     } else {
         updateButtons();
     }
+}
+
+void ReadMail::showMail(Email *mailIn)
+{
+    // mailIn must be an SMS currently
+    mail = mailIn;
+    lastMailUuid = mailIn->uuid();
+    updateView();
+    
+    // Precomputed button visibility settings
+    // Only known to be correct for SMS messages
+    getThisMailButton->setVisible(false);
+    sendThisMailButton->setVisible(false);
+    modifyButton->setVisible(false);
+    attachmentsButton->setVisible( mail->messagePartCount() );
+    nextButton->setVisible(false); // no mailView exists yet
+    previousButton->setVisible(false); // no mailView exists yet
+    progressLabel->hide();
+    context->clear();
+    context->addAction( replyButton );
+    context->addAction( replyAllAction );
+    context->addAction( forwardAction );
+    context->addAction( deleteButton );
+    context->addAction( plainTextButton );
+    context->addAction( printButton );
+    addDialActions();
 }
 
 #ifdef QTOPIA_PHONE

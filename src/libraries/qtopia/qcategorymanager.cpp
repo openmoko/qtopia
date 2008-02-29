@@ -305,8 +305,6 @@ public:
 QCategoryManager::QCategoryManager(QObject *parent)
     : QObject(parent)
 {
-    foreach(QSqlDatabase db, QtopiaSql::databases())
-        QtopiaSql::ensureSchema("categories", db);
     d = new QCategoryManagerData(QString());
 #ifndef QTOPIA_CONTENT_INSTALLER
     if (qApp)
@@ -322,8 +320,6 @@ QCategoryManager::QCategoryManager(QObject *parent)
 QCategoryManager::QCategoryManager(const QString &scope, QObject *parent)
     : QObject(parent)
 {
-    foreach(QSqlDatabase db, QtopiaSql::databases())
-        QtopiaSql::ensureSchema("categories", db);
     d = new QCategoryManagerData(scope);
 #ifndef QTOPIA_CONTENT_INSTALLER
     if (qApp)

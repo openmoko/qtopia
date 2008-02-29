@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qwidget.cpp -->
 <head>
   <title>Qt 4.2: QWidget Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -13,7 +14,7 @@
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QWidget Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
 <p>The QWidget class is the base class of all user interface objects. <a href="#details">More...</a></p>
 <pre> #include &lt;QWidget&gt;</pre><p>Inherits <a href="qobject.html">QObject</a> and <a href="qpaintdevice.html">QPaintDevice</a>.</p>
-<p>Inherited by <a href="qabstractbutton.html">QAbstractButton</a>, <a href="qabstractslider.html">QAbstractSlider</a>, <a href="qabstractspinbox.html">QAbstractSpinBox</a>, <a href="qcalendarwidget.html">QCalendarWidget</a>, <a href="qcombobox.html">QComboBox</a>, <a href="qdesigneractioneditorinterface.html">QDesignerActionEditorInterface</a>, <a href="qdesignerformwindowinterface.html">QDesignerFormWindowInterface</a>, <a href="qdesignerobjectinspectorinterface.html">QDesignerObjectInspectorInterface</a>, <a href="qdesignerpropertyeditorinterface.html">QDesignerPropertyEditorInterface</a>, <a href="qdesignerwidgetboxinterface.html">QDesignerWidgetBoxInterface</a>, <a href="qdialog.html">QDialog</a>, <a href="qdialogbuttonbox.html">QDialogButtonBox</a>, <a href="qdockwidget.html">QDockWidget</a>, <a href="qfocusframe.html">QFocusFrame</a>, <a href="qframe.html">QFrame</a>, <a href="qglwidget.html">QGLWidget</a>, <a href="qgroupbox.html">QGroupBox</a>, <a href="qlineedit.html">QLineEdit</a>, <a href="qmainwindow.html">QMainWindow</a>, <a href="qmenu.html">QMenu</a>, <a href="qmenubar.html">QMenuBar</a>, <a href="qprogressbar.html">QProgressBar</a>, <a href="qrubberband.html">QRubberBand</a>, <a href="qsizegrip.html">QSizeGrip</a>, <a href="qsplashscreen.html">QSplashScreen</a>, <a href="qsplitterhandle.html">QSplitterHandle</a>, <a href="qstatusbar.html">QStatusBar</a>, <a href="qsvgwidget.html">QSvgWidget</a>, <a href="qtabbar.html">QTabBar</a>, <a href="qtabwidget.html">QTabWidget</a>, <a href="qtoolbar.html">QToolBar</a>, <a href="qworkspace.html">QWorkspace</a>, <a href="qwsembedwidget.html">QWSEmbedWidget</a>, <a href="qx11embedcontainer.html">QX11EmbedContainer</a>, and <a href="qx11embedwidget.html">QX11EmbedWidget</a>.</p>
+<p>Inherited by <a href="qabstractbutton.html">QAbstractButton</a>, <a href="qabstractslider.html">QAbstractSlider</a>, <a href="qabstractspinbox.html">QAbstractSpinBox</a>, <a href="qaxwidget.html">QAxWidget</a>, <a href="qcalendarwidget.html">QCalendarWidget</a>, <a href="qcombobox.html">QComboBox</a>, <a href="qdesigneractioneditorinterface.html">QDesignerActionEditorInterface</a>, <a href="qdesignerformwindowinterface.html">QDesignerFormWindowInterface</a>, <a href="qdesignerobjectinspectorinterface.html">QDesignerObjectInspectorInterface</a>, <a href="qdesignerpropertyeditorinterface.html">QDesignerPropertyEditorInterface</a>, <a href="qdesignerwidgetboxinterface.html">QDesignerWidgetBoxInterface</a>, <a href="qdesktopwidget.html">QDesktopWidget</a>, <a href="qdialog.html">QDialog</a>, <a href="qdialogbuttonbox.html">QDialogButtonBox</a>, <a href="qdockwidget.html">QDockWidget</a>, <a href="qfocusframe.html">QFocusFrame</a>, <a href="qframe.html">QFrame</a>, <a href="qglwidget.html">QGLWidget</a>, <a href="qgroupbox.html">QGroupBox</a>, <a href="qlineedit.html">QLineEdit</a>, <a href="qmainwindow.html">QMainWindow</a>, <a href="qmenu.html">QMenu</a>, <a href="qmenubar.html">QMenuBar</a>, <a href="qprogressbar.html">QProgressBar</a>, <a href="qrubberband.html">QRubberBand</a>, <a href="qsizegrip.html">QSizeGrip</a>, <a href="qsplashscreen.html">QSplashScreen</a>, <a href="qsplitterhandle.html">QSplitterHandle</a>, <a href="qstatusbar.html">QStatusBar</a>, <a href="qsvgwidget.html">QSvgWidget</a>, <a href="qtabbar.html">QTabBar</a>, <a href="qtabwidget.html">QTabWidget</a>, <a href="qtoolbar.html">QToolBar</a>, <a href="qworkspace.html">QWorkspace</a>, <a href="qwsembedwidget.html">QWSEmbedWidget</a>, <a href="qx11embedcontainer.html">QX11EmbedContainer</a>, and <a href="qx11embedwidget.html">QX11EmbedWidget</a>.</p>
 <ul>
 <li><a href="qwidget-members.html">List of all members, including inherited members</a></li>
 <li><a href="qwidget-obsolete.html">Obsolete members</a></li>
@@ -288,7 +289,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -418,12 +419,12 @@
 <a name="composite-widgets"></a>
 <h3>Composite Widgets</h3>
 <p>When a widgets is used as a container to group a number of child widgets, it is known as a composite widget. These can be created by constructing a widget with the required visual properties - a <a href="qframe.html">QFrame</a>, for example - and adding child widgets to it, usually managed by a layout. The above diagram shows such a composite widget that was created using <a href="designer-manual.html#qt-designer">Qt Designer</a>.</p>
-<p>Composite widgets can also be created by subclassing a standard widget, such as QWidget or <a href="qframe.html">QFrame</a>, and adding the necessary layout and child widgets in the constructor of the subclass. Many of the examples provided with Qt use this approach, and it is also covered in the Qt Tutorial.</p>
+<p>Composite widgets can also be created by subclassing a standard widget, such as QWidget or <a href="qframe.html">QFrame</a>, and adding the necessary layout and child widgets in the constructor of the subclass. Many of the <a href="examples.html">examples provided with Qt</a> use this approach, and it is also covered in the <a href="tutorial.html">Qt Tutorial</a>.</p>
 <a name="custom-widgets-and-painting"></a>
 <h3>Custom Widgets and Painting</h3>
 <p>Since QWidget is a subclass of <a href="qpaintdevice.html">QPaintDevice</a>, subclasses can be used to display custom content that is composed using a series of painting operations with an instance of the <a href="qpainter.html">QPainter</a> class. This approach contrasts with the canvas-style approach used by the <a href="graphicsview.html#graphics-view">Graphics View Framework</a> where items are added to a scene by the application and are rendered by the framework itself.</p>
 <p>Each widget performs all painting operations from within its <a href="qwidget.html#paintEvent">paintEvent</a>() function. This is called whenever the widget needs to be redrawn, either as a result of some external change or when requested by the application.</p>
-<p>The Analog Clock example shows how a simple widget can handle paint events.</p>
+<p>The <a href="widgets-analogclock.html">Analog Clock example</a> shows how a simple widget can handle paint events.</p>
 <a name="size-hints-and-size-policies"></a>
 <h3>Size Hints and Size Policies</h3>
 <p>When implementing a new widget, it is almost always useful to reimplement <a href="qwidget.html#sizeHint-prop">sizeHint</a>() to provide a reasonable default size for the widget and to set the correct size policy with <a href="qwidget.html#sizePolicy-prop">setSizePolicy</a>().</p>
@@ -433,7 +434,7 @@
 <h3>Events</h3>
 <p>Widgets respond to events that are typically caused by user actions. Qt delivers events to widgets by calling specific event handler functions with instances of <a href="qevent.html">QEvent</a> subclasses containing information about each event.</p>
 <p>If your widget only contains child widgets, you probably do not need to implement any event handlers. If you want to detect a mouse click in a child widget call the child's <a href="qwidget.html#underMouse">underMouse</a>() function inside the widget's <a href="qwidget.html#mousePressEvent">mousePressEvent</a>().</p>
-<p>The Scribble example implements a wider set of events to handle mouse movement, button presses, and window resizing.</p>
+<p>The <a href="widgets-scribble.html">Scribble example</a> implements a wider set of events to handle mouse movement, button presses, and window resizing.</p>
 <p>You will need to supply the behavior and content for your own widgets, but here is a brief overview of the events that are relevant to QWidget, starting with the most common ones:</p>
 <ul>
 <li><a href="qwidget.html#paintEvent">paintEvent</a>() is called whenever the widget needs to be repainted. Every widget which displays custom content must implement it. Painting using a <a href="qpainter.html">QPainter</a> can only take place in a <a href="qwidget.html#paintEvent">paintEvent</a>() or a function called by a <a href="qwidget.html#paintEvent">paintEvent</a>().</li>
@@ -617,8 +618,12 @@
 <p>The <a href="qwidget.html#fontInfo">fontInfo</a>() function reports the actual font that is being used by the widget.</p>
 <p>As long as no special font has been set, or after setFont(<a href="porting4.html#qfont">QFont</a>()) is called, this is either a special font for the widget class, the parent's font or (if this widget is a top level widget), the default application font.</p>
 <p>This code fragment sets a 12 point helvetica bold font:</p>
-<pre> QFont f(&quot;Helvetica&quot;, 12, QFont::Bold);
- setFont(f);</pre>
+<pre> QFont font(&quot;Helvetica&quot;, 12, QFont::Bold);
+ setFont(font);</pre>
+<p>Note that when a child widget is given a different font to that of its parent widget, it will still inherit the parent's font <i>properties</i> unless these have been set explicitly on the child's font. For example, if the parent's font is bold, the child widget's font will be bold as well if not specified otherwise like this:</p>
+<pre> QFont font;
+ font.setBold(false);
+ setFont(font);</pre>
 <p>In addition to setting the font, setFont() informs all children about the change.</p>
 <p>Access functions:</p>
 <ul>
@@ -954,7 +959,7 @@
 <li><div class="fn"/><b>Qt::WindowFlags windowFlags () const</b></li>
 <li><div class="fn"/><b>void setWindowFlags ( Qt::WindowFlags <i>type</i> )</b></li>
 </ul>
-<p>See also <a href="qwidget.html#windowType">windowType</a>() and Window Flags Example.</p>
+<p>See also <a href="qwidget.html#windowType">windowType</a>() and <a href="widgets-windowflags.html">Window Flags Example</a>.</p>
 <h3 class="fn"><a name="windowIcon-prop"></a>windowIcon : <a href="qicon.html">QIcon</a></h3>
 <p>This property holds the widget's icon.</p>
 <p>This property only makes sense for windows. If no icon has been set, windowIcon() returns the application icon (<a href="qapplication.html#windowIcon-prop">QApplication::windowIcon</a>()).</p>
@@ -993,7 +998,7 @@
 <li><div class="fn"/><b>bool isWindowModified () const</b></li>
 <li><div class="fn"/><b>void setWindowModified ( bool )</b></li>
 </ul>
-<p>See also <a href="qwidget.html#windowTitle-prop">windowTitle</a>, Application Example, SDI Example, and MDI Example.</p>
+<p>See also <a href="qwidget.html#windowTitle-prop">windowTitle</a>, <a href="mainwindows-application.html">Application Example</a>, <a href="mainwindows-sdi.html">SDI Example</a>, and <a href="mainwindows-mdi.html">MDI Example</a>.</p>
 <h3 class="fn"><a name="windowOpacity-prop"></a>windowOpacity : double</h3>
 <p>This property holds the level of opacity for the window.</p>
 <p>The valid range of opacity is from 1.0 (completely opaque) to 0.0 (completely transparent).</p>
@@ -1098,7 +1103,7 @@
 <p>The <a href="qapplication.html#lastWindowClosed">QApplication::lastWindowClosed</a>() signal is emitted when the last visible primary window (i.e. window with no parent) with the <a href="qt.html#WidgetAttribute-enum">Qt::WA_QuitOnClose</a> attribute set is closed. By default this attribute is set for all widgets except transient windows such as splash screens, tool windows, and popup menus.</p>
 <h3 class="fn"><a name="closeEvent"></a>void QWidget::closeEvent ( <a href="qcloseevent.html">QCloseEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive widget close events.</p>
-<p>See also <a href="qwidget.html#event">event</a>(), <a href="qwidget.html#hide">hide</a>(), <a href="qwidget.html#close">close</a>(), <a href="qcloseevent.html">QCloseEvent</a>, and Application Example.</p>
+<p>See also <a href="qwidget.html#event">event</a>(), <a href="qwidget.html#hide">hide</a>(), <a href="qwidget.html#close">close</a>(), <a href="qcloseevent.html">QCloseEvent</a>, and <a href="mainwindows-application.html">Application Example</a>.</p>
 <h3 class="fn"><a name="contentsRect"></a><a href="qrect.html">QRect</a> QWidget::contentsRect () const</h3>
 <p>Returns the area inside the widget's margins.</p>
 <p>See also <a href="qwidget.html#setContentsMargins">setContentsMargins</a>() and <a href="qwidget.html#getContentsMargins">getContentsMargins</a>().</p>
@@ -1121,6 +1126,7 @@
 <p>This function is usually called from the <a href="qwidget.html">QWidget</a> destructor.</p>
 <h3 class="fn"><a name="dragEnterEvent"></a>void QWidget::dragEnterEvent ( <a href="qdragenterevent.html">QDragEnterEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler is called when a drag is in progress and the mouse enters this widget. The event is passed in the <i>event</i> parameter.</p>
+<p>If the event is ignored, the widget won't receive any <a href="qwidget.html#dragMoveEvent">drag move events</a>.</p>
 <p>See the <a href="dnd.html">Drag-and-drop documentation</a> for an overview of how to provide drag-and-drop in your application.</p>
 <p>See also <a href="porting4.html#qtextdrag">QTextDrag</a>, <a href="porting4.html#qimagedrag">QImageDrag</a>, and <a href="qdragenterevent.html">QDragEnterEvent</a>.</p>
 <h3 class="fn"><a name="dragLeaveEvent"></a>void QWidget::dragLeaveEvent ( <a href="qdragleaveevent.html">QDragLeaveEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
@@ -1202,7 +1208,6 @@
 <p>Returns the window system handle of the widget, for low-level access. Using this function is not portable.</p>
 <p>An HDC acquired with getDC() has to be released with <a href="qwidget.html#releaseDC">releaseDC</a>().</p>
 <p><b>Warning:</b> Using this function is not portable.</p>
-<p>Reimplemented from <a href="qpaintdevice.html#getDC">QPaintDevice</a>.</p>
 <h3 class="fn"><a name="grabKeyboard"></a>void QWidget::grabKeyboard ()</h3>
 <p>Grabs the keyboard input.</p>
 <p>This widget receives all keyboard events until <a href="qwidget.html#releaseKeyboard">releaseKeyboard</a>() is called; other widgets get no keyboard events at all. Mouse events are not affected. Use <a href="qwidget.html#grabMouse">grabMouse</a>() if you want to grab that.</p>
@@ -1294,7 +1299,7 @@
 <p>A widget must call <a href="qwidget.html#focusPolicy-prop">setFocusPolicy</a>() to accept focus initially and have focus in order to receive a key press event.</p>
 <p>If you reimplement this handler, it is very important that you <a href="qkeyevent.html">ignore()</a> the event if you do not understand it, so that the widget's parent can interpret it.</p>
 <p>The default implementation closes popup widgets if the user presses Esc. Otherwise the event is ignored.</p>
-<p>See also <a href="qwidget.html#keyReleaseEvent">keyReleaseEvent</a>(), <a href="qevent.html#ignore">QKeyEvent::ignore</a>(), <a href="qwidget.html#focusPolicy-prop">setFocusPolicy</a>(), <a href="qwidget.html#focusInEvent">focusInEvent</a>(), <a href="qwidget.html#focusOutEvent">focusOutEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qkeyevent.html">QKeyEvent</a>, and Tetrix Example.</p>
+<p>See also <a href="qwidget.html#keyReleaseEvent">keyReleaseEvent</a>(), <a href="qevent.html#ignore">QKeyEvent::ignore</a>(), <a href="qwidget.html#focusPolicy-prop">setFocusPolicy</a>(), <a href="qwidget.html#focusInEvent">focusInEvent</a>(), <a href="qwidget.html#focusOutEvent">focusOutEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qkeyevent.html">QKeyEvent</a>, and <a href="widgets-tetrix.html">Tetrix Example</a>.</p>
 <h3 class="fn"><a name="keyReleaseEvent"></a>void QWidget::keyReleaseEvent ( <a href="qkeyevent.html">QKeyEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive key release events for the widget.</p>
 <p>A widget must <a href="qwidget.html#focusPolicy-prop">accept focus</a> initially and <a href="qwidget.html#focus-prop">have focus</a> in order to receive a key release event.</p>
@@ -1344,7 +1349,7 @@
 <p>See also <a href="qwidget.html#mapFromParent">mapFromParent</a>(), <a href="qwidget.html#mapTo">mapTo</a>(), <a href="qwidget.html#mapToGlobal">mapToGlobal</a>(), and <a href="qwidget.html#underMouse">underMouse</a>().</p>
 <h3 class="fn"><a name="mask"></a><a href="qregion.html">QRegion</a> QWidget::mask () const</h3>
 <p>Returns the mask currently set on a widget. If no mask is set the return value will be an empty region.</p>
-<p>See also <a href="qwidget.html#setMask">setMask</a>(), <a href="qwidget.html#clearMask">clearMask</a>(), <a href="qregion.html#isEmpty">QRegion::isEmpty</a>(), and Shaped Clock Example.</p>
+<p>See also <a href="qwidget.html#setMask">setMask</a>(), <a href="qwidget.html#clearMask">clearMask</a>(), <a href="qregion.html#isEmpty">QRegion::isEmpty</a>(), and <a href="widgets-shapedclock.html">Shaped Clock Example</a>.</p>
 <h3 class="fn"><a name="metric"></a>int QWidget::metric ( <a href="qpaintdevice.html#PaintDeviceMetric-enum">PaintDeviceMetric</a> <i>m</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Internal implementation of the virtual <a href="qpaintdevice.html#metric">QPaintDevice::metric</a>() function.</p>
 <p><i>m</i> is the metric to get.</p>
@@ -1362,15 +1367,15 @@
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive mouse move events for the widget.</p>
 <p>If mouse tracking is switched off, mouse move events only occur if a mouse button is pressed while the mouse is being moved. If mouse tracking is switched on, mouse move events occur even if no mouse button is pressed.</p>
 <p><a href="qmouseevent.html#pos">QMouseEvent::pos</a>() reports the position of the mouse cursor, relative to this widget. For press and release events, the position is usually the same as the position of the last mouse move event, but it might be different if the user's hand shakes. This is a feature of the underlying window system, not Qt.</p>
-<p>See also <a href="qwidget.html#mouseTracking-prop">setMouseTracking</a>(), <a href="qwidget.html#mousePressEvent">mousePressEvent</a>(), <a href="qwidget.html#mouseReleaseEvent">mouseReleaseEvent</a>(), <a href="qwidget.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qmouseevent.html">QMouseEvent</a>, and Scribble Example.</p>
+<p>See also <a href="qwidget.html#mouseTracking-prop">setMouseTracking</a>(), <a href="qwidget.html#mousePressEvent">mousePressEvent</a>(), <a href="qwidget.html#mouseReleaseEvent">mouseReleaseEvent</a>(), <a href="qwidget.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qmouseevent.html">QMouseEvent</a>, and <a href="widgets-scribble.html">Scribble Example</a>.</p>
 <h3 class="fn"><a name="mousePressEvent"></a>void QWidget::mousePressEvent ( <a href="qmouseevent.html">QMouseEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive mouse press events for the widget.</p>
 <p>If you create new widgets in the mousePressEvent() the <a href="qwidget.html#mouseReleaseEvent">mouseReleaseEvent</a>() may not end up where you expect, depending on the underlying window system (or X11 window manager), the widgets' location and maybe more.</p>
 <p>The default implementation implements the closing of popup widgets when you click outside the window. For other widget types it does nothing.</p>
-<p>See also <a href="qwidget.html#mouseReleaseEvent">mouseReleaseEvent</a>(), <a href="qwidget.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a>(), <a href="qwidget.html#mouseMoveEvent">mouseMoveEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qmouseevent.html">QMouseEvent</a>, and Scribble Example.</p>
+<p>See also <a href="qwidget.html#mouseReleaseEvent">mouseReleaseEvent</a>(), <a href="qwidget.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a>(), <a href="qwidget.html#mouseMoveEvent">mouseMoveEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qmouseevent.html">QMouseEvent</a>, and <a href="widgets-scribble.html">Scribble Example</a>.</p>
 <h3 class="fn"><a name="mouseReleaseEvent"></a>void QWidget::mouseReleaseEvent ( <a href="qmouseevent.html">QMouseEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive mouse release events for the widget.</p>
-<p>See also <a href="qwidget.html#mousePressEvent">mousePressEvent</a>(), <a href="qwidget.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a>(), <a href="qwidget.html#mouseMoveEvent">mouseMoveEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qmouseevent.html">QMouseEvent</a>, and Scribble Example.</p>
+<p>See also <a href="qwidget.html#mousePressEvent">mousePressEvent</a>(), <a href="qwidget.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a>(), <a href="qwidget.html#mouseMoveEvent">mouseMoveEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qmouseevent.html">QMouseEvent</a>, and <a href="widgets-scribble.html">Scribble Example</a>.</p>
 <h3 class="fn"><a name="moveEvent"></a>void QWidget::moveEvent ( <a href="qmoveevent.html">QMoveEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler can be reimplemented in a subclass to receive widget move events which are passed in the <i>event</i> parameter. When the widget receives this event, it is already at the new position.</p>
 <p>The old position is accessible through <a href="qmoveevent.html#oldPos">QMoveEvent::oldPos</a>().</p>
@@ -1397,7 +1402,7 @@
  extern void qt_x11_set_global_double_buffer(bool);
  qt_x11_set_global_double_buffer(false);
  ...</pre>
-<p>See also <a href="qwidget.html#event">event</a>(), <a href="qwidget.html#repaint">repaint</a>(), <a href="qwidget.html#update">update</a>(), <a href="qpainter.html">QPainter</a>, <a href="qpixmap.html">QPixmap</a>, <a href="qpaintevent.html">QPaintEvent</a>, and Analog Clock Example.</p>
+<p>See also <a href="qwidget.html#event">event</a>(), <a href="qwidget.html#repaint">repaint</a>(), <a href="qwidget.html#update">update</a>(), <a href="qpainter.html">QPainter</a>, <a href="qpixmap.html">QPixmap</a>, <a href="qpaintevent.html">QPaintEvent</a>, and <a href="widgets-analogclock.html">Analog Clock Example</a>.</p>
 <h3 class="fn"><a name="parentWidget"></a>QWidget * QWidget::parentWidget () const</h3>
 <p>Returns the parent of this widget, or 0 if it does not have any parent widget.</p>
 <h3 class="fn"><a name="qwsEvent"></a>bool QWidget::qwsEvent ( <a href="qwsevent.html">QWSEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
@@ -1412,7 +1417,6 @@
 <h3 class="fn"><a name="releaseDC"></a>void QWidget::releaseDC ( HDC <i>hdc</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Releases the HDC <i>hdc</i> acquired by a previous call to <a href="qwidget.html#getDC">getDC</a>().</p>
 <p><b>Warning:</b> Using this function is not portable.</p>
-<p>Reimplemented from <a href="qpaintdevice.html#releaseDC">QPaintDevice</a>.</p>
 <h3 class="fn"><a name="releaseKeyboard"></a>void QWidget::releaseKeyboard ()</h3>
 <p>Releases the keyboard grab.</p>
 <p>See also <a href="qwidget.html#grabKeyboard">grabKeyboard</a>(), <a href="qwidget.html#grabMouse">grabMouse</a>(), and <a href="qwidget.html#releaseMouse">releaseMouse</a>().</p>
@@ -1447,7 +1451,7 @@
 <h3 class="fn"><a name="resizeEvent"></a>void QWidget::resizeEvent ( <a href="qresizeevent.html">QResizeEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler can be reimplemented in a subclass to receive widget resize events which are passed in the <i>event</i> parameter. When resizeEvent() is called, the widget already has its new geometry. The old size is accessible through <a href="qresizeevent.html#oldSize">QResizeEvent::oldSize</a>().</p>
 <p>The widget will be erased and receive a paint event immediately after processing the resize event. No drawing need be (or should be) done inside this handler.</p>
-<p>See also <a href="qwidget.html#moveEvent">moveEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qwidget.html#size-prop">resize</a>(), <a href="qresizeevent.html">QResizeEvent</a>, <a href="qwidget.html#paintEvent">paintEvent</a>(), and Scribble Example.</p>
+<p>See also <a href="qwidget.html#moveEvent">moveEvent</a>(), <a href="qwidget.html#event">event</a>(), <a href="qwidget.html#size-prop">resize</a>(), <a href="qresizeevent.html">QResizeEvent</a>, <a href="qwidget.html#paintEvent">paintEvent</a>(), and <a href="widgets-scribble.html">Scribble Example</a>.</p>
 <h3 class="fn"><a name="restoreGeometry"></a>bool QWidget::restoreGeometry ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>geometry</i> )</h3>
 <p>Restores the geometry and state top-level widgets stored in the byte array <i>geometry</i>. Returns true on success; otherwise returns false.</p>
 <p>If the restored geometry is off-screen, it will be modified to be inside the the available screen geometry.</p>
@@ -1545,7 +1549,10 @@
 <p>Sets the layout manager for this widget to <i>layout</i>.</p>
 <p>If there already is a layout manager installed on this widget, <a href="qwidget.html">QWidget</a> won't let you install another. You must first delete the existing layout manager (returned by <a href="qwidget.html#layout">layout</a>()) before you can call setLayout() with the new layout.</p>
 <p>Example:</p>
-<pre></pre>
+<pre>     QVBoxLayout *layout = new QVBoxLayout;
+     layout-&gt;addWidget(lcd);
+     layout-&gt;addWidget(slider);
+     setLayout(layout);</pre>
 <p>An alternative to calling this function is to pass this widget to the layout's constructor.</p>
 <p>The <a href="qwidget.html">QWidget</a> will take ownership of <i>layout</i>.</p>
 <p>See also <a href="qwidget.html#layout">layout</a>() and <a href="layout.html">Layout Classes</a>.</p>
@@ -1559,7 +1566,7 @@
      topLevelLabel.setMask(pixmap.mask());</pre>
 <p>The label shown by this code is masked using the image it contains, giving the appearance that an irregularly-shaped image is being drawn directly onto the screen.</p>
 <p>Masked widgets receive mouse events only on their visible portions.</p>
-<p>See also <a href="qwidget.html#mask">mask</a>(), <a href="qwidget.html#clearMask">clearMask</a>(), <a href="qwidget.html#windowOpacity-prop">windowOpacity</a>(), and Shaped Clock Example.</p>
+<p>See also <a href="qwidget.html#mask">mask</a>(), <a href="qwidget.html#clearMask">clearMask</a>(), <a href="qwidget.html#windowOpacity-prop">windowOpacity</a>(), and <a href="widgets-shapedclock.html">Shaped Clock Example</a>.</p>
 <h3 class="fn"><a name="setMask-2"></a>void QWidget::setMask ( const <a href="qregion.html">QRegion</a> &amp; <i>region</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Causes only the parts of the widget which overlap <i>region</i> to be visible. If the region includes pixels outside the <a href="qwidget.html#rect-prop">rect</a>() of the widget, window system controls in that area may or may not be visible, depending on the platform.</p>
@@ -1670,7 +1677,7 @@
 <p>This function does not cause an immediate repaint; instead it schedules a paint event for processing when Qt returns to the main event loop. This permits Qt to optimize for more speed and less flicker than a call to <a href="qwidget.html#repaint">repaint</a>() does.</p>
 <p>Calling update() several times normally results in just one <a href="qwidget.html#paintEvent">paintEvent</a>() call.</p>
 <p>Qt normally erases the widget's area before the <a href="qwidget.html#paintEvent">paintEvent</a>() call. If the <a href="qt.html#WidgetAttribute-enum">Qt::WA_OpaquePaintEvent</a> widget attribute is set, the widget is responsible for painting all its pixels with an opaque color.</p>
-<p>See also <a href="qwidget.html#repaint">repaint</a>(), <a href="qwidget.html#paintEvent">paintEvent</a>(), <a href="qwidget.html#updatesEnabled-prop">setUpdatesEnabled</a>(), and Analog Clock Example.</p>
+<p>See also <a href="qwidget.html#repaint">repaint</a>(), <a href="qwidget.html#paintEvent">paintEvent</a>(), <a href="qwidget.html#updatesEnabled-prop">setUpdatesEnabled</a>(), and <a href="widgets-analogclock.html">Analog Clock Example</a>.</p>
 <h3 class="fn"><a name="update-2"></a>void QWidget::update ( int <i>x</i>, int <i>y</i>, int <i>w</i>, int <i>h</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This version updates a rectangle (<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>) inside the widget.</p>
@@ -1970,6 +1977,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/plugins-howto.qdoc -->
 <head>
   <title>Qt 4.2: How to Create Qt Plugins</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -72,7 +73,7 @@
      return 0;
  }
 
- Q_EXPORT_PLUGIN2(MyStylePlugin)</pre>
+ Q_EXPORT_PLUGIN2(pnp_mystyleplugin, MyStylePlugin)</pre>
 <p>(Note that <a href="qstyleplugin.html">QStylePlugin</a> is case insensitive, and the lower-case version of the key is used in our <a href="qstyleplugin.html#create">create()</a> implementation; most other plugins are case sensitive.)</p>
 <p>For database drivers, image formats, text codecs, and most other plugin types, no explicit object creation is required. Qt will find and create them as required. Styles are an exception, since you might want to set a style explicitly in code. To apply a style, use code like this:</p>
 <pre> QApplication::setStyle(QStyleFactory::create(&quot;MyStyle&quot;));</pre>
@@ -98,10 +99,36 @@
 <li>Build the plugin using an suitable <tt>.pro</tt> file.</li>
 </ol>
 <p>For example, here's the definition of an interface class:</p>
-<pre></pre>
+<pre> class FilterInterface
+ {
+ public:
+     virtual ~FilterInterface() {}
+
+     virtual QStringList filters() const = 0;
+     virtual QImage filterImage(const QString &amp;filter, const QImage &amp;image,
+                                QWidget *parent) = 0;
+ };
+
+ Q_DECLARE_INTERFACE(FilterInterface,
+                     &quot;com.trolltech.PlugAndPaint.FilterInterface/1.0&quot;)</pre>
 <p>Here's the definition of a plugin class that implements that interface:</p>
-<pre></pre>
-<p>The Plug &amp; Paint example documentation explains this process in detail. See also <a href="designer-creating-custom-widgets.html">Creating Custom Widgets for Qt Designer</a> for information about issues that are specific to <i>Qt Designer</i>.</p>
+<pre> #include &lt;QObject&gt;
+ #include &lt;QStringList&gt;
+ #include &lt;QImage&gt;
+
+ #include &lt;plugandpaint/interfaces.h&gt;
+
+ class ExtraFiltersPlugin : public QObject, public FilterInterface
+ {
+     Q_OBJECT
+     Q_INTERFACES(FilterInterface)
+
+ public:
+     QStringList filters() const;
+     QImage filterImage(const QString &amp;filter, const QImage &amp;image,
+                        QWidget *parent);
+ };</pre>
+<p>The <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example documentation explains this process in detail. See also <a href="designer-creating-custom-widgets.html">Creating Custom Widgets for Qt Designer</a> for information about issues that are specific to <i>Qt Designer</i>.</p>
 <a name="loading-and-verifying-plugins-dynamically"></a>
 <h2>Loading and Verifying Plugins Dynamically</h2>
 <p>When loading plugins, the Qt library does some sanity checking to determine whether or not the plugin can be loaded and used. This provides the ability to have multiple versions and configurations of the Qt library installed side by side.</p>
@@ -185,7 +212,7 @@
 <li>Use the <a href="qtplugin.html#Q_IMPORT_PLUGIN">Q_IMPORT_PLUGIN</a>() macro in your application.</li>
 <li>Link your application with your plugin library using <tt>LIBS</tt> in the <tt>.pro</tt> file.</li>
 </ol>
-<p>See the Plug &amp; Paint example and the associated Basic Tools plugin for details on how to do this.</p>
+<p>See the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example and the associated <a href="tools-plugandpaintplugins-basictools.html">Basic Tools</a> plugin for details on how to do this.</p>
 <a name="the-plugin-cache"></a>
 <h2>The Plugin Cache</h2>
 <p>In order to speed up loading and validation of plugins, some of the information that is collected when plugins are loaded is cached through <a href="qsettings.html">QSettings</a>. This includes information about whether or not a plugin was successfully loaded, so that subsequent load operations don't try to load an invalid plugin. However, if the &quot;last modified&quot; timestamp of a plugin has changed, the plugin's cache entry is invalidated and the plugin is reloaded regardless of the values in the cache entry, and the cache entry itself is updated with the new result.</p>
@@ -204,11 +231,11 @@
 <tr valign="top" class="even"><td>A valid plugin that replaces an invalid (or broken) plugin fails to load.</td><td>The entry for the plugin in the plugin cache indicates that the original plugin could not be loaded, causing Qt to ignore the replacement.</td><td>Either ensure that the plugin's timestamp is updated, or delete the entry in the <a href="#the-plugin-cache">plugin cache</a>.</td></tr>
 </table></p>
 <p>You can also use the <tt>QT_DEBUG_PLUGINS</tt> environment variable to obtain diagnostic information from Qt about each plugin it tries to load. Set this variable to a non-zero value in the environment from which your application is launched.</p>
-<p>See also <a href="qpluginloader.html">QPluginLoader</a>, <a href="qlibrary.html">QLibrary</a>, and Plug &amp; Paint Example.</p>
+<p>See also <a href="qpluginloader.html">QPluginLoader</a>, <a href="qlibrary.html">QLibrary</a>, and <a href="tools-plugandpaint.html">Plug &amp; Paint Example</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -337,42 +337,17 @@ void DateBook::appMessage(const QString& msg, const QByteArray& data)
         QOccurrenceModel *om = new QOccurrenceModel(alarmTime, alarmTime.addSecs(1), this);
         om->completeFetch();
 
-        for (int i = 0; i < om->rowCount(); i++) {
-            QOccurrence o = om->occurrence(i);
-            QAppointment a = o.appointment();
+        if (om->rowCount() > 0) {
+            AlarmDialog dlg(parentWidget->isVisible() ? parentWidget : 0);
+            dlg.setModal(true);
+            bool needShow = (dlg.exec(om, alarmTime, warn) == AlarmDialog::Details);
 
-            if (a.hasAlarm() && o.alarmDelay() == warn) {
-                int stopTimer = 0;
-                bool sound = false;
-                QAppointment::AlarmFlags alarm = a.alarm();
-
-                if (alarm | QAppointment::Audible) {
-                    Qtopia::soundAlarm();
-                    stopTimer = startTimer(5000);
-                    sound = true;
-                }
-
-                AlarmDialog dlg(parentWidget->isVisible() ? parentWidget : 0);
-                dlg.setModal(true);
-                bool needShow = (dlg.exec(o) == AlarmDialog::Details);
-
-                if (sound)
-                    killTimer(stopTimer);
-
-                if (needShow) {
-                    initDayView();
-                    showAppointmentDetails(o);
-                }
-
-                //  Clear the alarm now that it has been sounded
-                a.clearAlarm();
-                model->updateAppointment(a);
-
-                if (dlg.getSkipDialogs())
-                    break;
+            if (needShow && dlg.selectedOccurrence().isValid()) {
+                initDayView();
+                showAppointmentDetails(dlg.selectedOccurrence());
+                showMaximized();
             }
         }
-
     /*@ \service Receive
     This service is invoked when typed data is received from outside the device,
     such as via IR beaming. The actual service is Receive/mimetype, such as
@@ -468,7 +443,7 @@ QDSData DateBook::appointmentQDLLink( QAppointment& appointment )
     // Check if we need to create the QDLLink
     QString keyString = appointment.customField( QDL::SOURCE_DATA_KEY );
     if ( keyString.isEmpty() ||
-         !QDSData( QLocalUniqueId( keyString ) ).isValid() ) {
+         !QDSData( QUniqueId( keyString ) ).isValid() ) {
         QByteArray dataRef;
         QDataStream refStream( &dataRef, QIODevice::WriteOnly );
         refStream << appointment.uid();
@@ -479,7 +454,7 @@ QDSData DateBook::appointmentQDLLink( QAppointment& appointment )
                       QString( "pics/datebook/DateBook" ) );
 
         QDSData linkData = link.toQDSData();
-        QLocalUniqueId key = linkData.store();
+        QUniqueId key = linkData.store();
         appointment.setCustomField( QDL::SOURCE_DATA_KEY, key.toString() );
         model->updateAppointment( appointment );
 
@@ -487,7 +462,7 @@ QDSData DateBook::appointmentQDLLink( QAppointment& appointment )
     }
 
     // Get the link from the QDSDataStore
-    return QDSData( QLocalUniqueId( keyString ) );
+    return QDSData( QUniqueId( keyString ) );
 }
 
 void DateBook::removeAppointmentQDLLink( QAppointment& appointment )
@@ -505,7 +480,7 @@ void DateBook::removeAppointmentQDLLink( QAppointment& appointment )
     QString key = appointment.customField( QDL::SOURCE_DATA_KEY );
     if ( !key.isEmpty() ) {
         // Break the link in the QDSDataStore
-        QDSData linkData = QDSData( QLocalUniqueId( key ) );
+        QDSData linkData = QDSData( QUniqueId( key ) );
         QDLLink link( linkData );
         link.setBroken( true );
         linkData.modify( link.toQDSData().data() );
@@ -555,7 +530,8 @@ void DateBook::editCurrentOccurrence()
 
     if (inViewMode) {
         QOccurrence o = editOccurrence(appointmentDetails->occurrence());
-        showAppointmentDetails(o);
+        if (o.isValid())
+            showAppointmentDetails(o);
     } else {
         editOccurrence(currentOccurrence());
     }
@@ -566,15 +542,6 @@ QOccurrence DateBook::editOccurrence(const QOccurrence &o)
     return editOccurrence( o, false );
 }
 
-static bool onOccurrence(int flag)
-{
-    return flag == ExceptionDialog::NotEarlier || flag == ExceptionDialog::Earlier;
-}
-
-static bool postSplit(int flag)
-{
-    return (flag & ExceptionDialog::Later);
-}
 QOccurrence DateBook::editOccurrence(const QOccurrence &o, bool preview)
 {
 #ifndef QTOPIA_DESKTOP
@@ -590,9 +557,10 @@ QOccurrence DateBook::editOccurrence(const QOccurrence &o, bool preview)
     int exceptionType = ExceptionDialog::All;
     bool hasEarlier = o.start() != mainApp.start();
     bool hasLater = o.nextOccurrence().isValid();
+    bool hasRepeat = mainApp.hasRepeat();
 
-    if (mainApp.hasRepeat() && (hasEarlier || hasLater)) {
-        exceptionType = askException(tr("Edit Event"));
+    if (hasRepeat && (hasEarlier || hasLater)) {
+        exceptionType = askException(true);
         QAppointment a = editedApp;
         /* fix up exception types.
            for starting occurrence
@@ -639,11 +607,11 @@ QOccurrence DateBook::editOccurrence(const QOccurrence &o, bool preview)
                 // split appointment
                 a.setUid(QUniqueId());
                 a.clearExceptions();
-                if (onOccurrence(exceptionType))
+                if (exceptionType == ExceptionDialog::NotEarlier || exceptionType == ExceptionDialog::Earlier)
                     a.setStart(o.start());
                 else
                     a.setStart(o.nextOccurrence().start());
-                if (postSplit(exceptionType))
+                if (exceptionType == ExceptionDialog::NotEarlier || exceptionType == ExceptionDialog::Later)
                     editedApp = a;
                 else
                     mainApp = a;
@@ -684,41 +652,84 @@ QOccurrence DateBook::editOccurrence(const QOccurrence &o, bool preview)
     delete editorView;
     editorView = 0;
 
+    QUniqueId newAppId;
+
     QOccurrence show;
     switch (exceptionType) {
         // exceptions
         case ExceptionDialog::RetainSelected:
-            // for some reason will create the exception properly,
-            // except will also duplicate a non-repeating version
-            // of the event set at the start.
-            show = QOccurrence(o.start().date(), mainApp);
-            model->replaceOccurrence(editedApp, show);
+            /* Exceptions are date based, so if the user changed the date of the appointment, we
+               need to make sure we update the appointment, then add the exception... */
+            newAppId = model->replaceOccurrence(editedApp, QOccurrence(o.start().date(), mainApp));
             model->updateAppointment(editedApp);
-        case ExceptionDialog::Selected:
-            show = QOccurrence(o.start().date(), editedApp);
-            model->replaceOccurrence(mainApp, show);
+            /* Show the original occurrence (but need the new appointment) */
+            show = model->appointment(newAppId).nextOccurrence(o.start().date());
             break;
-        // splits
+
+        case ExceptionDialog::Selected:
+            newAppId = model->replaceOccurrence(mainApp, editedApp.firstOccurrence(), o.start().date());
+            /* Show the new occurrence of the new app (need to fetch again to setExceptionParent) */
+            editedApp = model->appointment(newAppId); // exceptionParent is not set by replaceOccurrence
+            show = editedApp.firstOccurrence();
+            break;
+
         case ExceptionDialog::Earlier:
+            model->updateAppointment(editedApp);
+            newAppId = model->replaceRemaining(editedApp, mainApp, o.start().date());
+            /* Show the original occurrence (which is in the new appointment) */
+            mainApp = model->appointment(newAppId);
+            show = mainApp.nextOccurrence(o.start().date());
+            break;
+
         case ExceptionDialog::NotLater:
             model->updateAppointment(editedApp);
             model->replaceRemaining(editedApp, mainApp);
-            show = QOccurrence(editedApp.start().date(), editedApp);
-        case ExceptionDialog::Later:
-        case ExceptionDialog::NotEarlier:
-            model->replaceRemaining(mainApp, editedApp);
-            show = QOccurrence(editedApp.start().date(), editedApp);
+            /* Show the new edited occurrence, if we can, which will be the LAST occurrence of editedApp */
+            // XXX this could be hideous for perf.
+            editedApp = model->appointment(editedApp.uid());
+            show = editedApp.firstOccurrence();
+            while (show.nextOccurrence().isValid())
+                show = show.nextOccurrence();
             break;
+
+        case ExceptionDialog::Later:
+            model->replaceRemaining(mainApp, editedApp, o.start().date().addDays(1));
+            /* Show the original occurrence (but need the new appointment) */
+            mainApp = model->appointment(mainApp.uid());
+            show = mainApp.nextOccurrence(o.start().date());
+            break;
+
+        case ExceptionDialog::NotEarlier:
+            newAppId = model->replaceRemaining(mainApp, editedApp, o.start().date());
+            /* Show the first occurrence of the new app (need to fetch again to setExceptionParent) */
+            editedApp = model->appointment(newAppId);
+            show = editedApp.firstOccurrence();
+            break;
+
         case ExceptionDialog::All:
             model->updateAppointment(editedApp);
-            show = QOccurrence(o.start().date(), editedApp);
+            editedApp = model->appointment(editedApp.uid());
+            /* If this was a repeating appointment, try to find the occurrence after the original date */
+            if (hasRepeat) {
+                show = editedApp.nextOccurrence(o.start().date());
+                /* no occurrences after the original date, just find the last occurrence, then */
+                if (!show.isValid()) {
+                    show = editedApp.firstOccurrence();
+                    while (show.nextOccurrence().isValid())
+                        show = show.nextOccurrence();
+                }
+            } else {
+                /* Not originally a repeating appointment, so show the first occurrence */
+                show = editedApp.firstOccurrence();
+            }
             break;
         default:
             return QOccurrence();
     }
 
 #ifndef QTOPIA_DESKTOP
-    showAppointmentDetails(show);
+    if (show.isValid())
+        showAppointmentDetails(show);
 #endif
     return show;
 }
@@ -728,9 +739,6 @@ void DateBook::removeCurrentOccurrence()
     if (!occurrenceSelected())
         return;
     QOccurrence o = currentOccurrence();
-
-    if (viewStack->currentWidget() == appointmentDetails)
-        hideAppointmentDetails();
 
     removeOccurrence(o);
 }
@@ -745,7 +753,7 @@ void DateBook::removeOccurrence(const QOccurrence &o)
     QAppointment a = o.appointment();
     if (a.hasRepeat()) {
         //  Ask if just this one or the entire series
-        int e = askException(tr("Delete Event"));
+        int e = askException(false);
         switch (e) {
             case ExceptionDialog::Cancel:
                 return;
@@ -760,11 +768,15 @@ void DateBook::removeOccurrence(const QOccurrence &o)
                 } else {
                     model->removeOccurrence(o);
                 }
+                if (viewStack->currentWidget() == appointmentDetails)
+                    hideAppointmentDetails();
                 break;
 
             case ExceptionDialog::All:
                 removeAppointmentQDLLink(a);
                 model->removeAppointment(a);
+                if (viewStack->currentWidget() == appointmentDetails)
+                    hideAppointmentDetails();
                 break;
 
             case ExceptionDialog::RetainSelected:
@@ -774,6 +786,11 @@ void DateBook::removeOccurrence(const QOccurrence &o)
                     a.setStart(o.start());
                     a.setRepeatRule(QAppointment::NoRepeat);
                     model->updateAppointment(a);
+                }
+                // refresh the details
+                if (viewStack->currentWidget() == appointmentDetails) {
+                    a = model->appointment(a.uid());
+                    showAppointmentDetails(a.firstOccurrence());
                 }
                 break;
 
@@ -785,11 +802,21 @@ void DateBook::removeOccurrence(const QOccurrence &o)
                     if (start.isNull()) {
                         removeAppointmentQDLLink(a);
                         model->removeAppointment(a);
+                        if (viewStack->currentWidget() == appointmentDetails)
+                            hideAppointmentDetails();
                     } else {
                         a.setStart(start);
                         if (!a.nextOccurrence(a.start().date().addDays(1)).isValid())
                             a.setRepeatRule(QAppointment::NoRepeat);
                         model->updateAppointment(a);
+                        if (viewStack->currentWidget() == appointmentDetails) {
+                            if (e == ExceptionDialog::NotLater)
+                                hideAppointmentDetails();
+                            else {
+                                a = model->appointment(a.uid());
+                                showAppointmentDetails(a.nextOccurrence(o.start().date()));
+                            }
+                        }
                     }
                 }
                 break;
@@ -802,11 +829,21 @@ void DateBook::removeOccurrence(const QOccurrence &o)
                     if (start.date() == a.start().date()) {
                         removeAppointmentQDLLink(a);
                         model->removeAppointment(a);
+                        if (viewStack->currentWidget() == appointmentDetails)
+                            hideAppointmentDetails();
                     } else {
                         a.setRepeatUntil(start.date().addDays(-1));
                         if (!a.nextOccurrence(a.start().date().addDays(1)).isValid())
                             a.setRepeatRule(QAppointment::NoRepeat);
                         model->updateAppointment(a);
+                        if (viewStack->currentWidget() == appointmentDetails) {
+                            if (e == ExceptionDialog::NotEarlier)
+                                hideAppointmentDetails();
+                            else {
+                                a = model->appointment(a.uid());
+                                showAppointmentDetails(a.nextOccurrence(o.start().date()));
+                            }
+                        }
                     }
                     break;
                 }
@@ -818,6 +855,8 @@ void DateBook::removeOccurrence(const QOccurrence &o)
             return;
         removeAppointmentQDLLink(a);
         model->removeAppointment(a);
+        if (viewStack->currentWidget() == appointmentDetails)
+            hideAppointmentDetails();
     }
 
     updateIconsTimer->start( DATEBOOK_UPDATE_ICON_TIMEOUT );
@@ -923,8 +962,6 @@ void DateBook::removeOccurrencesBefore(const QDate &, bool)
 
 void DateBook::beamCurrentAppointment()
 {
-    if (viewStack->currentWidget() == appointmentDetails)
-        hideAppointmentDetails();
     if (occurrenceSelected())
         beamAppointment(currentAppointment());
 }
@@ -974,6 +1011,12 @@ void DateBook::showAppointmentDetails(const QOccurrence &o)
     if (viewStack->currentWidget() != appointmentDetails) {
         appointmentDetails->previousDetails = viewStack->currentWidget();
         raiseView(appointmentDetails);
+#ifdef QTOPIA_PHONE
+        if( !Qtopia::mousePreferred() )
+            appointmentDetails->setEditFocus( true );
+#endif
+        appointmentDetails->setEditFocus(true);
+        setWindowTitle( tr("Event Details") );
         updateIcons();
     }
 
@@ -991,7 +1034,7 @@ void DateBook::hideAppointmentDetails()
         raiseView(appointmentDetails->previousDetails);
         appointmentDetails->previousDetails->setFocus();
     }
-
+    setWindowTitle( tr("Calendar") );
     updateIcons();
 }
 
@@ -1086,18 +1129,6 @@ void DateBook::updateIcons()
     if (actionFind)
         actionFind->setEnabled(!view);*/
 #endif
-}
-
-void DateBook::timerEvent(QTimerEvent *e)
-{
-    static int stop = 0;
-    if (stop < 10) {
-        Qtopia::soundAlarm();
-        stop++;
-    } else {
-        stop = 0;
-        killTimer(e->timerId());
-    }
 }
 
 void DateBook::closeEvent(QCloseEvent *e)
@@ -1236,8 +1267,7 @@ void DateBook::init()
     connect(this, SIGNAL(categoryChanged(const QCategoryFilter &)),
             this, SLOT(categorySelected(const QCategoryFilter &)));
 
-    // and for good luck
-    emit categoryChanged(model->categoryFilter());
+    categorySelected(model->categoryFilter());
 
     new CalendarService( this );
 
@@ -1260,7 +1290,7 @@ void DateBook::init()
 void DateBook::initDayView()
 {
     if (!dayView) {
-        dayView = new DayView;
+        dayView = new DayView(0, model->categoryFilter());
         viewStack->addWidget(dayView);
         dayView->setDaySpan(startTime, 17);
         connect(dayView, SIGNAL(newAppointment()), this, SLOT(newAppointment()));
@@ -1280,8 +1310,6 @@ void DateBook::initDayView()
         connect(this, SIGNAL(categoryChanged( const QCategoryFilter &)),
                 dayView, SLOT(categorySelected(const QCategoryFilter &)));
 
-        dayView->categorySelected(model->categoryFilter());
-
         dayView->installEventFilter(this);
     }
 }
@@ -1289,15 +1317,13 @@ void DateBook::initDayView()
 void DateBook::initMonthView()
 {
     if (!monthView) {
-        monthView = new MonthView;
+        monthView = new MonthView(0, model->categoryFilter());
         monthView->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
         viewStack->addWidget(monthView);
         connect(monthView, SIGNAL(activated(const QDate&)),
                 this, SLOT(viewDay(const QDate&)));
         connect(this, SIGNAL(categoryChanged( const QCategoryFilter &)),
                 monthView, SLOT(categorySelected(const QCategoryFilter &)));
-
-        monthView->categorySelected(model->categoryFilter());
     }
 }
 
@@ -1306,8 +1332,10 @@ void DateBook::initAppointmentDetails()
     if (!appointmentDetails) {
         appointmentDetails = new AppointmentDetails(viewStack);
         viewStack->addWidget(appointmentDetails);
+
         connect(appointmentDetails, SIGNAL(done()), this, SLOT(hideAppointmentDetails()));
     }
+
 }
 
 #if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
@@ -1335,11 +1363,14 @@ void DateBook::initExceptionDialog()
     }
 }
 
-int DateBook::askException(const QString &action)
+int DateBook::askException(bool editMode)
 {
     initExceptionDialog();
-    exceptionDialog->setWindowTitle(action);
-    return exceptionDialog->exec();
+    if (editMode)
+        exceptionDialog->setWindowTitle(tr("Edit Event"));
+    else
+        exceptionDialog->setWindowTitle(tr("Delete Event"));
+    return exceptionDialog->exec(editMode);
 }
 
 void DateBook::loadSettings()
@@ -1656,6 +1687,7 @@ void DateBook::selectCategory()
 {
     if (!categoryDialog) {
         categoryDialog = new QCategoryDialog(DateBookCategoryScope, QCategoryDialog::Filter, this);
+        categoryDialog->setText( tr("Only events which have <i>all</i> the selected categories will be shown...") );
         categoryDialog->setObjectName("Calendar");
     }
     categoryDialog->selectFilter(model->categoryFilter());

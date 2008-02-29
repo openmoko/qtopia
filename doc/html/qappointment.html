@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QAppointment Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QAppointment Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAppointment Class Reference</h1>
 <p>The QAppointment class holds the data of a calendar appointment. <a href="#details">More...</a></p>
-<pre>    #include &lt;QAppointment&gt;</pre><p>Inherits <a href="qpimrecord.html">QPimRecord</a>.</p>
+<pre>#include &lt;QAppointment&gt;</pre><p>Inherits <a href="qpimrecord.html">QPimRecord</a>.</p>
 <ul>
 <li><a href="qappointment-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -80,6 +79,9 @@
 <li><div class="fn"/>QTimeZone <b><a href="qappointment.html#timeZone">timeZone</a></b> () const</li>
 <li><div class="fn"/>WeekFlags <b><a href="qappointment.html#weekFlags">weekFlags</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qappointment.html#weekOffset">weekOffset</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-3">writeVCalendar</a></b> ( const QString &amp; <i>filename</i> ) const</li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-4">writeVCalendar</a></b> ( QFile &amp; <i>file</i> ) const</li>
+<li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar-5">writeVCalendar</a></b> ( QDataStream * <i>stream</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#operator-not-eq">operator!=</a></b> ( const QAppointment &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QAppointment &amp; <b><a href="qappointment.html#operator-eq">operator=</a></b> ( const QAppointment &amp; <i>other</i> )</li>
 <li><div class="fn"/>bool <b><a href="qappointment.html#operator-eq-eq">operator==</a></b> ( const QAppointment &amp; <i>other</i> ) const</li>
@@ -92,6 +94,7 @@
 <ul>
 <li><div class="fn"/>WeekFlag <b><a href="qappointment.html#fromDateDay">fromDateDay</a></b> ( int <i>day</i> )</li>
 <li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendar">readVCalendar</a></b> ( const QString &amp; <i>filename</i> )</li>
+<li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendar-2">readVCalendar</a></b> ( const QByteArray &amp; <i>vcal</i> )</li>
 <li><div class="fn"/>QList&lt;QAppointment&gt; <b><a href="qappointment.html#readVCalendarData">readVCalendarData</a></b> ( const char * <i>data</i>, unsigned long <i>len</i> )</li>
 <li><div class="fn"/>int <b><a href="qappointment.html#toDateDay">toDateDay</a></b> ( WeekFlag <i>day</i> )</li>
 <li><div class="fn"/>void <b><a href="qappointment.html#writeVCalendar">writeVCalendar</a></b> ( const QString &amp; <i>filename</i>, const QList&lt;QAppointment&gt; &amp; <i>appointments</i> )</li>
@@ -226,13 +229,17 @@
 <p>See also <a href="qappointment.html#setLocation">setLocation</a>().</p>
 <h3 class="fn"><a name="nextOccurrence"></a><a href="qoccurrence.html">QOccurrence</a> QAppointment::nextOccurrence ( const <a href="qdate.html">QDate</a> &amp; <i>from</i> ) const</h3>
 <p>Returns the first date on or after <i>from</i> that the appointment will next occur. If the appointment only occurs once (no repeat) will return the date of the start of the appointment if the start of the appointment is on or after <i>from</i>.</p>
-<p>If the appointment does not occur on or after <i>from</i> then a null date is returned.</p>
+<p>If the appointment does not occur on or after <i>from</i> then a null occurrence is returned.</p>
 <h3 class="fn"><a name="notes"></a><a href="qstring.html">QString</a> QAppointment::notes () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the notes of the appointment.</p>
 <p>Reimplemented from <a href="qpimrecord.html#notes">QPimRecord</a>.</p>
 <p>See also <a href="qappointment.html#setNotes">setNotes</a>().</p>
 <h3 class="fn"><a name="readVCalendar"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Reads the file specified by <i>filename</i> as a list of vCalendar objects and returns the list of near equivalent appointments.</p>
+<p>See also <a href="qappointment.html#writeVCalendar">writeVCalendar</a>().</p>
+<h3 class="fn"><a name="readVCalendar-2"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendar ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>vcal</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Reads the given VCalendar data in <i>vcal</i> and returns the list of near equivalent appointments.</p>
 <p>See also <a href="qappointment.html#writeVCalendar">writeVCalendar</a>().</p>
 <h3 class="fn"><a name="readVCalendarData"></a><a href="qlist.html">QList</a>&lt;QAppointment&gt; QAppointment::readVCalendarData ( const char * <i>data</i>, unsigned long <i>len</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Reads the <i>data</i> of <i>len</i> byets as a list of vCalendar objects and returns the list of near equivalent appointments.</p>
@@ -341,6 +348,19 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Write the <i>appointment</i> as a vCalendar to the file specified by <i>filename</i>.</p>
 <p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
+<h3 class="fn"><a name="writeVCalendar-3"></a>void QAppointment::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the appointment as a vCalendar object to the file specified by <i>filename</i>.</p>
+<p>Returns true on success, false on fail.</p>
+<p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
+<h3 class="fn"><a name="writeVCalendar-4"></a>void QAppointment::writeVCalendar ( <a href="qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the appointment as a vCalendar object to the given <i>file</i>, which must be already open for writing.</p>
+<p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
+<h3 class="fn"><a name="writeVCalendar-5"></a>void QAppointment::writeVCalendar ( <a href="qdatastream.html">QDataStream</a> * <i>stream</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the appointment as a vCalendar object to the given <i>stream</i>, which must be writable.</p>
+<p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QAppointment::operator!= ( const QAppointment &amp; <i>other</i> ) const</h3>
 <p>Returns true if the appointment is not equal to <i>other</i>. Otherwise returns false.</p>
 <h3 class="fn"><a name="operator-eq"></a>QAppointment &amp; QAppointment::operator= ( const QAppointment &amp; <i>other</i> )</h3>
@@ -351,6 +371,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -3,9 +3,7 @@ VPATH+=vpn
 
 VPN_HEADERS+=\
     qvpnclient.h\
-    qvpnfactory.h \
-    qx500identity.h \
-    qkey.h
+    qvpnfactory.h 
 
 VPN_SOURCES+=\
     qvpnclient.cpp\
@@ -21,7 +19,9 @@ VPN_PRIVATE_HEADERS+=\
     qvpnclientprivate_p.h\
     qopenvpn_p.h\
     qvpnmanager_p.h\
-    qipsec_p.h
+    qipsec_p.h \
+    qx500identity.h \
+    qkey.h
 
 # Don't put this in include because it depends on the forms
 VPN_PACKAGE_HEADERS+=\

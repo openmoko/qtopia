@@ -172,9 +172,6 @@ bool AppearanceSettings::eventFilter(QObject *o, QEvent *e)
             int currentIndex = tabWidget->currentIndex();
             int count = tabWidget->count();
             switch ( key ) {
-                case Qt::Key_Hangup:
-                    reject();
-                    break;
                 case Qt::Key_Back:
                     e->ignore();
                     break;

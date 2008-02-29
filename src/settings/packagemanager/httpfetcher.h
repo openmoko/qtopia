@@ -27,6 +27,7 @@
 #include <QHttpResponseHeader>
 
 #include "packagecontroller.h"
+#include "md5file.h"
 
 class QHttp;
 class PackageInformationReader;
@@ -40,9 +41,13 @@ public:
 private slots:
     virtual void httpRequestFinished(int, bool);
     virtual void readResponseHeader(const QHttpResponseHeader &);
+protected slots:
     virtual void updateDataReadProgress(int, int);
 protected:
     HttpFetcher *fetcher;
+private:
+    int fileSize;
+    int maxFileSize;
 
     friend class HttpFetcher;
 };
@@ -53,12 +58,16 @@ class HttpInfoReceiver : public HttpFileReceiver
 public:
     HttpInfoReceiver( QObject *p = 0 );
     virtual ~HttpInfoReceiver();
+protected slots:
+    virtual void updateDataReadProgress(int, int);
 private slots:
     void packageDataWritten( qint64 );
     void packageComplete();
 private:
     PackageInformationReader *reader;
     QString lineString;
+    int maxPackagesList;
+    int maxPackagesListSize;
 
     friend class HttpFetcher;
 };
@@ -74,15 +83,17 @@ public:
     HttpFetcher( const QString &url, QObject *parent );
     virtual ~HttpFetcher();
     virtual void run();
-    void setFile( const QString &f ) { file = f; }
+    void setFile( const QString &f, int size = 0 ) { file = f; fileSize = size; }
     QString getFile() const { return file; }
     bool httpRequestWasAborted() const { return httpRequestAborted; }
     QString getError() const { return error; }
+    QString getMd5Sum() const{ return md5Sum; }
 public slots:
-    void cancel();
+    void cancel( const QString &errorReason = "" );
 signals:
     void progressValue( int );
     void newPackage(InstallControl::PackageInfo*);
+    void httpAbort();
 private:
     QHttp *http;
     QIODevice *packageData;
@@ -91,9 +102,10 @@ private:
     int httpGetId;
     QString url;
     QString file;
+    int fileSize;
     int curProgValue;
     QString error;
-
+    QString md5Sum;
     friend class HttpInfoReceiver;
     friend class HttpFileReceiver;
     friend class PackageWizard;

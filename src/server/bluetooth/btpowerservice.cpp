@@ -28,7 +28,8 @@
 #include <QTimer>
 #include <QObject>
 #include <QPhoneProfileManager>
-#include <QTranslatableSettings>
+#include <QSettings>
+#include <QValueSpaceObject>
 
 #include <qtopiacomm/qbluetoothaddress.h>
 
@@ -41,7 +42,9 @@ public:
     QBluetoothLocalDevice *m_device;
     QPhoneProfileManager *m_phoneProfileMgr;
     bool upRequest;
-    QTranslatableSettings *m_btsettings;
+    QSettings *m_btsettings;
+    QValueSpaceObject *m_localDeviceValues;
+    QBluetoothLocalDevice::State m_prevState;
 };
 
 BtPowerServicePrivate::BtPowerServicePrivate(const QByteArray &devId)
@@ -51,7 +54,8 @@ BtPowerServicePrivate::BtPowerServicePrivate(const QByteArray &devId)
         << devId << m_device->address().toString();
 
     m_phoneProfileMgr = new QPhoneProfileManager;
-    m_btsettings = new QTranslatableSettings("Trolltech", "bluetooth");
+    m_btsettings = new QSettings("Trolltech", "Bluetooth");
+    m_localDeviceValues = new QValueSpaceObject("/Communications/Bluetooth/LocalDevice");
 }
 
 BtPowerServicePrivate::~BtPowerServicePrivate()
@@ -59,6 +63,7 @@ BtPowerServicePrivate::~BtPowerServicePrivate()
     delete m_device;
     delete m_phoneProfileMgr;
     delete m_btsettings;
+    delete m_localDeviceValues;
 }
 
 /*!
@@ -93,6 +98,14 @@ BtPowerService::BtPowerService(const QByteArray &serverPath,
 
     connect(m_data->m_phoneProfileMgr, SIGNAL(planeModeChanged(bool)),
             this, SLOT(planeModeChanged(bool)));
+
+    m_data->m_localDeviceValues->setAttribute("Enabled", QVariant(isUp()));
+    // ensure the service is down if plane mode is on
+    if (m_data->m_phoneProfileMgr->planeMode()) {
+        bringDown();
+    }
+
+    m_data->m_prevState = QBluetoothLocalDevice::State(-1);
 }
 
 /*!
@@ -102,16 +115,6 @@ BtPowerService::~BtPowerService()
 {
     if (m_data)
         delete m_data;
-}
-
-/*!
-    \internal
- */
-void BtPowerService::initialize()
-{
-    // ensure the service is down if plane mode is on
-    if (m_data->m_phoneProfileMgr->planeMode())
-        bringDown();
 }
 
 /*!
@@ -161,15 +164,30 @@ bool BtPowerService::isUp() const
 */
 void BtPowerService::stateChanged(QBluetoothLocalDevice::State state)
 {
+    QBluetoothLocalDevice::State prevState = m_data->m_prevState;
+    m_data->m_prevState = state;
+
     if ( (state == QBluetoothLocalDevice::Connectable) ||
          (state == QBluetoothLocalDevice::Discoverable)) {
-        emit upStatus(false, QString());
 
+        // don't send signal if just changing between connectable <-> discoverable
+        if ( (prevState != QBluetoothLocalDevice::Connectable) &&
+                (prevState != QBluetoothLocalDevice::Discoverable) ) {
+            emit upStatus(false, QString());
+        }
+
+        // this is to restore the visibility setting when a device is brought 
+        // back up again
         m_data->m_btsettings->setValue("LocalDeviceVisible",
             QVariant((state == QBluetoothLocalDevice::Discoverable)) );
+
+        // this is used for determining whether to use the bluetooth status
+        // icon in the home screen status bar
+        m_data->m_localDeviceValues->setAttribute("Enabled", QVariant(true));
     }
     else {
         emit downStatus(false, QString());
+        m_data->m_localDeviceValues->setAttribute("Enabled", QVariant(false));
     }
 }
 
@@ -200,7 +218,7 @@ void BtPowerService::planeModeChanged(bool enabled)
 }
 
 /*!
-    \internal
+    \reimp
 */
 bool BtPowerService::shouldBringDown(QUnixSocket *) const
 {
@@ -309,7 +327,6 @@ void BtPowerServiceTask::startService()
         QByteArray path( (Qtopia::tempDir()+"bt_power_"+devName).toLocal8Bit() );
 
         m_btPower = new BtPowerService(path, devName.toLatin1(), this);
-        m_btPower->initialize();
         m_btPower->start();
     }
 }

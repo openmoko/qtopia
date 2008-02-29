@@ -37,7 +37,7 @@ class TodoCategorySelector : public QCategorySelector
 {
     public:
         TodoCategorySelector(QWidget *parent = 0)
-            : QCategorySelector(TodoCategoryScope, QCategorySelector::Editor, parent)
+            : QCategorySelector(TodoCategoryScope, QCategorySelector::Editor | QCategorySelector::DialogView, parent)
             {
             }
 

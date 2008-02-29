@@ -25,17 +25,10 @@
 
 #define QPE_DEFAULT_TODAY_MODE "Daily"
 
-//#define QPE_HAVE_MEMALERTER
-//#define QPE_LAZY_APPLICATION_SHUTDOWN
-
 // The serial device for AT command access to the phone
 // hardware:
 //
 #define QTOPIA_PHONE_DEVICE "/dev/ttyS0"
-//
-// The baud rate for the serial connection:
-//
-#define QTOPIA_PHONE_RATE 38400
 
 // Displays the homescreen background in the phone launcher.
 #define QTOPIA_ENABLE_EXPORTED_BACKGROUNDS

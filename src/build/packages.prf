@@ -77,8 +77,8 @@ for(_p,PACKAGES) {
             $$LITERAL_QUOTE$$p.license$$LITERAL_QUOTE\
             $$LITERAL_QUOTE$$p.maintainer$$LITERAL_QUOTE\
             $$LITERAL_QUOTE$$p.targets$$LITERAL_QUOTE
-    eval(package_$${p.name}.commands=\$$commands)
-    QMAKE_EXTRA_TARGETS+=package_$$p.name
-    packages.depends+=package_$$p.name
+    eval(package_$${p.name}_dummy.commands=\$$commands)
+    QMAKE_EXTRA_TARGETS+=package_$${p.name}_dummy
+    packages.depends+=package_$${p.name}_dummy
 }
 

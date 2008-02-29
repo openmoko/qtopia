@@ -163,6 +163,7 @@ protected:
 
     void setHighlighted(int);
     void setIndex(int);
+    virtual bool ensureVisible(int index);
 
     void updateCellForIndex(int ind);
 
@@ -170,11 +171,12 @@ protected:
     void mouseMoveEvent(QMouseEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
     void resizeEvent(QResizeEvent *);
-    void fontChange(const QFont &);
 
+    void fontChange(const QFont &);
     void layoutGlyphs();
 
     int numGlyphs() const;
+
 private:
     void addNonPrinting();
 
@@ -269,17 +271,31 @@ void CharacterView::setIndex(int ind)
             /* need to check map in case need to update combo box */
 
             updatingCurrent = true;
-//          ensureVisible(bounds(mCurrent));
             updatingCurrent = false;
-            setSetForIndex(mCurrent);
 
+            setSetForIndex(mCurrent);
             updateCellForIndex(mCurrent);
+            ensureVisible(mCurrent);
+
             emit selected(character());
             emit selected(text());
         }
         if (oldindex != -1)
             updateCellForIndex(oldindex);
     }
+}
+
+bool CharacterView::ensureVisible(int index)
+{
+    QRect currentCellBounds = bounds(index);
+    QScrollArea* scroller = qobject_cast<QScrollArea*>(parent()->parent());
+
+    if(scroller){
+        scroller->ensureVisible(currentCellBounds.center().x(), currentCellBounds.center().y(), currentCellBounds.width(), currentCellBounds.height()*2);
+        return true;
+    } else {
+        return false;
+    };
 }
 
 void CharacterView::keyPressEvent(QKeyEvent *e)
@@ -289,6 +305,7 @@ void CharacterView::keyPressEvent(QKeyEvent *e)
         if (!hasEditFocus()) {
             if (e->key() == Qt::Key_Select) {
                 setEditFocus(true);
+                ensureVisible(mCurrent); // TEMP: hack around scrollarea moving on defocus
                 updateCellForIndex(mCurrent);
             } else {
                 e->ignore();
@@ -305,10 +322,12 @@ void CharacterView::keyPressEvent(QKeyEvent *e)
         case Qt::Key_Up:
             if (row > 0)
                 row--;
+            else e->ignore();
             break;
         case Qt::Key_Down:
             if (row < glyphsPerCol + (int)mSpecials.count())
                 row++;
+            else e->ignore();
             break;
         case Qt::Key_Left:
             if (col > 0)
@@ -667,6 +686,7 @@ UniSelect::UniSelect( QWidget *parent, const char *name, Qt::WFlags f )
     vl->addWidget(mSetSelect);
 
     QScrollArea* scroller = new QScrollArea(this);
+    scroller->setFocusPolicy(Qt::NoFocus);
     mGlyphSelect = new CharacterView(scroller, this);
     scroller->setWidget(mGlyphSelect);
     vl->addWidget(scroller);

@@ -62,6 +62,7 @@ void PNGAPI
 png_write_chunk(png_structp png_ptr, png_bytep chunk_name,
    png_bytep data, png_size_t length)
 {
+   if(png_ptr == NULL) return;
    png_write_chunk_start(png_ptr, chunk_name, (png_uint_32)length);
    png_write_chunk_data(png_ptr, data, length);
    png_write_chunk_end(png_ptr);
@@ -77,6 +78,7 @@ png_write_chunk_start(png_structp png_ptr, png_bytep chunk_name,
 {
    png_byte buf[4];
    png_debug2(0, "Writing %s chunk (%lu bytes)\n", chunk_name, length);
+   if(png_ptr == NULL) return;
 
    /* write the length */
    png_save_uint_32(buf, length);
@@ -98,6 +100,7 @@ void PNGAPI
 png_write_chunk_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
    /* write the data, and run the CRC over it */
+   if(png_ptr == NULL) return;
    if (data != NULL && length > 0)
    {
       png_calculate_crc(png_ptr, data, length);
@@ -110,6 +113,8 @@ void PNGAPI
 png_write_chunk_end(png_structp png_ptr)
 {
    png_byte buf[4];
+
+   if(png_ptr == NULL) return;
 
    /* write the crc */
    png_save_uint_32(buf, png_ptr->crc);

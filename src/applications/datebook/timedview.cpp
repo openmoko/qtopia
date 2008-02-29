@@ -24,6 +24,7 @@
 #include <qtopia/pim/qappointment.h>
 #include <qtimestring.h>
 #include <qtopialog.h>
+#include <qappointmentview.h>
 
 #include <QList>
 #include <QPainter>
@@ -460,7 +461,7 @@ void TimedViewData::updateMarks()
     QMultiMap<QDateTime, int> columns;
     for( int i = 0; i < model->rowCount(); i++ ) {
         QOccurrence o = model->occurrence( i );
-        if( o.appointment().isAllDay() || !o.conflicts( start(), end() ) )
+        if( o.appointment().isAllDay())
             continue;
 
         addMarksFor( o );
@@ -555,6 +556,14 @@ QDateTime TimedView::start() const
 QDateTime TimedView::end() const
 {
     return d->end();
+}
+
+// Try to avoid changing current selection...
+void TimedView::setDaySpan(int start, int end)
+{
+    d->timeManager->setDaySpan(start, end);
+    d->updateMarks();
+    update();
 }
 
 void TimedView::setModel(QOccurrenceModel *m)

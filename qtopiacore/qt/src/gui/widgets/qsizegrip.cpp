@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -173,16 +183,6 @@ void QSizeGrip::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
     Q_D(QSizeGrip);
-    if (d->p.isNull()) { // update "bottomness" unless we are resizing
-#ifndef QT_NO_CURSOR
-#ifndef Q_WS_MAC
-        if (qt_sizegrip_atBottom(this) != d->atBottom) {
-            d->atBottom = !d->atBottom;
-            setCursor(isRightToLeft() ^ d->atBottom ? Qt::SizeFDiagCursor : Qt::SizeBDiagCursor);
-        }
-#endif
-#endif
-    }
     QPainter painter(this);
     QStyleOptionSizeGrip opt;
     opt.init(this);
@@ -320,6 +320,19 @@ bool QSizeGrip::event(QEvent *e)
     case QEvent::MouseButtonRelease:
         d->gotMousePress = false;
         d->p = QPoint();
+        break;
+    case QEvent::Move:
+        // We're inside a resize operation; no update necessary.
+        if (!d->p.isNull())
+            break;
+
+        // Update "bottomness" and cursor.
+        if (qt_sizegrip_atBottom(this) != d->atBottom) {
+            d->atBottom = !d->atBottom;
+#if !defined(QT_NO_CURSOR) && !defined(Q_WS_MAC)
+            setCursor(isRightToLeft() ^ d->atBottom ? Qt::SizeFDiagCursor : Qt::SizeBDiagCursor);
+#endif
+        }
         break;
     default:
         break;

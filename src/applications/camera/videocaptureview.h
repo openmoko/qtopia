@@ -60,10 +60,13 @@ public:
     uint refocusDelay() const;
 
 protected:
-    void paintEvent(QPaintEvent*);
-    void timerEvent(QTimerEvent*);
+    void moveEvent(QMoveEvent* moveEvent);
+    void resizeEvent(QResizeEvent* resizeEvent);
+    void paintEvent(QPaintEvent* paintEvent);
+    void timerEvent(QTimerEvent* timerEvent);
 
 private:
+    bool                m_cleared;
     int                 m_tidUpdate;
     QImage              m_image;
     camera::VideoCaptureDevice  *m_capture;

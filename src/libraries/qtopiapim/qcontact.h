@@ -189,7 +189,7 @@ public:
 
     // other
     void setNotes( const QString &v ) { replace( Notes, v); }
-    void setPortraitFile( const QString &v ) { replace( Portrait, v ); }
+    void setPortraitFile( const QString &v ) { replace( Portrait, v); }
     void changePortrait( const QPixmap &p );
 
     bool match( const QString &regexp ) const;

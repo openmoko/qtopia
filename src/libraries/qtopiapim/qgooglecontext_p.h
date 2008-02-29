@@ -52,6 +52,7 @@ public:
     QString title() const;
     QString title(const QPimSource &) const;
 
+    using QAppointmentContext::editable;
     bool editable() const;
 
     // do available and set, same as outer model?
@@ -61,8 +62,8 @@ public:
     QSet<QPimSource> sources() const;
     QUuid id() const;
 
+    using QAppointmentContext::exists;
     bool exists(const QUniqueId &) const;
-    bool exists(const QUniqueId &, const QPimSource &) const;
     QPimSource source(const QUniqueId &) const;
 
     bool updateAppointment(const QAppointment &);
@@ -70,8 +71,8 @@ public:
     QUniqueId addAppointment(const QAppointment &, const QPimSource &);
 
     bool removeOccurrence(const QUniqueId &original, const QDate &);
-    QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &);
-    QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &);
+    QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &, const QDate& = QDate());
+    QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &, const QDate& = QDate());
 
     // Google functions
     //void addUser(const QString &user);

@@ -125,7 +125,7 @@ sub resolveHeader
 	open IN, $file or die "Can't read $file\n";
 	my $orig = <IN>; 
 	if ( !defined($orig) ) {
-	    warn "undefined value read from $file\n";
+	    warn "Qtopia::File::resolveHeader() undefined value read from $file\n";
 	    return $file;
 	}
 	chomp $orig;

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>ThemeListModel Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>ThemeListModel Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ThemeListModel Class Reference</h1>
 <p>The ThemeListModel class provides a list model that is used for list functionality in Qtopia themeing. <a href="#details">More...</a></p>
-<pre>    #include &lt;ThemeListModel&gt;</pre><p>Inherits <a href="qabstractlistmodel.html">QAbstractListModel</a>.</p>
+<pre>#include &lt;ThemeListModel&gt;</pre><p>Inherits <a href="qabstractlistmodel.html">QAbstractListModel</a>.</p>
 <ul>
 <li><a href="themelistmodel-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -75,15 +74,15 @@
 </ul>
 <p>See the <a href="themetemplateitem.html">ThemeTemplateItem</a> and <a href="themelistmodelentry.html">ThemeListModelEntry</a> documentation for more information.</p>
 <p>The valuespace is used to communicate data from the system to items in the themed list. Normally a valuespace path can be assigned in the themed view XML to items using the vspath attribute of ThemeItem. However, as template definitions representing a theme list items' visual appearance are not actual instances, their vspath is dynamically determined and set at runtime when they are created using <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>(). <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>() takes a uid which is actually set to the vspath of the returned ThemeTemplateInstance. For template instances created by <a href="themelistmodelentry.html#templateInstance">ThemeListModelEntry::templateInstance</a>() the uid passed is the return value of <a href="themelistmodelentry.html#uid">ThemeListModelEntry::uid</a>(). This acts as a unique association between a theme template instance and the <a href="themelistmodelentry.html">ThemeListModelEntry</a>, as well as a unique valuespace path for both to communicate under. A call to <a href="themelistmodelentry.html#setValue">ThemeListModelEntry::setValue</a>() set keys under this unique vspath. For example, given the following themed view XML definition:</p>
-<pre>    &lt;list vspath=&quot;/UserInterface/MyList/&quot;&gt;
+<pre>&nbsp;   &lt;list vspath=&quot;/UserInterface/MyList/&quot;&gt;
         &lt;template name=&quot;myListItem&quot;&gt;
             &lt;text name=&quot;titleMessage&quot;&gt;@TitleMessage&lt;/text&gt;
         &lt;/template&gt;
     &lt;/list&gt;</pre>
 <p>you could set the text of the element 'titleMessage' with the following:</p>
-<pre>    ThemeListModelEntry* myEntry; <span class="comment">// assuming that myEntry-&gt;type() returns &quot;myListItem&quot;</span>
+<pre>&nbsp;   ThemeListModelEntry* myEntry; // assuming that myEntry-&gt;type() returns &quot;myListItem&quot;
     ..
-    myEntry-&gt;setValue(&quot;TitleMessage&quot;, &quot;Hello, World&quot;); <span class="comment">// expands to /UserInterface/MyList/&lt;myEntry-&gt;uid()&gt;/TitleMessage</span></pre>
+    myEntry-&gt;setValue(&quot;TitleMessage&quot;, &quot;Hello, World&quot;); // expands to /UserInterface/MyList/&lt;myEntry-&gt;uid()&gt;/TitleMessage</pre>
 <p>See also <a href="themed-view-elements.html">Themed View Elements</a>, <a href="themetemplateitem.html">ThemeTemplateItem</a>, <a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a>, and <a href="themelistmodelentry.html">ThemeListModelEntry</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -113,6 +112,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -198,6 +198,10 @@ bool Id3ContentPlugin::installContent( const QString &filePath, QContent *conten
     return success;
 }
 
+bool Id3ContentPlugin::updateContent( QContent *content )
+{
+    return installContent( content->file(), content );
+}
 
 QString Id3ContentPlugin::name( const QString &filePath, Id3Tag &tag ) const
 {

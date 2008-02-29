@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QBluetoothAudioGateway Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QBluetoothAudioGateway Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothAudioGateway Class Reference</h1>
 <p>The QBluetoothAudioGateway class provides an interface to a Bluetooth Audio Gateway. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothAudioGateway&gt;</pre><p>Inherits <a href="qcomminterface.html">QCommInterface</a>.</p>
+<pre>#include &lt;QBluetoothAudioGateway&gt;</pre><p>Inherits <a href="qcomminterface.html">QCommInterface</a>.</p>
 <ul>
 <li><a href="qbluetoothaudiogateway-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -82,10 +81,10 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QBluetoothAudioGateway"></a>QBluetoothAudioGateway::QBluetoothAudioGateway ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QAbstractIpcInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new audio gateway object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
-<p>If <i>service</i> is empty, this class will use the first available service that supports bluetooth audio gateway. If there is more than one service that supports advice of charge, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qbluetoothaudiogateway.html">QBluetoothAudioGateway</a> objects for each.</p>
+<p>If <i>service</i> is empty, this class will use the first available service that supports bluetooth audio gateway. If there is more than one service that supports bluetooth audio gateway, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qbluetoothaudiogateway.html">QBluetoothAudioGateway</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroup.html#supports">QAbstractIpcInterfaceGroup::supports</a>().</p>
 <h3 class="fn"><a name="dtor.QBluetoothAudioGateway"></a>QBluetoothAudioGateway::~QBluetoothAudioGateway ()</h3>
-<p>Destructor</p>
+<p>Destructor.</p>
 <h3 class="fn"><a name="audioDevice"></a><a href="qbytearray.html">QByteArray</a> QBluetoothAudioGateway::audioDevice () const</h3>
 <p>Returns the audio device associated with this gateway. This is implementation dependent. The default implementation returns an alsa hwid string.</p>
 <h3 class="fn"><a name="audioEnabled"></a>bool QBluetoothAudioGateway::audioEnabled () const</h3>
@@ -96,19 +95,22 @@
 <p>This signal is emitted whenever the state of the audio data stream has changed. E.g. the audio stream (SCO connection) has been disconnected or connected.</p>
 <h3 class="fn"><a name="connect"></a>void QBluetoothAudioGateway::connect ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, int <i>rfcomm_channel</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Attempts to establish an Audio Gateway initiated RFCOMM control connection to the headset. The <i>addr</i> contains the address of the remote device and <i>rfcomm_channel</i> contains the service channel to connect on.</p>
-<p>The connectResult signal will be sent once the connection succeds or fails.</p>
+<p>The <a href="qbluetoothaudiogateway.html#connectResult">connectResult</a>() signal will be sent once the connection succeeds or fails.</p>
+<p>See also <a href="qbluetoothaudiogateway.html#connectResult">connectResult</a>().</p>
 <h3 class="fn"><a name="connectAudio"></a>void QBluetoothAudioGateway::connectAudio ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Asks the Audio Gateway to establish an SCO data connection with the currently connected peer. All audio date should now be routed to the associated audio device.</p>
+<p>See also <a href="qbluetoothaudiogateway.html#releaseAudio">releaseAudio</a>().</p>
 <h3 class="fn"><a name="connectResult"></a>void QBluetoothAudioGateway::connectResult ( bool <i>success</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is sent after the connect method has been called on the Audio Gateway object. The <i>success</i> parameter is true if the connection succeded, and false otherwise. If the connection failed, the <i>msg</i> parameter holds the error string.</p>
 <h3 class="fn"><a name="disconnect"></a>void QBluetoothAudioGateway::disconnect ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
-<p>Disconnect the currently active client from the Audio Gateway.</p>
+<p>Disconnect the currently active client from the Audio Gateway. The <a href="qbluetoothaudiogateway.html#headsetDisconnected">headsetDisconnected</a>() signal will be sent once the headset is <a href="qabstractipcinterface.html#disconnected">disconnected</a>().</p>
+<p>See also <a href="qbluetoothaudiogateway.html#headsetDisconnected">headsetDisconnected</a>().</p>
 <h3 class="fn"><a name="headsetDisconnected"></a>void QBluetoothAudioGateway::headsetDisconnected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is sent whenever a headset has disconnected from the audio gateway.</p>
 <h3 class="fn"><a name="isConnected"></a>bool QBluetoothAudioGateway::isConnected () const</h3>
 <p>Returns true if a client is connected. This is true once an RFCOMM control connection has been established between the remote device and the audio gateway.</p>
 <h3 class="fn"><a name="microphoneVolume"></a>int QBluetoothAudioGateway::microphoneVolume () const</h3>
-<p>Returns the current micrphone volume of the device. The volume can be between 0 and 15.</p>
+<p>Returns the current microphone volume of the device. The volume can be between 0 and 15.</p>
 <p>See also <a href="qbluetoothaudiogateway.html#setMicrophoneVolume">setMicrophoneVolume</a>().</p>
 <h3 class="fn"><a name="microphoneVolumeChanged"></a>void QBluetoothAudioGateway::microphoneVolumeChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is sent whenever the microphone volume of the remote device has been changed.</p>
@@ -116,6 +118,7 @@
 <p>This signal is sent whenever a client has connected to the Audio Gateway. It is only sent on remote device initiated connections. The <i>addr</i> parameter holds the address of the connected remote device.</p>
 <h3 class="fn"><a name="releaseAudio"></a>void QBluetoothAudioGateway::releaseAudio ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Asks the Audio Gateway to release the SCO audio data connection. No audio should be routed through the associated audio device.</p>
+<p>See also <a href="qbluetoothaudiogateway.html#connectAudio">connectAudio</a>().</p>
 <h3 class="fn"><a name="remotePeer"></a><a href="qbluetoothaddress.html">QBluetoothAddress</a> QBluetoothAudioGateway::remotePeer () const</h3>
 <p>Returns the address of the connected remote device. If there is no connection an invalid <a href="qbluetoothaddress.html">QBluetoothAddress</a> is returned.</p>
 <h3 class="fn"><a name="setMicrophoneVolume"></a>void QBluetoothAudioGateway::setMicrophoneVolume ( int <i>volume</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
@@ -133,6 +136,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

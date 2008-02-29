@@ -43,7 +43,6 @@ public:
 private:
     bool readSocketParameters(int sockfd);
     void resetSocketParameters();
-    QBluetoothScoSocketPrivate *m_data;
 };
 
 #endif

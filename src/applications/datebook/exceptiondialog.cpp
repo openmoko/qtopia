@@ -31,12 +31,18 @@ ExceptionDialog::ExceptionDialog( QWidget *parent, Qt::WFlags f )
     setupUi( this );
 }
 
-int ExceptionDialog::exec()
+int ExceptionDialog::exec(bool editMode)
 {
     int series = 0;
     checkEarlier->setChecked(false);
     checkSelected->setChecked(true);
     checkLater->setChecked(true);
+
+    if (editMode) {
+        lblMessage->setText(tr("<qt>This appointment is part of a series. Select the part of the series you want to change below.</qt>"));
+    } else {
+        lblMessage->setText(tr("<qt>This appointment is part of a series. Select the part of the series you want to delete below.</qt>"));
+    }
 #ifdef QTOPIA_PHONE
     int ret = QtopiaApplication::execDialog( this );
 #else

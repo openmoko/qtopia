@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the Qt Assistant of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -175,6 +185,7 @@ int main( int argc, char ** argv )
     QString file, profileName, aDocPath;
     bool server = false;
     bool hideSidebar = false;
+    bool configLoaded = false;
     if ( argc == 2 ) {
         file = QString::fromLocal8Bit(argv[1]);
         if (file.startsWith(QLatin1String("-")) || file == QLatin1String("/?")) {
@@ -256,6 +267,8 @@ int main( int argc, char ** argv )
                     c->loadDefaultProfile();
                     c->setDocRebuild(true);
                     c->save();
+                    configLoaded = true;
+                    ++i;
                 } else {
                     fprintf(stderr, "The specified path does not exist!\n");
                     return 1;
@@ -292,6 +305,7 @@ int main( int argc, char ** argv )
                 resourceDir = QFile::decodeName( argv[++i] );
             } else {
                 fprintf(stderr, "Unrecognized option %s. Try -help to get help.\n", qPrintable(opt));
+                return 1;
             }
         }
     }
@@ -307,8 +321,12 @@ int main( int argc, char ** argv )
     qtTranslator.load( QLatin1String("qt_") + QLocale::system().name(), resourceDir );
     a.installTranslator( &qtTranslator );
 
-    Config *conf = Config::loadConfig( profileName );
-    if ( !conf ) {
+    Config *conf = 0;
+    if (configLoaded)
+        conf = Config::configuration();
+    else
+        conf = Config::loadConfig( profileName );
+    if (!conf) {
         fprintf( stderr, "Profile '%s' does not exist!\n", profileName.toLatin1().constData() );
         fflush( stderr );
         return -1;

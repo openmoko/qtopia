@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -61,6 +71,8 @@
 
 #ifndef Q_WS_MAC
 #include <private/qbackingstore_p.h>
+#else
+extern void qt_mac_update_metal_style(QWidget *widget); // qwidget_mac.cpp
 #endif
 
 #include "qwidget_p.h"
@@ -153,7 +165,8 @@ void QWidgetPrivate::scrollChildren(int dx, int dy)
                 QRect  r(w->pos() + pd, w->size());
                 w->data->crect = r;
 #ifndef Q_WS_QWS
-                w->d_func()->setWSGeometry();
+                if (w->testAttribute(Qt::WA_WState_Created))
+                    w->d_func()->setWSGeometry();
 #endif
                 QMoveEvent e(r.topLeft(), oldp);
                 QApplication::sendEvent(w, &e);
@@ -323,7 +336,7 @@ void QWidget::setAutoFillBackground(bool enabled)
     \class QWidget
     \brief The QWidget class is the base class of all user interface objects.
 
-    \ingroup abstractwidgets
+    \ingroup basicwidgets
     \mainclass
 
     The widget is the atom of the user interface: it receives mouse,
@@ -930,6 +943,7 @@ void QWidgetPrivate::init(QWidget *parentWidget, Qt::WindowFlags f)
     data.is_closing = 0;
     data.in_show = 0;
     data.in_set_window_state = 0;
+    data.in_destructor = false;
 
     q->setAttribute(Qt::WA_QuitOnClose); // might be cleared in create()
 
@@ -1010,6 +1024,9 @@ void QWidget::create(WId window, bool initializeWindow, bool destroyOldWindow)
     if (testAttribute(Qt::WA_WState_Created) && window == 0)
         return;
 
+    if (d->data.in_destructor)
+        return;
+
     Qt::WindowType type = windowType();
     Qt::WindowFlags &flags = data->window_flags;
 
@@ -1018,7 +1035,7 @@ void QWidget::create(WId window, bool initializeWindow, bool destroyOldWindow)
         flags |= Qt::Window;
     }
 
-    if (parentWidget() && (type & Qt::Window) && !parentWidget()->testAttribute(Qt::WA_WState_Created) && !isModal())
+    if (parentWidget() && (type & Qt::Window) && !parentWidget()->testAttribute(Qt::WA_WState_Created))
         parentWidget()->createWinId();
 
 #ifdef QT3_SUPPORT
@@ -1071,8 +1088,6 @@ void QWidget::create(WId window, bool initializeWindow, bool destroyOldWindow)
         if (isWindow() && !testAttribute(Qt::WA_SetWindowIcon))
             d->setWindowIcon_sys();
     }
-    if (testAttribute(Qt::WA_WState_ExplicitShowHide) && testAttribute(Qt::WA_WState_Hidden))
-        d->hide_helper();
 }
 
 /*!
@@ -1085,6 +1100,8 @@ void QWidget::create(WId window, bool initializeWindow, bool destroyOldWindow)
 QWidget::~QWidget()
 {
     Q_D(QWidget);
+    d->data.in_destructor = true;
+
 #if defined (QT_CHECK_STATE)
     if (paintingActive())
         qWarning("QWidget: %s (%s) deleted while being painted", className(), name());
@@ -1896,6 +1913,7 @@ void QWidgetPrivate::setStyle_helper(QStyle *newStyle, bool propagate)
 {
     Q_Q(QWidget);
     createExtra();
+
     QStyle *oldStyle  = q->style();
 #ifndef QT_NO_STYLE_STYLESHEET
     QStyle *origStyle = extra->style;
@@ -1948,9 +1966,9 @@ void QWidgetPrivate::inheritStyle()
 
     // If we have stylesheet on app or parent has stylesheet style, we need
     // to be running a proxy
-    QStyle *origStyle = proxy ? proxy->base : (extra ? extra->style : 0);
+    QStyle *origStyle = proxy ? proxy->base : (extra ? (QStyle*)extra->style : 0);
     QWidget *parent = q->parentWidget();
-    QStyle *parentStyle = parent && parent->d_func()->extra ? parent->d_func()->extra->style : 0;
+    QStyle *parentStyle = (parent && parent->d_func()->extra) ? (QStyle*)parent->d_func()->extra->style : 0;
     if (!qApp->styleSheet().isEmpty() || qobject_cast<QStyleSheetStyle *>(parentStyle)) {
         QStyle *newStyle = parentStyle;
         if (q->testAttribute(Qt::WA_SetStyle))
@@ -1964,7 +1982,7 @@ void QWidgetPrivate::inheritStyle()
 
     // So, we have no stylesheet on parent/app and we have an empty stylesheet
     // we just need our original style back
-    if (origStyle == (extra ? extra->style : 0)) // is it any different?
+    if (origStyle == (extra ? (QStyle*)extra->style : 0)) // is it any different?
         return;
 
     // We could have inherited the proxy from our parent (which has a custom style)
@@ -2929,14 +2947,14 @@ QSize QWidget::baseSize() const
         : QSize(0, 0);
 }
 
-bool QWidgetPrivate::setMinimumSize_helper(int minw, int minh)
+bool QWidgetPrivate::setMinimumSize_helper(int &minw, int &minh)
 {
     Q_Q(QWidget);
 
 #ifdef Q_WS_QWS
     if (q->isWindow()) {
         QApplicationPrivate *ap = QApplicationPrivate::instance();
-        const QRect maxWindowRect = ap->maxWindowRect(getScreen());
+        const QRect maxWindowRect = QApplication::desktop()->availableGeometry(QApplication::desktop()->screenNumber(q));
         if (!maxWindowRect.isEmpty()) {
             // ### This is really just a work-around. Layout shouldn't be
             // asking for minimum sizes bigger than the screen.
@@ -2999,7 +3017,7 @@ void QWidget::setMinimumSize(int minw, int minh)
     updateGeometry();
 }
 
-bool QWidgetPrivate::setMaximumSize_helper(int maxw, int maxh)
+bool QWidgetPrivate::setMaximumSize_helper(int &maxw, int &maxh)
 {
     Q_Q(QWidget);
     if (maxw > QWIDGETSIZE_MAX || maxh > QWIDGETSIZE_MAX) {
@@ -3613,9 +3631,23 @@ void QWidgetPrivate::setPalette_helper(const QPalette &palette)
     default application font.
 
     This code fragment sets a 12 point helvetica bold font:
+
     \code
-    QFont f("Helvetica", 12, QFont::Bold);
-    setFont(f);
+        QFont font("Helvetica", 12, QFont::Bold);
+        setFont(font);
+    \endcode
+
+    Note that when a child widget is given a different font to that of
+    its parent widget, it will still inherit the parent's font \e
+    properties unless these have been set explicitly on the child's
+    font. For example, if the parent's font is bold, the child
+    widget's font will be bold as well if not specified otherwise like
+    this:
+
+    \code
+        QFont font;
+        font.setBold(false);
+        setFont(font);
     \endcode
 
     In addition to setting the font, setFont() informs all children
@@ -6558,6 +6590,9 @@ QVariant QWidget::inputMethodQuery(Qt::InputMethodQuery query) const
     This event handler is called when a drag is in progress and the
     mouse enters this widget. The event is passed in the \a event parameter.
 
+    If the event is ignored, the widget won't receive any \l{dragMoveEvent()}{drag
+    move events}.
+
     See the \link dnd.html Drag-and-drop documentation\endlink for an
     overview of how to provide drag-and-drop in your application.
 
@@ -7118,7 +7153,7 @@ void QWidget::setParent(QWidget *parent)
 {
     if (parent == parentWidget())
         return;
-    setParent((QWidget*)parent, 0);
+    setParent((QWidget*)parent, windowFlags() & ~Qt::WindowType_Mask);
 }
 
 /*!
@@ -7161,7 +7196,14 @@ void QWidget::setParent(QWidget *parent, Qt::WindowFlags f)
     d->resolvePalette();
     d->resolveLayoutDirection();
 
-    if (newParent) {
+    // Note: GL widgets under Windows will always need a ParentChange
+    // event to handle recreation/rebinding of the GL context, hence
+    // the (f & Qt::MSWindowsOwnDC) clause
+    if (newParent
+#ifdef Q_WS_WIN
+        || (f & Qt::MSWindowsOwnDC)
+#endif
+        ) {
         // propagate enabled updates enabled state to non-windows
         if (!isWindow()) {
             if (!testAttribute(Qt::WA_ForceDisabled))
@@ -7445,18 +7487,23 @@ void QWidget::setAttribute(Qt::WidgetAttribute attribute, bool on)
     case Qt::WA_NoChildEventsFromChildren:
         d->receiveChildEvents = !on;
         break;
+#ifdef Q_WS_MAC
     case Qt::WA_MacMetalStyle:
-#ifdef Q_WS_MAC
-        extern void qt_mac_update_metal_style(QWidget*); //qwidget_mac.cpp
-        qt_mac_update_metal_style(this);
-#endif
-        break;
+        if (!d->polished) {
+            qt_mac_update_metal_style(this);
+        } else {
+            // This is the "wrong" way to do this, it is done correctly in main (change 245810)
+            // Done this way to preserve current behavior in the 4.2 branch, but still get metal working.
+            style()->unpolish(this);
+            qt_mac_update_metal_style(this);
+            style()->polish(this);
+        }
+        // fall through since changing the metal attribute affects the opaque size grip.
     case Qt::WA_MacOpaqueSizeGrip:
-#ifdef Q_WS_MAC
         extern void qt_mac_update_opaque_sizegrip(QWidget*); //qwidget_mac.cpp
         qt_mac_update_opaque_sizegrip(this);
-#endif
         break;
+#endif
     case Qt::WA_ShowModal:
         if (!on) {
             if (isVisible())

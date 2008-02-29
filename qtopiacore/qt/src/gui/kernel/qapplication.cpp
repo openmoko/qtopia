@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -477,6 +487,9 @@ void QApplicationPrivate::process_cmdline()
 /*!
   Initializes the window system and constructs an application object
   with \a argc command line arguments in \a argv.
+
+  \warning The data pointed to by \a argc and \a argv must stay valid
+  for the entire lifetime of the QApplication object.
 
   The global \c qApp pointer refers to this application object. Only
   one application object should be created.
@@ -1044,7 +1057,7 @@ bool QApplication::compressEvent(QEvent *event, QObject *receiver, QPostEventLis
     \brief the application style sheet
     \since 4.2
 
-    \sa QWidget::setStyle(), {Customizing Widgets using Style Sheets}
+    \sa QWidget::setStyle(), {Qt Style Sheets}
 */
 QString QApplication::styleSheet() const
 {
@@ -1128,6 +1141,8 @@ QStyle *QApplication::style()
         if (!app_style)
             qFatal("No styles available!");
     }
+    // take ownership of the style
+    QApplicationPrivate::app_style->setParent(qApp);
 
     if (!QApplicationPrivate::sys_pal)
         QApplicationPrivate::setSystemPalette(QApplicationPrivate::app_style->standardPalette());
@@ -3252,7 +3267,7 @@ bool QApplication::notify(QObject *receiver, QEvent *e)
         break;
 #endif // QT_NO_TABLETEVENT
 
-#if !defined(QT_NO_TOOLTIP) && !defined(QT_NO_WHATSTHIS)
+#if !defined(QT_NO_TOOLTIP) || !defined(QT_NO_WHATSTHIS)
     case QEvent::ToolTip:
     case QEvent::WhatsThis:
     case QEvent::QueryWhatsThis:
@@ -3277,7 +3292,7 @@ bool QApplication::notify(QObject *receiver, QEvent *e)
         }
         break;
 #endif
-#if !defined(QT_NO_STATUSTIP) && !defined(QT_NO_WHATSTHIS)
+#if !defined(QT_NO_STATUSTIP) || !defined(QT_NO_WHATSTHIS)
     case QEvent::StatusTip:
     case QEvent::WhatsThisClicked:
         {
@@ -3590,11 +3605,13 @@ bool QApplicationPrivate::notify_helper(QObject *receiver, QEvent * e)
 /*!
   \fn bool QSessionManager::allowsErrorInteraction()
 
-  This is similar to allowsInteraction(), but also tells the session
-  manager that an error occurred. Session managers may give error
-  interaction request higher priority, which means that it is more likely
-  that an error interaction is permitted. However, you are still not
-  guaranteed that the session manager will allow interaction.
+  Returns true if error interaction is permitted; otherwise returns false.
+
+  This is similar to allowsInteraction(), but also enables the application
+  to tell the user about any errors that occur. Session managers
+  may give error interaction requests higher priority, which means that it
+  is more likely that an error interaction is permitted. However, you are
+  still not guaranteed that the session manager will allow interaction.
 
   \sa allowsInteraction(), release(), cancel()
 */

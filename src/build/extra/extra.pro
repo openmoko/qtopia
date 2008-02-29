@@ -14,10 +14,6 @@ for(p,PROJECTS) {
     depends($$p,fake)
 }
 
-content_installer.commands=$$QPEDIR/bin/content_installer -finalize $$QTOPIA_DEPOT_PATH $(INSTALL_ROOT)
-content_installer.CONFIG=no_path
-INSTALLS+=content_installer
-
 # Stuff for the SDK
 unix {
     # Qtopia files
@@ -27,6 +23,7 @@ unix {
         $$QPEDIR/bin/pngscale\
         $$QPEDIR/bin/qdawggen\
         $$QPEDIR/bin/content_installer\
+        $$QPEDIR/bin/sxe_installer\
         $$QTOPIA_DEPOT_PATH/bin/Qtopia\
         $$QTOPIA_DEPOT_PATH/bin/Hash\
         $$QTOPIA_DEPOT_PATH/bin/installhelp\
@@ -55,7 +52,8 @@ unix {
         $$QTOPIA_DEPOT_PATH/scripts/runqvfb\
         $$QTOPIA_DEPOT_PATH/scripts/runqpe\
         $$QTOPIA_DEPOT_PATH/scripts/runqtopia\
-        $$QTOPIA_DEPOT_PATH/scripts/getpaths.sh
+        $$QTOPIA_DEPOT_PATH/scripts/getpaths.sh\
+        $$QTOPIA_DEPOT_PATH/scripts/dumpsec.pl
     scripts.path=/scripts
     scripts.hint=sdk
     INSTALLS+=scripts
@@ -76,7 +74,7 @@ unix {
 
     qtopiahostlibs.commands=$$COMMAND_HEADER\
         for file in $$QPEDIR/lib/host/*; do\
-            if [ "\$$file" != "$$QPEDIR/lib/host/*" ]; then\
+            if [ $${LITERAL_QUOTE}\$$file$${LITERAL_QUOTE} != $${LITERAL_QUOTE}$$QPEDIR/lib/host/*$${LITERAL_QUOTE} ]; then\
                 cp -aRpf \$$file $(INSTALL_ROOT)/lib/host;\
             fi;\
         done

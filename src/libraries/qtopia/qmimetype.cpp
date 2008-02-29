@@ -58,10 +58,12 @@ class QMimeTypeAppManager : public QObject
     Q_OBJECT
 public:
     QMimeTypeAppManager() : QObject() {
-        apps = new QContentSet(QContentFilter(QContent::Application), this);
-        connect(apps, SIGNAL(changed(const QContentIdList&,QContent::ChangeType)),
-            this, SLOT(appsChanged(const QContentIdList&,QContent::ChangeType)));
-        connect(apps, SIGNAL(changed()), this, SLOT(appsChanged()));
+        updateApplications();
+    }
+
+    void updateApplications()
+    {
+        QTimer::singleShot(1, this, SLOT(init()));
     }
 
 private slots:
@@ -76,6 +78,14 @@ private slots:
     void appsChanged()
     {
         QMimeType::updateApplications();
+    }
+    
+    void init()
+    {
+        apps = new QContentSet(QContentFilter(QContent::Application), this);
+        connect(apps, SIGNAL(changed(const QContentIdList&,QContent::ChangeType)),
+            this, SLOT(appsChanged(const QContentIdList&,QContent::ChangeType)));
+        connect(apps, SIGNAL(changed()), this, SLOT(appsChanged()));
     }
 
 private:

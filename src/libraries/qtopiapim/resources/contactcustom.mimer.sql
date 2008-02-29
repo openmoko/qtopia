@@ -1,5 +1,5 @@
 CREATE TABLE contactcustom (
-        recid BINARY(8) NOT NULL,
+        recid INTEGER NOT NULL,
         fieldname VARCHAR(255) NOT NULL,
         fieldvalue VARCHAR(255), 
 	UNIQUE(recid, fieldname), 

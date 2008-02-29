@@ -21,8 +21,8 @@
 
 #include <qtopiaapplication.h>
 
-//#include <QBitmap>
-//#include <QPixmap>
+#include <QApplication>
+#include <QPixmap>
 #include <QWhatsThis>
 #include <QDebug>
 
@@ -76,16 +76,16 @@ void MyLcdDisplay::readStack() {
     int visibleWidth = viewport()->size().width();
 
     if (!lcdPixmap) {
-        lcdPixmap = new QBitmap(visibleWidth-3,pmHeight);
+        lcdPixmap = new QPixmap(visibleWidth-3,pmHeight);
     }
-    lcdPixmap->clear();
+    lcdPixmap->fill(Qt::transparent);
 
     if ( lcdPainter )
        delete lcdPainter;
     lcdPainter = new QPainter();
 
     lcdPainter->begin(lcdPixmap);
-    lcdPainter->setPen(Qt::color1);
+    lcdPainter->setPen(QApplication::palette().color(QPalette::Text));
 
     verticalOffset=0; // top margin
     int horizontalOffset = 10; // right margin
@@ -165,8 +165,8 @@ int MyLcdDisplay::drawNextItem(int hoffset,bool newline, int visibleWidth) {
         verticalOffset += tmp->height();
         if ( lcdPixmap->height() - verticalOffset < 50 ) {
             lcdPainter->end();
-            QBitmap *old = lcdPixmap;
-            lcdPixmap = new QBitmap( visibleWidth-3, old->height()+pmHeight );
+            QPixmap *old = lcdPixmap;
+            lcdPixmap = new QPixmap( visibleWidth-3, old->height()+pmHeight );
             lcdPainter->begin(lcdPixmap);
             lcdPainter->setPen(Qt::color1);
             delete old;

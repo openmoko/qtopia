@@ -31,10 +31,10 @@ QAnnotator::~QAnnotator()
 {
 }
 
-QLocalUniqueId QAnnotator::add(const QByteArray &data, const QString &mimetype)
+QUniqueId QAnnotator::add(const QByteArray &data, const QString &mimetype)
 {
-    QLocalUniqueId id = mIdGen.createUniqueId();
-    QString path = Qtopia::applicationFileName("Annotator", id.toString());
+    QUniqueId id = mIdGen.createUniqueId();
+    QString path = Qtopia::applicationFileName("Annotator", id.toLocalContextString());
     QFile file(path);
 
     if (!file.exists() && file.open(QIODevice::WriteOnly)) {
@@ -44,12 +44,12 @@ QLocalUniqueId QAnnotator::add(const QByteArray &data, const QString &mimetype)
         file.close();
         return id;
     }
-    return QLocalUniqueId();
+    return QUniqueId();
 }
 
-bool QAnnotator::set(const QLocalUniqueId &id, const QByteArray &data, const QString &mimetype)
+bool QAnnotator::set(const QUniqueId &id, const QByteArray &data, const QString &mimetype)
 {
-    QString path = Qtopia::applicationFileName("Annotator", id.toString());
+    QString path = Qtopia::applicationFileName("Annotator", id.toLocalContextString());
     QFile file(path);
 
     if (file.open(QIODevice::WriteOnly)) {
@@ -62,26 +62,26 @@ bool QAnnotator::set(const QLocalUniqueId &id, const QByteArray &data, const QSt
     return false;
 }
 
-void QAnnotator::remove(const QLocalUniqueId &id)
+void QAnnotator::remove(const QUniqueId &id)
 {
-    QString path = Qtopia::applicationFileName("Annotator", id.toString());
+    QString path = Qtopia::applicationFileName("Annotator", id.toLocalContextString());
     QFile file(path);
 
     if (file.exists())
         file.remove();
 }
 
-bool QAnnotator::contains(const QLocalUniqueId &id) const
+bool QAnnotator::contains(const QUniqueId &id) const
 {
-    QString path = Qtopia::applicationFileName("Annotator", id.toString());
+    QString path = Qtopia::applicationFileName("Annotator", id.toLocalContextString());
     QFile file(path);
 
     return file.exists();
 }
 
-QString QAnnotator::mimetype(const QLocalUniqueId &id) const
+QString QAnnotator::mimetype(const QUniqueId &id) const
 {
-    QString path = Qtopia::applicationFileName("Annotator", id.toString());
+    QString path = Qtopia::applicationFileName("Annotator", id.toLocalContextString());
     QFile file(path);
 
     if (file.exists() && file.open(QIODevice::ReadOnly)) {
@@ -96,9 +96,9 @@ QString QAnnotator::mimetype(const QLocalUniqueId &id) const
     return QString();
 }
 
-QByteArray QAnnotator::blob(const QLocalUniqueId &id) const
+QByteArray QAnnotator::blob(const QUniqueId &id) const
 {
-    QString path = Qtopia::applicationFileName("Annotator", id.toString());
+    QString path = Qtopia::applicationFileName("Annotator", id.toLocalContextString());
     QFile file(path);
 
     if (file.exists() && file.open(QIODevice::ReadOnly)) {

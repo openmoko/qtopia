@@ -52,7 +52,8 @@ public:
 
     bool isListening() const;
 
-    QBluetoothAbstractServer::ServerError lastError() const;
+    QBluetoothAbstractServer::ServerError error() const;
+    QString errorString() const;
 
     int maxPendingConnections() const;
     void setMaxPendingConnections(int max);
@@ -68,7 +69,7 @@ signals:
 
 protected:
     bool initiateListen(int socket, sockaddr *addr, int len);
-    void setError(const QBluetoothAbstractServer::ServerError &error);
+    void setError(QBluetoothAbstractServer::ServerError serverError);
     virtual QBluetoothAbstractSocket * createSocket() = 0;
 
 private:

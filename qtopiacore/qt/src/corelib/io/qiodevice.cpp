@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -252,9 +262,12 @@ QIODevicePrivate::~QIODevicePrivate()
                      example '\r\n' for Win32.
     \value Unbuffered Any buffer in the device is bypassed.
 
-    Certain flags, such as QIODevice::Unbuffered and
-    QIODevice::Truncate, might be meaningless for some subclasses.
-    (For example, access to a QBuffer is always unbuffered.)
+    Certain flags, such as \c Unbuffered and \c Truncate, are meaningless
+    when used with some subclasses. Some of these restrictions are implied
+    by the type of device that is represented by a subclass; for example,
+    access to a QBuffer is always unbuffered. In other cases, the restriction
+    may be due to the implementation, or may be imposed by the underlying
+    platform; for example, QTcpSocket does not support \c Unbuffered mode.
 */
 
 /*!     \fn QIODevice::bytesWritten(qint64 bytes)
@@ -951,9 +964,10 @@ QByteArray QIODevice::readAll()
         }
     \endcode
 
-    If the '\n' character is the 1023th character read then it will be
-    inserted into the buffer; if it occurs after the 1023 character then
-    it is not read.
+    The newline character ('\n') is included in the buffer. If a
+    newline is not encountered before maxSize - 1 bytes are read, a
+    newline will not be inserted into the buffer. On windows newline
+    characters are replaced with '\n'.
 
     This function calls readLineData(), which is implemented using
     repeated calls to getChar(). You can provide a more efficient

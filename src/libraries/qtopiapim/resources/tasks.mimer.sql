@@ -1,5 +1,5 @@
 CREATE TABLE tasks (
-        recid BINARY(8) NOT NULL,
+        recid INTEGER NOT NULL,
         description NVARCHAR(255),
         priority INT, 
 	status INT,

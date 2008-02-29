@@ -26,6 +26,7 @@
 #include <QImage>
 #include <QPair>
 #include <QList>
+#include <QCache>
 
 #if QT_VERSION >= 0x040300
 #include <QResource>
@@ -390,28 +391,42 @@ QAbstractFileEngine *QFileResourceFileEngineHandler::findArchivedIcon(const QStr
 
 QString QFileResourceFileEngineHandler::findDiskResourceFile(const QString &path) const
 {
+    // Caching makes sense.  We often look for the same small number of files.
+    static QCache<QString,QString> fileCache(25);
+
+    if (QString *cFile = fileCache.object(path))
+        return *cFile;
+
+    static const QString image(QLatin1String(":image/"));
+    static const QString icon(QLatin1String(":icon/"));
+    static const QString sound(QLatin1String(":sound/"));
+
     QString r;
-    if ( path.left(7 /* ::strlen(":image/") */)==":image/" ) {
+    if (path.startsWith(image)) {
 
         QString p1 = path.mid(7 /* ::strlen(:image/") */);
-        return findDiskImage(p1, "");
+        r = findDiskImage(p1, QString());
 
-    } else if ( path.left(6 /* ::strlen(":icon/") */)==":icon/" ) {
+    } else if (path.startsWith(icon)) {
 
         QString p1 = path.mid(6 /* ::strlen(":icon/") */);
-        r = findDiskImage(p1, "icons/");
+        static const QString icons(QLatin1String("icons/"));
+        r = findDiskImage(p1, icons);
         if ( r.isEmpty() )
-            r = findDiskImage(p1, "");
+            r = findDiskImage(p1, QString());
 
-    } else if ( path.left(7 /* ::strlen(":sound/") */)==":sound/" ) {
+    } else if (path.startsWith(sound)) {
 
         QString p1 = path.mid(7 /* ::strlen(":sound/") */);
-        return findDiskSound(p1);
+        r = findDiskSound(p1);
 
     } else {
 
         qLog(Resource) << "Unsupported resource" << path;
     }
+
+    fileCache.insert(path, new QString(r));
+
     return r;
 }
 

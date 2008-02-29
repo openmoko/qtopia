@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QValueSpaceObject Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QValueSpaceObject Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QValueSpaceObject Class Reference</h1>
 <p>The QValueSpaceObject class allows applications to add entries to the Value Space. <a href="#details">More...</a></p>
-<pre>    #include &lt;QValueSpaceObject&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QValueSpaceObject&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qvaluespaceobject-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -73,7 +72,7 @@
 <p>For an overview of the Qtopia Value Space, please see the <a href="valuespace.html">ValueSpace</a> documentation.</p>
 <p>The QValueSpaceObject class provides an application interface to the Value Space's &quot;Application Object&quot; layer. The &quot;Application Object&quot; layer allows applications to write entries into the Value Space that are automatically removed when the QValueSpaceObject is destroyed, or the application exits either cleanly or abnormally. The &quot;Application Object&quot; layer supports full change notification, allowing other components or processes to gain access to data as soon as it has changed.</p>
 <p>Although, logically, the Value Space is a simple collection of hierarchical paths, these paths can conceptually be visualized as a set of objects with attributes. For example, rather than viewing the following list as 12 distinct Value Space paths:</p>
-<pre>    /Device/Network/Interfaces/eth0/Name
+<pre>&nbsp;   /Device/Network/Interfaces/eth0/Name
     /Device/Network/Interfaces/eth0/Type
     /Device/Network/Interfaces/eth0/Status
     /Device/Network/Interfaces/eth0/BytesSent
@@ -87,18 +86,18 @@
     /Device/Network/Interfaces/ppp0/Time</pre>
 <p>it can be thought of as describing two Value Space objects, <tt>{ /Device/Network/Interfaces/eth0, /Device/Network/Interfaces/ppp0 }</tt>, each with the six attributes <tt>{Name, Type, Status, BytesSent, BytesReceived, Time}</tt>. The QValueSpaceObject class encapsulates this abstraction.</p>
 <p>In the case of two or more applications creating an application object with overlapping attributes, only the first is visible to observers in the system. The other attributes are not discarded, but are buffered until the first releases its hold on the attribute, either by manually removing it, destroying the QValueSpaceObject or by terminating. For example:</p>
-<pre>    QValueSpaceObject * object1 = new QValueSpaceObject(&quot;/Device&quot;);
+<pre>&nbsp;   QValueSpaceObject * object1 = new QValueSpaceObject(&quot;/Device&quot;);
     object1-&gt;setAttribute(&quot;Buttons&quot;, 2);
 
-<span class="comment">    // QValueSpaceItem(&quot;/Device/Buttons&quot;) == QVariant(2)</span>
+    // QValueSpaceItem(&quot;/Device/Buttons&quot;) == QVariant(2)
 
     QValueSpaceObject * object2 = new QValueSpaceObject(&quot;/Device&quot;);
     object2-&gt;setAttribute(&quot;Buttons&quot;, 3);
 
-<span class="comment">    // QValueSpaceItem(&quot;/Device/Buttons&quot;) == QVariant(2)</span>
+    // QValueSpaceItem(&quot;/Device/Buttons&quot;) == QVariant(2)
 
     object2-&gt;removeAttribute(&quot;Buttons&quot;);
-<span class="comment">    // QValueSpaceItem(&quot;/Device/Buttons&quot;) == QVariant(3)</span></pre>
+    // QValueSpaceItem(&quot;/Device/Buttons&quot;) == QVariant(3)</pre>
 <p>For performance reasons the setting of and removing of attributes is buffered internally by the QValueSpaceObject and applied as a batch sometime later. Normally this occurs the next time the application enters the Qt event loop, but this behaviour should not be relied apon. If an application must synchronize application objects with others, the <a href="qvaluespaceobject.html#sync">QValueSpaceObject::sync</a>() method can be used to force the application of changes. This call is generally unnecessary, and should be used sparingly to prevent unnecessary load on the system.</p>
 <p>Note: The QValueSpaceObject class may only be used from an application's main thread.</p>
 <hr />
@@ -120,17 +119,17 @@
 <h3 class="fn"><a name="removeAttribute"></a>void QValueSpaceObject::removeAttribute ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>attribute</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Removes the object <i>attribute</i> and all sub-attributes from the system.</p>
 <p>For example:</p>
-<pre>    QValueSpaceObject object(&quot;/Device&quot;);
+<pre>&nbsp;   QValueSpaceObject object(&quot;/Device&quot;);
     object.setAttribute(&quot;State&quot;, &quot;Starting&quot;);
     object.setAttribute(&quot;State/Memory&quot;, &quot;1000&quot;);
     object.sync();
-<span class="comment">    // QValueSpaceItem(&quot;/Device/State&quot;).value() == QVariant(&quot;Starting&quot;)</span>
-<span class="comment">    // QValueSpaceItem(&quot;/Device/State/Memory&quot;).value() == QVariant(&quot;1000&quot;)</span>
+    // QValueSpaceItem(&quot;/Device/State&quot;).value() == QVariant(&quot;Starting&quot;)
+    // QValueSpaceItem(&quot;/Device/State/Memory&quot;).value() == QVariant(&quot;1000&quot;)
 
     object.removeAttribute(&quot;State&quot;);
     object.sync();
-<span class="comment">    // QValueSpaceItem(&quot;/Device/State&quot;).value() == QVariant();</span>
-<span class="comment">    // QValueSpaceItem(&quot;/Device/State/Memory&quot;).value() == QVariant();</span></pre>
+    // QValueSpaceItem(&quot;/Device/State&quot;).value() == QVariant();
+    // QValueSpaceItem(&quot;/Device/State/Memory&quot;).value() == QVariant();</pre>
 <h3 class="fn"><a name="removeAttribute-2"></a>void QValueSpaceObject::removeAttribute ( const <a href="qstring.html">QString</a> &amp; <i>attribute</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is a convenience overload and is equivalent to <tt>removeAttribute(attribute.toUtf8())</tt>.</p>
@@ -140,11 +139,11 @@
 <h3 class="fn"><a name="setAttribute"></a>void QValueSpaceObject::setAttribute ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>attribute</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Set an <i>attribute</i> on the object to <i>data</i>. If attribute is empty, this call will set the object's value.</p>
 <p>For example:</p>
-<pre>    QValueSpaceObject object(&quot;/Device&quot;);
+<pre>&nbsp;   QValueSpaceObject object(&quot;/Device&quot;);
     object.setAttribute(&quot;State&quot;, &quot;Starting&quot;);
     object.sync();
 
-<span class="comment">    // QValueSpaceItem(&quot;/Device/State&quot;).value() == QVariant(&quot;Starting&quot;)</span></pre>
+    // QValueSpaceItem(&quot;/Device/State&quot;).value() == QVariant(&quot;Starting&quot;)</pre>
 <h3 class="fn"><a name="setAttribute-2"></a>void QValueSpaceObject::setAttribute ( const char * <i>attribute</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is a convenience overload and is equivalent to <tt>setAttribute(QByteArray(attribute), data)</tt>.</p>
@@ -159,6 +158,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

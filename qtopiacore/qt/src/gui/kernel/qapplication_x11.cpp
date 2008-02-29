@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1561,8 +1571,9 @@ void qt_init(QApplicationPrivate *priv, int,
                 QX11Info::setAppDpiY(s, dpi);
             }
         }
-        X11->fc_scale = 1.;
-        getXDefault("Xft", FC_SCALE, &X11->fc_scale);
+        double fc_scale = 1.;
+        getXDefault("Xft", FC_SCALE, &fc_scale);
+        X11->fc_scale = fc_scale;
         for (int s = 0; s < ScreenCount(X11->display); ++s) {
             int subpixel = FC_RGBA_UNKNOWN;
 #if RENDER_MAJOR > 0 || RENDER_MINOR >= 6
@@ -2158,7 +2169,8 @@ void QApplication::setMainWidget(QWidget *mainWidget)
                   "has a parent",
                   mainWidget->metaObject()->className(), mainWidget->objectName().toLocal8Bit().constData());
 #endif
-    mainWidget->d_func()->createWinId();
+    if (mainWidget)
+        mainWidget->d_func()->createWinId();
     QApplicationPrivate::main_widget = mainWidget;
     if (QApplicationPrivate::main_widget) // give WM command line
         QApplicationPrivate::applyX11SpecificCommandLineArguments(QApplicationPrivate::main_widget);
@@ -2421,18 +2433,19 @@ void qPRCleanup(QWidget *widget)
     QETWidget *etw = static_cast<QETWidget *>(const_cast<QWidget *>(widget));
     if (!(wPRmapper && widget->testAttribute(Qt::WA_WState_Reparented)))
         return;                                        // not a reparented widget
-    for (QWidgetMapper::ConstIterator it = wPRmapper->constBegin(); it != wPRmapper->constEnd(); ++it) {
+    QWidgetMapper::Iterator it = wPRmapper->begin();
+    while (it != wPRmapper->constEnd()) {
         QWidget *w = *it;
-        int key = it.key();
         if (w == etw) {                       // found widget
             etw->setAttribute(Qt::WA_WState_Reparented, false); // clear flag
-            wPRmapper->remove(key);// old window no longer needed
-            if (wPRmapper->size() == 0) {        // became empty
-                delete wPRmapper;                // then reset alt mapper
-                wPRmapper = 0;
-            }
-            return;
+            it = wPRmapper->erase(it);// old window no longer needed
+        } else {
+            ++it;
         }
+    }
+    if (wPRmapper->size() == 0) {        // became empty
+        delete wPRmapper;                // then reset alt mapper
+        wPRmapper = 0;
     }
 }
 

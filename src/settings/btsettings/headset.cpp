@@ -23,10 +23,10 @@
 
 #include <qtopiaapplication.h>
 #include <qtopia/comm/qbluetoothaudiogateway.h>
-#include <qtopia/comm/qbluetoothdeviceselector.h>
+#include <qtopia/comm/qbluetoothremotedevicedialog.h>
 #include <qtopia/comm/qbluetoothlocaldevice.h>
 #include <qtopia/comm/qbluetoothremotedevice.h>
-#include <qtopia/comm/qsdap.h>
+#include <qtopia/comm/qbluetoothsdpquery.h>
 #include <qwaitwidget.h>
 #include <qtopialog.h>
 
@@ -92,9 +92,9 @@ HeadsetDialog::HeadsetDialog(QBluetooth::SDPProfile profile, QWidget *parent, Qt
             this, SLOT(newConnection(const QBluetoothAddress &)));
 
     m_waitWidget = new QWaitWidget( 0 );
-    m_sdap = new QSDAP();
-    connect( m_sdap, SIGNAL(searchComplete(const QSDAPSearchResult&)),
-             this, SLOT(searchComplete(const QSDAPSearchResult&)) );
+    m_sdap = new QBluetoothSdpQuery();
+    connect( m_sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult&)),
+             this, SLOT(searchComplete(const QBluetoothSdpQueryResult&)) );
 
     audioStateChanged();
     microphoneVolumeChanged();
@@ -156,13 +156,13 @@ void HeadsetDialog::changeAudio(int item)
     }
 }
 
-void HeadsetDialog::searchComplete(const QSDAPSearchResult &result)
+void HeadsetDialog::searchComplete(const QBluetoothSdpQueryResult &result)
 {
     qLog(Bluetooth) << "Service searching complete";
 
-    foreach ( QSDPService service, result.services() ) {
-        if ( QSDPService::isInstance( service, m_profile ) ) {
-            int channel = QSDPService::rfcommChannel(service);
+    foreach ( QBluetoothSdpRecord service, result.services() ) {
+        if ( service.isInstance( m_profile ) ) {
+            int channel = QBluetoothSdpRecord::rfcommChannel(service);
             if (channel != -1) {
                 m_waitWidget->setText( tr("Connecting...") );
                 m_ag->connect(m_addr, channel);
@@ -203,9 +203,10 @@ void HeadsetDialog::doConnect()
 {
     QSet<QBluetooth::SDPProfile> profiles;
     profiles.insert(m_profile);
-    QBluetoothAddress addr = QBluetoothDeviceSelector::getRemoteDevice(profiles);
+    QBluetoothAddress addr = 
+            QBluetoothRemoteDeviceDialog::getRemoteDevice(this, profiles);
 
-    if ( addr.valid() ) {
+    if ( addr.isValid() ) {
         m_addr = addr;
         m_waitWidget->setText( tr( "Searching..." ) );
         m_waitWidget->setCancelEnabled(true);
@@ -214,8 +215,9 @@ void HeadsetDialog::doConnect()
         connect(m_waitWidget, SIGNAL(cancelled()),
                 m_sdap, SLOT(cancelSearch()));
         QBluetoothLocalDevice localDev;
-        m_sdap->searchServices( m_addr, localDev, m_profile );
-        m_waitWidget->show();
+        if (m_sdap->searchServices( m_addr, localDev, m_profile )) {
+            m_waitWidget->show();
+        }
     }
 }
 

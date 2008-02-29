@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/widgets/qcombobox.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qcombobox.cpp -->
 <head>
   <title>Qt 4.2: QComboBox Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -115,7 +115,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -164,6 +164,7 @@
 <p>When the user enters a new string in an editable combobox, the widget may or may not insert it, and it can insert it in several locations. The default policy is is <a href="qcombobox.html#InsertPolicy-enum">AtBottom</a> but you can change this using <a href="qcombobox.html#insertPolicy-prop">setInsertPolicy</a>().</p>
 <p>It is possible to constrain the input to an editable combobox using <a href="qvalidator.html">QValidator</a>; see <a href="qcombobox.html#setValidator">setValidator</a>(). By default, any input is accepted.</p>
 <p>A combobox can be populated using the insert functions, <a href="qcombobox-qt3.html#insertStringList">insertStringList</a>() and <a href="qcombobox.html#insertItem">insertItem</a>() for example. Items can be changed with <a href="qcombobox-qt3.html#changeItem">changeItem</a>(). An item can be removed with <a href="qcombobox.html#removeItem">removeItem</a>() and all items can be removed with <a href="qcombobox.html#clear">clear</a>(). The text of the current item is returned by <a href="qcombobox.html#currentText-prop">currentText</a>(), and the text of a numbered item is returned with <a href="qcombobox-qt3.html#text">text</a>(). The current item can be set with <a href="qcombobox.html#currentIndex-prop">setCurrentIndex</a>(). The number of items in the combobox is returned by <a href="qcombobox.html#count-prop">count</a>(); the maximum number of items can be set with <a href="qcombobox.html#maxCount-prop">setMaxCount</a>(). You can allow editing using <a href="qcombobox.html#editable-prop">setEditable</a>(). For editable comboboxes you can set auto-completion using <a href="qcombobox.html#setCompleter">setCompleter</a>() and whether or not the user can add duplicates is set with <a href="qcombobox.html#duplicatesEnabled-prop">setDuplicatesEnabled</a>().</p>
+<p>QComboBox uses the <a href="model-view-programming.html">model/view framework</a> for its popup list and to store its items. By default a <a href="qstandarditemmodel.html">QStandardItemModel</a> stores the items and a <a href="qlistview.html">QListView</a> subclass displays the popuplist. You can access the model and view directly (with <a href="qcombobox.html#model">model</a>() and <a href="qcombobox.html#view">view</a>()), but QComboBox also provides functions to set and get item data (e.g., <a href="qcombobox.html#setItemData">setItemData</a>() and <a href="qcombobox.html#itemText">itemText</a>()). You can also set a new model and view (with <a href="qcombobox.html#setModel">setModel</a>() and <a href="qcombobox.html#setView">setView</a>()). For the text and icon in the combobox label, the data in the model that has the <a href="qt.html#ItemDataRole-enum">Qt::DisplayRole</a> and <a href="qt.html#ItemDataRole-enum">Qt::DecorationRole</a> is used.</p>
 <p align="center"><img src="images/qstyle-comboboxes.png" alt="Comboboxes in the different built-in styles." /></p><p>See also <a href="qlineedit.html">QLineEdit</a>, <a href="qspinbox.html">QSpinBox</a>, <a href="qradiobutton.html">QRadioButton</a>, <a href="qbuttongroup.html">QButtonGroup</a>, and <a href="guibooks.html#fowler">GUI Design Handbook: Combo Box, Drop-Down List Box</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -276,6 +277,7 @@
 <p>See also <a href="qcombobox.html#sizeAdjustPolicy-prop">sizeAdjustPolicy</a>.</p>
 <h3 class="fn"><a name="modelColumn-prop"></a>modelColumn : int</h3>
 <p>This property holds the column in the model that is visible.</p>
+<p>If set prior to populating the combobox, the popup view will not be affected and will show the first column.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>int modelColumn () const</b></li>
@@ -483,6 +485,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>SQL Integration</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>SQL Integration</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -31,7 +30,7 @@
 <a name="internationalization"></a>
 <h3>Internationalization</h3>
 <p>Qtopia supports a number of languages and so strings should be stored in a Unicode-compatible encoding such as UTF8 or UTF16. A localized string comparison operation must be provided by the database as <tt>localeAwareCompare</tt> needs to be equivalent to the <tt>QString::localeAwareCompare()</tt> function. The <a href="3rdparty.html#sqlite">SQLite</a> version of this function is as follows:</p>
-<pre>    int sqliteLocaleAwareCompare(void *, int ll, const void *l, int rl, const void *r)
+<pre>&nbsp;   int sqliteLocaleAwareCompare(void *, int ll, const void *l, int rl, const void *r)
     {
         QString left = QString::fromUtf16((const ushort *)l, ll);
         QString right = QString::fromUtf16((const ushort *)r, rl);
@@ -56,7 +55,7 @@
 <a name="specifying-the-sql-database-driver"></a>
 <h3>Specifying the SQL Database Driver</h3>
 <p>Code related to specifying a Qtopia driver as well as many other driver-specific code can be found in:</p>
-<pre>         $QPEDIR/src/libraries/qtopia/qtopiasql.cpp</pre>
+<pre>&nbsp;        $QPEDIR/src/libraries/qtopia/qtopiasql.cpp</pre>
 <p>however relevant sections may be moved to <tt>custom.cpp</tt> in future.</p>
 <a name="ensuring-table-schemas"></a>
 <h3>Ensuring Table Schemas</h3>
@@ -64,16 +63,16 @@
 <ol type="1">
 <li>Libraries and applications specify a set of resource files containing the SQL statements required to create required tables and constraints. For example the resource file to create the categories table, related constraints and initial data can be found at<p><tt>$QPEDIR/src/libraries/qtopia/resources/categories.sqlite.sql</tt></p>
 </li>
-<li>The file is then specified in the <tt>.qrc</tt> file for the qtopia library using the alias:<pre>         &lt;file alias=&quot;QtopiaSql/QSQLITE/categories&quot;&gt;resources/categories.sqlite.sql&lt;/file&gt;</pre>
+<li>The file is then specified in the <tt>.qrc</tt> file for the qtopia library using the alias:<pre>&nbsp;        &lt;file alias=&quot;QtopiaSql/QSQLITE/categories&quot;&gt;resources/categories.sqlite.sql&lt;/file&gt;</pre>
 <p>The alias has the form <tt>QtopiaSql/&lt;driver&gt;/&lt;table&gt;</tt> where:</p>
 <ul>
 <li>the driver is the identifier that is used for the Qt SQL driver</li>
-<li>the table is as used by the <tt>QtopiaSql::ensureSchema</tt> command:<pre>         QtopiaSql::ensureSchema(&quot;categories&quot;);</pre>
+<li>the table is as used by the <tt>QtopiaSql::ensureSchema</tt> command:<pre>&nbsp;        QtopiaSql::ensureSchema(&quot;categories&quot;);</pre>
 </li>
 </ul>
 </li>
 <li>The function first checks for an existing table of the name specified. If it does not exist it will load the schema as via the resource files described earlier. The resource file is responsible for creating the table of its own name and setting any constraints or initial data required by that table.</li>
-<li>Code that uses the SQL database is required to call <tt>ensureSchema</tt> for all tables it depends on. For example, the <tt>Contacts</tt> part of Qtopia PIM library has the following <tt>ensureSchema</tt> statements:<pre>         QStringList tables;
+<li>Code that uses the SQL database is required to call <tt>ensureSchema</tt> for all tables it depends on. For example, the <tt>Contacts</tt> part of Qtopia PIM library has the following <tt>ensureSchema</tt> statements:<pre>&nbsp;        QStringList tables;
          tables &lt;&lt; &quot;categories&quot;;
          tables &lt;&lt; &quot;contacts&quot;;
          tables &lt;&lt; &quot;emailaddresses&quot;;
@@ -87,6 +86,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

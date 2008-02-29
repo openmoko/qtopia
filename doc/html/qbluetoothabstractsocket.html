@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QBluetoothAbstractSocket Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QBluetoothAbstractSocket Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,8 +11,8 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothAbstractSocket Class Reference</h1>
 <p>The QBluetoothAbstractSocket class represents an abstract Bluetooth client socket. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothAbstractSocket&gt;</pre><p>Inherits <a href="qiodevice.html">QIODevice</a>.</p>
-<p>Inherited by <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a> and <a href="qbluetoothscosocket.html">QBluetoothScoSocket</a>.</p>
+<pre>#include &lt;QBluetoothAbstractSocket&gt;</pre><p>Inherits <a href="qiodevice.html">QIODevice</a>.</p>
+<p>Inherited by <a href="qbluetoothl2capdatagramsocket.html">QBluetoothL2CapDatagramSocket</a>, <a href="qbluetoothl2capsocket.html">QBluetoothL2CapSocket</a>, <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, and <a href="qbluetoothscosocket.html">QBluetoothScoSocket</a>.</p>
 <ul>
 <li><a href="qbluetoothabstractsocket-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -21,12 +20,11 @@
 <h3>Public Types</h3>
 <ul>
 <li><div class="fn"/>enum <b><a href="qbluetoothabstractsocket.html#SocketError-enum">SocketError</a></b> { NoError, AccessError, ResourceError, BindError, ..., UnknownError }</li>
-<li><div class="fn"/>enum <b><a href="qbluetoothabstractsocket.html#SocketState-enum">SocketState</a></b> { UnconnectedState, ConnectingState, ConnectedState, ClosingState }</li>
+<li><div class="fn"/>enum <b><a href="qbluetoothabstractsocket.html#SocketState-enum">SocketState</a></b> { UnconnectedState, ConnectingState, ConnectedState, BoundState, ClosingState }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qbluetoothabstractsocket.html#QBluetoothAbstractSocket">QBluetoothAbstractSocket</a></b> ( QObject * <i>parent</i> = 0 )</li>
 <li><div class="fn"/><b><a href="qbluetoothabstractsocket.html#dtor.QBluetoothAbstractSocket">~QBluetoothAbstractSocket</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#abort">abort</a></b> ()</li>
 <li><div class="fn"/>virtual bool <b><a href="qbluetoothabstractsocket.html#atEnd">atEnd</a></b> () const</li>
@@ -35,8 +33,8 @@
 <li><div class="fn"/>virtual bool <b><a href="qbluetoothabstractsocket.html#canReadLine">canReadLine</a></b> () const</li>
 <li><div class="fn"/>virtual void <b><a href="qbluetoothabstractsocket.html#close">close</a></b> ()</li>
 <li><div class="fn"/>virtual bool <b><a href="qbluetoothabstractsocket.html#disconnect">disconnect</a></b> ()</li>
+<li><div class="fn"/>SocketError <b><a href="qbluetoothabstractsocket.html#error">error</a></b> () const</li>
 <li><div class="fn"/>virtual bool <b><a href="qbluetoothabstractsocket.html#flush">flush</a></b> ()</li>
-<li><div class="fn"/>SocketError <b><a href="qbluetoothabstractsocket.html#lastError">lastError</a></b> () const</li>
 <li><div class="fn"/>qint64 <b><a href="qbluetoothabstractsocket.html#readBufferSize">readBufferSize</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#setReadBufferSize">setReadBufferSize</a></b> ( qint64 <i>size</i> )</li>
 <li><div class="fn"/>bool <b><a href="qbluetoothabstractsocket.html#setSocketDescriptor">setSocketDescriptor</a></b> ( int <i>socketDescriptor</i>, QBluetoothAbstractSocket::SocketState <i>state</i>, QIODevice::OpenMode <i>openMode</i> = QIODevice::ReadWrite )</li>
@@ -54,7 +52,7 @@
 <ul>
 <li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#connected">connected</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#disconnected">disconnected</a></b> ()</li>
-<li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#error">error</a></b> ( QBluetoothAbstractSocket::SocketError <i>error</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#error-2">error</a></b> ( QBluetoothAbstractSocket::SocketError <i>socketError</i> )</li>
 <li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#stateChanged">stateChanged</a></b> ( QBluetoothAbstractSocket::SocketState <i>socketState</i> )</li>
 </ul>
 <ul>
@@ -65,9 +63,13 @@
 <h3>Protected Functions</h3>
 <ul>
 <li><div class="fn"/>bool <b><a href="qbluetoothabstractsocket.html#initiateConnect">initiateConnect</a></b> ( int <i>socket</i>, sockaddr * <i>addr</i>, int <i>size</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qbluetoothabstractsocket.html#readSocketParameters">readSocketParameters</a></b> ( int <i>sockfd</i> )</li>
+<li><div class="fn"/>int <b><a href="qbluetoothabstractsocket.html#readMtu">readMtu</a></b> () const</li>
+<li><div class="fn"/>virtual bool <b><a href="qbluetoothabstractsocket.html#readSocketParameters">readSocketParameters</a></b> ( int <i>sockfd</i> ) = 0</li>
 <li><div class="fn"/>virtual void <b><a href="qbluetoothabstractsocket.html#resetSocketParameters">resetSocketParameters</a></b> ()</li>
-<li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#setError">setError</a></b> ( const QBluetoothAbstractSocket::SocketError &amp; <i>error</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#setError">setError</a></b> ( QBluetoothAbstractSocket::SocketError <i>error</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#setReadMtu">setReadMtu</a></b> ( int <i>mtu</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothabstractsocket.html#setWriteMtu">setWriteMtu</a></b> ( int <i>mtu</i> )</li>
+<li><div class="fn"/>int <b><a href="qbluetoothabstractsocket.html#writeMtu">writeMtu</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>5 protected functions inherited from <a href="qiodevice.html#protected-functions">QIODevice</a></li>
@@ -110,7 +112,7 @@
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::ConnectionRefused</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The remote host has refused a connection.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::HostDownError</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The remote host could not be contacted.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::NetworkError</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">A network error has occurred, e.g. device moved out of range.</td></tr>
-<tr><td valign="top"><tt>QBluetoothAbstractSocket::TimedoutError</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">Operation has timed out.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::TimeoutError</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">Operation has timed out.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::RemoteHostClosedError</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">Remote host has closed the connection.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::UnknownError</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">Unknown error has occurred.</td></tr>
 </table></p>
@@ -121,14 +123,13 @@
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::UnconnectedState</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The socket is not connected.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::ConnectingState</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The socket is being connected.</td></tr>
 <tr><td valign="top"><tt>QBluetoothAbstractSocket::ConnectedState</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The socket is connected.</td></tr>
-<tr><td valign="top"><tt>QBluetoothAbstractSocket::ClosingState</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The socket is being closed.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::BoundState</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The socket has been bound.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractSocket::ClosingState</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The socket is being closed.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothAbstractSocket"></a>QBluetoothAbstractSocket::QBluetoothAbstractSocket ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a new <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a> with <i>parent</i>. The socket is not connected.</p>
 <h3 class="fn"><a name="dtor.QBluetoothAbstractSocket"></a>QBluetoothAbstractSocket::~QBluetoothAbstractSocket ()</h3>
-<p>Deconstructs a <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a>.</p>
+<p>Deconstructs a <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a>. If the socket is in any state other than <a href="qbluetoothabstractsocket.html#SocketState-enum">UnconnectedState</a>, the current connection is aborted.</p>
 <h3 class="fn"><a name="abort"></a>void QBluetoothAbstractSocket::abort ()</h3>
 <p>Aborts the current connection and resets the socket. Unlike <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>(), this function immediately closes the socket, clearing any pending data in the write buffer.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>() and <a href="qbluetoothabstractsocket.html#close">close</a>().</p>
@@ -148,7 +149,7 @@
 <p>Reimplemented from <a href="qiodevice.html#canReadLine">QIODevice</a>.</p>
 <p>See also <a href="qiodevice.html#readLine">readLine</a>().</p>
 <h3 class="fn"><a name="close"></a>void QBluetoothAbstractSocket::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Closes the socket.</p>
+<p>Closes the socket. This is the same as <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>()</p>
 <p>Reimplemented from <a href="qiodevice.html#close">QIODevice</a>.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#abort">abort</a>() and <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>().</p>
 <h3 class="fn"><a name="connected"></a>void QBluetoothAbstractSocket::connected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -160,34 +161,47 @@
 <h3 class="fn"><a name="disconnected"></a>void QBluetoothAbstractSocket::disconnected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the socket has been disconnected.</p>
 <p>See also <a href="qobject.html#connect">connect</a>(), <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>(), and <a href="qbluetoothabstractsocket.html#abort">abort</a>().</p>
-<h3 class="fn"><a name="error"></a>void QBluetoothAbstractSocket::error ( <a href="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::SocketError</a> <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted after an error occurred. the <i>error</i> parameter describes the type of error that has occurred.</p>
-<p>See also <a href="qbluetoothabstractsocket.html#setError">setError</a>() and <a href="qbluetoothabstractsocket.html#lastError">lastError</a>().</p>
+<h3 class="fn"><a name="error"></a><a href="qbluetoothabstractsocket.html#SocketError-enum">SocketError</a> QBluetoothAbstractSocket::error () const</h3>
+<p>Returns the last error that has occurred.</p>
+<p>See also <a href="qbluetoothabstractsocket.html#setError">setError</a>().</p>
+<h3 class="fn"><a name="error-2"></a>void QBluetoothAbstractSocket::error ( <a href="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::SocketError</a> <i>socketError</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>This signal is emitted after an error occurred. The <i>socketError</i> parameter describes the type of error that has occurred.</p>
+<p>See also <a href="qbluetoothabstractsocket.html#error">error</a>() and <a href="qiodevice.html#errorString">errorString</a>().</p>
 <h3 class="fn"><a name="flush"></a>bool QBluetoothAbstractSocket::flush ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This function writes as much as possible from the internal write buffer to the underlying network socket, without blocking. If any data was written, this function returns true; otherwise false is returned.</p>
 <h3 class="fn"><a name="initiateConnect"></a>bool QBluetoothAbstractSocket::initiateConnect ( int <i>socket</i>, sockaddr * <i>addr</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Clients of this class can call this method to initiate connection procedures common to all Bluetooth socket types. The <i>socket</i> parameter holds the socket file descriptor to use. The <i>addr</i> structure holds the sockaddr structure of the remote peer to connect to and <i>size</i> holds the size of the sockaddr structure.</p>
-<h3 class="fn"><a name="lastError"></a><a href="qbluetoothabstractsocket.html#SocketError-enum">SocketError</a> QBluetoothAbstractSocket::lastError () const</h3>
-<p>Returns the last error that has occurred.</p>
 <h3 class="fn"><a name="readBufferSize"></a>qint64 QBluetoothAbstractSocket::readBufferSize () const</h3>
 <p>Returns the size of the internal read buffer. This limits the amount of data that the client can receive before you call <a href="qiodevice.html#read">read</a>() or <a href="qiodevice.html#readAll">readAll</a>().</p>
 <p>A read buffer size of 0 (the default) means that the buffer has no size limit, ensuring that no data is lost.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#setReadBufferSize">setReadBufferSize</a>() and <a href="qiodevice.html#read">read</a>().</p>
-<h3 class="fn"><a name="readSocketParameters"></a>bool QBluetoothAbstractSocket::readSocketParameters ( int <i>sockfd</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="readMtu"></a>int QBluetoothAbstractSocket::readMtu () const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Returns the current read MTU.</p>
+<p>See also <a href="qbluetoothabstractsocket.html#setReadMtu">setReadMtu</a>().</p>
+<h3 class="fn"><a name="readSocketParameters"></a>bool QBluetoothAbstractSocket::readSocketParameters ( int <i>sockfd</i> )&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>The clients of this class can override this method to read specific socket parameters from the socket given by <i>sockfd</i>. This method is called when the socket initially enters the connected state.</p>
 <p>If the parameters could not be obtained, the clients should return false, and should return true otherwise.</p>
 <p>The default implementation returns true.</p>
 <h3 class="fn"><a name="resetSocketParameters"></a>void QBluetoothAbstractSocket::resetSocketParameters ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>The clients of this class should override this method to reset the specific socket parameters. This method is called when a socket enters the disconnected state.</p>
-<h3 class="fn"><a name="setError"></a>void QBluetoothAbstractSocket::setError ( const <a href="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::SocketError</a> &amp; <i>error</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setError"></a>void QBluetoothAbstractSocket::setError ( <a href="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::SocketError</a> <i>error</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Can be used by the clients of this class to set the <i>error</i> that might have occurred. This function is generally used from the specific socket connect implementation.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#error">error</a>().</p>
 <h3 class="fn"><a name="setReadBufferSize"></a>void QBluetoothAbstractSocket::setReadBufferSize ( qint64 <i>size</i> )</h3>
-<p>Sets the size of <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a>'s internal read buffer to be <i>size</i> bytes. A size of 0 means that the buffer is infinite. This is the default.</p>
+<p>Sets the capacity of <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a>'s internal read buffer to be <i>size</i> bytes. If <i>size</i> is 0 the buffer has unlimited capacity. This is the default.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#readBufferSize">readBufferSize</a>().</p>
+<h3 class="fn"><a name="setReadMtu"></a>void QBluetoothAbstractSocket::setReadMtu ( int <i>mtu</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Clients of this class can set the <i>mtu</i> to be used on reading. This value will be used as the maximum number of bytes to read on a socket.</p>
+<p>A value of 0 means there is no MTU.</p>
+<p>See also <a href="qbluetoothabstractsocket.html#readMtu">readMtu</a>().</p>
 <h3 class="fn"><a name="setSocketDescriptor"></a>bool QBluetoothAbstractSocket::setSocketDescriptor ( int <i>socketDescriptor</i>, <a href="qbluetoothabstractsocket.html#SocketState-enum">QBluetoothAbstractSocket::SocketState</a> <i>state</i>, <a href="qiodevice.html#OpenMode-typedef">QIODevice::OpenMode</a> <i>openMode</i> = QIODevice::ReadWrite )</h3>
 <p>Initializes the <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a> with the native descriptor <i>socketDescriptor</i>. The socket is put into the <i>state</i> and opened in <i>openMode</i>.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#socketDescriptor">socketDescriptor</a>().</p>
+<h3 class="fn"><a name="setWriteMtu"></a>void QBluetoothAbstractSocket::setWriteMtu ( int <i>mtu</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Clients of this class can set the <i>mtu</i> to be used when writing. This value will be used as the maximum number of bytes to write on a socket.</p>
+<p>A value of 0 means there is no MTU.</p>
+<p>See also <a href="qbluetoothabstractsocket.html#writeMtu">writeMtu</a>().</p>
 <h3 class="fn"><a name="socketDescriptor"></a>int QBluetoothAbstractSocket::socketDescriptor () const</h3>
 <p>Returns the socket descriptor for the socket if the socket is currently active (e.g. not in <a href="qbluetoothabstractsocket.html#SocketState-enum">UnconnectedState</a>). Otherwise returns -1.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#setSocketDescriptor">setSocketDescriptor</a>().</p>
@@ -197,15 +211,18 @@
 <p>This signal is emitted when the state of the socket has changed. The <i>socketState</i> parameter holds the new state.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#state">state</a>().</p>
 <h3 class="fn"><a name="waitForConnected"></a>bool QBluetoothAbstractSocket::waitForConnected ( int <i>msecs</i> = 30000 )</h3>
-<p>Waits until the socket is connected, up to <i>msecs</i> milliseconds. If the connection has been established, this function returns true; otherwise returns false. In the case where it returns false, you can call <a href="qbluetoothabstractsocket.html#lastError">lastError</a>() to determine the cause of the error.</p>
+<p>Waits until the socket is connected, up to <i>msecs</i> milliseconds. If the connection has been established, this function returns true; otherwise returns false. In the case where it returns false, you can call <a href="qbluetoothabstractsocket.html#error">error</a>() to determine the cause of the error.</p>
 <p>See also <a href="qobject.html#connect">connect</a>() and <a href="qbluetoothabstractsocket.html#connected">connected</a>().</p>
 <h3 class="fn"><a name="waitForDisconnected"></a>bool QBluetoothAbstractSocket::waitForDisconnected ( int <i>msecs</i> = 30000 )</h3>
-<p>Waits until the socket is disconnected, up to <i>msecs</i> milliseconds. If the connection has been terminated, this function returns true; otherwise returns false. In the case where it returns false, you can call <a href="qbluetoothabstractsocket.html#lastError">lastError</a>() to determine the cause of the error.</p>
+<p>Waits until the socket is disconnected, up to <i>msecs</i> milliseconds. If the connection has been terminated, this function returns true; otherwise returns false. In the case where it returns false, you can call <a href="qbluetoothabstractsocket.html#error">error</a>() to determine the cause of the error.</p>
 <p>See also <a href="qbluetoothabstractsocket.html#disconnect">disconnect</a>(), <a href="qbluetoothabstractsocket.html#close">close</a>(), and <a href="qbluetoothabstractsocket.html#disconnected">disconnected</a>().</p>
+<h3 class="fn"><a name="writeMtu"></a>int QBluetoothAbstractSocket::writeMtu () const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Returns the current write MTU.</p>
+<p>See also <a href="qbluetoothabstractsocket.html#setWriteMtu">setWriteMtu</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

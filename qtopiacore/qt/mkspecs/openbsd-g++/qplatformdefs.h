@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the qmake spec of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -97,6 +107,21 @@
 
 #define QT_SNPRINTF		::snprintf
 #define QT_VSNPRINTF		::vsnprintf
+
+// 1003.1c-1995 says on page 38 (2.9.3, paragraph 3) that if _POSIX_THREADS
+// is defined, then _POSIX_THREAD_SAFE_FUNCTIONS must also be defined.
+// However this looks like a well-known typo (reversed dependency).
+//
+// On the other hand _POSIX_THREAD_SAFE_FUNCTIONS should be defined only
+// if the Thread-Safe Functions option is implemented. OpenBSD does not
+// support all of the required _r() interfaces, especially getpwuid_r(),
+// which means it cannot legitimately define _POSIX_THREAD_SAFE_FUNCTIONS.
+//
+// Since OpenBSD does define _POSIX_THREAD_SAFE_FUNCTIONS, we hae to
+// undefine it behind its back.
+#ifdef _POSIX_THREAD_SAFE_FUNCTIONS
+#undef _POSIX_THREAD_SAFE_FUNCTIONS
+#endif
 
 // Older OpenBSD versions may still use the a.out format instead of ELF.
 #ifndef __ELF__

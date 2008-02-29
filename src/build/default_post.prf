@@ -35,10 +35,17 @@ part_of_qtopia:!desktop:enable_singleexec:CONFIG+=singleexec
 QMAKE_EXTRA_TARGETS*=lupdate packages syncqtopia first_syncqtopia
 !equals(QTOPIA_SDKROOT,$$QPEDIR):QMAKE_EXTRA_TARGETS+=sdk
 
-# Set the default license
-isEmpty(QTOPIA_LICENSE) {
-    qtopia_depot|free_package:license(GPL)
-    else:license(COMMERCIAL)
+!subdirs {
+    # Set the default license
+    isEmpty(QTOPIA_LICENSE) {
+        free_package {
+            license(GPL)
+            depotProject:license(OpenSSL_COMPATIBLE)
+        } else {
+            license(COMMERCIAL)
+        }
+        echo("$$self: No LICENSE specified. Assuming $${QTOPIA_LICENSE}.")
+    }
 }
 
 # We want these items processed as early as possible

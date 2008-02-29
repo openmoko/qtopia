@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/embedded/qwindowsystem_qws.cpp -->
 <head>
   <title>Qt 4.2: QWSWindow Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -32,10 +33,10 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QWSWindow class encapsulates a top-level window in Qtopia Core.</p>
-<p>When running a <a href="qtopiacore.html">Qtopia Core</a> application, it either runs as a server or connects to an existing server. As applications add and remove widgets, the <a href="qwsserver.html">QWSServer</a> class maintains information about each window. Note that you should never construct the QWSWindow class yourself; the current top-level windows can be retrieved using the <a href="qwsserver.html#clientWindows">QWSServer::clientWindows</a>() function.</p>
-<p>QWSWindow provides functions returning various information about the window: its <a href="qwswindow.html#caption">caption</a>(), <a href="qwswindow.html#name">name</a>(), <a href="qwswindow.html#opacity">opacity</a>() and <a href="qwswindow.html#winId">winId</a>() along with the <a href="qwswindow.html#client">client</a>() that owns the window.</p>
-<p>In addition, it is possible to determine whether the window is visible using the <a href="qwswindow.html#isVisible">isVisible</a>() function, if the window is completely obscured by another window or by the bounds of the screen using the <a href="qwswindow.html#isFullyObscured">isFullyObscured</a>() function, and whether the window has an alpha channel different from 255 using the <a href="qwswindow.html#isOpaque">isOpaque</a>() function. Finally, QWSWindow provides the <a href="qwswindow.html#requestedRegion">requestedRegion</a>() function that returns the region of the display the window wants to draw on.</p>
-<p>See also <a href="qwsserver.html">QWSServer</a> and <a href="qtopiacore-running.html">Running Qtopia Core Applications</a>.</p>
+<p>When you run a <a href="qtopiacore.html">Qtopia Core</a> application, it either runs as a server or connects to an existing server. As applications add and remove windows, the server process maintains information about each window. In <a href="qtopiacore.html">Qtopia Core</a>, top-level windows are encapsulated as QWSWindow objects. Note that you should never construct the QWSWindow class yourself; the current top-level windows can be retrieved using the <a href="qwsserver.html#clientWindows">QWSServer::clientWindows</a>() function.</p>
+<p>With a window at hand, you can retrieve its caption, name, opacity and ID using the <a href="qwswindow.html#caption">caption</a>(), <a href="qwswindow.html#name">name</a>(), <a href="qwswindow.html#opacity">opacity</a>() and <a href="qwswindow.html#winId">winId</a>() functions, respectively. Use the <a href="qwswindow.html#client">client</a>() function to retrieve a pointer to the client that owns the window.</p>
+<p>Use the <a href="qwswindow.html#isVisible">isVisible</a>() function to find out if the window is visible. You can find out if the window is completely obscured by another window or by the bounds of the screen, using the <a href="qwswindow.html#isFullyObscured">isFullyObscured</a>() function. The <a href="qwswindow.html#isOpaque">isOpaque</a>() function returns true if the window has an alpha channel equal to 255. Finally, the <a href="qwswindow.html#requestedRegion">requestedRegion</a>() function returns the region of the display the window wants to draw on.</p>
+<p>See also <a href="qwsserver.html">QWSServer</a>, <a href="qwsclient.html">QWSClient</a>, and <a href="qtopiacore-architecture.html">Qtopia Core Architecture</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="caption"></a>const <a href="qstring.html">QString</a> &amp; QWSWindow::caption () const</h3>
@@ -43,11 +44,12 @@
 <p>See also <a href="qwswindow.html#name">name</a>() and <a href="qwswindow.html#winId">winId</a>().</p>
 <h3 class="fn"><a name="client"></a><a href="qwsclient.html">QWSClient</a> * QWSWindow::client () const</h3>
 <p>Returns a reference to the <a href="qwsclient.html">QWSClient</a> object that owns this window.</p>
+<p>See also <a href="qwswindow.html#requestedRegion">requestedRegion</a>().</p>
 <h3 class="fn"><a name="isFullyObscured"></a>bool QWSWindow::isFullyObscured () const</h3>
 <p>Returns true if the window is completely obsured by another window or by the bounds of the screen; otherwise returns false.</p>
 <p>See also <a href="qwswindow.html#isVisible">isVisible</a>().</p>
 <h3 class="fn"><a name="isOpaque"></a>bool QWSWindow::isOpaque () const</h3>
-<p>Returns true if the window is opaque, i.e. if its alpha channel equals 255; otherwise returns false.</p>
+<p>Returns true if the window is opaque, i.e., if its alpha channel equals 255; otherwise returns false.</p>
 <p>See also <a href="qwswindow.html#opacity">opacity</a>().</p>
 <h3 class="fn"><a name="isVisible"></a>bool QWSWindow::isVisible () const</h3>
 <p>Returns true if the window is visible; otherwise returns false.</p>
@@ -60,6 +62,7 @@
 <p>See also <a href="qwswindow.html#isOpaque">isOpaque</a>().</p>
 <h3 class="fn"><a name="requestedRegion"></a>const <a href="qregion.html">QRegion</a> &amp; QWSWindow::requestedRegion () const</h3>
 <p>Returns the region that the window has requested to draw onto, including any window decorations.</p>
+<p>See also <a href="qwswindow.html#client">client</a>().</p>
 <h3 class="fn"><a name="winId"></a>int QWSWindow::winId () const</h3>
 <p>Returns the window's ID.</p>
 <p>See also <a href="qwswindow.html#name">name</a>() and <a href="qwswindow.html#caption">caption</a>().</p>
@@ -67,6 +70,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

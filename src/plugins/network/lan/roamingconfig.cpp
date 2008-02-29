@@ -24,6 +24,7 @@
 #ifndef NO_WIRELESS_LAN
 
 #include <QMultiHash>
+#include "roamingmonitor.h" //includes wireless.h
 
 RoamingPage::RoamingPage( const QtopiaNetworkProperties& cfg, QWidget* parent, Qt::WFlags fl )
     : QWidget( parent, fl )

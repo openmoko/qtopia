@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/itemviews/qdatawidgetmapper.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qdatawidgetmapper.cpp -->
 <head>
   <title>Qt 4.2: QDataWidgetMapper Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -96,7 +96,7 @@
 <p>It is possible to set an item delegate to support custom widgets. By default, a <a href="qitemdelegate.html">QItemDelegate</a> is used to synchronize the model with the widgets.</p>
 <p>Let us assume that we have an item model named <tt>model</tt> with the following contents:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td>1</td><td>TROLLTECH ASA</td><td>Oslo</td></tr>
+<tr valign="top" class="odd"><td>1</td><td>Trolltech ASA</td><td>Oslo</td></tr>
 <tr valign="top" class="even"><td>2</td><td>Trolltech Pty</td><td>Brisbane</td></tr>
 <tr valign="top" class="odd"><td>3</td><td>Trolltech Inc</td><td>Palo Alto</td></tr>
 <tr valign="top" class="even"><td>4</td><td>Trolltech China</td><td>Beijing</td></tr>
@@ -109,7 +109,7 @@
  mapper-&gt;addMapping(myLineEdit, 1);
  mapper-&gt;addMapping(myCountryChooser, 2);
  mapper-&gt;toFirst();</pre>
-<p>After the call to <a href="qdatawidgetmapper.html#toFirst">toFirst</a>(), <tt>mySpinBox</tt> displays the value <tt>1</tt>, <tt>myLineEdit</tt> displays <tt>TROLLTECH ASA</tt> and <tt>myCountryChooser</tt> displays <tt>Oslo</tt>. The navigational functions <a href="qdatawidgetmapper.html#toFirst">toFirst</a>(), <a href="qdatawidgetmapper.html#toNext">toNext</a>(), <a href="qdatawidgetmapper.html#toPrevious">toPrevious</a>(), <a href="qdatawidgetmapper.html#toLast">toLast</a>() and <a href="qdatawidgetmapper.html#currentIndex-prop">setCurrentIndex</a>() can be used to navigate in the model and update the widgets with contents from the model.</p>
+<p>After the call to <a href="qdatawidgetmapper.html#toFirst">toFirst</a>(), <tt>mySpinBox</tt> displays the value <tt>1</tt>, <tt>myLineEdit</tt> displays <tt>Trolltech ASA</tt> and <tt>myCountryChooser</tt> displays <tt>Oslo</tt>. The navigational functions <a href="qdatawidgetmapper.html#toFirst">toFirst</a>(), <a href="qdatawidgetmapper.html#toNext">toNext</a>(), <a href="qdatawidgetmapper.html#toPrevious">toPrevious</a>(), <a href="qdatawidgetmapper.html#toLast">toLast</a>() and <a href="qdatawidgetmapper.html#currentIndex-prop">setCurrentIndex</a>() can be used to navigate in the model and update the widgets with contents from the model.</p>
 <p>QDataWidgetMapper supports two submit policies, <tt>AutoSubmit</tt> and <tt>ManualSubmit</tt>. <tt>AutoSubmit</tt> will update the model as soon as the current widget loses focus, <tt>ManualSubmit</tt> will not update the model unless <a href="qdatawidgetmapper.html#submit">submit</a>() is called. <tt>ManualSubmit</tt> is useful when displaying a dialog that lets the user cancel all modifications. Also, other views that display the model won't update until the user finishes all his modifications and submits.</p>
 <p>Note that QDataWidgetMapper keeps track of external modifications. If the contents of the model are updated in another module of the application, the widgets are updated as well.</p>
 <p>See also <a href="qabstractitemmodel.html">QAbstractItemModel</a> and <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>.</p>
@@ -138,7 +138,7 @@
 <p>If the orientation is <a href="qt.html#Orientation-enum">Qt::Horizontal</a> (the default), a widget is mapped to a column of a data model. The widget will be populated with the model's data from its mapped column and the row that <a href="qdatawidgetmapper.html#currentIndex-prop">currentIndex</a>() points at.</p>
 <p>Use <a href="qt.html#Orientation-enum">Qt::Horizontal</a> for tabular data that looks like this:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td>1</td><td>TROLLTECH ASA</td><td>Oslo</td></tr>
+<tr valign="top" class="odd"><td>1</td><td>Trolltech ASA</td><td>Oslo</td></tr>
 <tr valign="top" class="even"><td>2</td><td>Trolltech Pty</td><td>Brisbane</td></tr>
 <tr valign="top" class="odd"><td>3</td><td>Trolltech Inc</td><td>Silicon Valley</td></tr>
 <tr valign="top" class="even"><td>4</td><td>Trolltech China</td><td>Beijing</td></tr>
@@ -148,7 +148,7 @@
 <p>Use <a href="qt.html#Orientation-enum">Qt::Vertical</a> for tabular data that looks like this:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
-<tr valign="top" class="even"><td>TROLLTECH ASA</td><td>Trolltech Pty</td><td>Trolltech Inc</td><td>Trolltech China</td><td>Trolltech GmbH</td></tr>
+<tr valign="top" class="even"><td>Trolltech ASA</td><td>Trolltech Pty</td><td>Trolltech Inc</td><td>Trolltech China</td><td>Trolltech GmbH</td></tr>
 <tr valign="top" class="odd"><td>Oslo</td><td>Brisbane</td><td>Silicon Valley</td><td>Beijing</td><td>Berlin</td></tr>
 </table></p>
 <p>Changing the orientation clears all existing mappings.</p>
@@ -174,12 +174,16 @@
 <p>Destroys the object.</p>
 <h3 class="fn"><a name="addMapping"></a>void QDataWidgetMapper::addMapping ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, int <i>section</i> )</h3>
 <p>Adds a mapping between a <i>widget</i> and a <i>section</i> from the model. The <i>section</i> is a column in the model if the orientation is horizontal (the default), otherwise a row.</p>
-<p>For the following example, we assume a model <tt>myModel</tt> that has two columns, the first one containing the name of a person, the second column his age. The first column is mapped to the <a href="qlineedit.html">QLineEdit</a> <tt>nameLineEdit</tt> and the second to the <a href="qspinbox.html">QSpinBox</a> <tt>ageSpinBox</tt>:</p>
+<p>For the following example, we assume a model <tt>myModel</tt> that has two columns: the first one contains the names of people in a group, and the second column contains their ages. The first column is mapped to the <a href="qlineedit.html">QLineEdit</a> <tt>nameLineEdit</tt>, and the second is mapped to the <a href="qspinbox.html">QSpinBox</a> <tt>ageSpinBox</tt>:</p>
 <pre> QDataWidgetMapper *mapper = new QDataWidgetMapper();
  mapper-&gt;setModel(myModel);
  mapper-&gt;addMapping(nameLineEdit, 0);
  mapper-&gt;addMapping(ageSpinBox, 1);</pre>
-<p>Note: If the <i>widget</i> is already mapped to a section, the old mapping will be replaced by the new one. A widget can never be mapped to more than one section at a time.</p>
+<p><b>Notes:</b></p>
+<ul>
+<li>If the <i>widget</i> is already mapped to a section, the old mapping will be replaced by the new one.</li>
+<li>Only one-to-one mappings between sections and widgets are allowed. It is not possible to map a single section to multiple widgets, or to map a single widget to multiple sections.</li>
+</ul>
 <p>See also <a href="qdatawidgetmapper.html#removeMapping">removeMapping</a>(), <a href="qdatawidgetmapper.html#mappedSection">mappedSection</a>(), and <a href="qdatawidgetmapper.html#clearMapping">clearMapping</a>().</p>
 <h3 class="fn"><a name="clearMapping"></a>void QDataWidgetMapper::clearMapping ()</h3>
 <p>Clears all mappings.</p>
@@ -252,6 +256,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

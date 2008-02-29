@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/itemviews/qdirmodel.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qdirmodel.cpp -->
 <head>
   <title>Qt 4.2: QDirModel Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -97,7 +97,7 @@
 <h2>Detailed Description</h2>
 <p>The QDirModel class provides a data model for the local filesystem.</p>
 <p>This class provides access to the local filesystem, providing functions for renaming and removing files and directories, and for creating new directories. In the simplest case, it can be used with a suitable display widget as part of a browser or filer.</p>
-<p>QDirModel does not store file information internally or cache file data.</p>
+<p>QDirModel keeps a cache with file information. The cache needs to be updated with <a href="qdirmodel.html#refresh">refresh</a>().</p>
 <p>A directory model that displays the contents of a default directory is usually constructed with a parent object:</p>
 <pre>     QDirModel *model = new QDirModel;</pre>
 <p>A tree view can be used to display the contents of the model</p>
@@ -107,7 +107,7 @@
 <pre>     tree-&gt;setRootIndex(model-&gt;index(QDir::currentPath()));</pre>
 <p>The view's root index can be used to control how much of a hierarchical model is displayed. QDirModel provides a convenience function that returns a suitable model index for a path to a directory within the model.</p>
 <p>QDirModel can be accessed using the standard interface provided by <a href="qabstractitemmodel.html">QAbstractItemModel</a>, but it also provides some convenience functions that are specific to a directory model. The <a href="qdirmodel.html#fileInfo">fileInfo</a>(), <a href="qdirmodel.html#isDir">isDir</a>(), <a href="qobject-qt3.html#name">name</a>(), and path() functions provide information about the underlying files and directories related to items in the model. Directories can be created and removed using <a href="qdirmodel.html#mkdir">mkdir</a>(), <a href="qdirmodel.html#rmdir">rmdir</a>(), and the model will be automatically updated to take the changes into account.</p>
-<p>See also <a href="qdirmodel.html#nameFilters">nameFilters</a>(), <a href="qdirmodel.html#setFilter">setFilter</a>(), <a href="qdirmodel.html#filter">filter</a>(), <a href="qlistview.html">QListView</a>, <a href="qtreeview.html">QTreeView</a>, Dir View Example, and <a href="model-view-model.html">Model Classes</a>.</p>
+<p>See also <a href="qdirmodel.html#nameFilters">nameFilters</a>(), <a href="qdirmodel.html#setFilter">setFilter</a>(), <a href="qdirmodel.html#filter">filter</a>(), <a href="qlistview.html">QListView</a>, <a href="qtreeview.html">QTreeView</a>, <a href="itemviews-dirview.html">Dir View Example</a>, and <a href="model-view-model.html">Model Classes</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Roles-enum"></a>enum QDirModel::Roles</h3>
@@ -167,7 +167,9 @@
 <h3 class="fn"><a name="fileIcon"></a><a href="qicon.html">QIcon</a> QDirModel::fileIcon ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns the icons for the item stored in the model under the given <i>index</i>.</p>
 <h3 class="fn"><a name="fileInfo"></a><a href="qfileinfo.html">QFileInfo</a> QDirModel::fileInfo ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
-<p>Returns the file information for the model item <i>index</i>.</p>
+<p>Returns the file information for the specified model <i>index</i>.</p>
+<p><b>Note:</b> If the model index represents a symbolic link in the underlying filing system, the file information returned will contain information about the symbolic link itself, regardless of whether <a href="qdirmodel.html#resolveSymlinks-prop">resolveSymlinks</a> is enabled or not.</p>
+<p>See also <a href="qfileinfo.html#symLinkTarget">QFileInfo::symLinkTarget</a>().</p>
 <h3 class="fn"><a name="fileName"></a><a href="qstring.html">QString</a> QDirModel::fileName ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns the name of the item stored in the model under the <i>index</i> given.</p>
 <h3 class="fn"><a name="filePath"></a><a href="qstring.html">QString</a> QDirModel::filePath ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
@@ -212,7 +214,7 @@
 <p>Return the parent of the given <i>child</i> model item.</p>
 <p>Reimplemented from <a href="qabstractitemmodel.html#parent">QAbstractItemModel</a>.</p>
 <h3 class="fn"><a name="refresh"></a>void QDirModel::refresh ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() )</h3>
-<p>Refreshes (rereads) the children of <i>parent</i>.</p>
+<p><a href="qdirmodel.html">QDirModel</a> caches file information. This function updates the cache. The <i>parent</i> parameter is the directory from which the model is updated; the default value will update the model from root directory of the file system (the entire model).</p>
 <h3 class="fn"><a name="remove"></a>bool QDirModel::remove ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> )</h3>
 <p>Removes the model item <i>index</i> from the directory model, returning true if successful. If the item cannot be removed, false is returned.</p>
 <h3 class="fn"><a name="rmdir"></a>bool QDirModel::rmdir ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> )</h3>
@@ -251,6 +253,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

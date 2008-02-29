@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Application Control Subsystem</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Application Control Subsystem</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -17,20 +16,21 @@
 <p>During bring up the <a href="applicationlauncher.html">ApplicationLauncher</a> (or, more specifically, the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> instances that will be discussed shortly) may install a &quot;custom route&quot; into the <a href="applicationipcrouter.html">ApplicationIpcRouter</a> for the particular application. If installed, the router should deliver all messages for this application to this route. This model allows &quot;non-Qtopia&quot; application types, such as Java games, to transform Qtopia service and message requests into a form they understand. For example, sending a <tt>raise()</tt> message to a Java application may transformed into executing a special command line utility to start and raise the Java game.</p>
 <p>The <a href="applicationlauncher.html">ApplicationLauncher</a> itself does not know how to start any type of application. Instead, it acts as a coordinator for other system components that do. When asked to launch an application, the <a href="applicationlauncher.html">ApplicationLauncher</a> collects together all tasks in the server that provide the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> interface. It then asks each in turn to launch the application until one accepts the request or all have been exhausted. It is the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> instances that actually launch the application and allow new application types to be easily added to the system.</p>
 <p>The following classes are part of Qtopia's application control subsystem.</p>
-<p><table width="100%" class="annotated">
-<tr valign="top" class="odd"><th><a href="applicationipcrouter.html">ApplicationIpcRouter</a></th><td>Interface through which ApplicationTypeLauncher instances to control IPC message routing</td></tr>
-<tr valign="top" class="even"><th><a href="applicationterminationhandler.html">ApplicationTerminationHandler</a></th><td>Allows tasks to be notified, and possibly filter, when an application terminates</td></tr>
-<tr valign="top" class="odd"><th><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></th><td>Interface to control a particular application type in the system</td></tr>
-<tr valign="top" class="even"><th><a href="builtinapplicationlauncher.html">BuiltinApplicationLauncher</a></th><td>Supports launching simple applications that run inside the Qtopia Server process</td></tr>
-<tr valign="top" class="odd"><th><a href="exeapplicationlauncher.html">ExeApplicationLauncher</a></th><td>Simplifies implementing ApplicationTypeLauncher for process based applications</td></tr>
-<tr valign="top" class="even"><th><a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a></th><td>Supports launching &quot;quicklaunched&quot; QtopiaApplication applications</td></tr>
-<tr valign="top" class="odd"><th><a href="sandboxedexeapplicationlauncher.html">SandboxedExeApplicationLauncher</a></th><td>Supports launching untrusted installed application executables</td></tr>
-<tr valign="top" class="even"><th><a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a></th><td>Supports launching regular QtopiaApplication executables</td></tr>
+<p><table width="100%">
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="applicationipcrouter.html">ApplicationIpcRouter</a></b></td><td>Interface through which ApplicationTypeLauncher instances to control IPC message routing</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="applicationterminationhandler.html">ApplicationTerminationHandler</a></b></td><td>Allows tasks to be notified, and possibly filter, when an application terminates</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></b></td><td>Interface to control a particular application type in the system</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="builtinapplicationlauncher.html">BuiltinApplicationLauncher</a></b></td><td>Supports launching simple applications that run inside the Qtopia Server process</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="consoleapplicationlauncher.html">ConsoleApplicationLauncher</a></b></td><td>Supports launching console applications</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="exeapplicationlauncher.html">ExeApplicationLauncher</a></b></td><td>Simplifies implementing ApplicationTypeLauncher for process based applications</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a></b></td><td>Supports launching &quot;quicklaunched&quot; QtopiaApplication applications</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="sandboxedexeapplicationlauncher.html">SandboxedExeApplicationLauncher</a></b></td><td>Supports launching untrusted installed application executables</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b><a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a></b></td><td>Supports launching regular QtopiaApplication executables</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

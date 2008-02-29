@@ -1,13 +1,17 @@
 <html>
 <head><title>Working with Documents</title></head>
 <body>
-<h3>Working with Documents</h3>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Working with Documents</h2>
+<!--#else -->
+   <h3>Working with Documents</h3>
+<!--#endif-->
 <ul>
 <li><a href="qpe-document-properties.html">Document Properties</a></li>
 <li><a href="documents-type.html">Show Document by Type</a></li>
 <li><a href="documents-category.html">Showing Documents by Category</a></li>
-<!--#if expr="$PDASTYLE"-->
 <li><a href="documents-storage.html">Document Storage</a></li>
+<!--#if expr="$PDASTYLE"-->
 <li><a href="backuprestore.html">Back-ups</a></li>
 <!--#endif-->
 </ul>

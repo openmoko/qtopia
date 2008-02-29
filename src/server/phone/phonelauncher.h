@@ -201,7 +201,6 @@ private:
     QMenu *documentsMenu;
     QPointer<QAbstractMessageBox> warningBox;
     int separatorId;
-    int timeId;
     QBasicTimer multitaskingMultipressTimer;
     int multitaskingcursor;
     uint registrationMsgId;

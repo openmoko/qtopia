@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QDSAction Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QDSAction Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDSAction Class Reference</h1>
 <p>The QDSAction class provides an interface for requesting QDS services. <a href="#details">More...</a></p>
-<pre>    #include &lt;QDSAction&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QDSAction&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qdsaction-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -32,7 +31,7 @@
 <li><div class="fn"/>QString <b><a href="qdsaction.html#errorMessage">errorMessage</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qdsaction.html#exec">exec</a></b> ()</li>
 <li><div class="fn"/>int <b><a href="qdsaction.html#exec-2">exec</a></b> ( const QDSData &amp; <i>requestData</i>, const QByteArray &amp; <i>auxiliary</i> = QByteArray() )</li>
-<li><div class="fn"/>QLocalUniqueId <b><a href="qdsaction.html#id">id</a></b> () const</li>
+<li><div class="fn"/>QUniqueId <b><a href="qdsaction.html#id">id</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qdsaction.html#invoke">invoke</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qdsaction.html#invoke-2">invoke</a></b> ( const QDSData &amp; <i>requestData</i>, const QByteArray &amp; <i>auxiliary</i> = QByteArray() )</li>
 <li><div class="fn"/>bool <b><a href="qdsaction.html#isActive">isActive</a></b> () const</li>
@@ -48,9 +47,9 @@
 <a name="signals"></a>
 <h3>Signals</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="qdsaction.html#error">error</a></b> ( const QLocalUniqueId &amp; <i>actionId</i>, const QString &amp; <i>message</i> )</li>
-<li><div class="fn"/>void <b><a href="qdsaction.html#response">response</a></b> ( const QLocalUniqueId &amp; <i>actionId</i> )</li>
-<li><div class="fn"/>void <b><a href="qdsaction.html#response-2">response</a></b> ( const QLocalUniqueId &amp; <i>actionId</i>, const QDSData &amp; <i>responseData</i> )</li>
+<li><div class="fn"/>void <b><a href="qdsaction.html#error">error</a></b> ( const QUniqueId &amp; <i>actionId</i>, const QString &amp; <i>message</i> )</li>
+<li><div class="fn"/>void <b><a href="qdsaction.html#response">response</a></b> ( const QUniqueId &amp; <i>actionId</i> )</li>
+<li><div class="fn"/>void <b><a href="qdsaction.html#response-2">response</a></b> ( const QUniqueId &amp; <i>actionId</i>, const QDSData &amp; <i>responseData</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
@@ -94,7 +93,7 @@
 <p>Constructor which accesses the service in <i>serviceInfo</i> and attaches to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QDSAction"></a>QDSAction::~QDSAction ()</h3>
 <p>Destructor.</p>
-<h3 class="fn"><a name="error"></a>void QDSAction::error ( const <a href="qlocaluniqueid.html">QLocalUniqueId</a> &amp; <i>actionId</i>, const <a href="qstring.html">QString</a> &amp; <i>message</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="error"></a>void QDSAction::error ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>actionId</i>, const <a href="qstring.html">QString</a> &amp; <i>message</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when a error message <i>message</i> is received for the action identified by <i>actionId</i>.</p>
 <h3 class="fn"><a name="errorMessage"></a><a href="qstring.html">QString</a> QDSAction::errorMessage () const</h3>
 <p>Returns any error message that was generated during the request. Errors are reported from either <a href="qdsaction.html">QDSAction</a> or the provider application, and are reported through QDSData::error() or the return value of QDSData::exec(). If no error has been reported <a href="porting4.html#qstring">QString</a>() will be returned.</p>
@@ -106,7 +105,7 @@
 <p>Performs the QDS service request with <i>requestData</i> synchronously. The return value provides the result of the request, see <a href="qdsaction.html#ResponseCode-enum">QDSAction::ResponseCode</a>. Beware, this call will block until the response has been received from the QDS service or the request times out.</p>
 <p>The request may also contain <i>auxiliary</i> data for supplementary information which may be required for the request but does not conceptionally belong to <i>requestData</i>.</p>
 <p>This method should only be used for QDS services which have request data, as discussed in <a href="qdsserviceinfo.html">QDSServiceInfo</a>, otherwise an error will be generated.</p>
-<h3 class="fn"><a name="id"></a><a href="qlocaluniqueid.html">QLocalUniqueId</a> QDSAction::id () const</h3>
+<h3 class="fn"><a name="id"></a><a href="quniqueid.html">QUniqueId</a> QDSAction::id () const</h3>
 <p>Returns the unique identifier for the <a href="qdsaction.html">QDSAction</a></p>
 <h3 class="fn"><a name="invoke"></a>bool QDSAction::invoke ()</h3>
 <p>Initiates the QDS service request asynchronously. Depending on the outcome of the request, the response from the QDS service provider is given by one of QDSData::response() or QDSData::error() signals.</p>
@@ -122,9 +121,9 @@
 <p>Determines if the <a href="qdsaction.html">QDSAction</a> object represents an available QDS service. The requirements of an available QDS service are discussed in <a href="qdsserviceinfo.html">QDSServiceInfo</a>.</p>
 <h3 class="fn"><a name="isValid"></a>bool QDSAction::isValid () const</h3>
 <p>Determines if the <a href="qdsaction.html">QDSAction</a> object represents a valid QDS service. The requirements of a valid QDS service are discussed in <a href="qdsserviceinfo.html">QDSServiceInfo</a>.</p>
-<h3 class="fn"><a name="response"></a>void QDSAction::response ( const <a href="qlocaluniqueid.html">QLocalUniqueId</a> &amp; <i>actionId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="response"></a>void QDSAction::response ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>actionId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when a response is received from the service provider for action identified by <i>actionId</i>.</p>
-<h3 class="fn"><a name="response-2"></a>void QDSAction::response ( const <a href="qlocaluniqueid.html">QLocalUniqueId</a> &amp; <i>actionId</i>, const <a href="qdsdata.html">QDSData</a> &amp; <i>responseData</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="response-2"></a>void QDSAction::response ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>actionId</i>, const <a href="qdsdata.html">QDSData</a> &amp; <i>responseData</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Signal that is emitted when a response is received from the service provider, which contains the response data <i>responseData</i> for action identified by <i>actionId</i>.</p>
 <h3 class="fn"><a name="responseData"></a><a href="qdsdata.html">QDSData</a> QDSAction::responseData () const</h3>
@@ -137,6 +136,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

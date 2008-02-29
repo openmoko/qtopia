@@ -28,8 +28,7 @@ BtHandsfreeService::BtHandsfreeService( QObject* parent )
     : QObject( parent )
 {
     qLog(Bluetooth) << "Initializing Handsfree Service";
-    m_hfService = new QBluetoothHandsfreeService( "BluetoothHandsfree", this );
-    m_hfService->initialize();
+    m_hfService = new QBluetoothHandsfreeService( "BluetoothHandsfree", tr("Handsfree Audio Gateway"), this );
 }
 
 BtHandsfreeService::~BtHandsfreeService()

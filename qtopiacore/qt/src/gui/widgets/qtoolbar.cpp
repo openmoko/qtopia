@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -516,8 +526,10 @@ Qt::ToolBarAreas QToolBar::allowedAreas() const
 
     The default is Qt::Horizontal.
 
-    The orientation is updated automatically when the toolbar is
-    managed by QMainWindow.
+    This function should not be used when the toolbar is managed
+    by QMainWindow. You can use QMainWindow::addToolBar() or
+    QMainWindow::insertToolBar() if you wish to move a toolbar (that
+    is already added to a main window) to another Qt::ToolBarArea.
 */
 
 void QToolBar::setOrientation(Qt::Orientation orientation)
@@ -551,10 +563,12 @@ void QToolBar::setOrientation(Qt::Orientation orientation)
 Qt::Orientation QToolBar::orientation() const
 { Q_D(const QToolBar); return d->orientation; }
 
-/*! \property QToolBar::iconSize
+/*! 
+    \property QToolBar::iconSize
     \brief size of icons in the toolbar.
 
-    The default is Qt::AutomaticIconSize.
+    The default size is determined by the application's style and is
+    derived from the QStyle::PM_ToolBarIconSize pixel metric.
 */
 
 QSize QToolBar::iconSize() const

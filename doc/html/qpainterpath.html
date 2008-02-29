@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/painting/qpainterpath.cpp -->
 <head>
   <title>Qt 4.2: QPainterPath Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -74,8 +75,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpainterpath.html#operator-lt-lt-88">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QPainterPath &amp; <i>path</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpainterpath.html#operator-gt-gt-52">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QPainterPath &amp; <i>path</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpainterpath.html#operator-lt-lt-89">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QPainterPath &amp; <i>path</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpainterpath.html#operator-gt-gt-53">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QPainterPath &amp; <i>path</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -132,13 +133,13 @@
 <p>The <a href="qpainterpath.html#toFillPolygon">toFillPolygon</a>() and <a href="qpainterpath.html#toFillPolygons">toFillPolygons</a>() functions first convert all the subpaths to polygons, then uses a rewinding technique to make sure that overlapping subpaths can be filled using the correct fill rule. Note that rewinding inserts additional lines in the polygon so the outline of the fill polygon does not match the outline of the path.</p>
 <a name="examples"></a>
 <h3>Examples</h3>
-<p>Qt provides the Painter Paths Example and the <a href="demos-deform.html">Vector Deformation Demo</a> which are located in Qt's example and demo directories respectively.</p>
-<p>The Painter Paths Example shows how painter paths can be used to build complex shapes for rendering and lets the user experiment with the filling and stroking. The <a href="demos-deform.html">Vector Deformation Demo</a> shows how to use QPainterPath to draw text.</p>
+<p>Qt provides the <a href="painting-painterpaths.html">Painter Paths Example</a> and the <a href="demos-deform.html">Vector Deformation Demo</a> which are located in Qt's example and demo directories respectively.</p>
+<p>The <a href="painting-painterpaths.html">Painter Paths Example</a> shows how painter paths can be used to build complex shapes for rendering and lets the user experiment with the filling and stroking. The <a href="demos-deform.html">Vector Deformation Demo</a> shows how to use QPainterPath to draw text.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/qpainterpath-example.png" /></td><td><img src="images/qpainterpath-demo.png" /></td></tr>
-<thead><tr valign="top" class="qt-style"><th>Painter Paths Example</th><th><a href="demos-deform.html">Vector Deformation Demo</a></th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th><a href="painting-painterpaths.html">Painter Paths Example</a></th><th><a href="demos-deform.html">Vector Deformation Demo</a></th></tr></thead>
 </table></p>
-<p>See also <a href="qpainterpathstroker.html">QPainterPathStroker</a>, <a href="qpainter.html">QPainter</a>, <a href="qregion.html">QRegion</a>, and Painter Paths Example.</p>
+<p>See also <a href="qpainterpathstroker.html">QPainterPathStroker</a>, <a href="qpainter.html">QPainter</a>, <a href="qregion.html">QRegion</a>, and <a href="painting-painterpaths.html">Painter Paths Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ElementType-enum"></a>enum QPainterPath::ElementType</h3>
@@ -402,11 +403,11 @@
 <p>See also <a href="qpainterpath.html#operator-not-eq">operator!=</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-88"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QPainterPath &amp; <i>path</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-89"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QPainterPath &amp; <i>path</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given painter <i>path</i> to the given <i>stream</i>, and returns a reference to the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-52"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QPainterPath &amp; <i>path</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-53"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QPainterPath &amp; <i>path</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a painter path from the given <i>stream</i> into the specified <i>path</i>, and returns a reference to the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
@@ -414,6 +415,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Debugging Qtopia Applications</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Debugging Qtopia Applications</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -31,9 +30,9 @@
 <h4>Build the Application with Debug Symbols</h4>
 <p>To build an application with debug symbols:</p>
 <ul>
-<li>pass <tt>-debug</tt> to configure or add debug to the <tt>.pro</tt> file CONFIG settings as follows:<pre>    CONFIG += debug</pre>
+<li>pass <tt>-debug</tt> to configure or add debug to the <tt>.pro</tt> file CONFIG settings as follows:<pre>&nbsp;   CONFIG += debug</pre>
 </li>
-<li>build the application and install the application binary into the <tt>/opt/Qtopia/bin</tt> directory using the following commands:<pre>    $ make clean
+<li>build the application and install the application binary into the <tt>/opt/Qtopia/bin</tt> directory using the following commands:<pre>&nbsp;   $ make clean
     $ make
     $ make install</pre>
 </li>
@@ -47,7 +46,7 @@
 <li>start gdb</li>
 </ul>
 <p>using the following commands:</p>
-<pre>    $ qvfb &amp;
+<pre>&nbsp;   $ qvfb &amp;
     $ qpe &amp;
     $ gdb theProgram
     (gdb) r # run</pre>
@@ -57,7 +56,7 @@
 <li>ensure the application hooks into the virtual frame buffer</li>
 </ul>
 <p>using the following commands:</p>
-<pre>    $ qvfb &amp;
+<pre>&nbsp;   $ qvfb &amp;
     $ gdb theProgram
     (gdb) set args - qws # we need this to hook to the virtual frame buffer.
     (gdb) list # if you want to list the main.cpp file
@@ -68,13 +67,13 @@
 <a name="debug-crashes"></a>
 <h4>Debug Crashes</h4>
 <p>If an application built with debug crashes, a <tt>core</tt> file is produced. Use the following commands to examine the core file contents:</p>
-<pre>    $ gdb theapplication core
+<pre>&nbsp;   $ gdb theapplication core
     (gdb) backtrace full</pre>
 <a name="qlog"></a><a name="qlog-categorized-logging"></a>
 <h3>qLog - Categorized Logging</h3>
 <p>Qtopia provides the <tt>qLog(CategoryIdentifier)</tt> function for categorized logging, built on top of the <tt>QDebug</tt> class in Qtopia Core.</p>
 <p>To turn on <tt>qLog</tt> edit the file:</p>
-<pre>        $HOME/Settings/Trolltech/Log.conf</pre>
+<pre>&nbsp;       $HOME/Settings/Trolltech/Log.conf</pre>
 <p>If the file does not exist:</p>
 <ol type="1">
 <li>run the <tt>Settings-&gt;Logging</tt> application from Qtopia.</li>
@@ -83,12 +82,12 @@
 </ol>
 <p><b>Note:</b> To implement a <tt>qLog</tt> change you must restart Qtopia.</p>
 <p>Log messages are displayed if the <tt>CategoryIdentifier</tt> has been enabled in the <tt>qtopia-config.h</tt> file. For example, the following enables logging messages related to the user interface:</p>
-<pre>    [UI]
+<pre>&nbsp;   [UI]
     Enabled = 1
     Name[] = User interface
     Help[] = Anything to do with the user interface.</pre>
 <p>The following is an example of using a log message in the source code:</p>
-<pre>    #include &lt;qtopialog.h&gt;
+<pre>&nbsp;   #include &lt;qtopialog.h&gt;
 
     qLog(Type) &lt;&lt;&quot;Test&quot;;
     qLog(Type) &lt;&lt;&quot;string=&quot;&lt;&lt;str &lt;&lt;&quot;,int=&quot;&lt;&lt;i;</pre>
@@ -101,9 +100,20 @@
 <li><tt>QLOG_OPTION_VOLATILE(CategoryIdentifier,expr)</tt> - as above, but <i>expr</i> is not cached.</li>
 </ul>
 <p>The <tt>CategoryIdentifier</tt> has <tt>_QLog</tt> appended within the macros, so it can be any identifier you choose. The associated type name might be a useful choice:</p>
-<pre>        qLog(QWidget) &lt;&lt; &quot;Created&quot; &lt;&lt; name;</pre>
-<p>To assist field testing, there is a Logging settings application. It uses the <tt>logread</tt> program to interface with the <tt>BusyBox syslogd</tt> output. To forward Qtopia's output to <tt>syslogd</tt>, use the <tt>logger</tt> program:</p>
-<pre>        qpe 2&gt;&amp;1 | logger -t 'Qtopia'</pre>
+<pre>&nbsp;       qLog(QWidget) &lt;&lt; &quot;Created&quot; &lt;&lt; name;</pre>
+<p>To assist field testing, there is a <tt>Logging Settings</tt> application that uses the <tt>logread</tt> program to interface with the <tt>BusyBox syslogd</tt> output. To forward Qtopia's output to <tt>syslogd</tt>, use the <tt>logger</tt> program:</p>
+<ol type="1">
+<li>Start the <tt>syslog</tt> daemon in circular buffer mode. With the command:<pre>&nbsp;      syslogd -C &lt;buffersize&gt;</pre>
+<p>For example, to start <tt>syslogd</tt> with a 512 byte circular buffer use:</p>
+<pre>&nbsp;       syslogd -C 512</pre>
+</li>
+<li>Start Qtopia with logging output redirected to the system log using:<pre>&nbsp;       qpe 2&gt;&amp;1 | logger -t Qtopia</pre>
+</li>
+<li>Start <tt>Logging Settings</tt> to view log messages.</li>
+<li>Select <tt>Categories...</tt> from the context menu to select the log messages to enable/disable. <b>Note:</b> you will need to restart Qtopia for the changes to take effect.</li>
+<li>Log messages can be viewed on the console by running:<pre>&nbsp;       logread -f</pre>
+</li>
+</ol>
 <a name="references"></a>
 <h2>References</h2>
 <ul>
@@ -115,6 +125,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

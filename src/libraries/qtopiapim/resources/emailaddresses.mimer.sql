@@ -4,7 +4,7 @@
 CREATE TABLE emailaddresses (
     addr NVARCHAR(255) NOT NULL,
     label NVARCHAR(255),
-    recid BINARY(8),
+    recid INTEGER,
     PRIMARY KEY(addr),
     FOREIGN KEY(recid) REFERENCES contacts(recid)
 );

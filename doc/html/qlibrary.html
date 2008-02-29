@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/plugin/qlibrary.cpp -->
 <head>
   <title>Qt 4.2: QLibrary Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -93,12 +94,12 @@
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="LoadHint-enum"></a>enum QLibrary::LoadHint<br />flags QLibrary::LoadHints</h3>
-<p>This enum describes the possible hints that can be used to change the way libraries are handled when they are loaded.</p>
+<p>This enum describes the possible hints that can be used to change the way libraries are handled when they are loaded. These values indicate how symbols are resolved when libraries are loaded, and are specified using the <a href="qlibrary.html#loadHints-prop">setLoadHints</a>() function.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QLibrary::ResolveAllSymbolsHint</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">Try to resolve all symbols in a library as soon as it is loaded.</td></tr>
-<tr><td valign="top"><tt>QLibrary::ExportExternalSymbolsHint</tt></td><td align="center" valign="top"><tt>0x02</tt></td><td valign="top">Export unresolved symbols in the library so that they can be resolved in other dynamically-loaded libraries.</td></tr>
-<tr><td valign="top"><tt>QLibrary::LoadArchiveMemberHint</tt></td><td align="center" valign="top"><tt>0x04</tt></td><td valign="top">Allow the file name of the library to specify a particular object file within an archive file.</td></tr>
+<tr><td valign="top"><tt>QLibrary::ResolveAllSymbolsHint</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">Causes all symbols in a library to be resolved when it is loaded, not simply when <a href="qlibrary.html#resolve">resolve</a>() is called.</td></tr>
+<tr><td valign="top"><tt>QLibrary::ExportExternalSymbolsHint</tt></td><td align="center" valign="top"><tt>0x02</tt></td><td valign="top">Exports unresolved and external symbols in the library so that they can be resolved in other dynamically-loaded libraries loaded later.</td></tr>
+<tr><td valign="top"><tt>QLibrary::LoadArchiveMemberHint</tt></td><td align="center" valign="top"><tt>0x04</tt></td><td valign="top">Allows the file name of the library to specify a particular object file within an archive file. If this hint is given, the filename of the library consists of a path, which is a reference to an archive file, followed by a reference to the archive member.</td></tr>
 </table></p>
 <p>The LoadHints type is a typedef for <a href="qflags.html">QFlags</a>&lt;LoadHint&gt;. It stores an OR combination of LoadHint values.</p>
 <p>See also <a href="qlibrary.html#loadHints-prop">loadHints</a>.</p>
@@ -209,6 +210,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

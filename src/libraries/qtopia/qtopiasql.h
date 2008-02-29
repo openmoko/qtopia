@@ -38,22 +38,18 @@ class QTOPIA_EXPORT QtopiaSql {
 public:
     static void openDatabase();
 
-    static bool ensureSchema(const QStringList &tables, QSqlDatabase &db,  bool transact = true);
-    static bool ensureSchema(const QString &table, QSqlDatabase &db, bool transact = true);
-
     static int stringCompare(const QString &, const QString &);
-
 
     static QSqlDatabase &systemDatabase();
     static void loadConfig(const QString &type, const QString &name, const QString &user);
 
-    /*static QSqlError exec(const QString &query);*/
     static QSqlError exec(const QString &query, QSqlDatabase& db, bool inTransaction=true );
     static QSqlError exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction=true );
     static void attachDB(const QString& path);
     static void attachDB(const QString& path, const QString &dbPath);
     static void detachDB(const QString& path);
     static QtopiaDatabaseId databaseIdForPath(const QString& path);
+    static QtopiaDatabaseId databaseIdForDatabasePath(const QString& dbPath);
     static QSqlDatabase &database(const QtopiaDatabaseId& id);
     static const QList<QtopiaDatabaseId> databaseIds();
     static const QList<QSqlDatabase> databases();
@@ -61,19 +57,19 @@ public:
     static QString databasePathForId(const QtopiaDatabaseId& id);
 
     static QString escapeString(const QString &input);
+    static QSqlDatabase applicationSpecificDatabase(const QString &appname);
+    static bool ensureTableExists(const QString &table, QSqlDatabase &db );
+    static bool ensureTableExists(const QStringList &, QSqlDatabase& );
 
     static void logQuery(const QSqlQuery &q);
-    static bool loadSchema(QSqlDatabase &db, const QString &, bool transact=true);
 private:
     static void closeDatabase();
-    static void setupPreloadDatabase();
     static QSqlDatabase *connectDatabase(const QString &connName);
     static void init(QSqlDatabase &db, bool force=false);
     static void loadConfig();
     static void saveConfig();
 
     static void initPrivate();
-    static void ensureDatabaseSchema(QSqlDatabase &db);
 
     static QtopiaSqlPrivate *d;
 };

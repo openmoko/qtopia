@@ -26,7 +26,7 @@
 /*!
     \class QMultiPortMultiplexer
     \brief The QMultiPortMultiplexer class provides multiplexing across several serial ports
-    \ingroup communication
+    \ingroup telephony::serial
 
     The QMultiPortMultiplexer class provides multiplexing across several
     serial ports.  Use this instead of QGsm0710Multiplexer if the kernel

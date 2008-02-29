@@ -108,7 +108,7 @@ void QPreparedSqlQuery::reset()
 void QPreparedSqlQuery::buildQuery()
 {
     if (!mQuery) {
-        mQuery = new QSqlQuery();
+        mQuery = new QSqlQuery(QPimSqlIO::database());
         //mQuery->setForwardOnly(true);
     }
 }
@@ -152,7 +152,7 @@ QString concat(const char *a, const char *b, const char *c, const char *d = 0, c
 */
 QPimSqlIO::QPimSqlIO(const QUuid &scope, const char *table, const char *categoryTable,
         const char *customTable, const char *updateText, const char *insertText) :
-    model(table, categoryTable), appScope(scope),
+    model(table, categoryTable), idGenerator(scope),
     tableText(table),
     updateRecordText(concat("UPDATE ", table, " SET ", updateText, " WHERE recid = :i")),
     selectCustomText(concat("SELECT count(*) FROM ", customTable, " WHERE recid = :i")),
@@ -166,7 +166,7 @@ QPimSqlIO::QPimSqlIO(const QUuid &scope, const char *table, const char *category
 
     retrieveCategoriesQuery(concat("SELECT categoryid FROM ", categoryTable, " WHERE recid=:id")),
     retrieveCustomQuery(concat("SELECT fieldname, fieldvalue FROM ", customTable, " WHERE recid = :i")),
-    changeLogInsert("INSERT INTO changelog (recid, created, modified) VALUES (:id, :ct, :mt)"),
+    changeLogInsert("INSERT INTO changelog (recid, context, created, modified) VALUES (:id, :context, :ct, :mt)"),
     changeLogUpdate("UPDATE changelog SET modified = :ls, removed = NULL WHERE recid = :id"),
     changeLogQuery("SELECT recid FROM changelog WHERE recid = :r"),
     addRecordQuery(concat("INSERT INTO ", table, insertText)),
@@ -183,29 +183,42 @@ QPimSqlIO::~QPimSqlIO()
 {
 }
 
+static QSqlDatabase *pimdb = 0;
+
+/*!
+  Returns the database object specific to the pim sql data.
+*/
+QSqlDatabase QPimSqlIO::database()
+{
+    if (!pimdb)
+        pimdb = new QSqlDatabase( QtopiaSql::systemDatabase() );
+    if (!pimdb->isOpen())
+        qWarning() << "Failed to open pim database";
+    return *pimdb;
+}
+
 /*!
   \internal
   Updates the table rows for record \a r to the values in record \a r.
   */
 bool QPimSqlIO::updateRecord(const QPimRecord& r)
 {
-    if (mSyncTime.isNull()) QSqlDatabase::database().transaction();
-    QLocalUniqueId uid = r.uid();
-    QByteArray uiddata = uid.toByteArray();
+    if (mSyncTime.isNull()) database().transaction();
+    QUniqueId uid = r.uid();
 
     // update last_modified as well, unless change tracking is off.
 
     {
-        QSqlQuery q;
+        QSqlQuery q(database());
         q.prepare(updateRecordText);
 
-        q.bindValue(":i", uiddata);
+        q.bindValue(":i", uid.toUInt());
         bindFields(r, q);
 
         QtopiaSql::logQuery(q);
         if (!q.exec()) {
             qWarning("failed main table update: %s", (const char *)q.lastError().text().toLocal8Bit());
-            if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+            if (mSyncTime.isNull()) database().rollback();
             return false;
         }
 
@@ -213,29 +226,29 @@ bool QPimSqlIO::updateRecord(const QPimRecord& r)
         QMap<QString, QString> cmap = r.customFields();
         // could do a check to see whats there or not, or ... XXX
         q.prepare(selectCustomText);
-        q.bindValue(":i", uiddata);
+        q.bindValue(":i", uid.toUInt());
         QtopiaSql::logQuery(q);
         if(!q.exec())
         {
             qWarning("selectCustomText failed: %s", (const char *)q.lastError().text().toLocal8Bit());
-            if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+            if (mSyncTime.isNull()) database().rollback();
             return false;
         }
 
         if(q.next() && q.value(0).toInt() > 0) {
             q.prepare(deleteCustomText);
-            q.bindValue(":i", uiddata);
+            q.bindValue(":i", uid.toUInt());
             QtopiaSql::logQuery(q);
             if (!q.exec()) {
                 qWarning("failed clean up custom fields: %s", (const char *)q.lastError().text().toLocal8Bit());
-                if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+                if (mSyncTime.isNull()) database().rollback();
                 return false;
             }
         }
 
         if (cmap.count()) {
             q.prepare(insertCustomText);
-            q.bindValue(":i", uiddata);
+            q.bindValue(":i", uid.toUInt());
             QMap<QString, QString>::ConstIterator it;
             for (it = cmap.begin(); it != cmap.end(); ++it) {
                 q.bindValue(":n", it.key());
@@ -243,7 +256,7 @@ bool QPimSqlIO::updateRecord(const QPimRecord& r)
                 QtopiaSql::logQuery(q);
                 if (!q.exec()) {
                     qWarning("failed custom insert: %s", (const char *)q.lastError().text().toLocal8Bit());
-                    if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+                    if (mSyncTime.isNull()) database().rollback();
                     return false;
                 }
             }
@@ -251,35 +264,35 @@ bool QPimSqlIO::updateRecord(const QPimRecord& r)
 
         QList<QString> cats = r.categories();
         q.prepare(selectCategoriesText);
-        q.bindValue(":i", uiddata);
+        q.bindValue(":i", uid.toUInt());
         q.exec();
         if(q.next() && q.value(0).toInt() > 0) {
             q.prepare(deleteCategoriesText);
-            q.bindValue(":i", uiddata);
+            q.bindValue(":i", uid.toUInt());
             QtopiaSql::logQuery(q);
             if (!q.exec()) {
                 qWarning("failed clean up: %s", (const char *)q.lastError().text().toLocal8Bit());
-                if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+                if (mSyncTime.isNull()) database().rollback();
                 return false;
             }
         }
         if (cats.count()) {
             q.prepare(insertCategoriesText);
-            q.bindValue(":i", uiddata);
+            q.bindValue(":i", uid.toUInt());
             foreach(QString v, cats) {
                 q.bindValue(":v", v);
                 QtopiaSql::logQuery(q);
                 if (!q.exec()) {
                     qWarning("failed category table insert: %s", (const char *)q.lastError().text().toLocal8Bit());
-                    if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+                    if (mSyncTime.isNull()) database().rollback();
                     return false;
                 }
             }
         }
 
-        if (!updateExtraTables(uiddata, r)) {
-            qWarning("failed to update extra tables: %s", (const char *)QSqlDatabase::database().lastError().text().toLocal8Bit());
-            if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+        if (!updateExtraTables(uid.toUInt(), r)) {
+            qWarning("failed to update extra tables: %s", (const char *)database().lastError().text().toLocal8Bit());
+            if (mSyncTime.isNull()) database().rollback();
             return false;
         }
 
@@ -288,17 +301,17 @@ bool QPimSqlIO::updateRecord(const QPimRecord& r)
                     q.lastQuery().toLocal8Bit().constData(), q.lastError().text().toLocal8Bit().constData());
         QDateTime syncTime = mSyncTime.isNull() ? QTimeZone::current().toUtc(QDateTime::currentDateTime()) : mSyncTime;
         q.bindValue(":ls", syncTime);
-        q.bindValue(":id", uiddata);
+        q.bindValue(":id", uid.toUInt());
         if (!q.exec()) {
             qWarning("Failed to update record sync time: %s",
                     q.lastError().text().toLocal8Bit().constData());
-            if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+            if (mSyncTime.isNull()) database().rollback();
             return false;
         }
     }
-    if (mSyncTime.isNull() && !QSqlDatabase::database().commit()) {
-        qWarning("Could not commit update of record: %s", (const char *)QSqlDatabase::database().lastError().text().toLocal8Bit());
-        QSqlDatabase::database().rollback();
+    if (mSyncTime.isNull() && !database().commit()) {
+        qWarning("Could not commit update of record: %s", (const char *)database().lastError().text().toLocal8Bit());
+        database().rollback();
         return false;
     }
 
@@ -337,33 +350,30 @@ bool QPimSqlIO::removeRecord(int row)
 */
 bool QPimSqlIO::removeRecord(const QUniqueId & id)
 {
-    if (mSyncTime.isNull()) QSqlDatabase::database().transaction();
+    if (mSyncTime.isNull()) database().transaction();
 
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)id;
-    QByteArray uiddata = lid.toByteArray();
-
-    if (!removeExtraTables(uiddata)) {
-        if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
-        qWarning ("Failed to remove extra tables for %s", lid.toString().toLatin1().constData());
+    if (!removeExtraTables(id.toUInt())) {
+        if (mSyncTime.isNull()) database().rollback();
+        qWarning ("Failed to remove extra tables for %s", id.toString().toLatin1().constData());
         return false;
     }
-    QSqlQuery q;
+    QSqlQuery q(database());
 
     q.prepare(deleteCustomText);
-    q.bindValue(":i", uiddata);
+    q.bindValue(":i", id.toUInt());
     QtopiaSql::logQuery(q);
     if (!q.exec()) {
         qWarning("failed clean up custom fields: %s", (const char *)q.lastError().text().toLocal8Bit());
-        if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+        if (mSyncTime.isNull()) database().rollback();
         return false;
     }
 
     q.prepare(deleteRecordText);
-    q.bindValue(":i", uiddata);
+    q.bindValue(":i", id.toUInt());
     QtopiaSql::logQuery(q);
     if( !q.exec()) {
         qWarning("failed to delete record: %s", (const char *)q.lastError().text().toLocal8Bit());
-        if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+        if (mSyncTime.isNull()) database().rollback();
         return false;
     }
 
@@ -372,17 +382,17 @@ bool QPimSqlIO::removeRecord(const QUniqueId & id)
                 q.lastQuery().toLocal8Bit().constData(), q.lastError().text().toLocal8Bit().constData());
     QDateTime syncTime = mSyncTime.isNull() ? QTimeZone::current().toUtc(QDateTime::currentDateTime()) : mSyncTime;
     q.bindValue(":ls", syncTime);
-    q.bindValue(":id", uiddata);
+    q.bindValue(":id", id.toUInt());
     if (!q.exec()) {
         qWarning("Failed to update record remove time: %s",
                 q.lastError().text().toLocal8Bit().constData());
-        if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+        if (mSyncTime.isNull()) database().rollback();
         return false;
     }
 
-    if (mSyncTime.isNull() && !QSqlDatabase::database().commit()) {
-        qWarning("Could not commit removal of record: %s", (const char *)QSqlDatabase::database().lastError().text().toLocal8Bit());
-        QSqlDatabase::database().rollback();
+    if (mSyncTime.isNull() && !database().commit()) {
+        qWarning("Could not commit removal of record: %s", (const char *)database().lastError().text().toLocal8Bit());
+        database().rollback();
         return false;
     }
 
@@ -416,16 +426,16 @@ QList<QUniqueId> QPimSqlIO::recordIds(const QList<int> &rows) const
 */
 bool QPimSqlIO::removeRecords(const QList<QUniqueId> &ids)
 {
-    if (mSyncTime.isNull()) QSqlDatabase::database().transaction();
+    if (mSyncTime.isNull()) database().transaction();
 
     foreach(QUniqueId id, ids) {
         if (!removeRecord(id)) {
-            if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+            if (mSyncTime.isNull()) database().rollback();
             return false;
         }
     }
-    if (mSyncTime.isNull() && !QSqlDatabase::database().commit()) {
-        QSqlDatabase::database().rollback();
+    if (mSyncTime.isNull() && !database().commit()) {
+        database().rollback();
         return false;
     }
     return true;
@@ -445,21 +455,19 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, const QPimSource &sourc
 
 QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool createuid)
 {
-    if (mSyncTime.isNull()) QSqlDatabase::database().transaction();
+    if (mSyncTime.isNull()) database().transaction();
 
     // update created and last_modified as well, unless change tracking is off.
 
-    QUniqueIdGenerator g(appScope); // later, same scop method as xml
-    QLocalUniqueId u;
+    QUniqueId u;
     if (createuid || record.uid().isNull())
-        u = g.createUniqueId();
+        u = idGenerator.createUniqueId();
     else
         u = record.uid();
-    QByteArray ub = u.toByteArray();
 
     addRecordQuery.prepare();
 
-    addRecordQuery.bindValue(":i", ub);
+    addRecordQuery.bindValue(":i", u.toUInt());
     addRecordQuery.bindValue(":context", context);
 
     bindFields(record, *addRecordQuery);
@@ -467,7 +475,7 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool creat
     QtopiaSql::logQuery(*addRecordQuery);
     if (!addRecordQuery.exec()) {
         qWarning("failed main table insert: %s", (const char *)addRecordQuery.lastError().text().toLocal8Bit());
-        if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+        if (mSyncTime.isNull()) database().rollback();
         return QUniqueId();
     }
 
@@ -476,9 +484,9 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool creat
     // custom
     QMap<QString, QString> cmap = record.customFields();
     if (cmap.count()) {
-        QSqlQuery q;
+        QSqlQuery q(database());
         q.prepare(insertCustomText);
-        q.bindValue(":i", ub);
+        q.bindValue(":i", u.toUInt());
         QMap<QString, QString>::ConstIterator it;
         for (it = cmap.begin(); it != cmap.end(); ++it) {
             q.bindValue(":n", it.key());
@@ -486,7 +494,7 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool creat
             QtopiaSql::logQuery(q);
             if (!q.exec()) {
                 qWarning("failed custom insert: %s", (const char *)q.lastError().text().toLocal8Bit());
-                if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+                if (mSyncTime.isNull()) database().rollback();
                 return QUniqueId();
             }
         }
@@ -494,24 +502,28 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool creat
 
     QList<QString> cats = record.categories();
     if (cats.count()) {
-        QSqlQuery q;
+        QSqlQuery q(database());
         q.prepare(insertCategoriesText);
-        q.bindValue(":i", ub);
+        q.bindValue(":i", u.toUInt());
         foreach(QString v, cats) {
             q.bindValue(":v", v);
             QtopiaSql::logQuery(q);
             if (!q.exec()) {
                 qWarning("failed category table insert: %s", (const char *)q.lastError().text().toLocal8Bit());
-                if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+                if (mSyncTime.isNull()) database().rollback();
                 return QUniqueId();
             }
         }
     }
 
-    insertExtraTables(ub, record);
+    if (!insertExtraTables(u.toUInt(), record))
+    {
+        if (mSyncTime.isNull()) database().rollback();
+        return QUniqueId();
+    }
 
     changeLogQuery.prepare();
-    changeLogQuery.bindValue(":r", ub);
+    changeLogQuery.bindValue(":r", u.toUInt());
     changeLogQuery.exec();
     if (changeLogQuery.next()) {
         changeLogQuery.reset();
@@ -521,11 +533,11 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool creat
                     changeLogUpdate.lastQuery().toLocal8Bit().constData(), changeLogUpdate.lastError().text().toLocal8Bit().constData());
         QDateTime syncTime = mSyncTime.isNull() ? QTimeZone::current().toUtc(QDateTime::currentDateTime()) : mSyncTime;
         changeLogUpdate.bindValue(":ls", syncTime);
-        changeLogUpdate.bindValue(":id", ub);
+        changeLogUpdate.bindValue(":id", u.toUInt());
         if (!changeLogUpdate.exec()) {
             qWarning("Failed to update record sync time: %s",
                     changeLogUpdate.lastError().text().toLocal8Bit().constData());
-            if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+            if (mSyncTime.isNull()) database().rollback();
             changeLogUpdate.reset();
             return QUniqueId();
         }
@@ -537,22 +549,23 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool creat
             qWarning("Failed to prepare query %s: %s",
                     changeLogInsert.lastQuery().toLocal8Bit().constData(), changeLogInsert.lastError().text().toLocal8Bit().constData());
         QDateTime syncTime = mSyncTime.isNull() ? QTimeZone::current().toUtc(QDateTime::currentDateTime()) : mSyncTime;
-        changeLogInsert.bindValue(":id", ub);
+        changeLogInsert.bindValue(":id", u.toUInt());
+        changeLogInsert.bindValue(":context", context);
         changeLogInsert.bindValue(":ct", syncTime);
         changeLogInsert.bindValue(":mt", syncTime);
         if (!changeLogInsert.exec()) {
             qWarning("Failed to insert record sync time: %s",
                     changeLogInsert.lastError().text().toLocal8Bit().constData());
-            if (mSyncTime.isNull()) QSqlDatabase::database().rollback();
+            if (mSyncTime.isNull()) database().rollback();
             changeLogInsert.reset();
             return QUniqueId();
         }
         changeLogInsert.reset();
     }
 
-    if (mSyncTime.isNull() && !QSqlDatabase::database().commit()) {
-        qWarning("failed to commit: %s", (const char *)QSqlDatabase::database().lastError().text().toLocal8Bit());
-        QSqlDatabase::database().rollback();
+    if (mSyncTime.isNull() && !database().commit()) {
+        qWarning("failed to commit: %s", (const char *)database().lastError().text().toLocal8Bit());
+        database().rollback();
         return QUniqueId();
     }
 
@@ -650,10 +663,9 @@ bool QPimSqlIO::contains(const QUniqueId & id) const
 */
 int QPimSqlIO::context(const QUniqueId &id) const
 {
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)id;
     contextQuery.prepare();
 
-    contextQuery.bindValue(":i", lid.toByteArray());
+    contextQuery.bindValue(":i", id.toUInt());
 
     int rv = -1;
     
@@ -679,7 +691,7 @@ void QPimSqlIO::invalidateCache()
   Retrieves the category and custom filed information for the \a record
   identified by the \a id.
 */
-void QPimSqlIO::retrieveRecord(const QByteArray &id, QPimRecord &record) const
+void QPimSqlIO::retrieveRecord(uint id, QPimRecord &record) const
 {
     qLog(Sql) << "Read categories";
 
@@ -712,7 +724,9 @@ void QPimSqlIO::retrieveRecord(const QByteArray &id, QPimRecord &record) const
     retrieveCustomQuery.reset();
 
     QAnnotator bag;
-    QLocalUniqueId lid(id);
+
+    QUniqueId lid(QUniqueId::fromUInt(id));
+
     if (bag.contains(lid)) {
         QByteArray ba = bag.blob(lid);
         QString n;
@@ -728,17 +742,17 @@ void QPimSqlIO::retrieveRecord(const QByteArray &id, QPimRecord &record) const
   \internal
   Perform any additional updates on any additional tables.  Return true if successful.
 */
-bool QPimSqlIO::updateExtraTables(const QByteArray &, const QPimRecord &) { return true; }
+bool QPimSqlIO::updateExtraTables(uint, const QPimRecord &) { return true; }
 /*!
   \internal
   Perform any additional inserts on any additional tables.  Return true if successful.
 */
-bool QPimSqlIO::insertExtraTables(const QByteArray &, const QPimRecord &) { return true; }
+bool QPimSqlIO::insertExtraTables(uint, const QPimRecord &) { return true; }
 /*!
   \internal
   Perform any additional removes on any additional tables.  Return true if successful.
 */
-bool QPimSqlIO::removeExtraTables(const QByteArray &) { return true; }
+bool QPimSqlIO::removeExtraTables(uint) { return true; }
 
 int QPimSqlIO::sourceContext(const QPimSource &source)
 {
@@ -765,7 +779,7 @@ int QPimSqlIO::sourceContext(const QPimSource &source)
     }
     sourceContextQuery.reset();
 
-    QSqlQuery q;
+    QSqlQuery q(database());
     if (!q.prepare("INSERT INTO sqlsources (contextid, subsource) VALUES (:id, :source)")) {
         qWarning("Failed to prepare source context id store: %s",
                 (const char *)q.lastError().text().toLocal8Bit());
@@ -784,7 +798,7 @@ int QPimSqlIO::sourceContext(const QPimSource &source)
 
 QDateTime QPimSqlIO::lastSyncTime(const QPimSource &source)
 {
-    QSqlQuery q;
+    QSqlQuery q(database());
     if (!q.prepare("SELECT last_sync FROM sqlsources WHERE contextid = :id AND subsource = :source")) {
         qWarning("Failed to prepare select last sync time: %s",
                 (const char *)q.lastError().text().toLocal8Bit());
@@ -805,7 +819,7 @@ QDateTime QPimSqlIO::lastSyncTime(const QPimSource &source)
 
 bool QPimSqlIO::setLastSyncTime(const QPimSource &source, const QDateTime &time)
 {
-    QSqlQuery q;
+    QSqlQuery q(database());
     if (!q.prepare("UPDATE sqlsources SET last_sync = :ls WHERE contextid = :id AND subsource = :source")) {
         qWarning("Failed to prepare update last sync time: %s",
                 (const char *)q.lastError().text().toLocal8Bit());
@@ -820,29 +834,107 @@ bool QPimSqlIO::setLastSyncTime(const QPimSource &source, const QDateTime &time)
 
 bool QPimSqlIO::startSync(const QPimSource &source, const QDateTime &syncTime)
 {
+    QSet<QPimSource> sources;
+    sources.insert(source);
+    return startSync(sources, syncTime);
+}
+
+static QString contextString(const QSet<QPimSource> &list)
+{
+    QString contextset;
+    bool first = true;
+    foreach(QPimSource source, list) {
+        int c = QPimSqlIO::sourceContext(source);
+        if (c == -1)
+            continue;
+        if (first)
+            first = false;
+        else
+            contextset.append(QLatin1String(", "));
+        contextset.append(QString::number(QPimSqlIO::sourceContext(source)));
+    }
+    return contextset;
+}
+
+bool QPimSqlIO::startSync(const QSet<QPimSource> &sources, const QDateTime &syncTime)
+{
+    QString contextset = contextString(sources);
     Q_ASSERT(syncTime.isValid());
-    if (QSqlDatabase::database().transaction()) {
-        if (!QPimSqlIO::setLastSyncTime(source, syncTime)) {
-            QSqlDatabase::database().rollback();
+    if (database().transaction()) {
+        QString querytext = QLatin1String("UPDATE sqlsources SET last_sync = :ls WHERE contextid in (");
+        querytext.append(contextset);
+        querytext.append(QLatin1String(")"));
+        QSqlQuery query(database());
+        query.prepare(querytext);
+        query.bindValue(":ls", syncTime);
+        if (!query.exec()) {
+            database().rollback();
             return false;
         }
         mSyncTime = syncTime;
-        return true;
     }
-    return false;
+    return true;
 }
 
 bool QPimSqlIO::abortSync()
 {
     mSyncTime = QDateTime();
-    return QSqlDatabase::database().rollback();
+    return database().rollback();
 }
 
 bool QPimSqlIO::commitSync()
 {
-    if (QSqlDatabase::database().commit()) {
+    if (database().commit()) {
         mSyncTime = QDateTime();
         return true;
     }
     return false;
 }
+
+QList<QUniqueId> QPimSqlIO::removed(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+{
+    QString contextset = contextString(sources);
+    QSqlQuery q(database());
+    q.prepare("SELECT recid FROM changelog WHERE removed >= :ts AND CREATED < :ts2 AND context IN ("
+            + contextset + ")");
+    q.bindValue(":ts", timestamp);
+    q.bindValue(":ts2", timestamp);
+    q.exec();
+    QList<QUniqueId> result;
+    while(q.next()) {
+        result.append(QUniqueId::fromUInt(q.value(0).toInt()));
+    }
+    return result;
+}
+
+QList<QUniqueId> QPimSqlIO::added(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+{
+    QString contextset = contextString(sources);
+    QSqlQuery q(database());
+    q.prepare("SELECT recid FROM changelog WHERE created >= :ts AND removed IS NULL AND context IN ("
+            + contextset + ")");
+    q.bindValue(":ts", timestamp);
+    q.exec();
+    QList<QUniqueId> result;
+    while(q.next()) {
+        result.append(QUniqueId::fromUInt(q.value(0).toInt()));
+    }
+    return result;
+}
+
+QList<QUniqueId> QPimSqlIO::modified(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+{
+    QString contextset = contextString(sources);
+    QSqlQuery q(database());
+    q.prepare("SELECT recid FROM changelog WHERE modified >= :ts AND created < :ts2 AND removed IS NULL AND context IN ("
+            + contextset + ")");
+    q.bindValue(":ts", timestamp);
+    q.bindValue(":ts2", timestamp);
+    q.exec();
+    QList<QUniqueId> result;
+    while(q.next()) {
+        result.append(QUniqueId::fromUInt(q.value(0).toInt()));
+    }
+    return result;
+}
+

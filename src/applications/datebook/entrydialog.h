@@ -71,6 +71,8 @@ public slots:
     void turnOnAlarm();
     void checkAlarmSpin( int );
 
+    void checkRepeatDate( bool );
+
     void updateCategories();
     void showSummary();
 

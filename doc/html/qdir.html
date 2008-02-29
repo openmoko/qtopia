@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/io/qdir.cpp -->
 <head>
   <title>Qt 4.2: QDir Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -194,7 +195,7 @@
      }
      return 0;
  }</pre>
-<p>See also <a href="qfileinfo.html">QFileInfo</a>, <a href="qfile.html">QFile</a>, <a href="qfiledialog.html">QFileDialog</a>, <a href="qcoreapplication.html#applicationDirPath">QApplication::applicationDirPath</a>(), and Find Files Example.</p>
+<p>See also <a href="qfileinfo.html">QFileInfo</a>, <a href="qfile.html">QFile</a>, <a href="qfiledialog.html">QFileDialog</a>, <a href="qcoreapplication.html#applicationDirPath">QApplication::applicationDirPath</a>(), and <a href="dialogs-findfiles.html">Find Files Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="Filter-enum"></a>enum QDir::Filter<br />flags QDir::Filters</h3>
@@ -337,7 +338,7 @@
 <p>Returns an empty list if the directory is unreadable, does not exist, or if nothing matches the specification.</p>
 <p>See also <a href="qdir.html#entryInfoList">entryInfoList</a>(), <a href="qdir.html#setNameFilters">setNameFilters</a>(), <a href="qdir.html#setSorting">setSorting</a>(), and <a href="qdir.html#setFilter">setFilter</a>().</p>
 <h3 class="fn"><a name="exists"></a>bool QDir::exists ( const <a href="qstring.html">QString</a> &amp; <i>name</i> ) const</h3>
-<p>Returns true if the file called <i>name</i> exists; otherwise returns false.</p>
+<p>Returns true if the directory called <i>name</i> exists; otherwise returns false.</p>
 <p>See also <a href="qfileinfo.html#exists">QFileInfo::exists</a>() and <a href="qfile.html#exists">QFile::exists</a>().</p>
 <h3 class="fn"><a name="exists-2"></a>bool QDir::exists () const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -350,8 +351,7 @@
 <p>Returns the value set by <a href="qdir.html#setFilter">setFilter</a>()</p>
 <p>See also <a href="qdir.html#setFilter">setFilter</a>().</p>
 <h3 class="fn"><a name="fromNativeSeparators"></a><a href="qstring.html">QString</a> QDir::fromNativeSeparators ( const <a href="qstring.html">QString</a> &amp; <i>pathName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns <i>pathName</i> with the native '\' separators converted to '/' separators.</p>
-<p>On Windows, fromNativeSeparators(&quot;c:\winnt\system32&quot;) returns &quot;c:/winnt/system32&quot;.</p>
+<p>Returns <i>pathName</i> using '/' as file separator. On Windows, for instance, fromNativeSeparators(&quot;c:\winnt\system32&quot;) returns &quot;c:/winnt/system32&quot;.</p>
 <p>The returned string may be the same as the argument on some operating systems, for example on Unix.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qdir.html#toNativeSeparators">toNativeSeparators</a>() and <a href="qdir.html#separator">separator</a>().</p>
@@ -363,14 +363,15 @@
 <h3 class="fn"><a name="homePath"></a><a href="qstring.html">QString</a> QDir::homePath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the absolute path of the user's home directory.</p>
 <p>Under Windows this function will return the directory of the current user's profile. Typically, this is:</p>
-<pre> C:\Documents and Settings\Username</pre>
+<pre> C:/Documents and Settings/Username</pre>
+<p>Use the <a href="qdir.html#toNativeSeparators">toNativeSeparators</a>() function to convert the separators to the ones that are appropriate for the underlying operating system.</p>
 <p>If the directory of the current user's profile does not exist or cannot be retrieved, the following alternatives will be checked (in the given order) until an existing and available path is found:</p>
 <ol type="1">
 <li>The path specified by the <tt>USERPROFILE</tt> environment variable.</li>
 <li>The path formed by concatenating the <tt>HOMEDRIVE</tt> and <tt>HOMEPATH</tt> environment variables.</li>
 <li>The path specified by the <tt>HOME</tt> environment variable.</li>
 <li>The path returned by the <a href="qdir.html#rootPath">rootPath</a>() function (which uses the <tt>SystemDrive</tt> environment variable)</li>
-<li>The <tt>C:\</tt> directory.</li>
+<li>The <tt>C:/</tt> directory.</li>
 </ol>
 <p>Under non-Windows operating systems the <tt>HOME</tt> environment variable is used if it exists, otherwise the path returned by the <a href="qdir.html#rootPath">rootPath</a>() function is used.</p>
 <p>See also <a href="qdir.html#home">home</a>(), <a href="qdir.html#currentPath">currentPath</a>(), <a href="qdir.html#rootPath">rootPath</a>(), and <a href="qdir.html#tempPath">tempPath</a>().</p>
@@ -565,8 +566,9 @@
 <h3 class="fn"><a name="convertToAbs"></a>void QDir::convertToAbs ()</h3>
 <p>Use <a href="qdir.html#makeAbsolute">makeAbsolute</a>() instead.</p>
 <h3 class="fn"><a name="currentDirPath"></a><a href="qstring.html">QString</a> QDir::currentDirPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Use <a href="qdir.html#currentPath">currentPath</a>() instead.</p>
 <p>Returns the current working directory or &quot;/&quot; if the current directory cannot be determined.</p>
-<p>See also <a href="qdir-qt3.html#homeDirPath">homeDirPath</a>() and <a href="qdir-qt3.html#rootDirPath">rootDirPath</a>().</p>
+<p>See also <a href="qdir.html#homePath">homePath</a>() and <a href="qdir.html#rootPath">rootPath</a>().</p>
 <h3 class="fn"><a name="entryInfoList-3"></a><a href="qfileinfo.html#QFileInfoList-typedef">QFileInfoList</a> QDir::entryInfoList ( const <a href="qstring.html">QString</a> &amp; <i>nameFilter</i>, <a href="qdir.html#Filter-enum">Filters</a> <i>filters</i> = NoFilter, <a href="qdir.html#SortFlag-enum">SortFlags</a> <i>sort</i> = NoSort ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Use the overload that takes a name filter string list as first argument instead of a combination of attribute filter flags.</p>
@@ -574,8 +576,9 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Use the overload that takes a name filter string list as first argument instead of a combination of attribute filter flags.</p>
 <h3 class="fn"><a name="homeDirPath"></a><a href="qstring.html">QString</a> QDir::homeDirPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Use <a href="qdir.html#homePath">homePath</a>() instead.</p>
 <p>Returns the user's home directory or an empty string if it cannot be determined.</p>
-<p>See also <a href="qdir-qt3.html#currentDirPath">currentDirPath</a>() and <a href="qdir-qt3.html#rootDirPath">rootDirPath</a>().</p>
+<p>See also <a href="qdir.html#currentPath">currentPath</a>() and <a href="qdir.html#rootPath">rootPath</a>().</p>
 <h3 class="fn"><a name="matchAllDirs"></a>bool QDir::matchAllDirs () const</h3>
 <p>Use <a href="qdir.html#filter">filter</a>() &amp; <a href="qdir.html#Filter-enum">AllDirs</a> instead.</p>
 <p>See also <a href="qdir-qt3.html#setMatchAllDirs">setMatchAllDirs</a>().</p>
@@ -591,8 +594,9 @@
 <p>Use rmdir(<i>dirName</i>) instead.</p>
 <p>The <i>acceptAbsPath</i> parameter is ignored.</p>
 <h3 class="fn"><a name="rootDirPath"></a><a href="qstring.html">QString</a> QDir::rootDirPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Use <a href="qdir.html#rootPath">rootPath</a>() instead.</p>
 <p>Returns &quot;/&quot;.</p>
-<p>See also <a href="qdir-qt3.html#homeDirPath">homeDirPath</a>() and <a href="qdir-qt3.html#currentDirPath">currentDirPath</a>().</p>
+<p>See also <a href="qdir.html#homePath">homePath</a>() and <a href="qdir.html#currentPath">currentPath</a>().</p>
 <h3 class="fn"><a name="setMatchAllDirs"></a>void QDir::setMatchAllDirs ( bool <i>on</i> )</h3>
 <p>Use <a href="qdir.html#setFilter">setFilter</a>() instead.</p>
 <p>See also <a href="qdir-qt3.html#matchAllDirs">matchAllDirs</a>().</p>
@@ -611,6 +615,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

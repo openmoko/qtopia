@@ -27,29 +27,45 @@
 
 #include <QDL>
 #include <QDLBrowserClient>
-
+#include <QStyle>
 #include <qglobal.h>
 #include <QKeyEvent>
 
 AppointmentDetails::AppointmentDetails( QWidget *parent )
 :   QDLBrowserClient( parent, "editnote" ),
-    previousDetails( 0 )
+    previousDetails( 0 ), mIconsLoaded(false)
 {
 #ifdef QTOPIA_PHONE
     setFrameStyle(NoFrame);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 #endif
 }
 
 void AppointmentDetails::init( const QOccurrence &occurrence )
 {
+    QPalette p = palette();
+    p.setBrush( QPalette::Base, qApp->palette(this).brush( QPalette::Base ) );
+    setPalette( p );
     mOccurrence = occurrence;
-    QAppointment ev = occurrence.appointment();
-    QString text = createPreviewText( ev );
-    if ( text != previousText ) {
-        setHtml( text );
-        verifyLinks();
+    if (!mIconsLoaded) {
+        /* precache some icons, scaled nicely - just using these as img src=... gives poor results */
+        QIcon audible(":icon/audible");
+        QIcon repeat(":icon/repeat");
+        QIcon silent(":icon/silent");
+        QIcon exception(":icon/repeatException");
+        QIcon timezone(":icon/globe");
+        int iconMetric = style()->pixelMetric(QStyle::PM_SmallIconSize);
+
+        QTextDocument* doc = document();
+        doc->addResource(QTextDocument::ImageResource, QUrl("audibleicon"), audible.pixmap(iconMetric));
+        doc->addResource(QTextDocument::ImageResource, QUrl("repeaticon"), repeat.pixmap(iconMetric));
+        doc->addResource(QTextDocument::ImageResource, QUrl("silenticon"), silent.pixmap(iconMetric));
+        doc->addResource(QTextDocument::ImageResource, QUrl("exceptionicon"), exception.pixmap(iconMetric));
+        doc->addResource(QTextDocument::ImageResource, QUrl("timezoneicon"), timezone.pixmap(iconMetric));
+        mIconsLoaded = true;
     }
-    previousText = text;
+    setHtml( createPreviewText( mOccurrence ) );
+    verifyLinks();
 }
 
 void AppointmentDetails::keyPressEvent( QKeyEvent *e )
@@ -66,28 +82,143 @@ void AppointmentDetails::keyPressEvent( QKeyEvent *e )
     }
 }
 
-QString AppointmentDetails::createPreviewText( const QAppointment &ev )
+QString AppointmentDetails::formatDate(const QDate& date, const QDate& today)
+{
+    /* We want either "Mon, 26 Feb 2008" or "Mon, 26 Feb" if the year is the current year */
+    if (date.year() == today.year())
+        return tr("%1, %2", "[Mon], [26 Feb]").arg(QTimeString::localDayOfWeek(date), QTimeString::localMD(date, QTimeString::Short));
+    else
+        return tr("%1, %2", "[Mon], [26 Feb 2007]").arg(QTimeString::localDayOfWeek(date), QTimeString::localYMD(date, QTimeString::Medium));
+}
+
+/* Basically.. we try to format things usefully:
+
+Six cases:
+1 all day event (today)
+2 all day event (not on today)
+3 timed event today
+4 timed event split over today and other days
+5 timed event on other day
+6 timed event split over other days
+
+1: Today (all day)
+
+2a: Monday 26th February 2007 (all day)
+2b: Mon 26 Feb, 2007 (all day)
+
+3: Today, 11:00am - 12:00pm
+
+4: Today, 11:00pm - Mon 26 Feb, 2007, 3:00am
+4: Sun Feb 25 2007, 11:00pm - Today, 11:00am
+
+5: Mon 26 Feb 2007, 2:00pm - 3:00pm
+
+6: Mon 26 Feb 2007, 11:00am - Tue 27 Feb 2007, 11:00pm
+
+We can drop the year if it is the current year.
+
+In the presence of timezones, we do:
+
+3: Today, 11:00am - 12:00pm (3:00pm - 4:00pm Oslo)
+4: Today, 11:00pm (3:00am Oslo) - Mon 26 Feb, 2007, 3:00am (6:00pm Oslo)
+*/
+
+QString AppointmentDetails::formatDateTimes(const QOccurrence& ev, const QDate& today)
 {
     QString text;
 
+    QDateTime start = ev.startInCurrentTZ();
+    QDateTime end = ev.endInCurrentTZ();
+
+    QString startdate(start.date() == today ? tr("Today") : formatDate(start.date(), today));
+    QString enddate(end.date() == today ? tr("Today") : formatDate(end.date(), today));
+
+    if (ev.appointment().isAllDay()) {
+        // Cases 1 and 2
+        text = tr("%1 (all day)", "[Today] (all day) / [Mon Sep 27 2007] (all day)").arg(startdate);
+    } else {
+        if (start.date() == end.date()) {
+            // Cases 3 and 5
+            if ( ev.timeZone().isValid() && ev.timeZone() != QTimeZone::current() )
+                text = tr("%1, %2 to %3 (%4 to %5 %6 time)", "[Mon Feb 26 2007], [3:00pm] - [6:00pm] ([6:00am] - [9:00am] [Oslo] time)")
+                    .arg(startdate,
+                    QTimeString::localHM(start.time()),
+                    QTimeString::localHM(end.time()))
+                    .arg(QTimeString::localHM(ev.start().time()),
+                    QTimeString::localHM(ev.end().time()),
+                    ev.timeZone().city()); // XXX qt/4.3 has up to 9 args.
+            else
+                text = tr("%1, %2 to %3", "[Mon Feb 26 2007], [3:00pm] to [6:00pm]")
+                    .arg(startdate,
+                    QTimeString::localHM(start.time()),
+                    QTimeString::localHM(end.time()));
+        } else {
+            // Cases 4 and 6
+            if ( ev.timeZone().isValid() && ev.timeZone() != QTimeZone::current() )
+                text = tr("%1, %2 (%3 %4 time) to %5, %6  (%7 %4 time)", "[Mon Feb 26 2007], [3:00pm] ([6:00 am] [Oslo] time) to [Tue Feb 27 2007], [6:00pm] ([9:00am] [Oslo] time)")
+                    .arg(startdate,
+                    QTimeString::localHM(start.time()),
+                    QTimeString::localHM(ev.start().time()))
+                    .arg(ev.timeZone().city(),
+                    enddate,
+                    QTimeString::localHM(end.time()),
+                    QTimeString::localHM(ev.end().time()));
+            else
+                text = tr("%1, %2 to %3, %4", "[Mon Feb 26 2007], [3:00pm] to [Tue Feb 27 2007], [6:00pm]")
+                    .arg(startdate,
+                    QTimeString::localHM(start.time()),
+                    enddate,
+                    QTimeString::localHM(end.time()));
+        }
+    }
+    return text;
+}
+
+QString AppointmentDetails::createPreviewText( const QOccurrence &o )
+{
+    QAppointment ev = o.appointment();
+    QString text;
+    QDate today = QDate::currentDate();
+
     loadLinks( ev.customField( QDL::CLIENT_DATA_KEY ) );
 
-    text = "<center><b>" + Qt::escape(ev.description()) + "</b></center><br>";
-    if ( !ev.location().isEmpty() )
-        text += "<b>" + tr("Location: ") + "</b>" + ev.location() + "<br>";
-    if ( !ev.isAllDay() ) {
-        text += "<b>" + tr("Start: ") + "</b>" +
-                QTimeString::localYMD( ev.startInCurrentTZ().date() ) + " " +
-                QTimeString::localHM( ev.startInCurrentTZ().time() ) + "<br>";
-        text += "<b>" + tr("End: ") + "</b>" +
-                QTimeString::localYMD( ev.endInCurrentTZ().date() ) + " " +
-                QTimeString::localHM( ev.endInCurrentTZ().time() ) + "<br>";
+    if ( ev.hasRepeat() )
+        text += QLatin1String("<img style=\"float: right;\" src=\"repeaticon\">");
+    else if ( ev.isException() )
+        text += QLatin1String("<img style=\"float: right;\" src=\"exceptionicon\">");
+
+    if ( ev.hasAlarm() ) {
+        if (ev.alarm() == QAppointment::Audible)
+            text += QLatin1String("<img style=\"float: right;\" src=\"audibleicon\">");
+        else
+            text += QLatin1String("<img style=\"float: right;\" src=\"silenticon\">");
     }
-    if ( ev.hasAlarm() )
-        text += "<b>" + tr("Alarm: ") + "</b>" +
-            QString("%1").arg( ev.alarmDelay() ) + " " + tr("minutes") + " (" +
-            tr(ev.alarm() == QAppointment::Visible ? "Silent" : "Audible") +
-            ")" + "<br>";
+
+    if ( ev.timeZone().isValid() )
+        text += QLatin1String("<img style=\"float: right;\" src=\"timezoneicon\">");
+
+    text += "<b>";
+
+    if ( !ev.description().isEmpty() )
+        text += Qt::escape(ev.description());
+    else
+        text += tr("No description", "no description entered for appointment");
+
+    text += "</b>";
+
+    if ( !ev.location().isEmpty() )
+        text += "<br><b>" + tr("Where: ") + "</b>" + Qt::escape(ev.location());
+
+    text += "<br><b>When: </b>" + formatDateTimes(o, today);
+
+    if ( ev.hasAlarm() ) {
+        text += "<br><b>" + tr("Reminder: ") + "</b>" +
+            tr("%1 minutes before (%2)", "eg. 5 minutes before (Audible/Silent)")
+                .arg(ev.alarmDelay())
+                .arg(ev.alarm() == QAppointment::Visible ?
+                        tr("Silent", "eg. 5 minutes before (Silent)") :
+                        tr("Audible", "eg. 5 minutes before (Audible)"));
+    }
     if ( ev.hasRepeat() ) {
         QString word;
         if ( ev.repeatRule() == QAppointment::Daily )
@@ -132,8 +263,8 @@ QString AppointmentDetails::createPreviewText( const QAppointment &ev )
             word = word.arg(repStr);
         }
         else if ( ev.repeatRule() == QAppointment::MonthlyDate ||
-                  ev.repeatRule() == QAppointment::MonthlyDay ||
-                  ev.repeatRule() == QAppointment::MonthlyEndDay )
+                ev.repeatRule() == QAppointment::MonthlyDay ||
+                ev.repeatRule() == QAppointment::MonthlyEndDay )
             /// XXX this could also get extra information
             if ( ev.frequency() > 1 )
                 word = tr("every %1 months", "eg. every 2 months", ev.frequency());
@@ -144,21 +275,28 @@ QString AppointmentDetails::createPreviewText( const QAppointment &ev )
                 word = tr("every %1 years", "eg. every 2 years", ev.frequency());
             else
                 word = tr("every year");
-        text += "<b>" + tr("Repeat: ") + "</b>";
+
+        text += "<br><b>" + tr("Repeat: ") + "</b>";
         if ( ev.frequency() > 1 )
-            text += word.arg( ev.frequency() );
+            word = word.arg( ev.frequency() );
+
+        QString endword;
+        if ( ev.repeatForever() )
+            endword = tr("forever");
         else
-            text += word;
-        if ( !ev.repeatForever() )
-            text += tr(" ending on %1", "eg. repeat every week ending on 21 june").arg( QTimeString::localYMD(ev.repeatUntil()) );
-        text += "<br>";
+            endword = tr("ending on %1", "1=date").arg(formatDate(ev.repeatUntil(), today));
+
+        text += tr("From %1, %2, %3", "1=date, 2=every x days/weeks/etc, 3=ending on date/forever")
+            .arg(formatDate(ev.startInCurrentTZ().date(), today))
+            .arg(word)
+            .arg(endword);
     }
-    if ( !ev.notes().isEmpty() )
-    {
+
+    if ( !ev.notes().isEmpty() ) {
         QString txt = ev.notes();
-        text += "<b>" + tr("Notes: ") + "</b>" +
-             txt + "<br>";
+        text += "<br><b>" + tr("Notes: ") + "</b>" + txt; // txt is already formatted html
     }
+
     return text;
 }
 

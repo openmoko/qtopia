@@ -57,7 +57,7 @@ $DQTDIR = fixpath("$QPEDIR/qtopiacore/host");
 # code.
 if ( $isWindows ) {
     if ( -f $qt_depot_path ) {
-        open IN, $qt_depot_path or die "Can't open $qt_depot_path\n";
+        open IN, $qt_depot_path or die "Can not open $qt_depot_path\n";
         chomp($qt_depot_path = <IN>);
         close IN;
     }
@@ -66,7 +66,7 @@ if ( $isWindows ) {
 
 =pod
     if ( -f $QTEDIR ) {
-        open IN, $QTEDIR or die "Can't open $QTEDIR\n";
+        open IN, $QTEDIR or die "Can not open $QTEDIR\n";
         $QTEDIR = <IN>;
         warn "Using $QTEDIR for the target Qt\n";
         close IN;
@@ -83,7 +83,7 @@ chdir($QTEDIR) or mkpath($QTEDIR);
 chdir($DQTDIR) or mkpath($DQTDIR);
 # The paths might be misleading (especially if we're a depot build)
 for ( $qt_depot_path, $QTEDIR, $DQTDIR ) {
-    chdir $_ or die "Can't enter $_\n";
+    chdir $_ or die "Can not enter $_\n";
     $_ = fixpath(getcwd());
 }
 
@@ -100,7 +100,7 @@ if ( configopt("depot") ) {
         if ( $_ eq "-test-free" || $_ eq "-test-free-plus-binaries" ) {
             @Qtopia::Vars::configureoptions = qw(depot free phone);
             if ( ! -e "$depotpath/LICENSE.GPL" ) {
-                open OUT, ">$depotpath/LICENSE.GPL" or die "Can't write $depotpath/LICENSE.GPL";
+                open OUT, ">$depotpath/LICENSE.GPL" or die "Can not write $depotpath/LICENSE.GPL";
                 print OUT "GPL TEST\n";
                 close OUT;
             }
@@ -745,7 +745,7 @@ set_optvar( "ssl", +{
     "setaliases" => [ "qtmail-ssl" ],
     "unset" => [ "no-%", "Disable the use of OpenSSL." ],
     "unsetaliases" => [ "no-qtmail-ssl" ],
-    "default" => sub { configopt("depot") && opt("edition") ne "media" },
+    "default" => sub { configopt("depot") && opt_resolve("edition") ne "media" },
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,
     "config_pri" => "CONFIG+=enable_ssl",
@@ -869,6 +869,7 @@ set_optvar( "phonelibs", +{
     "setaliases" => [ "test-free-plus-binaries" ],
     "setfunc" => sub { opt("phonelibs") = 1; opt("test_free") = 1 if configopt("depot"); },
     "unset" => [ "no-phone-libraries", "Do not use the binary-only Qtopia phone libraries." ],
+    "value" => 0,
     "default" => 0,
     "config_pri" => "free_package:CONFIG+=free_plus_binaries",
     "visible" => sub { configopt("free") },
@@ -972,8 +973,8 @@ set_optvar( "voip", +{
     "unset" => [ "no-%", "Disable VoIP communication." ],
     "unsetaliases" => [ "disable-voip" ],
     "default" => configopt("depot"),
-    "visible" => $qtopia_nonfree_or_binaries_visref,
-    "autodep" => $qtopia_nonfree_or_binaries_autoref,
+    "visible" => $qtopia_nonfree_visref,
+    "autodep" => $qtopia_nonfree_autoref,
     "config_pri" => "CONFIG+=enable_voip",
 });
 add_note("Modem and VoIP communication are not exclusive or mandatory. You can enable one, both or none.");
@@ -982,8 +983,8 @@ set_optvar( "sipagent_socket", +{
     "unset" => [ "no-%", "Disable socket-based sipagent implementation." ],
     "default" => 0,
     "config_pri" => "CONFIG+=enable_sipagent_socket",
-    "visible" => $qtopia_nonfree_or_binaries_visref,
-    "autodep" => $qtopia_nonfree_or_binaries_autoref,
+    "visible" => $qtopia_nonfree_visref,
+    "autodep" => $qtopia_nonfree_autoref,
 });
 add_separator();
 set_optvar( "vpn", +{
@@ -1045,8 +1046,8 @@ set_optvar( "readline", +{
 set_optvar( "test", +{
     "set" => [ "%", "Enable the test framework which provides automated unit (class) and GUI testing functionality." ],
     "unset" => [ "no-%", "Disable the test framework." ],
-    "visible" => $qtopia_visref,
-    "autodep" => $qtopia_autoref,
+    "visible" => sub { configopt("depot") && &$qtopia_visref() },
+    "autodep" => sub { configopt("depot") && &$qtopia_autoref() },
     "default" => 0,
     "config_pri" => "CONFIG+=qtopiatest",
 });
@@ -1055,7 +1056,8 @@ set_optvar( "perftest", +{
     "unset" => [ "no-%", "Disable the code based performance testing in Qtopia Core." ],
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,
-    "default" => 0
+    "default" => 0,
+    "config_pri" => "CONFIG+=qtopia_performance_test",
 });
 
 add_note("Qtopia should not be configured with -test for a final release as it creates a potential security hole.");
@@ -1475,7 +1477,7 @@ Type 'yes' if you have a Qtopia license agreement that is signed by you and Trol
 Type 'no' if you do NOT have a Qtopia license agreement that is signed by you and Trolltech.
 
 END
-                    print "Do you have a signed license agreement? ";
+                    print "Have you signed an license agreement? ";
                 }
                 $acceptance = <STDIN>;
                 chomp $acceptance;
@@ -1513,6 +1515,10 @@ if ( $shadow ) {
 	die "ERROR: You cannot shadow build from inside the source tree\n";
     }
 
+    if ( -f "$depotpath/.shadow_warn" ) {
+        unlink "$depotpath/.shadow_warn";
+    }
+
     symlink_all_files("bin");
     symlink_all_files("scripts");
 
@@ -1532,6 +1538,31 @@ if ( $shadow ) {
 
     # Clean out any builds found in the Qtopia source tree
     clean_qtopia_sources();
+} elsif ( ! -f "$depotpath/.shadow_warn" ) {
+    if ( open OUT, ">$depotpath/.shadow_warn" ) {
+        print OUT "\n";
+        close OUT;
+    }
+    my $dir = basename($depotpath);
+    warn <<END;
+
+
+WARNING: In-source builds are not reliable. You should build from a different
+         directory to ensure that you do not run into problems.
+
+         eg.
+
+             cd ..
+             mkdir build
+             cd build
+             ../$dir/configure [options]
+
+
+Note: This warning will not display again.
+
+
+END
+    sleep 30
 }
 mkpath("$QPEDIR/lib/host");
 
@@ -1621,8 +1652,8 @@ if ( !opt("platform") ) {
 	    opt("platform") = "macx-g++";
 	} else { 
             die <<END;
-ERROR: Can't autodetect the host platform. Host = $^O.
-Please explicitly set a -platform paramater.
+ERROR: Can not autodetect the host platform. Host = $^O.
+Please explicitly set a -platform parameter.
 END
 	}
     }
@@ -1632,11 +1663,6 @@ if ( opt("edition") ) {
     if ( opt("edition") && opt("xplatform") && !defined(opt("qvfb")) ) {
         opt("qvfb", "auto") = 1;
 	opt("qvfb") = 0;
-    }
-
-    if ( opt("helix") && !opt("helix_system_id") && !opt("xplatform") ) {
-        opt("helix_system_id", "auto") = 1;
-        opt("helix_system_id") = "linux-2.2-libc6-gcc32-i586";
     }
 
     if (!opt("xplatform")) {
@@ -1823,7 +1849,7 @@ while ( @combinations ) {
     next if ( !$plat );
 
     # Detect gcc 4
-    open IN, "$plat/qmake.conf" or die "Can't open $plat/qmake.conf\n";
+    open IN, "$plat/qmake.conf" or die "Can not open $plat/qmake.conf\n";
     my @data = <IN>;
     close IN;
     my @old = @data;
@@ -1831,7 +1857,7 @@ while ( @combinations ) {
     for ( @old ) {
         if ( /include\((.*)\)/ ) {
             chdir $plat;
-            open INC, "$1" or die "Can't open $1\n";
+            open INC, "$1" or die "Can not open $1\n";
             push(@data, <INC>);
             close INC;
         } else {
@@ -1877,6 +1903,44 @@ while ( @combinations ) {
     }
 }
 
+if ( opt("sxe") ) {
+    # Change 186258 in Qtopia renders SXE impotent unless change
+    # 256275/256276/256278 (Qt 4.2/4.3/main) has been applied.
+    # The problem is that change 186258 removes the per-app keys,
+    # opting for magic in /proc instead. This gains us many things
+    # but means that out-of-sync builds will have ALL operations denied.
+    #
+    # So because SXE has been enabled and because we don't want to
+    # produce a build that can't do anything we're going to test that
+    # Qt actually contains the required change and warn/die if it's missing.
+    my $enable = 0;
+    if ( open IN, "$qt_depot_path/src/gui/embedded/qtransportauth_qws.cpp" ) {
+        my @data = <IN>;
+        close IN;
+        my @tmp = grep(/SxeRegistryLocker::SxeRegistryLocker/, @data);
+        if ( @tmp ) {
+            $enable = 1;
+        }
+    }
+    if ( !$enable ) {
+        if ( opt("sxe", "auto") ) {
+            warn <<END;
+WARNING: SXE cannot be enabled because change 256275 has not been applied to
+         Qt. Please apply this change to your Qt sources if you want SXE to
+         be enabled.
+END
+            opt("sxe", "auto") = 1;
+            opt("sxe") = 0;
+        } else {
+            die <<END;
+ERROR: SXE cannot be enabled because change 256275 has not been applied to
+       Qt. Please apply this change to your Qt sources if you want SXE to
+       be enabled.
+END
+        }
+    }
+}
+
 # Validate options
 
 if ( opt("edition") ) {
@@ -1887,7 +1951,9 @@ if ( opt("edition") ) {
 	     "         Using edition '$edn' instead.\n";
         opt("edition") = $edn;
     }
-    if ( !opt("singleexec") && !opt("sxe") && configopt("depot") && !configopt("free") ) {
+
+    # TODO Enable this warning for Qtopia 4.3 
+    if ( 0 && !opt("singleexec") && !opt("sxe") && configopt("depot") && !configopt("free") ) {
         warn "WARNING: You are building without SXE. This is not a supported configuration!\n";
     }
 
@@ -1958,7 +2024,7 @@ if ( opt("font") ) {
             $style = $3;
             $rotation = $4;
         } else {
-            warn "Can't understand the naming of font $file\n";
+            warn "Can not understand the naming of font $file\n";
             next;
         }
 
@@ -1984,15 +2050,15 @@ if ( opt("font") ) {
                                 push(@fonts, $file);
                                 last FONTSPEC;
                             } else {
-                                DEBUG and print "$style doesn't equal $_\n";
+                                DEBUG and print "$style does not equal $_\n";
                             }
                         }
                     } else {
-                        DEBUG and print "$size doesn't equal $_\n";
+                        DEBUG and print "$size does not equal $_\n";
                     }
                 }
             } else {
-                DEBUG and print "$family doesn't equal $fsfamily\n";
+                DEBUG and print "$family does not equal $fsfamily\n";
             }
         }
     }
@@ -2006,12 +2072,12 @@ if ( opt("font") ) {
 # Write config.status
 if ( opt("save_options") ) {
     write_config_status();
-    if ( $shadow ) {
-        # Setup the depot hopping config.status file
-        $outpath = $depotpath;
-        write_config_status();
-        $outpath = $QPEDIR;
-    }
+}
+if ( $shadow ) {
+    # Setup the depot hopping config.status file
+    $outpath = $depotpath;
+    write_config_status();
+    $outpath = $QPEDIR;
 }
 
 # Clean out any builds found in the Qt source tree
@@ -2142,6 +2208,17 @@ fi
 $MAKE regenerate
 END
 
+        # Pick a default helix_system_id if we've detected the xplatform (ie. standard x86 build)
+        if ( !opt("helix_system_id") && opt("xplatform", "auto") ) {
+            opt("helix_system_id", "auto") = 1;
+            # GCC 4 requires a different helix_system_id to avoid the annoying "-mcpu is deprecated" messages
+            if ( opt("gcc4", "target") ) {
+                opt("helix_system_id") = "linux-2.2-libc6-gcc32-i586-gcc4";
+            } else {
+                opt("helix_system_id") = "linux-2.2-libc6-gcc32-i586";
+            }
+        }
+
         if ( opt("helix_system_id") &&
              ! -e "$helix_build_path/build/umakecf/".opt("helix_system_id").".cf" ) {
             warn "Helix SYSTEM_ID ".opt("helix_system_id")." is not valid.\n";
@@ -2231,7 +2308,7 @@ if ( opt("edition") && opt("helix") ) {
     my @defines;
     my $outdir;
     get_system_id_flags(opt("helix_system_id").".cf", \@flags, \@defines, \$outdir);
-    open OUT, ">>$QPEDIR/src/config.pri" or die "Can't open $QPEDIR/src/config.pri\n";
+    open OUT, ">>$QPEDIR/src/config.pri" or die "Can not open $QPEDIR/src/config.pri\n";
     my $cfgref = opt("config");
     for my $flag ( @flags ) {
         for my $cc ( qw(C CXX) ) {
@@ -2246,7 +2323,7 @@ if ( opt("edition") && opt("helix") ) {
     if ( $outdir ) {
         push(@$cfgref, "HELIX_OUT_DIR=$outdir");
     } else {
-        die "ERROR: Can't locate the Helix output dir.\n".
+        die "ERROR: Can not locate the Helix output dir.\n".
             "       Please ensure your SYSTEM_ID sets project.output_dir = '[prefix-]<rel|dbg>'.\n";
     }
     close OUT;
@@ -2261,7 +2338,7 @@ if ( opt("edition") && opt("helix") ) {
         print <<END;
 
 WARNING: Your xplatform qmake.conf does not seem to allow building Helix with
-         atomic operaions. Helix requires the use of atomic operations in order
+         atomic operations. Helix requires the use of atomic operations in order
          to be thread-safe. Please inspect the SYSTEM_ID you are using to see
          if you need to add compiler switches or defines to qmake.conf.
 
@@ -2286,7 +2363,7 @@ if ( opt("edition") && !opt("qte_config") ) {
                "-prefix ".fixpath(opt("sdkroot")."/qtopiacore/target")." ".
                "-no-stl -no-exceptions -no-qt3support -make src ".
                "-qconfig $qconfig -fast -no-glib -no-cups -no-qdbus ".
-               "-DQT_NO_PLUGIN_CHECK -DQT_EXTERNAL_SOUND_SERVER ".
+               "-DQT_NO_PLUGIN_CHECK -DQT_EXTERNAL_SOUND_SERVER -DQT_QWS_KEYEVENT_SINGLECLIENT ".
                "-confirm-license";
     if ( opt("perftest") ) {
         $args .= " -DQTOPIA_PERFTEST";
@@ -2424,7 +2501,7 @@ if ( opt("edition") && opt("drm") ) {
             debugMsg("searching $dir\n");
             if ( -f "$dir/libdrmagent.so" ) {
                 debugMsg("testing $dir/libdrmagent.so\n");
-                open OUT, ">$QPEDIR/config.tests/locate_drmagent.pri" or die "Can't write to $QPEDIR/config.tests/locate_drmagent.pri\n";
+                open OUT, ">$QPEDIR/config.tests/locate_drmagent.pri" or die "Can not write to $QPEDIR/config.tests/locate_drmagent.pri\n";
                 print OUT "DRMAGENT=$dir/libdrmagent.so\n";
                 close OUT;
                 $ok = configtest("test_drmagent", "outvar", $out);
@@ -2613,6 +2690,20 @@ if ( opt("dbus") ) {
 }
 
 if ( opt("bluetooth") ) {
+    print "Testing for bluetooth: ";
+    print "\n" if ( opt("verbose") );
+    my $test = configtest("bluetooth");
+    if ( $test ) {
+        print "OK\n";
+    } else {
+        print "FAIL\n";
+        print "Bluetooth is disabled.\n";
+        opt("bluetooth", "auto") = 1;
+        opt("bluetooth") = 0;
+    }
+}
+
+if ( opt("bluetooth") ) {
     if ( not opt("dbus") ) {
         print "Bluetooth support requires dbus.\n";
         opt("bluetooth", "auto") = 1;
@@ -2677,7 +2768,7 @@ if ( opt("device") && -d opt("device", "config_path")."/src" ) {
 # Cleanup the locations passed as -build
 for my $dir ( @$extraBuildPathsRef ) {
     chdir $cwd; # in case $dir is relative!
-    chdir $dir or die "Can't enter $dir\n";
+    chdir $dir or die "Can not enter $dir\n";
     $dir = fixpath(getcwd());
     # Relocate it to the build tree
     $dir =~ s,\Q$depotpath\E,$QPEDIR,;
@@ -2701,7 +2792,7 @@ if ( opt("qmake") ) {
     print "Running qmake...\n";
     my @dirs = ( $QPEDIR );
     for my $dir ( @dirs ) {
-        chdir $dir or die "Can't enter ".fixpath($dir)."\n";
+        chdir $dir or die "Can not enter ".fixpath($dir)."\n";
         filter_system(opt("make")." first_syncqtopia");
     }
 }
@@ -2748,7 +2839,7 @@ sub write_config_status
 	}
 	open RECONF, ">".$reconf or die "Cannot write to $reconf\n";
 	print RECONF '#!/bin/sh'."\n";
-        if ( $outpath eq $depotpath ) {
+        if ( $shadow && $outpath eq $depotpath ) {
             print RECONF 'if [ -z "$QPEDIR" ]; then'."\n".
                          '    echo "ERROR: You must set QPEDIR if you want to shadow build."'."\n".
                          '    echo "When this file was created, QPEDIR was set to:"'."\n".
@@ -2775,7 +2866,7 @@ sub configure_qt
     my ( $QTDIR, $qt, $qt_config ) = @_;
     
     # configure sets the output directory to $PWD
-    chdir($QTDIR) or die "Can't enter $QTDIR\n";
+    chdir($QTDIR) or die "Can not enter $QTDIR\n";
 
     if ( opt("skip_qt_configure") ) {
         return;
@@ -2791,12 +2882,13 @@ sub configure_qt
     $ENV{QTDIR} = $qt_depot_path;
     open IN, "$qt_depot_path/bin/syncqt" or
         open IN, "$qt_depot_path/bin/syncqt.disabled" or
-            die "Can't read $qt_depot_path/bin/syncqt\n";
+            die "Can not read $qt_depot_path/bin/syncqt\n";
     my @data = <IN>;
     close IN;
     @data = grep { !/qtestlib/ } @data;
+    @data = grep { !/ActiveQt/ } @data;
     mkpath("$QPEDIR/bin");
-    open OUT, ">$QPEDIR/bin/syncqt" or die "Can't write $QPEDIR/bin/syncqt\n";
+    open OUT, ">$QPEDIR/bin/syncqt" or die "Can not write $QPEDIR/bin/syncqt\n";
     print OUT @data;
     close OUT;
     if ( $isWindows ) {
@@ -3006,8 +3098,8 @@ sub configtest
         } elsif ( -d "$source" ) {
             my $dest = fixpath("$QPEDIR/config.tests/$test");
             mkpath($dest);
-            chdir $dest or die "Can't enter $dest\n";
-            open CACHE_FILE, ">$dest/.qmake.cache" or die "Can't open ".fixpath("$dest/.qmake.cache")."\n";
+            chdir $dest or die "Can not enter $dest\n";
+            open CACHE_FILE, ">$dest/.qmake.cache" or die "Can not open ".fixpath("$dest/.qmake.cache")."\n";
             print CACHE_FILE "include($QPEDIR/src/config.pri)\n";
             close CACHE_FILE;
             filter_system($command_header.fixpath("$DQTDIR/bin/qmake")." -spec ".fixpath(opt($platform, "absolute"))." -o ".fixpath("$dest/Makefile")." ".fixpath("$source/$test.pro")." 2>&1", $subref);
@@ -3032,7 +3124,7 @@ sub get_system_id_flags
 {
     my ( $config_file, $flags, $defines, $outdir ) = @_;
 
-    open IN, "$helix_build_path/build/umakecf/$config_file" or die "Can't open $helix_build_path/build/umakecf/$config_file\n";
+    open IN, "$helix_build_path/build/umakecf/$config_file" or die "Can not open $helix_build_path/build/umakecf/$config_file\n";
     my @data = <IN>;
     close IN;
     while ( @data ) {
@@ -3047,13 +3139,17 @@ sub get_system_id_flags
             get_system_id_flags($1, $flags, $defines, $outdir);
         }
 
-        # look for -march and -mcpu added to cxx.args
+        # look for -march, -mcpu and -mtune (gcc 4) added to cxx.args
         if ( /^platform\.cxx\.args/ ) {
             if ( /(-march=[^\s"]+)/ ) {
                 push(@$flags, $1);
                 #print "$1\n";
             }
             if ( /(-mcpu=[^\s"]+)/ ) {
+                push(@$flags, $1);
+                #print "$1\n";
+            }
+            if ( opt("gcc4", "target") && /(-mtune=[^\s"]+)/ ) {
                 push(@$flags, $1);
                 #print "$1\n";
             }

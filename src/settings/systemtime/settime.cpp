@@ -465,6 +465,7 @@ SetTime::SetTime( QWidget *parent )
     }
     sbHour->setWrapping(true);
     connect( sbHour, SIGNAL(valueChanged(int)), this, SLOT(hourChanged(int)) );
+    l->setBuddy( sbHour );
     hb2->addWidget( sbHour );
 
     hb2->addStretch( 1 );
@@ -480,6 +481,7 @@ SetTime::SetTime( QWidget *parent )
     minuteChanged(minute);
     sbMin->setMinimumWidth( 30 );
     connect( sbMin, SIGNAL(valueChanged(int)), this, SLOT(minuteChanged(int)) );
+    l->setBuddy( sbMin );
     hb2->addWidget( sbMin );
 
     hb2->addStretch( 1 );

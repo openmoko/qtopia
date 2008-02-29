@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Running Qtopia</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Running Qtopia</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -47,10 +46,10 @@
 <p>Qtopia runs using files in the <tt>image</tt> directory. The image directory contains all the files required to run Qtopia and will make packaging and deployment efforts to install Qtopia with your own applications onto a device a lot easier.</p>
 <p>The location of the Qtopia Image Directory is dependent on the package being used. The following table displays the default locations:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Package</th><th>Location</th></tr></thead>
-<tr valign="top" class="odd"><td>Source package</td><td><tt>&lt;qtopia-root-dir&gt;/image</tt></td></tr>
-<tr valign="top" class="even"><td>SDK package x86</td><td><tt>/opt/Qtopia/SDK/&lt;version/x86</tt>.</td></tr>
-<tr valign="top" class="odd"><td>SDK package &lt;device&gt;</td><td><tt>/opt/Qtopia/SDK/&lt;version/&lt;device&gt;</tt>.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Package</th><th>Location</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Source package</td><td><tt>&lt;qtopia-root-dir&gt;/image</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>SDK package x86</td><td><tt>/opt/Qtopia/SDK/&lt;version/x86</tt>.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>SDK package &lt;device&gt;</td><td><tt>/opt/Qtopia/SDK/&lt;version/&lt;device&gt;</tt>.</td></tr>
 </table></p>
 <p>where <tt>&lt;qtopia-root-dir&gt;</tt> is the install location of the source package and &lt;device&gt; is the device in which Qtopia needs to be installed.</p>
 <p>The image directory for source packages may be changed to meet your requirements by using the <tt>-prefix</tt> option with the <tt>configure</tt> script for SDK packages the directory is fixed to /opt/Qtopia/SDK/&lt;version&gt;/&lt;something&gt;.</p>
@@ -62,17 +61,17 @@
 <li><tt>LD_LIBRARY_PATH</tt></li>
 </ul>
 <p>For example if the Qtopia image directory is :</p>
-<pre>    /opt/Qtopia</pre>
+<pre>&nbsp;   /opt/Qtopia</pre>
 <p>use the following commands to set the above variables:</p>
-<pre>    export PATH=/opt/Qtopia/bin:$PATH
+<pre>&nbsp;   export PATH=/opt/Qtopia/bin:$PATH
     export LD_LIBRARY_PATH=/opt/Qtopia/lib:$LD_LIBRARY_PATH</pre>
 <a name="running-qtopia-on-the-desktop-machine"></a>
 <h2>Running Qtopia on the Desktop Machine</h2>
 <p>To run Qtopia on the desktop a <tt>runqtopia</tt> script is provided. The exact location of the script depends on the package:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>package</th><th>location</th></tr></thead>
-<tr valign="top" class="odd"><td>SDK package</td><td>/opt/Qtopia/SDK/scripts/runqtopia</td></tr>
-<tr valign="top" class="even"><td>Source package</td><td>&lt;qtopia-root-dir&gt;/scripts/runqtopia</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>package</th><th>location</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>SDK package</td><td>/opt/Qtopia/SDK/scripts/runqtopia</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Source package</td><td>&lt;qtopia-root-dir&gt;/scripts/runqtopia</td></tr>
 </table></p>
 <p>where <tt>&lt;qtopia-root-dir&gt;</tt> is the install location of the source package.</p>
 <p>The <i>runqtopia</i> script performs the following:</p>
@@ -89,7 +88,7 @@
 <p>QVFb is run using a specific skin depending on the package installed. A skin is simply a set of XML files that define the look and feel of QVFb. You may use a different skin, or create your own to replicate your target device. If you are not familiar with QVFb please refer to: <a href="qtopiacore-qvfb.html">Qtopia QVFb </a> before continuing.</p>
 <p>In practice the <tt>runqtopia</tt> script can be used in all cases to conveniently start Qtopia. In exceptional cases where the script does not perform as expected, it is is advised to take the script as the starting point and modify the procedure to meet your specific requirements.</p>
 <p>The script accepts a number of parameters:</p>
-<pre>    The defaults (*) are usually acceptable. A plus (+) denotes a default
+<pre>&nbsp;   The defaults (*) are usually acceptable. A plus (+) denotes a default
     value that needs to be evaluated. If the evaluation succeeds, the
     feature is included. Here is a short explanation of each option:
 
@@ -115,7 +114,7 @@
             For arguments to the 'runqpe' part of this script, use [script
             arguments] -- [runqpe arguments]</pre>
 <p>For further information and a description of environment variables used by the script, use the command:</p>
-<pre>        runqtopia -help</pre>
+<pre>&nbsp;       runqtopia -help</pre>
 <p><b>Note:</b> To connect to a modem device instead of the simulator, modify the QTOPIA_PHONE_DEVICE variable and <b>DO NOT</b> start <tt>phonesim</tt>. If the <tt>runqtopia</tt> script is used, it will automatically skip the phone simulator unless this variable is set to <tt>sim:localhost</tt>. This subject is discussed in more detail in one of the next sections.</p>
 <a name="running-qtopia-on-an-embedded-device"></a>
 <h2>Running Qtopia on an Embedded Device</h2>
@@ -132,19 +131,19 @@
 <h4>Step 2: Exporting the Qtopia Image Directory to the Device</h4>
 <p>To export the Qtopia image directory to the device, execute the following commands on the desktop machine:</p>
 <ol type="1">
-<li>First verify that NFS is running:<pre>         ps aux | grep nfs</pre>
+<li>First verify that NFS is running:<pre>&nbsp;        ps aux | grep nfs</pre>
 <p>Output will be something like this:</p>
-<pre>    tester@desk:~&gt; ps aux | grep nfs
+<pre>&nbsp;   tester@desk:~&gt; ps aux | grep nfs
     root     10661  0.0  0.0     0    0 ?        SW   16:20   0:00 [nfsd]
     root     10662  0.0  0.0     0    0 ?        SW   16:20   0:00 [nfsd]
     tester     10554  0.0  0.1  3540  564 pts/8    S    16:12   0:00 grep nfs</pre>
 <p>If you only get the bottom line, then NFS is NOT running and needs to be started.</p>
 <p>To start NFS use <tt>/etc/init.d/nfsserver</tt> start (or similar) as root.</p>
 </li>
-<li>indicate to NFS to export a directory by editing the <tt>/etc/exports</tt> file (as root) and adding the following line:<pre>         /path/to/image/ *(ro)</pre>
+<li>indicate to NFS to export a directory by editing the <tt>/etc/exports</tt> file (as root) and adding the following line:<pre>&nbsp;        /path/to/image/ *(ro)</pre>
 <p>This exports the <tt>/path/to/image</tt> directory (and all subdirectories), and gives read-only access from any computer. In this procedure it is assumed this is the directory you want to export.</p>
 </li>
-<li>indicate to NFS (again as root) that the configuration has changed using:<pre>         exportfs -a</pre>
+<li>indicate to NFS (again as root) that the configuration has changed using:<pre>&nbsp;        exportfs -a</pre>
 <p>The Qtopia binaries in <tt>/path/to/image/Qtopia/bin</tt> are now accessible from the network.</p>
 </li>
 </ol>
@@ -152,9 +151,9 @@
 <h4>Step 3: Connecting to the Device</h4>
 <ol type="1">
 <li>login to the connected device via telnet or ssh (using the IP address displayed in the current tab)</li>
-<li>enter your password as root and create the directory on the device that links to the desktop file system using the following command:<pre>         mkdir -p /opt/Qtopia</pre>
+<li>enter your password as root and create the directory on the device that links to the desktop file system using the following command:<pre>&nbsp;        mkdir -p /opt/Qtopia</pre>
 </li>
-<li>mount/assign the file system to the device by mounting the created folder using the following command:<pre>        mount desk:/path/to/image/Qtopia -orsize=8192,wsize=8192 /opt/Qtopia</pre>
+<li>mount/assign the file system to the device by mounting the created folder using the following command:<pre>&nbsp;       mount desk:/path/to/image/Qtopia -orsize=8192,wsize=8192 /opt/Qtopia</pre>
 </li>
 <li>You should now be able to fill <tt>/path/to/image/Qtopia</tt> on your desktop machine (named <i>desk</i>) with files that are accessible from the device.</li>
 </ol>
@@ -168,7 +167,7 @@
 <a name="touchscreen-phone-calibration"></a>
 <h2>Touchscreen Phone Calibration</h2>
 <p>When building Qtopia Phone edition for a touchscreen device, the touchscreen must be calibrated manually as <i>Calibration</i> is not run automatically. With Qtopia Phone running, enter the following command to start calibration:</p>
-<pre>          qcop service send Launcher &quot;execute(QString)&quot; &quot;calibrate&quot;</pre>
+<pre>&nbsp;         qcop service send Launcher &quot;execute(QString)&quot; &quot;calibrate&quot;</pre>
 <p>This outputs calibration information to the <tt>$HOME/Settings/pointercal</tt> file which should be copied to <tt>/etc/</tt> to avoid repeating this process.</p>
 <p><b>Note:</b> QPE_NEED_CALIBRATION must be defined in the <tt>custom-&lt;xplatform-spec&gt;.h</tt> file. See also: <a href="syscust-index.html">Device Configuration</a>.</p>
 <a name="connecting-qtopia-phone-to-the-phone-device"></a>
@@ -178,13 +177,13 @@
 <h3>Using a Phone Simulator</h3>
 <p>The phone simulator is an internal tool used to test part of the Qtopia Phone functionality. It simulates part of the modem functionality and is the first step in debugging software. The simulator has been included in the package because it is well suited to illustrating the capabilities of Qtopia Phone. Please be advised however that the phone simulator is an unsupported tool.</p>
 <p>Connect Qtopia Phone to the simulator using the following command:</p>
-<pre>         export QTOPIA_PHONE_DEVICE=sim:localhost</pre>
+<pre>&nbsp;        export QTOPIA_PHONE_DEVICE=sim:localhost</pre>
 <p>This must be set before either Qtopia or the simulator are started. If the <tt>runqtopia</tt> script is used, the default value for the environment variable <tt>QTOPIA_PHONE_DEVICE</tt> is <tt>sim:localhost</tt>. It is possible to run Qtopia Phone on one machine (embedded device) and the phone simulator on another machine. To do this replace <i>localhost</i> with the name of the machine on which the <tt>phonesim</tt> is running.</p>
 <p>Further phone simulator information is available in the <a href="tools-list.html">Tools section</a> of the reference documentation. To call to peers in the same network the <tt>peers.xml</tt> file must be modified by entering valid machine names within your network environment.</p>
 <a name="using-a-phone-device"></a>
 <h3>Using a Phone Device</h3>
 <p>Qtopia Phone can be connected to a real phone device using a serial connection. Please be advised that the phone device must support the standard AT commands. To connect use the following command:</p>
-<pre>         export QTOPIA_PHONE_DEVICE=/dev/ttyS1:115200
+<pre>&nbsp;        export QTOPIA_PHONE_DEVICE=/dev/ttyS1:115200
          export QTOPIA_PHONE_VENDOR=wavecom</pre>
 <p>where:</p>
 <ul>
@@ -194,11 +193,11 @@
 </ul>
 <p>When using Qtopia connect to a modem the environment variables <tt>QTOPIA_PHONE_DEVICE</tt> and <tt>QTOPIA_PHONE_VENDOR</tt> must be set before Qtopia Phone is started. Entering a baud rate after the serial port name is optional and depends on the modem being used. It is not necessary to start the <tt>phonesim</tt> application.</p>
 <p>If you wish to start Qtopia with multiplexing disabled then use the following command before starting Qtopia Phone:</p>
-<pre>         export QTOPIA_PHONE_MUX=no</pre>
+<pre>&nbsp;        export QTOPIA_PHONE_MUX=no</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

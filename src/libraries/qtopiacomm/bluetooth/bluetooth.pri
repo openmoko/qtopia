@@ -17,16 +17,17 @@ BLUETOOTH_HEADERS+=\
     qbluetoothabstractsocket.h\
     qbluetoothscosocket.h\
     qbluetoothrfcommsocket.h\
-    qsdap.h\
-    qsdp.h\
-    qsdpservice.h\
-    qsdpuuid.h\
-    qbluetoothdeviceselector.h\
+    qbluetoothsdpquery.h\
+    qbluetoothsdprecord.h\
+    qbluetoothsdpuuid.h\
+    qbluetoothremotedevicedialog.h\
     qbluetoothrfcommserialport.h \
-    qbluetoothservicecontrol.h \
     qbluetoothabstractservice.h \
     qbluetoothservicecontroller.h \
-    qbluetoothaudiogateway.h
+    qbluetoothaudiogateway.h \
+    qbluetoothl2capsocket.h \
+    qbluetoothl2capserver.h \
+    qbluetoothl2capdatagramsocket.h
 
 BLUETOOTH_SOURCES+=\
     qbluetoothaddress.cpp\
@@ -44,29 +45,31 @@ BLUETOOTH_SOURCES+=\
     qbluetoothscosocket.cpp\
     qbluetoothrfcommsocket.cpp\
     qbluetoothremotedevice.cpp\
-    qsdap.cpp\
-    qsdp.cpp\
-    qsdpservice.cpp\
-    qsdpuuid.cpp\
-    sdplexer.cpp\
-    qbluetoothdeviceselector.cpp\
+    qbluetoothsdpquery.cpp\
+    qbluetoothsdprecord.cpp\
+    qbluetoothsdpuuid.cpp\
+    qbluetoothremotedevicedialog.cpp\
     qbluetoothrfcommserialport.cpp \
-    qbluetoothservicecontrolserver.cpp\
     qbluetoothabstractservice.cpp \
-    qbluetoothservicecontrol.cpp \
     qbluetoothservicecontroller.cpp \
     qbluetoothaudiogateway.cpp \
     qbluetoothpairingagent.cpp \
-    remotedevicepropertiesdialog.cpp 
+    remotedevicepropertiesdialog.cpp \
+    qsdpxmlparser.cpp \
+    qsdpxmlgenerator.cpp \
+    qbluetoothl2capsocket.cpp \
+    qbluetoothl2capserver.cpp \
+    qbluetoothl2capdatagramsocket.cpp
 
 BLUETOOTH_PRIVATE_HEADERS+=\
     qbluetoothnamespace_p.h\
-    sdp_tokens_p.h\
-    sdplexer_p.h \
-    qbluetoothdeviceselector_p.h \
+    qbluetoothremotedevicedialog_p.h \
     qbluetoothpairingagent_p.h \
-    qbluetoothservicecontrolserver_p.h \
-    remotedevicepropertiesdialog_p.h
+    remotedevicepropertiesdialog_p.h \
+    qsdpxmlparser_p.h \
+    qsdpxmlgenerator_p.h \
+    qbluetoothabstractsocket_p.h
+
 
 sdk_bluetooth_headers.files=$$BLUETOOTH_HEADERS
 sdk_bluetooth_headers.path=/include/qtopia/comm

@@ -88,7 +88,7 @@ public:
 
 /*!
     \class QContentFilterModel::Template
-    \brief The QContentFilterModel::Template class defines the structure of a QContentFilterModel.
+    \brief The Template class defines a template for constructing a QContentFilterModel.
 
   \ingroup content
 */

@@ -1,0 +1,1 @@
+Ensures that the SQL database schema is up-to-date. Run by the server at startup and when applications attempt to open tables.

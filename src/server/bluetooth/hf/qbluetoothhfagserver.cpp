@@ -25,7 +25,7 @@
 #include <qtopialog.h>
 
 QBluetoothHandsfreeAudioGatewayServer::QBluetoothHandsfreeAudioGatewayServer(
-        QBluetoothHandsfreeService *parent,
+        QBluetoothHandsfreeCommInterface *parent,
         const QString &audioDev,
         const QString &service)
     : QBluetoothAudioGateway(service, parent, QCommInterface::Server)

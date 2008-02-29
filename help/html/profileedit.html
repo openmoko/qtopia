@@ -1,4 +1,4 @@
-<!--#if expr="$TELEPHONY"-->
+<!--#if expr="$PHONESTYLE"-->
 <html>
 <head><title>Profiles</title></head>
 <body>
@@ -7,15 +7,26 @@
 <!--#else -->
    <h3>Profiles</h3>
 <!--#endif-->
-<p>Profiles are used to make the phone sound and behave differently when it receives a call/message. Your <i>Qtopia</i> phone has several <a href="profileedit-existing.html">existing profiles</a>.</p>
+<p><img src=":image/profileedit/Note"></p>
+<p>Profiles are used to make the device sound and behave differently under certain circumstances. Your <i>Qtopia</i> device has several <a href="profileedit-existing.html">existing profiles</a>.</p>
 <p>Press <img src=":icon/options"> </img> for options:
 <p><b>New</b> - create a new profile.</p>
 <p><b>Edit</b> - change the highlighted profile.</p>
 <p><b>Delete</b> - delete a profile. Existing profiles cannot be deleted.</p>
 <p><b>Activate</b> - activate a profile.</p>
 <p><b>Add to Speed Dial...</b> - add the highlighted profile to Speed Dial.</p>
+<!--#if expr="$TELEPHONY"-->
 <p><b>Airplane safe mode:</b> turns off the radio transmitter. No calls can be made or received in <a href="qpe-safemode.html">safe mode</a>.</p>
-<p><a href="profileedit-index.html">More Profiles Help</a></p>
 <!--#endif-->
+<p>For more Profiles help, choose from the following topics:</p>
+<ul>
+<li><a href="profileedit.html">Profiles</a></li>
+<li><a href="profileedit-existing.html">Existing Profiles</a></li>
+<li><a href="profileedit-edit.html">Edit a Profile</a></li>
+<li><a href="profileedit-settings.html">Capture Settings</a></li>
+<li><a href="profileedit-new.html">New Profile</a></li>
+<li><a href="profileedit-add-speed.html">Add to Speed Dial</a></li>
+</ul>
 </body>
 </html>
+<!--#endif-->

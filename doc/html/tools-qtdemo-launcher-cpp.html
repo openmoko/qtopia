@@ -1,0 +1,1098 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: launcher.cpp Example File (tools/qtdemo/launcher.cpp)</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">launcher.cpp Example File<br /><sup><sup>tools/qtdemo/launcher.cpp</sup></sup></h1>
+<pre><span class="comment"> /****************************************************************************
+ **
+ ** Copyright (C) 2005-2007 Trolltech ASA. All rights reserved.
+ **
+ ** This file is part of the example classes of the Qt Toolkit.
+ **
+ ** This file may be used under the terms of the GNU General Public
+ ** License version 2.0 as published by the Free Software Foundation
+ ** and appearing in the file LICENSE.GPL included in the packaging of
+ ** this file.  Please review the following information to ensure GNU
+ ** General Public Licensing requirements will be met:
+ ** http://www.trolltech.com/products/qt/opensource.html
+ **
+ ** If you are unsure which license is appropriate for your use, please
+ ** review the following information:
+ ** http://www.trolltech.com/products/qt/licensing.html or contact the
+ ** sales department at sales@trolltech.com.
+ **
+ ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ **
+ ****************************************************************************/</span>
+
+ #include &lt;QtGui&gt;
+ #include &lt;QDomDocument&gt;
+ #include &lt;QtAssistant/QAssistantClient&gt;
+
+ #include &quot;displayshape.h&quot;
+ #include &quot;displaywidget.h&quot;
+ #include &quot;launcher.h&quot;
+
+ Launcher::Launcher(QWidget *parent)
+     : QMainWindow(parent)
+ {
+     titleFont = font();
+     titleFont.setWeight(QFont::Bold);
+     buttonFont = font();
+     fontRatio = 0.8;
+     documentFont = font();
+     inFullScreenResize = false;
+     currentCategory = &quot;[starting]&quot;;
+
+     QAction *parentPageAction1 = new QAction(tr(&quot;Show Parent Page&quot;), this);
+     QAction *parentPageAction2 = new QAction(tr(&quot;Show Parent Page&quot;), this);
+     QAction *parentPageAction3 = new QAction(tr(&quot;Show Parent Page&quot;), this);
+     parentPageAction1-&gt;setShortcut(QKeySequence(tr(&quot;Escape&quot;)));
+     parentPageAction2-&gt;setShortcut(QKeySequence(tr(&quot;Backspace&quot;)));
+     parentPageAction3-&gt;setShortcut(QKeySequence(tr(&quot;Alt+Left&quot;)));
+
+     QAction *fullScreenAction = new QAction(tr(&quot;Toggle &amp;Full Screen&quot;), this);
+     fullScreenAction-&gt;setShortcut(QKeySequence(tr(&quot;Ctrl+F&quot;)));
+
+     QAction *exitAction = new QAction(tr(&quot;E&amp;xit&quot;), this);
+     exitAction-&gt;setShortcut(QKeySequence(tr(&quot;Ctrl+Q&quot;)));
+
+     connect(parentPageAction1, SIGNAL(triggered()), this, SIGNAL(showPage()));
+     connect(parentPageAction2, SIGNAL(triggered()), this, SIGNAL(showPage()));
+     connect(parentPageAction3, SIGNAL(triggered()), this, SIGNAL(showPage()));
+     connect(fullScreenAction, SIGNAL(triggered()),
+             this, SLOT(toggleFullScreen()));
+     connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
+
+     display = new DisplayWidget;
+
+     addAction(parentPageAction1);
+     addAction(parentPageAction2);
+     addAction(parentPageAction3);
+     addAction(fullScreenAction);
+     addAction(exitAction);
+
+     slideshowTimer = new QTimer(this);
+     slideshowTimer-&gt;setInterval(5000);
+     resizeTimer = new QTimer(this);
+     resizeTimer-&gt;setSingleShot(true);
+     connect(resizeTimer, SIGNAL(timeout()), this, SLOT(redisplayWindow()));
+
+     assistant = new QAssistantClient(
+         QLibraryInfo::location(QLibraryInfo::BinariesPath), this);
+
+     connect(display, SIGNAL(actionRequested(const QString &amp;)),
+             this, SLOT(executeAction(const QString &amp;)));
+     connect(display, SIGNAL(categoryRequested(const QString &amp;)),
+             this, SLOT(showExamples(const QString &amp;)));
+     connect(display, SIGNAL(documentationRequested(const QString &amp;)),
+             this, SLOT(showExampleDocumentation(const QString &amp;)));
+     connect(display, SIGNAL(exampleRequested(const QString &amp;)),
+             this, SLOT(showExampleSummary(const QString &amp;)));
+
+     connect(display, SIGNAL(launchRequested(const QString &amp;)),
+             this, SLOT(launchExample(const QString &amp;)));
+
+     connect(this, SIGNAL(showPage()), this, SLOT(showParentPage()),
+             Qt::QueuedConnection);
+     connect(this, SIGNAL(windowResized()), this, SLOT(redisplayWindow()),
+             Qt::QueuedConnection);
+
+     setCentralWidget(display);
+     setMaximumSize(QApplication::desktop()-&gt;screenGeometry().size());
+     setWindowTitle(tr(&quot;Qt Examples and Demos&quot;));
+     setWindowIcon(QPixmap(&quot;:/images/qt4-logo.png&quot;));
+ }
+
+ bool Launcher::setup()
+ {
+     documentationDir = QDir(QLibraryInfo::location(
+                             QLibraryInfo::DocumentationPath));
+
+     if (!documentationDir.cd(&quot;html&quot;)) {
+         <span class="comment">// Failed to find the HTML documentation.</span>
+         <span class="comment">// We can continue without it.</span>
+         QMessageBox::warning(this, tr(&quot;No Documentation Found&quot;),
+             tr(&quot;I could not find the Qt documentation.&quot;),
+             QMessageBox::Cancel);
+     }
+
+     imagesDir = documentationDir;
+     if (!imagesDir.cd(&quot;images&quot;)) {
+         <span class="comment">// Failed to find the accompanying images for the documentation.</span>
+         <span class="comment">// We can continue without them.</span>
+         QMessageBox::warning(this, tr(&quot;No Images Found&quot;),
+             tr(&quot;I could not find any images for the Qt documentation.&quot;),
+             QMessageBox::Cancel);
+     }
+
+     maximumLabels = 0;
+
+     demosDir = QDir(QLibraryInfo::location(QLibraryInfo::DemosPath));
+     int demoCategories = readInfo(&quot;:/demos.xml&quot;, demosDir);
+
+     examplesDir = QDir(QLibraryInfo::location(QLibraryInfo::ExamplesPath));
+     int exampleCategories = readInfo(&quot;:/examples.xml&quot;, examplesDir);
+
+     if (demoCategories + exampleCategories &lt;= 0) {
+         <span class="comment">// Failed to find the examples.</span>
+         QMessageBox::warning(this, tr(&quot;No Examples or Demos found&quot;),
+             tr(&quot;I could not find any Qt examples or demos.\n&quot;
+                &quot;Please ensure that Qt is installed correctly.&quot;),
+             QMessageBox::Cancel);
+         return false;
+     }
+
+     maximumLabels = qMax(demoCategories + exampleCategories, maximumLabels);
+
+     <span class="comment">// For example menus, remember that the menu has to include a Back button.</span>
+     foreach (QString category, categories)
+         maximumLabels = qMax(examples[category].size() + 1, maximumLabels);
+
+     QString mainDescription = categoryDescriptions[&quot;[main]&quot;];
+     if (!mainDescription.isEmpty())
+         mainDescription += tr(&quot;\n&quot;);
+
+     categoryDescriptions[&quot;[main]&quot;] = mainDescription + tr(
+         &quot;&lt;p&gt;Press &lt;b&gt;Escape&lt;/b&gt;, &lt;b&gt;Backspace&lt;/b&gt;, or &lt;b&gt;%1&lt;/b&gt; to &quot;
+         &quot;return to a previous menu.&lt;/p&gt;\n&quot;
+         &quot;&lt;p&gt;Press &lt;b&gt;%2&lt;/b&gt; to switch between normal and full screen &quot;
+         &quot;modes.&lt;/p&gt;\n&quot;
+         &quot;&lt;p&gt;Use &lt;b&gt;%3&lt;/b&gt; to exit the launcher.&lt;/p&gt;&quot;).arg(QString(
+             QKeySequence(tr(&quot;Alt+Left&quot;)))).arg(QString(
+             QKeySequence(tr(&quot;Ctrl+F&quot;)))).arg(QString(
+             QKeySequence(tr(&quot;Ctrl+Q&quot;))));
+
+     emit showPage();
+     return true;
+ }
+
+ void Launcher::findDescriptionAndImages(const QString &amp;uniqueName,
+                                         const QString &amp;docName)
+ {
+     if (documentationDir.exists(docName)) {
+         exampleDetails[uniqueName][&quot;document path&quot;] = \
+             documentationDir.absoluteFilePath(docName);
+
+         QDomDocument exampleDoc;
+         QFile exampleFile(exampleDetails[uniqueName][&quot;document path&quot;]);
+         exampleDoc.setContent(&amp;exampleFile);
+
+         QDomNodeList paragraphs = exampleDoc.elementsByTagName(&quot;p&quot;);
+         QString description;
+
+         for (int p = 0; p &lt; int(paragraphs.length()); ++p) {
+             QDomNode descriptionNode = paragraphs.item(p);
+             description = readExampleDescription(descriptionNode);
+
+             if (description.indexOf(QRegExp(QString(
+                 &quot;((The|This) )?(%1 )?.*(example|demo)&quot;).arg(
+                     exampleDetails[uniqueName][&quot;name&quot;]),
+                 Qt::CaseInsensitive)) != -1) {
+                 exampleDetails[uniqueName][&quot;description&quot;] = description;
+                 break;
+             }
+         }
+
+         QDomNodeList images = exampleDoc.elementsByTagName(&quot;img&quot;);
+         QStringList imageFiles;
+
+         for (int i = 0; i &lt; int(images.length()); ++i) {
+             QDomElement imageElement = images.item(i).toElement();
+             QString source = imageElement.attribute(&quot;src&quot;);
+             if (!source.contains(&quot;-logo&quot;))
+                 imageFiles.append(documentationDir.absoluteFilePath(source));
+         }
+
+         if (imageFiles.size() &gt; 0)
+             imagePaths[uniqueName] = imageFiles;
+     }
+ }
+
+ int Launcher::readInfo(const QString &amp;resource, const QDir &amp;dir)
+ {
+     QFile categoriesFile(resource);
+     QDomDocument document;
+     document.setContent(&amp;categoriesFile);
+     QDomElement documentElement = document.documentElement();
+     QDomNodeList categoryNodes = documentElement.elementsByTagName(&quot;category&quot;);
+
+     readCategoryDescription(dir, &quot;[main]&quot;);
+     qtLogo.load(imagesDir.absoluteFilePath(&quot;:/images/qt4-logo.png&quot;));
+     trolltechLogo.load(imagesDir.absoluteFilePath(&quot;:/images/trolltech-logo.png&quot;));
+
+     for (int i = 0; i &lt; int(categoryNodes.length()); ++i) {
+
+         QDomNode categoryNode = categoryNodes.item(i);
+         QDomElement element = categoryNode.toElement();
+         QString categoryName = element.attribute(&quot;name&quot;);
+         QString categoryDirName = element.attribute(&quot;dirname&quot;);
+         QString categoryDocName = element.attribute(&quot;docname&quot;);
+         QString categoryColor = element.attribute(&quot;color&quot;, &quot;#f0f0f0&quot;);
+
+         QDir categoryDir = dir;
+         if (categoryDir.cd(categoryDirName)) {
+
+             readCategoryDescription(categoryDir, categoryName);
+
+             examples[categoryName] = QStringList();
+
+             QDomNodeList exampleNodes = element.elementsByTagName(&quot;example&quot;);
+             maximumLabels = qMax(maximumLabels, int(exampleNodes.length()));
+
+             for (int j = 0; j &lt; int(exampleNodes.length()); ++j) {
+
+                 QDir exampleDir = categoryDir;
+
+                 QDomNode exampleNode = exampleNodes.item(j);
+                 element = exampleNode.toElement();
+                 QString exampleName = element.attribute(&quot;name&quot;);
+                 QString exampleFileName = element.attribute(&quot;filename&quot;);
+                 QString exampleDirName = element.attribute(&quot;dirname&quot;);
+
+                 examples[categoryName].append(exampleName);
+
+                 QString uniqueName = categoryName+&quot;-&quot;+exampleName;
+                 exampleOptions[uniqueName] = QMap&lt;QString,QString&gt;();
+                 exampleDetails[uniqueName] = QMap&lt;QString,QString&gt;();
+
+                 QString docName;
+                 if (!categoryDocName.isEmpty())
+                     docName = categoryDocName+&quot;-&quot;+exampleFileName+&quot;.html&quot;;
+                 else
+                     docName = categoryDirName+&quot;-&quot;+exampleFileName+&quot;.html&quot;;
+
+                 exampleDetails[uniqueName][&quot;name&quot;] = exampleName;
+                 findDescriptionAndImages(uniqueName, docName);
+
+                 exampleOptions[uniqueName][&quot;changedirectory&quot;] = element.attribute(&quot;changedirectory&quot;, &quot;true&quot;);
+                 exampleOptions[uniqueName][&quot;color&quot;] = element.attribute(&quot;color&quot;, &quot;#f0f0f0&quot;);
+
+                 if (!exampleDirName.isEmpty() &amp;&amp; !exampleDir.cd(exampleDirName))
+                     continue;
+
+                 if (element.attribute(&quot;executable&quot;, &quot;true&quot;) != &quot;true&quot;)
+                     continue;
+
+                 if (exampleDir.cd(exampleFileName)) {
+                     QString examplePath = findExecutable(exampleDir);
+                     if (!examplePath.isNull()) {
+                         exampleDetails[uniqueName][&quot;absolute path&quot;] = exampleDir.absolutePath();
+                         exampleDetails[uniqueName][&quot;path&quot;] = examplePath;
+                     }
+                 }
+             }
+
+             categories.append(categoryName);
+             categoryColors[categoryName] = categoryColor;
+         }
+     }
+
+     return categories.size();
+ }
+
+ QString Launcher::findExecutable(const QDir &amp;dir) const
+ {
+     QDir parentDir = dir;
+     parentDir.cdUp();
+
+     QFileInfo releaseDir(dir, &quot;release&quot;);
+     if (releaseDir.isDir()) {
+         QDir currentDir(releaseDir.absoluteFilePath());
+         QString path = findExecutable(currentDir);
+         if (!path.isEmpty())
+             return path;
+     }
+
+     foreach (QFileInfo info, dir.entryInfoList(QDir::Dirs)) {
+         if (info.fileName().endsWith(&quot;.app&quot;))
+             return info.absoluteFilePath();
+         QDir currentDir(info.absoluteFilePath());
+         if (currentDir != dir &amp;&amp; currentDir != parentDir &amp;&amp;
+             currentDir.dirName() != &quot;plugins&quot;) {
+             QString path = findExecutable(currentDir);
+             if (!path.isNull())
+                 return path;
+         }
+     }
+
+     foreach (QFileInfo info, dir.entryInfoList(QDir::Files)) {
+         if (info.isExecutable())
+             return info.absoluteFilePath();
+     }
+     return QString();
+ }
+
+ void Launcher::readCategoryDescription(const QDir &amp;categoryDir,
+                                        const QString &amp;categoryName)
+ {
+     if (categoryDir.exists(&quot;README&quot;)) {
+         QFile file(categoryDir.absoluteFilePath(&quot;README&quot;));
+         if (!file.open(QFile::ReadOnly))
+             return;
+
+         QTextStream inputStream(&amp;file);
+
+         QStringList paragraphs;
+         QStringList currentPara;
+         bool openQuote = true;
+
+         while (!inputStream.atEnd()) {
+             QString line = inputStream.readLine();
+             int at = 0;
+             while ((at = line.indexOf(&quot;\&quot;&quot;, at)) != -1) {
+                 if (openQuote)
+                     line[at] = QChar::Punctuation_InitialQuote;
+                 else
+                     line[at] = QChar::Punctuation_FinalQuote;
+                 openQuote = !openQuote;
+             }
+
+             if (!line.trimmed().isEmpty()) {
+                 currentPara.append(line.trimmed());
+             } else if (!currentPara.isEmpty()) {
+                 paragraphs.append(currentPara.join(&quot; &quot;));
+                 currentPara.clear();
+             } else
+                 break;
+         }
+
+         if (!currentPara.isEmpty())
+             paragraphs.append(currentPara.join(&quot; &quot;));
+
+         categoryDescriptions[categoryName] = &quot;&lt;p&gt;&quot; + \
+             paragraphs.join(&quot;\n&lt;/p&gt;&lt;p&gt;&quot;) + &quot;&lt;/p&gt;\n&quot;;
+     }
+ }
+
+ QString Launcher::readExampleDescription(const QDomNode &amp;parentNode) const
+ {
+     QString description;
+     QDomNode node = parentNode.firstChild();
+
+     while (!node.isNull()) {
+         QString beginTag;
+         QString endTag;
+         if (node.isText())
+             description += node.nodeValue();
+         else if (node.hasChildNodes()) {
+             if (node.nodeName() == &quot;b&quot;) {
+                 beginTag = &quot;&lt;b&gt;&quot;;
+                 endTag = &quot;&lt;/b&gt;&quot;;
+             } else if (node.nodeName() == &quot;a&quot;) {
+                 beginTag = &quot;&lt;font color=\&quot;blue\&quot;&gt;&quot;;
+                 endTag = &quot;&lt;/font&gt;&quot;;
+             } else if (node.nodeName() == &quot;i&quot;) {
+                 beginTag = &quot;&lt;i&gt;&quot;;
+                 endTag = &quot;&lt;/i&gt;&quot;;
+             } else if (node.nodeName() == &quot;tt&quot;) {
+                 beginTag = &quot;&lt;tt&gt;&quot;;
+                 endTag = &quot;&lt;/tt&gt;&quot;;
+             }
+             description += beginTag + readExampleDescription(node) + endTag;
+         }
+
+         node = node.nextSibling();
+     }
+
+     return description;
+ }
+
+ void Launcher::launchExample(const QString &amp;uniqueName)
+ {
+     if (runningExamples.contains(uniqueName))
+         return;
+
+     QProcess *process = new QProcess(this);
+     connect(process, SIGNAL(finished(int)), this, SLOT(enableLaunching()));
+
+ #ifdef Q_OS_WIN
+     <span class="comment">//make sure it finds the dlls on windows</span>
+     QString curpath = QString::fromLocal8Bit(qgetenv(&quot;PATH&quot;).constData());
+     QString newpath = QString(&quot;PATH=%1;%2&quot;).arg(
+         QLibraryInfo::location(QLibraryInfo::BinariesPath), curpath);
+     process-&gt;setEnvironment(QStringList(newpath));
+ #endif
+
+     runningExamples.append(uniqueName);
+     runningProcesses[process] = uniqueName;
+
+     if (exampleOptions[uniqueName][&quot;changedirectory&quot;] == &quot;true&quot;)
+         process-&gt;setWorkingDirectory(exampleDetails[uniqueName][&quot;absolute path&quot;]);
+
+     process-&gt;start(exampleDetails[uniqueName][&quot;path&quot;]);
+
+     if (process-&gt;state() == QProcess::Starting)
+         slideshowTimer-&gt;stop();
+ }
+
+ void Launcher::enableLaunching()
+ {
+     QProcess *process = static_cast&lt;QProcess*&gt;(sender());
+     QString example = runningProcesses.take(process);
+     process-&gt;deleteLater();
+     runningExamples.removeAll(example);
+
+     if (example == currentExample) {
+         for (int i = 0; i &lt; display-&gt;shapesCount(); ++i) {
+             DisplayShape *shape = display-&gt;shape(i);
+             if (shape-&gt;metaData(&quot;launch&quot;).toString() == example) {
+                 shape-&gt;setMetaData(&quot;fade&quot;, 15);
+                 display-&gt;enableUpdates();
+             }
+         }
+         slideshowTimer-&gt;start();
+     }
+ }
+
+ void Launcher::executeAction(const QString &amp;action)
+ {
+     if (action == &quot;parent&quot;)
+         showParentPage();
+     else if (action == &quot;exit&quot;) {
+         if (runningExamples.size() == 0) {
+             connect(display, SIGNAL(displayEmpty()), this, SLOT(close()));
+             display-&gt;reset();
+         } else
+             close();
+     }
+ }
+
+ void Launcher::closeEvent(QCloseEvent *event)
+ {
+     if (runningExamples.size() &gt; 0) {
+         if (QMessageBox::warning(this, tr(&quot;Examples Running&quot;),
+                 tr(&quot;There are examples running. Do you really want to exit?&quot;),
+                 QMessageBox::Yes|QMessageBox::No) == QMessageBox::No)
+             event-&gt;ignore();
+             return;
+     }
+
+     foreach (QProcess *example, runningProcesses.keys()) {
+         example-&gt;terminate();
+         example-&gt;waitForFinished(1000);
+     }
+
+     qDeleteAll(runningProcesses.keys());
+     resizeTimer-&gt;stop();
+     slideshowTimer-&gt;stop();
+ }
+
+ void Launcher::showParentPage()
+ {
+     slideshowTimer-&gt;stop();
+     disconnect(slideshowTimer, SIGNAL(timeout()), this, 0);
+
+     if (!currentExample.isEmpty()) {
+         currentExample = &quot;&quot;;
+         redisplayWindow();
+     } else if (!currentCategory.isEmpty()) {
+         currentCategory = &quot;&quot;;
+         redisplayWindow();
+     }
+ }
+
+ void Launcher::newPage()
+ {
+     slideshowTimer-&gt;stop();
+     disconnect(slideshowTimer, SIGNAL(timeout()), this, 0);
+     disconnect(display, SIGNAL(displayEmpty()), this, 0);
+ }
+
+ DisplayShape *Launcher::addTitle(const QString &amp;title, qreal verticalMargin)
+ {
+     QPointF titlePosition = QPointF(0.0, 2*verticalMargin);
+
+     DisplayShape *newTitle = new TitleShape(title, titleFont,
+         QPen(Qt::white), titlePosition,
+         QSizeF(0.5 * width(), 2*verticalMargin),
+         Qt::AlignHCenter | Qt::AlignTop);
+
+     newTitle-&gt;setPosition(QPointF(-newTitle-&gt;rect().width(), titlePosition.y()));
+     newTitle-&gt;setTarget(QPointF(0.25*width(), titlePosition.y()));
+     newTitle-&gt;setMetaData(&quot;fade&quot;, 15);
+
+     display-&gt;appendShape(newTitle);
+
+     return newTitle;
+ }
+
+ DisplayShape *Launcher::addTitleBackground(DisplayShape *titleShape)
+ {
+     QPainterPath backgroundPath;
+     backgroundPath.addRect(0, -titleShape-&gt;rect().height()*0.3,
+                            width(), titleShape-&gt;rect().height()*1.6);
+
+     DisplayShape *titleBackground = new PanelShape(backgroundPath,
+         QBrush(QColor(&quot;#a6ce39&quot;)), QBrush(QColor(&quot;#a6ce39&quot;)), Qt::NoPen,
+             QPointF(width(), titleShape-&gt;position().y()),
+             backgroundPath.boundingRect().size());
+
+     titleBackground-&gt;setTarget(QPointF(0.0, titleShape-&gt;position().y()));
+
+     display-&gt;insertShape(0, titleBackground);
+
+     return titleBackground;
+ }
+
+ void Launcher::addVersionAndCopyright(const QRectF &amp;rect)
+ {
+     DisplayShape *versionCaption = new TitleShape(
+         QString(&quot;Qt %1&quot;).arg(QT_VERSION_STR), font(),
+         QPen(QColor(0,0,0,0)),
+         QPointF(rect.center().x(), rect.top()),
+         QSizeF(0.5*rect.width(), rect.height()),
+         Qt::AlignRight | Qt::AlignVCenter);
+
+     versionCaption-&gt;setMetaData(&quot;fade&quot;, 15);
+     display-&gt;appendShape(versionCaption);
+
+     DisplayShape *copyrightCaption = new TitleShape(
+         QString(&quot;Copyright \xa9 2005-2007 Trolltech ASA&quot;), font(),
+         QPen(QColor(0,0,0,0)),
+         rect.topLeft(), QSizeF(0.5*rect.width(), rect.height()),
+         Qt::AlignLeft | Qt::AlignVCenter);
+
+     copyrightCaption-&gt;setMetaData(&quot;fade&quot;, 15);
+     display-&gt;appendShape(copyrightCaption);
+ }
+
+ void Launcher::fadeShapes()
+ {
+     for (int i = 0; i &lt; display-&gt;shapesCount(); ++i) {
+         DisplayShape *shape = display-&gt;shape(i);
+
+         shape-&gt;setMetaData(&quot;fade&quot;, -15);
+         shape-&gt;setMetaData(&quot;fade minimum&quot;, 0);
+     }
+ }
+
+ void Launcher::showCategories()
+ {
+     newPage();
+     fadeShapes();
+     currentCategory = &quot;&quot;;
+     currentExample = &quot;&quot;;
+
+     qreal horizontalMargin = 0.025*width();
+     qreal verticalMargin = 0.025*height();
+
+     DisplayShape *title = new TitleShape(tr(&quot;Qt Examples and Demos&quot;),
+         titleFont, QPen(QColor(&quot;#a6ce39&quot;)), QPointF(),
+         QSizeF(0.5*width(), 4*verticalMargin));
+
+     title-&gt;setPosition(QPointF(width()/2 - title-&gt;rect().width()/2,
+                                -title-&gt;rect().height()));
+     title-&gt;setTarget(QPointF(title-&gt;position().x(), verticalMargin));
+
+     display-&gt;appendShape(title);
+
+     qreal topMargin = 6*verticalMargin;
+     qreal bottomMargin = height() - 3.2*verticalMargin;
+     qreal space = bottomMargin - topMargin;
+     qreal step = qMin(title-&gt;rect().height() / fontRatio,
+                       space/qreal(maximumLabels));
+     qreal textHeight = fontRatio * step;
+
+     QPointF startPosition = QPointF(0.0, topMargin);
+     QSizeF maxSize(10.8*horizontalMargin, textHeight);
+     qreal maxWidth = 0.0;
+
+     QList&lt;DisplayShape*&gt; newShapes;
+
+     foreach (QString category, categories) {
+
+         DisplayShape *caption = new TitleShape(category, font(), QPen(),
+             startPosition, maxSize);
+         caption-&gt;setPosition(QPointF(-caption-&gt;rect().width(),
+                                      caption-&gt;position().y()));
+         caption-&gt;setTarget(QPointF(2*horizontalMargin, caption-&gt;position().y()));
+
+         newShapes.append(caption);
+
+         startPosition += QPointF(0.0, step);
+         maxWidth = qMax(maxWidth, caption-&gt;rect().width());
+     }
+
+     DisplayShape *exitButton = new TitleShape(tr(&quot;Exit&quot;), font(),
+         QPen(Qt::white), startPosition, maxSize);
+
+     exitButton-&gt;setTarget(QPointF(2*horizontalMargin, exitButton-&gt;position().y()));
+     newShapes.append(exitButton);
+
+     startPosition = QPointF(width(), topMargin);
+     qreal extra = (step - textHeight)/4;
+
+     QPainterPath backgroundPath;
+     backgroundPath.addRect(-2*extra, -extra, maxWidth + 4*extra, textHeight + 2*extra);
+
+     foreach (QString category, categories) {
+
+         DisplayShape *background = new PanelShape(backgroundPath,
+             QBrush(categoryColors[category]), QBrush(QColor(&quot;#e0e0ff&quot;)),
+             Qt::NoPen, startPosition,
+             QSizeF(maxWidth + 4*extra, textHeight + 2*extra));
+
+         background-&gt;setMetaData(&quot;category&quot;, category);
+         background-&gt;setInteractive(true);
+         background-&gt;setTarget(QPointF(2*horizontalMargin,
+                                       background-&gt;position().y()));
+         display-&gt;insertShape(0, background);
+         startPosition += QPointF(0.0, step);
+     }
+
+     QPainterPath exitPath;
+     exitPath.moveTo(-2*extra, -extra);
+     exitPath.lineTo(-8*extra, textHeight/2);
+     exitPath.lineTo(-extra, textHeight + extra);
+     exitPath.lineTo(maxWidth + 2*extra, textHeight + extra);
+     exitPath.lineTo(maxWidth + 2*extra, -extra);
+     exitPath.closeSubpath();
+
+     DisplayShape *exitBackground = new PanelShape(exitPath,
+         QBrush(QColor(&quot;#a6ce39&quot;)), QBrush(QColor(&quot;#c7f745&quot;)), Qt::NoPen,
+         startPosition, QSizeF(maxWidth + 10*extra, textHeight + 2*extra));
+
+     exitBackground-&gt;setMetaData(&quot;action&quot;, &quot;exit&quot;);
+     exitBackground-&gt;setInteractive(true);
+     exitBackground-&gt;setTarget(QPointF(2*horizontalMargin,
+                                       exitBackground-&gt;position().y()));
+     display-&gt;insertShape(0, exitBackground);
+
+     foreach (DisplayShape *caption, newShapes) {
+         QPointF position = caption-&gt;target();
+         QSizeF size = caption-&gt;rect().size();
+         caption-&gt;setPosition(QPointF(-maxWidth, position.y()));
+         display-&gt;appendShape(caption);
+     }
+
+     qreal leftMargin = 3*horizontalMargin + maxWidth;
+     qreal rightMargin = width() - 3*horizontalMargin;
+
+     DocumentShape *description = new DocumentShape(categoryDescriptions[&quot;[main]&quot;],
+         documentFont, QPointF(leftMargin, topMargin),
+         QSizeF(rightMargin - leftMargin, space), 0);
+
+     description-&gt;setMetaData(&quot;fade&quot;, 10);
+     display-&gt;appendShape(description);
+
+     qreal imageHeight = title-&gt;rect().height() + verticalMargin;
+
+     qreal qtLength = qMin(imageHeight, title-&gt;rect().left()-3*horizontalMargin);
+     QSizeF qtMaxSize = QSizeF(qtLength, qtLength);
+
+     DisplayShape *qtShape = new ImageShape(qtLogo,
+         QPointF(2*horizontalMargin-extra, -imageHeight), qtMaxSize, 0,
+         Qt::AlignLeft | Qt::AlignVCenter);
+
+     qtShape-&gt;setMetaData(&quot;fade&quot;, 15);
+     qtShape-&gt;setTarget(QPointF(qtShape-&gt;rect().x(), verticalMargin));
+     display-&gt;insertShape(0, qtShape);
+
+     QSizeF trolltechMaxSize = QSizeF(
+         width()-3*horizontalMargin-title-&gt;rect().right(), imageHeight);
+
+     DisplayShape *trolltechShape = new ImageShape(trolltechLogo,
+         QPointF(width()-2*horizontalMargin-trolltechMaxSize.width()+extra,
+                 -imageHeight),
+         trolltechMaxSize, 0, Qt::AlignRight | Qt::AlignVCenter);
+
+     trolltechShape-&gt;setMetaData(&quot;fade&quot;, 15);
+     trolltechShape-&gt;setTarget(QPointF(trolltechShape-&gt;rect().x(),
+                                       verticalMargin));
+     display-&gt;insertShape(0, trolltechShape);
+
+     addVersionAndCopyright(QRectF(2*horizontalMargin,
+                            height() - verticalMargin - textHeight,
+                            width()-4*horizontalMargin, textHeight));
+ }
+
+ void Launcher::showExamples(const QString &amp;category)
+ {
+     newPage();
+     fadeShapes();
+     currentCategory = category;
+     currentExample = &quot;&quot;;
+
+     qreal horizontalMargin = 0.025*width();
+     qreal verticalMargin = 0.025*height();
+
+     DisplayShape *newTitle = addTitle(category, verticalMargin);
+     addTitleBackground(newTitle);
+
+     qreal topMargin = 6*verticalMargin;
+     qreal bottomMargin = height() - 3.2*verticalMargin;
+     qreal space = bottomMargin - topMargin;
+     qreal step = qMin(newTitle-&gt;rect().height() / fontRatio,
+                       space/qreal(maximumLabels));
+     qreal textHeight = fontRatio * step;
+
+     QPointF startPosition = QPointF(2*horizontalMargin, height() + topMargin);
+     QPointF finishPosition = QPointF(2*horizontalMargin, topMargin);
+     QSizeF maxSize(32*horizontalMargin, textHeight);
+     qreal maxWidth = 0.0;
+
+     foreach (QString example, examples[currentCategory]) {
+
+         DisplayShape *caption = new TitleShape(example, font(), QPen(),
+             startPosition, maxSize);
+         caption-&gt;setTarget(finishPosition);
+
+         display-&gt;appendShape(caption);
+
+         startPosition += QPointF(0.0, step);
+         finishPosition += QPointF(0.0, step);
+         maxWidth = qMax(maxWidth, caption-&gt;rect().width());
+     }
+
+     DisplayShape *menuButton = new TitleShape(tr(&quot;Main Menu&quot;), font(),
+         QPen(Qt::white), startPosition, maxSize);
+     menuButton-&gt;setTarget(finishPosition);
+
+     display-&gt;appendShape(menuButton);
+     maxWidth = qMax(maxWidth, menuButton-&gt;rect().width());
+
+     startPosition = QPointF(width(), topMargin);
+     qreal extra = (step - textHeight)/4;
+
+     foreach (QString example, examples[currentCategory]) {
+
+         QString uniqueName = currentCategory+&quot;-&quot;+example;
+         QPainterPath path;
+         path.addRect(-2*extra, -extra, maxWidth + 4*extra, textHeight + 2*extra);
+
+         DisplayShape *background = new PanelShape(path,
+             QBrush(QColor(exampleOptions[uniqueName][&quot;color&quot;])),
+             QBrush(QColor(&quot;#e0e0ff&quot;)),
+             Qt::NoPen, startPosition,
+             QSizeF(maxWidth + 4*extra, textHeight + 2*extra));
+
+         background-&gt;setMetaData(&quot;example&quot;, uniqueName);
+         background-&gt;setInteractive(true);
+         background-&gt;setTarget(QPointF(2*horizontalMargin,
+                                       background-&gt;position().y()));
+         display-&gt;insertShape(0, background);
+         startPosition += QPointF(0.0, step);
+     }
+
+     QPainterPath backPath;
+     backPath.moveTo(-2*extra, -extra);
+     backPath.lineTo(-8*extra, textHeight/2);
+     backPath.lineTo(-extra, textHeight + extra);
+     backPath.lineTo(maxWidth + 2*extra, textHeight + extra);
+     backPath.lineTo(maxWidth + 2*extra, -extra);
+     backPath.closeSubpath();
+
+     DisplayShape *buttonBackground = new PanelShape(backPath,
+         QBrush(QColor(&quot;#a6ce39&quot;)), QBrush(QColor(&quot;#c7f745&quot;)), Qt::NoPen,
+         startPosition, QSizeF(maxWidth + 10*extra, textHeight + 2*extra));
+
+     buttonBackground-&gt;setMetaData(&quot;action&quot;, &quot;parent&quot;);
+     buttonBackground-&gt;setInteractive(true);
+     buttonBackground-&gt;setTarget(QPointF(2*horizontalMargin,
+                                         buttonBackground-&gt;position().y()));
+     display-&gt;insertShape(0, buttonBackground);
+
+     qreal leftMargin = 3*horizontalMargin + maxWidth;
+     qreal rightMargin = width() - 3*horizontalMargin;
+
+     DocumentShape *description = new DocumentShape(
+         categoryDescriptions[currentCategory], documentFont,
+         QPointF(leftMargin, topMargin), QSizeF(rightMargin - leftMargin, space),
+         0);
+
+     description-&gt;setMetaData(&quot;fade&quot;, 10);
+
+     display-&gt;appendShape(description);
+
+     addVersionAndCopyright(QRectF(2*horizontalMargin,
+                            height() - verticalMargin - textHeight,
+                            width()-4*horizontalMargin, textHeight));
+ }
+
+ void Launcher::showExampleDocumentation(const QString &amp;uniqueName)
+ {
+     disconnect(display, SIGNAL(displayEmpty()), this, 0);
+     currentExample = uniqueName;
+
+     assistant-&gt;showPage(exampleDetails[uniqueName][&quot;document path&quot;]);
+ }
+
+ void Launcher::showExampleSummary(const QString &amp;uniqueName)
+ {
+     newPage();
+     fadeShapes();
+     currentExample = uniqueName;
+
+     qreal horizontalMargin = 0.025*width();
+     qreal verticalMargin = 0.025*height();
+
+     DisplayShape *newTitle = addTitle(exampleDetails[currentExample][&quot;name&quot;],
+                                       verticalMargin);
+     DisplayShape *titleBackground = addTitleBackground(newTitle);
+
+     qreal topMargin = 2*verticalMargin + titleBackground-&gt;rect().bottom();
+     qreal bottomMargin = height() - 8*verticalMargin;
+     qreal space = bottomMargin - topMargin;
+     qreal step = qMin(newTitle-&gt;rect().height() / fontRatio,
+                       (bottomMargin + qreal(4.8)*verticalMargin - topMargin)
+                       /qreal(maximumLabels));
+     qreal textHeight = fontRatio * step;
+
+     qreal leftMargin = 3*horizontalMargin;
+     qreal rightMargin = width() - 3*horizontalMargin;
+
+     if (exampleDetails[currentExample].contains(&quot;description&quot;)) {
+         DocumentShape *description = new DocumentShape(
+             exampleDetails[currentExample][&quot;description&quot;], documentFont,
+             QPointF(leftMargin, topMargin),
+             QSizeF(rightMargin-leftMargin, space), 0);
+
+         description-&gt;setMetaData(&quot;fade&quot;, 10);
+
+         description-&gt;setPosition(QPointF(description-&gt;position().x(),
+             0.8*height() - description-&gt;rect().height()));
+
+         display-&gt;appendShape(description);
+         space = description-&gt;position().y() - topMargin - 2*verticalMargin;
+     }
+
+     if (imagePaths.contains(currentExample)) {
+
+         QImage image(imagePaths[currentExample][0]);
+
+         QSizeF imageMaxSize = QSizeF(width() - 8*horizontalMargin, space);
+
+         currentFrame = new ImageShape(image,
+             QPointF(width() - imageMaxSize.width()/2, topMargin),
+             imageMaxSize);
+
+         currentFrame-&gt;setMetaData(&quot;fade&quot;, 15);
+         currentFrame-&gt;setTarget(QPointF(width()/2 - imageMaxSize.width()/2,
+                                         topMargin));
+
+         display-&gt;appendShape(currentFrame);
+
+         if (imagePaths[currentExample].size() &gt; 1) {
+             connect(slideshowTimer, SIGNAL(timeout()),
+                     this, SLOT(updateExampleSummary()));
+
+             slideshowFrame = 0;
+             slideshowTimer-&gt;start();
+         }
+     }
+
+     QSizeF maxSize(0.3 * width(), 2*verticalMargin);
+     leftMargin = 0.0;
+     rightMargin = 0.0;
+
+     if (true) {
+         DisplayShape *backButton = new TitleShape(currentCategory, font(),
+             QPen(Qt::white), QPointF(0.1*width(), height()), maxSize,
+             Qt::AlignLeft | Qt::AlignTop);
+         backButton-&gt;setTarget(QPointF(backButton-&gt;position().x(),
+                                       height() - 5.2*verticalMargin));
+
+         display-&gt;appendShape(backButton);
+
+         qreal maxWidth = backButton-&gt;rect().width();
+         qreal textHeight = backButton-&gt;rect().height();
+         qreal extra = (3*verticalMargin - textHeight)/4;
+
+         QPainterPath path;
+         path.moveTo(-extra, -extra);
+         path.lineTo(-4*extra, textHeight/2);
+         path.lineTo(-extra, textHeight + extra);
+         path.lineTo(maxWidth + 2*extra, textHeight + extra);
+         path.lineTo(maxWidth + 2*extra, -extra);
+         path.closeSubpath();
+
+         DisplayShape *buttonBackground = new PanelShape(path,
+             QBrush(QColor(&quot;#a6ce39&quot;)), QBrush(QColor(&quot;#c7f745&quot;)), Qt::NoPen,
+             backButton-&gt;position(),
+             QSizeF(maxWidth + 6*extra, textHeight + 2*extra));
+
+         buttonBackground-&gt;setMetaData(&quot;category&quot;, currentCategory);
+         buttonBackground-&gt;setInteractive(true);
+         buttonBackground-&gt;setTarget(backButton-&gt;target());
+
+         display-&gt;insertShape(0, buttonBackground);
+
+         leftMargin = buttonBackground-&gt;rect().right();
+     }
+
+     if (exampleDetails[currentExample].contains(&quot;absolute path&quot;)) {
+
+         DisplayShape *launchCaption = new TitleShape(tr(&quot;Launch&quot;),
+             font(), QPen(Qt::white), QPointF(0.0, 0.0), maxSize,
+             Qt::AlignLeft | Qt::AlignTop);
+         launchCaption-&gt;setPosition(QPointF(
+             0.9*width() - launchCaption-&gt;rect().width(), height()));
+         launchCaption-&gt;setTarget(QPointF(launchCaption-&gt;position().x(),
+                                          height() - 5.2*verticalMargin));
+
+         display-&gt;appendShape(launchCaption);
+
+         qreal maxWidth = launchCaption-&gt;rect().width();
+         qreal textHeight = launchCaption-&gt;rect().height();
+         qreal extra = (3*verticalMargin - textHeight)/4;
+
+         QPainterPath path;
+         path.addRect(-2*extra, -extra, maxWidth + 4*extra, textHeight + 2*extra);
+
+         QColor backgroundColor = QColor(&quot;#a63e39&quot;);
+         QColor highlightedColor = QColor(&quot;#f95e56&quot;);
+
+         DisplayShape *background = new PanelShape(path,
+             QBrush(backgroundColor), QBrush(highlightedColor), Qt::NoPen,
+             launchCaption-&gt;position(),
+             QSizeF(maxWidth + 4*extra, textHeight + 2*extra));
+
+         background-&gt;setMetaData(&quot;fade minimum&quot;, 120);
+         background-&gt;setMetaData(&quot;launch&quot;, currentExample);
+         background-&gt;setInteractive(true);
+         background-&gt;setTarget(launchCaption-&gt;target());
+
+         if (runningExamples.contains(currentExample)) {
+             background-&gt;setMetaData(&quot;highlight&quot;, true);
+             background-&gt;setMetaData(&quot;highlight scale&quot;, 0.99);
+             background-&gt;animate();
+             background-&gt;setMetaData(&quot;fade&quot;, -135);
+             slideshowTimer-&gt;stop();
+         }
+
+         display-&gt;insertShape(0, background);
+
+         rightMargin = background-&gt;rect().left();
+     }
+
+     if (exampleDetails[currentExample].contains(&quot;document path&quot;)) {
+
+         DisplayShape *documentCaption = new TitleShape(tr(&quot;Show Documentation&quot;),
+             font(), QPen(Qt::white), QPointF(0.0, 0.0), maxSize,
+             Qt::AlignLeft | Qt::AlignTop);
+
+         if (rightMargin == 0.0) {
+             documentCaption-&gt;setPosition(QPointF(
+                 0.9*width() - documentCaption-&gt;rect().width(), height()));
+         } else {
+             documentCaption-&gt;setPosition(QPointF(
+                 leftMargin/2 + rightMargin/2 - documentCaption-&gt;rect().width()/2,
+                 height()));
+         }
+         documentCaption-&gt;setTarget(QPointF(documentCaption-&gt;position().x(),
+                                            height() - 5.2*verticalMargin));
+
+         display-&gt;appendShape(documentCaption);
+
+         qreal maxWidth = documentCaption-&gt;rect().width();
+         qreal textHeight = documentCaption-&gt;rect().height();
+         qreal extra = (3*verticalMargin - textHeight)/4;
+
+         QPainterPath path;
+         path.addRect(-2*extra, -extra, maxWidth + 4*extra, textHeight + 2*extra);
+
+         DisplayShape *background = new PanelShape(path,
+             QBrush(QColor(&quot;#9c9cff&quot;)), QBrush(QColor(&quot;#cfcfff&quot;)), Qt::NoPen,
+             documentCaption-&gt;position(),
+             QSizeF(maxWidth + 4*extra, textHeight + 2*extra));
+
+         background-&gt;setMetaData(&quot;fade minimum&quot;, 120);
+         background-&gt;setMetaData(&quot;documentation&quot;, currentExample);
+         background-&gt;setInteractive(true);
+         background-&gt;setTarget(documentCaption-&gt;target());
+
+         display-&gt;insertShape(0, background);
+     }
+
+     addVersionAndCopyright(QRectF(2*horizontalMargin,
+                            height() - verticalMargin - textHeight,
+                            width()-4*horizontalMargin, textHeight));
+ }
+
+ void Launcher::updateExampleSummary()
+ {
+     if (imagePaths.contains(currentExample)) {
+
+         currentFrame-&gt;setMetaData(&quot;fade&quot;, -15);
+         currentFrame-&gt;setTarget(currentFrame-&gt;position() - QPointF(0.5*width(),
+                                 0));
+
+         slideshowFrame = (slideshowFrame+1) % imagePaths[currentExample].size();
+         QImage image(imagePaths[currentExample][slideshowFrame]);
+
+         QSizeF imageSize = currentFrame-&gt;size();
+         QPointF imagePosition = QPointF(width() - imageSize.width()/2,
+                                         currentFrame-&gt;position().y());
+
+         currentFrame = new ImageShape(image, imagePosition, imageSize);
+         currentFrame-&gt;setMetaData(&quot;fade&quot;, 15);
+         currentFrame-&gt;setTarget(QPointF(width()/2 - imageSize.width()/2,
+                                         imagePosition.y()));
+
+         display-&gt;appendShape(currentFrame);
+     }
+ }
+
+ void Launcher::toggleFullScreen()
+ {
+     if (inFullScreenResize)
+         return;
+
+     inFullScreenResize = true;
+
+     connect(display, SIGNAL(displayEmpty()), this, SLOT(resizeWindow()),
+             Qt::QueuedConnection);
+     display-&gt;reset();
+ }
+
+ void Launcher::resizeWindow()
+ {
+     disconnect(display, SIGNAL(displayEmpty()), this, 0);
+
+     if (isFullScreen())
+         showNormal();
+     else
+         showFullScreen();
+ }
+
+ void Launcher::resizeEvent(QResizeEvent *event)
+ {
+     Q_UNUSED(event);
+
+     documentFont = font();
+     documentFont.setPointSizeF(qMin(documentFont.pointSizeF()*width()/640.0,
+                                     documentFont.pointSizeF()*height()/480.0));
+
+     if (inFullScreenResize)
+         inFullScreenResize = false;
+
+     if (currentCategory != &quot;[starting]&quot;)
+         resizeTimer-&gt;start(500);
+ }
+
+ void Launcher::redisplayWindow()
+ {
+     if (!currentExample.isEmpty())
+         showExampleSummary(currentExample);
+     else if (!currentCategory.isEmpty())
+         showExamples(currentCategory);
+     else
+         showCategories();
+ }</pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+</tr></table></div></address></body>
+</html>

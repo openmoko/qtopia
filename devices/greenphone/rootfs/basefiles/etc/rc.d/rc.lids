@@ -1,0 +1,47 @@
+#!/bin/sh
+
+if [ ! -f /proc/sys/lids/locks ]; then
+    echo "LIDS kernel not enabled!"
+    exit 1
+fi
+
+if [ ! -x /opt/Qtopia/etc/sxe_qtopia/sxe_qtopia ]; then
+    if [ "$1" = "start" ]; then
+        echo "Qtopia does not support SXE, disabling LIDS!"
+    fi
+    exit 1
+fi
+
+case "$1" in
+    start)
+        splash -p + "Starting LIDS"
+
+        # Bind mount the writeable LIDS config directory onto /etc/lids
+        mount -o bind /mnt/user/etc/lids /etc/lids
+
+        if [ ! -f /etc/lids/lids_initialized ]; then
+            echo "building LIDS rules"
+
+            /etc/rc.d/sxe_boot
+
+            #head -c32 /dev/urandom | uuencode -m - | sed -n '2s/=*$//;2p' > /etc/lids/lids.secret
+            #cat /etc/lids/lids.secret | /sbin/lidsconf -P
+
+            #touch /etc/lids/lids_initialized
+        fi
+
+        # Enable LIDS
+        lidsadm -I
+        ;;
+    stop)
+        splash -p + "Stopping LIDS"
+
+        # Enter lids shutdown state
+        /sbin/lidsadm -S -- +SHUTDOWN < /etc/lids/lids.secret
+        ;;
+    *)
+        echo "Usage: $0 [start|stop]"
+        exit 1
+        ;;
+esac
+

@@ -5,8 +5,7 @@ OBEX_HEADERS+=\
     qobexpushclient.h\
     qobexpushservice.h\
     qobexsocket.h\
-    qobexserver.h\
-    qobexnamespace.h
+    qobexserver.h
 
 OBEX_SOURCES+=\
     qobexpushclient.cpp\
@@ -14,8 +13,7 @@ OBEX_SOURCES+=\
     qobexsocket.cpp\
     qobexserver.cpp\
     qobexcommand_p.cpp\
-    qobexcommon_p.cpp\
-    qobexnamespace.cpp
+    qobexcommon_p.cpp
 
 OBEX_PRIVATE_HEADERS+=\
     qobexcommon_p.h\

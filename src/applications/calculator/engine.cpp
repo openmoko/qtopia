@@ -688,14 +688,14 @@ void Engine::setDisplay(MyLcdDisplay *l) {
 
     memMark = new QLabel( "m", lcd );
     memMark->setBackgroundRole( QPalette::Base );
-    memMark->setFont( QFont( "helvetica", 12, QFont::Bold, true ) );
+    memMark->setFont( QFont( "dejavu", 10, QFont::Bold, true ) );
     memMark->resize( 12, 12 );
     memMark->move( 4, 2 );
     memMark->hide();
 
     kMark = new QLabel( "k", lcd );
     kMark->setBackgroundRole( QPalette::Base );
-    kMark->setFont( QFont( "helvetica", 12, QFont::Bold, true ) );
+    kMark->setFont( QFont( "dejavu", 10, QFont::Bold, true ) );
     kMark->resize( 12, 12 );
     kMark->move( 4, 14 );
     kMark->hide();

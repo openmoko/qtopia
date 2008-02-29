@@ -166,7 +166,6 @@ public:
     virtual ~ThemePageItem();
 
     const QString base() const;
-    bool isTransparent() const;
 
     int rtti() const;
 
@@ -376,7 +375,7 @@ public:
     ThemePixmapItem(ThemeItem *p, ThemedView *ir, const ThemeAttributes &atts);
     virtual ~ThemePixmapItem();
 
-    static QImage colorizeImage( const QImage& src, const QColor& col, int alpha, bool colorroles = true);
+    static void colorizeImage( QImage &img, const QColor& col, int alpha, bool colorroles = true);
 
 protected:
     QPixmap loadImage(const QString &imgName, int colorRole, const QColor &color, int alpha, int width = 0, int height = 0);

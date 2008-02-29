@@ -55,8 +55,8 @@ public:
     bool restrictToHint() const { return mRestrictToHint; }
     void setRestrictToHint(bool b) { mRestrictToHint = b; }
 
-    bool passwordHint() const { return mPasswordHint; }
-    void setPasswordHint(bool b) { mPasswordHint = b; }
+    bool passwordHint() const;
+    void setPasswordHint(bool b);
 
 signals:
     void stateChanged(int);
@@ -119,7 +119,11 @@ private:
 
     void processStroke(QIMPenStroke *);
     bool shift;
-
+    bool autoCapitalize;
+    bool capitalizeNext;
+    bool hintedAutoCapitalization;
+    QString autoCapitalizingPunctuation;
+    bool autoCapitalizeEveryWord;
     bool active;
 
     int lastUnicode;

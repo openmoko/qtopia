@@ -214,7 +214,7 @@ CallHistoryView::CallHistoryView( QCallList &callList, QWidget *parent, Qt::WFla
     connect( mOpenContact, SIGNAL(triggered()), this, SLOT(openContact()) );
     mAddContact = new QAction( addressbookIcon, tr( "Save to Contacts" ), this );
     connect( mAddContact, SIGNAL(triggered()), this, SLOT(addContact()) );
-    mSendMessage = new QAction( QIcon( ":icon/email" ), tr( "Send Message" ), this );
+    mSendMessage = new QAction( QIcon( ":icon/txt" ), tr( "Send Message" ), this );
     connect( mSendMessage, SIGNAL(triggered()), this, SLOT(sendMessage()) );
     if ( rw ) {
         mDeleteAction = new QAction( QIcon( ":icon/trash" ), tr( "Delete" ), this );

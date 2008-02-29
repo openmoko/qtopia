@@ -1,5 +1,6 @@
 qtopia_project(qtopia app)
 TARGET=packagemanager
+CONFIG+=qtopia_main
 
 FORMS           = serveredit.ui \
                     packagedetails.ui
@@ -13,7 +14,9 @@ HEADERS         = packageview.h \
                     installedpackagescanner.h\
                     targz.h \
                     sandboxinstall.h \
-                    packagemanagerservice.h
+                    md5file.h \
+                    packagemanagerservice.h \
+                    version.h
 
 SOURCES         = main.cpp \
                     packageview.cpp \
@@ -26,9 +29,14 @@ SOURCES         = main.cpp \
                     installedpackagescanner.cpp\
                     targz.cpp \
                     sandboxinstall.cpp \
-                    packagemanagerservice.cpp
+                    md5file.cpp \
+                    packagemanagerservice.cpp \
+                    version.cpp
+
+INCLUDEPATH+=$$QT_DEPOT_PATH/src/3rdparty/md5
 
 depends(3rdparty/libraries/tar)
+depends(3rdparty/libraries/md5)
 enable_sxe:depends(libraries/qtopiasecurity)
 
 help.source=$$QTOPIA_DEPOT_PATH/help
@@ -40,14 +48,20 @@ desktop.hint=desktop
 pics.files=$$QTOPIA_DEPOT_PATH/pics/packagemanager/*
 pics.path=/pics/packagemanager
 pics.hint=pics
-secsettings.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PackageServers.conf
+            
+!isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageServers.conf) {
+    secsettings.files+=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageServers.conf
+} else {
+    secsettings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PackageServers.conf
+}
 secsettings.path=/etc/default/Trolltech
 secsettings.hint=secsettings
+
 packagemanagerservice.files=$$QTOPIA_DEPOT_PATH/services/PackageManager/packagemanager
 packagemanagerservice.path=/services/PackageManager
 qdspackagemanagerservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/PackageManager
 qdspackagemanagerservice.path=/etc/qds
-INSTALLS+=content_installer packagemanagerservice qdspackagemanagerservice
+INSTALLS+=packagemanagerservice qdspackagemanagerservice
 INSTALLS+=help desktop pics secsettings
 
 enable_sxe {
@@ -56,4 +70,4 @@ enable_sxe {
 }
 
 pkg.desc=Safely download and install programs for Qtopia.
-pkg.domain=window,cardreader,docapi
+pkg.domain=window,cardreader,docapi,policy,launcher,prefix

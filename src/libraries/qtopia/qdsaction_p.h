@@ -72,7 +72,7 @@ public:
     void connectToAction( QDSAction* action );
 
     // Data members
-    QLocalUniqueId      mId;
+    QUniqueId           mId;
     QDSServiceInfo      mServiceInfo;
     QtopiaIpcAdaptor*   mResponseChannel;
     QTimer*             mTimer;
@@ -91,9 +91,9 @@ private slots:
     void errorSlot( const QString& message );
 
 signals:
-    void response( const QLocalUniqueId& actionId );
-    void response( const QLocalUniqueId& actionId, const QDSData& responseData );
-    void error( const QLocalUniqueId& actionId, const QString& message );
+    void response( const QUniqueId& actionId );
+    void response( const QUniqueId& actionId, const QDSData& responseData );
+    void error( const QUniqueId& actionId, const QString& message );
 
 private:
     void connectToChannel();

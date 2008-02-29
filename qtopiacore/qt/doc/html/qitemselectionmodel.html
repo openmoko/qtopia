@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/itemviews/qitemselectionmodel.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qitemselectionmodel.cpp -->
 <head>
   <title>Qt 4.2: QItemSelectionModel Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -92,7 +92,7 @@
 <p>The selected items are stored using ranges. Whenever you want to modify the selected items use <a href="qitemselectionmodel.html#select">select</a>() and provide either a <a href="qitemselection.html">QItemSelection</a>, or a <a href="qmodelindex.html">QModelIndex</a> and a <a href="qitemselectionmodel.html#SelectionFlag-enum">QItemSelectionModel::SelectionFlag</a>.</p>
 <p>The QItemSelectionModel takes a two layer approach to selection management, dealing with both selected items that have been committed and items that are part of the current selection. The current selected items are part of the current interactive selection (for example with rubber-band selection or keyboard-shift selections).</p>
 <p>To update the currently selected items, use the bitwise OR of <a href="qitemselectionmodel.html#SelectionFlag-enum">QItemSelectionModel::Current</a> and any of the other <a href="qitemselectionmodel.html#SelectionFlag-enum">SelectionFlags</a>. If you omit the <a href="qitemselectionmodel.html#SelectionFlag-enum">QItemSelectionModel::Current</a> command, a new current selection will be created, and the previous one added to the committed selection. All functions operate on both layers; for example, selectedItems() will return items from both layers.</p>
-<p>See also <a href="model-view-programming.html">Model/View Programming</a>, <a href="qabstractitemmodel.html">QAbstractItemModel</a>, and Chart Example.</p>
+<p>See also <a href="model-view-programming.html">Model/View Programming</a>, <a href="qabstractitemmodel.html">QAbstractItemModel</a>, and <a href="itemviews-chart.html">Chart Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="SelectionFlag-enum"></a>enum QItemSelectionModel::SelectionFlag<br />flags QItemSelectionModel::SelectionFlags</h3>
@@ -192,6 +192,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

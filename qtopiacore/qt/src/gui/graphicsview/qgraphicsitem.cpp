@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -86,6 +96,11 @@
     cut-off. The fine grained collision algorithm in collidesWithItem() is based
     on calling shape(), which returns an accurate outline of the item's shape
     as a QPainterPath.
+
+    QGraphicsScene expects all items boundingRect() and shape() to remain
+    unchanged unless it is notified. If you want to change an item's geometry
+    in any way, you must first call prepareGeometryChange() to allow
+    QGraphicsScene to update its bookkeeping.
 
     Collision detection can be done in two ways:
 
@@ -1497,6 +1512,8 @@ qreal QGraphicsItem::zValue() const
     that share the same Z-value will be drawn in an undefined order, although
     the order will stay the same for as long as the items live.
 
+    \img graphicsview-zorder.png
+    
     Children of different parents are stacked according to the Z-value of
     each item's ancestor item which is an immediate child of the two
     items' closest common ancestor. For example, a robot item might
@@ -1561,6 +1578,12 @@ QRectF QGraphicsItem::childrenBoundingRect() const
     always rectangular, and it is unaffected by the items'
     transformation (scale(), rotate(), etc.).
 
+    If you want to change the item's bounding rectangle, you must first call
+    prepareGeometryChange(). This notifies the scene of the imminent change,
+    so that its can update its item geometry index; otherwise, the scene will
+    be unaware of the item's new geometry, and the results are undefined
+    (typically, rendering artifacts are left around in the view).
+
     Reimplement this function to let QGraphicsView determine what
     parts of the widget, if any, need to be redrawn.
 
@@ -1579,7 +1602,8 @@ QRectF QGraphicsItem::childrenBoundingRect() const
     }
     \endcode
 
-    \sa shape(), contains(), {The Graphics View Coordinate System}
+    \sa shape(), contains(), {The Graphics View Coordinate System},
+    prepareGeometryChange()
 */
 
 /*!
@@ -1618,7 +1642,7 @@ QRectF QGraphicsItem::sceneBoundingRect() const
     This function is called by the default implementations of contains() and
     collidesWithPath().
 
-    \sa boundingRect(), contains()
+    \sa boundingRect(), contains(), prepareGeometryChange()
 */
 QPainterPath QGraphicsItem::shape() const
 {
@@ -2507,6 +2531,20 @@ bool QGraphicsItem::sceneEvent(QEvent *event)
     will propagate to any item beneath this item. If no items accept the
     event, it will be ignored by the scene, and propagate to the view.
 
+    It's common to open a QMenu in response to receiving a context menu
+    event. Example:
+
+    \code
+        void CustomItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+        {
+            QMenu menu;
+            QAction *removeAction = menu.addAction("Remove");
+            QAction *markAction = menu.addAction("Mark");
+            QAction *selectedAction = menu.exec(event->screenPos());
+            // ...
+        }
+    \endcode
+
     The default implementation does nothing.
 
     \sa sceneEvent()
@@ -3161,6 +3199,9 @@ QBrush QAbstractGraphicsShapeItem::brush() const
     Sets the item's brush to \a brush.
 
     The item's brush is used to fill the item.
+
+    If you use a brush with a QGradient, the gradient
+    is relative to the item's coordinate system.
 
     \sa brush()
 */
@@ -4554,6 +4595,7 @@ void QGraphicsPixmapItem::setOffset(const QPointF &offset)
     if (offset != d->offset) {
         removeFromIndex();
         d->offset = offset;
+        d->updateShape();
         addToIndex();
     }
 }
@@ -4564,9 +4606,9 @@ void QGraphicsPixmapItem::setOffset(const QPointF &offset)
 QRectF QGraphicsPixmapItem::boundingRect() const
 {
     Q_D(const QGraphicsPixmapItem);
-    qreal halfPw = 0.5;
+    qreal pw = 1.0;
     return d->pixmap.isNull() ? QRectF() : QRectF(d->offset, d->pixmap.size())
-        .adjusted(-halfPw, -halfPw, halfPw, halfPw);
+        .adjusted(-pw/2, -pw/2, pw, pw);
 }
 
 /*!
@@ -4599,8 +4641,7 @@ void QGraphicsPixmapItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 
     QRectF exposed = option->exposedRect.adjusted(-1, -1, 1, 1);
     exposed &= QRectF(d->offset.x(), d->offset.y(), d->pixmap.width(), d->pixmap.height());
-    exposed.translate(d->offset);
-    painter->drawPixmap(exposed, d->pixmap, exposed);
+    painter->drawPixmap(exposed, d->pixmap, exposed.translated(-d->offset));
 
     if (option->state & QStyle::State_Selected) {
         painter->setPen(QPen(Qt::black, 1));
@@ -5751,11 +5792,15 @@ void QGraphicsItemGroup::removeFromGroup(QGraphicsItem *item)
     QGraphicsItem *newParent = parentItem();
     QPointF oldPos = item->mapToItem(newParent, 0, 0);
     item->setParentItem(newParent);
+    // ### This function should remap the item's matrix to keep the item's
+    // transformation unchanged relative to the scene.
     item->setPos(oldPos);
     item->d_func()->setIsMemberOfGroup(item->group() != 0);
 
     // ### Quite expensive. But removeFromGroup() isn't called very often.
+    removeFromIndex();
     d->itemsBoundingRect = childrenBoundingRect();
+    addToIndex();
 }
 
 /*!

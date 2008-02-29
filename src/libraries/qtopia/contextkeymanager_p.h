@@ -43,9 +43,9 @@ public:
     void setContextPixmap(QWidget *w, int id, const QString &p, QSoftMenuBar::FocusState state);
     void setContextStandardLabel(QWidget *w, int id, QSoftMenuBar::StandardLabel label, QSoftMenuBar::FocusState state);
     void clearContextLabel(QWidget *w, int key, QSoftMenuBar::FocusState state);
-    void setClassText(const QString &className, int id, const QString &t, QSoftMenuBar::FocusState);
-    void setClassPixmap(const QString &className, int id, const QString &p, QSoftMenuBar::FocusState);
-    void setClassStandardLabel(const QString &className, int id, QSoftMenuBar::StandardLabel label, QSoftMenuBar::FocusState);
+    void setClassText(const QByteArray &className, int id, const QString &t, QSoftMenuBar::FocusState);
+    void setClassPixmap(const QByteArray &className, int id, const QString &p, QSoftMenuBar::FocusState);
+    void setClassStandardLabel(const QByteArray &className, int id, QSoftMenuBar::StandardLabel label, QSoftMenuBar::FocusState);
 
     struct ModalState {
         ModalState() : nmType(NoLabel), mType(NoLabel) {}
@@ -66,7 +66,7 @@ public:
     typedef QMap<int,ModalState> KeyMap;
 
     struct ClassModalState {
-        ClassModalState(const QString &c)
+        ClassModalState(const QByteArray &c)
             : className(c) {}
         ClassModalState() {}
 
@@ -74,7 +74,7 @@ public:
             return className == c.className;
         }
 
-        QString className;
+        QByteArray className;
         KeyMap keyMap;
     };
 

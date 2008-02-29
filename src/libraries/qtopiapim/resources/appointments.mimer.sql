@@ -1,6 +1,6 @@
 
 CREATE TABLE appointments (
-        recid BINARY(8) NOT NULL PRIMARY KEY,
+        recid INTEGER NOT NULL PRIMARY KEY,
         description NVARCHAR(32),
         location NVARCHAR(32),
         start DATETIME,

@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -19,7 +29,6 @@
 #include "qfile.h"
 #include "qdebug.h"
 #include "qscreen_qws.h"
-#include <math.h>
 
 /*!
     \class QWSPointerCalibrationData
@@ -418,6 +427,31 @@ void QWSCalibratedMouseHandler::readCalibration()
     }
 }
 
+static int ilog2(quint32 n)
+{
+    int result = 0;
+
+    if (n & 0xffff0000) {
+        n >>= 16;
+        result += 16;
+    }
+    if (n & 0xff00) {
+        n >>= 8;
+        result += 8;}
+    if (n & 0xf0) {
+        n >>= 4;
+        result += 4;
+    }
+    if (n & 0xc) {
+        n >>= 2;
+        result += 2;
+    }
+    if (n & 0x2)
+        result += 1;
+
+    return result;
+}
+
 /*!
     Updates the calibration parameters based on coordinate mapping of
     the given \a data.
@@ -460,7 +494,7 @@ void QWSCalibratedMouseHandler::calibrate(const QWSPointerCalibrationData *data)
 
     // use maximum 16 bit precision to reduce risk of integer overflow
     if (scale > (1 << 16)) {
-        shift = int(log2(double(qAbs(scale) >> 16))) + 1;
+        shift = ilog2(scale >> 16) + 1;
         scale >>= shift;
     }
 

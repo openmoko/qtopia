@@ -49,8 +49,6 @@ struct QStartMenuAccessoryData {
 
   Accessories can add a single menu entry or add a sub-menu and are particularly useful
   when using real estate on the taskbar is wasteful.
-
-  \ingroup qtopiaemb
 */
 
 /*!

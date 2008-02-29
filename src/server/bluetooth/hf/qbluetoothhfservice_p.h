@@ -34,11 +34,10 @@ class QBluetoothHandsfreeService : public QBluetoothAbstractService
     Q_OBJECT
 
 public:
-    QBluetoothHandsfreeService(const QString &service, QObject *parent = 0);
+    QBluetoothHandsfreeService(const QString &service, const QString &displayName, QObject *parent = 0);
     ~QBluetoothHandsfreeService();
 
-    // Methods from the Control Interface
-    void start(int channel);
+    void start();
     void stop();
 
     void setSecurityOptions(QBluetooth::SecurityOptions options);
@@ -49,7 +48,6 @@ public:
     void setSpeakerVolume(int volume);
     void setMicrophoneVolume(int volume);
     void releaseAudio();
-    QString translatableDisplayName() const;
     void connectAudio();
 
     // Internal helper methods
@@ -57,14 +55,6 @@ public:
     void updateMicrophoneVolume(int volume);
 
 signals:
-    // Signals from the Control interface
-    void started(QBluetooth::ServiceError error,
-                    const QString &errorDesc);
-    void stopped(QBluetooth::ServiceError error,
-                    const QString &errorDesc);
-    void error(QBluetooth::ServiceError error,
-                const QString &errorDesc);
-
     // Signals from the Headset AG interface
     void connectResult(bool success, const QString &msg);
     void newConnection(const QBluetoothAddress &addr);
@@ -105,6 +95,41 @@ private:
     bool audioGatewayInitialized();
 
     QBluetoothHandsfreeServicePrivate *m_data;
+};
+
+
+class QBluetoothHandsfreeCommInterfacePrivate;
+class QBluetoothHandsfreeCommInterface : public QAbstractIpcInterfaceGroup
+{
+    Q_OBJECT
+
+public:
+    QBluetoothHandsfreeCommInterface(const QByteArray &audioDev, QBluetoothHandsfreeService *parent);
+    ~QBluetoothHandsfreeCommInterface();
+
+    void initialize();
+
+    void setValue(const QString &key, const QVariant &value);
+
+    // Methods from the Headset AG Interface
+    void connect(const QBluetoothAddress &addr, int rfcomm_channel);
+    void disconnect();
+    void setSpeakerVolume(int volume);
+    void setMicrophoneVolume(int volume);
+    void releaseAudio();
+    void connectAudio();
+
+signals:
+    // Signals from the Headset AG interface
+    void connectResult(bool success, const QString &msg);
+    void newConnection(const QBluetoothAddress &addr);
+    void disconnected();
+    void speakerVolumeChanged();
+    void microphoneVolumeChanged();
+    void audioStateChanged();
+
+private:
+    QBluetoothHandsfreeCommInterfacePrivate *m_data;
 };
 
 #endif

@@ -321,7 +321,7 @@ void Dialer::themeLoaded( const QString & )
         ++actionCount;
     }
     if( !findItem( "messages" , 0 ) ) {
-        newAction = new QAction( QIcon( ":icon/email" ),
+        newAction = new QAction( QIcon( ":icon/txt" ),
                 tr("Send Message"), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(sms()) );
         ++actionCount;
@@ -530,6 +530,7 @@ QString PhoneTouchDialerScreen::digits() const
     return m_dialer->digits();
 }
 
+/*! \internal */
 void PhoneTouchDialerScreen::keyEntered(const QString &key)
 {
     bool filtered = false;

@@ -39,6 +39,7 @@
 #include <QContent>
 #include <QContentFilter>
 #include <QContentSet>
+#include <qtopiaservices.h> 
 
 #ifndef QT_NO_SXE
 #include "sandboxedprocess.h"
@@ -306,7 +307,12 @@ struct ExeApplicationLauncherPrivate {
             : proc(0) {}
         RunningProcess(const QString &_a, QProcess *_p,
                        ApplicationTypeLauncher::ApplicationState _s)
-            : app(_a), proc(_p), state(_s), pidChannelOpen( false ) {}
+            : app(_a), 
+            proc(_p), 
+            state(_s), 
+            pidChannelOpen( false ), 
+            m_killed(false),
+            m_pid(proc->pid()) {}
         ~RunningProcess()
         {
             if(proc) {
@@ -315,10 +321,21 @@ struct ExeApplicationLauncherPrivate {
             }
         }
 
+        void kill() {
+            if(proc){
+                proc->kill();
+                m_killed = true;
+            }
+        }
+
+        bool killed() const { return m_killed; }
+
         QString app;
         QProcess *proc;
         ApplicationTypeLauncher::ApplicationState state;
         bool pidChannelOpen;
+        bool m_killed;
+        int m_pid;
     };
 
     RunningProcess *runningProcess(const QString &);
@@ -414,7 +431,7 @@ void ExeApplicationLauncher::kill(const QString &app)
 {
     ExeApplicationLauncherPrivate::RunningProcess *rp = d->runningProcess(app);
     if(!rp) return;
-    rp->proc->kill();
+    rp->kill();
 }
 
 /*! \internal */
@@ -462,7 +479,10 @@ void ExeApplicationLauncher::appExited(int code)
         emit applicationStateChanged(rp->app, NotRunning);
     } else {
         rp->state = NotRunning;
-        emit terminated(rp->app, Normal);
+        if ( rp->killed() )
+            emit terminated( rp->app, Killed );
+        else
+            emit terminated(rp->app, Normal);
         emit applicationStateChanged(rp->app, NotRunning);
     }
 
@@ -496,7 +516,7 @@ void ExeApplicationLauncher::appError(QProcess::ProcessError error)
     d->m_runningProcesses.remove(rp->app);
 
     {
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("notBusy(QString)") );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
         e << rp->app;
     }
 
@@ -504,6 +524,19 @@ void ExeApplicationLauncher::appError(QProcess::ProcessError error)
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
     if(r) r->remRoute(rp->app, this);
 #endif
+
+#ifndef QT_NO_SXE
+    QValueSpaceItem sxeVsi( "/Sxe/killedPids", this );
+    QList<QVariant> killedPids = sxeVsi.value().toList();
+    
+    if (rp->killed() || (killedPids.contains(QVariant(rp->m_pid))))
+    {
+#else
+    if(rp->killed())
+    {      
+#endif
+        reason = Killed;
+    }
 
     emit terminated(rp->app, reason);
     emit applicationStateChanged(rp->app, NotRunning);
@@ -716,7 +749,11 @@ bool SandboxedExeApplicationLauncher::canLaunch(const QString &app)
     QStringList exes = applicationExecutable(app);
     for(int ii = 0; ii < exes.count(); ++ii) {
         if( QFile::symLinkTarget(exes.at(ii)).contains("__DISABLED") ) {
-            QMessageBox::warning( 0,tr("Security Alert"), tr("<qt>Program has been <font color=\"#FF0000\">disabled</font></qt>"));
+            QtopiaServiceRequest req( "SystemMessages", "showDialog(QString,QString)" );
+            req << tr("Security Alert");
+            QString msg = tr("<qt>This application has been <font color=\"#FF0000\">disabled</font></qt>");  
+            req << msg;
+            req.send();
             return false;
         }
         if(QFile::exists(exes.at(ii)))
@@ -989,16 +1026,11 @@ QTOPIA_TASK_PROVIDES(BuiltinApplicationLauncher, ApplicationTypeLauncher);
 // declare ConsoleApplicationLauncherPrivate
 struct ConsoleApplicationLauncherPrivate
 {
-    ConsoleApplicationLauncherPrivate()
-        : set(0) { 
-            QContentFilter filter(QContent::Application);
-            set = new QContentSet(filter);
+    ConsoleApplicationLauncherPrivate() {
         }
     
     ~ConsoleApplicationLauncherPrivate()
     {
-        delete set;
-        set = 0;
     }
 
 
@@ -1011,7 +1043,6 @@ struct ConsoleApplicationLauncherPrivate
     };
 
     QMap<QString, App *> apps;
-    QContentSet *set;
     
     App *processToApp(QProcess *proc)
     {
@@ -1028,22 +1059,29 @@ struct ConsoleApplicationLauncherPrivate
 // define ConsoleApplicationLauncher
 /*!
   \class ConsoleApplicationLauncher
-  \ingroup QtopiaServer
+  \ingroup QtopiaServer::AppLaunch
   \brief The ConsoleApplicationLauncher class supports launching console 
          applications.
 */
 
+/*!
+  Constructs a new ConsoleApplicationLauncher instance.
+ */
 ConsoleApplicationLauncher::ConsoleApplicationLauncher()
 : d(new ConsoleApplicationLauncherPrivate)
 {
 }
 
+/*!
+  Destroys the ConsoleApplicationLauncher instance.
+ */
 ConsoleApplicationLauncher::~ConsoleApplicationLauncher()
 {
     delete d;
     d = 0;
 }
 
+/*! \internal */
 ConsoleApplicationLauncher::ApplicationState 
 ConsoleApplicationLauncher::applicationState(const QString &app)
 {
@@ -1055,14 +1093,16 @@ ConsoleApplicationLauncher::applicationState(const QString &app)
         return (*iter)->state;
 }
 
+/*! \internal */
 bool ConsoleApplicationLauncher::canLaunch(const QString &app)
 {
-    QContent capp = d->set->findExecutable(app);
+    QContent capp = QContentSet(QContent::Application).findExecutable(app);
     if(!capp.isValid())
         return false;
     return capp.property("ConsoleApplication") == QLatin1String("1");
 }
 
+/*! \internal */
 void ConsoleApplicationLauncher::launch(const QString &app)
 {
     if(d->apps.find(app) != d->apps.end())
@@ -1189,10 +1229,17 @@ ConsoleApplicationLauncher::applicationExecutable(const QString &app)
     return rv;
 }
 
+/*! \internal */
 void ConsoleApplicationLauncher::kill(const QString &app)
 {
+    QMap<QString, ConsoleApplicationLauncherPrivate::App *>::Iterator iter =
+        d->apps.find(app);
+    if(iter != d->apps.end()) {
+        (*iter)->process->kill();
+    }
 }
 
+/*! \internal */
 void ConsoleApplicationLauncher::routeMessage(const QString &, const QString &, const QByteArray &)
 {
     // Do nothing
@@ -1243,7 +1290,7 @@ void ApplicationLauncher::stateChanged(const QString &app,
         m_runningApps.remove(app);
         m_orderedApps.removeAll(app);
         qLog(QtopiaServer) << "ApplicationLauncher::stateChanged(" << app << ", NotRunning )";
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("notBusy(QString)") );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
         e << app;
     } else {
         if(ApplicationTypeLauncher::Starting == state)
@@ -1265,7 +1312,7 @@ void ApplicationLauncher::stateChanged(const QString &app,
 
         if(state != ApplicationTypeLauncher::Starting)
         {
-            QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("notBusy(QString)") );
+            QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
             e << app;
         }
 
@@ -1411,10 +1458,17 @@ bool ApplicationLauncher::launch(const QString &app)
   */
 bool ApplicationLauncher::kill(const QString &app)
 {
+    for (int ii=0; ii < m_launchers.count(); ++ii) {
+        if (m_launchers[ii]->canLaunch(app)) {
+            m_launchers[ii]->kill(app);
+            return true;
+        }
+    }
+#if 0
     Q_UNUSED( app );
 
     qFatal("Not supported");
-
+#endif
     return false;
 }
 

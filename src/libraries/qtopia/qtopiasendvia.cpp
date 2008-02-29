@@ -91,7 +91,7 @@ QtopiaSendFileDialog::QtopiaSendFileDialog(QWidget *parent,
     }
 #endif
 
-#ifdef QTOPIA_BLUETOOTH
+#ifdef QTOPIA_INFRARED
     {
         QListWidgetItem *item = new QListWidgetItem( tr("Infrared"), lb );
         item->setIcon( QPixmap(":icon/beam") );

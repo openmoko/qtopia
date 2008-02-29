@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qtdesigner.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qtdesigner.qdoc -->
 <head>
   <title>Qt 4.2: QDesignerCustomWidgetInterface Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -44,13 +44,35 @@
 <h2>Detailed Description</h2>
 <p>The QDesignerCustomWidgetInterface class enables Qt Designer to access and construct custom widgets.</p>
 <p>QDesignerCustomWidgetInterface provides a custom widget with an interface. The class contains a set of functions that must be subclassed to return basic information about the widget, such as its class name and the name of its header file. Other functions must be implemented to initialize the plugin when it is loaded, and to construct instances of the custom widget for <i>Qt Designer</i> to use.</p>
-<p>When implementing a custom widget you must subclass QDesignerCustomWidgetInterface to expose your widget to <i>Qt Designer</i>. For example, this is the declaration for the plugin used in the Custom Widget Plugin example that enables an analog clock custom widget to be used by <i>Qt Designer</i>:</p>
-<pre></pre>
+<p>When implementing a custom widget you must subclass QDesignerCustomWidgetInterface to expose your widget to <i>Qt Designer</i>. For example, this is the declaration for the plugin used in the <a href="designer-customwidgetplugin.html">Custom Widget Plugin example</a> that enables an analog clock custom widget to be used by <i>Qt Designer</i>:</p>
+<pre> class AnalogClockPlugin : public QObject, public QDesignerCustomWidgetInterface
+ {
+     Q_OBJECT
+     Q_INTERFACES(QDesignerCustomWidgetInterface)
+
+ public:
+     AnalogClockPlugin(QObject *parent = 0);
+
+     bool isContainer() const;
+     bool isInitialized() const;
+     QIcon icon() const;
+     QString domXml() const;
+     QString group() const;
+     QString includeFile() const;
+     QString name() const;
+     QString toolTip() const;
+     QString whatsThis() const;
+     QWidget *createWidget(QWidget *parent);
+     void initialize(QDesignerFormEditorInterface *core);
+
+ private:
+     bool initialized;
+ };</pre>
 <p>Note that the only part of the class definition that is specific to this particular custom widget is the class name. In addition, since we are implementing an interface, we must ensure that it's made known to the meta object system using the <a href="qobject.html#Q_INTERFACES">Q_INTERFACES</a>() macro. This enables <i>Qt Designer</i> to use the <a href="qobject.html#qobject_cast">qobject_cast</a>() function to query for supported interfaces using nothing but a <a href="qobject.html">QObject</a> pointer.</p>
 <p>After <i>Qt Designer</i> loads a custom widget plugin, it calls the interface's <a href="qdesignercustomwidgetinterface.html#initialize">initialize</a>() function to enable it to set up any resources that it may need. This function is called with a <a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a> parameter that provides the plugin with a gateway to all of <i>Qt Designer</i>'s API.</p>
 <p><i>Qt Designer</i> constructs instances of the custom widget by calling the plugin's <a href="qdesignercustomwidgetinterface.html#createWidget">createWidget</a>() function with a suitable parent widget. Plugins must construct and return an instance of a custom widget with the specified parent widget.</p>
-<p>In the implementation of the class you must remember to export your custom widget plugin to <i>Qt Designer</i> using the <a href="qtplugin.html#Q_EXPORT_PLUGIN2">Q_EXPORT_PLUGIN2</a>() macro:</p>
-<pre> Q_EXPORT_PLUGIN2(MyCustomWidget)</pre>
+<p>In the implementation of the class you must remember to export your custom widget plugin to <i>Qt Designer</i> using the <a href="qtplugin.html#Q_EXPORT_PLUGIN2">Q_EXPORT_PLUGIN2</a>() macro. For example, if a library called <tt>libcustomwidgetplugin.so</tt> (on Unix) or <tt>libcustomwidget.dll</tt> (on Windows) contains a widget class called <tt>MyCustomWidget</tt>, we can export it by adding the following line to the file containing the plugin implementation:</p>
+<pre> Q_EXPORT_PLUGIN2(customwidgetplugin, MyCustomWidget)</pre>
 <p>This macro ensures that <i>Qt Designer</i> can access and construct the custom widget. Without this macro, there is no way for <i>Qt Designer</i> to use it.</p>
 <p>When implementing a custom widget plugin, you build it as a separate library. If you want to include several custom widget plugins in the same library, you must in addition subclass <a href="qdesignercustomwidgetcollectioninterface.html">QDesignerCustomWidgetCollectionInterface</a>.</p>
 <p><b>Warning:</b> If your custom widget plugin contains <a href="qvariant.html">QVariant</a> properties, be aware that only the following <a href="qvariant.html#Type-enum">types</a> are supported:</p>
@@ -71,7 +93,7 @@
 <li><a href="qvariant.html#Type-enum">QVariant::Time</a></li>
 <li><a href="qvariant.html#Type-enum">QVariant::UInt</a></li>
 </ul>
-<p>For a complete example using the QDesignerCustomWidgetInterface class, see the Custom Widget Example. The example shows how to create a custom widget plugin for <i>Qt Designer</i>.</p>
+<p>For a complete example using the QDesignerCustomWidgetInterface class, see the <a href="designer-customwidgetplugin.html">Custom Widget Example</a>. The example shows how to create a custom widget plugin for <i>Qt Designer</i>.</p>
 <p>See also <a href="qdesignercustomwidgetcollectioninterface.html">QDesignerCustomWidgetCollectionInterface</a> and <a href="designer-creating-custom-widgets.html">Creating Custom Widgets for Qt Designer</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -110,14 +132,18 @@
 <h3 class="fn"><a name="QDESIGNER_WIDGET_EXPORT"></a>QDESIGNER_WIDGET_EXPORT</h3>
 <p>This macro is used when defining custom widgets to ensure that they are correctly exported from plugins for use with <i>Qt Designer</i>.</p>
 <p>On some platforms, the symbols required by <i>Qt Designer</i> to create new widgets are removed from plugins by the build system, making them unusable. Using this macro ensures that the symbols are retained on those platforms, and has no side effects on other platforms.</p>
-<p>For example, the World Time Clock Plugin example exports a custom widget class with the following declaration:</p>
-<pre>     ...</pre>
+<p>For example, the <a href="designer-worldtimeclockplugin.html">World Time Clock Plugin</a> example exports a custom widget class with the following declaration:</p>
+<pre> class QDESIGNER_WIDGET_EXPORT WorldTimeClock : public QWidget
+ {
+     Q_OBJECT
+     ...
+ };</pre>
 <p>This function was introduced in Qt 4.1.</p>
 <p>See also <a href="designer-creating-custom-widgets.html">Creating Custom Widgets for Qt Designer</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

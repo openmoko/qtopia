@@ -200,6 +200,9 @@ void InputMethodSelector::showList()
 
 }
 
+/*!
+    Set the current input method to \a method and activate it
+*/
 void InputMethodSelector::setInputMethod(QtopiaInputMethod *method)
 {
     if (mCurrent != method) {
@@ -211,13 +214,64 @@ void InputMethodSelector::setInputMethod(QtopiaInputMethod *method)
     activateCurrent(true);
 }
 
+/*!
+    Cycle to the next input method.
+*/
+void InputMethodSelector::setNextInputMethod()
+{
+    if(list.size() < 1) {
+        return;
+    };
+
+    if(list.size() == 1) {
+        if (list.first() != mCurrent){
+        setInputMethod(list.first());
+        };
+        return;
+    };
+
+    QList<QtopiaInputMethod *>::iterator  i = list.begin();
+    while(i != list.end() && *i != mCurrent) {
+        i++;
+    };
+
+    if(i != list.end()) // implies i == mCurrent
+    {
+        if(++i != list.end()) {
+            setInputMethod(*i);
+            return;
+        };
+    }; 
+    
+    setInputMethod(list.first());
+}
+
+/*!
+    Cycle to the next input method.
+*/
+void InputMethods::setNextInputMethod(){
+    selector->setNextInputMethod();
+}
+
+/*!
+    Cycle to the next input method.
+*/
+void InputMethodService::setNextInputMethod()
+{
+    parent->setNextInputMethod();
+}
+
+/*!
+    Turns the current input method on if \a on is true, or off if it is false.
+*/
 void InputMethodSelector::activateCurrent( bool on )
 {
     if (mCurrent) {
         QWidget *w = mCurrent->inputWidget();
         qLog(Input) << (on?"activating":"deactivating") << "input method" << (uint)mCurrent << ", with widget" << w;
-        if (w) {
-            if ( on ) {
+        if ( on ) {
+            updateIMMenuAction(true);
+            if (w) {
                 mCurrent->reset();
                 // HACK... Make the texteditor fit with all input methods
                 // Input methods should also never use more than about 40% of the screen
@@ -230,18 +284,22 @@ void InputMethodSelector::activateCurrent( bool on )
                 w->show();
 
                 //Add menu item:
-                updateIMMenuAction(true);
-            } else {
-                mButton->setChecked(false);
-                w->hide();
-                updateIMMenuAction(false);
-            }
+            };
             // should be emitted if the screen is changing sizes.
             emit inputWidgetShown( on );
+        } else { // on == false
+            updateIMMenuAction(false);
+            if(w) {
+                mButton->setChecked(false);
+                w->hide();
+            };
         }
     }
 }
 
+/*!
+    Deactivates and hides the current input method, and then sets no current input method.
+*/
 void InputMethodSelector::clear()
 {
     pop->clear();
@@ -264,6 +322,9 @@ class QtopiaInputMethodSorter
         }
 };
 
+/*!
+    Sorts the loaded input methods alphabetically by name.
+*/
 void InputMethodSelector::sort()
 {
     if (list.count() > 1) {
@@ -272,11 +333,17 @@ void InputMethodSelector::sort()
     }
 }
 
+/*!
+    Returns a pointer to the current input method.
+*/
 QtopiaInputMethod *InputMethodSelector::current() const
 {
     return mCurrent;
 }
 
+/*!
+    Selects the input method named \a s if it exists.
+*/
 void InputMethodSelector::setInputMethod(const QString &s)
 {
     foreach(QtopiaInputMethod *method, list) {
@@ -290,13 +357,12 @@ void InputMethodSelector::setInputMethod(const QString &s)
 /*
     A simple helper function for supporting inputmethod menu QActions.
     Removes the current IM's QAction from all menus.
-    If the argument is true, adds the QAction to the current focus widget's
+    If the argument is true, adds the QAction to the current focus widgets
     Menu
 */
-
 void InputMethodSelector::updateIMMenuAction(bool addToMenu)
 {
-    qLog(Input) << "Updating IM Menu actions";
+    qLog(Input) << "Updating IM Menu actions" << (addToMenu?"- adding":"- removing");
     // Could have gotten here because input method changed menu options,
     // so set them again whether or not they're already shown
     if (m_IMMenuActionAdded) {
@@ -306,24 +372,31 @@ void InputMethodSelector::updateIMMenuAction(bool addToMenu)
     };
 
     if( addToMenu ){
-        qLog(Input) << "Adding valuespace Entry";
-        const QList<QIMActionDescription*> &actionDescriptionList  = mCurrent->menuDescription();
+        QList<QIMActionDescription*> actionDescriptionList  = mCurrent->menuDescription();
+        
+        if(count() > 1)
+        {
+            actionDescriptionList.append(new QIMActionDescription(InputMethods::NextInputMethod, tr("Change Input Method"),QString(":icon/rotate")));
+        }
 
         if(!actionDescriptionList.isEmpty()){
             QList<QVariant> IMMenu;
             qLog(Input) << "Building IMMenu";
             for(QList<QIMActionDescription*>::const_iterator i = actionDescriptionList.begin(); i != actionDescriptionList.end(); ++i) {
-//                qDebug() << "Appending an action that looks like: QIMActionDescription("<< (*i)->id() << ","<< (*i)->label() << ","<< (*i)->iconFileName() <<")";
                 IMMenu.append(QVariant::fromValue(**i));
+                delete *i;
             };
 
+            qLog(Input) << "Adding valuespace Entry";
             m_menuVS.setAttribute("MenuItem", QVariant(IMMenu));
             m_IMMenuActionAdded = true;
-        }
+        };
     };
 };
 
-
+/*!
+    Shows or hides the input method selector pop-up widget, depending on \a on.
+*/
 void InputMethodSelector::showChoice( bool on)
 {
     if(on){
@@ -335,6 +408,11 @@ void InputMethodSelector::showChoice( bool on)
 };
 
 
+/*!
+    InputMethods is the core class for the Qtopia servers input method handling.  It is very closely related to the \l InputMethodService and \l InputMethodSelector classes.
+
+    InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts the messages from the \l InputMethodService, either taking direct action or passing them on to the  \l InputMethodSelector.
+*/
 InputMethods::InputMethods( QWidget *parent, IMType t ) :
     QWidget( parent ),
     loader(0), type(t), currentIM(0), lastActiveWindow(0), m_IMVisibleVS("/UI/IMVisible"), m_IMVisible(false)
@@ -367,29 +445,55 @@ InputMethods::InputMethods( QWidget *parent, IMType t ) :
     // might also add own win id since wouldn't have been added at start up.
 }
 
+/*!
+    Unloads all input methods.
+*/
 InputMethods::~InputMethods()
 {
     unloadInputMethods();
 }
 
+/*!
+    Deactiviates and hides the current input method.
+*/
 void InputMethods::hideInputMethod()
 {
     selector->activateCurrent(false);
 }
 
+/*!
+    Shows and activates the current input method.
+*/
 void InputMethods::showInputMethod()
 {
     selector->activateCurrent(true);
 }
 
+/*!
+    Selects the the input method named \a name, if it exists, and activates and shows it.  If the named input method does not exist, this function activates the current input method.
+*/
 void InputMethods::showInputMethod(const QString& name)
 {
     selector->setInputMethod(name);
     selector->activateCurrent(true);
 }
 
+/*!
+    Checks whether the activated menu item belonged to the server, and either responds or passes the information on to the current input method appropriately.
+*/
 void InputMethods::activateMenuItem(int v)
 {
+    // Check for server items
+    if(v == ChangeInputMethod) {// client menu items
+        selector->showList();
+        return;
+    }
+    if(v == NextInputMethod) {// client menu items
+        setNextInputMethod();
+        return;
+    }
+    
+    // pass to current input method
     selector->current()->menuActionActivated(v);
 }
 
@@ -584,6 +688,7 @@ void InputMethods::inputMethodHint( int h, int wid, bool password)
 
 void InputMethods::inputMethodHint( const QString& h, int wid )
 {
+    // Could easily scan this here and act on it to change inputmethods...
     bool r;
     if (h.contains("only")) {
         r = true;
@@ -786,6 +891,24 @@ void InputMethodService::activateMenuItem(int v)
 }
 
 /*!
+    Activate the input method selector pop-up.
+*/
+
+void InputMethodService::changeInputMethod()
+{
+    parent->changeInputMethod();
+}
+
+/*!
+    Activate the input method selector pop-up.
+*/
+
+void InputMethods::changeInputMethod()
+{
+    selector->showList();
+};
+
+/*!
     If actions have been added to the softmenu on behalf of an IM, make
     sure they are up to date.
 
@@ -795,5 +918,13 @@ void InputMethodSelector::refreshIMMenuAction()
 {
     updateIMMenuAction(m_IMMenuActionAdded);
 
+};
+
+/*!
+    Change to the input method named \a inputMethodName if it exists.
+*/
+void InputMethodService::setInputMethod(const QString &inputMethodName)
+{
+    parent->showInputMethod(inputMethodName);
 };
 

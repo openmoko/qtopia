@@ -47,6 +47,7 @@
 #include "fullduplexpluginsession.h"
 #include "drmsession.h"
 #include "sessionmanager.h"
+#include "mediavolumecontrol.h"
 #include "devicemanager.h"
 #include "contentdevice.h"
 #include "qmediahelixsettingsserver.h"
@@ -82,6 +83,7 @@ struct HelixEngine::HelixEnginePrivate
     PluginSessionThread*    pluginSessionThread;
     QList<MediaSession*>    sessions;
     SessionManager*         sessionManager;
+    MediaVolumeControl*     mediaVolumeControl;
     QString                 activeDomain;
 };
 
@@ -97,6 +99,7 @@ HelixEngine::HelixEngine():
     d->engine = 0;
     d->pluginSessionThread = 0;
     d->sessionManager = new SessionManager(this);
+    d->mediaVolumeControl = new MediaVolumeControl(d->sessionManager);
 
     // Get helix lib
     QLibrary library(helix_library_path() + QLatin1String("/clntcore.so")) ;
@@ -108,6 +111,8 @@ HelixEngine::HelixEngine():
 
 HelixEngine::~HelixEngine()
 {
+    delete d->mediaVolumeControl;
+    delete d->sessionManager;
     delete d;
 }
 

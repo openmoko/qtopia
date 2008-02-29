@@ -501,12 +501,7 @@ void BackgroundAppearanceItemControl::selectBackground(bool wallpapers)
 {
     QContentFilter locations;
     if( wallpapers) {
-        QStringList qtopia_paths = Qtopia::installPaths();
-        QStringList::Iterator it;
-        for ( it = qtopia_paths.begin(); it != qtopia_paths.end(); it++ ) {
-            locations |= QContentFilter( QContentFilter::Directory, (*it) + QLatin1String("pics/wallpaper") );
-            QContentSet::scan( (*it) + "pics/wallpaper" );
-        }
+        locations = QContentFilter( QContentFilter::Category, QLatin1String("SystemWallpapers") );
     }
     else
         locations = QContentFilter( QContent::Document );

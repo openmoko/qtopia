@@ -21,6 +21,7 @@
 
 #include <qtopia/comm/qbluetoothrfcommsocket.h>
 #include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include <qtopiacomm/private/qbluetoothabstractsocket_p.h>
 #include <bluetooth/rfcomm.h>
 #include <qbluetoothaddress.h>
 
@@ -31,13 +32,20 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-class QBluetoothRfcommSocketPrivate
+class QBluetoothRfcommSocketPrivate : public QBluetoothAbstractSocketPrivate
 {
 public:
+    QBluetoothRfcommSocketPrivate();
     QBluetoothAddress m_local;
     QBluetoothAddress m_remote;
     int m_remoteChannel;
 };
+
+QBluetoothRfcommSocketPrivate::QBluetoothRfcommSocketPrivate()
+    : QBluetoothAbstractSocketPrivate(true)
+{
+    m_remoteChannel = -1;
+}
 
 /*!
     \class QBluetoothRfcommSocket
@@ -62,10 +70,8 @@ public:
     is passed to the QObject constructor.
 */
 QBluetoothRfcommSocket::QBluetoothRfcommSocket(QObject *parent)
-    : QBluetoothAbstractSocket(parent)
+    : QBluetoothAbstractSocket(new QBluetoothRfcommSocketPrivate, parent)
 {
-    m_data = new QBluetoothRfcommSocketPrivate();
-    m_data->m_remoteChannel = -1;
 }
 
 /*!
@@ -73,8 +79,6 @@ QBluetoothRfcommSocket::QBluetoothRfcommSocket(QObject *parent)
 */
 QBluetoothRfcommSocket::~QBluetoothRfcommSocket()
 {
-    if (m_data)
-        delete m_data;
 }
 
 /*!
@@ -83,6 +87,8 @@ QBluetoothRfcommSocket::~QBluetoothRfcommSocket()
  */
 QBluetoothAddress QBluetoothRfcommSocket::remoteAddress() const
 {
+    SOCKET_DATA(QBluetoothRfcommSocket);
+
     return m_data->m_remote;
 }
 
@@ -92,6 +98,8 @@ QBluetoothAddress QBluetoothRfcommSocket::remoteAddress() const
  */
 QBluetoothAddress QBluetoothRfcommSocket::localAddress() const
 {
+    SOCKET_DATA(QBluetoothRfcommSocket);
+
     return m_data->m_local;
 }
 
@@ -101,6 +109,8 @@ QBluetoothAddress QBluetoothRfcommSocket::localAddress() const
  */
 int QBluetoothRfcommSocket::remoteChannel() const
 {
+    SOCKET_DATA(QBluetoothRfcommSocket);
+
     return m_data->m_remoteChannel;
 }
 
@@ -144,6 +154,8 @@ QBluetooth::SecurityOptions QBluetoothRfcommSocket::securityOptions() const
 
 bool QBluetoothRfcommSocket::readSocketParameters(int socket)
 {
+    SOCKET_DATA(QBluetoothRfcommSocket);
+
     struct sockaddr_rc addr;
     socklen_t len = sizeof(addr);
 
@@ -180,11 +192,11 @@ bool QBluetoothRfcommSocket::readSocketParameters(int socket)
     generally return immediately, and the socket will enter into the
     \c ConnectingState.
 
-    Optionally the client can request that that the connection be secured
+    Optionally the client can request that the connection be secured
     by specifying the \a options parameter.  \bold NOTE: This feature
     might not work under some systems.
 
-    The function returns true if the connection couldbe started,
+    The function returns true if the connection process could be started,
     and false otherwise.
 
     Note that the connection could still fail, the state of the socket
@@ -198,9 +210,7 @@ bool QBluetoothRfcommSocket::connect(const QBluetoothAddress &local,
     if (state() != QBluetoothAbstractSocket::UnconnectedState)
         return false;
 
-    m_data->m_local = QBluetoothAddress::invalid;
-    m_data->m_remote = QBluetoothAddress::invalid;
-    m_data->m_remoteChannel = -1;
+    resetSocketParameters();
 
     int sockfd = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
@@ -209,24 +219,22 @@ bool QBluetoothRfcommSocket::connect(const QBluetoothAddress &local,
         return false;
     }
 
-    _q_setSecurityOptions(sockfd, options);
-
     struct sockaddr_rc addr;
-    if (local != QBluetoothAddress::any) {
-        bdaddr_t localBdaddr;
+    bdaddr_t localBdaddr;
 
-        str2bdaddr(local.toString(), &localBdaddr);
+    str2bdaddr(local.toString(), &localBdaddr);
 
-        memset(&addr, 0, sizeof(addr));
-        addr.rc_family = AF_BLUETOOTH;
-        memcpy(&addr.rc_bdaddr, &localBdaddr, sizeof(bdaddr_t));
+    memset(&addr, 0, sizeof(addr));
+    addr.rc_family = AF_BLUETOOTH;
+    memcpy(&addr.rc_bdaddr, &localBdaddr, sizeof(bdaddr_t));
 
-        if (::bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-                ::close(sockfd);
-            setError(QBluetoothAbstractSocket::BindError);
-            return false;
-        }
+    if (::bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+        ::close(sockfd);
+        setError(QBluetoothAbstractSocket::BindError);
+        return false;
     }
+
+    _q_setSecurityOptions(sockfd, options);
 
     bdaddr_t remoteBdaddr;
     str2bdaddr(remote.toString(), &remoteBdaddr);
@@ -241,6 +249,8 @@ bool QBluetoothRfcommSocket::connect(const QBluetoothAddress &local,
 
 void QBluetoothRfcommSocket::resetSocketParameters()
 {
+    SOCKET_DATA(QBluetoothRfcommSocket);
+
     m_data->m_local = QBluetoothAddress::invalid;
     m_data->m_remote = QBluetoothAddress::invalid;
     m_data->m_remoteChannel = -1;

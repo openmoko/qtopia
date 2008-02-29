@@ -69,14 +69,14 @@ QBluetoothRemoteDevice::QBluetoothRemoteDevice(const QBluetoothAddress &address)
 /*!
     Constructs a new QBluetoothRemoteDevice object.
     \list
-        \o \a address parameter defines the address of the remote device.
-        \o \a name parameter defines the name of the remote device.
-        \o \a version parameter defines the Bluetooth protocol version this device supports.
-        \o \a revision parameter defines the manufacturer specific revision of the device
+        \o \a address defines the address of the remote device.
+        \o \a name defines the name of the remote device.
+        \o \a version defines the Bluetooth protocol version this device supports.
+        \o \a revision defines the manufacturer specific revision of the device
         \o \a manufacturer defines the manufacturer string
         \o \a company defines the company producing the device
-        \o \a devMajor parameter defines the major device number
-        \o \a devMinor parameter defines the minor device number
+        \o \a devMajor defines the major device number
+        \o \a devMinor defines the minor device number
         \o \a serviceClasses defines the bitmap of all device classes associated with this device.
     \endlist
 */
@@ -232,8 +232,8 @@ void QBluetoothRemoteDevice::setRevision(const QString &revision)
 }
 
 /*!
-    Returns null if the manufacturer is unknown, otherwise returns
-    the name of the manufacturer.
+    Returns the manufacturer of the remote bluetooth device.
+    If the manufacturer is unknown, returns a null string.
 
     \sa setManufacturer()
  */

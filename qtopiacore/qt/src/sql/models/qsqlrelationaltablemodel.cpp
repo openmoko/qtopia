@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtSql module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -111,6 +121,7 @@ public:
     QSqlRecord baseRec; // the record without relations
     void clearChanges();
     void clearEditBuffer();
+    void clearCache();
     void revertCachedRow(int row);
 
     void translateFieldNames(int row, QSqlRecord &values) const;
@@ -163,6 +174,17 @@ int QSqlRelationalTableModelPrivate::nameToIndex(const QString &name) const
 void QSqlRelationalTableModelPrivate::clearEditBuffer()
 {
     editBuffer = baseRec;
+}
+
+/*!
+    \reimp
+*/
+void QSqlRelationalTableModelPrivate::clearCache()
+{
+    for (int i = 0; i < relations.count(); ++i)
+        relations[i].displayValues.clear();
+
+    QSqlTableModelPrivate::clearCache();
 }
 
 /*!
@@ -225,6 +247,7 @@ void QSqlRelationalTableModelPrivate::clearEditBuffer()
     Notes:
 
     \list
+    \o The table must have a primary key declared.
     \o The table's primary key may not contain a relation to
        another table.
     \o If a relational table contains keys that refer to non-existent

@@ -34,7 +34,8 @@ regenerate.depends+=setup_helixbuild
 
 # setup the helix bulid system
 setup_helix.commands=$$COMMAND_HEADER\
-    echo Setting up the helix build system... $$LINE_SEP\
+    echo $${LITERAL_QUOTE}Setting up the helix build system. To see the output run:$${LITERAL_QUOTE}$$LINE_SEP\
+    echo $${LITERAL_QUOTE} make setup_helix HELIX_OUTPUT=1$${LITERAL_QUOTE}$$LINE_SEP\
     if [ ! -d $$HELIX_PATH ]; then\
         $$MAKE setup_helixbuild;\
     fi $$LINE_SEP\
@@ -43,12 +44,21 @@ setup_helix.commands=$$COMMAND_HEADER\
     # If there are CVS directories, helix tries to fetch stuff from CVS
     find $$HELIX_PATH -type d -name CVS | xargs rm -rf $$LINE_SEP\
     cd $$HELIX_PATH;\
-    $$ENV BUILD_ROOT=$$LITERAL_QUOTE$$HELIX_PATH/build$$LITERAL_QUOTE\
+    output=$$LITERAL_QUOTE>/dev/null 2>&1$$LITERAL_QUOTE;\
+    helix_output=$(HELIX_OUTPUT);\
+    if [ $$LITERAL_QUOTE\$$helix_output$$LITERAL_QUOTE = 1 ]; then\
+        output=;\
+    fi;\
+    eval $$ENV BUILD_ROOT=$$LITERAL_QUOTE$$HELIX_PATH/build$$LITERAL_QUOTE\
           PATH=$$LITERAL_QUOTE\$$PATH:\$$BUILD_ROOT/bin$$LITERAL_QUOTE\
           BUILDRC=$$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE\
           SYSTEM_ID=$$HELIX_SYSTEM_ID \
     # we have to ignore errors from this script because it always give us an error
-    python build/bin/build $$release -U -m hxclient_1_5_0_cayenne -P helix-client-qtopia-nodist splay_nodist >/dev/null 2>&1 || true $$LINE_SEP\
+    python build/bin/build $$release -U -m hxclient_1_5_0_cayenne -P helix-client-qtopia-nodist splay_nodist \$$output || true $$LINE_SEP\
+    if [ ! -f $$HELIX_PATH/Makefile ]; then\
+        echo $${LITERAL_QUOTE}ERROR: Helix build system failure.$${LITERAL_QUOTE};\
+        exit 1;\
+    fi;\
     for file in \$$(find $$HELIX_PATH -name Makefile); do\
         mv -f \$$file \$$file.bak;\
         cat \$$file.bak\

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qt4-scribe.qdoc -->
 <head>
   <title>Qt 4.2: The Scribe Classes</title>
   <link rel="prev" href="qt4-arthur.html" />
@@ -180,7 +181,16 @@
 
      document-&gt;print(&amp;printer);</pre>
 <p>Rich text documents can also be exported as PDF files using <a href="qprinter.html">QPrinter</a> and the appropriate print engine:</p>
-<pre></pre>
+<pre>     QString fileName = QFileDialog::getSaveFileName(this, &quot;Export PDF&quot;,
+                                                     QString(), &quot;*.pdf&quot;);
+     if (!fileName.isEmpty()) {
+         if (QFileInfo(fileName).suffix().isEmpty())
+             fileName.append(&quot;.pdf&quot;);
+         QPrinter printer(QPrinter::HighResolution);
+         printer.setOutputFormat(QPrinter::PdfFormat);
+         printer.setOutputFileName(fileName);
+         textEdit-&gt;document()-&gt;print(&amp;printer);
+     }</pre>
 <a name="comparison-with-qt-3"></a>
 <h2>Comparison with Qt 3</h2>
 <p>The cursor-based editing features, combined with the structural document model, provide a powerful set of tools for manipulating and displaying rich text documents. These provide features that were unavailable in Qt 3's public API. The engine used is a complete rewrite and does not use the rich text engine supplied with Qt 3.</p>
@@ -194,6 +204,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

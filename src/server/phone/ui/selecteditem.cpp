@@ -872,7 +872,6 @@ SelectedItem::AnimationState SelectedItem::animationState() const
 
 /*!
   \internal
-  \fn bool SelectedItem::isAnimating()
   Returns true if the item is currently animating or about to animate.
 */
 bool SelectedItem::isAnimating() const

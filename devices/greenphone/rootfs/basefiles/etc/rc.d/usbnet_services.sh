@@ -28,21 +28,16 @@ findlauncherpids()
 case $1 in
 daemon)
     while :; do
-        # Wait for eth0 to exist
-        ret=1
-        while [ $ret != 0 ]; do
-            ifconfig eth0
-            ret=$?
+        # Wait for an external interface (eth* or wlan*) to exist
+        # and be brought up.
+        while ! ifconfig | grep -E '^(eth|wlan)' >/dev/null; do
             sleep 5
         done
 
         StartService
 
-        # Wait for eth0 to disappear
-        ret=0
-        while [ $ret = 0 ]; do
-            ifconfig eth0
-            ret=$?
+        # Wait for all external interfaces (eth* or wlan*) to disappear
+        while ifconfig | grep -E '^(eth|wlan)' >/dev/null; do
             sleep 5
         done
 

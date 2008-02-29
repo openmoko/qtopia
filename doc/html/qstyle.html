@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/styles/qstyle.cpp -->
 <head>
   <title>Qt 4.2: QStyle Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -93,7 +94,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QStyle class is an abstract base class that encapsulates the look and feel of a GUI.</p>
-<p>Qt contains a set of QStyle subclasses that emulate the styles of the different platforms supported by Qt (<a href="qwindowsstyle.html">QWindowsStyle</a>, QMacStyle, <a href="qmotifstyle.html">QMotifStyle</a>, etc.). By default, these styles are built into the <a href="qtgui.html">QtGui</a> library. Styles can also be made available as plugins.</p>
+<p>Qt contains a set of QStyle subclasses that emulate the styles of the different platforms supported by Qt (<a href="qwindowsstyle.html">QWindowsStyle</a>, <a href="qmacstyle.html">QMacStyle</a>, <a href="qmotifstyle.html">QMotifStyle</a>, etc.). By default, these styles are built into the <a href="qtgui.html">QtGui</a> library. Styles can also be made available as plugins.</p>
 <p>Qt's built-in widgets use QStyle to perform nearly all of their drawing, ensuring that they look exactly like the equivalent native widgets. The diagram below shows a <a href="qcombobox.html">QComboBox</a> in six different styles.</p>
 <p align="center"><img src="images/qstyle-comboboxes.png" alt="Six combo boxes" /></p><p>Topics:</p>
 <ul><li><a href="#setting-a-style">Setting a Style</a></li>
@@ -197,7 +198,7 @@
      ...
      }</pre>
 <p>When implementing a custom style, you cannot assume that the widget is a <a href="qspinbox.html">QSpinBox</a> just because the enum value is called <a href="qstyle.html#PrimitiveElement-enum">PE_IndicatorSpinUp</a> or <a href="qstyle.html#PrimitiveElement-enum">PE_IndicatorSpinUp</a>.</p>
-<p>The documentation for the Styles example covers this topic in more detail.</p>
+<p>The documentation for the <a href="widgets-styles.html">Styles</a> example covers this topic in more detail.</p>
 <a name="using-a-custom-style"></a>
 <h3>Using a Custom Style</h3>
 <p>There are several ways of using a custom style in a Qt application. The simplest way is call the <a href="qapplication.html#setStyle">QApplication::setStyle</a>() static function before creating the <a href="qapplication.html">QApplication</a> object:</p>
@@ -230,7 +231,7 @@
 <li><a href="qstyle.html#visualRect">visualRect</a>(), <a href="qstyle.html#visualPos">visualPos</a>(), and <a href="qstyle.html#visualAlignment">visualAlignment</a>() are helpful functions that will translate from logical to screen representations.</li>
 <li><a href="qstyle.html#alignedRect">alignedRect</a>() will return a logical rect aligned for the current direction</li>
 </ul>
-<p>See also <a href="qstyleoption.html">QStyleOption</a>, <a href="qstylepainter.html">QStylePainter</a>, and Styles Example.</p>
+<p>See also <a href="qstyleoption.html">QStyleOption</a>, <a href="qstylepainter.html">QStylePainter</a>, and <a href="widgets-styles.html">Styles Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ComplexControl-enum"></a>enum QStyle::ComplexControl</h3>
@@ -242,7 +243,7 @@
 <tr><td valign="top"><tt>QStyle::CC_ScrollBar</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">A scroll bar, like <a href="qscrollbar.html">QScrollBar</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::CC_Slider</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">A slider, like <a href="qslider.html">QSlider</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::CC_ToolButton</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">A tool button, like <a href="qtoolbutton.html">QToolButton</a>.</td></tr>
-<tr><td valign="top"><tt>QStyle::CC_TitleBar</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">A Title bar, like what is used in <a href="qworkspace.html">QWorkspace</a>.</td></tr>
+<tr><td valign="top"><tt>QStyle::CC_TitleBar</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">A Title bar, like those used in <a href="qworkspace.html">QWorkspace</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::CC_Q3ListView</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">Used for drawing the Q3ListView class.</td></tr>
 <tr><td valign="top"><tt>QStyle::CC_GroupBox</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">A group box, like <a href="qgroupbox.html">QGroupBox</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::CC_Dial</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">A dial, like <a href="qdial.html">QDial</a>.</td></tr>
@@ -381,7 +382,6 @@
 <tr><td valign="top"><tt>QStyle::PM_MenuPanelWidth</tt></td><td align="center" valign="top"><tt>30</tt></td><td valign="top">Border width (applied on all sides) for a <a href="qmenu.html">QMenu</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::PM_MenuHMargin</tt></td><td align="center" valign="top"><tt>28</tt></td><td valign="top">Additional border (used on left and right) for a <a href="qmenu.html">QMenu</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::PM_MenuVMargin</tt></td><td align="center" valign="top"><tt>29</tt></td><td valign="top">Additional border (used for bottom and top) for a <a href="qmenu.html">QMenu</a>.</td></tr>
-<tr><td valign="top"><tt>QStyle::PM_MenuScrollerHeight</tt></td><td align="center" valign="top"><tt>27</tt></td><td valign="top">Height of the scroller area in a <a href="qmenu.html">QMenu</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::PM_MenuScrollerHeight</tt></td><td align="center" valign="top"><tt>27</tt></td><td valign="top">Height of the scroller area in a <a href="qmenu.html">QMenu</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::PM_MenuTearoffHeight</tt></td><td align="center" valign="top"><tt>31</tt></td><td valign="top">Height of a tear off area in a <a href="qmenu.html">QMenu</a>.</td></tr>
 <tr><td valign="top"><tt>QStyle::PM_MenuDesktopFrameWidth</tt></td><td align="center" valign="top"><tt>32</tt></td><td valign="top">The frame width for the menu on the desktop.</td></tr>
@@ -892,7 +892,7 @@
 <p>Late initialization of the given <i>application</i> object.</p>
 <h3 class="fn"><a name="polish-3"></a>void QStyle::polish ( <a href="qpalette.html">QPalette</a> &amp; <i>palette</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Changes the <i>palette</i> acoording to style specific requirements for color palettes (if any).</p>
+<p>Changes the <i>palette</i> according to style specific requirements for color palettes (if any).</p>
 <p>See also <a href="qpalette.html">QPalette</a> and <a href="qapplication.html#setPalette">QApplication::setPalette</a>().</p>
 <h3 class="fn"><a name="sizeFromContents"></a><a href="qsize.html">QSize</a> QStyle::sizeFromContents ( <a href="qstyle.html#ContentsType-enum">ContentsType</a> <i>type</i>, const <a href="qstyleoption.html">QStyleOption</a> * <i>option</i>, const <a href="qsize.html">QSize</a> &amp; <i>contentsSize</i>, const <a href="qwidget.html">QWidget</a> * <i>widget</i> = 0 ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the size of the element described by the specified <i>option</i> and <i>type</i>, based on the provided <i>contentsSize</i>.</p>
@@ -988,6 +988,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -22,32 +22,12 @@
 #include "securitymonitor.h"
 #include <QTimer>
 
-#ifndef QT_NO_SXE
-#include <monitor.h>
-#endif
-
-#ifndef QT_NO_SXE
-#ifdef QTOPIA_CELL
-#include "qsxemangle.h"
-#endif
-#endif
-
 SecurityMonitorTask::SecurityMonitorTask()
-: m_monitor(0), m_finished(false)
 {
 #ifndef QT_NO_SXE
-    m_monitor = new SecurityMonitor( this );
-
-#ifdef QTOPIA_PHONE
-#ifdef QTOPIA_CELL
-    IdMangler *idmangler = new IdMangler( this );
-    connect(idmangler, SIGNAL(gotIds(const QString &)),
-            m_monitor, SLOT(addMangleSeed(const QString &)));
-#endif
-#endif
-
-    m_monitor->start();
-    startNewSxeMonitor();
+    // No point starting in less than 10secs - the server will take at least
+    // that long to startup.
+    QTimer::singleShot(10000, this, SLOT(startNewSxeMonitor()));
 #endif
 }
 
@@ -73,23 +53,13 @@ bool SecurityMonitorTask::systemShutdown()
 
 void SecurityMonitorTask::doShutdown()
 {
-#ifndef QT_NO_SXE
-    QObject::connect(m_monitor, SIGNAL(finished()), this, SLOT(finished()));
-    QTimer::singleShot(500, this, SLOT(finished()));
-    m_monitor->quit();
-#endif
 }
 
 void SecurityMonitorTask::finished()
 {
-    if(m_finished) return;
-
-    m_finished = true;
-    emit proceed();
 }
 
 #ifndef QT_NO_SXE
-
 void SecurityMonitorTask::startNewSxeMonitor()
 {
     m_sxeMonitorProcess = new QProcess(this);

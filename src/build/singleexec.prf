@@ -5,6 +5,9 @@ enable_singleexec {
     # Bail out early if the project doesn't support singleexec
     requires(!no_singleexec)
 
+    # A non-Qtopia embedded app MUST declare no_singleexec
+    !qtopia:!desktop:app:!no_singleexec:error("$$self: You must declare this project with CONFIG no_singleexec or make it a qtopia project and declare CONFIG qtopia_main or singleexec_main")
+
     isEmpty(TRTARGET):TRTARGET=$$TARGET
 
     contains(PROJECT_TYPE,app) {

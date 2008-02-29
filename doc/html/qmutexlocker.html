@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/thread/qmutex.cpp -->
 <head>
   <title>Qt 4.2: QMutexLocker Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -30,7 +31,7 @@
 <h2>Detailed Description</h2>
 <p>The QMutexLocker class is a convenience class that simplifies locking and unlocking mutexes.</p>
 <p>The purpose of QMutexLocker is to simplify <a href="qmutex.html">QMutex</a> locking and unlocking. Locking and unlocking a <a href="qmutex.html">QMutex</a> in complex functions and statements or in exception handling code is error-prone and difficult to debug. QMutexLocker can be used in such situations to ensure that the state of the mutex is always well-defined.</p>
-<p>QMutexLocker should be created within a function where a <a href="qmutex.html">QMutex</a> needs to be locked. The mutex is locked when QMutexLocker is created, and unlocked when QMutexLocker is destroyed.</p>
+<p>QMutexLocker should be created within a function where a <a href="qmutex.html">QMutex</a> needs to be locked. The mutex is locked when QMutexLocker is created. You can unlock and relock the mutex with <tt>unlock()</tt> and <tt>relock()</tt>. If locked, the mutex will be unlocked when the QMutexLocker is destroyed.</p>
 <p>For example, this complex function locks a <a href="qmutex.html">QMutex</a> upon entering the function and unlocks the mutex at all the exit points:</p>
 <pre> int complexFunction(int flag)
  {
@@ -94,7 +95,7 @@
  }</pre>
 <p>Now, the mutex will always be unlocked when the QMutexLocker object is destroyed (when the function returns since <tt>locker</tt> is an auto variable).</p>
 <p>The same principle applies to code that throws and catches exceptions. An exception that is not caught in the function that has locked the mutex has no way of unlocking the mutex before the exception is passed up the stack to the calling function.</p>
-<p>QMutexLocker also provides a <a href="qmutexlocker.html#mutex">mutex</a>() member function that returns the mutex on which the QMutexLocker is operating. This is useful for code that needs access to the mutex, such as <a href="qwaitcondition.html#wait">QWaitCondition::wait</a>(). For example:</p>
+<p>QMutexLocker also provides a <tt>mutex()</tt> member function that returns the mutex on which the QMutexLocker is operating. This is useful for code that needs access to the mutex, such as <a href="qwaitcondition.html#wait">QWaitCondition::wait</a>(). For example:</p>
 <pre> class SignalWaiter
  {
  private:
@@ -129,12 +130,12 @@
 <p>Relocks an unlocked mutex locker.</p>
 <p>See also <a href="qmutexlocker.html#unlock">unlock</a>().</p>
 <h3 class="fn"><a name="unlock"></a>void QMutexLocker::unlock ()</h3>
-<p>Unlocks this mutex locker.</p>
+<p>Unlocks this mutex locker. You can use <tt>relock()</tt> to lock it again. It does not need to be locked when destroyed.</p>
 <p>See also <a href="qmutexlocker.html#relock">relock</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

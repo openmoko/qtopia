@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>StartupApplications Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>StartupApplications Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">StartupApplications Class Reference</h1>
 <p>The StartupApplications class launches applications preemptively at startup. <a href="#details">More...</a></p>
-<pre>    #include &lt;StartupApplications&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;StartupApplications&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="startupapplications-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -52,13 +51,13 @@
 <h3>Preloaded Applications</h3>
 <p>Preloaded applications are started immediately after Qtopia starts, but in a hidden state. Preloading an application ensures that it is available for almost instantaneouse &quot;startup&quot; whenever the user accesses it. However, as preloaded applications continue to run indefinately, they consume system resources such as RAM and scheduler time even when not actively in use. Only applications used very frequently should be preloaded.</p>
 <p>An application can be preloaded by adding it to the <tt>AppLoading\PreloadApps</tt> item list in the <tt>Trolltech/Launcher</tt> configuration file. The following example shows both the <tt>addressbook</tt> and <tt>qtmail</tt> applications set to preload.</p>
-<pre>    [AppLoading]
+<pre>&nbsp;   [AppLoading]
     PreloadApps=addressbook,qtmail</pre>
 <a name="background-applications"></a>
 <h3>Background Applications</h3>
 <p>Background applications allow simple QCop messages to be sent to an application during startup, whenever it terminates or at system shutdown. Background applications allow Qtopia to launch and control simple daemon-style servers.</p>
 <p>Background applications are configured in the <tt>Trolltech/BackgroundApplications</tt> configuration file. The file has the following form:</p>
-<pre>    [General]
+<pre>&nbsp;   [General]
     Count = &lt;daemon count&gt;
 
     [Application&lt;X&gt;]
@@ -72,14 +71,14 @@
 <p>The <tt>Count</tt> argument specifies the number of background applications that follow. Settings for each are grouped under <tt>Application&lt;X&gt;</tt> sections, where <tt>X</tt> is from <tt>0</tt> to <tt>Count - 1</tt>. For example, if <tt>Count</tt> were two, there should be <tt>Application0</tt> and <tt>Application1</tt> sections.</p>
 <p>For each configured application, the following options are available:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ApplicationName</tt></td><td>The name of the application to send the QCop messages to.</td></tr>
-<tr valign="top" class="even"><td><tt>ServiceName</tt></td><td>A name of a service to send QCop messages to. The default provider of the service will be used. If both <tt>ApplicationName</tt> and <tt>ServiceName</tt> are specified, the <tt>ServiceName</tt> option is ignored.</td></tr>
-<tr valign="top" class="odd"><td><tt>TaskGroup</tt></td><td>The name of the group to which the background application belogs. Group names allow a collection of applications to be started together at startup by inserting the group name into the <tt>Tasks.cfg</tt> Qtopia startup file. Task groups are not optional.</td></tr>
-<tr valign="top" class="even"><td><tt>Silent</tt></td><td>If true, warning messages about this application will be suppressed. For example, if the application or service cannot be found a qWarning() will only appear if <tt>Silent</tt> is false or omitted.</td></tr>
-<tr valign="top" class="odd"><td><tt>StartupMessage</tt></td><td>A message to send when the application is started.</td></tr>
-<tr valign="top" class="even"><td><tt>RestartMessage</tt></td><td>A message to send when the application exits. This message is optional and will only be sent if the application had previously been started with <tt>StartupMessage</tt>.</td></tr>
-<tr valign="top" class="odd"><td><tt>ShutdownMessage</tt></td><td>A message to send at system shutdown. This message is optional and will only be sent if the application had previously been started with <tt>StartupMessage</tt>. Following this message, the application is expected to exit within 5 seconds.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Option</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>ApplicationName</tt></td><td>The name of the application to send the QCop messages to.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>ServiceName</tt></td><td>A name of a service to send QCop messages to. The default provider of the service will be used. If both <tt>ApplicationName</tt> and <tt>ServiceName</tt> are specified, the <tt>ServiceName</tt> option is ignored.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>TaskGroup</tt></td><td>The name of the group to which the background application belogs. Group names allow a collection of applications to be started together at startup by inserting the group name into the <tt>Tasks.cfg</tt> Qtopia startup file. Task groups are not optional.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>Silent</tt></td><td>If true, warning messages about this application will be suppressed. For example, if the application or service cannot be found a qWarning() will only appear if <tt>Silent</tt> is false or omitted.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>StartupMessage</tt></td><td>A message to send when the application is started.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>RestartMessage</tt></td><td>A message to send when the application exits. This message is optional and will only be sent if the application had previously been started with <tt>StartupMessage</tt>.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>ShutdownMessage</tt></td><td>A message to send at system shutdown. This message is optional and will only be sent if the application had previously been started with <tt>StartupMessage</tt>. Following this message, the application is expected to exit within 5 seconds.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -92,6 +91,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

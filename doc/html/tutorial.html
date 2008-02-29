@@ -1,61 +1,51 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>
-<p>
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-<p>
-<h1 align=center>Tutorial: The 14 Steps</h1><br clear="all">
-<p>
-This tutorial gives an introduction to GUI programming using the Qt
-toolkit 2.3.10 .  It doesn't cover everything: The emphasis is on
-teaching the programming philosophy of GUI programming, and Qt's
-features are introduced as needed.  Some commonly used features are
-never used in this tutorial.
-<p>
-Chapter one starts with a ten-line hello-world and each subsequent
-chapter introduces one or a few more concepts.  By chapter 14, the ten
-lines from chapter one have turned into a 650-line game.
-<p>
-Tutorial chapters:
-<ol>
-<li><a href="t1.html">Hello, World!</a>
-<li><a href="t2.html">Calling it Quits</a>
-<li><a href="t3.html">Family Values</a>
-<li><a href="t4.html">Let There Be Widgets</a>
-<li><a href="t5.html">Building Blocks</a>
-<li><a href="t6.html">Building Blocks Galore!</a>
-<li><a href="t7.html">One Thing Leads to Another</a>
-<li><a href="t8.html">Preparing for Battle</a>
-<li><a href="t9.html">With Cannon You Can</a>
-<li><a href="t10.html">Smooth as Silk</a>
-<li><a href="t11.html">Giving It a Shot</a>
-<li><a href="t12.html">Hanging in the Air the Way Bricks Don't</a>
-<li><a href="t13.html">Game Over</a>
-<li><a href="t14.html">Facing the Wall</a>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/examples/tutorial.qdoc -->
+<head>
+  <title>Qt 4.2: Qt Tutorial</title>
+  <link rel="next" href="tutorial-t1.html" />
+  <link rel="start" href="index.html" />
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><p>
+[Next: <a href="tutorial-t1.html">Chapter 1</a>]
+</p>
+<h1 align="center">Qt Tutorial<br /><small></small></h1>
+<p>This tutorial gives an introduction to GUI programming using the Qt toolkit. It doesn't cover everything; the emphasis is on teaching the programming philosophy of GUI programming, and Qt's features are introduced as needed. Some commonly used features are never used in this tutorial.</p>
+<p>Chapter one starts with a minimal &quot;Hello world&quot; program and the following chapters introduce new concepts. By Chapter 14, the &quot;Hello world&quot; program from Chapter 1 will have turned into a 650-line game.</p>
+<p>If you're completely new to Qt, please read <a href="how-to-learn-qt.html">How to Learn Qt</a> if you haven't already done so.</p>
+<p>The tutorial's source code is located in Qt's <tt>examples/tutorial</tt> directory.</p>
+<p>Tutorial chapters:</p>
+<ol type="1">
+<li><a href="tutorial-t1.html">Hello World!</a></li>
+<li><a href="tutorial-t2.html">Calling it Quits</a></li>
+<li><a href="tutorial-t3.html">Family Values</a></li>
+<li><a href="tutorial-t4.html">Let There Be Widgets</a></li>
+<li><a href="tutorial-t5.html">Building Blocks</a></li>
+<li><a href="tutorial-t6.html">Building Blocks Galore!</a></li>
+<li><a href="tutorial-t7.html">One Thing Leads to Another</a></li>
+<li><a href="tutorial-t8.html">Preparing for Battle</a></li>
+<li><a href="tutorial-t9.html">With Cannon You Can</a></li>
+<li><a href="tutorial-t10.html">Smooth as Silk</a></li>
+<li><a href="tutorial-t11.html">Giving It a Shot</a></li>
+<li><a href="tutorial-t12.html">Hanging in the Air the Way Bricks Don't</a></li>
+<li><a href="tutorial-t13.html">Game Over</a></li>
+<li><a href="tutorial-t14.html">Facing the Wall</a></li>
 </ol>
+<p>This little game doesn't look much like a modern GUI application. It uses a some GUI techniques, but after you've worked through it, we recommend checking out the <a href="mainwindows-application.html">Application</a> example, which presents a small GUI application, with menus, tool bars, a status bar, and so on.</p>
 <p>
-This little game doesn't look much like a modern GUI application.  It
-uses a good few of the GUI techniques, but after you've worked through
-it, we recommend reading the <a href="simple-application.html">Simple
-Application Walkthrough</a> too.  That discusses a very simple
-application with all the common features (menu bars, tool bars,
-on-line help, printing, a couple of dialogs) in detail.
-
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+[Next: <a href="tutorial-t1.html">Chapter 1</a>]
+</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+</tr></table></div></address></body>
+</html>

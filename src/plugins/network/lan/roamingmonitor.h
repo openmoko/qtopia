@@ -25,20 +25,38 @@
 #include <custom.h>
 
 #ifndef NO_WIRELESS_LAN
-#include <QObject>
+
+//these two Qt includes must be in fornt of the four system includes for wireless.h
+#include <QObject>  
 #include <QString>
 
-#include <sys/socket.h>
+//must be defined to be able to include kernel includes
+#ifndef __user
+#define __user
+#endif
+
+#include <linux/types.h>    /* required for wireless.h */
+#include <sys/socket.h>     /* required for wireless.h */
+#include <net/if.h>         /* required for wireless.h */
+
+/* A lot of wireless.h have kernel includes which should be protected by
+   #ifdef __KERNEL__. They course include errors due to redefinitions of types.
+   This prevents those kernel headers being included by Qtopia.  
+   */
+#ifndef _LINUX_IF_H
+#define _LINUX_IF_H
+#endif
+#ifndef _LINUX_SOCKET_H
+#define _LINUX_SOCKET_H
+#endif
 #include <linux/wireless.h>
 
 #include <qtopianetworkinterface.h>
 
 class QTimer;
-#if WIRELESS_EXT > 13
 class WirelessScan;
-#endif
 class QValueSpaceItem;
-
+class QSignalSourceProvider;
 class RoamingMonitor : public QObject
 {
     Q_OBJECT
@@ -58,16 +76,18 @@ private slots:
     void scanTimeout();
     void newScanResults();
     void deviceNameChanged();
+    void updateSignalStrength();
 
 private:
     QtopiaNetworkConfiguration* configIface;
     QTimer* rescanTimer;
-#if WIRELESS_EXT > 13
     WirelessScan* scanner;
-#endif
     QValueSpaceItem* netSpace;
     QString deviceName;
     bool activeHop;
+
+    QSignalSourceProvider* signalProvider;
+    QTimer* signalTimer;
 };
 
 #endif // NO_WIRELESS_LAN

@@ -41,7 +41,8 @@ enum InputMatcherFunc {
     modifyText,
     insertSpace,
     insertSymbol,
-    insertText
+    insertText,
+    changeInputMethod
 };
 
 struct InputMatcherChar {

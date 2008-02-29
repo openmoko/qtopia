@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qmake-manual.qdoc -->
 <head>
   <title>Qt 4.2: Using Precompiled Headers</title>
   <link rel="prev" href="qmake-advanced-usage.html" />
@@ -80,25 +81,137 @@
 <p>You can find the following source code in the <tt>examples/qmake/precompile</tt> directory in the Qt distribution:</p>
 <a name=""></a>
 <h3><tt>mydialog.ui</tt></h3>
-<pre></pre>
+<pre> &lt;ui version=&quot;4.0&quot; &gt;
+  &lt;author&gt;&lt;/author&gt;
+  &lt;comment&gt;&lt;/comment&gt;
+  &lt;exportmacro&gt;&lt;/exportmacro&gt;
+  &lt;class&gt;MyDialog&lt;/class&gt;
+  &lt;widget class=&quot;QDialog&quot; name=&quot;MyDialog&quot; &gt;
+   &lt;property name=&quot;geometry&quot; &gt;
+    &lt;rect&gt;
+     &lt;x&gt;0&lt;/x&gt;
+     &lt;y&gt;0&lt;/y&gt;
+     &lt;width&gt;401&lt;/width&gt;
+     &lt;height&gt;70&lt;/height&gt;
+    &lt;/rect&gt;
+   &lt;/property&gt;
+   &lt;property name=&quot;windowTitle&quot; &gt;
+    &lt;string&gt;Mach 2!&lt;/string&gt;
+   &lt;/property&gt;
+   &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+    &lt;property name=&quot;margin&quot; &gt;
+     &lt;number&gt;9&lt;/number&gt;
+    &lt;/property&gt;
+    &lt;property name=&quot;spacing&quot; &gt;
+     &lt;number&gt;6&lt;/number&gt;
+    &lt;/property&gt;
+    &lt;item&gt;
+     &lt;widget class=&quot;QLabel&quot; name=&quot;aLabel&quot; &gt;
+      &lt;property name=&quot;text&quot; &gt;
+       &lt;string&gt;Join the life in the fastlane; - PCH enable your project today! -&lt;/string&gt;
+      &lt;/property&gt;
+     &lt;/widget&gt;
+    &lt;/item&gt;
+    &lt;item&gt;
+     &lt;widget class=&quot;QPushButton&quot; name=&quot;aButton&quot; &gt;
+      &lt;property name=&quot;text&quot; &gt;
+       &lt;string&gt;&amp;amp;Quit&lt;/string&gt;
+      &lt;/property&gt;
+      &lt;property name=&quot;shortcut&quot; &gt;
+       &lt;string&gt;Alt+Q&lt;/string&gt;
+      &lt;/property&gt;
+     &lt;/widget&gt;
+    &lt;/item&gt;
+   &lt;/layout&gt;
+  &lt;/widget&gt;
+  &lt;pixmapfunction&gt;qPixmapFromMimeSource&lt;/pixmapfunction&gt;
+  &lt;resources/&gt;
+  &lt;connections/&gt;
+ &lt;/ui&gt;</pre>
 <a name=""></a>
 <h3><tt>stable.h</tt></h3>
-<pre></pre>
+<pre> /* Add C includes here */
+
+ #if defined __cplusplus
+ /* Add C++ includes here */</span>
+
+ # include &lt;iostream&gt;
+ # include &lt;QApplication&gt;
+ # include &lt;QPushButton&gt;
+ # include &lt;QLabel&gt;
+ #endif</pre>
 <a name=""></a>
 <h3><tt>myobject.h</tt></h3>
-<pre></pre>
+<pre> #include &lt;QObject&gt;
+
+ class MyObject : public QObject
+ {
+ public:
+     MyObject();
+     ~MyObject();
+ };</pre>
 <a name=""></a>
 <h3><tt>myobject.cpp</tt></h3>
-<pre></pre>
+<pre> #include &lt;iostream&gt;
+ #include &lt;QDebug&gt;
+ #include &lt;QObject&gt;
+ #include &quot;myobject.h&quot;
+
+ MyObject::MyObject()
+     : QObject()
+ {
+     std::cout &lt;&lt; &quot;MyObject::MyObject()\n&quot;;
+ }</pre>
 <a name=""></a>
 <h3><tt>util.cpp</tt></h3>
-<pre></pre>
+<pre> void util_function_does_nothing()
+ {
+     <span class="comment">// Nothing here...</span>
+     int x = 0;
+     ++x;
+ }</pre>
 <a name=""></a>
 <h3><tt>main.cpp</tt></h3>
-<pre></pre>
+<pre> #include &lt;QApplication&gt;
+ #include &lt;QPushButton&gt;
+ #include &lt;QLabel&gt;
+ #include &quot;myobject.h&quot;
+ #include &quot;mydialog.h&quot;
+
+ int main(int argc, char **argv)
+ {
+     QApplication app(argc, argv);
+
+     MyObject obj;
+     MyDialog dialog;
+
+     dialog.connect(dialog.aButton, SIGNAL(clicked()), SLOT(close()));
+     dialog.show();
+
+     return app.exec();
+ }</pre>
 <a name=""></a>
 <h3><tt>precompile.pro</tt></h3>
-<pre></pre>
+<pre> #############################################
+ #
+ # Example for using Precompiled Headers
+ #
+ #############################################
+ TEMPLATE  = app
+ LANGUAGE  = C++
+ CONFIG   += console precompile_header
+
+ # Use Precompiled headers (PCH)
+ PRECOMPILED_HEADER  = stable.h
+
+ HEADERS   = stable.h \
+             mydialog.h \
+             myobject.h
+ SOURCES   = main.cpp \
+             mydialog.cpp \
+             myobject.cpp \
+             util.cpp
+ FORMS     = mydialog.ui</pre>
 <p>
 [Previous: <a href="qmake-advanced-usage.html">qmake Advanced Usage</a>]
 [<a href="qmake-manual.html">Contents</a>]
@@ -108,6 +221,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

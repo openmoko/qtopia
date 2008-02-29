@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1373,6 +1383,12 @@ static inline uint BYTE_MUL_RGB16(uint x, uint a) {
     return t;
 }
 
+static inline uint BYTE_MUL_RGB16_32(uint x, uint a) {
+    uint t = (((x & 0xf81f07e0)>>5)*a) & 0xf81f07e0;
+    t |= (((x & 0x07e0f81f)*a) >> 5) & 0x07e0f81f;
+    return t;
+}
+
 static void blend_color_rgb16(int count, const QSpan *spans, void *userData)
 {
     QSpanData *data = reinterpret_cast<QSpanData *>(userData);
@@ -1410,10 +1426,40 @@ static void blend_color_rgb16(int count, const QSpan *spans, void *userData)
         ushort c = qConvertRgb32To16(color);
         ushort *target = ((ushort *)data->rasterBuffer->scanLine(spans->y)) + spans->x;
         const ushort *end = target + spans->len;
-        while (target < end) {
+#if 1
+        int len = spans->len;
+        bool pre = (((unsigned long)target) & 0x3) != 0;
+        bool post = false;
+        if (pre) {
+            // skip to word boundary
+            *target = c + BYTE_MUL_RGB16(*target, ialpha);
+            ++target;
+            --len;
+        }
+        if (len & 0x1) {
+            post = true;
+            --len;
+        }
+        uint *target32 = (uint*)target;
+        uint c32 = c | (c<<16);
+        len >>= 1;
+        uint salpha = (ialpha+1) >> 3; // calculate here rather than in loop
+        while (len--) {
+            // blend full words
+            *target32 = c32 + BYTE_MUL_RGB16_32(*target32, salpha);
+            ++target32;
+            target += 2;
+        }
+        if (post) {
+            // one last pixel beyond a full word
+            *target = c + BYTE_MUL_RGB16(*target, ialpha);
+        }
+#else
+        while (target != end) {
             *target = c + BYTE_MUL_RGB16(*target, ialpha);
             ++target;
         }
+#endif
         ++spans;
     }
 }
@@ -1938,10 +1984,9 @@ static void blend_texture_generic(int count, const QSpan *spans, void *userData)
             const int coverage = (spans->coverage * data->texture.const_alpha) >> 8;
             QWS_CALLBACK_IF_NONBUFFERED(data, {
                 uint *dest = op.dest_fetch ? op.dest_fetch(buffer, data->rasterBuffer, x, spans->y, l) : buffer;
+                op.func(dest, src, l, coverage);
                 if (op.dest_store)
                     op.dest_store(data->rasterBuffer, x, spans->y, dest, l);
-
-                op.func(dest, src, l, coverage);
             }, {
                 data->rasterEngine->drawBufferSpan(src, buffer_size,
                                                    x, spans->y, l, coverage);

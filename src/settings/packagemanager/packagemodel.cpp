@@ -31,6 +31,7 @@
 #include <QHttp>
 #include <QTimer>
 #include <QSettings>
+#include <QFile>
 
 #include <qstorage.h>
 #include <qtopianamespace.h>
@@ -97,27 +98,45 @@ PackageModel::PackageModel( QObject* parent )
     , storage( 0 )
 {
     networked = AbstractPackageController::factory( AbstractPackageController::network, this );
-    locally = AbstractPackageController::factory( AbstractPackageController::local, this );
     installed = AbstractPackageController::factory( AbstractPackageController::installed, this );
 
+#ifndef QT_NO_SXE
+    QFile file( Qtopia::qtopiaDir() + QLatin1String( "/etc/default/Trolltech/PackageServers.conf" ) );
+
+    if( file.open( QIODevice::ReadOnly ) )
+    {
+        QString header = QLatin1String( "[Sensitive]" );
+        QChar bracket = QLatin1Char( '[' );
+
+        QString line;
+
+        while( !file.atEnd() && !(line = file.readLine()).startsWith( header ) );
+
+        while( !file.atEnd() && !(line = file.readLine()).startsWith( bracket ) )
+            sensitiveDomains.append( line.trimmed() );
+
+        file.close();
+    }
+#endif
+
     // can only have a max of 15 top level items
-    rootItems << installed << networked << locally;
+    rootItems << installed << networked;
 
     for ( int i = 0; i < rootItems.count(); i++ )
         connect( rootItems[i], SIGNAL(updated()),
                 this, SLOT(controllerUpdate()) );
-    connect( networked, SIGNAL(packageInstalled(const InstallControl::PackageInfo &)),
+    connect( networked, SIGNAL(packageInstalled(const InstallControl::PackageInfo &,bool)),
             installed, SLOT(addPackage(const InstallControl::PackageInfo &)) );
     connect( networked, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)),
             this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&,int,int)));
     connect( networked, SIGNAL(rowsRemoved(const QModelIndex&,int,int)),
             this, SIGNAL(rowsRemoved(const QModelIndex&,int,int)));
-    connect( locally, SIGNAL(packageInstalled(const InstallControl::PackageInfo &)),
-            installed, SLOT(addPackage(const InstallControl::PackageInfo &)) );
-    connect( networked, SIGNAL(packageInstalled(const InstallControl::PackageInfo &)),
-            this, SLOT(packageInstalled(const InstallControl::PackageInfo &)) );
-    connect( locally, SIGNAL(packageInstalled(const InstallControl::PackageInfo &)),
-            this, SLOT(packageInstalled(const InstallControl::PackageInfo &)) );
+    connect( networked, SIGNAL(packageInstalled(const InstallControl::PackageInfo &,bool)),
+            this, SLOT(packageInstalled(const InstallControl::PackageInfo &,bool)) );
+    connect( networked, SIGNAL(packageMessage(const QString &)), 
+            this, SIGNAL(infoHtml(const QString &)) );
+    connect( installed, SIGNAL(packageInstalled(const InstallControl::PackageInfo &,bool)),
+            this, SLOT(packageInstalled(const InstallControl::PackageInfo &,bool)) );
 
     // can only have a max of 4 columns, if more are needed, change the
     // macros used for PackageModel::index(...) below
@@ -139,6 +158,13 @@ void PackageModel::populateLists()
     for ( int srv = 0; srv < servConfList.count(); srv++ )
     {
         srvName = servConfList[srv];
+
+#ifndef QT_NO_SXE
+        if( srvName == QLatin1String( "Sensitive" ) ||
+                srvName == QLatin1String( "Configuration" ))
+            continue;
+#endif
+
         serverConf.beginGroup( srvName );
         if ( serverConf.contains( "active" ) &&
                 serverConf.contains( "URL" ))
@@ -234,9 +260,26 @@ void PackageModel::activateItem( const QModelIndex &item )
     if ( c == installed )
         html = tr( "Uninstalling %1 ..." ).arg( dataItem );
     else
+    {
         html = tr( "Installing %1 ..." ).arg( dataItem );
-    emit infoHtml( html );
+        emit infoHtml( html );
+    }
 }
+
+void PackageModel::reenableItem( const QModelIndex &item )
+{
+    QModelIndex parent = item.parent();
+    if ( !parent.isValid() )
+        return;
+
+    QString html;
+    if ( !qobject_cast<InstalledPackageController *>(installed)->reenable( item.row() ) )
+    {
+        html = tr( "Reenable unsuccessful" );
+        emit infoHtml( html );
+    }
+}
+
 
 QString PackageModel::getOperation( const QModelIndex &item )
 {
@@ -256,7 +299,7 @@ QString PackageModel::getOperation( const QModelIndex &item )
 */
 void PackageModel::sendUpdatedText( const QModelIndex &item )
 {
-    QString html = data( item, Qt::UserRole ).toString();
+    QString html = data( item, Qt::WhatsThisRole ).toString();
     QModelIndex parent = item.parent();
     if ( parent.isValid() )
     {
@@ -268,6 +311,7 @@ void PackageModel::sendUpdatedText( const QModelIndex &item )
             return;
         }
     }
+    
     emit infoHtml( html );
 }
 
@@ -289,18 +333,20 @@ void PackageModel::userTargetChoice( const QString &t )
 
 void PackageModel::controllerUpdate()
 {
-    InstalledPackageController *installed = qobject_cast<InstalledPackageController *>( sender() );
+    emit layoutAboutToBeChanged();
     if ( installed )
-    {
         networked->setPackageFilter( installed->packageList() );
-        locally->setPackageFilter( installed->packageList() );
-    }
-    reset();
+    emit layoutChanged();
 }
 
-void PackageModel::packageInstalled( const InstallControl::PackageInfo &pkg )
+void PackageModel::packageInstalled( const InstallControl::PackageInfo &pkg, bool success )
 {
-    QString html = tr( "%1 <b>successfully</b> installed" ).arg( pkg.name );
+    
+    InstalledPackageController *installed = qobject_cast<InstalledPackageController *>( sender() );
+    QString html = tr( "%1 <b>%2</b> %3", "%1 = package name, %2 = successfully/unsuccessfully, %3 = installed/uninstalled" )
+                    .arg( pkg.name )
+                    .arg( success ? tr("successfully") : tr("unsuccessfully") )
+                    .arg( installed ? tr("uninstalled") : tr("installed") ); 
     emit infoHtml( html );
 }
 
@@ -314,7 +360,7 @@ void PackageModel::publishTargets()
     for ( int i = 0; i < fl.count(); i++ )
     {
         mediaNames[ fl[i]->name() ] = fl[i]->path();
-        targets << fl[i]->name();
+        targets << fl[i]->path();
         if ( !installMediaValid && fl[i]->path() == installControl()->installMedia() )
             installMediaValid = true;
     }
@@ -446,3 +492,16 @@ int PackageModel::columnCount( const QModelIndex &parent ) const
         return 1;
     return  2; // columnHeads.count();
 }
+
+#ifndef QT_NO_SXE
+bool PackageModel::hasSensitiveDomains( const QString &domain )
+{
+    QStringList packageDomains = domain.split( QLatin1Char( ',' ), QString::SkipEmptyParts );
+
+    foreach( QString d, packageDomains )
+        if( sensitiveDomains.contains( d ) )
+            return true;
+
+    return false;
+}
+#endif

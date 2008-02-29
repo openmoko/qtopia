@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qmake-manual.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qmake-manual.qdoc -->
 <head>
   <title>Qt 4.2: qmake Common Projects</title>
   <link rel="prev" href="qmake-tutorial.html" />
@@ -24,14 +24,13 @@
 <p>This chapter describes how to set up <tt>qmake</tt> project files for three common project types that are based on Qt. Although all kinds of projects use many of the same variables, each of them use project-specific variables to customize output files.</p>
 <p>Platform-specific variables are not described here; we refer the reader to the <a href="deployment.html">Deploying Qt Applications</a> document for information on issues such as <a href="deployment-mac.html#architecture-dependencies">building universal binaries for Mac OS X</a> and <a href="deployment-windows.html#visual-studio-2005">handling Visual Studio manifest files</a>.</p>
 <ul><li><a href="#building-an-application">Building an Application</a></li>
-<ul><li><a href="#the-template">The <tt>app</tt> Template</a></li>
+<ul><li><a href="#the-app-template">The app Template</a></li>
 </ul>
 <li><a href="#building-a-library">Building a Library</a></li>
-<ul><li><a href="#the-template">The <tt>lib</tt> Template</a></li>
+<ul><li><a href="#the-lib-template">The lib Template</a></li>
 </ul>
 <li><a href="#building-a-plugin">Building a Plugin</a></li>
-<ul><li><a href="#the-template">The <tt>plugin</tt> Template</a></li>
-<li><a href="#building-a-qt-designer-plugin">Building a Qt Designer Plugin</a></li>
+<ul><li><a href="#building-a-qt-designer-plugin">Building a Qt Designer Plugin</a></li>
 </ul>
 <li><a href="#building-and-installing-in-debug-and-release-modes">Building and Installing in Debug and Release Modes</a></li>
 <ul><li><a href="#building-in-both-modes">Building in Both Modes</a></li>
@@ -40,8 +39,8 @@
 </ul>
 <a name="application"></a><a name="building-an-application"></a>
 <h2>Building an Application</h2>
-<a name="the-template"></a>
-<h3>The <tt>app</tt> Template</h3>
+<a name="the-app-template"></a>
+<h3>The app Template</h3>
 <p>The <tt>app</tt> template tells <tt>qmake</tt> to generate a Makefile that will build an application. With this template, the type of application can be specified by adding one of the following options to the <tt>CONFIG</tt> variable definition:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
@@ -76,10 +75,10 @@
 <p>For items that are single valued, e.g. the template or the destination directory, we use &quot;=&quot;; but for multi-valued items we use &quot;+=&quot; to <i>add</i> to the existing items of that type. Using &quot;=&quot; replaces the item's value with the new value, for example if we wrote <tt>DEFINES=QT_DLL</tt>, all other definitions would be deleted.</p>
 <a name="library"></a><a name="building-a-library"></a>
 <h2>Building a Library</h2>
-<a name="the-template"></a>
-<h3>The <tt>lib</tt> Template</h3>
+<a name="the-lib-template"></a>
+<h3>The lib Template</h3>
 <p>The <tt>lib</tt> template tells <tt>qmake</tt> to generate a Makefile that will build a library. When using this template, in addition to the system variables mentioned above for the <tt>app</tt> template the <tt>VERSION</tt> variable is supported. You should use these in your .pro file to specify information about the library.</p>
-<p>When using the <tt>lib</tt> template, the following options determine the type of library that is built:</p>
+<p>When using the <tt>lib</tt> template, the following options can be added to the <tt>CONFIG</tt> variable to determine the type of library that is built:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>dll</td><td>The library is a shared library (dll).</td></tr>
@@ -91,17 +90,15 @@
 </ul>
 <a name="plugin"></a><a name="building-a-plugin"></a>
 <h2>Building a Plugin</h2>
-<a name="the-template"></a>
-<h3>The <tt>plugin</tt> Template</h3>
-<p>The <tt>plugin</tt> template tells <tt>qmake</tt> to generate a Makefile that will build a plugin, usually in the form of a library. As with the <tt>lib</tt> template, the <tt>VERSION</tt> variable is supported. You should use this to specify information about the plugin.</p>
+<p>Plugins are built using the <tt>lib</tt> template, as described in the previous section. This tells <tt>qmake</tt> to generate a Makefile for the project that will build a plugin in a suitable form for each platform, usually in the form of a library. As with ordinary libraries, the <tt>VERSION</tt> variable is used to specify information about the plugin.</p>
 <ul>
 <li>VERSION - The version number of the target library, for example, 2.3.1.</li>
 </ul>
 <a name="building-a-qt-designer-plugin"></a>
 <h3>Building a Qt Designer Plugin</h3>
 <p><i>Qt Designer</i> plugins are built using a specific set of configuration settings that depend on the way Qt was configured for your system. For convenience, these settings can be enabled by adding <tt>designer</tt> to the project's <tt>CONFIG</tt> variable. For example:</p>
-<pre></pre>
-<p>See the Qt Designer examples for more examples of plugin-based projects.</p>
+<pre> CONFIG      += designer plugin debug_and_release</pre>
+<p>See the <a href="examples.html#qt-designer-examples">Qt Designer examples</a> for more examples of plugin-based projects.</p>
 <a name="building-and-installing-in-debug-and-release-modes"></a>
 <h2>Building and Installing in Debug and Release Modes</h2>
 <p>Sometimes, it is necessary to build a project in both debug and release modes. Although the <tt>CONFIG</tt> variable can hold both <tt>debug</tt> and <tt>release</tt> options, the <tt>debug</tt> option overrides the <tt>release</tt> option.</p>
@@ -127,7 +124,10 @@
 <p>The <tt>build_all</tt> option also ensures that both versions of the target will be installed when the installation rule is invoked:</p>
 <pre> make install</pre>
 <p>It is possible to customize the names of the build targets depending on the target platform. For example, a library or plugin may be named using a different convention on Windows to the one used on Unix platforms:</p>
-<pre></pre>
+<pre> CONFIG(debug, debug|release) {
+     mac: TARGET = $$join(TARGET,,,_debug)
+     win32: TARGET = $$join(TARGET,,d)
+ }</pre>
 <p>The default behavior in the above snippet is to modify the name used for the build target when building in debug mode. An <tt>else</tt> clause could be added to the scope to do the same for release mode; left as it is, the target name remains unmodified.</p>
 <p>
 [Previous: <a href="qmake-tutorial.html">qmake Tutorial</a>]
@@ -138,6 +138,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

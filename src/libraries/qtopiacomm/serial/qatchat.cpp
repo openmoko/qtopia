@@ -30,7 +30,7 @@
 /*!
     \class QAtChat
     \brief The QAtChat class provides a simple mechanism for sending AT commands to modems
-    \ingroup communication
+    \ingroup telephony::serial
 
     The QAtChat interface provides a simple mechanism for sending AT
     commands to modems and retrieving the responses to those commands.
@@ -254,7 +254,8 @@ void QAtChat::chat( const QString& command, QObject *target, const char *slot,
                     QAtResult::UserData *data )
 {
     QAtChatCommand *cmd = new QAtChatCommand( command, data );
-    connect( cmd, SIGNAL(done(bool,QAtResult)), target, slot );
+    if ( target && slot )
+        connect( cmd, SIGNAL(done(bool,QAtResult)), target, slot );
     queue( cmd );
 }
 
@@ -464,6 +465,19 @@ void QAtChat::requestNextLine( QObject *target, const char *slot )
 void QAtChat::send( const QString& command )
 {
     writeLine( command );
+}
+
+/*!
+    Register \a type as a prefix for error strings.  Any line of data
+    from the modem that starts with \a type will be recorded as a
+    synonym for \c ERROR.  This is to support modems that have non-standard
+    error strings.
+
+    This function was introduced in Qtopia 4.2.1
+*/
+void QAtChat::registerErrorPrefix( const QString& type )
+{
+    d->matcher->add( type, QPrefixMatcher::Terminator );
 }
 
 /*!

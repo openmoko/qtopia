@@ -28,8 +28,7 @@ BtHeadsetService::BtHeadsetService( QObject* parent )
     : QObject( parent )
 {
     qLog(Bluetooth) << "Initializing Headset Service";
-    m_hsService = new QBluetoothHeadsetService( "BluetoothHeadset", this );
-    m_hsService->initialize();
+    m_hsService = new QBluetoothHeadsetService( "BluetoothHeadset", tr("Headset Audio Gateway"), this );
 }
 
 BtHeadsetService::~BtHeadsetService()

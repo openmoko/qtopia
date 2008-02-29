@@ -4,61 +4,78 @@
 exec 1>/dev/null
 exec 2>/dev/null
 
-# Loopback block device
-insmod loop
+case "$1" in
+    boot)
+        splash "Loading filesystem" "modules"
 
-# Networking and PPP
-insmod af_packet
-insmod unix
-insmod slhc
-insmod ppp_generic
-insmod ppp_async
+        # FAT Support
+        insmod fat
+        insmod vfat
+        insmod nls_cp437
+        insmod nls_iso8859-1
+        insmod nls_utf8
+        ;;
+    *)
+        splash -p + "Loading modules"
 
-# USB
-insmod usbdcore
-insmod net_fd if_name=eth
-insmod bvd_bi
+        # Loopback block device
+        insmod loop
 
-# Multimedia interfaces
-insmod omega_i2c
-insmod videodev
-insmod omega_camera
-insmod soundcore
-insmod greenphone-sound
-insmod wm9713-ts
-insmod s1d19120
+        # Networking and PPP
+        insmod af_packet
+        insmod unix
+        insmod slhc
+        insmod ppp_generic
+        insmod ppp_async
 
-# Misc Hardware
-insmod docparatable
-insmod hsav_detect
-insmod omega_alarm
-insmod omega_rtcalarm
-insmod omega_bcm2121
-insmod omega_chgled
-insmod omega_spi
-insmod omega_vibrator
-insmod omega_kpbl
-insmod pseudo_serial
+        # USB
+        insmod usbdcore
+        insmod net_fd if_name=eth
+        insmod bvd_bi
 
-# Power Management
-insmod omega_pmu
-insmod omega_power
-insmod omega_poweroff
+        # Multimedia interfaces
+        insmod omega_i2c
+        insmod videodev
+        insmod omega_camera
+        insmod soundcore
+        insmod greenphone-sound
+        insmod wm9713-ts
+        insmod s1d19120
 
-# miniSD Card
-insmod mmc_base
-insmod mmc_omega
+        # Misc Hardware
+        insmod docparatable
+        insmod hsav_detect
+        insmod omega_alarm
+        insmod omega_rtcalarm
+        insmod omega_bcm2121
+        insmod omega_chgled
+        insmod omega_spi
+        insmod omega_vibrator
+        insmod omega_kpbl
+        insmod pseudo_serial
 
-# Bluetooth
-insmod omega_bt
-insmod bluez
-insmod l2cap
-insmod sco
-insmod hci_uart
-insmod rfcomm
+        # Power Management
+        insmod omega_pmu
+        insmod omega_power
+        insmod omega_poweroff
 
-# NFS Support
-insmod sunrpc
-insmod lockd
-insmod nfs
+        # miniSD Card
+        insmod mmc_base
+        insmod mmc_omega
+#        insmod p300wlan
+
+        # Bluetooth
+        insmod omega_bt
+        insmod bluez
+        insmod l2cap
+        insmod sco
+        insmod hci_uart
+        insmod rfcomm
+
+        # NFS Support
+        insmod sunrpc
+        insmod lockd
+        insmod nfs
+        ;;
+esac
 

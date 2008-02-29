@@ -5,7 +5,7 @@ start)
     ENV=/etc/profile /usr/sbin/telnetd
     ;;
 stop)
-    killall telnetd
+    kill $( pidof telnetd ) 2>/dev/null
     ;;
 esac
 

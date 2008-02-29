@@ -21,42 +21,14 @@
 
 #include <QDialog>
 
-#include "ui_mainwindow.h"
-
-class QEvent;
-
 class ServerWidgetSettings : public QDialog
 {
     Q_OBJECT
 public:
-    enum {
-        ServerInterface,
-        SecondaryDisplay,
-        DialerScreen,
-        MessageBox,
-        BrowserScreen,
-        CallScreen,
-    } WidgetType;
-
     ServerWidgetSettings( QWidget* parent = 0, Qt::WFlags fl = 0 );
     ~ServerWidgetSettings();
 
-public slots:
-    void accept();
-
-protected:
-    bool eventFilter( QObject* watched, QEvent* event );
-
-
 private slots:
-    void shutdownClicked();
-    void newWidgetSelected( QTreeWidgetItem* item, int column );
-
-private:
-    void init();
-    void saveSettings();
-
-private:
-    Ui::MainWindow ui;
+    void clicked();
 };
 

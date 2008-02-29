@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/3rdparty.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/3rdparty.qdoc -->
 <head>
   <title>Qt 4.2: Third-Party Licenses Used in Qt</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -15,6 +15,8 @@
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Third-Party Licenses Used in Qt<br /><small></small></h1>
 <p>Run <tt>configure -help</tt> to see any options that may be available for controlling the use of these libraries.</p>
 <ul><li><a href="#freetype-2">FreeType 2 (<tt>freetype</tt>)</a></li>
+<li><a href="#harfbuzz">HarfBuzz (<tt>harfbuzz</tt>)</a></li>
+<li><a href="#md5-and">MD5 (<tt>md5.cpp</tt> and <tt>md5.h</tt>)</a></li>
 <li><a href="#the-independent-jpeg-group-s-jpeg-software">The Independent JPEG Group's JPEG Software (<tt>libjpeg</tt>)</a></li>
 <li><a href="#mng-library">MNG Library (<tt>libmng</tt>)</a></li>
 <li><a href="#png-reference-library">PNG Reference Library (<tt>libpng</tt>)</a></li>
@@ -39,6 +41,15 @@
 <li>Renamed: ftgrays.h to qgrayraster_p.h</li>
 <li>Renamed: ftgrays.c to qgrayraster.c</li>
 </ul>
+<a name="harfbuzz"></a>
+<h2>HarfBuzz (<tt>harfbuzz</tt>)</h2>
+<p><i>This is <a href="#harfbuzz">HarfBuzz</a>, an OpenType Layout engine.</i></p>
+<p><i>It was derived originally from the OpenType code in <a href="qtopiacore-fonts.html#freetype">FreeType</a>-1.x, ported to FreeType2. (This code has been abandoned for FreeType2, but until something better comes along, should serve our purposes.) In addition to porting to <a href="qtopiacore-fonts.html#freetype">FreeType</a>-2, it has been modified in various other ways.</i> -- quoted from <tt>src/3rdparty/harfbuzz/README</tt>.</p>
+<p>See <tt>src/3rdparty/harfbuzz/COPYING.FTL</tt> and src/3rdparty/harfbuzz/COPYING.GPL for license details.</p>
+<a name="md5-and"></a>
+<h2>MD5 (<tt>md5.cpp</tt> and <tt>md5.h</tt>)</h2>
+<p><i>This code implements the MD5 message-digest algorithm. The algorithm is due to Ron Rivest. This code was written by Colin Plumb in 1993, no copyright is claimed. This code is in the public domain; do with it what you wish.</i> -- quoted from <tt>src/3rdparty/md5/md5.h</tt></p>
+<p>See <tt>src/3rdparty/md5/md5.cpp</tt> and <tt>src/3rdparty/md5/md5.h</tt> for more information about the terms and conditions under which the code is supplied.</p>
 <a name="the-independent-jpeg-group-s-jpeg-software"></a>
 <h2>The Independent JPEG Group's JPEG Software (<tt>libjpeg</tt>)</h2>
 <p><i>This package contains C software to implement JPEG image compression and decompression. JPEG (pronounced &quot;jay-peg&quot;) is a standardized compression method for full-color and gray-scale images. JPEG is intended for compressing &quot;real-world&quot; scenes; line drawings, cartoons and other non-realistic images are not its strong suit. JPEG is lossy, meaning that the output image is not exactly identical to the input image.</i> -- quoted from <tt>src/3rdparty/libjpeg/README</tt>.</p>
@@ -67,6 +78,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

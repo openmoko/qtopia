@@ -29,7 +29,6 @@
 #include <qtopiaglobal.h>
 #include <qbluetoothnamespace.h>
 
-
 class QBluetoothAddress;
 struct sockaddr;
 
@@ -44,6 +43,7 @@ public:
         UnconnectedState,
         ConnectingState,
         ConnectedState,
+        BoundState,
         ClosingState,
     };
 
@@ -55,12 +55,11 @@ public:
         ConnectionRefused,
         HostDownError,
         NetworkError,
-        TimedoutError,
+        TimeoutError,
         RemoteHostClosedError,
         UnknownError
     };
 
-    explicit QBluetoothAbstractSocket(QObject *parent = 0);
     ~QBluetoothAbstractSocket();
 
     void abort();
@@ -71,7 +70,7 @@ public:
                              QBluetoothAbstractSocket::SocketState state,
                              QIODevice::OpenMode openMode = QIODevice::ReadWrite);
 
-    SocketError lastError() const;
+    SocketError error() const;
     SocketState state() const;
 
     qint64 readBufferSize() const;
@@ -94,22 +93,30 @@ public:
 signals:
     void connected();
     void stateChanged(QBluetoothAbstractSocket::SocketState socketState);
-    void error(QBluetoothAbstractSocket::SocketError error);
+    void error(QBluetoothAbstractSocket::SocketError socketError);
     void disconnected();
 
 protected:
+    explicit QBluetoothAbstractSocket(QBluetoothAbstractSocketPrivate *data, QObject *parent = 0);
+
     virtual qint64 readLineData(char *data, qint64 maxsize);
     virtual qint64 readData(char *data, qint64 maxsize);
     virtual qint64 writeData(const char *data, qint64 size);
 
     bool initiateConnect(int socket, sockaddr *, int size);
-    virtual bool readSocketParameters(int sockfd);
+    virtual bool readSocketParameters(int sockfd) = 0;
     virtual void resetSocketParameters();
-    void setError(const QBluetoothAbstractSocket::SocketError &error);
+    void setError(QBluetoothAbstractSocket::SocketError error);
+
+    void setReadMtu(int mtu);
+    int readMtu() const;
+    void setWriteMtu(int mtu);
+    int writeMtu() const;
+
+    QBluetoothAbstractSocketPrivate *m_data;
 
 private:
     Q_DISABLE_COPY(QBluetoothAbstractSocket)
-    QBluetoothAbstractSocketPrivate *m_data;
 };
 
 #endif

@@ -2,10 +2,10 @@
 
 update_resolv_conf()
 {
-	[ -n "$domain" ] && echo search $domain > /etc/resolv.conf.udhcpc
+	[ -n "$domain" ] && echo search $domain > /etc/resolvconf/$interface
 
 	for i in $dns; do
-		echo nameserver $i >> /etc/resolv.conf.udhcpc
+		echo nameserver $i >> /etc/resolvconf/$interface
 	done
 }
 

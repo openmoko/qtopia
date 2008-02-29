@@ -40,6 +40,8 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent *);
     virtual void keyPressEvent(QKeyEvent *);
+    virtual void keyReleaseEvent(QKeyEvent *);
+    virtual void closeEvent(QCloseEvent *);
     virtual void mousePressEvent(QMouseEvent *);
     virtual void showEvent(QShowEvent *);
 

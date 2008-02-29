@@ -35,8 +35,10 @@
 
 /*!
     Constructs a QBluetoothPasskeyRequest.  The \a localDevice parameter
-    specifies the local bluetooth adapter the request came in on.  The \a
-    remoteDevice parameter specifies the remote device being paired to.
+    specifies the local bluetooth adapter the request came in on.  This
+    string should be in the form hciX, such that it can be passed
+    to QBluetoothLocalDevice constructor. The \a remoteDevice parameter
+    specifies the remote device being paired to.
 
     By default, the request is set to be rejected.
 */
@@ -103,8 +105,8 @@ bool QBluetoothPasskeyRequest::operator!=(const QBluetoothPasskeyRequest &other)
 }
 
 /*!
-    Returns the name of the local device adapter.  This can be passed in to the
-    QBluetoothLocalDevice constructor.
+    Returns the name of the local device adapter.  The string returned is of the
+    form hciX.  This can be passed in to the QBluetoothLocalDevice constructor.
 
     \sa QBluetoothLocalDevice
 */

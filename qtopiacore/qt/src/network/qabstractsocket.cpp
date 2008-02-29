@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtNetwork module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -13,7 +23,8 @@
 
 //#define QABSTRACTSOCKET_DEBUG
 
-/*! \class QAbstractSocket
+/*! 
+    \class QAbstractSocket
 
     \brief The QAbstractSocket class provides the base functionality
     common to all socket types.
@@ -109,6 +120,15 @@
     \o waitForDisconnected() blocks until the connection has closed.
     \endlist
 
+    We show an example:
+
+    \quotefromfile snippets/network/tcpwait.cpp
+    \skipto numRead
+    \printuntil /^\s\s\s\s\}/
+
+    If \l{QIODevice::}{waitForReadyRead()} returns false, the
+    connection has been closed or an error has occurred.
+
     Programming with a blocking socket is radically different from
     programming with a non-blocking socket. A blocking socket doesn't
     require an event loop and typically leads to simpler code.
@@ -181,7 +201,8 @@
     \sa QHostAddress::protocol()
 */
 
-/*! \enum QAbstractSocket::SocketType
+/*! 
+    \enum QAbstractSocket::SocketType
 
     This enum describes the transport layer protocol.
 
@@ -192,7 +213,8 @@
     \sa QAbstractSocket::socketType()
 */
 
-/*! \enum QAbstractSocket::SocketError
+/*! 
+    \enum QAbstractSocket::SocketError
 
     This enum describes the socket errors that can occur.
 
@@ -290,7 +312,7 @@ static QByteArray qt_prettyDebug(const char *data, int len, int maxLength)
     QByteArray out;
     for (int i = 0; i < len; ++i) {
         char c = data[i];
-        if (isprint(c)) {
+        if (isprint(int(uchar(c)))) {
             out += c;
         } else switch (c) {
         case '\n': out += "\\n"; break;
@@ -804,9 +826,23 @@ void QAbstractSocketPrivate::_q_testConnection()
             connectTimer->stop();
     }
 
-    if (socketEngine && (socketEngine->state() == QAbstractSocket::ConnectedState || socketEngine->connectToHost(host, port))) {
-        fetchConnectionParameters();
-        return;
+    if (socketEngine) {
+        if (socketEngine->state() != QAbstractSocket::ConnectedState) {
+            // Try connecting if we're not already connected.
+            if (!socketEngine->connectToHost(host, port)) {
+                if (socketEngine->error() == QAbstractSocket::SocketError(11)) {
+                    // Connection in progress; wait for the next notification.
+                    return;
+                }
+            }
+        }
+
+        if (socketEngine->state() == QAbstractSocket::ConnectedState) {
+            // Fetch the parameters if our connection is completed;
+            // otherwise, fall out and try the next address.
+            fetchConnectionParameters();
+            return;
+        }
     }
 
 #if defined(QABSTRACTSOCKET_DEBUG)
@@ -1659,6 +1695,8 @@ qint64 QAbstractSocket::readData(char *data, qint64 maxSize)
             d->socketError = d->socketEngine->error();
             setErrorString(d->socketEngine->errorString());
         }
+        if (!d->socketEngine->isReadNotificationEnabled())
+            d->socketEngine->setReadNotificationEnabled(true);
 #if defined (QABSTRACTSOCKET_DEBUG)
         qDebug("QAbstractSocket::readData(%p \"%s\", %lli) == %lld",
                data, qt_prettyDebug(data, 32, readBytes).data(), maxSize,
@@ -2114,7 +2152,8 @@ QNetworkProxy QAbstractSocket::proxy() const
     \value ErrSocketRead Use QAbstractSocket::UnknownSocketError instead.
 */
 
-/*! \typedef QAbstractSocket::State
+/*! 
+    \typedef QAbstractSocket::State
     \compat
 
     Use QAbstractSocket::SocketState instead.

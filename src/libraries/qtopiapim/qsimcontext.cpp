@@ -141,8 +141,6 @@ private:
 QContactSimContext::QContactSimContext(QObject *parent, QObject *access)
     : QContactContext(parent)
 {
-    QtopiaSql::ensureSchema("simcardidmap", QtopiaSql::systemDatabase(), true);
-
     mPhoneBook = new QPhoneBook( QString(), this );
     mSimInfo = new QSimInfo( QString(), this );
 
@@ -319,7 +317,7 @@ QUniqueId QContactSimContext::addContact(const QContact &contact, const QPimSour
 
     QContact c;
     c.setFirstName(contact.firstName());
-    c.setHomePhone(contact.firstName());
+    c.setHomePhone(contact.homePhone());
 
     int i = nextFreeIndex();
     QUniqueId u = mSync->id(source.identity, i);
@@ -343,13 +341,13 @@ bool QContactSimContext::waitingOnSim() const
 
 QString QContactSimContext::card(const QUniqueId &u) const
 {
-    QSqlQuery q;
+    QSqlQuery q(QPimSqlIO::database());
     if (!q.prepare("SELECT cardid FROM simcardidmap WHERE sqlid = :s")) {
         qWarning("Failed to prepare card id lookup: %s",
                 q.lastError().text().toLocal8Bit().constData());
         return QString();
     }
-    q.bindValue(":s", u.toByteArray());
+    q.bindValue(":s", u.toUInt());
     if (!q.exec()) {
         qWarning("Failed card id lookup: %s",
                 q.lastError().text().toLocal8Bit().constData());
@@ -362,14 +360,13 @@ QString QContactSimContext::card(const QUniqueId &u) const
 
 int QContactSimContext::cardIndex(const QUniqueId &u) const
 {
-    QLocalUniqueId lu(u);
-    QSqlQuery q;
+    QSqlQuery q(QPimSqlIO::database());
     if (!q.prepare("SELECT cardindex FROM simcardidmap WHERE sqlid = :s")) {
         qWarning("Failed to prepare card index lookup: %s",
                 q.lastError().text().toLocal8Bit().constData());
         return -1;
     }
-    q.bindValue(":s", lu.toByteArray());
+    q.bindValue(":s", u.toUInt());
     QtopiaSql::logQuery(q);
     if (!q.exec()) {
         qWarning("Failed card index lookup: %s",
@@ -394,7 +391,7 @@ QUniqueId QContactSimSyncer::id(const QString &card, int index) const
     }
 
     if (selectIdQuery.next()) {
-        QUniqueId result(selectIdQuery.value(0).toByteArray());
+        QUniqueId result = QUniqueId::fromUInt(selectIdQuery.value(0).toUInt());
         selectIdQuery.reset();
         return result;
     }
@@ -405,9 +402,9 @@ QUniqueId QContactSimSyncer::id(const QString &card, int index) const
 
     static QUuid appScope("b63abe6f-36bd-4bb8-9c27-ece5436a5130");
     QUniqueIdGenerator g(appScope); // later, same scop method as xml
-    QLocalUniqueId u = g.createUniqueId();
+    QUniqueId u = g.createUniqueId();
 
-    insertIdQuery.bindValue(":s", u.toByteArray());
+    insertIdQuery.bindValue(":s", u.toUInt());
     insertIdQuery.bindValue(":c", card);
     insertIdQuery.bindValue(":i", index);
 
@@ -419,7 +416,7 @@ QUniqueId QContactSimSyncer::id(const QString &card, int index) const
 
 int QContactSimContext::nextFreeIndex() const
 {
-    QSqlQuery q;
+    QSqlQuery q(QPimSqlIO::database());
     if (!q.prepare("SELECT cardindex FROM simcardidmap WHERE cardid = :c ORDER BY cardindex"))
     {
         qWarning("Failed to prepare used index lookup: %s",
@@ -585,21 +582,21 @@ void QContactSimSyncer::updateSqlEntries()
     if (lastSync.isValid() && lastSync >= syncTime)
         return;
 
-    if (QSqlDatabase::database().transaction()) {
+    if (QPimSqlIO::database().transaction()) {
         if (!QPimSqlIO::setLastSyncTime(mSource, syncTime)) {
-            QSqlDatabase::database().rollback();
+            QPimSqlIO::database().rollback();
             return;
         }
         QList<QUniqueId> existing;
         QList<QContact> updated;
         QList<QContact> added;
 
-        QSqlQuery q;
+        QSqlQuery q(QPimSqlIO::database());
         q.prepare("SELECT recid FROM contacts WHERE context = :c");
         q.bindValue(":c", context);
         q.exec();
         while(q.next())
-            existing.append(QUniqueId(q.value(0).toByteArray()));
+            existing.append(QUniqueId::fromUInt(q.value(0).toUInt()));
         q.clear();
 
         foreach(QPhoneBookEntry entry, phoneData) {
@@ -624,26 +621,26 @@ void QContactSimSyncer::updateSqlEntries()
 
         foreach(QContact c, updated) {
             if (!updateSimContact(c)) {
-                QSqlDatabase::database().rollback();
+                QPimSqlIO::database().rollback();
                 return;
             }
         }
         foreach(QContact c, added) {
             if (!addSimContact(c, context)) {
-                QSqlDatabase::database().rollback();
+                QPimSqlIO::database().rollback();
                 return;
             }
         }
         // covers cards not from this sim, will have different id's.
         foreach(QUniqueId u, existing) {
             if (!removeSimContact(u)) {
-                QSqlDatabase::database().rollback();
+                QPimSqlIO::database().rollback();
                 return;
             }
         }
 
-        if (!QSqlDatabase::database().commit()) {
-            QSqlDatabase::database().rollback();
+        if (!QPimSqlIO::database().commit()) {
+            QPimSqlIO::database().rollback();
             return;
         }
 
@@ -664,9 +661,7 @@ QContact QContactSimSyncer::simContact(const QUniqueId &u) const
     if (!selectNameQuery.isValid() || !selectNumberQuery.isValid())
         return t;
 
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)u;
-    QByteArray uid = lid.toByteArray();
-    selectNameQuery.bindValue(":i", uid);
+    selectNameQuery.bindValue(":i", u.toUInt());
 
     if (!selectNameQuery.exec()) {
         qWarning("failed to select sim contact: %s", (const char *)selectNameQuery.lastError().text().toLocal8Bit());
@@ -675,7 +670,7 @@ QContact QContactSimSyncer::simContact(const QUniqueId &u) const
 
     if ( selectNameQuery.next() ) {
         qLog(Sql) << "Read homephone number";
-        selectNumberQuery.bindValue(":id", uid);
+        selectNumberQuery.bindValue(":id", u.toUInt());
         if (!selectNumberQuery.exec()) {
             qWarning("select phone numbers failed: %s", (const char *)selectNumberQuery.lastError().text().toLocal8Bit());
         }
@@ -699,14 +694,14 @@ QContact QContactSimSyncer::simContact(const QUniqueId &u) const
 
 bool QContactSimSyncer::addSimContact(const QContact &c, int context)
 {
-    const QLocalUniqueId lid(c.uid());
+    const QUniqueId id(c.uid());
 
     addNameQuery.prepare();
     addNumberQuery.prepare();
     if (!addNameQuery.isValid() || !addNumberQuery.isValid())
         return false;
 
-    addNameQuery.bindValue(":i", lid.toByteArray());
+    addNameQuery.bindValue(":i", id.toUInt());
     addNameQuery.bindValue(":fn", c.firstName());
     addNameQuery.bindValue(":c", context);
     QtopiaSql::logQuery(*addNameQuery);
@@ -717,7 +712,7 @@ bool QContactSimSyncer::addSimContact(const QContact &c, int context)
     }
     addNameQuery.reset();
 
-    addNumberQuery.bindValue(":i", lid.toByteArray());
+    addNumberQuery.bindValue(":i", id.toUInt());
     addNumberQuery.bindValue(":pn", c.homePhone());
     if (!addNumberQuery.exec())
         return false;
@@ -728,20 +723,20 @@ bool QContactSimSyncer::addSimContact(const QContact &c, int context)
 
 bool QContactSimSyncer::updateSimContact(const QContact &c)
 {
-    const QLocalUniqueId lid(c.uid());
+    const QUniqueId id(c.uid());
 
     updateNameQuery.prepare();
     updateNumberQuery.prepare();
     if (!updateNameQuery.isValid() || !updateNumberQuery.isValid())
         return false;
 
-    updateNameQuery.bindValue(":i", lid.toByteArray());
+    updateNameQuery.bindValue(":i", id.toUInt());
     updateNameQuery.bindValue(":fn", c.firstName());
     if (!updateNameQuery.exec())
         return false;
     updateNameQuery.reset();
 
-    updateNumberQuery.bindValue(":i", lid.toByteArray());
+    updateNumberQuery.bindValue(":i", id.toUInt());
     updateNumberQuery.bindValue(":pn", c.homePhone());
     if (!updateNumberQuery.exec())
         return false;
@@ -752,19 +747,17 @@ bool QContactSimSyncer::updateSimContact(const QContact &c)
 
 bool QContactSimSyncer::removeSimContact(const QUniqueId &id)
 {
-    const QLocalUniqueId lid(id);
-
     removeNameQuery.prepare();
     removeNumberQuery.prepare();
     if (!removeNameQuery.isValid() || !removeNumberQuery.isValid())
         return false;
 
-    removeNameQuery.bindValue(":i", lid.toByteArray());
+    removeNameQuery.bindValue(":i", id.toUInt());
     if (!removeNameQuery.exec())
         return false;
     removeNameQuery.reset();
 
-    removeNumberQuery.bindValue(":i", lid.toByteArray());
+    removeNumberQuery.bindValue(":i", id.toUInt());
     if (!removeNumberQuery.exec())
         return false;
     removeNumberQuery.reset();
@@ -775,7 +768,7 @@ bool QContactSimSyncer::removeSimContact(const QUniqueId &id)
 QUniqueId QContactSimContext::findLabel(const QString &test) const
 {
     int context = QPimSqlIO::sourceContext(defaultSource());
-    QSqlQuery q;
+    QSqlQuery q(QPimSqlIO::database());
     bool prepared = q.prepare("SELECT recid FROM contacts WHERE context = :c AND firstname = :fn");
     Q_ASSERT(prepared);
     prepared = prepared;
@@ -783,7 +776,7 @@ QUniqueId QContactSimContext::findLabel(const QString &test) const
     q.bindValue(":fn", test);
     Q_ASSERT(q.exec());
     if (q.next())
-        return QUniqueId(q.value(0).toByteArray());
+        return QUniqueId::fromUInt(q.value(0).toUInt());
     return QUniqueId();
 }
 

@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -345,10 +355,23 @@ void QGraphicsScenePrivate::_q_emitUpdated()
     Q_Q(QGraphicsScene);
     calledEmitUpdated = false;
     QList<QRectF> oldUpdatedRects;
-    oldUpdatedRects = updateAll ? (QList<QRectF>() << growingItemsBoundingRect) : updatedRects;
+    oldUpdatedRects = updateAll ? (QList<QRectF>() << (sceneRect | growingItemsBoundingRect)) : updatedRects;
     updateAll = false;
     updatedRects.clear();
     emit q->changed(oldUpdatedRects);
+}
+
+/*!
+    \internal
+
+    Updates all items in the pending update list. At this point, the list is
+    unlikely to contain partially constructed items.
+*/
+void QGraphicsScenePrivate::_q_updateLater()
+{
+    foreach (QGraphicsItem *item, pendingUpdateItems)
+        item->update();
+    pendingUpdateItems.clear();
 }
 
 /*!
@@ -400,6 +423,7 @@ void QGraphicsScenePrivate::_q_removeItemLater(QGraphicsItem *item)
     // Update selected & hovered item bookkeeping
     selectedItems.remove(item);
     hoverItems.removeAll(item);
+    pendingUpdateItems.removeAll(item);
 
     // Remove all children recursively.
     foreach (QGraphicsItem *child, item->children())
@@ -747,6 +771,7 @@ void QGraphicsScenePrivate::sortItems(QList<QGraphicsItem *> *itemList)
 QGraphicsScene::QGraphicsScene(QObject *parent)
     : QObject(*new QGraphicsScenePrivate, parent)
 {
+    update();
 }
 
 /*!
@@ -760,6 +785,7 @@ QGraphicsScene::QGraphicsScene(const QRectF &sceneRect, QObject *parent)
     : QObject(*new QGraphicsScenePrivate, parent)
 {
     setSceneRect(sceneRect);
+    update();
 }
 
 /*!
@@ -774,6 +800,7 @@ QGraphicsScene::QGraphicsScene(qreal x, qreal y, qreal width, qreal height, QObj
     : QObject(*new QGraphicsScenePrivate, parent)
 {
     setSceneRect(x, y, width, height);
+    update();
 }
 
 /*!
@@ -800,6 +827,10 @@ QGraphicsScene::~QGraphicsScene()
             }
         }
     }
+
+    // Remove this scene from all associated views.
+    for (int j = 0; j < d->views.size(); ++j)
+        d->views.at(j)->setScene(0);
 }
 
 /*!
@@ -810,9 +841,10 @@ QGraphicsScene::~QGraphicsScene()
     primarily used by QGraphicsView to determine the view's default
     scrollable area, and by QGraphicsScene to manage item indexing.
 
-    If unset, sceneRect() will return the largest bounding rect of all items
-    on the scene since the scene was created (i.e., a rectangle that grows
-    when items are added to or moved in the scene, but never shrinks).
+    If unset, or if set to a null QRectF, sceneRect() will return the largest
+    bounding rect of all items on the scene since the scene was created (i.e.,
+    a rectangle that grows when items are added to or moved in the scene, but
+    never shrinks).
 
     \sa width(), height(), QGraphicsView::sceneRect
 */
@@ -1059,15 +1091,15 @@ QList<QGraphicsItem *> QGraphicsScene::items(const QPointF &pos) const
 }
 
 /*!
-    \fn QList<QGraphicsItem *> QGraphicsScene::items(const QRectF &rectangle) const
+    \fn QList<QGraphicsItem *> QGraphicsScene::items(const QRectF &rectangle, Qt::ItemSelectionMode mode) const
 
     \overload
 
     Returns all visible items that, depending on \a mode, are either inside or
-    intersect with the rectangle \a rect.
+    intersect with the specified \a rectangle.
 
     The default value for \a mode is Qt::IntersectsItemShape; all items whose
-    exact shape intersects with or is contained by \a rect are returned.
+    exact shape intersects with or is contained by \a rectangle are returned.
 
     \sa itemAt()
 */
@@ -1232,12 +1264,12 @@ QList<QGraphicsItem *> QGraphicsScene::selectedItems() const
 }
 
 /*!
-    Sets the selection area to \a path. All items within this area will be
-    marked as selected. You can get the list of all selected items by
-    calling selectedItems().
+    Sets the selection area to \a path. All items within this area
+    will be marked as selected. You can get the list of all selected
+    items by calling selectedItems().
 
     For an item to be selected, it must be marked as \e selectable
-    (QGraphicsItem::ItemIsSelectable). Items are selectable by default.
+    (QGraphicsItem::ItemIsSelectable).
 
     \sa clearSelection()
 */
@@ -1278,7 +1310,8 @@ void QGraphicsScene::clearSelection()
     pointer to the group. The group is created with the common ancestor of \a
     items as its parent, and with position (0, 0). The items are all
     reparented to the group, and their positions and transformations are
-    mapped to the group.
+    mapped to the group. If \a items is empty, this function will return an
+    empty top-level QGraphicsItemGroup.
 
     QGraphicsScene has ownership of the group item; you do not need to delete
     it. To dismantle (ungroup) a group, call destroyItemGroup().
@@ -1290,9 +1323,11 @@ QGraphicsItemGroup *QGraphicsScene::createItemGroup(const QList<QGraphicsItem *>
     // Build a list of the first item's ancestors
     QList<QGraphicsItem *> ancestors;
     int n = 0;
-    QGraphicsItem *parent = items.at(n++);
-    while ((parent = parent->parentItem()))
-        ancestors.append(parent);
+    if (!items.isEmpty()) {
+        QGraphicsItem *parent = items.at(n++);
+        while ((parent = parent->parentItem()))
+            ancestors.append(parent);
+    }
 
     // Find the common ancestor for all items
     QGraphicsItem *commonAncestor = 0;
@@ -1410,6 +1445,15 @@ void QGraphicsScene::addItem(QGraphicsItem *item)
             item->d_func()->index = d->allItems.size();
             d->allItems << item;
         }
+    }
+
+    // Add to list of items that require an update. We cannot assume that the
+    // item is fully constructed, so calling item->update() can lead to a pure
+    // virtual function call to boundingRect().
+    if (!d->updateAll) {
+        if (d->pendingUpdateItems.isEmpty())
+            QTimer::singleShot(0, this, SLOT(_q_updateLater()));
+        d->pendingUpdateItems << item;
     }
 
     // Update selection lists
@@ -1641,6 +1685,7 @@ void QGraphicsScene::removeItem(QGraphicsItem *item)
     // Update selected & hovered item bookkeeping
     d->selectedItems.remove(item);
     d->hoverItems.removeAll(item);
+    d->pendingUpdateItems.removeAll(item);
 
     // Remove all children recursively
     foreach (QGraphicsItem *child, item->children())
@@ -1823,8 +1868,10 @@ void QGraphicsScene::setBackgroundBrush(const QBrush &brush)
 {
     Q_D(QGraphicsScene);
     d->backgroundBrush = brush;
-    foreach (QGraphicsView *view, d->views)
+    foreach (QGraphicsView *view, d->views) {
         view->resetCachedContent();
+        view->viewport()->update();
+    }
     update();
 }
 
@@ -1867,6 +1914,8 @@ void QGraphicsScene::setForegroundBrush(const QBrush &brush)
 {
     Q_D(QGraphicsScene);
     d->foregroundBrush = brush;
+    foreach (QGraphicsView *view, views())
+        view->viewport()->update();
     update();
 }
 
@@ -2230,11 +2279,17 @@ void QGraphicsScene::focusOutEvent(QFocusEvent *focusEvent)
 }
 
 /*!
-   This event handler, for event \a helpEvent, can be reimplemented in a
-   subclass to receive help events. The default implementation uses the event
-   to show tooltips for items.
+    This event handler, for event \a helpEvent, can be
+    reimplemented in a subclass to receive help events. The events
+    are of type QEvent::ToolTip, which are created when a tooltip is
+    requested.
+    
+    The default implementation shows the tooltip of the topmost
+    item, i.e., the item with the highest z-value, at the mouse
+    cursor position. If no item has a tooltip set, this function
+    does nothing.
 
-   \sa QGraphicsItem::toolTip()
+   \sa QGraphicsItem::toolTip(), QGraphicsSceneHelpEvent
 */
 void QGraphicsScene::helpEvent(QGraphicsSceneHelpEvent *helpEvent)
 {

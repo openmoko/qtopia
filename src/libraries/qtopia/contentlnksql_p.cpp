@@ -206,9 +206,9 @@ QContentId ContentLinkSql::updateLinkUnchecked(ContentLinkPrivate *cl, const QCo
     if(cl->fileKnown())
     {
         qry += QString( ", path = %1" )
-                .arg( addParameter( cl->file().section( '/', -1 ), &parameters ) );
+                .arg( addParameter( cl->file().section( QLatin1Char('/'), -1 ), &parameters ) );
         qry += QString( ", location = %2" )
-                .arg( addParameter( locationCode( cl->file().section( '/', 0, -2 ) ), &parameters ) );
+                .arg( addParameter( locationCode( cl->file().section( QLatin1Char('/'), 0, -2 ) ), &parameters ) );
     }
 
     if ( !cl->iconName().isEmpty() )
@@ -224,14 +224,14 @@ QContentId ContentLinkSql::updateLinkUnchecked(ContentLinkPrivate *cl, const QCo
 
     if ( !cl->mimeTypes().isEmpty() && !cl->mimeTypes().first().isEmpty() )
         qry += QString( ", mimeTypes = %1" )
-                .arg( addParameter( cl->mimeTypes().join( ";" ), &parameters ) );
+                .arg( addParameter( cl->mimeTypes().join( QLatin1String(";") ), &parameters ) );
 
     QFileInfo fi( path );
 
     qry += QString( ", lastUpdated = %1" )
             .arg( addParameter( fi.lastModified().toTime_t(), &parameters ) );
 
-    if ( qry[0] == ',' )
+    if ( qry[0] == QLatin1Char(',') )
         qry = qry.mid( 2 );
     qry += QLatin1String(" WHERE ");
 
@@ -245,7 +245,8 @@ QContentId ContentLinkSql::updateLinkUnchecked(ContentLinkPrivate *cl, const QCo
 
     qry = QLatin1String("UPDATE content SET ") + qry;
 
-    QSqlQuery query( qry, QtopiaSql::database(cidList.first().first) );
+    QSqlQuery query( QtopiaSql::database(cidList.first().first) );
+    query.prepare( qry );
 
     bindParameters( &query, parameters );
 
@@ -254,9 +255,9 @@ QContentId ContentLinkSql::updateLinkUnchecked(ContentLinkPrivate *cl, const QCo
     if ( !query.exec() )
     {
         qLog(DocAPI) << "ContentLinkSql::updateLinkUnchecked: Query failed!! qry =" << qry << endl
-                << "error =" << QtopiaSql::database(cidList.first().first).lastError();
+                << "error =" << query.lastError();
         isError = true;
-        errText += QtopiaSql::database(cidList.first().first).lastError().text();
+        errText += query.lastError().text();
         ContentLinkPrivate::errors[QContent::InvalidId] = errText;
         return QContent::InvalidId;
     }
@@ -281,10 +282,11 @@ QContentIdList ContentLinkSql::getContentIds( const QString &path, bool isLink )
 
     qLog(DocAPI) << "Checking if file exists in the content database:" << path;
 
-    QSqlQuery qUL_qry( isLink ? linkQuery : realQuery, db );
+    QSqlQuery qUL_qry( db );
+    qUL_qry.prepare( isLink ? linkQuery : realQuery );
 
-    qUL_qry.bindValue( QLatin1String("path"), path.section( '/', -1 ) );
-    qUL_qry.bindValue( QLatin1String("location"), path.section( '/', 0, -2 ) );
+    qUL_qry.bindValue( QLatin1String("path"), path.section( QLatin1Char('/'), -1 ) );
+    qUL_qry.bindValue( QLatin1String("location"), path.section( QLatin1Char('/'), 0, -2 ) );
 
     QtopiaSql::logQuery( qUL_qry );
 
@@ -360,33 +362,31 @@ QContentId ContentLinkSql::postLink( ContentLinkPrivate *cl, QContent::ChangeTyp
 
     QString types;
     if (cl->mimeTypes().count()) {
-        types = cl->mimeTypes()[0];
-        for (int i = 1; i < cl->mimeTypes().count(); i++)
-            types += ";" + cl->mimeTypes()[i];
+        types = cl->mimeTypes().join( QLatin1String(";") );
     }
-    QSqlQuery aPL_qry( QLatin1String("INSERT INTO content ") +
+    QSqlQuery aPL_qry( db );  // NO TR
+    aPL_qry.prepare( QLatin1String("INSERT INTO content ") +
             QLatin1String("(uiName, mType, drmFlags, docStatus, path, location, icon, linkFile, linkLocation, mimeTypes, lastUpdated) "
-            "VALUES (:uiName, :mType, :drmFlags, :docStatus, :path, :location, :icon, :linkFile, :linkLocation, :mimeTypes, :lastUpdated)"),
-            db );  // NO TR
+            "VALUES (:uiName, :mType, :drmFlags, :docStatus, :path, :location, :icon, :linkFile, :linkLocation, :mimeTypes, :lastUpdated)"));
     aPL_qry.bindValue( QLatin1String("uiName"), cl->cName );
     aPL_qry.bindValue( QLatin1String("mType"), mimeCode(QtopiaSql::databaseIdForPath( path ), cl->type()) );
     aPL_qry.bindValue( QLatin1String("drmFlags"), QVariant( drmCode( cl->drm ) ) );
     aPL_qry.bindValue( QLatin1String("docStatus"), getCodeFromDocState( cl ));
     if(cl->fileKnown())
     {
-        aPL_qry.bindValue( QLatin1String("path"), cl->file().section( '/', -1 ) );
-        aPL_qry.bindValue( QLatin1String("location"), locationCode( cl->file().section( '/', 0, -2 ) ) );
+        aPL_qry.bindValue( QLatin1String("path"), cl->file().section( QLatin1Char('/'), -1 ) );
+        aPL_qry.bindValue( QLatin1String("location"), locationCode( cl->file().section( QLatin1Char('/'), 0, -2 ) ) );
     }
     else
     {
         aPL_qry.bindValue( QLatin1String("path"), "" );
         aPL_qry.bindValue( QLatin1String("location"), 0 );
     }
-    aPL_qry.bindValue( "icon", cl->iconName() );
+    aPL_qry.bindValue( QLatin1String("icon"), cl->iconName() );
     if(!cl->linkFile().isEmpty())
     {
-        aPL_qry.bindValue( QLatin1String("linkFile"), cl->linkFile().section( '/', -1 ) );
-        aPL_qry.bindValue( QLatin1String("linkLocation"), locationCode( cl->linkFile().section( '/', 0, -2 ) ) );
+        aPL_qry.bindValue( QLatin1String("linkFile"), cl->linkFile().section( QLatin1Char('/'), -1 ) );
+        aPL_qry.bindValue( QLatin1String("linkLocation"), locationCode( cl->linkFile().section( QLatin1Char('/'), 0, -2 ) ) );
     }
     else
     {
@@ -445,9 +445,12 @@ bool ContentLinkSql::removeLink( QContentId cid )
     if (cid==QContent::InvalidId)
         return false;
     QSqlDatabase db=QtopiaSql::database(cid.first);
-    QSqlQuery dfContent( QLatin1String("DELETE FROM content WHERE cid=:cid"), db );
-    QSqlQuery dfCategoryMap( QLatin1String("DELETE FROM mapCategoryToContent WHERE cid=:cid"), db );
-    QSqlQuery dfContentProps( QLatin1String("DELETE FROM contentProps WHERE cid=:cid"), db );
+    QSqlQuery dfContent( db );
+    dfContent.prepare( QLatin1String("DELETE FROM content WHERE cid=:cid") );
+    QSqlQuery dfCategoryMap( db );
+    dfCategoryMap.prepare( QLatin1String("DELETE FROM mapCategoryToContent WHERE cid=:cid") );
+    QSqlQuery dfContentProps( db );
+    dfContentProps.prepare( QLatin1String("DELETE FROM contentProps WHERE cid=:cid") );
     dfContent.bindValue( QLatin1String("cid"), cid.second );
     dfCategoryMap.bindValue( QLatin1String("cid"), cid.second );
     dfContentProps.bindValue( QLatin1String("cid"), cid.second );
@@ -456,12 +459,19 @@ bool ContentLinkSql::removeLink( QContentId cid )
     QtopiaSql::logQuery( dfContentProps );
     if ( !dfContent.exec() || !dfCategoryMap.exec() || !dfContentProps.exec() )
     {
+        QSqlError error;
+        if(dfContent.lastError().isValid())
+            error = dfContent.lastError();
+        else if(dfCategoryMap.lastError().isValid())
+            error = dfCategoryMap.lastError();
+        else if(dfContentProps.lastError().isValid())
+            error = dfContentProps.lastError();
         qLog(DocAPI) << "ContentLinkSql::removeLink: Query failed!! qry=" << dfContent.lastQuery()
                 << "\n|| qry=" << dfCategoryMap.lastQuery()
                 << "\n|| qry=" << dfContentProps.lastQuery()
-                << "\nerror =" << db.lastError();
+                << "\nerror =" << error;
         isError = true;
-        errText += db.lastError().text();
+        errText += error.text();
         ContentLinkPrivate::errors[cid] = errText;
         return false;
     }
@@ -492,9 +502,10 @@ bool ContentLinkSql::removeLink( QContentId cid )
     QStringList result;
     if(cid == QContent::InvalidId)
         return result;
-    QSqlQuery qCBI_qry( QLatin1String("SELECT mapCategoryToContent.categoryid "
+    QSqlQuery qCBI_qry( QtopiaSql::database(cid.first) );
+    qCBI_qry.prepare( QLatin1String("SELECT mapCategoryToContent.categoryid "
                 "FROM mapCategoryToContent INNER JOIN categories "
-            "ON categories.categoryid=mapCategoryToContent.categoryid WHERE mapCategoryToContent.cid=:cid"), QtopiaSql::database(cid.first) );
+            "ON categories.categoryid=mapCategoryToContent.categoryid WHERE mapCategoryToContent.cid=:cid") );
     qCBI_qry.bindValue( "cid", cid.second );
     QtopiaSql::logQuery( qCBI_qry );
     if ( !qCBI_qry.exec() )
@@ -514,10 +525,11 @@ int ContentLinkSql::recordCount( const QContentFilter &filter )
 {
     QList< Parameter > parameters;
 
-    QString queryString = QString(
+    QString queryString = QLatin1String(
             "select count(distinct cid) "
             "from %1 "
-            "where %2");
+            "group by content.cid "
+            "having %2" );
 
     queryString = buildQuery( queryString, filter, &parameters );
 
@@ -528,7 +540,8 @@ int ContentLinkSql::recordCount( const QContentFilter &filter )
 
     foreach( QtopiaDatabaseId dbId, QtopiaSql::databaseIds() )
     {
-        QSqlQuery query( queryString, QtopiaSql::database( dbId ) );
+        QSqlQuery query( QtopiaSql::database( dbId ) );
+        query.prepare( queryString );
 
         bindParameters( &query, parameters );
 
@@ -563,7 +576,8 @@ bool ContentLinkSql::removeCategoryMap(QContentId cid)
     isError = false;
     if(cid == QContent::InvalidId)
         return false;
-    QSqlQuery removeExistingQry(QLatin1String("DELETE FROM mapCategoryToContent WHERE cid=:cid"), QtopiaSql::database(cid.first)); // NO TR
+    QSqlQuery removeExistingQry( QtopiaSql::database(cid.first) ); // NO TR
+    removeExistingQry.prepare( QLatin1String("DELETE FROM mapCategoryToContent WHERE cid=:cid") );
     removeExistingQry.bindValue(QLatin1String("cid"), cid.second);
     QtopiaSql::logQuery( removeExistingQry );
     if (!removeExistingQry.exec()) {
@@ -606,7 +620,8 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
     // there must be exactly one row returned from the foreign key checks
 
     {
-        QSqlQuery aNCM_fkchk_cid_qry( QLatin1String("SELECT * FROM content WHERE cid=:cid"), db );  // NO TR
+        QSqlQuery aNCM_fkchk_cid_qry( db );  // NO TR
+        aNCM_fkchk_cid_qry.prepare( QLatin1String("SELECT * FROM content WHERE cid=:cid") );
 
         aNCM_fkchk_cid_qry.bindValue( QLatin1String("cid"), cid.second );
 
@@ -623,7 +638,7 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
         {
             isError = true;
             errText += QString( "content id (%1, %2) didnt exist" ).arg( cid.first ).arg( cid.second );
-            errText += db.lastError().text();
+            errText += aNCM_fkchk_cid_qry.lastError().text();
             qLog(DocAPI) << "couldn't update categories for" << cid;
             return false;
         }
@@ -631,7 +646,8 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
 
     {
         static const QString selectString = QLatin1String("SELECT * FROM categories WHERE categoryid=:categoryid");
-        QSqlQuery aNCM_fkchk_category_qry( selectString, db );  // NO TR
+        QSqlQuery aNCM_fkchk_category_qry( db );  // NO TR
+        aNCM_fkchk_category_qry.prepare( selectString );
 
         aNCM_fkchk_category_qry.bindValue( QLatin1String("categoryid"), cat );
 
@@ -657,7 +673,8 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
                 if( dbId == cid.first )
                     continue;
 
-                QSqlQuery query( selectString, QtopiaSql::database( dbId ) );
+                QSqlQuery query( QtopiaSql::database( dbId ) );
+                query.prepare( selectString );
 
                 query.bindValue( QLatin1String("categoryid"), cat );
 
@@ -678,7 +695,8 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
                 }
             }
 
-            QSqlQuery aNCM_cat_qry( QLatin1String("INSERT INTO categories ( categoryid, categorytext, categoryscope, categoryicon, flags ) VALUES ( :categoryid, :categorytext, :categoryscope, :categoryicon, :flags )"), db );  // NO TR
+            QSqlQuery aNCM_cat_qry( db );  // NO TR
+            aNCM_cat_qry.prepare( QLatin1String("INSERT INTO categories ( categoryid, categorytext, categoryscope, categoryicon, flags ) VALUES ( :categoryid, :categorytext, :categoryscope, :categoryicon, :flags )") );
 
             if( found )
             {
@@ -701,7 +719,7 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
             if (QtopiaSql::exec(aNCM_cat_qry, db, useTransaction).type() != QSqlError::NoError)
             {
                 isError = true;
-                errText += db.lastError().text();
+                errText += aNCM_cat_qry.lastError().text();
                 qLog(DocAPI) << "couldn't insert category" << cat << "for" << cid;
                 return false;
             } else {
@@ -717,14 +735,15 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
 
     //
     // now do the actual update
-    QSqlQuery aNCM_qry( QLatin1String("INSERT INTO mapCategoryToContent ( categoryid, cid ) VALUES ( :categoryid, :cid )"), db );  // NO TR
+    QSqlQuery aNCM_qry( db );  // NO TR
+    aNCM_qry.prepare( QLatin1String("INSERT INTO mapCategoryToContent ( categoryid, cid ) VALUES ( :categoryid, :cid )") );
 
     aNCM_qry.bindValue( QLatin1String("categoryid"), cat );
     aNCM_qry.bindValue( QLatin1String("cid"), cid.second );
     if ( QtopiaSql::exec(aNCM_qry, db, useTransaction).type() != QSqlError::NoError )
     {
         isError = true;
-        errText += db.lastError().text();
+        errText += aNCM_qry.lastError().text();
         qLog(DocAPI) << "couldn't update categories for" << cid;
         return false;
     }
@@ -747,7 +766,8 @@ QList< ContentLinkSql::MimeData > ContentLinkSql::getMimeData()
 
     foreach(QtopiaDatabaseId dbid, QtopiaSql::databaseIds())
     {
-        QSqlQuery query( queryString, QtopiaSql::database( dbid ) );
+        QSqlQuery query( QtopiaSql::database( dbid ) );
+        query.prepare( queryString );
 
         query.bindValue( QLatin1String( "iconGroup" ), QLatin1String( "none"                ) );
         query.bindValue( QLatin1String( "iconKey"   ), QLatin1String( "MimeTypeIcons"       ) );
@@ -800,7 +820,7 @@ QContentIdList ContentLinkSql::matches( const QContentIdList &idList, const QCon
     QList< Parameter > parameters;
     QStringList joins;
 
-    QString where = QLatin1String(" WHERE ") + buildWhereClause( filter, &parameters, &insertAt, &joins );
+    QString where = QLatin1String(" GROUP BY content.cid HAVING ") + buildWhereClause( filter, &parameters, &insertAt, &joins );
     QString order = buildOrderBy( sortOrder, &parameters, &insertAt, &joins );
     QString qry = QLatin1String( "SELECT DISTINCT content.cid FROM " ) + buildFrom( filter, joins );
 
@@ -820,7 +840,8 @@ QContentIdList ContentLinkSql::matches( const QContentIdList &idList, const QCon
             cidString = QLatin1String(" and content.cid in (") + cidString + QLatin1String(") ");
         }
 
-        QSqlQuery qGM_qry(qry + where + cidString + order, QtopiaSql::database(dbid) );
+        QSqlQuery qGM_qry( QtopiaSql::database(dbid) );
+        qGM_qry.prepare( qry + where + cidString + order );
 
         bindParameters( &qGM_qry, parameters );
 
@@ -958,9 +979,9 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
     {
         location = QDir::cleanPath( location );
 
-        if( location.contains( '*' ) )
+        if( location.contains( QLatin1Char('*') ) )
         {
-            location.replace( '*', '%' );
+            location.replace( QLatin1Char('*'), QLatin1Char('%') );
 
             expression += c + QString( "real.location LIKE %1 OR link.location LIKE %1" )
                     .arg( addParameter( location, parameters ) );
@@ -969,7 +990,7 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
         }
         else
         {
-            if( location.endsWith( '/' ) )
+            if( location.endsWith( QLatin1Char('/') ) )
                 location.chop( 1 );
 
             QString likeParam = addParameter( location + QLatin1String( "/%" ), parameters );
@@ -989,9 +1010,9 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
     {
         directory = QDir::cleanPath( directory );
 
-        if( directory.contains( '*' ) )
+        if( directory.contains( QLatin1Char('*') ) )
         {
-            directory.replace( '*', '%' );
+            directory.replace( QLatin1Char('*'), QLatin1Char('%') );
 
             expression += c + QString( "real.location LIKE %1 OR link.location LIKE %1" )
                     .arg( addParameter( directory, parameters ) );
@@ -1000,7 +1021,7 @@ QString ContentLinkSql::buildPaths( const QStringList &locations, const QStringL
         }
         else
         {
-            if( directory.endsWith( '/' ) )
+            if( directory.endsWith( QLatin1Char('/') ) )
                 directory.chop( 1 );
 
             expression += c + QString( "real.location = %1 OR link.location = %1" )
@@ -1023,9 +1044,9 @@ QString ContentLinkSql::buildMimeTypes( const QStringList &mimes, const QString 
 
     foreach( QString mime, mimes )
     {
-        if( mime.contains( '*' ) )
+        if( mime.contains( QLatin1Char('*') ) )
         {
-            mime.replace( '*', '%' );
+            mime.replace( QLatin1Char('*'), QLatin1Char('%') );
 
             expression += c + QString( "mimeTypeLookup.mimeType LIKE %1" )
                     .arg( addParameter( mime, parameters ) );
@@ -1053,7 +1074,7 @@ QString ContentLinkSql::buildCategories( const QStringList &categories, const QS
 
         joins->append( QString( " left join mapCategoryToContent as %1 on %1.cid = content.cid" ).arg( table ) );
 
-        category.replace('*', "%");
+        category.replace(QLatin1Char('*'), QLatin1Char('%'));
         category = QtopiaSql::escapeString(category);
 
         if (category == QLatin1String("Unfiled"))
@@ -1115,9 +1136,8 @@ bool ContentLinkSql::writeProperty(QContentId cId, const QString& key, const QSt
 
     if( value.isEmpty() )
     {
-        QSqlQuery removeQuery( 
-                QLatin1String( "delete from contentProps where cid=:cid and name=:name and grp=:grp" ),
-                QtopiaSql::database( cId.first ) );
+        QSqlQuery removeQuery( QtopiaSql::database( cId.first ) );
+        removeQuery.prepare( QLatin1String( "delete from contentProps where cid=:cid and name=:name and grp=:grp" ) );
 
         removeQuery.bindValue( QLatin1String( "cid" ), cId.second );
         removeQuery.bindValue( QLatin1String( "name" ), key );
@@ -1148,7 +1168,8 @@ bool ContentLinkSql::writeProperty(QContentId cId, const QString& key, const QSt
             bool update = qProperties_qry.first() && qProperties_qry.value(0).toInt() > 0;
             qProperties_qry.clear();
             if (update) {
-                QSqlQuery qPropertiesUpdate_qry( QLatin1String("update contentProps set value = :value where cid = :cid and grp = :grp and name = :name"), QtopiaSql::database(cId.first) );  // no tr
+                QSqlQuery qPropertiesUpdate_qry( QtopiaSql::database(cId.first) );  // no tr
+                qPropertiesUpdate_qry.prepare( QLatin1String("update contentProps set value = :value where cid = :cid and grp = :grp and name = :name") );
                 qPropertiesUpdate_qry.bindValue( QLatin1String("value"), value );
                 qPropertiesUpdate_qry.bindValue( QLatin1String("cid"), cId.second );
                 qPropertiesUpdate_qry.bindValue( QLatin1String("grp"), grp );
@@ -1156,7 +1177,8 @@ bool ContentLinkSql::writeProperty(QContentId cId, const QString& key, const QSt
                 QtopiaSql::logQuery( qPropertiesUpdate_qry );
                 result = qPropertiesUpdate_qry.exec();
             } else {
-                QSqlQuery qPropertiesInsert_qry( QLatin1String("insert into contentProps(cid,name,value,grp) values (:cid, :name, :value, :grp)"), QtopiaSql::database(cId.first) );  // no tr
+                QSqlQuery qPropertiesInsert_qry( QtopiaSql::database(cId.first) );  // no tr
+                qPropertiesInsert_qry.prepare( QLatin1String("insert into contentProps(cid,name,value,grp) values (:cid, :name, :value, :grp)") );
                 qPropertiesInsert_qry.bindValue( QLatin1String("cid"), cId.second );
                 qPropertiesInsert_qry.bindValue( QLatin1String("name"), key );
                 qPropertiesInsert_qry.bindValue( QLatin1String("value"), value );
@@ -1293,7 +1315,8 @@ int ContentLinkSql::queryLocationCode( const QString &location )
 {
     QSqlDatabase db = QtopiaSql::database( QtopiaSql::databaseIdForPath( location ) );
 
-    QSqlQuery lookupQuery( QLatin1String( "select pKey from locationLookup where location = :location" ), db );
+    QSqlQuery lookupQuery( db );
+    lookupQuery.prepare( QLatin1String( "select pKey from locationLookup where location = :location" ) );
 
     lookupQuery.bindValue( QLatin1String( "location" ), location );
 
@@ -1359,7 +1382,7 @@ QString ContentLinkSql::buildOrderBy( const QStringList &sortList, QList< Parame
             if(!result.isEmpty())
                 result+=QLatin1String(", ");
             if(field == QLatin1String("name"))
-                filter.replace(QLatin1String("name"), QLatin1String("uiName"));
+                filter.replace(QLatin1String("name"), QLatin1String("uiName COLLATE localeAwareCompare"));
             else if(field == QLatin1String("time"))
                 filter.replace(QLatin1String("time"), QLatin1String("lastUpdated"));
             else if(field == QLatin1String("type"))
@@ -1368,14 +1391,14 @@ QString ContentLinkSql::buildOrderBy( const QStringList &sortList, QList< Parame
 
                 joins->append( QString( " left join mimeTypeLookup as %1" ).arg( table ) );
 
-                filter.replace(QLatin1String( "type" ), QString( "%1.mimeType" ).arg( table ) );
+                filter.replace(QLatin1String( "type" ), QString( "%1.mimeType COLLATE localeAwareCompare" ).arg( table ) );
             }
             else if( field.startsWith( "synthetic/" ) )
             {
                 QString table = QString( "sort%1" ).arg( joins->count(), 3, 10, QLatin1Char( '0' ) );
 
-                QString groupParam = addParameter( filter.section( '/', 1, 1 ), parameters, insertAt );
-                QString keyParam   = addParameter( filter.section( '/', 2, 2 ), parameters, insertAt );
+                QString groupParam = addParameter( filter.section( QLatin1Char('/'), 1, 1 ), parameters, insertAt );
+                QString keyParam   = addParameter( filter.section( QLatin1Char('/'), 2, 2 ), parameters, insertAt );
 
                 QString join = QString(
                         " left join contentProps as %1 on content.cid = %1.cid"
@@ -1386,14 +1409,14 @@ QString ContentLinkSql::buildOrderBy( const QStringList &sortList, QList< Parame
 
                 joins->append( join );
 
-                filter.replace( field, QString( "%1.value" ).arg( table ) );
+                filter.replace( field, QString( "%1.value COLLATE localeAwareCompare" ).arg( table ) );
             }
             result+=filter;
         }
         result = QLatin1String(" ORDER BY ") + result;
     }
     else
-        result = QLatin1String(" ORDER BY content.uiName");
+        result = QLatin1String(" ORDER BY content.uiName COLLATE localeAwareCompare");
     return result;
 }
 
@@ -1434,7 +1457,7 @@ QSet< QString > ContentLinkSql::getAllSyntheticKeys( const QContentFilter &filte
     QStringList syntheticFilters = filter.arguments( QContentFilter::Synthetic );
 
     foreach( QString syntheticFilter, syntheticFilters )
-        keys.insert( syntheticFilter.section( '/', 0, 1 ) );
+        keys.insert( syntheticFilter.section( QLatin1Char('/'), 0, 1 ) );
 
     foreach( QContentFilter f, filter.subFilters() )
         keys.unite( getAllSyntheticKeys( f ) );
@@ -1449,9 +1472,9 @@ QString ContentLinkSql::buildSynthetic( const QStringList &synthetic, const QStr
 
     foreach( QString filter, synthetic )
     {
-        QString group = filter.section( '/', 0, 0 );
-        QString key   = filter.section( '/', 1, 1 );
-        QString value = filter.section( '/', 2 );
+        QString group = filter.section( QLatin1Char('/'), 0, 0 );
+        QString key   = filter.section( QLatin1Char('/'), 1, 1 );
+        QString value = filter.section( QLatin1Char('/'), 2 );
 
         QString table = QString( "prop%1" ).arg( joins->count(), 3, 10, QLatin1Char( '0' ) );
 
@@ -1467,21 +1490,21 @@ QString ContentLinkSql::buildSynthetic( const QStringList &synthetic, const QStr
 
         if( value.isEmpty() )
         {
-            expression += c + QString( "%1.grp = %2 and %1.name = %3 and %1.value is null" )
+            expression += c + QString( "(%1.grp = %2 and %1.name = %3 and %1.value is null)" )
                     .arg( table );
         }
-        else if( value.contains( '*' ) )
+        else if( value.contains( QLatin1Char('*') ) )
         {
-            value.replace( '*', '%' );
+            value.replace( QLatin1Char('*'), QLatin1Char('%') );
 
-            expression += c + QString( "%1.value like %2" )
+            expression += c + QString( "(%1.value like %2 and %1.value not null)" )
                     .arg( key.section( "/", 0, 0 ) )
                     .arg( table )
                     .arg( addParameter( value, parameters ) );
         }
         else
         {
-            expression += c + QString( "%1.value = %2" )
+            expression += c + QString( "(%1.value = %2 and %1.value not null)" )
                     .arg( table )
                     .arg( addParameter( value, parameters ) );
         }
@@ -1511,16 +1534,18 @@ QStringList ContentLinkSql::mimeFilterMatches( const QContentFilter &filter, con
             mimeQuery = QLatin1String(
                     "select distinct mimeTypeLookup.mimeType "
                     "from %1 "
-                    "where %2 "
-                    "order by mimeTypeLookup.mimeType" );
+                    "group by content.cid "
+                     "having %2 "
+                    "order by mimeTypeLookup.mimeType COLLATE localeAwareCompare" );
         }
         else
         {
             mimeQuery = QLatin1String(
                     "select distinct mimeTypeLookup.mimeType "
                     "from %1 left join mimeTypeLookup on content.mType = mimeTypeLookup.pKey "
-                    "where %2 "
-                    "order by mimeTypeLookup.mimeType" );
+                    "group by content.cid "
+                    "having %2 "
+                    "order by mimeTypeLookup.mimeType COLLATE localeAwareCompare" );
         }
 
         queryString = buildQuery( mimeQuery, filter, &parameters );
@@ -1537,7 +1562,8 @@ QStringList ContentLinkSql::mimeFilterMatches( const QContentFilter &filter, con
 
     foreach( QtopiaDatabaseId dbId, QtopiaSql::databaseIds() )
     {
-        QSqlQuery query( queryString, QtopiaSql::database( dbId ) );
+        QSqlQuery query( QtopiaSql::database( dbId ) );
+        query.prepare( queryString );
 
         bindParameters( &query, parameters );
 
@@ -1573,7 +1599,8 @@ QStringList ContentLinkSql::syntheticFilterGroups( const QContentFilter &filter 
         static const QString groupQuery = QLatin1String(
                 "select distinct contentProps.grp "
                 "from %1 left join contentProps on content.cid = contentProps.cid "
-                "where %2 "
+                "group by content.cid "
+                "having %2 "
                 "order by contentProps.grp" );
 
         queryString = buildQuery( groupQuery, filter, &parameters );
@@ -1590,7 +1617,8 @@ QStringList ContentLinkSql::syntheticFilterGroups( const QContentFilter &filter 
 
     foreach( QtopiaDatabaseId dbId, QtopiaSql::databaseIds() )
     {
-        QSqlQuery query( queryString, QtopiaSql::database( dbId ) );
+        QSqlQuery query( QtopiaSql::database( dbId ) );
+        query.prepare( queryString );
 
         bindParameters( &query, parameters );
 
@@ -1626,8 +1654,9 @@ QStringList ContentLinkSql::syntheticFilterKeys( const QContentFilter &filter, c
         QString keyQuery = QLatin1String(
                 "select distinct contentProps.name "
                 "from %2 left join contentProps on content.cid = contentProps.cid and contentProps.grp = :group "
-                "where %3 "
-                "order by contentProps.name" );
+                "group by content.cid "
+                "having %3 "
+                "order by contentProps.name COLLATE localeAwareCompare" );
 
         parameters.append( Parameter( QLatin1String( "group" ), group ) );
 
@@ -1645,7 +1674,8 @@ QStringList ContentLinkSql::syntheticFilterKeys( const QContentFilter &filter, c
 
     foreach( QtopiaDatabaseId dbId, QtopiaSql::databaseIds() )
     {
-        QSqlQuery query( queryString, QtopiaSql::database( dbId ) );
+        QSqlQuery query( QtopiaSql::database( dbId ) );
+        query.prepare( queryString );
 
         query.bindValue( QLatin1String( "group" ), group );
 
@@ -1683,8 +1713,9 @@ QStringList ContentLinkSql::syntheticFilterMatches( const QContentFilter &filter
         static const QString valueQuery = QLatin1String(
                 "select distinct contentProps.value "
                 "from %1 left join contentProps on content.cid = contentProps.cid and contentProps.grp = :group and contentProps.name = :key "
-                "where %2 "
-                "order by contentProps.value");
+                "group by content.cid "
+                "having %2 "
+                "order by contentProps.value COLLATE localeAwareCompare");
 
         parameters.append( Parameter( QLatin1String( "group" ), group ) );
         parameters.append( Parameter( QLatin1String( "key" ), key ) );
@@ -1701,11 +1732,12 @@ QStringList ContentLinkSql::syntheticFilterMatches( const QContentFilter &filter
 
     QMap< QString, QString > filters;
 
-    QString filterBase = group + '/' + key + '/';
+    QString filterBase = group + QLatin1Char('/') + key + ('/');
 
     foreach( QtopiaDatabaseId dbId, QtopiaSql::databaseIds() )
     {
-        QSqlQuery query( queryString, QtopiaSql::database( dbId ) );
+        QSqlQuery query( QtopiaSql::database( dbId ) );
+        query.prepare( queryString );
 
         bindParameters( &query, parameters );
 
@@ -1751,8 +1783,9 @@ QStringList ContentLinkSql::categoryFilterMatches( const QContentFilter &filter,
             "select distinct category.categoryid "
             "from %2 inner join mapCategoryToContent as category on content.cid = category.cid "
                     "inner join categories on category.categoryid = categories.categoryid and %1 "
-            "where %3 "
-            "order by categories.categorytext")
+                "group by content.cid "
+                "having %3 "
+            "order by categories.categorytext COLLATE localeAwareCompare")
             .arg( scopeClause );
 
         queryString = buildQuery( queryString, filter, &parameters );
@@ -1770,7 +1803,8 @@ QStringList ContentLinkSql::categoryFilterMatches( const QContentFilter &filter,
 
     foreach( QtopiaDatabaseId dbId, QtopiaSql::databaseIds() )
     {
-        QSqlQuery query( queryString, QtopiaSql::database( dbId ) );
+        QSqlQuery query( QtopiaSql::database( dbId ) );
+        query.prepare( queryString );
 
         bindParameters( &query, parameters );
 
@@ -1865,11 +1899,12 @@ QHash<QString, QVariant> ContentLinkSql::linkByPath( const QString &path, bool i
 
     QtopiaDatabaseId dbId = QtopiaSql::databaseIdForPath( path );
 
-    QSqlQuery qLBI_qry( commonString + (isLink ? linkString : realString), QtopiaSql::database( dbId ) );
+    QSqlQuery qLBI_qry( QtopiaSql::database( dbId ) );
+    qLBI_qry.prepare( commonString + (isLink ? linkString : realString) );
 
     // at present, no need for a transaction
-    qLBI_qry.bindValue( QLatin1String( "path"     ), path.section( '/', -1     ) );
-    qLBI_qry.bindValue( QLatin1String( "location" ), path.section( '/',  0, -2 ) );
+    qLBI_qry.bindValue( QLatin1String( "path"     ), path.section( QLatin1Char('/'), -1     ) );
+    qLBI_qry.bindValue( QLatin1String( "location" ), path.section( QLatin1Char('/'),  0, -2 ) );
 
     QtopiaSql::logQuery( qLBI_qry );
 
@@ -1922,7 +1957,8 @@ QHash<QString, QVariant> ContentLinkSql::linkById( QContentId cId )
     if( cId == QContent::InvalidId )
         return QHash<QString, QVariant>();
 
-    QSqlQuery qLBI_qry( queryString, QtopiaSql::database( cId.first ) );
+    QSqlQuery qLBI_qry( QtopiaSql::database( cId.first ) );
+    qLBI_qry.prepare(queryString);
 
     // at present, no need for a transaction
     qLBI_qry.bindValue( "cid", cId.second );
@@ -1971,7 +2007,8 @@ QList< QHash<QString, QVariant> > ContentLinkSql::linksById( const QContentIdLis
     {
         QStringList cIds = idLists.values( dbid );
 
-        QSqlQuery qLBI_qry( queryString.arg( cIds.join( QLatin1String( "," ) ) ), QtopiaSql::database(dbid) );
+        QSqlQuery qLBI_qry( QtopiaSql::database(dbid) );
+        qLBI_qry.prepare(queryString.arg( cIds.join( QLatin1String( "," ) ) ));
 
         QtopiaSql::logQuery( qLBI_qry );
 
@@ -2010,7 +2047,7 @@ QHash<QString, QVariant> ContentLinkSql::linkFromRecord( const QSqlRecord &recor
         static QString real_location("real_location");
         if(link.contains(real_location) && !link[real_location].toString().isEmpty())
         {
-            link[QLatin1String("path")] = link[real_location].toString() + QChar('/') + link[QLatin1String("path")].toString();
+            link[QLatin1String("path")] = link[real_location].toString() + QLatin1Char('/') + link[QLatin1String("path")].toString();
             link.remove(real_location);
         }
         }
@@ -2019,7 +2056,7 @@ QHash<QString, QVariant> ContentLinkSql::linkFromRecord( const QSqlRecord &recor
         static QString link_location("link_location");
         if(link.contains(link_location) && !link[link_location].toString().isEmpty())
         {
-            link[QLatin1String("linkFile")] = link[link_location].toString() + QChar('/') + link[QLatin1String("linkFile")].toString();
+            link[QLatin1String("linkFile")] = link[link_location].toString() + QLatin1Char('/') + link[QLatin1String("linkFile")].toString();
             link.remove(link_location);
         }
     }

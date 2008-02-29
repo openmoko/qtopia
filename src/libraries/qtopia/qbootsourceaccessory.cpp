@@ -42,6 +42,17 @@ static const char* const QBOOTSOURCEACCESSORY_SOURCE   = "source";
     \sa QBootSourceAccessoryProvider, QHardwareInterface
 */
 
+/*!
+    \enum QBootSourceAccessory::Source
+    Defines the types of boot sources
+
+    \value Unknown Boot was triggered by an unknown event
+    \value PowerKey Boot was triggered by pressing the power-on key
+    \value Charger Boot was triggered by plugging in the battery charger
+    \value Alarm Boot was triggered by an RTC alarm
+    \value Watchdog Boot was triggered by the expiration of the watchdog timer
+    \value Software Boot was triggered by software
+*/
 
 /*!
     \fn void QBootSourceAccessory::bootSourceModified()

@@ -29,9 +29,14 @@
 #include <QPainter>
 #include <QDesktopWidget>
 #include <QApplication>
-
+#include <QMenu>
+#ifdef QTOPIA_PHONE
+#include <qsoftmenubar.h>
+#endif
 #include <qtopialog.h>
 
+#include <qtopiaipcenvelope.h>
+#include <qtopiaservices.h>
 
 Calibrate::Calibrate(QWidget* parent, Qt::WFlags f)
     : QDialog( parent, f )
@@ -44,7 +49,10 @@ Calibrate::Calibrate(QWidget* parent, Qt::WFlags f)
     timer = new QTimer( this );
     connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
 
-    qWarning("Starting Calibrate!");
+    QMenu *contextMenu = QSoftMenuBar::menuFor(this);
+    connect (contextMenu,SIGNAL(triggered(QAction*)),this,SLOT(menuTriggered(QAction*)));
+    
+    qLog(Input)<<"Starting Calibrate!";
 }
 
 Calibrate::~Calibrate()
@@ -63,11 +71,8 @@ void Calibrate::showEvent(QShowEvent *e )
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desk = desktop->screenGeometry(desktop->primaryScreen());
     setGeometry(desk);
-    if ( desk.height() < 250 ) {
-      logo = QPixmap(":image/qpelogo");
-    } else {
-      logo = QPixmap( ":image/qpelogo" );
-    }
+    logo = QPixmap(":image/qpelogo");
+
     cd.screenPoints[QWSPointerCalibrationData::TopLeft] = QPoint( offset, offset );
     cd.screenPoints[QWSPointerCalibrationData::BottomLeft] = QPoint( offset, qt_screen->deviceHeight() - offset );
     cd.screenPoints[QWSPointerCalibrationData::BottomRight] = QPoint( qt_screen->deviceWidth() - offset, qt_screen->deviceHeight() - offset );
@@ -327,6 +332,11 @@ void Calibrate::doGrab()
 */
     grabMouse();
     keyboardGrabber();
+}
+
+void Calibrate::menuTriggered(QAction *action)
+{
+    hide();
 }
 
 #endif // Q_WS_QWS

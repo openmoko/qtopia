@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the Qt Linguist of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -338,10 +348,11 @@ bool MetaTranslatorMessage::operator==( const MetaTranslatorMessage& m ) const
 bool MetaTranslatorMessage::operator<( const MetaTranslatorMessage& m ) const
 {
     int delta = qstrcmp( context(), m.context() );
-    if ( delta == 0 )
+    if ( delta == 0 ) {
         delta = qstrcmp( sourceText(), m.sourceText() );
-    if ( delta == 0 )
-        delta = qstrcmp( comment(), m.comment() );
+        if (delta == 0)
+            delta = qstrcmp( comment(), m.comment() );
+    }
     return delta < 0;
 }
 
@@ -615,40 +626,29 @@ bool MetaTranslator::contains( const char *context, const char *sourceText,
 MetaTranslatorMessage MetaTranslator::find( const char *context, const char *sourceText,
                    const char *comment ) const
 {
-    QList<MetaTranslatorMessage> all = messages();
-    QList<MetaTranslatorMessage>::const_iterator i1;
-    int delta = -1;
-    for (i1 = all.constBegin(); i1 != all.constEnd(); ++i1) {
-        MetaTranslatorMessage m = *i1;
-        delta = qstrcmp(m.context(), context);
-        if (delta == 0) {
-            delta = qstrcmp(m.comment(), comment);
-            if (delta == 0) {
-                delta = QString::compare(m.sourceText(), sourceText);
-                if (delta == 0) return (*i1);
-            }
-        }
-    }
-    return MetaTranslatorMessage();    
+    QMap<MetaTranslatorMessage, int>::const_iterator it = 
+        mm.constFind(MetaTranslatorMessage(context, sourceText, comment, QString(), 0));
+    return (it == mm.constEnd() ? MetaTranslatorMessage() : it.key());
 }
 
 MetaTranslatorMessage MetaTranslator::find(const char *context, const char *comment, 
                                 const QString &fileName, int lineNumber) const
 {
-    QList<MetaTranslatorMessage> all = messages();
-    QList<MetaTranslatorMessage>::const_iterator i1;
-    int delta = -1;
     if (lineNumber >= 0 && !fileName.isEmpty()) {
-        for (i1 = all.constBegin(); i1 != all.constEnd(); ++i1) {
-            MetaTranslatorMessage m = *i1;
-            delta = qstrcmp(m.context(), context);
+        MetaTranslatorMessage m;
+
+        for (QMap<MetaTranslatorMessage, int>::const_iterator it = mm.constBegin();
+            it != mm.constEnd(); ++it) {
+            m = it.key();
+            int delta = qstrcmp(m.context(), context);
             if (delta == 0) {
                 delta = qstrcmp(m.comment(), comment);
                 if (delta == 0) {
                     delta = QString::compare(m.fileName(), fileName);
                     if (delta == 0) {
                         delta = m.lineNumber() - lineNumber;
-                        if (delta == 0) return (*i1);
+                        if (delta == 0)
+                            return m;
                     }
                 }
             }

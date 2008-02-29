@@ -23,21 +23,15 @@
 #include "config.h"
 #include "roamingmonitor.h"
 
+#include <errno.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
 #include <custom.h>
 #include <qtopialog.h>
 #include <qtopianamespace.h>
-
 #include <QDebug>
-
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <linux/if.h>
-#ifndef NO_WIRELESS_LAN
-#include <linux/wireless.h>
-#endif
 
 static const QString lanScript = Qtopia::qtopiaDir()+"/bin/lan-network";
 static QMap<QString,QString>* devToConfig = 0;
@@ -228,6 +222,8 @@ bool LanImpl::start( const QVariant options )
         netIndex = roaming->selectWLAN( essid );
 
         if (netIndex <= 0) {
+            updateTrigger( QtopiaNetworkInterface::NotConnected,
+                    tr("No WLAN found in sourrounding area") );
             qLog(Network) << "Invalid WLAN selected";
             return false;
         }
@@ -283,31 +279,9 @@ bool LanImpl::start( const QVariant options )
 
             QString temp = prop.value("Properties/IPADDR").toString();
             if ( temp.isEmpty() ) {
+                updateTrigger( QtopiaNetworkInterface::NotConnected,
+                        tr("IP address missing.") );
                 qLog(Network) << "IP address missing";
-                missingOption = true;
-            } else {
-                params << temp;
-            }
-
-            temp = prop.value("Properties/SUBNET").toString();
-            if ( temp.isEmpty() ) {
-                qLog(Network) << "Subnet mask missing";
-                missingOption = true;
-            } else {
-                params << temp;
-            }
-
-            temp = prop.value("Properties/BROADCAST").toString();
-            if ( temp.isEmpty() ) {
-                qLog(Network) << "Broadcast address missing";
-                missingOption = true;
-            } else {
-                params << temp;
-            }
-
-            temp = prop.value("Properties/GATEWAY").toString();
-            if ( temp.isEmpty() ) {
-                qLog(Network) << "Gateway address missing";
                 missingOption = true;
             } else {
                 params << temp;
@@ -315,6 +289,42 @@ bool LanImpl::start( const QVariant options )
 
             if ( missingOption )
                 return false;
+
+            temp = prop.value("Properties/SUBNET").toString();
+            if ( temp.isEmpty() ) {
+                qLog(Network) << "Subnet mask missing";
+                updateTrigger( QtopiaNetworkInterface::NotConnected,
+                        tr("Subnet mask missing.") );
+                missingOption = true;
+            } else {
+                params << temp;
+            }
+
+            if ( missingOption )
+                return false;
+
+            QString ip = temp; //save ip in case we need it as gateway address
+
+            temp = prop.value("Properties/BROADCAST").toString();
+            if ( temp.isEmpty() ) {
+                updateTrigger( QtopiaNetworkInterface::NotConnected,
+                        tr("Broadcast address missing.") );
+                qLog(Network) << "Broadcast address missing";
+                missingOption = true;
+            } else {
+                params << temp;
+            }
+            
+            if ( missingOption )
+                return false;
+
+            temp = prop.value("Properties/GATEWAY").toString();
+            if ( temp.isEmpty() ) {
+                qLog(Network) << "Gateway address missing. Using IP address.";
+                params << ip;
+            } else {
+                params << temp;
+            }
         }
 
         thread.addScriptToRun( lanScript, params );
@@ -524,7 +534,7 @@ bool LanImpl::isAvailable() const
             int index = buffer.indexOf( QChar(':') );
             if ( index >= 0 ) {
                 QString dev = buffer.left(index).trimmed();
-                if ( dev.startsWith( "eth" ) || dev.startsWith( "wlan" ) ) {
+                if ( dev.startsWith( "eth" ) || dev.startsWith( "wlan" ) || dev.startsWith("usb") ) {
                     //it is a wireless or ethernet
                     int flags = 0;
                     struct ifreq ifrq2;
@@ -679,8 +689,14 @@ void LanImpl::updateState()
     status(); //update state first and then set new gateway
     if ( delayedGatewayInstall ) {
         if ( ifaceStatus == QtopiaNetworkInterface::Up ) {
-            QtopiaNetwork::setDefaultGateway( configIface->configFile() );
-            delayedGatewayInstall = false;
+            //the assumption is that the last script starts the network device "lan-network start ethX"
+            //once the device is up we can trigger the gateway updates
+            if ( thread.remainingTasks() == 0 ) {
+                QtopiaNetwork::setDefaultGateway( configIface->configFile() );
+                delayedGatewayInstall = false;
+            } else {
+                qWarning("%s is up but has remaining script tasks.",configIface->configFile().toLatin1().constData());
+            }
         } else if ( ifaceStatus == QtopiaNetworkInterface::Down
                 || ifaceStatus == QtopiaNetworkInterface::Unavailable ) {
             // do not update gateway when we suddenly drop out during the startup of the network

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qstackedwidget.cpp -->
 <head>
   <title>Qt 4.2: QStackedWidget Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -45,7 +46,7 @@
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -104,7 +105,7 @@
 <p>When populating a stacked widget, the widgets are added to an internal list. The <a href="qstackedwidget.html#indexOf">indexOf</a>() function returns the index of a widget in that list. The widgets can either be added to the end of the list using the <a href="qstackedwidget.html#addWidget">addWidget</a>() function, or inserted at a given index using the <a href="qstackedwidget.html#insertWidget">insertWidget</a>() function. The <a href="qstackedwidget.html#removeWidget">removeWidget</a>() function removes the widget at the given index from the stacked widget. The number of widgets contained in the stacked widget, can be obtained using the <a href="qstackedwidget.html#count-prop">count</a>() function.</p>
 <p>The <a href="qstackedwidget.html#widget">widget</a>() function returns the widget at a given index position. The index of the widget that is shown on screen is given by <a href="qstackedwidget.html#currentIndex-prop">currentIndex</a>() and can be changed using <a href="qstackedwidget.html#currentIndex-prop">setCurrentIndex</a>(). In a similar manner, the currently shown widget can be retrieved using the <a href="qstackedwidget.html#currentWidget">currentWidget</a>() function, and altered using the <a href="qstackedwidget.html#setCurrentWidget">setCurrentWidget</a>() function.</p>
 <p>Whenever the current widget in the stacked widget changes or a widget is removed from the stacked widget, the <a href="qstackedwidget.html#currentChanged">currentChanged</a>() and <a href="qstackedwidget.html#widgetRemoved">widgetRemoved</a>() signals are emitted respectively.</p>
-<p>See also <a href="qstackedlayout.html">QStackedLayout</a>, <a href="qtabwidget.html">QTabWidget</a>, and Config Dialog Example.</p>
+<p>See also <a href="qstackedlayout.html">QStackedLayout</a>, <a href="qtabwidget.html">QTabWidget</a>, and <a href="dialogs-configdialog.html">Config Dialog Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="count-prop"></a>count : const int</h3>
@@ -165,6 +166,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

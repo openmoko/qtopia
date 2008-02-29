@@ -71,15 +71,24 @@ Section "Greenphone SDK"
   CopyFiles "$EXEDIR\vmware_player.png" "$INSTDIR"
   CopyFiles "$EXEDIR\release.html" "$INSTDIR"
 
+
   DetailPrint "" 
+  IfFileExists "$INSTDIR\qtopiasrc.vmdk" 0 doit1
+  MessageBox MB_YESNO "Overwrite Qtopia SDK source partition?" IDYES doit1 IDNO next1
+  doit1:
   DetailPrint "Installing qtopia src..."
   untgz::extract -d "$INSTDIR" "$EXEDIR\qtopiasrc.dat"
   AddSize 10000
+  next1:
 
   DetailPrint "" 
+  IfFileExists "$INSTDIR\home.vmdk" 0 doit2
+  MessageBox MB_YESNO "Overwrite Qtopia SDK home partition?" IDYES doit2 IDNO next2
+  doit2:
   DetailPrint "Installing home........."
   untgz::extract -d "$INSTDIR" "$EXEDIR\home.dat"
   AddSize 50000
+  next2:
 
   DetailPrint "" 
   DetailPrint "Installing qtopia SDK...3.5 minutes remaining"
@@ -92,17 +101,26 @@ Section "Greenphone SDK"
   AddSize 220000
 
   DetailPrint "" 
+  IfFileExists "$INSTDIR\rootfs.vmdk" 0 doit3
+  MessageBox MB_YESNO "Overwrite Qtopia SDK root filesystem partition?" IDYES doit3 IDNO next3
+  doit3:
   DetailPrint "Installing root.........2.0 minutes remaining"
   untgz::extract -d "$INSTDIR" "$EXEDIR\rootfs.dat"
-  DetailPrint "SDK extraction complete." 
-  DetailPrint "" 
   AddSize 1100000
+  next3:
 
 SectionEnd
 
 ;--------------------------------
   
 Function .onInit
+ System::Call 'kernel32::CreateMutexA(i 0, i 0, t "gpMutex") i .r1 ?e'
+ Pop $R0
+ 
+ StrCmp $R0 0 +3
+   MessageBox MB_OK|MB_ICONEXCLAMATION "The installer is already running."
+   Abort
+
   SetOutPath $TEMP
   File /oname=spltmp.bmp "splash.bmp"
   ;File /oname=spltmp.wav "splash.wav"

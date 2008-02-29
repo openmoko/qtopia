@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/tools/qchar.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qchar.cpp -->
 <head>
   <title>Qt 4.2: QChar Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -84,12 +84,12 @@
 <ul>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-not-eq-10">operator!=</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-lt-2">operator&lt;</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qchar.html#operator-lt-lt-35">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qchar.html#operator-lt-lt-36">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-lt-eq">operator&lt;=</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-eq-eq-11">operator==</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-gt">operator&gt;</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
 <li><div class="fn"/>bool <b><a href="qchar.html#operator-gt-eq">operator&gt;=</a></b> ( QChar <i>c1</i>, QChar <i>c2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qchar.html#operator-gt-gt-17">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QChar &amp; <i>chr</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qchar.html#operator-gt-gt-18">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QChar &amp; <i>chr</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -333,7 +333,7 @@
 <h3 class="fn"><a name="toUpper"></a>QChar QChar::toUpper () const</h3>
 <p>Returns the uppercase equivalent if the character is lowercase; otherwise returns the character itself.</p>
 <h3 class="fn"><a name="unicode"></a><a href="qtglobal.html#ushort-typedef">ushort</a> &amp; QChar::unicode ()</h3>
-<p>Returns a reference to the numberic Unicode value of the <a href="qchar.html">QChar</a>.</p>
+<p>Returns a reference to the numeric Unicode value of the <a href="qchar.html">QChar</a>.</p>
 <h3 class="fn"><a name="unicode-2"></a>const <a href="qtglobal.html#ushort-typedef">ushort</a> QChar::unicode () const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <h3 class="fn"><a name="unicodeVersion"></a><a href="qchar.html#UnicodeVersion-enum">UnicodeVersion</a> QChar::unicodeVersion () const</h3>
@@ -346,7 +346,7 @@
 <h3 class="fn"><a name="operator-lt-2"></a>bool operator&lt; ( QChar <i>c1</i>, QChar <i>c2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the numeric Unicode value of <i>c1</i> is less than that of <i>c2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-lt-35"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-36"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QChar &amp; <i>chr</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the char <i>chr</i> to the stream <i>out</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -359,7 +359,7 @@
 <p>Returns true if the numeric Unicode value of <i>c1</i> is greater than that of <i>c2</i>; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-gt-eq"></a>bool operator&gt;= ( QChar <i>c1</i>, QChar <i>c2</i> )</h3>
 <p>Returns true if the numeric Unicode value of <i>c1</i> is greater than or equal to that of <i>c2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-gt-17"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QChar &amp; <i>chr</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-18"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QChar &amp; <i>chr</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a char from the stream <i>in</i> into char <i>chr</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -381,6 +381,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

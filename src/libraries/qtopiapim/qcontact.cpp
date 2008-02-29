@@ -123,6 +123,7 @@ QString emailSeparator() { return " "; }
   This data includes information the name of the person, contact
   information, and business information such as department and job title.
 
+  \sa QContactAddress
 */
 
 /*!
@@ -491,7 +492,7 @@ QMap<QContact::PhoneType, QString> QContact::phoneNumbers() const
 }
 
 /*!
-  Returns the list of phone numbers of the contact.
+  Returns the list of addresses of the contact.
 */
 QMap<QContact::Location, QContactAddress> QContact::addresses() const
 {
@@ -830,7 +831,7 @@ QPixmap QContact::thumbnail() const
         if (nameTitle().isEmpty() && firstName().isEmpty()
                 && middleName().isEmpty() && lastName().isEmpty()
                 && suffix().isEmpty() && !company().isEmpty()) {
-            key = QLatin1String("pimcontact-generic-corporation-contact");
+            key = QLatin1String("pimcontact-generic-corporation-contact-thumb");
             filename = ":image/addressbook/generic-corporation-contact";
         } else if (d->mCategories.contains("Business")) { // no tr
             key = QLatin1String("pimcontact-generic-thumb");
@@ -1416,7 +1417,7 @@ static QContact parseVObject( VObject *obj )
 }
 
 /*!
-  Compares to \a other contacts and returns true if it is equivalent.
+  Compares to \a other contact and returns true if it is equivalent.
   Otherwise returns false
 */
 bool QContact::operator==(const QContact &other) const
@@ -1559,7 +1560,7 @@ QList<QContact> QContact::readVCard( const QString &filename )
 }
 
 /*!
-  Reads the given VCard data in \a vcard, and returns the list of
+  Reads the given vCard data in \a vcard, and returns the list of
   near equivalent contacts.
 
   \sa writeVCard()
@@ -1576,7 +1577,7 @@ QList<QContact> QContact::readVCard( const QByteArray &vcard )
 }
 
 /*!
-  Reads the given VCard data in \a vobject, and returns the list of
+  Reads the given vCard data in \a vobject, and returns the list of
   near equivalent contacts.
 
   \sa writeVCard()
@@ -1658,9 +1659,13 @@ QMap<QString, QString> &QContact::customFieldsRef() { return d->customMap; }
 */
 const QMap<QString, QString> &QContact::customFieldsRef() const { return d->customMap; }
 
+/*! \fn void QContact::setPortraitFile( const QString &str )
+  Sets the path for the portrait file of the contact to \a str.
+*/
+
 /*!
   Changes the contacts portrait to the given pixmap \a p. The pixmap is saved to the contactimages
-  directory, and replaces the file currently used as the contact's portrait.
+  directory, and removes the file previously used as the contact's portrait.
 */
 
 void QContact::changePortrait( const QPixmap &p )
@@ -1668,6 +1673,11 @@ void QContact::changePortrait( const QPixmap &p )
     //  Check for existing contact portraits, and delete them if necessary.
     QString photoFile = portraitFile();
     QString baseDir = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+
+    QString extension(".jpg");
+
+    if (p.hasAlpha())
+        extension = ".png";
 
     QDir dir( baseDir );
     if( !dir.exists() )
@@ -1679,22 +1689,26 @@ void QContact::changePortrait( const QPixmap &p )
             pFile.remove();
     }
 
-    if( !p.isNull() ) {
-        //  If there was no portrait initially, find a filename for the portrait.
-        if( photoFile.isEmpty() ) {
-            QString baseFileName = "ci-" + QString::number( ::time(0) ) + "-";
-            int i = 0;
-            QFile pFile;
+    // Clear out any cached pixmaps
+    QString key("pimcontact" + uid().toString() + "-cfl");
+    QPixmapCache::remove(key);
+    QPixmapCache::remove(key + "-thumb");
 
-            do {
-                photoFile = baseFileName + QString::number( i++ ) + ".jpg";
-                pFile.setFileName( baseDir + photoFile );
-            } while( pFile.exists() );
-        }
+    if( !p.isNull() ) {
+        // Always generate a new name for the file, since it could be a
+        // diferent file type.
+        QString baseFileName = "ci-" + QString::number( ::time(0) ) + "-";
+        int i = 0;
+        QFile pFile;
+
+        do {
+            photoFile = baseFileName + QString::number( i++ ) + extension;
+            pFile.setFileName( baseDir + photoFile );
+        } while( pFile.exists() );
 
         //  Save the image, scaled to the maximum image size
         QImage scaled = p.toImage().scaled( portraitSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation );
-        if( scaled.save( baseDir + photoFile, "JPEG", 50 ) ) {
+        if( scaled.save( baseDir + photoFile, p.hasAlpha()?"PNG":"JPEG", 50 ) ) {
             setPortraitFile( photoFile );
             return;
         } else {
@@ -2130,10 +2144,6 @@ void QContact::setBusinessCountry( const QString &str )
   Sets the notes about the contact to \a str.
 */
 
-/*! \fn void QContact::setPortraitFile( const QString &str )
-  Sets the path for the portrait file of the contact to \a str.
-*/
-
 /*! \fn QString QContact::nameTitle() const
   Returns the title of the contact.
 */
@@ -2280,6 +2290,68 @@ void QContact::setBusinessCountry( const QString &str )
 
 /*! \fn QString QContact::notes() const
   Returns the notes relating to the the contact.
+*/
+
+/*!
+   \class QContactAddress
+   \module qpepim
+   \ingroup pim
+   \brief The QContactAddress class contains an address of a QContact.
+
+   The address is split into a number of fields:
+   \list
+   \o street address
+   \o city
+   \o state
+   \o zip or postal code
+   \o country
+   \endlist
+
+   It also provides two functions - \l {QContactAddress::}{isEmpty()} and
+   \l {QContactAddress::}{operator==()}.
+
+   \sa QContact
+*/
+
+/*!
+  \fn bool QContactAddress::isEmpty() const
+  Returns true if this address is empty (all the fields are empty),
+  and false otherwise.
+*/
+
+/*!
+  \fn bool QContactAddress::operator==(const QContactAddress& other) const
+  Returns true if this address is the same as the \a other address,
+  and false otherwise.
+*/
+
+/*!
+  \variable QContactAddress::street
+  \brief the street address portion of this address
+  This would typically be something like "123 Penny Lane" or
+  "Level 5, 123 Wharf St."
+*/
+
+/*!
+  \variable QContactAddress::city
+  \brief the city portion of this address
+*/
+
+/*!
+  \variable QContactAddress::state
+  \brief the state portion of this address
+  This would typically be something like "MA", or "Queensland".
+*/
+
+/*!
+  \variable QContactAddress::zip
+  \brief the postal code portion of this address
+  This would typically be something like "90210" or "SW1234".
+*/
+
+/*!
+  \variable QContactAddress::country
+  \brief the country portion of this address.
 */
 
 Q_IMPLEMENT_USER_METATYPE(QContact)

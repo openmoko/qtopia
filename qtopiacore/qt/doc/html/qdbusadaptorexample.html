@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qdbusadaptors.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qdbusadaptors.qdoc -->
 <head>
   <title>Qt 4.2: D-BUS Adaptor Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -60,7 +60,7 @@
      }
 
  public slots:
-     Q_ASYNC void quit()
+     Q_NOREPLY void quit()
      { app-&gt;quit(); }
 
      void reparseConfiguration()
@@ -203,7 +203,7 @@
 <h2>Slots/methods</h2>
 <p>The public slots in the example (which will be exported as D-BUS methods) are the following:</p>
 <pre> public slots:
-     Q_ASYNC void quit()
+     Q_NOREPLY void quit()
      { app-&gt;quit(); }
 
      void reparseConfiguration()
@@ -225,12 +225,12 @@
      }</pre>
 <p>This snippet of code defines 4 methods with different properties each:</p>
 <ol type="1">
-<li><tt>quit</tt>: this method takes no parameters and is defined to be asynchronous. That is, callers are expected to use &quot;fire-and-forget&quot; mechanism when calling this method, since it provides no useful reply. This is represented in D-BUS by the use of the org.freedesktop.DBus.Method.NoReply annotation. See <a href="qdbusabstractadaptor.html#Q_ASYNC">Q_ASYNC</a> for more information on asynchronous methods</li>
+<li><tt>quit</tt>: this method takes no parameters and is defined to be asynchronous. That is, callers are expected to use &quot;fire-and-forget&quot; mechanism when calling this method, since it provides no useful reply. This is represented in D-BUS by the use of the org.freedesktop.DBus.Method.NoReply annotation. See <a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a> for more information on asynchronous methods</li>
 <li><tt>reparseConfiguration</tt>: this simple method, with no input or output arguments simply relays the call to the application's reparseConfiguration member function.</li>
 <li><tt>mainWindowObject</tt>: this method takes no input parameter, but returns one string output argument, containing the path to the main window object (if the application has a main window), or an empty string if it has no main window. Note that this method could have also been written: void mainWindowObject(<a href="qstring.html">QString</a> &amp;path).</li>
 <li><tt>setSessionManagement</tt>: this method takes one input argument (a boolean) and, depending on its value, it calls one function or another in the application.</li>
 </ol>
-<p>See also: <a href="qdbusabstractadaptor.html#Q_ASYNC">Q_ASYNC</a>.</p>
+<p>See also: <a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a>.</p>
 <a name="signals"></a>
 <h2>Signals</h2>
 <p>The signals in this example are defined as follows:</p>
@@ -251,6 +251,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

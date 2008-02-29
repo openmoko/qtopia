@@ -274,6 +274,14 @@ QVariant CallContactModel::data(const QModelIndex &index, int role) const
             case QContactModel::PortraitRole:
                 return item->decoration();
             case Qt::DisplayRole:
+                {
+                    QString result;
+                    if (text.isEmpty())
+                        result = item->extraInfoText();
+                    else
+                        result = text;
+                    return result;
+                }
             case QContactModel::LabelRole:
                 {
                     QString result;
@@ -339,9 +347,9 @@ CallContactDelegate::CallContactDelegate( QObject * parent)
 
 CallContactDelegate::~CallContactDelegate() {}
 
-QFont CallContactDelegate::secondaryFont(const QStyleOptionViewItem& o) const
+QFont CallContactDelegate::secondaryFont(const QStyleOptionViewItem& o, const QModelIndex& idx) const
 {
-    QFont font = QContactDelegate::secondaryFont(o);
+    QFont font = QContactDelegate::secondaryFont(o, idx);
     QFont f(font);
     f.setItalic(true);
     return f;
@@ -364,7 +372,7 @@ CallContactView::CallContactView(QWidget * parent)
     mAddContact->setVisible(false);
     mOpenContact = mMenu->addAction(addressbookIcon, tr("Open Contact"), this, SLOT(openContact()));
     mOpenContact->setVisible(false);
-    mSendMessage = mMenu->addAction(QIcon(":icon/email"), tr("Send Message"), this, SLOT(sendMessageToItem()));
+    mSendMessage = mMenu->addAction(QIcon(":icon/txt"), tr("Send Message"), this, SLOT(sendMessageToItem()));
     mSendMessage->setVisible(false);
 
     m_noResultMessage = tr("No matches.");

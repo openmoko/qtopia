@@ -75,7 +75,6 @@ void QTaskSqlIO::setContextFilter(const QSet<int> &list)
     if (list != contextFilter()) {
         QPimSqlIO::setContextFilter(list, ExcludeContexts);
         invalidateCache();
-        emit recordsUpdated();
     }
 }
 
@@ -88,7 +87,7 @@ void QTaskSqlIO::setCategoryFilter(const QCategoryFilter &f)
 {
     if (f != categoryFilter()) {
         QPimSqlIO::setCategoryFilter(f);
-        emit recordsUpdated();
+        emit filtersUpdated();
     }
 }
 
@@ -102,16 +101,6 @@ QTaskSqlIO::QTaskSqlIO(QObject *parent, const QString &)
             ":completed)"),
     cCompFilter(false), cSort(QTaskModel::Description), taskByRowValid(false)
 {
-    QStringList tables;
-    tables << "sqlsources";
-    tables << "changelog";
-    tables << "tasks";
-    tables << "categories";
-    tables << "taskcategories";
-    tables << "taskcustom";
-    QtopiaSql::ensureSchema(tables, QtopiaSql::systemDatabase());
-
-
     QStringList sortColumns;
     sortColumns << "completed";
     sortColumns << "priority";
@@ -147,15 +136,13 @@ QTask QTaskSqlIO::task( const QUniqueId & u ) const
 {
     if (taskByRowValid && u == lastTask.uid())
         return lastTask;
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)u;
-    QByteArray uid = lid.toByteArray();
 
-    QSqlQuery q;
+    QSqlQuery q(database());
     q.prepare("SELECT recid, description, priority, status, percentcompleted, due, started, completed from tasks where recid = :i");
-    q.bindValue(":i", uid);
+    q.bindValue(":i", u.toUInt());
 
     QTask t;
-    retrieveRecord(uid, t);
+    retrieveRecord(u.toUInt(), t);
     q.setForwardOnly(true);
     if (!q.exec()) {
         qWarning("failed to select task: %s", (const char *)q.lastError().text().toLocal8Bit());
@@ -164,7 +151,7 @@ QTask QTaskSqlIO::task( const QUniqueId & u ) const
     }
 
     if ( q.next() ) {
-        t.setUid(QUniqueId(q.value(0).toByteArray()));
+        t.setUid(QUniqueId::fromUInt(q.value(0).toUInt()));
         t.setDescription(q.value(1).toString());
         t.setPriority((QTask::Priority)q.value(2).toInt());
         t.setStatus((QTask::Status)q.value(3).toInt());
@@ -190,17 +177,16 @@ QTask QTaskSqlIO::task( const QUniqueId & u ) const
 void QTaskSqlIO::setCompletedFilter(bool b)
 {
     if (cCompFilter != b) {
-        invalidateCache();
         cCompFilter = b;
+        invalidateCache();
     }
 }
 
 void QTaskSqlIO::setSortKey(QTaskModel::Field s)
 {
     if (cSort != s) {
-        invalidateCache();
         cSort = s;
-        emit recordsUpdated();
+        invalidateCache();
     }
 }
 
@@ -219,6 +205,7 @@ void QTaskSqlIO::invalidateCache()
 {
     QPimSqlIO::invalidateCache();
     taskByRowValid = false;
+    emit filtersUpdated();
 }
 
 QTask QTaskSqlIO::task(int row) const
@@ -270,7 +257,7 @@ bool QTaskSqlIO::removeTasks(const QList<QUniqueId> &ids)
 bool QTaskSqlIO::updateTask(const QTask &t)
 {
     if (QPimSqlIO::updateRecord(t)) {
-        notifyUpdated(t);
+        notifyUpdated(t.uid());
         emit recordsUpdated();
         return true;
     }
@@ -286,7 +273,7 @@ QUniqueId QTaskSqlIO::addTask(const QTask &task, const QPimSource &source, bool 
     if (!i.isNull()) {
         QTask added = task;
         added.setUid(i);
-        notifyAdded(added);
+        notifyAdded(i);
 	emit recordsUpdated();
     }
     return i;

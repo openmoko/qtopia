@@ -32,6 +32,7 @@
 #include <QSharedDataPointer>
 
 class QTaskData;
+class VObject;
 class QTOPIAPIM_EXPORT QTask : public QPimRecord
 {
 public:
@@ -63,7 +64,14 @@ public:
 
     static void writeVCalendar( const QString &filename, const QList<QTask> &tasks);
     static void writeVCalendar( const QString &filename, const QTask &task);
+
+    void writeVCalendar( const QString &filename ) const;
+    void writeVCalendar( QFile &file ) const;
+    void writeVCalendar( QDataStream *stream ) const;
+
     static QList<QTask> readVCalendar( const QString &filename );
+    static QList<QTask> readVCalendarData( const char *, unsigned long );
+    static QList<QTask> readVCalendar( const QByteArray &vcard );
 
     void setPriority( Priority priority );
     void setPriority( int priority );
@@ -120,6 +128,8 @@ protected:
     const QMap<QString, QString> &customFieldsRef() const;
 
 private:
+    static QList<QTask> readVCalendarData( VObject *obj);
+
     QSharedDataPointer<QTaskData> d;
 };
 

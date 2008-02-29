@@ -27,6 +27,7 @@
   \class DesktopPowerAlerter
   \ingroup QtopiaServer
   \brief The DesktopPowerAlerter class displays a message when power is low.
+  \internal
 
   Priority is defined as the number of alerts that are needed to pop-up
 an alert.

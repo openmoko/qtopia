@@ -106,11 +106,9 @@ bool PhonePowerManager::save(int level)
                 QSettings c("Trolltech","qpe");
                 c.beginGroup("HomeScreen");
                 if (c.value( "AutoKeyLock", "Disabled" ).toString() == "Enabled")
-                    QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreenAndToggleKeylock()" );
+                    QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreenAndKeylock()" );
                 else
                     QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreen()" );
-
-                QWSServer::processKeyEvent( 0xffff, Qt::Key_F34, false, true, false );
             }
             return true;
             break;

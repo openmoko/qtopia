@@ -933,7 +933,6 @@ void QContentSet::setSortOrder( const QStringList &sortOrder )
     d->currentSortOrder = sortOrder;
     d->implicitLinksNeedsFlush = true;
     sync( true );
-    emit changed();
 }
 
 /*!
@@ -1064,15 +1063,12 @@ void QContentSet::updateImplicits( const QContentIdList &implicits )
         if(start != end)
             updatesSeen = true;
     }
-    if(updatesSeen)
-        emit changed();
 }
 
 void QContentSet::refreshRequested()
 {
     d->implicitLinksNeedsFlush = true;
     sync();
-    emit changed();
 }
 
 /*!

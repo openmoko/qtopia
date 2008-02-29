@@ -41,7 +41,7 @@ protected:
     void paintEvent(QPaintEvent *pe);
 
 private:
-    QBitmap *lcdPixmap;
+    QPixmap *lcdPixmap;
     QPainter *lcdPainter;
 #ifdef QTOPIA_PHONE
     int drawNextItem(int,bool,int);

@@ -34,7 +34,8 @@
 /*!
     \class QSerialIODeviceMultiplexer
     \brief The QSerialIODeviceMultiplexer class provides a base class for serial device multiplexing
-    \ingroup communication
+    \ingroup io
+    \ingroup telephony::serial
 
     The QSerialIODeviceMultiplexer class provides a base class for serial
     device multiplexers on AT-based modems (e.g. GSM 07.10 multiplexing).
@@ -156,6 +157,7 @@ bool QSerialIODeviceMultiplexer::chat
         QString line = readLine( device );
         if ( line.isNull() ||
              line.startsWith( "ERROR" ) ||
+             line.startsWith( "COMMAND NOT SUPPORT" ) ||
              line.startsWith( "+CME ERROR:" ) ) {
             return false;
         }
@@ -315,7 +317,8 @@ QSerialIODeviceMultiplexer *QSerialIODeviceMultiplexer::create
 /*!
     \class QNullSerialIODeviceMultiplexer
     \brief The QNullSerialIODeviceMultiplexer class provides a null implementation of multiplexing
-    \ingroup communication
+    \ingroup io
+    \ingroup telephony::serial
 
     The QNullSerialIODeviceMultiplexer class provides a null implementation
     on modems that do not support multiplexing.

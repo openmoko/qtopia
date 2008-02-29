@@ -1,9 +1,9 @@
 <http://www.trolltech.com>
 
 
-    Greenphone™ Release Notes
+    Greenphone(TM)Release Notes
 
-Qtopia® Greenphone SDK is a virtual machine created to run with VMware®
+Qtopia(R) Greenphone SDK is a virtual machine created to run with VMware(R)
 Player.
 
 <http://www.vmware.com/products/player>  Please download and install the
@@ -14,7 +14,7 @@ VMware Player is available at http://www.vmware.com/products/player
       License information
 
 Please note that this .iso file contains additional software for use in
-conjunction with the Qtopia® Greenphone™.  This software is licensed
+conjunction with the Qtopia(R) Greenphone(TM).  This software is licensed
 under a variety of different licenses.
 
 
@@ -22,7 +22,7 @@ under a variety of different licenses.
 
 If you are a Qtopia Greenphone Community SDK licensee, your use of the
 Qtopia software provided in binary format in this .iso file is licensed
-under the terms contained in the “Qtopia® Greenphone ISO File Format
+under the terms contained in the “Qtopia(R) Greenphone ISO File Format
 License Agreement”.  This license agreement is included on this CDROM
 <Qtopia_GreenphoneSDK_CommunityISO_v1_1_FINAL.pdf> and
 is also available on qtopia.net.
@@ -32,7 +32,7 @@ is also available on qtopia.net.
 
 If you are a Qtopia Greenphone SDK Light or Professional licensee, your
 use of the Qtopia software provided in binary format in this .iso file
-is licensed under the terms contained in the “Qtopia® Greenphone™ SDK
+is licensed under the terms contained in the “Qtopia(R) Greenphone(TM) SDK
 License Agreement” that accompanied your purchase of the Qtopia Greenphone.
 
 

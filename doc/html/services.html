@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Services</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Services</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -13,16 +12,28 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Services<br /><small></small></h1>
 <a name="top"></a><a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Application Services are standardized APIs to access functionality supplied by other applications. They allow applications to invoke the services of other applications, while allowing the specific application providing the service to be selected by the system integrator or end-user. Messages between applications are delivered via Qtopia IPC.</p>
+<p>Application Services are standardized APIs to access functionality supplied by other applications. They allow applications to invoke the services of other applications, while allowing the specific application providing the service to be selected by the system integrator or end-user. Messages between applications are delivered via <a href="qtopiaipc.html">Qtopia IPC</a>.</p>
 <a name="pre-defined-services"></a>
 <h2>Pre-defined Services</h2>
 <p>The following provides a list of the pre-defined services:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Available Services</th></tr></thead>
-<tr valign="top" class="odd"><td><p><table width="100%">
+<tr valign="top" bgcolor="#a2c511"><th>Available Services</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><p><table width="100%">
 <tr>
 <td align="right"><b>A&nbsp;</b></td>
 <td><a href="alarmservice.html">Alarm</a></td>
+<td align="right"></td>
+<td><a href="clockservice.html">Clock</a></td>
+<td align="right"><b>H&nbsp;</b></td>
+<td><a href="helpservice.html">Help</a></td>
+<td align="right"></td>
+<td><a href="qtopiapowermanagerservice.html">QtopiaPowerManager</a></td>
+<td align="right"></td>
+<td><a href="tasksservice.html">Tasks</a></td>
+</tr>
+<tr>
+<td align="right"></td>
+<td><a href="alarmserverservice.html">AlarmServer</a></td>
 <td align="right"></td>
 <td><a href="contactsservice.html">Contacts</a></td>
 <td align="right"><b>I&nbsp;</b></td>
@@ -80,36 +91,24 @@
 <td align="right"><b>W&nbsp;</b></td>
 <td><a href="webaccessservice.html">WebAccess</a></td>
 </tr>
-<tr>
-<td align="right"></td>
-<td><a href="clockservice.html">Clock</a></td>
-<td align="right"><b>H&nbsp;</b></td>
-<td><a href="helpservice.html">Help</a></td>
-<td align="right"></td>
-<td><a href="qtopiapowermanagerservice.html">QtopiaPowerManager</a></td>
-<td align="right"></td>
-<td><a href="tasksservice.html">Tasks</a></td>
-<td>
-</td>
-</tr>
 </table></p>
 </td></tr>
 </table></p>
 <a name="requesting-services"></a>
 <h2>Requesting Services</h2>
 <p>To request a service, the calling application executes:</p>
-<pre>    QtopiaServiceRequest srv(servicename, action);
+<pre>&nbsp;   QtopiaServiceRequest srv(servicename, action);
     srv &lt;&lt; parameters;
     srv.send();</pre>
 <p>For example:</p>
-<pre>    QtopiaServiceRequest srv(&quot;Email&quot;, &quot;writeMail(QString,QString)&quot;);
+<pre>&nbsp;   QtopiaServiceRequest srv(&quot;Email&quot;, &quot;writeMail(QString,QString)&quot;);
     srv &lt;&lt; QString(&quot;Johan R. User&quot;) &lt;&lt; QString(&quot;random@trolltech.com&quot;);
     srv.send();</pre>
-<p><tt>QtopiaServiceRequest::send()</tt> returns a boolean value indicating whether the service is available.</p>
+<p><a href="qtopiaservicerequest.html#send">QtopiaServiceRequest::send</a>() returns a boolean value indicating whether the service is available.</p>
 <a name="responding-to-service-requests"></a>
 <h2>Responding to Service Requests</h2>
-<p>To respond to a service request, an application should use the <tt>QtopiaAbstractService</tt> class. The following example responds to the <tt>openURL(QString)</tt> request on the <tt>WebAccess</tt> service. It would typically be implemented by a Web browser application:</p>
-<pre>    class WebAccessService : public QtopiaAbstractService
+<p>To respond to a service request, an application should use the <a href="qtopiaabstractservice.html">QtopiaAbstractService</a> class. The following example responds to the <tt>openURL(QString)</tt> request on the <tt>WebAccess</tt> service. It would typically be implemented by a Web browser application:</p>
+<pre>&nbsp;   class WebAccessService : public QtopiaAbstractService
     {
         Q_OBJECT
     public:
@@ -172,7 +171,7 @@
 </li>
 </ul>
 <p>For example:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaServices
     Context=Calendar
     [Service]
@@ -186,7 +185,7 @@
     Icon=today
     Name[]=Today's calendar</pre>
 <p>Usually, only one application responds to a given service. The user selects the application to handle the service using the <tt>Application Serviceas</tt> settings. If the service can be provided by multiple applications, the service file will contain:</p>
-<pre>    Multiple = 1</pre>
+<pre>&nbsp;   Multiple = 1</pre>
 <p>in the <tt>[Service]</tt> section.</p>
 <a name="advanced-service-functionality"></a>
 <h2>Advanced Service Functionality</h2>
@@ -195,6 +194,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -196,7 +196,6 @@ void QCommDeviceController_Private::bringUpOneItem()
 /*!
     \class QCommDeviceController
     \brief The QCommDeviceController class provides facilities to control the power state of a hardware communications device
-    \ingroup communication
 
     The QCommDeviceController class provides facilities to control the power state of a
     hardware communications device.  The devices that fall under this category are currently

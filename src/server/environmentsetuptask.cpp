@@ -133,6 +133,7 @@ void EnvironmentSetupTask::initEnvironment()
     validateTheme();
 }
 
+/*! \internal */
 void EnvironmentSetupTask::validateTheme()
 {
     QString themeDir = Qtopia::qtopiaDir() + QLatin1String("etc/themes/");

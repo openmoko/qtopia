@@ -33,7 +33,7 @@
 
 /*!
   \class QPhoneProfile::Setting
-  \brief The QPhoneProfile::Setting class allows applications to add their own settings to a profile.
+  \brief The Setting class provides applications with a mechanism to add their own settings to a profile.
 
   Applications may integrate with the Qtopia profiles by adding their own
   settings.  Optionally, when the profile changes the application will be
@@ -822,7 +822,7 @@ void QPhoneProfile::write(QSettings &c) const
 
 /*!
   \class QPhoneProfile::Schedule
-  \brief The QPhoneProfile::Schedule class controls timed auto-activation of a
+  \brief The Schedule class provided information on timed auto-activation of a
          profile.
 
   Qtopia profiles may be automatically activated on certain times and dates.

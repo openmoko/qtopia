@@ -46,6 +46,7 @@ public:
 signals:
     void deviceAdded(const QString &device);
     void deviceRemoved(const QString &device);
+    void defaultDeviceChanged(const QString &device);
 
 private:
     QBluetoothLocalDeviceManager_Private *m_data;

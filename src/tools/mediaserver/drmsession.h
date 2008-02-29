@@ -54,6 +54,8 @@ public:
     void setMuted(bool mute);
     bool isMuted() const;
 
+    QtopiaMedia::State playerState() const;
+
     QString errorString();
 
     void setDomain(QString const& domain);

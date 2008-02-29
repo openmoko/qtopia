@@ -189,7 +189,9 @@ void StandardDialogsImpl::applicationTerminated(const QString &name,
         ApplicationTypeLauncher::TerminationReason reason,
         bool filtered)
 {
-    if(ApplicationTypeLauncher::Normal == reason || !defaultCrashDialog || filtered)
+    if (ApplicationTypeLauncher::Normal == reason || 
+        ApplicationTypeLauncher::Killed == reason ||
+        !defaultCrashDialog || filtered)
         return;
 
     QContentFilter filter(QContent::Application);

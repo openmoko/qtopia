@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -529,21 +539,27 @@ static void qt_debug_path(const QPainterPath &path)
     \ingroup qws
     \since 4.2
 
-    \brief The QRasterPaintEngine class enables acceleration of
-    painting operations using the available hardware.
+    \brief The QRasterPaintEngine class enables hardware acceleration
+    of painting operations in Qtopia Core.
 
-    Note that this functionality is only available in Qtopia Core.
+    Note that this functionality is only available in \l {Qtopia
+    Core}.
 
-    In Qtopia Core, painting is a pure software implementation. But
-    starting with Qtopia Core 4.2, it is possible to add an
-    accelerated graphics driver to take advantage of available
-    hardware resources.
+    In \l {Qtopia Core}, painting is a pure software
+    implementation. But starting with \l{Qtopia Core} 4.2, it is
+    possible to add an accelerated graphics driver to take advantage
+    of available hardware resources.
 
-    The painting operations can be accelerated by deriving from the
-    QRasterPaintEngine and QCustomRasterPaintDevice classes. Note that
-    there are several other issues to be aware of; see the \l {Adding
-    an Accelerated Graphics Driver in Qtopia Core} documentation for
-    details.
+    Hardware acceleration is accomplished by creating a custom screen
+    driver, accelerating the copying from memory to the screen, and
+    implementing a custom paint engine accelerating the various
+    painting operations. Then a custom paint device (derived from the
+    QCustomRasterPaintDevice class) and a custom window surface
+    (derived from QWSWindowSurface) must be implemented to make \l
+    {Qtopia Core} aware of the accelerated driver.
+
+    See the \l {Adding an Accelerated Graphics Driver in Qtopia Core}
+    documentation for details.
 
     \sa QCustomRasterPaintDevice, QPaintEngine
 */
@@ -623,7 +639,7 @@ void QRasterPaintEngine::init()
 }
 
 /*!
-    Destroys the paint engine.
+    Destroys this paint engine.
 */
 QRasterPaintEngine::~QRasterPaintEngine()
 {
@@ -786,6 +802,7 @@ bool QRasterPaintEngine::begin(QPaintDevice *device)
 
     d->matrix = QMatrix();
     d->txop = QPainterPrivate::TxNone;
+    d->txscale = 1;
 
     d->outlineMapper->setMatrix(d->matrix, d->txop);
     d->outlineMapper->m_clipper.setBoundingRect(d->deviceRect.adjusted(-10, -10, 10, 10));
@@ -981,18 +998,23 @@ void QRasterPaintEngine::updateMatrix(const QMatrix &matrix)
         d->int_xform = true;
     }
 
+    d->txscale = d->txop > QPainterPrivate::TxTranslate ?
+        sqrt(qMax(d->matrix.m11() * d->matrix.m11()
+                  + d->matrix.m21() * d->matrix.m21(),
+                  d->matrix.m12() * d->matrix.m12()
+                  + d->matrix.m22() * d->matrix.m22()))
+        : 1.0;
+
     // 1/10000 == 0.0001, so we have good enough res to cover curves
     // that span the entire widget...
-    d->inverseScale = qMax(1 / qMax( qMax(qAbs(matrix.m11()), qAbs(matrix.m22())),
-                                     qMax(qAbs(matrix.m12()), qAbs(matrix.m21())) ),
-                           qreal(0.0001));
+    d->inverseScale = d->txop <= QPainterPrivate::TxTranslate ? 1
+                      : qMax(1 / qMax( qMax(qAbs(matrix.m11()), qAbs(matrix.m22())),
+                                       qMax(qAbs(matrix.m12()), qAbs(matrix.m21())) ),
+                             qreal(0.0001));
 
     d->outlineMapper->setMatrix(d->matrix, d->txop);
-    QMatrix penMatrix = (d->matrix.inverted()*d->pen.brush().matrix().inverted()).inverted();
-    d->penData.setupMatrix(penMatrix,
-                           d->txop, d->bilinear);
-    QMatrix brushMatrix = (d->brushMatrix().inverted() * d->brush.matrix().inverted()).inverted();
-    d->brushData.setupMatrix(brushMatrix, d->txop, d->bilinear);
+    d->updateMatrixData(&d->penData, d->pen.brush(), matrix);
+    d->updateMatrixData(&d->brushData, d->brush, d->brushMatrix());
 }
 
 /*!
@@ -1066,8 +1088,7 @@ void QRasterPaintEngine::updateState(const QPaintEngineState &state)
         d->brush = brush;
         d->brushOffset = state.brushOrigin();
         d->brushData.setup(d->brush, d->opacity);
-        d->brushData.setupMatrix((d->brushMatrix().inverted() * d->brush.matrix().inverted()).inverted(),
-                                 d->txop, d->bilinear);
+        d->updateMatrixData(&d->brushData, d->brush, d->brushMatrix());
     }
 
     if (flags & (DirtyClipPath | DirtyClipRegion)) {
@@ -1099,38 +1120,23 @@ void QRasterPaintEngine::updateState(const QPaintEngineState &state)
             // The tricky case... When we disable clipping we still do
             // system clip so we need to rasterize the system clip and
             // replace the current clip with it. Since people might
-            // choose to set clipping to true later on we have to the
+            // choose to set clipping to true later on we have to save the
             // current one (in disabled_clip).
-            if (!d->baseClip.isEmpty()) {
-                if (!state.isClipEnabled()) { // save current clip for later
-                    Q_ASSERT(!d->rasterBuffer->disabled_clip);
-                    d->rasterBuffer->disabled_clip = d->rasterBuffer->clip;
-                    d->rasterBuffer->clip = 0;
+            if (!state.isClipEnabled()) { // save current clip for later
+                Q_ASSERT(!d->rasterBuffer->disabled_clip);
+                d->rasterBuffer->disabled_clip = d->rasterBuffer->clip;
+                d->rasterBuffer->clip = 0;
 #ifdef QT_EXPERIMENTAL_REGIONS
-                    updateClipRegion(QRegion(), Qt::NoClip);
+                updateClipRegion(QRegion(), Qt::NoClip);
 #else
-                    updateClipPath(QPainterPath(), Qt::NoClip);
+                updateClipPath(QPainterPath(), Qt::NoClip);
 #endif
-                } else { // re-enable old clip
-                    Q_ASSERT(d->rasterBuffer->disabled_clip);
-                    d->rasterBuffer->resetClip();
-                    d->rasterBuffer->clip = d->rasterBuffer->disabled_clip;
-                    d->rasterBuffer->disabled_clip = 0;
-                }
-            } else {
-                if (!state.isClipEnabled()) {
-#ifdef QT_EXPERIMENTAL_REGIONS
-                    updateClipRegion(QRegion(), Qt::NoClip);
-#else
-                    updateClipPath(QPainterPath(), Qt::NoClip);
-#endif
-                } else {
-#ifdef QT_EXPERIMENTAL_REGIONS
-                    updateClipRegion(state.clipRegion(), state.clipOperation());
-#else
-                    updateClipPath(state.clipPath(), state.clipOperation());
-#endif
-                }
+            } else { // re-enable old clip
+                Q_ASSERT(d->rasterBuffer->disabled_clip);
+                d->rasterBuffer->resetClip();
+                d->rasterBuffer->clip = d->rasterBuffer->disabled_clip;
+                d->rasterBuffer->disabled_clip = 0;
+                d->rasterBuffer->clipEnabled = true;
             }
             d->penData.adjustSpanMethods();
             d->brushData.adjustSpanMethods();
@@ -1158,6 +1164,29 @@ void QRasterPaintEngine::updateState(const QPaintEngineState &state)
         d->fast_pen = !d->antialiased
                       && (d->pen.widthF() == 0
                           || d->pen.widthF() <= 1 && d->txop <= QPainterPrivate::TxTranslate);
+    }
+}
+
+void QRasterPaintEnginePrivate::updateMatrixData(QSpanData *spanData, const QBrush &b, const QMatrix &m)
+{
+    if (b.d->hasTransform) {
+        spanData->setupMatrix(b.matrix() * m, txop, bilinear);
+    } else {
+        if (txop <= QPainterPrivate::TxTranslate) {
+            // specialize setupMatrix for translation matrices
+            // to avoid needless matrix inversion
+            spanData->m11 = 1;
+            spanData->m12 = 0;
+            spanData->m21 = 0;
+            spanData->m22 = 1;
+            spanData->dx = -m.dx();
+            spanData->dy = -m.dy();
+            spanData->txop = txop;
+            spanData->bilinear = bilinear;
+            spanData->adjustSpanMethods();
+        } else {
+            spanData->setupMatrix(m, txop, bilinear);
+        }
     }
 }
 
@@ -2030,6 +2059,7 @@ bool QRasterPaintEngine::drawTextInFontBuffer(const QRect &devRect, int xmin, in
         if (clearType) {
             DeleteObject(SelectObject(d->fontRasterBuffer->hdc(),GetStockObject(NULL_BRUSH)));
             DeleteObject(SelectObject(d->fontRasterBuffer->hdc(),GetStockObject(BLACK_PEN)));
+            SetTextColor(d->fontRasterBuffer->hdc(), RGB(0, 0, 0));
         }
 
         // Clean up alpha channel
@@ -2083,7 +2113,9 @@ void QRasterPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textIte
     if (!d->penData.blend)
         return;
 
-    if (QT_WA_INLINE(false, d->txop >= QPainterPrivate::TxScale)) {
+    if (QT_WA_INLINE(false, d->txop >= QPainterPrivate::TxScale)
+        || d->txscale * textItem.font().pointSize() > 64)
+    {
         QPaintEngine::drawTextItem(p, textItem);
         return;
     }
@@ -2311,6 +2343,15 @@ void QRasterPaintEngine::drawPoints(const QPointF *points, int pointCount)
             x = qFloor(trans_x);
             y = qFloor(trans_y);
             if (x >= left && x < right && y >= top && y < bottom) {
+                if (count > 0) {
+                    const QT_FT_Span &last = array[count - 1];
+                    // spans must be sorted on y (primary) and x (secondary)
+                    if (y < last.y || y == last.y && x < last.x) {
+                        d->penData.blend(count, array.constData(), &d->penData);
+                        count = 0;
+                    }
+                }
+
                 span.x = x;
                 span.y = y;
                 array[count++] = span;
@@ -2318,7 +2359,8 @@ void QRasterPaintEngine::drawPoints(const QPointF *points, int pointCount)
             ++points;
         }
 
-        d->penData.blend(count, array.constData(), &d->penData);
+        if (count > 0)
+            d->penData.blend(count, array.constData(), &d->penData);
     }
 }
 
@@ -2611,12 +2653,13 @@ QPoint QRasterPaintEngine::coordinateOffset() const
 }
 
 /*!
-    Reimplement this function to draw the given color \a spans with
-    the specified \a color. The \a count parameter specified the
-    number of spans.
+    Draws the given color \a spans with the specified \a color. The \a
+    count parameter specifies the number of spans.
 
-    Note that this function must be reimplemented on devices where the
-    framebuffer is not memory-mapped.
+    The default implementation does nothing; reimplement this function
+    to draw the given color \a spans with the specified \a color. Note
+    that this function \e must be reimplemented if the framebuffer is
+    not memory-mapped.
 
     \sa drawBufferSpan()
 */
@@ -2633,17 +2676,18 @@ void QRasterPaintEngine::drawColorSpans(const QSpan *spans, int count, uint colo
 /*!
     \fn void QRasterPaintEngine::drawBufferSpan(const uint *buffer, int size, int x, int y, int length, uint alpha)
 
-    Reimplement this function to draw a buffer that contains more than
-    one color.
+    Draws the given \a buffer.
+
+    The default implementation does nothing; reimplement this function
+    to draw a buffer that contains more than one color. Note that this
+    function \e must be reimplemented if the framebuffer is not
+    memory-mapped.
 
     The \a size parameter specifies the total size of the given \a
     buffer, while the \a length parameter specifies the number of
     pixels to draw. The buffer's position is given by (\a x, \a
     y). The provided \a alpha value is added to each pixel in the
     buffer when drawing.
-
-    Note that this function must be reimplemented on devices where the
-    framebuffer is not memory-mapped.
 
     \sa drawColorSpans()
 */
@@ -2898,9 +2942,11 @@ void QRasterPaintEnginePrivate::rasterize(QT_FT_Outline *outline,
             (unsigned char *) malloc(rasterPoolSize);
 #endif
 
+            qt_ft_grays_raster.raster_done(*grayRaster);
             qt_ft_grays_raster.raster_new(0, grayRaster);
             qt_ft_grays_raster.raster_reset(*grayRaster, rasterPoolBase, rasterPoolSize);
 
+            qt_ft_standard_raster.raster_done(*blackRaster);
             qt_ft_standard_raster.raster_new(0, blackRaster);
             qt_ft_standard_raster.raster_reset(*blackRaster, rasterPoolBase, rasterPoolSize);
 
@@ -3089,7 +3135,7 @@ void QRasterBuffer::prepare(QImage *image)
     m_buffer = (uchar *)image->bits();
     m_width = image->width();
     m_height = image->height();
-    bytes_per_line = 4*(depth == 32 ? m_width : (m_width*depth + 31)/32);
+    bytes_per_line = image->bytesPerLine();
 
     format = image->format();
     drawHelper = qDrawHelper + format;
@@ -3244,21 +3290,26 @@ int QCustomRasterPaintDevice::bytesPerLine() const
     \ingroup qws
     \since 4.2
 
-    \brief The QCustomRasterPaintDevice class enables acceleration of
-    painting operations using the available hardware.
+    \brief The QCustomRasterPaintDevice class is provided to activate
+    hardware accelerated paint engines in Qtopia Core.
 
-    Note that this functionality is only available in Qtopia Core.
+    Note that this class is only available in \l {Qtopia Core}.
 
-    In Qtopia Core, painting is a pure software implementation. But
-    starting with Qtopia Core 4.2, it is possible to add an
-    accelerated graphics driver to take advantage of available
-    hardware resources.
+    In \l {Qtopia Core}, painting is a pure software
+    implementation. But starting with \l {Qtopia Core} 4.2, it is
+    possible to add an accelerated graphics driver to take advantage
+    of available hardware resources.
 
-    The painting operations can be accelerated by deriving from the
-    QRasterPaintEngine and QCustomRasterPaintDevice classes. Note that
-    there are several other issues to be aware of; see the \l {Adding
-    an Accelerated Graphics Driver in Qtopia Core} documentation for
-    details.
+    Hardware acceleration is accomplished by creating a custom screen
+    driver, accelerating the copying from memory to the screen, and
+    implementing a custom paint engine accelerating the various
+    painting operations. Then a custom paint device (derived from the
+    QCustomRasterPaintDevice class) and a custom window surface
+    (derived from QWSWindowSurface) must be implemented to make \l
+    {Qtopia Core} aware of the accelerated driver.
+
+    See the \l {Adding an Accelerated Graphics Driver in Qtopia Core}
+    documentation for details.
 
     \sa QRasterPaintEngine, QPaintDevice
 */
@@ -3294,8 +3345,8 @@ int QCustomRasterPaintDevice::bytesPerLine() const
 /*!
     \fn void * QCustomRasterPaintDevice::memory () const
 
-    Returns a pointer to the paint device's memory buffer, or 0 if
-    there is no such buffer.
+    Returns a pointer to the paint device's memory buffer, or 0 if no
+    such buffer exists.
 */
 
 /*!

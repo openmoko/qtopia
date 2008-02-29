@@ -1,4 +1,4 @@
-<!--#if expr="$TELEPHONY"-->
+<!--#if expr="$PHONESTYLE"-->
 <html>
 <head><title>New Profile</title></head>
 <body>
@@ -11,9 +11,12 @@
 <p>Use the fields on the three tabs to specify the profile settings.</p>
 <p><b>Name:</b> name of new profile.</p>
 <p><b>Volume:</b> how loud it should be.</p>
+<!--#if expr="$TELEPHONY"-->
 <p><b>Auto answer:</b> tick to indicate if it should answer immediately without ringing.</p>
 <p><b>Vibrate active:</b> tick to indicate if the profile should include vibration.</p>
+<!--#endif-->
 <p><b>Auto Activation:</b> preset a profile to be activated on a specific day and time.</p>
+<!--#if expr="$TELEPHONY"-->
 <p><b>Alert:</b> how the profile should alert for calls and messages.</p>
 <ul>
 <li><b>Off:</b> don't sound any alert.</li>
@@ -25,3 +28,4 @@
 <!--#endif-->
 </body>
 </html>
+<!--#endif-->

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/itemviews/qabstractitemview.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qabstractitemview.cpp -->
 <head>
   <title>Qt 4.2: QAbstractItemView Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -122,7 +122,7 @@
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -243,7 +243,7 @@
 <p>Several other functions are concerned with selection control; for example <a href="qabstractitemview.html#selectionMode-prop">setSelectionMode</a>(), and <a href="qabstractitemview.html#selectionBehavior-prop">setSelectionBehavior</a>(). This class provides a default selection model to work with (<a href="qabstractitemview.html#selectionModel">selectionModel</a>()), but this can be replaced by using <a href="qabstractitemview.html#setSelectionModel">setSelectionModel</a>() with an instance of <a href="qitemselectionmodel.html">QItemSelectionModel</a>.</p>
 <p>For complete control over the display and editing of items you can specify a delegate with <a href="qabstractitemview.html#setItemDelegate">setItemDelegate</a>().</p>
 <p>QAbstractItemView provides a lot of protected functions. Some are concerned with editing, for example, <a href="qabstractitemview.html#edit">edit</a>(), and <a href="qabstractitemview.html#commitData">commitData</a>(), whilst others are keyboard and mouse event handlers.</p>
-<p>See also <a href="model-view-view.html">View Classes</a>, <a href="model-view-programming.html">Model/View Programming</a>, <a href="qabstractitemmodel.html">QAbstractItemModel</a>, and Chart Example.</p>
+<p>See also <a href="model-view-view.html">View Classes</a>, <a href="model-view-programming.html">Model/View Programming</a>, <a href="qabstractitemmodel.html">QAbstractItemModel</a>, and <a href="itemviews-chart.html">Chart Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="CursorAction-enum"></a>enum QAbstractItemView::CursorAction</h3>
@@ -272,8 +272,9 @@
 <tr><td valign="top"><tt>QAbstractItemView::DragDrop</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The view supports both dragging and dropping</td></tr>
 <tr><td valign="top"><tt>QAbstractItemView::InternalMove</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">only accepts move operations only from itself.</td></tr>
 </table></p>
+<p>Note that the model used needs to provide support for drag and drop operations.</p>
 <p>This enum was introduced in Qt 4.2.</p>
-<p>See also <a href="qabstractitemview.html#dragDropMode-prop">setDragDropMode</a>().</p>
+<p>See also <a href="qabstractitemview.html#dragDropMode-prop">setDragDropMode</a>() and <a href="model-view-dnd.html">Using Drag and Drop with Item Views</a>.</p>
 <h3 class="fn"><a name="DropIndicatorPosition-enum"></a>enum QAbstractItemView::DropIndicatorPosition</h3>
 <p>This enum indicates the position of the drop indicator in relation to the index at the current mouse position:</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -542,7 +543,7 @@
 <p>Reimplemented from <a href="qwidget.html#focusInEvent">QWidget</a>.</p>
 <p>See also <a href="qwidget.html#setFocus">setFocus</a>() and <a href="qabstractitemview.html#focusOutEvent">focusOutEvent</a>().</p>
 <h3 class="fn"><a name="focusOutEvent"></a>void QAbstractItemView::focusOutEvent ( <a href="qfocusevent.html">QFocusEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This function is called with the given <i>event</i> when the widget obtains the focus. By default, the event is ignored.</p>
+<p>This function is called with the given <i>event</i> when the widget looses the focus. By default, the event is ignored.</p>
 <p>Reimplemented from <a href="qwidget.html#focusOutEvent">QWidget</a>.</p>
 <p>See also <a href="qwidget.html#clearFocus">clearFocus</a>() and <a href="qabstractitemview.html#focusInEvent">focusInEvent</a>().</p>
 <h3 class="fn"><a name="horizontalOffset"></a>int QAbstractItemView::horizontalOffset () const&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
@@ -747,6 +748,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

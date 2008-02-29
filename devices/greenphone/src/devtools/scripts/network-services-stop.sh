@@ -1,3 +1,4 @@
 #!/bin/sh
 
-network-services.sh stop
+/etc/rc.d/usbnet_services.sh stop
+

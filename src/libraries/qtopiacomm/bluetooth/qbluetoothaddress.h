@@ -48,7 +48,7 @@ public:
         return !operator==(other);
     }
 
-    bool valid() const;
+    bool isValid() const;
     QString toString() const;
 
     static const QBluetoothAddress invalid;
@@ -60,9 +60,12 @@ public:
     template <typename Stream> void deserialize(Stream &stream);
 
 private:
+    friend uint qHash(const QBluetoothAddress &addr);
     QString m_bdaddr;
     bool m_valid;
 };
+
+uint QTOPIA_EXPORT qHash(const QBluetoothAddress &addr);
 
 Q_DECLARE_USER_METATYPE(QBluetoothAddress)
 

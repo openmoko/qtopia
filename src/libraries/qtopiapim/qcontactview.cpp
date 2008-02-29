@@ -53,7 +53,7 @@
   QContactModel::PortraitRole is expected to be a pixmap that will be drawn to the left
   of the item centered to the height of the item.  QContactModel::StatusIconRole if provided
   is expected to be a pixmap that will be drawn to the right of the item centered to the height
-  of the item. QContactModel::LabelRole is expected to be html formatted text and will be drawn
+  of the item. Qt::DisplayRole is expected to be plain formatted text and will be drawn
   at the top of the model start at the right of where the portrait role is, and ending to the
   left of the status icon if present, otherwise the right of the item.  If Room is available,
   text provided by QContactModel::SubLabelRole will be drawn as plain text below the label text.
@@ -63,8 +63,125 @@
   Contstructs a QContactModelDelegate with parent \a parent.
 */
 QContactDelegate::QContactDelegate( QObject * parent )
-    : QAbstractItemDelegate(parent)
+    : QPimDelegate(parent)
 {
+}
+
+/*!
+  Returns a list consisting of a single string, with the QContactModel::SubLabelRole for the
+  supplied \a index.  Ignores \a option.
+*/
+QList<StringPair> QContactDelegate::subTexts(const QStyleOptionViewItem &option, const QModelIndex& index) const
+{
+    Q_UNUSED(option);
+
+    QList< StringPair > subList;
+    QString subLabel = index.model()->data(index, QContactModel::SubLabelRole).toString();
+    subList.append(qMakePair(QString(), subLabel));
+    return subList;
+}
+
+/*!
+  Returns the count of subsidiary lines for a contact, which is set to one (the QContactModel::SubLabelRole
+  text).
+
+  Ignores \a index and \a option.
+ */
+int QContactDelegate::subTextsCountHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+
+    // We usually have one row, and no harm comes from this if we have zero
+    return 1;
+}
+
+/*!
+  Draws the portrait picture (QContactModel::PortraitRole) for the contact
+  specified by \a index on the leading side of the item, and the pixmap
+  specified by QContactModel::StatusIconRole on the trailing side of the
+  item.  The leading and trailing sides are determined by the \a rtl parameter.
+  The pixmaps are drawn using the painter \a p.  The rectangle taken up by the
+  portrait is added to \a leadingFloats, while the rectangle taken up by the
+  status icon is added to \a trailingFloats.
+
+  Ignores \a option.
+*/
+void QContactDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index,
+                                      QList<QRect>& leadingFloats, QList<QRect>& trailingFloats) const
+{
+    QPixmap decoration = qvariant_cast<QPixmap>(index.model()->data(index, QContactModel::PortraitRole));
+    QPixmap trailingdecoration = qvariant_cast<QPixmap>(index.model()->data(index, QContactModel::StatusIconRole));
+
+    QRect drawRect;
+    QSize ths;
+
+    if (!decoration.isNull()) {
+        drawRect = option.rect;
+        ths = QContact::thumbnailSize();
+        if (rtl)
+            drawRect.setLeft(drawRect.right() - ths.width() - 4);
+        else
+            drawRect.setWidth(ths.width() + 4);
+
+        // Center the thumbnail
+        QPoint drawOffset = QPoint(drawRect.left() + (drawRect.width() - ths.width())/2, drawRect.top() + (drawRect.height() - ths.height())/2);
+
+        p->drawPixmap(drawOffset, decoration);
+
+        leadingFloats.append(drawRect);
+    }
+
+
+    if (!trailingdecoration.isNull()) {
+        drawRect = option.rect;
+        ths = trailingdecoration.size();
+        if (rtl)
+            drawRect.setWidth(ths.width() + 2);
+        else
+            drawRect.setLeft(drawRect.right() - ths.width() - 2);
+
+        // Center the thumbnail
+        QPoint drawOffset = QPoint(drawRect.left() + (drawRect.width() - ths.width())/2, drawRect.top() + (drawRect.height() - ths.height())/2);
+
+        p->drawPixmap(drawOffset, trailingdecoration);
+
+        trailingFloats.append(drawRect);
+    }
+}
+
+/*!
+  Always returns QPimDelegate::Independent, ignoring \a option and \a index.
+*/
+QPimDelegate::SubTextAlignment QContactDelegate::subTextAlignment(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+    return QPimDelegate::Independent;
+}
+
+/*!
+  Always returns QPimDelegate::SelectedOnly, ignoring \a option and \a index.
+ */
+QPimDelegate::BackgroundStyle QContactDelegate::backgroundStyle(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+    return QPimDelegate::SelectedOnly;
+}
+
+/*!
+  Calculates the size hint for the delegate, given the \a option and \a index parameters.
+  The \a textSize size hint is expanded to accommodate the portrait icon width and height.
+*/
+QSize QContactDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& textSize) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+
+    // Note - this ignores the secondaryIconRole pixmap, since it is of variable size
+    QSize ths = QContact::thumbnailSize();
+    return QSize(ths.width() + 2 + textSize.width(), qMax(ths.height() + 4, textSize.height()));
 }
 
 /*!
@@ -72,232 +189,6 @@ QContactDelegate::QContactDelegate( QObject * parent )
 */
 QContactDelegate::~QContactDelegate() {}
 
-/*!
-  \internal
-  Provides an alternate font based of the \a start font.  Reduces the size of the returned font
-  by at least step point sizes.  Will attempt a total of six point sizes beyond the request
-  point size until a valid font size that differs from the starting font size is found.
-*/
-QFont QContactDelegate::differentFont(const QFont& start, int step) const
-{
-    int osize = QFontMetrics(start).lineSpacing();
-    QFont f = start;
-    for (int t=1; t<6; t++) {
-        int newSize = f.pointSize() + step;
-        if ( newSize > 0 )
-            f.setPointSize(f.pointSize()+step);
-        else
-            return start; // we cannot find a font -> return old one
-        step += step < 0 ? -1 : +1;
-        QFontMetrics fm(f);
-        if ( fm.lineSpacing() != osize )
-            break;
-    }
-    return f;
-}
-
-/*!
-  Returns the font to use for painting the main label text of the item.
-  Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
-  ignored.  These attributes can be set by the text returned for
-  QAbstractItemModel::data() where role is QContactModel::LabelRole.
-
-  By default returns the font of the style option \a o.
-*/
-QFont QContactDelegate::mainFont(const QStyleOptionViewItem &o) const
-{
-    return o.font;
-}
-
-/*!
-  Returns the font to use for painting the sub label text of the item.
-  Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
-  ignored.  These attributes can be set by the text returned for
-  QAbstractItemModel::data() where role is QContactModel::SubLabelRole.
-
-  By default returns a font at least two point sizes smaller of the font of the
-  style option \a o.
-*/
-QFont QContactDelegate::secondaryFont(const QStyleOptionViewItem &o) const
-{
-    return differentFont(o.font, -2);
-}
-
-/*!
-  \overload
-
-  Paints the element at \a index using \a painter with style options \a option.
-*/
-void QContactDelegate::paint(QPainter *painter, const QStyleOptionViewItem & option,
-        const QModelIndex & index ) const
-{
-    // could these be roles of the model?  would have to add the 'secondary' roles
-    // although preferable as a Qtopia or Qt role as they don't really
-    // apply to contacts.
-    QString text = index.model()->data(index, QContactModel::LabelRole).toString();
-    QString secondaryText = index.model()->data(index, QContactModel::SubLabelRole).toString();
-
-    QPixmap decoration = qvariant_cast<QPixmap>(index.model()->data(index, QContactModel::PortraitRole));
-    QPixmap secondaryDecoration = qvariant_cast<QPixmap>(index.model()->data(index, QContactModel::StatusIconRole));
-    bool rtl = QtopiaApplication::layoutDirection() == Qt::RightToLeft ;
-
-    painter->save();
-
-    // fill rect based on row background
-    // or assume can be left to list class
-    bool selected = (option.state & QStyle::State_Selected) == QStyle::State_Selected;
-    QBrush baseBrush = selected ? option.palette.highlight() : option.palette.base();
-    QBrush textBrush = selected ? option.palette.highlightedText() : option.palette.text();
-    QPalette modpalette(option.palette);
-
-    modpalette.setBrush(QPalette::Text, textBrush);
-    modpalette.setBrush(QPalette::Base, baseBrush);
-
-    painter->setBrush(baseBrush);
-    painter->setPen(textBrush.color());
-
-    if (selected)
-        painter->fillRect(option.rect, baseBrush);
-
-    // set up fonts, fbold, fsmall, fsmallbold
-    QFont fbold = mainFont(option);
-    QFont fsmall = secondaryFont(option);
-
-    int x = option.rect.x();
-    int y = option.rect.y();
-    int width = option.rect.width();
-    int height = option.rect.height()-1;
-
-    int offset = (height-decoration.height())/2;
-    if ( rtl )
-        painter->drawPixmap(width-decoration.width(), y+offset, decoration );
-    else
-        painter->drawPixmap(x, y+offset, decoration);
-
-    x += QContact::thumbnailSize().width() + 2;
-    width -= QContact::thumbnailSize().width() + 2;
-
-    int bcardwidth = 0;
-    int bcardbase = y;
-    if (!secondaryDecoration.isNull()) {
-        bcardwidth = secondaryDecoration.width();
-        bcardbase = y+secondaryDecoration.height();
-        offset = (height-secondaryDecoration.height())/2;
-        if ( rtl )
-            painter->drawPixmap( option.rect.x(), y+offset, secondaryDecoration );
-        else
-            painter->drawPixmap(x+width-bcardwidth, y+offset,secondaryDecoration);
-    }
-
-    // draw label bold
-    painter->setFont(fbold);
-
-    // fit inside available width;
-    QFontMetrics fboldM(fbold);
-
-    // somehow underline appropriate characters.
-    // clm->markSearchedText(text);, if richtext, would be <u>...</u> but only first
-    // QContactModel maybe could do a better job of this.
-
-    QRect space;
-    if ( rtl )
-        space = QRect(option.rect.x() + bcardwidth, y, width-bcardwidth, height);
-    else
-        space = QRect(x, y, width - bcardwidth, height);
-
-    // draw label/fileas
-    QTextOption to;
-    to.setWrapMode(QTextOption::WordWrap);
-    to.setAlignment(QStyle::visualAlignment(qApp->layoutDirection(),
-                Qt::AlignLeft));
-
-    QString drawText;
-    /* elidedText drops formatting from rich text */
-#if 0
-    if(fboldM.width(text) > space.width())  {
-        drawText = elidedText(fboldM, space.width(), Qt::ElideRight, text);
-    } else
-#endif
-        drawText = text;
-
-
-    // Painting simple rich text, although all I need to do is deal with a bit of
-    // an underline.
-    QTextDocument document;
-    document.setDefaultFont(fbold);
-    document.setHtml(drawText); // or setPlainText or create using QTextCursor, etc.
-
-    /* seemingly the only way to stop wrapping in a QTextDocument... */
-    document.setPageSize(space.size().expandedTo(QSize(1000, 0)));
-
-    QTextCursor cursor = document.rootFrame()->firstCursorPosition();
-    QTextBlockFormat frmt = cursor.blockFormat();
-    frmt.setAlignment(QStyle::visualAlignment( qApp->layoutDirection(), Qt::AlignLeft ));
-    cursor.setBlockFormat( frmt );
-    QTextCharFormat charFmt = cursor.charFormat();
-
-    QAbstractTextDocumentLayout::PaintContext ctx;
-    ctx.palette = modpalette;
-    ctx.clip = QRect(0, 0, space.width(), space.height());
-    painter->save();
-    if (rtl) {
-        painter->translate(space.x()-1000+space.width(), space.y());
-        painter->setClipRect(1000-space.width(), 0, space.width(), space.height());
-    } else {
-        painter->translate(space.x(), space.y());
-        painter->setClipRect(0, 0, space.width(), space.height());
-    }
-    document.documentLayout()->draw(painter, ctx);
-    painter->restore();
-    // was
-    //painter->drawText(space, drawText, to);
-
-    y+=fboldM.height();
-
-    painter->setFont(fsmall);
-    // could do this in loop similar to abtable paintCell.
-    // however would need to keep a list of printed labels, and ensure
-    // not printing duplicates.
-    QFontMetrics fsmallM(fsmall);
-    if (y + fsmallM.height() <= option.rect.bottom()) {
-        // go for more text.
-
-        // this could just be a list of 'try this field then that.
-        if (y > bcardbase)
-            bcardwidth = 0;
-
-        if (!secondaryText.isEmpty()) {
-            if (fsmallM.width(secondaryText) > space.width())
-                drawText = elidedText(fsmallM, width-bcardwidth, Qt::ElideRight, secondaryText);
-            else
-                drawText = secondaryText;
-            if ( rtl )
-                painter->drawText(
-                    QRect(option.rect.x()+bcardwidth, y, width-bcardwidth, height),
-                    drawText, to );
-            else
-                painter->drawText(QRect(x, y, width-bcardwidth, height), drawText, to);
-        }
-    }
-    painter->restore();
-}
-
-/*!
-   \overload
-
-   Returns the size hint for objects drawn with the delgate with style options \a option for item at \a index.
-*/
-QSize QContactDelegate::sizeHint(const QStyleOptionViewItem & option,
-        const QModelIndex &index) const
-{
-    Q_UNUSED(index);
-
-    QFontMetrics fm(mainFont(option));
-    QFontMetrics sfm(secondaryFont(option));
-
-    return QSize(QContact::thumbnailSize().width() + fm.width("M")*10,
-            qMax(QContact::thumbnailSize().height(), fm.height()+sfm.height())+1);
-}
 /*!
   \class QContactListView
   \module qpepim
@@ -360,7 +251,7 @@ void QContactListView::setModel( QAbstractItemModel *model )
         return;
     QListView::setModel(model);
     /* connect the selectionModel (which is created by setModel) */
-    connect(selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(slotCurrentChanged(const QModelIndex &)));
+    connect(selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentContactChanged(const QModelIndex &)));
 }
 
 /*!
@@ -399,7 +290,7 @@ QList<QUniqueId> QContactListView::selectedContactIds() const
    Try to make sure we select the current item, whenever it
    changes.
    */
-void QContactListView::slotCurrentChanged(const QModelIndex& newIndex)
+void QContactListView::currentContactChanged(const QModelIndex& newIndex)
 {
     if (newIndex.isValid()) {
         selectionModel()->select(newIndex, QItemSelectionModel::Select);

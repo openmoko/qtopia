@@ -78,8 +78,6 @@
   \endcode
   \endlist
   See also: \l {Qtopia IPC Layer}{Qtopia IPC} and \l {Services}{Services}.
-
-  \ingroup qtopiaemb
 */
 
 /*!

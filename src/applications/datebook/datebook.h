@@ -145,7 +145,6 @@ signals:
     void categoryChanged( const QCategoryFilter & c );
 
 protected:
-    void timerEvent(QTimerEvent *e);
     void closeEvent(QCloseEvent *e);
     bool eventFilter(QObject *o, QEvent *e);
 
@@ -158,7 +157,7 @@ protected:
 #endif
 
     void initExceptionDialog();
-    int askException(const QString &action);
+    int askException(bool editMode);
 
     void loadSettings();
     void saveSettings();

@@ -19,6 +19,10 @@ VPATH+=$$QTOPIA_DEPOT_PATH/src/libraries/qtopiapim
 INCLUDEPATH+=$$QPEDIR/include/qtopiapim
 RESOURCES+=qtopiapim.qrc
 
+VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate
+VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate/qtopiapim
+INCLUDEPATH+=$$QPEDIR/src/tools/dbmigrate
+
 DEFINES+=QTOPIA_CONTENT_INSTALLER
 
 SOURCES	= main.cpp \
@@ -48,7 +52,9 @@ SOURCES	= main.cpp \
     qtopiaservices.cpp \
     qslotinvoker.cpp \
     qsignalintercepter.cpp \
-    quniqueid.cpp 
+    quniqueid.cpp \
+    migrateengine.cpp \
+    pimmigrate.cpp
 
 HEADERS = \
     qtopiasql.h \
@@ -77,4 +83,17 @@ HEADERS = \
     qtopiaservices.h \
     qslotinvoker.h \
     qsignalintercepter.h \
-    quniqueid.h
+    quniqueid.h \
+    migrateengine.h \
+    pimmigrate.h
+
+RESOURCES += pimmigrate.qrc
+
+#INCLUDEPATH+=$$QTE_DEPOT_PATH/src/3rdparty/sqlite
+backup.TARGET=$$TARGET
+include($$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite/sqlite.pro)
+TARGET=$$backup.TARGET
+# qmake can't handle main.cpp and main.c so include sqlitemain.c instead (which includes main.c)
+SOURCES-=main.c
+SOURCES+=sqlitemain.c
+

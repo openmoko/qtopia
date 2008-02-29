@@ -22,11 +22,8 @@
 #ifndef APPOINTMENTLISTMODEL_H
 #define APPOINTMENTLISTMODEL_H
 
-#include <QStyleOptionViewItem>
-#include <QAbstractListModel>
-#include <QAbstractItemDelegate>
 #include <QSet>
-#include <QSharedDataPointer>
+#include <QPimModel>
 #include <qappointment.h>
 
 #include <qcategorymanager.h>
@@ -35,7 +32,7 @@
 
 class QAppointmentModelData;
 class QAppointmentIO;
-class QTOPIAPIM_EXPORT QAppointmentModel : public QAbstractItemModel
+class QTOPIAPIM_EXPORT QAppointmentModel : public QPimModel
 {
     friend class QOccurrenceModel;
     Q_OBJECT
@@ -66,31 +63,16 @@ public:
         Categories
     };
 
-    const QList<QAppointmentContext*> &contexts() const;
-
     /* consider making these just generic added roles */
     enum QAppointmentModelRole {
         LabelRole = Qt::UserRole
     };
-
-    QSet<QPimSource> visibleSources() const;
-    void setVisibleSources(const QSet<QPimSource> &);
-    QSet<QPimSource> availableSources() const;
-
-    QPimSource source(const QUniqueId &) const;
-    QAppointmentContext *context(const QUniqueId &) const;
-
-    bool sourceExists(const QPimSource &source, const QUniqueId &id) const;
 
     static QString fieldLabel(Field);
     static QIcon fieldIcon(Field k);
 
     static QString fieldIdentifier(Field);
     static Field identifierField(const QString &);
-
-    int rowCount(const QModelIndex & = QModelIndex()) const;
-
-    int count() const { return rowCount(); }
 
     int columnCount(const QModelIndex & = QModelIndex()) const;
 
@@ -100,49 +82,39 @@ public:
     QStringList mimeTypes() const;
 
     QVariant data(const QModelIndex &index, int role) const;
-    bool setData(const QModelIndex &, const QVariant &, int) const;
-    bool setItemData(const QModelIndex &, const QMap<int,QVariant> &) const;
+    bool setData(const QModelIndex &, const QVariant &, int);
+    bool setItemData(const QModelIndex &, const QMap<int,QVariant> &);
     QMap<int,QVariant> itemData(const QModelIndex &) const;
 
     QVariant headerData(int section, Qt::Orientation orientation,
             int role = Qt::DisplayRole) const;
 
-
-    bool exists(const QUniqueId &) const;
-
-    virtual QModelIndex index(const QUniqueId &) const;
-    QModelIndex index(int,int = 0,const QModelIndex & = QModelIndex()) const;
-    virtual QUniqueId id(const QModelIndex &) const;
-    QModelIndex parent(const QModelIndex &) const;
-    bool hasChildren(const QModelIndex & = QModelIndex()) const;
     QAppointment appointment(const QModelIndex &index) const;
     QAppointment appointment(const QUniqueId &) const;
     QAppointment appointment(int index) const;
-
-    bool editable(const QModelIndex &index) const;
-    bool editable(const QUniqueId &) const;
 
     static QVariant appointmentField(const QAppointment &c, QAppointmentModel::Field k);
     static bool setAppointmentField(QAppointment &c, QAppointmentModel::Field k,  const QVariant &);
 
     bool updateAppointment(const QAppointment& appointment);
     bool removeAppointment(const QAppointment& appointment);
+    bool removeAppointment(const QUniqueId& appointment);
     QUniqueId addAppointment(const QAppointment& appointment, const QPimSource & = QPimSource());
 
     bool removeOccurrence(const QOccurrence& occurrence);
     bool removeOccurrence(const QAppointment& appointment, const QDate &date);
     bool removeOccurrence(const QUniqueId &id, const QDate &date);
-    QUniqueId replaceOccurrence(const QAppointment& appointment, const QOccurrence& replacement);
-    QUniqueId replaceRemaining(const QAppointment& appointment, const QAppointment& replacement);
+    QUniqueId replaceOccurrence(const QAppointment& appointment, const QOccurrence& replacement, const QDate& date = QDate());
+    QUniqueId replaceRemaining(const QAppointment& appointment, const QAppointment& replacement, const QDate& date = QDate());
 
     // should also be QItemSelection, although isn't that iteratable.
     bool removeList(const QList<QUniqueId> &);
 
-    void setCategoryFilter(const QCategoryFilter &);
-    QCategoryFilter categoryFilter() const;
+    QUniqueId addRecord(const QByteArray &, const QPimSource &, const QString &format = QString());
+    bool updateRecord(const QUniqueId &id, const QByteArray &, const QString &format = QString());
+    QByteArray record(const QUniqueId &id, const QString &format = QString()) const;
 
-    bool flush();
-    bool refresh();
+    bool removeRecord(const QUniqueId &id) { return removeAppointment(id); }
 
     void setRange(const QDateTime &, const QDateTime &);
     QDateTime rangeStart() const;
@@ -158,12 +130,9 @@ public:
     void setDurationType(DurationType f);
     DurationType durationType() const;
 
-private slots:
-    void voidCache();
-
 private:
 
-    bool removeAppointment(const QUniqueId& appointment);
+    QAppointment simpleAppointment(int row);
 
     static void initMaps();
     static QMap<Field, QString> k2t;
@@ -192,8 +161,8 @@ public:
     QStringList mimeTypes() const;
 
     QVariant data(const QModelIndex &index, int role) const;
-    bool setData(const QModelIndex &, const QVariant &, int) const;
-    bool setItemData(const QModelIndex &, const QMap<int,QVariant> &) const;
+    bool setData(const QModelIndex &, const QVariant &, int);
+    bool setItemData(const QModelIndex &, const QMap<int,QVariant> &);
     QMap<int,QVariant> itemData(const QModelIndex &) const;
 
     int count() const { return rowCount(); }
@@ -242,34 +211,12 @@ signals:
 
 public slots:
     void rebuildCache();
-private slots:
-    void voidCache();
 
 private:
+    QVariant appointmentData(int row, int column) const;
     void init(QAppointmentModel *appointmentModel);
 
     QOccurrenceModelData *od;
-};
-
-class QFont;
-class QTOPIAPIM_EXPORT QAppointmentDelegate : public QAbstractItemDelegate
-{
-public:
-    QAppointmentDelegate( QObject * parent = 0 );
-    virtual ~QAppointmentDelegate();
-
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem & option,
-            const QModelIndex & index ) const;
-
-    virtual QSize sizeHint(const QStyleOptionViewItem & option,
-            const QModelIndex &index) const;
-
-    virtual QFont mainFont(const QStyleOptionViewItem &) const;
-    virtual QFont secondaryFont(const QStyleOptionViewItem &) const;
-private:
-    QFont differentFont(const QFont& start, int step) const;
-
-    int iconSize;
 };
 
 #endif // APPOINTMENTLISTMODEL_H

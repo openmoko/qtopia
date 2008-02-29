@@ -35,7 +35,6 @@
 /*!
     \class QHardwareInterface
     \brief The QHardwareInterface class is a base-class for accessory classes.
-    \ingroup qtopiaemb
 
     QHardwareInterface is part of the accessory system which
     provides information about the available physical accessories.

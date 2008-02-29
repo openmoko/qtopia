@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/embedded/qwindowsystem_qws.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/embedded/qwindowsystem_qws.cpp -->
 <head>
   <title>Qt 4.2: Qt 3 Support Members for QWSServer</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -24,22 +24,36 @@
 </ul>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="qwsserver-qt3.html#setDesktopBackground">setDesktopBackground</a></b> ( const QImage &amp; <i>img</i> )</li>
-<li><div class="fn"/>void <b><a href="qwsserver-qt3.html#setDesktopBackground-2">setDesktopBackground</a></b> ( const QColor &amp; <i>c</i> )</li>
+<li><div class="fn"/>void <b><a href="qwsserver-qt3.html#setDesktopBackground">setDesktopBackground</a></b> ( const QImage &amp; <i>image</i> )</li>
+<li><div class="fn"/>void <b><a href="qwsserver-qt3.html#setDesktopBackground-2">setDesktopBackground</a></b> ( const QColor &amp; <i>color</i> )</li>
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QWSServer-2"></a>QWSServer::QWSServer ( int <i>flags</i>, <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use the two-argument overload and call <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="setDesktopBackground"></a>void QWSServer::setDesktopBackground ( const <a href="qimage.html">QImage</a> &amp; <i>img</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Sets the image <i>img</i> to be used as the background in the absence of obscuring windows.</p>
-<h3 class="fn"><a name="setDesktopBackground-2"></a>void QWSServer::setDesktopBackground ( const <a href="qcolor.html">QColor</a> &amp; <i>c</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Use the two-argument overload and call the <a href="qobject.html#objectName-prop">QObject::setObjectName</a>() function instead.</p>
+<h3 class="fn"><a name="setDesktopBackground"></a>void QWSServer::setDesktopBackground ( const <a href="qimage.html">QImage</a> &amp; <i>image</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Sets the image used as background in the absence of obscuring windows, to be the given <i>image</i>.</p>
+<p>Use the <a href="qwsserver.html#setBackground">setBackground</a>() function instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> QImage image;
+ setDesktopBackground(image);</font></pre>
+<p>you can rewrite it as</p>
+<pre> QImage image;
+ setBackground(QBrush(image));</pre>
+<h3 class="fn"><a name="setDesktopBackground-2"></a>void QWSServer::setDesktopBackground ( const <a href="qcolor.html">QColor</a> &amp; <i>color</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Sets the color <i>c</i> to be used as the background in the absence of obscuring windows.</p>
+<p>Sets the color used as background in the absence of obscuring windows, to be the given <i>color</i>.</p>
+<p>Use the <a href="qwsserver.html#setBackground">setBackground</a>() function instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> QColor color;
+ setDesktopBackground(color);</font></pre>
+<p>you can rewrite it as</p>
+<pre> QColor color;
+ setBackground(QBrush(color));</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

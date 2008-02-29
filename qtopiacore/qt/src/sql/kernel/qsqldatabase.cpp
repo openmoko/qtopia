@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtSql module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -371,7 +381,7 @@ void QSqlDatabasePrivate::disable()
     isDriverAvailable(). If you have created your own custom driver,
     you can register it with registerSqlDriver().
 
-    \sa QSqlDriver, QSqlQuery, {QtSql Module}
+    \sa QSqlDriver, QSqlQuery, {QtSql Module}, {Threads and the SQL Module}
 */
 
 /*!
@@ -403,7 +413,7 @@ void QSqlDatabasePrivate::disable()
     setConnectOptions(), and then you'll need to open() the
     connection.
 
-    \sa database() removeDatabase()
+    \sa database() removeDatabase() {Threads and the SQL Module}
 */
 QSqlDatabase QSqlDatabase::addDatabase(const QString &type, const QString &connectionName)
 {
@@ -423,7 +433,7 @@ QSqlDatabase QSqlDatabase::addDatabase(const QString &type, const QString &conne
     connectionName does not exist in the list of databases, an invalid
     connection is returned.
 
-    \sa isOpen()
+    \sa isOpen() {Threads and the SQL Module}
 */
 
 QSqlDatabase QSqlDatabase::database(const QString& connectionName, bool open)
@@ -464,7 +474,7 @@ QSqlDatabase QSqlDatabase::database(const QString& connectionName, bool open)
     QSqlDatabase::removeDatabase("sales"); // correct
     \endcode
 
-    \sa database()
+    \sa database() {Threads and the SQL Module}
 */
 
 void QSqlDatabase::removeDatabase(const QString& connectionName)
@@ -564,7 +574,7 @@ void QSqlDatabase::registerSqlDriver(const QString& name, QSqlDriverCreatorBase 
     Returns true if the list of database connections contains \a
     connectionName; otherwise returns false.
 
-    \sa connectionNames(), database()
+    \sa connectionNames(), database(), {Threads and the SQL Module}
 */
 
 bool QSqlDatabase::contains(const QString& connectionName)
@@ -577,7 +587,7 @@ bool QSqlDatabase::contains(const QString& connectionName)
 
     Returns a list containing the names of all connections.
 
-    \sa contains(), database()
+    \sa contains(), database(), {Threads and the SQL Module}
 */
 QStringList QSqlDatabase::connectionNames()
 {

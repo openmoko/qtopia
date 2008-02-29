@@ -23,7 +23,7 @@
 #define CALCULATOR_INSTRUCTION_H
 
 #include <QString>
-#include <QBitmap>
+#include <QPixmap>
 
 #include "data.h"
 
@@ -39,7 +39,7 @@ public:
     int precedence;
     int argCount;
     virtual QPixmap* draw();
-    QBitmap *cache;
+    QPixmap *cache;
 };
 
 #endif

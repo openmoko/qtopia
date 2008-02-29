@@ -1,0 +1,145 @@
+#!/bin/sh
+
+# This flash script updates the Greenphone with a new Qtopia image,
+# by running trolltech_flash.sh in the update image.
+
+usage()
+{
+    echo "Usage: $0 [options] <Qtopia image>"
+    echo "    --remove-flash-files    Remove flash files after upgrade"
+    echo "    --dont-reboot           Don't automatically reboot after upgrade"
+    echo "    --ignore-firstrun       Ignore firstrun file and always flash"
+    echo "    --no-questions          Don't ask any questions"
+}
+
+export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+
+# Process command line options
+OPTION_REMOVE_FLASH_FILES=0
+OPTION_DONT_REBOOT=0
+OPTION_IGNORE_FIRSTRUN=0
+OPTION_NO_QUESTIOSN=0
+QTOPIA_IMAGE_PATH=""
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --remove-flash-files)
+            OPTION_REMOVE_FLASH_FILES=1
+            ;;
+        --dont-reboot)
+            OPTION_DONT_REBOOT=1
+            ;;
+        --ignore-firstrun)
+            OPTION_IGNORE_FIRSTRUN=1
+            ;;
+        --no-questions)
+            OPTION_NO_QUESTIONS=1
+            ;;
+        --help)
+            usage
+            exit 1
+            ;;
+        --*)
+            echo "Unknown option $1, ignoring."
+            ;;
+        *)
+            QTOPIA_IMAGE_PATH="$1"
+            ;;
+    esac
+    shift
+done
+
+if [ "$QTOPIA_IMAGE_PATH" = "" ]; then
+    echo "Qtopia image not specified."
+    usage
+    exit 1
+fi
+
+cd "$QTOPIA_IMAGE_PATH"
+
+QTOPIA_FIRST_RUN=/mnt/user/tools/.firstrun
+
+# Path where status images are stored
+STATUS_IMAGE_PATH=/usr/share/updateqtopia
+
+# The following files are used by this script. If --remove-flash-files is
+# sepcified all of these files will be removed from the installation medium.
+QTOPIA_IMAGE="qtopia.cramfs"
+STATUS_IMAGES="flash-status-fail-fserror.gif \
+               flash-status-fail-fsversion.gif \
+               flash-status-fail-files.gif \
+               flash-status-fail-space.gif \
+               flash-status-fail-initqtopia.gif \
+               flash-status-flashing.gif \
+               flash-status-pass.gif"
+
+contains_update_image()
+{
+    for i in trolltech_flash.sh $QTOPIA_IMAGE $STATUS_IMAGES; do
+        [ ! -r $QTOPIA_IMAGE_PATH/$i ] && return 1
+    done
+    
+    return 0
+}
+
+flash_status()
+{
+    echo "TROLL: $2"
+    gifanim $STATUS_IMAGE_PATH/$1.gif
+}
+
+question()
+{
+    # usage: question <image?> <question?>
+    # returns: 0 for left context, 1 for right context
+    flash_status "$1" "$2"
+
+    while true; do
+        KEYCODE=`getkeycode`
+
+        [ "$KEYCODE" = "19" ] && return 0
+        [ "$KEYCODE" = "26" ] && return 1
+    done
+}
+
+###############################################
+# Greenphone Qtoipa Flash for SDK Development #
+###############################################
+
+[ $OPTION_IGNORE_FIRSTRUN -eq 1 ] && rm -f $QTOPIA_FIRST_RUN
+
+if [ -e $QTOPIA_FIRST_RUN ]; then
+    # this is the first boot after flashing
+    # don't reflash the device
+    rm -f $QTOPIA_FIRST_RUN
+    exit 1
+fi
+
+if ! contains_update_image; then
+    exit 1
+fi
+
+if [ $OPTION_NO_QUESTIONS -eq 0 ]; then
+    if ! question flash-status-proceed "Install new Qtopia image?"; then
+        flash_status flash-status-user-abort "User aborted flash"
+        exit 1
+    fi
+fi
+
+# trolltech_flash expects the image to be mounted on /mnt/sd
+if [ "$QTOPIA_IMAGE_PATH" != "/mnt/sd" ]; then
+    mount -o bind $QTOPIA_IMAGE_PATH /mnt/sd
+fi
+
+[ $OPTION_REMOVE_FLASH_FILES -eq 1 ] && OPTIONS="--remove-files"
+[ $OPTION_DONT_REBOOT -eq 1 ] && OPTIONS="$OPTIONS --dont-reboot"
+
+updateqtopiahelper flash $OPTIONS
+RETVAL=$?
+
+if [ "$QTOPIA_IMAGE_PATH" != "/mnt/sd" ]; then
+    umount /mnt/sd
+fi
+
+exit $RETVAL
+

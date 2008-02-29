@@ -232,10 +232,12 @@ bool QtopiaChannel_Private::dbusSend(const QString &channel,
 QtopiaChannel::QtopiaChannel(const QString &channel, QObject *parent) :
         QObject(parent)
 {
+#ifndef QTOPIA_TEST     // Allow all channels to be hijacked for testing.
     if (channel.startsWith("QPE/Application")) {
         qWarning("QtopiaChannel does not support receiving on QPE/Application channels.");
         return;
     }
+#endif
     m_data = new QtopiaChannel_Private(channel, this);
 }
 

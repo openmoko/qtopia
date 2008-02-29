@@ -42,12 +42,15 @@ public:
 private:
     QSocketNotifier *m_notify;
     int  kbdFD;
+//    unsigned int    m_repeatKeyCode;
+//    unsigned short  m_unicode;
     struct termios origTermData;
+//    QTimer*     m_timer;
 
 private Q_SLOTS:
     void readKbdData();
-
     void handleTtySwitch(int sig);
+//    void repeat();
 };
 
 #endif // QT_QWS_GREENPHONE

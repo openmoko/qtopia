@@ -27,60 +27,32 @@
 #include <QSqlDriver>
 #include <QFile>
 #include <QDir>
+#include <QProcess>
+#include <QFileInfo>
+#include <QTextCodec>
 
 #include <qtopiasql.h>
 #include <qcontent.h>
 #include <qtopianamespace.h>
 #include <private/contentlnksql_p.h>
 #include <qtopialog.h>
+#include "../dbmigrate/migrateengine.h"
 
 #include <qdebug.h>
 
 #include <time.h>
-
-bool doFinalizeResources( const QString &dbPath )
-{
-    if ( QFile::exists( dbPath ))
-        QFile::remove( dbPath );
-    QString dbType( "QSQLITE" );
-    QSqlDatabase db = QSqlDatabase::addDatabase( dbType );
-    db.setDatabaseName( dbPath );
-    if ( !db.open() )
-    {
-        qWarning( "Could not open database %s", qPrintable( dbPath ));
-        return false;
-    }
-    QString schemaPrefix( ":/QtopiaSql/" );
-    schemaPrefix += dbType;
-    QDir schema( schemaPrefix );
-    QStringList schemaList = schema.entryList();
-    bool transact = db.driver()->hasFeature( QSqlDriver::Transactions );
-    foreach ( QString s, schemaList )
-    {
-        QtopiaSql::loadSchema( db, schemaPrefix + "/" + s, transact );
-        qLog(Sql) << "loaded schema for" << s;
-    }
-    return true;
-}
-
-/*!
-  main = install the application via its .desktop file
-*/
+#include <stdio.h>
 int main( int argc, char** argv )
 {
+    setenv( "LANG", "en_US.utf8", 1 ); //Force LANG to UTF-8 so correct bytes are written to the database.
+
     QApplication app(argc, argv, false);
-    bool doFinalize = false;
-    if ( argc < 4 )
-        qFatal( "Usage: %s { installroot depotpath prefix file/s | -finalize depotpath installpath }\n", argv[0] );
+    if ( argc < 6  ) {
+        printf("Usage: %s database prefix destpath categories file/s\n", app.arguments().at(0).toLocal8Bit().constData());
+        return 1;
+    }
 
-    if ( strncmp( argv[1], "-finalize", 9 ) == 0 )
-        doFinalize = true;
-
-    QString dbPath( argv[ doFinalize ? 3 : 1 ] );
-    if ( doFinalize )
-        dbPath += "/etc/default/Trolltech/qtopia_db.sqlite";
-    else
-        dbPath += "/qtopia_db.sqlite";
+    QString dbPath( app.arguments().at(1) );
     QString dbLockPath = dbPath + ".lock";
     QFileInfo lkInfo( dbLockPath );
     QDir lkDir( lkInfo.absolutePath() );
@@ -98,42 +70,45 @@ int main( int argc, char** argv )
             printf( "." );
         if ( --tries == 0 )
             break;
-        Qtopia::msleep( 10 );
+        Qtopia::msleep( 100 );
     }
     if ( tries == 0 )
         qFatal( "Could not lock file %s", qPrintable( dbLockPath ));
 
-    if ( doFinalize )
+    // Add one or more .desktop files to the database
+    QtopiaSql::loadConfig(QString ("QSQLITE"), dbPath, QString ());
+    if(!QDBMigrationEngine::instance()->doMigrate(QStringList() << dbPath))
     {
-        doFinalizeResources( dbPath );
+        Qtopia::unlockFile( lk );
+        lk.remove();
+        qFatal( "Database creation/upgrade failed on database %s", qPrintable( dbPath ));
     }
-    else
+    QString prefixPath = app.arguments().at(2);
+    QString destPath = app.arguments().at(3);
+    QStringList categories = app.arguments().at(4).split(" ", QString::SkipEmptyParts);
+    for (int i=5; i<app.arguments().count (); i++)
     {
-        QtopiaSql::loadConfig(QString ("QSQLITE"), dbPath, QString ());
-        QString depotPath(argv[2]), prefixPath(argv[3]);
-        for (int i=4; i<app.arguments ().count (); i++)
-        {
-            QFileInfo fi( app.arguments().at( i ));
-            QContent content( fi, false );
-            if(content.id() != QContent::InvalidId)
-            {
-                QContent::uninstall(content.id());
-                content=QContent(fi, false);
-            }
-            if(content.file().startsWith(depotPath))
-            {
-                QString newPath=content.file();
-                newPath=newPath.replace(depotPath, prefixPath);
-                content.setFile(newPath);
-            }
-            if(content.linkFile().startsWith(depotPath))
-            {
-                QString newPath=content.linkFile();
-                newPath=newPath.replace(depotPath, prefixPath);
-                content.setLinkFile(newPath);
-            }
-            content.commit();
+        QString sourceFile = app.arguments().at(i);
+        QString destFile = prefixPath + destPath + QLatin1Char('/') + QFileInfo(sourceFile).fileName();
+        // Remove the existing entry (we don't want duplication)
+        QContent content(destFile, false);
+        if(content.id() != QContent::InvalidId)
+            QContent::uninstall(content.id());
+        // Create a new entry
+        content=QContent(sourceFile, false);
+        if ( QFileInfo(sourceFile).suffix() == "desktop" )
+            content.setLinkFile(destFile);
+        if( content.role() != QContent::Application && content.fileKnown() )
+            if(QFileInfo(content.file()).absolutePath() == QFileInfo(sourceFile).absolutePath())
+                content.setFile(QDir::cleanPath(QFileInfo(destFile).absolutePath()+ QLatin1Char('/')+QFileInfo(content.file()).fileName()));
+        if ( QFileInfo(sourceFile).suffix() != "desktop" ) {
+            content.setName( QFileInfo(sourceFile).baseName() );
+            content.setRole( QContent::Data );
         }
+        // categories can come in via the .pro file (required for hint=content)
+        if ( categories.count() != 0 )
+            content.setCategories( categories );
+        content.commit();
     }
     Qtopia::unlockFile( lk );
     lk.remove();

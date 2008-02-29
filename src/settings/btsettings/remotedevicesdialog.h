@@ -21,17 +21,15 @@
 #ifndef __REMOTEDEVICESDIALOG_H__
 #define __REMOTEDEVICESDIALOG_H__
 
-#include <qtopia/comm/qbluetoothdeviceselector.h>
-#include <qtopia/comm/qsdap.h>
+#include <qbluetoothsdpquery.h>
 
 #include <QDialog>
 
 class QContent;
 class QAction;
 class QDocumentSelector;
-class QBluetoothDeviceSelector;
 class QFile;
-
+class MyDeviceDialog;
 
 class RemoteDevicesWindow : public QDialog
 {
@@ -43,17 +41,12 @@ public:
 
 public slots:
     void start();
-
     void sendVCard();
     void sendFile();
-    void sendFileRequest(const QContent &doc);
 
 private:
-    QBluetoothDeviceSelector *m_deviceSelector;
-
-    QDialog *m_fileSelector;
-    QSDAP m_vcardSDAP;            // SDAP for querying the m_vcardDevice
-    QDocumentSelector *m_docSelector;
+    MyDeviceDialog *m_deviceDialog;
+    QBluetoothSdpQuery m_vcardSDAP;            // SDAP for querying the m_vcardDevice
 };
 
 #endif

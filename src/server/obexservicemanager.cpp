@@ -25,16 +25,15 @@
 #include <qcommdevicesession.h>
 
 #ifdef QTOPIA_BLUETOOTH
-#include <qsdp.h>
-#include <qsdpservice.h>
+#include <qbluetoothsdprecord.h>
 #include <qbluetoothabstractservice.h>
 #include <qbluetoothobexserver.h>
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothlocaldevicemanager.h>
 #include <qbluetoothnamespace.h>
 #include <qbluetoothobexsocket.h>
-#include <qsdap.h>
-#include <qbluetoothdeviceselector.h>
+#include <qbluetoothsdpquery.h>
+#include <qbluetoothremotedevicedialog.h>
 #endif
 
 #ifdef QTOPIA_INFRARED
@@ -317,7 +316,8 @@ void InfraredBeamingService::sessionOpen()
     }
 
     QObexPushClient *client = new QObexPushClient(socket, this);
-    client->setAutoDelete(true);
+    connect(client, SIGNAL(done(bool)), client, SLOT(deleteLater()));
+    connect(client, SIGNAL(destroyed()), socket, SLOT(deleteLater()));
 
     if (m_type == File) {
         QObject::connect(client, SIGNAL(done(bool)), this, SLOT(doneBeamingFile(bool)));
@@ -592,7 +592,7 @@ public slots:
     void pushFile(const QBluetoothAddress &addr, const QContentId &id);
 
 private slots:
-    void sdapQueryComplete(const QSDAPSearchResult &result);
+    void sdapQueryComplete(const QBluetoothSdpQueryResult &result);
     void donePushingVObj(bool error);
     void donePushingFile(bool error);
 
@@ -611,7 +611,7 @@ private:
     ObexServiceManager *m_parent;
     bool m_busy;
     QWaitWidget *m_waitWidget;
-    QSDAP *m_sdap;
+    QBluetoothSdpQuery *m_sdap;
 
     QDSActionRequest *m_current;
     QIODevice *m_device;
@@ -641,9 +641,9 @@ BluetoothPushingService::BluetoothPushingService(ObexServiceManager *parent)
     m_busy = false;
     m_waitWidget = new QWaitWidget(0);
 
-    m_sdap = new QSDAP();
-    QObject::connect(m_sdap, SIGNAL(searchComplete(const QSDAPSearchResult)),
-                     this, SLOT(sdapQueryComplete(const QSDAPSearchResult &)));
+    m_sdap = new QBluetoothSdpQuery();
+    QObject::connect(m_sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult)),
+                     this, SLOT(sdapQueryComplete(const QBluetoothSdpQueryResult &)));
 
     m_device = 0;
     m_current = 0;
@@ -667,13 +667,13 @@ BluetoothPushingService::~BluetoothPushingService()
  */
 void BluetoothPushingService::sessionOpen()
 {
-    if (!m_req.m_addr.valid()) {
+    if (!m_req.m_addr.isValid()) {
         QSet<QBluetooth::SDPProfile> profiles;
         profiles.insert(QBluetooth::ObjectPushProfile);
         m_req.m_addr =
-                QBluetoothDeviceSelector::getRemoteDevice(profiles);
+                QBluetoothRemoteDeviceDialog::getRemoteDevice(0, profiles);
 
-        if ( !m_req.m_addr.valid() ) {
+        if ( !m_req.m_addr.isValid() ) {
             m_session->endSession();
             m_busy = false;
             return;
@@ -717,16 +717,16 @@ void BluetoothPushingService::startSession()
 /*!
     \internal
  */
-void BluetoothPushingService::sdapQueryComplete(const QSDAPSearchResult &result)
+void BluetoothPushingService::sdapQueryComplete(const QBluetoothSdpQueryResult &result)
 {
     qLog(Bluetooth) << "Service searching complete";
 
     bool success = false;
     int channel;
 
-    foreach ( QSDPService service, result.services() ) {
-        if ( QSDPService::isInstance( service, QBluetooth::ObjectPushProfile ) ) {
-            channel = QSDPService::rfcommChannel(service);
+    foreach ( QBluetoothSdpRecord service, result.services() ) {
+        if ( service.isInstance( QBluetooth::ObjectPushProfile ) ) {
+            channel = QBluetoothSdpRecord::rfcommChannel(service);
             success = true;
             break;
         }
@@ -759,7 +759,8 @@ void BluetoothPushingService::sdapQueryComplete(const QSDAPSearchResult &result)
     }
 
     QObexPushClient *client = new QObexPushClient(socket, this);
-    client->setAutoDelete(true);
+    connect(client, SIGNAL(done(bool)), client, SLOT(deleteLater()));
+    connect(client, SIGNAL(destroyed()), socket, SLOT(deleteLater()));
 
     if ((m_req.m_mimetype == "text/x-vcard") || (m_req.m_mimetype == "text/x-vcalendar")) {
         QObject::connect(client, SIGNAL(done(bool)), this, SLOT(donePushingVObj(bool)));
@@ -944,7 +945,7 @@ void BluetoothPushingService::pushPersonalBusinessCard(const QBluetoothAddress &
     if (!getPersonalVCard(arr))
         return;
 
-    if ( !addr.valid() ) {
+    if ( !addr.isValid() ) {
         return;
     }
 
@@ -1111,11 +1112,10 @@ public:
     ObexPushServiceProvider(ObexServiceManager *parent = 0);
     ~ObexPushServiceProvider();
 
-    virtual void start(int channel);
+    virtual void start();
     virtual void stop();
 
     virtual void setSecurityOptions(QBluetooth::SecurityOptions options);
-    virtual QString translatableDisplayName() const;
 
 private slots:
     void newOPushConnection();
@@ -1130,18 +1130,19 @@ private:
     QBluetoothLocalDevice *m_local;
     int m_numBtSessions;
     QCommDeviceSession *m_btDeviceSession;
+    quint32 m_sdpRecordHandle;
 };
 
 ObexPushServiceProvider::ObexPushServiceProvider(ObexServiceManager *parent)
-    : QBluetoothAbstractService("ObexObjectPush", parent),
+    : QBluetoothAbstractService("ObexObjectPush", tr("OBEX Object Push Service"), parent),
       m_parent(parent),
       m_opush(0),
       m_securityOptions(0),
       m_local(new QBluetoothLocalDevice(this)),
       m_numBtSessions(0),
-      m_btDeviceSession(0)
+      m_btDeviceSession(0),
+      m_sdpRecordHandle(0)
 {
-    initialize();
 }
 
 ObexPushServiceProvider::~ObexPushServiceProvider()
@@ -1163,7 +1164,7 @@ void ObexPushServiceProvider::close()
     m_btDeviceSession = 0;
 }
 
-void ObexPushServiceProvider::start(int channel)
+void ObexPushServiceProvider::start()
 {
     qLog(Bluetooth) << "ObexPushServiceProvider start";
     if (m_opush)
@@ -1173,39 +1174,37 @@ void ObexPushServiceProvider::start(int channel)
         delete m_local;
         m_local = new QBluetoothLocalDevice(this);
         if (!m_local->isValid()) {
-            emit started(QBluetooth::NoSuchAdapter,
-                    tr("Cannot access local bluetooth device"));
+            emit started(true, tr("Cannot access local bluetooth device"));
             return;
         }
     }
+
+    m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/opp.xml");
+    if (m_sdpRecordHandle == 0) {
+        emit started(true,
+                     tr("Error registering with SDP server"));
+        return;
+    }
+
+    // For now, hard code in the channel, which has to be the same channel as
+    // the one in the XML file passed in the registerRecord() call above
+    int channel = 9;
 
     m_opush = new QBluetoothObexServer(channel, m_local->address(), this);
     connect(m_opush, SIGNAL(newConnection()),
             this, SLOT(newOPushConnection()));
 
-    if (m_opush->isListening()) {
-        emit started(QBluetooth::AlreadyRunning,
-                   tr("OBEX Push Server already listening"));
-        return;
-    }
-
     if (!m_opush->listen()) {
+        unregisterRecord(m_sdpRecordHandle);
         close();
-        emit started(QBluetooth::UnknownError,
+        emit started(true,
                    tr("Error listening on OBEX Push Server"));
         return;
     }
 
     m_opush->setSecurityOptions(m_securityOptions);
 
-    if (!sdpRegister(m_local->address(), QBluetooth::ObjectPushProfile, channel)) {
-        close();
-        emit started(QBluetooth::SDPServerError,
-                     tr("Error registering with SDP server"));
-        return;
-    }
-
-    emit started(QBluetooth::NoError, QString());
+    emit started(false, QString());
 
     if (!m_btDeviceSession) {
         QBluetoothLocalDevice dev;
@@ -1218,9 +1217,12 @@ void ObexPushServiceProvider::newOPushConnection()
     if (!m_opush->hasPendingConnections())
         return;
 
-    CustomPushService *opush =
-            new CustomPushService(m_opush->nextPendingConnection());
+    QObexSocket *socket = m_opush->nextPendingConnection();
+    CustomPushService *opush = new CustomPushService(socket);
     m_parent->setupConnection(opush);
+
+    // delete socket once the service is gone
+    connect(opush, SIGNAL(destroyed(QObject *)), socket, SLOT(deleteLater()));
 
     connect(opush, SIGNAL(destroyed(QObject *)), this, SLOT(sessionEnded()));
 
@@ -1248,20 +1250,13 @@ void ObexPushServiceProvider::stop()
 {
     qLog(Bluetooth) << "ObexPushServiceProvider stop";
 
-    if (!m_opush || !m_opush->isListening()) {
-        emit stopped(QBluetooth::NotRunning,
-                   tr("OBEX Push Server is not running"));
-        return;
-    }
-    close();
+    if (m_opush && m_opush->isListening())
+        close();
 
-    if (!sdpUnregister()) {
-        emit stopped(QBluetooth::SDPServerError,
-                     tr("Error unregistering from SDP server"));
-        return;
-    }
+    if (!unregisterRecord(m_sdpRecordHandle))
+        qLog(Bluetooth) << "ObexPushServiceProvider::stop() error unregistering SDP service";
 
-    emit stopped(QBluetooth::NoError, QString());
+    emit stopped();
 }
 
 void ObexPushServiceProvider::setSecurityOptions(QBluetooth::SecurityOptions options)
@@ -1269,11 +1264,6 @@ void ObexPushServiceProvider::setSecurityOptions(QBluetooth::SecurityOptions opt
     m_securityOptions = options;
     if (m_opush && m_opush->isListening())
         m_opush->setSecurityOptions(options);
-}
-
-QString ObexPushServiceProvider::translatableDisplayName() const
-{
-    return tr("OBEX Object Push Service");
 }
 
 #endif
@@ -1285,7 +1275,7 @@ QString ObexPushServiceProvider::translatableDisplayName() const
     \brief The ObexServiceManager class is responsible for managing OBEX related services over Bluetooth and Infrared.
 
     ObexServiceManager provides a common infrastructure for OBEX related services, such as
-    the OPUSH Bluetooth profile and IrXfer Infrared profile. 
+    the OPUSH Bluetooth profile and IrXfer Infrared profile.
   */
 
 /*!
@@ -1355,7 +1345,7 @@ ObexServiceManager::~ObexServiceManager()
 void ObexServiceManager::setupConnection(QObexPushService *opush)
 {
     opush->setIncomingDirectory(OBEX_INCOMING_DIRECTORY);
-    opush->setAutoDelete(true);
+    connect(opush, SIGNAL(done(bool)), opush, SLOT(deleteLater()));
 
     connect(opush, SIGNAL(putRequest(const QString &, const QString &)),
             SLOT(putRequest(const QString &, const QString &)));

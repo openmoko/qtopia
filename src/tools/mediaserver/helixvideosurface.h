@@ -22,8 +22,6 @@
 #ifndef HELIXVIDEOSURFACE_H
 #define HELIXVIDEOSURFACE_H
 
-#include <observer.h>
-
 #include <QtGui>
 
 #include <config.h>
@@ -43,13 +41,18 @@ struct HelixColorLibrary
     FPINITCOLORCONVERTER InitColorConverter;
 };
 
-class GenericVideoSurface : public IHXVideoSurface,
-    public Subject
+class PaintObserver
+{
+public:
+    virtual void paintNotification() = 0;
+};
+
+class GenericVideoSurface : public IHXVideoSurface
 {
 public:
     GenericVideoSurface();
 
-    QImage buffer() const { return m_buffer; }
+    QImage const& buffer() const { return m_buffer; }
 
     // IHXVideoSurface
     STDMETHOD(BeginOptimizedBlt) (THIS_ HXBitmapInfoHeader *pBitmapInfo);
@@ -73,27 +76,32 @@ public:
     STDMETHOD_(UINT32, AddRef) (THIS);
     STDMETHOD_(UINT32, Release) (THIS);
 
+    void addPaintObserver(PaintObserver* paintObserver);
+
 private:
     INT32 m_refCount;
 
     HelixColorLibrary m_library;
 
-    QImage m_buffer;
-    LPHXCOLORCONVERTER Converter;
-    int m_bufferPitch;
-    int m_inPitch;
-
+    QImage              m_buffer;
+    LPHXCOLORCONVERTER  Converter;
+    int                 m_bufferPitch;
+    int                 m_inPitch;
+    int                 m_bufferWidth;
+    int                 m_bufferHeight;
+    PaintObserver*      m_paintObserver;
 };
 
-class GenericVideoWidget : public QWidget,
-    public Observer
+class GenericVideoWidget :
+    public QWidget,
+    public PaintObserver
 {
 public:
     GenericVideoWidget( GenericVideoSurface* surface, QWidget* parent = 0 );
     ~GenericVideoWidget();
 
     // Observer
-    void update( Subject* subject );
+    void paintNotification();
 
 protected:
     // QWidget
@@ -103,15 +111,16 @@ private:
     GenericVideoSurface *m_surface;
 };
 
-class DirectPainterVideoWidget : public QWidget,
-    public Observer
+class DirectPainterVideoWidget :
+    public QWidget,
+    public PaintObserver
 {
 public:
     DirectPainterVideoWidget( GenericVideoSurface* surface, QWidget* parent = 0 );
     ~DirectPainterVideoWidget();
 
     // Observer
-    void update( Subject* subject );
+    void paintNotification();
 
     static int isSupported();
 
@@ -124,12 +133,20 @@ protected:
     void hideEvent( QHideEvent* e );
 
 private:
+    void paint();
+
     void calcDestRect();
 
     GenericVideoSurface *m_surface;
 
-    QImage m_buffer;
-    QRect m_destrect;
+    QRect       m_destrect;
+    QRegion     m_bufferRegion;
+    QPoint      m_destTopLeft;
+    QSize       m_destSize;
+    QRegion     m_reservedRegion;
+    bool        m_clear;
+    bool        m_isVisible;
+    bool        m_firstPaintCalc;
 };
 
 #endif // HELIXVIDEOSURFACE_H

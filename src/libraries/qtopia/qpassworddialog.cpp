@@ -190,20 +190,27 @@ void QPasswordWidget::keyPressEvent( QKeyEvent *e )
                 QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
 #endif
             }
-        } else
+        } else {
             emit passwordEntered( text );
+            return;
+        }
     }
 #ifdef QTOPIA_PHONE
-    if ( e->key() == Qt::Key_Select )
+    if ( e->key() == Qt::Key_Select ) {
         emit passwordEntered( text );
+        return;
+    }
     if ( e->key() == Qt::Key_NumberSign && mode == QPasswordDialog::Pin ) {
         // Key_NumberSign (#), is required for GCF compliance.
         // GSM 02.30, section 4.6.1, Entry of PIN and PIN2.
         emit passwordEntered( text );
+        return;
     }
 #else
-    if ( e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return )
+    if ( e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return ) {
         emit passwordEntered( text );
+        return;
+    }
 #endif
     QString t = e->text().left(1);
     if ( t[0]>='0' && t[0]<='9' ) {
@@ -213,6 +220,8 @@ void QPasswordWidget::keyPressEvent( QKeyEvent *e )
         QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Ok);
 #endif
     }
+
+    QWidget::keyPressEvent( e );
 }
 
 void QPasswordWidget::input( QString c )

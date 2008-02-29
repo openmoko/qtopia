@@ -79,7 +79,7 @@ enum TelnetOption
 /*!
     \class QSerialSocket
     \brief The QSerialSocket class provides a serial port abstraction via a TCP socket.
-    \ingroup communication
+    \ingroup io
 
     The QSerialSocket class provides a serial port abstraction via a TCP
     socket.  The abstraction implements the telnet protocol (RFC 854),
@@ -719,7 +719,8 @@ void QSerialSocket::receiveSubOption( int option, const char *buf, int len )
 /*!
     \class QSerialSocketServer
     \brief The QSerialSocketServer class provides a server to handling incoming serial-over-sockets connections.
-    \ingroup communication
+    \ingroup io
+    \ingroup ipc
 
     The QSerialSocketServer class provides a server to handling incoming
     serial-over-sockets connections.  As each connection arrives, the

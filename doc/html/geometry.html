@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/geometry.qdoc -->
 <head>
   <title>Qt 4.2: Window Geometry</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -32,13 +33,27 @@
 <h2>Restoring a Window's Geometry</h2>
 <p>Since version 4.2, Qt provides functions that saves and restores a window's geometry and state for you. <a href="qwidget.html#saveGeometry">QWidget::saveGeometry</a>() saves the window geometry and maximized/fullscreen state, while <a href="qwidget.html#restoreGeometry">QWidget::restoreGeometry</a>() restores it. The restore function also checks if the restored geometry is outside the available screen geometry, and modifies it as appropriate if it is.</p>
 <p>The rest of this document describes how to save and restore the geometry using the geometry properties. On Windows, this is basically storing the result of <a href="qwidget.html#geometry-prop">QWidget::geometry</a>() and calling <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>() in the next session before calling <a href="qwidget.html#show">show()</a>. On X11, this won't work because an invisible window doesn't have a frame yet. The window manager will decorate the window later. When this happens, the window shifts towards the bottom/right corner of the screen depending on the size of the decoration frame. Although X provides a way to avoid this shift, most window managers fail to implement this feature.</p>
-<p>A workaround is to call <a href="qwidget.html#geometry-prop">setGeometry()</a> after <a href="qwidget.html#show">show()</a>. This has the two disadvantages that the widget appears at a wrong place for a millisecond (results in flashing) and that currently only every second window manager gets it right. A safer solution is to store both <a href="qwidget.html#pos-prop">pos()</a> and <a href="qwidget.html#size-prop">size()</a> and to restore the geometry using <a href="qwidget.html#size-prop">QWidget::resize</a>() and <a href="qwidget.html#pos-prop">move()</a> before calling <a href="qwidget.html#show">show()</a>, as demonstrated in the following code snippets (from the Application example):</p>
-<pre></pre>
+<p>A workaround is to call <a href="qwidget.html#geometry-prop">setGeometry()</a> after <a href="qwidget.html#show">show()</a>. This has the two disadvantages that the widget appears at a wrong place for a millisecond (results in flashing) and that currently only every second window manager gets it right. A safer solution is to store both <a href="qwidget.html#pos-prop">pos()</a> and <a href="qwidget.html#size-prop">size()</a> and to restore the geometry using <a href="qwidget.html#size-prop">QWidget::resize</a>() and <a href="qwidget.html#pos-prop">move()</a> before calling <a href="qwidget.html#show">show()</a>, as demonstrated in the following code snippets (from the <a href="mainwindows-application.html">Application</a> example):</p>
+<pre> void MainWindow::readSettings()
+ {
+     QSettings settings(&quot;Trolltech&quot;, &quot;Application Example&quot;);
+     QPoint pos = settings.value(&quot;pos&quot;, QPoint(200, 200)).toPoint();
+     QSize size = settings.value(&quot;size&quot;, QSize(400, 400)).toSize();
+     resize(size);
+     move(pos);
+ }
+
+ void MainWindow::writeSettings()
+ {
+     QSettings settings(&quot;Trolltech&quot;, &quot;Application Example&quot;);
+     settings.setValue(&quot;pos&quot;, pos());
+     settings.setValue(&quot;size&quot;, size());
+ }</pre>
 <p>This method works on Windows, Mac OS X, and most X11 window managers.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

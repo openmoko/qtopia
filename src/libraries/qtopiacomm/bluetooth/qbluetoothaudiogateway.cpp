@@ -49,7 +49,7 @@
 
     If \a service is empty, this class will use the first available
     service that supports bluetooth audio gateway.  If there is more
-    than one service that supports advice of charge, the caller
+    than one service that supports bluetooth audio gateway, the caller
     should enumerate them with QCommServiceManager::supports()
     and create separate QBluetoothAudioGateway objects for each.
 
@@ -64,7 +64,7 @@ QAbstractIpcInterface::Mode mode) : QCommInterface("QBluetoothAudioGateway", ser
 }
 
 /*!
-    Destructor
+    Destructor.
 */
 QBluetoothAudioGateway::~QBluetoothAudioGateway()
 {
@@ -90,6 +90,8 @@ int QBluetoothAudioGateway::audioFrequency() const
 /*!
     Returns the current speaker volume of the device.  The volume can be between
     0 and 15.
+
+    \sa setSpeakerVolume()
 */
 int QBluetoothAudioGateway::speakerVolume() const
 {
@@ -97,8 +99,10 @@ int QBluetoothAudioGateway::speakerVolume() const
 }
 
 /*!
-    Returns the current micrphone volume of the device.  The volume can be between
+    Returns the current microphone volume of the device.  The volume can be between
     0 and 15.
+
+    \sa setMicrophoneVolume()
 */
 int QBluetoothAudioGateway::microphoneVolume() const
 {
@@ -140,7 +144,9 @@ QBluetoothAddress QBluetoothAudioGateway::remotePeer() const
     to the headset.  The \a addr contains the address of the remote device
     and \a rfcomm_channel contains the service channel to connect on.
 
-    The connectResult signal will be sent once the connection succeds or fails.
+    The connectResult() signal will be sent once the connection succeeds or fails.
+
+    \sa connectResult()
 */
 void QBluetoothAudioGateway::connect(const QBluetoothAddress &addr,
                                      int rfcomm_channel)
@@ -151,7 +157,10 @@ void QBluetoothAudioGateway::connect(const QBluetoothAddress &addr,
 }
 
 /*!
-    Disconnect the currently active client from the Audio Gateway.
+    Disconnect the currently active client from the Audio Gateway.  The
+    headsetDisconnected() signal will be sent once the headset is disconnected().
+
+    \sa headsetDisconnected()
 */
 void QBluetoothAudioGateway::disconnect()
 {
@@ -162,6 +171,8 @@ void QBluetoothAudioGateway::disconnect()
     Requests the Audio Gateway to notify the remote device to update
     its microphone volume to \a volume.  The volume range must be between
     0 and 15.
+
+    \sa microphoneVolume()
 */
 void QBluetoothAudioGateway::setMicrophoneVolume(int volume)
 {
@@ -173,6 +184,8 @@ void QBluetoothAudioGateway::setMicrophoneVolume(int volume)
     Requests the Audio Gateway to notify the remote device to update
     its speaker volume to \a volume.  The volume range must be between
     0 and 15.
+
+    \sa speakerVolume()
  */
 void QBluetoothAudioGateway::setSpeakerVolume(int volume)
 {
@@ -183,6 +196,8 @@ void QBluetoothAudioGateway::setSpeakerVolume(int volume)
 /*!
     Asks the Audio Gateway to release the SCO audio data connection.  No audio
     should be routed through the associated audio device.
+
+    \sa connectAudio()
 */
 void QBluetoothAudioGateway::releaseAudio()
 {
@@ -193,6 +208,8 @@ void QBluetoothAudioGateway::releaseAudio()
     Asks the Audio Gateway to establish an SCO data connection with the currently
     connected peer.  All audio date should now be routed to the associated audio
     device.
+
+    \sa releaseAudio()
 */
 void QBluetoothAudioGateway::connectAudio()
 {

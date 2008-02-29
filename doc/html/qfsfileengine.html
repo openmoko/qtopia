@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/io/qfsfileengine.cpp -->
 <head>
   <title>Qt 4.2: QFSFileEngine Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -23,24 +24,8 @@
 <li><div class="fn"/><b><a href="qfsfileengine.html#QFSFileEngine">QFSFileEngine</a></b> ()</li>
 <li><div class="fn"/><b><a href="qfsfileengine.html#QFSFileEngine-2">QFSFileEngine</a></b> ( const QString &amp; <i>file</i> )</li>
 <li><div class="fn"/><b><a href="qfsfileengine.html#dtor.QFSFileEngine">~QFSFileEngine</a></b> ()</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#caseSensitive">caseSensitive</a></b> () const</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#copy">copy</a></b> ( const QString &amp; <i>newName</i> )</li>
-<li><div class="fn"/>virtual QStringList <b><a href="qfsfileengine.html#entryList">entryList</a></b> ( QDir::Filters <i>filters</i>, const QStringList &amp; <i>filterNames</i> ) const</li>
-<li><div class="fn"/>virtual QString <b><a href="qfsfileengine.html#fileName">fileName</a></b> ( FileName <i>file</i> ) const</li>
-<li><div class="fn"/>virtual QDateTime <b><a href="qfsfileengine.html#fileTime">fileTime</a></b> ( FileTime <i>time</i> ) const</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#isRelativePath">isRelativePath</a></b> () const</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#link">link</a></b> ( const QString &amp; <i>newName</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#mkdir">mkdir</a></b> ( const QString &amp; <i>dirName</i>, bool <i>createParentDirectories</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qfsfileengine.html#open-2">open</a></b> ( QIODevice::OpenMode <i>flags</i>, FILE * <i>fh</i> )</li>
 <li><div class="fn"/>bool <b><a href="qfsfileengine.html#open-3">open</a></b> ( QIODevice::OpenMode <i>flags</i>, int <i>fd</i> )</li>
-<li><div class="fn"/>virtual QString <b><a href="qfsfileengine.html#owner">owner</a></b> ( FileOwner ) const</li>
-<li><div class="fn"/>virtual uint <b><a href="qfsfileengine.html#ownerId">ownerId</a></b> ( FileOwner ) const</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#remove">remove</a></b> ()</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#rename">rename</a></b> ( const QString &amp; <i>newName</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#rmdir">rmdir</a></b> ( const QString &amp; <i>dirName</i>, bool <i>recurseParentDirectories</i> ) const</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#setPermissions">setPermissions</a></b> ( uint <i>perms</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qfsfileengine.html#setSize">setSize</a></b> ( qint64 <i>size</i> )</li>
-<li><div class="fn"/>virtual qint64 <b><a href="qfsfileengine.html#size">size</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>30 public functions inherited from <a href="qabstractfileengine.html#public-functions">QAbstractFileEngine</a></li>
@@ -48,7 +33,7 @@
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>QString <b><a href="qfsfileengine.html#currentPath">currentPath</a></b> ( const QString &amp; <i>path</i> = QString() )</li>
+<li><div class="fn"/>QString <b><a href="qfsfileengine.html#currentPath">currentPath</a></b> ( const QString &amp; <i>fileName</i> = QString() )</li>
 <li><div class="fn"/>QFileInfoList <b><a href="qfsfileengine.html#drives">drives</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qfsfileengine.html#homePath">homePath</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qfsfileengine.html#rootPath">rootPath</a></b> ()</li>
@@ -77,42 +62,33 @@
 <p>Constructs a <a href="qfsfileengine.html">QFSFileEngine</a> for the file name <i>file</i>.</p>
 <h3 class="fn"><a name="dtor.QFSFileEngine"></a>QFSFileEngine::~QFSFileEngine ()</h3>
 <p>Destructs the <a href="qfsfileengine.html">QFSFileEngine</a>.</p>
-<h3 class="fn"><a name="caseSensitive"></a>bool QFSFileEngine::caseSensitive () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="copy"></a>bool QFSFileEngine::copy ( const <a href="qstring.html">QString</a> &amp; <i>newName</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="currentPath"></a><a href="qstring.html">QString</a> QFSFileEngine::currentPath ( const <a href="qstring.html">QString</a> &amp; <i>path</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="currentPath"></a><a href="qstring.html">QString</a> QFSFileEngine::currentPath ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the canonicalized form of the current path used by the file engine for the drive specified by <i>fileName</i>.</p>
+<p>On Windows, each drive has its own current directory, so a different path is returned for file names that include different drive names (e.g. A: or C:).</p>
 <p>See also <a href="qfsfileengine.html#setCurrentPath">setCurrentPath</a>().</p>
 <h3 class="fn"><a name="drives"></a><a href="qfileinfo.html#QFileInfoList-typedef">QFileInfoList</a> QFSFileEngine::drives ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<h3 class="fn"><a name="entryList"></a><a href="qstringlist.html">QStringList</a> QFSFileEngine::entryList ( <a href="qdir.html#Filter-enum">QDir::Filters</a> <i>filters</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>filterNames</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="fileName"></a><a href="qstring.html">QString</a> QFSFileEngine::fileName ( <a href="qabstractfileengine.html#FileName-enum">FileName</a> <i>file</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="fileTime"></a><a href="qdatetime.html">QDateTime</a> QFSFileEngine::fileTime ( <a href="qabstractfileengine.html#FileTime-enum">FileTime</a> <i>time</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the list of drives in the file system as a list of <a href="qfileinfo.html">QFileInfo</a> objects. On unix and Mac OS X, only the root path is returned. On Windows, this function returns all drives (A:, C:, D:, etc.).</p>
 <h3 class="fn"><a name="homePath"></a><a href="qstring.html">QString</a> QFSFileEngine::homePath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<h3 class="fn"><a name="isRelativePath"></a>bool QFSFileEngine::isRelativePath () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="link"></a>bool QFSFileEngine::link ( const <a href="qstring.html">QString</a> &amp; <i>newName</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="mkdir"></a>bool QFSFileEngine::mkdir ( const <a href="qstring.html">QString</a> &amp; <i>dirName</i>, bool <i>createParentDirectories</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the home path of the current user.</p>
+<p>See also <a href="qfsfileengine.html#rootPath">rootPath</a>().</p>
 <h3 class="fn"><a name="open-2"></a>bool QFSFileEngine::open ( <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::OpenMode</a> <i>flags</i>, FILE * <i>fh</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Opens the file handle <i>fh</i> using the open mode <i>flags</i>.</p>
 <h3 class="fn"><a name="open-3"></a>bool QFSFileEngine::open ( <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::OpenMode</a> <i>flags</i>, int <i>fd</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Opens the file descriptor <i>fd</i> to the file engine, using the open mode <i>flags</i>.</p>
-<h3 class="fn"><a name="owner"></a><a href="qstring.html">QString</a> QFSFileEngine::owner ( <a href="qabstractfileengine.html#FileOwner-enum">FileOwner</a> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="ownerId"></a><a href="qtglobal.html#uint-typedef">uint</a> QFSFileEngine::ownerId ( <a href="qabstractfileengine.html#FileOwner-enum">FileOwner</a> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="remove"></a>bool QFSFileEngine::remove ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="rename"></a>bool QFSFileEngine::rename ( const <a href="qstring.html">QString</a> &amp; <i>newName</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="rmdir"></a>bool QFSFileEngine::rmdir ( const <a href="qstring.html">QString</a> &amp; <i>dirName</i>, bool <i>recurseParentDirectories</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <h3 class="fn"><a name="rootPath"></a><a href="qstring.html">QString</a> QFSFileEngine::rootPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the root path.</p>
+<p>See also <a href="qfsfileengine.html#homePath">homePath</a>().</p>
 <h3 class="fn"><a name="setCurrentPath"></a>bool QFSFileEngine::setCurrentPath ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Sets the current path (e.g., for <a href="qdir.html">QDir</a>), to <i>path</i>.</p>
 <p>See also <a href="qfsfileengine.html#currentPath">currentPath</a>().</p>
-<h3 class="fn"><a name="setPermissions"></a>bool QFSFileEngine::setPermissions ( <a href="qtglobal.html#uint-typedef">uint</a> <i>perms</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="setSize"></a>bool QFSFileEngine::setSize ( <a href="qtglobal.html#qint64-typedef">qint64</a> <i>size</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>See also <a href="qfsfileengine.html#size">size</a>().</p>
-<h3 class="fn"><a name="size"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QFSFileEngine::size () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>See also <a href="qfsfileengine.html#setSize">setSize</a>().</p>
 <h3 class="fn"><a name="tempPath"></a><a href="qstring.html">QString</a> QFSFileEngine::tempPath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the temporary path (i.e., a path in which it is safe to store temporary files).</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -31,16 +31,12 @@
 
 #define QPE_NEED_CALIBRATION
 
-#define NO_WIRELESS_LAN
+//#define NO_WIRELESS_LAN
 
 // The serial device for AT command access to the phone
 // hardware:
 //
 #define QTOPIA_PHONE_DEVICE "/dev/ttyS0"
-//
-// The baud rate for the serial connection:
-//
-#define QTOPIA_PHONE_RATE 115200
 
 // Sets the phone vendor plugin to load (normally all plugins are loaded).
 #define QTOPIA_PHONE_VENDOR "greenphone"

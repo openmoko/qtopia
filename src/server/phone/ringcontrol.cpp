@@ -56,6 +56,7 @@ public:
         lastRingVolume(0),
         ringVolume(0),
         profileManager(0),
+        priorityPlay(false),
 #ifdef MEDIA_SERVER
         soundcontrol(0)
 #else
@@ -79,6 +80,7 @@ public:
     int ringVolume;
     bool vibrateActive;
     QPhoneProfileManager *profileManager;
+    bool priorityPlay;
 #ifdef MEDIA_SERVER
     QSoundControl *soundcontrol;
 #else
@@ -220,6 +222,8 @@ RingControl::RingControl(QObject *parent)
             this, SLOT(stopMessageAlert()));
 
     //initSound();
+
+    d->curAlertType = QPhoneProfile::Off;
 }
 
 /*!
@@ -323,22 +327,30 @@ void RingControl::startRinging(RingType t)
             d->curRingTone = profile.systemCallTone().file();
         }
         d->curAlertType = profile.callAlert();
-    } else if (t == Msg) {
+    }
+    else if (t == Msg) 
+    {
         d->curAlertType = profile.msgAlert();
-        if (d->curAlertType == QPhoneProfile::Continuous
-                || d->curAlertType == QPhoneProfile::Ascending)
+
+        if (d->curAlertType == QPhoneProfile::Continuous ||
+            d->curAlertType == QPhoneProfile::Ascending)
+        {
             d->msgTid = startTimer(msgRingTime());
+        }
+
         QString ringToneDoc;
         ringToneDoc = profile.messageTone().file();
 
         d->curRingTone = QContent(ringToneDoc).file();
-        if (!QFile::exists(d->curRingTone)) {
+        if (!QFile::exists(d->curRingTone))
+        {
             // fall back if above settings lead to non-existent ringtone.
             d->curRingTone = profile.systemMessageTone().file();
         }
     }
 
-    if (profile.vibrate()) {
+    if (profile.vibrate())
+    {
         QVibrateAccessory vib;
         vib.setVibrateNow( true );
         d->vibrateActive = true;
@@ -409,7 +421,9 @@ void RingControl::stopRing( )
     if(d->msgTid) {
         killTimer(d->msgTid);
         d->msgTid = 0;
+        setSoundPriority(false);
     }
+
     if(d->vrbTid) {
         killTimer(d->vrbTid);
         d->vrbTid = 0;
@@ -417,17 +431,34 @@ void RingControl::stopRing( )
         QVibrateAccessory vib;
         vib.setVibrateNow( false );
     }
+
+    if (d->curAlertType != QPhoneProfile::Off)
+    {
 #ifdef MEDIA_SERVER
-    if(d->soundcontrol) d->soundcontrol->sound()->stop();
+        if(d->soundcontrol) d->soundcontrol->sound()->stop();
 #else
-    if (d->soundclient) d->soundclient->stop(0);
+        if (d->soundclient) d->soundclient->stop(0);
 #endif
-    if(d->currentRingSource != NotRinging) {
+        if (d->curAlertType == QPhoneProfile::Once)
+        {
+            // stopping a once off ring
+            setSoundPriority(false);
+        }
+
+        d->curAlertType = QPhoneProfile::Off;
+    }
+
+    if (d->currentRingSource != NotRinging)
+    {
         d->currentRingSource = NotRinging;
         emit ringTypeChanged(NotRinging);
     }
 }
 
+/*!
+    Stop the message alert sound.  Does nothing if no message alert
+    is in progress.
+*/
 void RingControl::stopMessageAlert()
 {
     if (d->currentRingSource == Msg) {
@@ -453,23 +484,29 @@ void RingControl::profileChanged()
 // should eventually timeout.
 void RingControl::nextRing()
 {
-    if(d->currentRingSource != NotRinging &&
-       d->curAlertType != QPhoneProfile::Once) {
-
-        if(d->curAlertType == QPhoneProfile::Ascending && d->lastRingVolume < 5)
+    if (d->currentRingSource != NotRinging &&
+        d->curAlertType != QPhoneProfile::Once)
+    {
+        if (d->curAlertType == QPhoneProfile::Ascending && d->lastRingVolume < 5)
             d->lastRingVolume++;
-    
+
 #ifdef MEDIA_SERVER
-    d->soundcontrol->setVolume( volmap[d->lastRingVolume] );
-    d->soundcontrol->sound()->play();
+        d->soundcontrol->setVolume(volmap[d->lastRingVolume]);
+        d->soundcontrol->sound()->play();
 #else
-    if(d->soundclient)
-        d->soundclient->play(0, d->curRingTone,
-                             volmap[d->lastRingVolume], QWSSoundClient::Priority);
+        if (d->soundclient)
+        {
+            d->soundclient->play(0,
+                                 d->curRingTone,
+                                 volmap[d->lastRingVolume],
+                                 QWSSoundClient::Priority);
+        }
 #endif
     }
+
     // we need to stop the vibration timer when using ring once
-    if ( d->curAlertType == QPhoneProfile::Once ) {
+    if (d->curAlertType == QPhoneProfile::Once)
+    {
         stopRing();
     }
 }
@@ -541,46 +578,28 @@ void RingControl::stateChanged()
 {
     DialerControl*  dialerControl = DialerControl::instance();
 
-    if(dialerControl->hasIncomingCall()) {
-        if(ringType() != RingControl::Call)
+    if (dialerControl->hasIncomingCall())
+    {
+        if (ringType() != RingControl::Call)
             startRinging(Call);
-    } else {
-        if(ringType() == RingControl::Call)
+    }
+    else
+    {
+        if (ringType() == RingControl::Call)
             stopRing();
     }
 
     initSound();
 
-    if (dialerControl->hasActiveCalls() ||
-        ringType() != RingControl::NotRinging) {
-#ifdef MEDIA_SERVER
-        QByteArray data;
-        {
-            QDataStream stream( &data, QIODevice::WriteOnly );
-            stream << QSoundControl::RingTone;
-        }
-
-        QCopChannel::send( SERVER_CHANNEL, "setPriority(int)", data );
-#else
-        // better checking...
-        if(d->soundclient)
-            d->soundclient->playPriorityOnly(true);
-#endif
-    }
-    else if (!dialerControl->hasCallsOnHold())
+    if (dialerControl->isConnected() ||
+        dialerControl->isDialing() ||
+        ringType() != RingControl::NotRinging)
     {
-#ifdef MEDIA_SERVER
-        QByteArray data;
-        {
-            QDataStream stream(&data, QIODevice::WriteOnly);
-            stream << QSoundControl::Default;
-        }
-
-        QCopChannel::send( SERVER_CHANNEL, "setPriority(int)", data );
-#else
-        if(d->soundclient)
-            d->soundclient->playPriorityOnly(false);
-#endif
+        setSoundPriority(true);
+    }
+    else
+    {
+        setSoundPriority(false);
     }
 }
 
@@ -589,10 +608,37 @@ void RingControl::messageCountChanged(int newMessageCount)
     // Doesn't apply if already ringing
     if(newMessageCount > d->messageCount &&
        ringType() == RingControl::NotRinging)
+    {
+        setSoundPriority(true);
         startRinging(Msg);
+    }
 
     d->messageCount = newMessageCount;
 }
+
+void RingControl::setSoundPriority(bool priorityPlay)
+{
+#ifdef MEDIA_SERVER
+    if (priorityPlay != d->priorityPlay)
+    {
+        QByteArray data;
+        {
+            QDataStream stream(&data, QIODevice::WriteOnly);
+            stream << (priorityPlay ? QSoundControl::RingTone : QSoundControl::Default);
+        }
+
+        QCopChannel::send(SERVER_CHANNEL, "setPriority(int)", data);
+#else
+        if (d->soundclient)
+            d->soundclient->playPriorityOnly(priorityPlay);
+#endif
+
+        d->priorityPlay = priorityPlay;
+#ifdef MEDIA_SERVER
+    }
+#endif
+}
+
 
 QTOPIA_TASK(RingControl, RingControl);
 QTOPIA_TASK_PROVIDES(RingControl, RingControl);

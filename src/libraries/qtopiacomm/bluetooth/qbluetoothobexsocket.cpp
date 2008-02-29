@@ -38,9 +38,9 @@ public:
 };
 
 /*!
-    Constructs a new invalid QBluetoothObexSocket.
+    Constructs a new invalid QBluetoothObexSocket with parent object \a parent.
 */
-QBluetoothObexSocket::QBluetoothObexSocket() : QObexSocket()
+QBluetoothObexSocket::QBluetoothObexSocket(QObject *parent) : QObexSocket(parent)
 {
     m_data = new QBluetoothObexSocketPrivate();
     m_data->m_channel = -1;
@@ -53,11 +53,13 @@ QBluetoothObexSocket::QBluetoothObexSocket() : QObexSocket()
     parameter specifies the RFCOMM channel to connect to.  The
     \a remote parameter specifies the remote address of the
     bluetooth device, and \a local parameter specifies what
-    local bluetooth adapter to use.
+    local bluetooth adapter to use. The \a parent specifies the parent
+    object.
 */
 QBluetoothObexSocket::QBluetoothObexSocket(const QBluetoothAddress &remote,
                                            quint8 rfcomm_channel,
-                                           const QBluetoothAddress &local ) : QObexSocket()
+                                           const QBluetoothAddress &local,
+                                           QObject *parent) : QObexSocket(parent)
 {
     m_data = new QBluetoothObexSocketPrivate();
     m_data->m_channel = rfcomm_channel;
@@ -136,7 +138,7 @@ static void qobex_dummy_callback(obex_t *, obex_object_t *, int, int, int, int)
 bool QBluetoothObexSocket::connect()
 {
     if ((m_data->m_channel == -1) ||
-        !m_data->m_remote.valid() || m_handle)
+        !m_data->m_remote.isValid() || m_handle)
         return false;
 
     obex_t *self;
@@ -167,7 +169,7 @@ bool QBluetoothObexSocket::connect()
     Returns true if the socket is authenticated.  This method will always
     return false if the socket is not connected.
 */
-bool QBluetoothObexSocket::authenticated() const
+bool QBluetoothObexSocket::isAuthenticated() const
 {
     if (!isConnected())
         return false;
@@ -179,7 +181,7 @@ bool QBluetoothObexSocket::authenticated() const
     Returns true if the socket is encrypted.  This method will always
     return false if the socket is not connected.
  */
-bool QBluetoothObexSocket::encrypted() const
+bool QBluetoothObexSocket::isEncrypted() const
 {
     if (!isConnected())
         return false;

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/kernel/qcoreapplication.cpp -->
 <head>
   <title>Qt 4.2: QCoreApplication Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -42,7 +43,7 @@
 <li><div class="fn"/>bool <b><a href="qcoreapplication.html#filterEvent">filterEvent</a></b> ( void * <i>message</i>, long * <i>result</i> )</li>
 <li><div class="fn"/>virtual bool <b><a href="qcoreapplication.html#notify">notify</a></b> ( QObject * <i>receiver</i>, QEvent * <i>event</i> )</li>
 <li><div class="fn"/>EventFilter <b><a href="qcoreapplication.html#setEventFilter">setEventFilter</a></b> ( EventFilter <i>filter</i> )</li>
-<li><div class="fn"/>virtual bool <b><a href="qcoreapplication.html#winEventFilter">winEventFilter</a></b> ( MSG * <i>message</i>, long * <i>result</i> )</li>
+<li><div class="fn"/>virtual bool <b><a href="qcoreapplication.html#winEventFilter">winEventFilter</a></b> ( MSG * <i>msg</i>, long * <i>result</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -180,6 +181,7 @@
 <h3 class="fn"><a name="QCoreApplication"></a>QCoreApplication::QCoreApplication ( int &amp; <i>argc</i>, char ** <i>argv</i> )</h3>
 <p>Constructs a Qt kernel application. Kernel applications are applications without a graphical user interface. These type of applications are used at the console or as server processes.</p>
 <p>The <i>argc</i> and <i>argv</i> arguments are processed by the application, and made available in a more convenient form by the <a href="qcoreapplication.html#arguments">arguments</a>() function.</p>
+<p><b>Warning:</b> The data pointed to by <i>argc</i> and <i>argv</i> must stay valid for the entire lifetime of the <a href="qcoreapplication.html">QCoreApplication</a> object.</p>
 <h3 class="fn"><a name="dtor.QCoreApplication"></a>QCoreApplication::~QCoreApplication ()</h3>
 <p>Destroys the <a href="qcoreapplication.html">QCoreApplication</a> object.</p>
 <h3 class="fn"><a name="aboutToQuit"></a>void QCoreApplication::aboutToQuit ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -334,7 +336,8 @@
 <p>See also <a href="qobject.html#tr">QObject::tr</a>(), <a href="qcoreapplication.html#installTranslator">installTranslator</a>(), and <a href="qtextcodec.html#codecForTr">QTextCodec::codecForTr</a>().</p>
 <h3 class="fn"><a name="translate-2"></a><a href="qstring.html">QString</a> QCoreApplication::translate ( const char * <i>context</i>, const char * <i>sourceText</i>, const char * <i>comment</i> = 0, <a href="qcoreapplication.html#Encoding-enum">Encoding</a> <i>encoding</i> = CodecForTr )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<h3 class="fn"><a name="winEventFilter"></a>bool QCoreApplication::winEventFilter ( MSG * <i>message</i>, long * <i>result</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="winEventFilter"></a>bool QCoreApplication::winEventFilter ( MSG * <i>msg</i>, long * <i>result</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>The message procedure calls this function for every message received. Reimplement this function if you want to process window messages <i>msg</i> that are not processed by Qt. If you don't want the event to be processed by Qt, then return true and set <i>result</i> to the value that the window procedure should return. Otherwise return false.</p>
 <hr />
 <h2>Related Non-Members</h2>
 <h3 class="fn"><a name="qAddPostRoutine"></a>void qAddPostRoutine ( QtCleanUpFunction <i>ptr</i> )</h3>
@@ -430,6 +433,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

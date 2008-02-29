@@ -161,7 +161,7 @@ public:
     ExpressionToken& operator=( const ExpressionToken& other );
 
     static const char* typeToName( ExpressionToken::Type t );
-    static const char* tokenData( ExpressionToken t );
+    static const char* tokenData( const ExpressionToken & t );
 
     /* Public data */
     Type type;
@@ -614,7 +614,7 @@ const char* ExpressionToken::typeToName( ExpressionToken::Type t )
     return "Unknown";
 }
 
-const char* ExpressionToken::tokenData( ExpressionToken t ) {
+const char* ExpressionToken::tokenData( const ExpressionToken & t ) {
     switch( t.type ) {
         case ExpressionToken::Multiply:
         case ExpressionToken::Divide:
@@ -1336,10 +1336,12 @@ bool ExpressionSemanticAnalyser::atleastOneChildReturnType( ExpressionParserNode
 /* Public Methods */
 /* ExpressionMachineOperand Ctors */
 ExpressionMachineOperand::ExpressionMachineOperand()
+: type(Bool)
 {
 }
 
 ExpressionMachineOperand::ExpressionMachineOperand( const ExpressionMachineOperand& other ) // deep copy
+: type(Bool)
 {
     (*this) = other;
 }

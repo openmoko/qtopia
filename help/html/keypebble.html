@@ -1,14 +1,16 @@
 <html>
-<head><title>VNC Viewer Help</title></head>
-<body>
-<h3>VNC Viewer Help</h3>
-<p><img src=":image/keypebble/vnc"></p>
-<p>The VNC Viewer is a port of the Keystone VNC Client.</p>
-<ul>
-<li><a href="keypebble-connect.html">Connecting and Disconnecting</a></li>
-<li><a href="keypebble-display.html">Display Options</a></li>
-<li><a href="keypebble-settings.html">Settings</a></li>
-</ul>
+<h1>keypebble</h1>
 
-</body>
-</html>
+<p>VNC Client
+
+<p>To user with vncserver:
+
+<ol>
+ <li>Start server on Linux PC:
+ <li> vncserver -depth 16 -geometry 800x600 -cc 3
+ <li>Note the display number on server start, eg.1.
+ <li>Test server on Linux PC:
+ <li> vncviewer localhost:1
+ <li>Run keypebble and connect
+</ol>
+

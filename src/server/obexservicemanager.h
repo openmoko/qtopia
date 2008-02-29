@@ -29,10 +29,10 @@
 
 #ifdef QTOPIA_BLUETOOTH
 class QBluetoothObexServer;
-class QSDPService;
-class QSDAPSearchResult;
+class QBluetoothSdpRecord;
+class QBluetoothSdpQueryResult;
 class QBluetoothLocalDevice;
-class QSDAP;
+class QBluetoothSdpQuery;
 class BluetoothPushingService;
 class ObexPushServiceProvider;
 #endif

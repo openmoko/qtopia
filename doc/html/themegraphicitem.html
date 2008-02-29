@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>ThemeGraphicItem Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>ThemeGraphicItem Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ThemeGraphicItem Class Reference</h1>
 <p>The ThemeGraphicItem class contains common functionality for graphics based items in a <a href="themedview.html">ThemedView</a>. <a href="#details">More...</a></p>
-<pre>    #include &lt;ThemeGraphicItem&gt;</pre><p>Inherited by <a href="themelineitem.html">ThemeLineItem</a>, <a href="themepixmapitem.html">ThemePixmapItem</a>, <a href="themerectitem.html">ThemeRectItem</a>, <a href="themetextitem.html">ThemeTextItem</a>, and <a href="themewidgetitem.html">ThemeWidgetItem</a>.</p>
+<pre>#include &lt;ThemeGraphicItem&gt;</pre><p>Inherited by <a href="themelineitem.html">ThemeLineItem</a>, <a href="themepixmapitem.html">ThemePixmapItem</a>, <a href="themerectitem.html">ThemeRectItem</a>, <a href="themetextitem.html">ThemeTextItem</a>, and <a href="themewidgetitem.html">ThemeWidgetItem</a>.</p>
 <ul>
 <li><a href="themegraphicitem-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -56,7 +55,7 @@
 <h3 class="fn"><a name="getColor"></a><a href="qcolor.html">QColor</a> ThemeGraphicItem::getColor ( const <a href="qcolor.html">QColor</a> &amp; <i>col</i>, int <i>role</i> ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Returns a <a href="qcolor.html">QColor</a> object for either <i>col</i> or <i>role</i>. If role is a valid <a href="qpalette.html#ColorRole-enum">QPalette::ColorRole</a>, the corresponding <a href="qcolor.html">QColor</a> object for the role is returned. Otherwise, <i>col</i> is returned.</p>
 <h3 class="fn"><a name="parseColor"></a>int ThemeGraphicItem::parseColor ( const <a href="qstring.html">QString</a> &amp; <i>val</i>, <a href="qcolor.html">QColor</a> &amp; <i>col</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Parses the color given by the color name <i>val</i>. <i>val</i> can either be a palette color name, eg. HighlightedText, or a name suitable for being passed to <a href="qcolor.html#setNamedColor">QColor::setNamedColor</a>(). If <i>val</i> references the palette, this function returns the <a href="qpalette.html#ColorRole-enum">QPalette::ColorRole</a> for the color and does not modify <i>col</i>. Otherwise, <i>val</i> is passed to <a href="qcolor.html#setNamedColor">QColor::setNamedColor</a>(), the result is stored in <i>col</i>, and the function returns <a href="qpalette.html#ColorRole-enum">QPalette::NColorRoles</a>+1.</p>
+<p>Parses the color given by the color name <i>val</i>. <i>val</i> can either be a palette color name, eg. HighlightedText, or a name suitable for being passed to <a href="qcolor.html#setNamedColor">QColor::setNamedColor</a>(). If <i>val</i> references the palette, this function returns the <a href="qpalette.html#ColorRole-enum">QPalette::ColorRole</a> for the color and does not modify <i>col</i>. Otherwise, <i>val</i> is passed to <a href="qcolor.html#setNamedColor">QColor::setNamedColor</a>(), the result is stored in <i>col</i>, and the function returns QPalette::NColorRoles+1.</p>
 <h3 class="fn"><a name="parseFont"></a><a href="qfont.html">QFont</a> ThemeGraphicItem::parseFont ( const <a href="qfont.html">QFont</a> &amp; <i>defFont</i>, const <a href="qstring.html">QString</a> &amp; <i>size</i>, const <a href="qstring.html">QString</a> &amp; <i>bold</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Returns <i>defFont</i> modified to be the point size given by <i>size</i>, and to be bold if <i>bold</i> is &quot;yes&quot; or normal weight if <i>bold</i> is any other non-empty string.</p>
 <h3 class="fn"><a name="setColor"></a>void ThemeGraphicItem::setColor ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qcolor.html">QColor</a> &amp; <i>val</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>st</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
@@ -73,6 +72,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

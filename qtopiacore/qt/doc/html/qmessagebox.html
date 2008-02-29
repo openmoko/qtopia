@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/dialogs/qmessagebox.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/dialogs/qmessagebox.cpp -->
 <head>
   <title>Qt 4.2: QMessageBox Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -86,7 +86,7 @@
 <li><div class="fn"/>5 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -144,7 +144,7 @@
 <p>Buttons are specified by combining <a href="qmessagebox.html#StandardButton-enum">StandardButtons</a> using the bitwise OR operator. The order of the buttons on screen is platform-dependent. For example, on Windows, <b>Save</b> is displayed to the left of <b>Cancel</b>, whereas on Mac OS, the order is reversed.</p>
 <p>The text part of all message box messages can be either rich text or plain text. With certain strings that contain XML meta characters, the auto-rich text detection may fail, interpreting plain text incorrectly as rich text. In these rare cases, use <a href="qt.html#convertFromPlainText">Qt::convertFromPlainText</a>() to convert your plain text string to a visually equivalent rich text string or set the text format explicitly with <a href="qmessagebox.html#textFormat-prop">setTextFormat</a>().</p>
 <p>Note that the Microsoft Windows User Interface Guidelines recommend using the application name as the window's title.</p>
-<p>The Standard Dialogs example shows how to use QMessageBox as well as other built-in Qt dialogs.</p>
+<p>The <a href="dialogs-standarddialogs.html">Standard Dialogs</a> example shows how to use QMessageBox as well as other built-in Qt dialogs.</p>
 <a name="severity-levels"></a>
 <h3>Severity Levels</h3>
 <p>QMessageBox supports four severity levels, indicated by an icon:</p>
@@ -196,7 +196,7 @@
 <li>On Mac OS X only, if there is exactly one button with the role <a href="qmessagebox.html#ButtonRole-enum">QMessageBox::RejectRole</a>, it is made the escape button.</li>
 </ol>
 <p>When an escape button could not be automatically detected, pressing <b>Esc</b> has no effect.</p>
-<p>See also <a href="qdialogbuttonbox.html">QDialogButtonBox</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Message Box</a>, Standard Dialogs Example, and Application Example.</p>
+<p>See also <a href="qdialogbuttonbox.html">QDialogButtonBox</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Message Box</a>, <a href="dialogs-standarddialogs.html">Standard Dialogs Example</a>, and <a href="mainwindows-application.html">Application Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ButtonRole-enum"></a>enum QMessageBox::ButtonRole</h3>
@@ -385,7 +385,7 @@
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qmessagebox.html#standardButtons-prop">standardButtons</a> and <a href="qmessagebox.html#standardButton">standardButton</a>().</p>
 <h3 class="fn"><a name="clickedButton"></a><a href="qabstractbutton.html">QAbstractButton</a> * QMessageBox::clickedButton () const</h3>
-<p>Returns the button that was clicked by the user, or 0 if the user hit the <b>Escape</b> key and no <a href="qmessagebox.html#setEscapeButton">escape button</a> was set.</p>
+<p>Returns the button that was clicked by the user, or 0 if the user hit the <b>Esc</b> key and no <a href="qmessagebox.html#setEscapeButton">escape button</a> was set.</p>
 <p>If <a href="qmessagebox.html#exec">exec</a>() hasn't been called yet, returns 0.</p>
 <p>Example:</p>
 <pre> QMessageBox messageBox(this);
@@ -400,7 +400,7 @@
 <p>See also <a href="qmessagebox.html#standardButton">standardButton</a>() and <a href="qmessagebox.html#button">button</a>().</p>
 <h3 class="fn"><a name="critical"></a><a href="qmessagebox.html#StandardButton-enum">StandardButton</a> QMessageBox::critical ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qmessagebox.html#StandardButton-enum">StandardButtons</a> <i>buttons</i> = Ok, <a href="qmessagebox.html#StandardButton-enum">StandardButton</a> <i>defaultButton</i> = NoButton )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Opens a critical message box with the title <i>title</i> and the text <i>text</i>. The standard buttons <i>buttons</i> is added to the message box. <i>defaultButton</i> specifies the button be used as the defaultButton. If the <i>defaultButton</i> is set to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>, <a href="qmessagebox.html">QMessageBox</a> picks a suitable default automatically.</p>
-<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a>.</p>
+<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a> (if any).</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qmessagebox.html#question">question</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#information">information</a>().</p>
@@ -409,7 +409,14 @@
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qmessagebox.html#setDefaultButton">setDefaultButton</a>(), <a href="qmessagebox.html#addButton">addButton</a>(), and <a href="qpushbutton.html#default-prop">QPushButton::setDefault</a>().</p>
 <h3 class="fn"><a name="escapeButton"></a><a href="qabstractbutton.html">QAbstractButton</a> * QMessageBox::escapeButton () const</h3>
-<p>Returns the button that is activated when escape is presed. Returns 0 if no escape button was set.</p>
+<p>Returns the button that is activated when escape is pressed.</p>
+<p>By default, <a href="qmessagebox.html">QMessageBox</a> attempts to automatically detect an escape button as follows:</p>
+<ol type="1">
+<li>If there is only one button, it is made the escape button.</li>
+<li>If there is a <a href="qmessagebox.html#StandardButton-enum">Cancel</a> button, it is made the escape button.</li>
+<li>On Mac OS X only, if there is exactly one button with the role <a href="qmessagebox.html#ButtonRole-enum">QMessageBox::RejectRole</a>, it is made the escape button.</li>
+</ol>
+<p>When an escape button could not be automatically detected, pressing <b>Esc</b> has no effect.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qmessagebox.html#setEscapeButton">setEscapeButton</a>() and <a href="qmessagebox.html#addButton">addButton</a>().</p>
 <h3 class="fn"><a name="exec"></a>int QMessageBox::exec ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -419,13 +426,13 @@
 <p>See also <a href="qwidget.html#show">show</a>() and <a href="qdialog.html#result">result</a>().</p>
 <h3 class="fn"><a name="information"></a><a href="qmessagebox.html#StandardButton-enum">StandardButton</a> QMessageBox::information ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qmessagebox.html#StandardButton-enum">StandardButtons</a> <i>buttons</i> = Ok, <a href="qmessagebox.html#StandardButton-enum">StandardButton</a> <i>defaultButton</i> = NoButton )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Opens an information message box with the title <i>title</i> and the text <i>text</i>. The standard buttons <i>buttons</i> is added to the message box. <i>defaultButton</i> specifies the button be used as the defaultButton. If the <i>defaultButton</i> is set to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>, <a href="qmessagebox.html">QMessageBox</a> picks a suitable default automatically.</p>
-<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a>.</p>
+<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a> (if any).</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qmessagebox.html#question">question</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
 <h3 class="fn"><a name="question"></a><a href="qmessagebox.html#StandardButton-enum">StandardButton</a> QMessageBox::question ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qmessagebox.html#StandardButton-enum">StandardButtons</a> <i>buttons</i> = Ok, <a href="qmessagebox.html#StandardButton-enum">StandardButton</a> <i>defaultButton</i> = NoButton )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Opens a question message box with the title <i>title</i> and the text <i>text</i>. The standard buttons <i>buttons</i> is added to the message box. <i>defaultButton</i> specifies the button be used as the defaultButton. If the <i>defaultButton</i> is set to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>, <a href="qmessagebox.html">QMessageBox</a> picks a suitable default automatically.</p>
-<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a>.</p>
+<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a> (if any).</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
@@ -456,7 +463,7 @@
 <p>See also <a href="qmessagebox.html#button">button</a>() and <a href="qmessagebox.html#standardButtons-prop">standardButtons</a>().</p>
 <h3 class="fn"><a name="warning"></a><a href="qmessagebox.html#StandardButton-enum">StandardButton</a> QMessageBox::warning ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qmessagebox.html#StandardButton-enum">StandardButtons</a> <i>buttons</i> = Ok, <a href="qmessagebox.html#StandardButton-enum">StandardButton</a> <i>defaultButton</i> = NoButton )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Opens a warning message box with the title <i>title</i> and the text <i>text</i>. The standard buttons <i>buttons</i> is added to the message box. <i>defaultButton</i> specifies the button be used as the defaultButton. If the <i>defaultButton</i> is set to <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a>, <a href="qmessagebox.html">QMessageBox</a> picks a suitable default automatically.</p>
-<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a>.</p>
+<p>Returns the identity of the standard button that was activated. If <b>Esc</b> was pressed, returns the <a href="qmessagebox.html#default-and-escape-keys">escape button</a> (if any).</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qmessagebox.html#question">question</a>(), <a href="qmessagebox.html#information">information</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
@@ -504,6 +511,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

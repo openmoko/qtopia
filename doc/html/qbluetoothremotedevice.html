@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QBluetoothRemoteDevice Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QBluetoothRemoteDevice Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothRemoteDevice Class Reference</h1>
 <p>The QBluetoothRemoteDevice class represents a remote bluetooth device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothRemoteDevice&gt;</pre><ul>
+<pre>#include &lt;QBluetoothRemoteDevice&gt;</pre><ul>
 <li><a href="qbluetoothremotedevice-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -59,14 +58,14 @@
 <h3 class="fn"><a name="QBluetoothRemoteDevice-2"></a>QBluetoothRemoteDevice::QBluetoothRemoteDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>address</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>version</i>, const <a href="qstring.html">QString</a> &amp; <i>revision</i>, const <a href="qstring.html">QString</a> &amp; <i>manufacturer</i>, const <a href="qstring.html">QString</a> &amp; <i>company</i>, <a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a> <i>devMajor</i>, quint8 <i>devMinor</i>, <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> <i>serviceClasses</i> )</h3>
 <p>Constructs a new <a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a> object.</p>
 <ul>
-<li><i>address</i> parameter defines the address of the remote device.</li>
-<li><i>name</i> parameter defines the name of the remote device.</li>
-<li><i>version</i> parameter defines the Bluetooth protocol version this device supports.</li>
-<li><i>revision</i> parameter defines the manufacturer specific revision of the device</li>
+<li><i>address</i> defines the address of the remote device.</li>
+<li><i>name</i> defines the name of the remote device.</li>
+<li><i>version</i> defines the Bluetooth protocol version this device supports.</li>
+<li><i>revision</i> defines the manufacturer specific revision of the device</li>
 <li><i>manufacturer</i> defines the manufacturer string</li>
 <li><i>company</i> defines the company producing the device</li>
-<li><i>devMajor</i> parameter defines the major device number</li>
-<li><i>devMinor</i> parameter defines the minor device number</li>
+<li><i>devMajor</i> defines the major device number</li>
+<li><i>devMinor</i> defines the minor device number</li>
 <li><i>serviceClasses</i> defines the bitmap of all device classes associated with this device.</li>
 </ul>
 <h3 class="fn"><a name="QBluetoothRemoteDevice-3"></a>QBluetoothRemoteDevice::QBluetoothRemoteDevice ( const QBluetoothRemoteDevice &amp; <i>other</i> )</h3>
@@ -92,7 +91,7 @@
 <p>Returns the minor device number of the remote device.</p>
 <p>See also <a href="qbluetoothremotedevice.html#deviceMinor">deviceMinor</a>() and <a href="qbluetoothremotedevice.html#setDeviceMinor">setDeviceMinor</a>().</p>
 <h3 class="fn"><a name="manufacturer"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::manufacturer () const</h3>
-<p>Returns null if the manufacturer is unknown, otherwise returns the name of the manufacturer.</p>
+<p>Returns the manufacturer of the remote bluetooth device. If the manufacturer is unknown, returns a null string.</p>
 <p>See also <a href="qbluetoothremotedevice.html#setManufacturer">setManufacturer</a>().</p>
 <h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QBluetoothRemoteDevice::name () const</h3>
 <p>Returns the human readable name of the remote device. If the name is unknown, an empty string is returned. For display purposes, it is best to display the address of the device in this case.</p>
@@ -145,6 +144,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

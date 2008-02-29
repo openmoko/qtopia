@@ -292,7 +292,7 @@ void EntryDialog::init()
     connect((QObject *)entry->timezone->d, SIGNAL(configureTimeZones()), this, SLOT(configureTimeZones()));
 #endif
 
-    QTimer::singleShot( 0, entry->comboDescription, SLOT( setFocus() ) );
+    entry->comboDescription->setFocus();
 
     connect( entry->repeatSelect, SIGNAL(activated(int)),
             this, SLOT(setRepeatRule(int)));
@@ -316,6 +316,9 @@ void EntryDialog::init()
              this, SLOT(updateEndTime()));
     connect( entry->endTime, SIGNAL(editingFinished()),
              this, SLOT(updateEndTime()));
+
+    connect( entry->repeatCheck, SIGNAL(toggled(bool)),
+            this, SLOT(checkRepeatDate(bool)));
 
     connect( qApp, SIGNAL(weekChanged(bool)),
              this, SLOT(setWeekStartsMonday(bool)) );
@@ -365,6 +368,7 @@ void EntryDialog::updateEndDateTime()
     entry->startTime->blockSignals(true);
     entry->endDate->blockSignals(true);
     entry->endTime->blockSignals(true);
+    entry->repeatDate->blockSignals(true);
 
     QDateTime target = QDateTime(entry->endDate->date(), entry->endTime->time());
 
@@ -376,11 +380,13 @@ void EntryDialog::updateEndDateTime()
     mAppointment.setEnd(target);
     entry->startDate->setDate(mAppointment.start().date());
     entry->startTime->setTime(mAppointment.start().time());
+    entry->repeatDate->setDate(mAppointment.repeatUntil());
 
     entry->startDate->blockSignals(false);
     entry->startTime->blockSignals(false);
     entry->endDate->blockSignals(false);
     entry->endTime->blockSignals(false);
+    entry->repeatDate->blockSignals(false);
 }
 
 /*
@@ -403,6 +409,7 @@ void EntryDialog::updateStartDateTime()
     entry->startTime->blockSignals(true);
     entry->endDate->blockSignals(true);
     entry->endTime->blockSignals(true);
+    entry->repeatDate->blockSignals(true);
 
     // start always works.
     QDateTime s = QDateTime(entry->startDate->date(), entry->startTime->time());
@@ -413,11 +420,27 @@ void EntryDialog::updateStartDateTime()
     // just ensure we update the widget.
     entry->endDate->setDate(mAppointment.end().date());
     entry->endTime->setTime(mAppointment.end().time());
+    entry->repeatDate->setDate(mAppointment.repeatUntil());
 
     entry->startDate->blockSignals(false);
     entry->startTime->blockSignals(false);
     entry->endDate->blockSignals(false);
     entry->endTime->blockSignals(false);
+    entry->repeatDate->blockSignals(false);
+}
+
+void EntryDialog::checkRepeatDate(bool on)
+{
+    entry->repeatDate->blockSignals(true);
+    if (on) {
+        mAppointment.setRepeatUntil(entry->repeatDate->date());
+        // and feed it back, to follow the mAppointment logic
+        entry->repeatDate->setDate(mAppointment.repeatUntil());
+    } else {
+        mAppointment.setRepeatForever();
+        entry->repeatDate->setDate(mAppointment.start().date());
+    }
+    entry->repeatDate->blockSignals(false);
 }
 
 void EntryDialog::editCustomRepeat()
@@ -446,11 +469,6 @@ QAppointment EntryDialog::appointment( const bool includeQdlLinks )
     mAppointment.setCategories( entry->comboCategory->selectedCategories() );
     mAppointment.setAllDay( entry->checkAllDay->isChecked() );
 
-    if (entry->repeatCheck->isChecked()) {
-        mAppointment.setRepeatUntil(entry->repeatDate->date());
-    } else {
-        mAppointment.setRepeatForever();
-    }
     // don't set the time if theres no need too
 
     if (entry->timezone->currentZone() == "None")
@@ -561,12 +579,12 @@ void EntryDialog::setRepeatRule(int i)
 
 void EntryDialog::setEndDate(const QDate &date)
 {
-    // chekc the date...
-    if (date.isValid() && date < entry->startDate->date()) {
-        entry->repeatDate->blockSignals(true);
-        entry->repeatDate->setDate(entry->startDate->date());
-        entry->repeatDate->blockSignals(false);
-    }
+    entry->repeatDate->blockSignals(true);
+
+    mAppointment.setRepeatUntil(entry->repeatDate->date());
+    entry->repeatDate->setDate(mAppointment.repeatUntil());
+
+    entry->repeatDate->blockSignals(false);
 }
 
 void EntryDialog::updateCategories()

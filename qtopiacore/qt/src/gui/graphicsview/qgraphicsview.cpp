@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -537,6 +547,8 @@ QGraphicsView::QGraphicsView(QGraphicsScene *scene, QWidget *parent)
 QGraphicsView::~QGraphicsView()
 {
     Q_D(QGraphicsView);
+    if (d->scene)
+        d->scene->d_func()->views.removeAll(this);
     delete d->lastDragDropEvent;
 }
 
@@ -874,9 +886,10 @@ void QGraphicsView::setScene(QGraphicsScene *scene)
     this means the area of the scene that you can navigate using the scroll
     bars.
 
-    If unset, this property has the same value as QGraphicsScene::sceneRect,
-    and it changes with QGraphicsScene::sceneRect. Otherwise, the view's scene
-    rect is unaffected by the scene.
+    If unset, or if a null QRectF is set, this property has the same value as
+    QGraphicsScene::sceneRect, and it changes with
+    QGraphicsScene::sceneRect. Otherwise, the view's scene rect is unaffected
+    by the scene.
 
     Note: The maximum size of the view's scene rect is limited by the range of
     QAbstractScrollArea's scrollbars, which operate in integer coordinates.
@@ -1154,8 +1167,10 @@ void QGraphicsView::ensureVisible(const QGraphicsItem *item, int xmargin, int ym
 }
 
 /*!
-    Scales the view matrix and scrolls the scroll bars to ensures that the
-    scene rectangle \a rect fits inside the view.
+    Scales the view matrix and scrolls the scroll bars to ensure that the
+    scene rectangle \a rect fits inside the viewport. \a rect must be inside
+    the scene rect; otherwise, fitInView() cannot guarantee that the whole
+    rect is visible.
 
     This function keeps the view's rotation, translation, or shear. The view
     is scaled according to \a aspectRatioMode. \a rect will be centered in the
@@ -1614,8 +1629,6 @@ QPoint QGraphicsView::mapFromScene(const QPointF &point) const
 */
 QPolygon QGraphicsView::mapFromScene(const QRectF &rect) const
 {
-    if (!rect.isValid())
-        return QPolygon();
     return QPolygon(QVector<QPoint>()
                     << mapFromScene(rect.topLeft())
                     << mapFromScene(rect.topRight())

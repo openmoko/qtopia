@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/embedded/qmouse_qws.cpp -->
 <head>
   <title>Qt 4.2: QWSMouseHandler Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -37,7 +38,7 @@
 <p>Note that this class is only available in <a href="qtopiacore.html">Qtopia Core</a>.</p>
 <p><a href="qtopiacore.html">Qtopia Core</a> provides ready-made drivers for several mouse protocols, see the <a href="qtopiacore-pointer.html">pointer handling</a> documentation for details. Custom mouse drivers can be implemented by subclassing the QWSMouseHandler class and creating a mouse driver plugin (derived from <a href="qmousedriverplugin.html">QMouseDriverPlugin</a>). <a href="qtopiacore.html">Qtopia Core</a>'s implementation of the <a href="qmousedriverfactory.html">QMouseDriverFactory</a> class will automatically detect the plugin, and load the driver into the server application at runtime using Qt's <a href="plugins-howto.html">plugin system</a>.</p>
 <p>The mouse driver receives mouse events from the system device and encapsulates each event with an instance of the <a href="qwsevent.html">QWSEvent</a> class which it then passes to the server application (the server is responsible for propagating the event to the appropiate client). To receive mouse events, a QWSMouseHandler object will usually create a <a href="qsocketnotifier.html">QSocketNotifier</a> object for the given device. The <a href="qsocketnotifier.html">QSocketNotifier</a> class provides support for monitoring activity on a file descriptor. When the socket notifier receives data, it will call the mouse driver's <a href="qwsmousehandler.html#mouseChanged">mouseChanged</a>() function to send the event to the <a href="qtopiacore.html">Qtopia Core</a> server application for relaying to clients.</p>
-<p>If you are creating a driver for a device that needs calibration or noise reduction, such as a touchscreen, use the <a href="qwscalibratedmousehandler.html">QWSCalibratedMouseHandler</a> subclass instead to take advantage of the <a href="qwsmousehandler.html#calibrate">calibrate</a>() and <a href="qwsmousehandler.html#clearCalibration">clearCalibration</a>() functions. The Mouse Calibration example demonstrates how to write a simple program using the mechanisms provided by the QWSMouseHandler class to calibrate a mouse driver.</p>
+<p>If you are creating a driver for a device that needs calibration or noise reduction, such as a touchscreen, use the <a href="qwscalibratedmousehandler.html">QWSCalibratedMouseHandler</a> subclass instead to take advantage of the <a href="qwsmousehandler.html#calibrate">calibrate</a>() and <a href="qwsmousehandler.html#clearCalibration">clearCalibration</a>() functions. The <a href="qtopiacore-mousecalibration.html">Mouse Calibration example</a> demonstrates how to write a simple program using the mechanisms provided by the QWSMouseHandler class to calibrate a mouse driver.</p>
 <p>Note that when deriving from the QWSMouseHandler class, the <a href="qwsmousehandler.html#resume">resume</a>() and <a href="qwsmousehandler.html#suspend">suspend</a>() functions must be reimplemented to control the flow of mouse input, i.e., the default implementation does nothing. Reimplementations of these functions typically call the <a href="qsocketnotifier.html#setEnabled">QSocketNotifier::setEnabled</a>() function to enable or disable the socket notifier, respectively.</p>
 <p>In addition, QWSMouseHandler provides the <a href="qwsmousehandler.html#setScreen">setScreen</a>() function that allows you to specify a screen for your mouse driver and the <a href="qwsmousehandler.html#limitToScreen">limitToScreen</a>() function that ensures that a given position is within this screen's boundaries (changing the position if necessary). Finally, QWSMouseHandler provides the <a href="qwsmousehandler.html#pos">pos</a>() function returning the current mouse position.</p>
 <p>See also <a href="qmousedriverplugin.html">QMouseDriverPlugin</a>, <a href="qmousedriverfactory.html">QMouseDriverFactory</a>, and <a href="qtopiacore-pointer.html">Qtopia Core Pointer Handling</a>.</p>
@@ -48,7 +49,7 @@
 <p>Call the <a href="qwsserver.html#setMouseHandler">QWSServer::setMouseHandler</a>() function to make the newly created mouse driver, the primary driver. Note that the primary driver is controlled by the system, i.e., the system will delete it upon exit.</p>
 <h3 class="fn"><a name="dtor.QWSMouseHandler"></a>QWSMouseHandler::~QWSMouseHandler ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys this mouse driver.</p>
-<p>Do not call this function if this driver is the primary mouse handler, i.e., if <a href="qwsserver.html#setMouseHandler">QWSServer::setMouseHandler</a>() function has been called passing this driver as argument. The primary mouse driver is deleted by the system.</p>
+<p>Do not call this function if this driver is the primary mouse driver, i.e., if <a href="qwsserver.html#setMouseHandler">QWSServer::setMouseHandler</a>() function has been called passing this driver as argument. The primary mouse driver is deleted by the system.</p>
 <h3 class="fn"><a name="calibrate"></a>void QWSMouseHandler::calibrate ( const <a href="qwspointercalibrationdata.html">QWSPointerCalibrationData</a> * <i>data</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This virtual function allows subclasses of <a href="qwsmousehandler.html">QWSMouseHandler</a> to set the calibration information passed in the given <i>data</i>. Note that the default implementation does nothing.</p>
 <p>See also <a href="qwscalibratedmousehandler.html#calibrate">QWSCalibratedMouseHandler::calibrate</a>() and <a href="qwsmousehandler.html#clearCalibration">clearCalibration</a>().</p>
@@ -80,6 +81,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

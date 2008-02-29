@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -491,6 +501,21 @@ void QMainWindowLayout::saveState(QDataStream &stream) const
 #endif // QT_NO_DOCKWIDGET
 }
 
+template <typename T>
+static QList<T> findChildren(const QObject *o)
+{
+    const QObjectList &list = o->children();
+    QList<T> result;
+    
+    for (int i=0; i < list.size(); ++i) {
+        if (T t = qobject_cast<T>(list[i])) {
+            result.append(t);
+        }
+    }
+
+    return result;
+}
+
 bool QMainWindowLayout::restoreState(QDataStream &stream)
 {
 #ifndef QT_NO_TOOLBAR
@@ -503,7 +528,7 @@ bool QMainWindowLayout::restoreState(QDataStream &stream)
     int lines;
     stream >> lines;
     QList<ToolBarLineInfo> toolBarState;
-    QList<QToolBar *> toolbars = qFindChildren<QToolBar *>(parentWidget());
+    QList<QToolBar *> toolbars = ::findChildren<QToolBar *>(parentWidget());
     for (int line = 0; line < lines; ++line) {
         ToolBarLineInfo lineInfo;
         stream >> lineInfo.pos;
@@ -610,7 +635,7 @@ bool QMainWindowLayout::restoreState(QDataStream &stream)
 
 #ifndef QT_NO_DOCKWIDGET
     // restore dockwidget layout
-    QList<QDockWidget *> dockwidgets = qFindChildren<QDockWidget *>(parentWidget());
+    QList<QDockWidget *> dockwidgets = ::findChildren<QDockWidget *>(parentWidget());
     QMainWindow *win = qobject_cast<QMainWindow*>(parentWidget());
     Q_ASSERT(win != 0);
 
@@ -1829,7 +1854,14 @@ bool QMainWindowLayout::dropToolBar(QToolBar *toolbar, const QPoint &mouse, cons
         addToolBar(static_cast<Qt::ToolBarArea>(areaForPosition(where)), toolbar, false);
         return toolBarPositionSwapped;
     }
-    relayout();
+
+    if (parentWidget()->isWindow()) {
+        relayout();
+    } else {
+        invalidate();
+        parentWidget()->updateGeometry();
+    }
+
     return toolBarPositionSwapped;
 }
 

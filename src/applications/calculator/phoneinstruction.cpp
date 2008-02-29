@@ -23,6 +23,8 @@
 #include "engine.h"
 
 #include <QBitmap>
+#include <QApplication>
+#include <QPalette>
 
 // Factory
 iPhoneDoubleFactory::iPhoneDoubleFactory():Instruction() {
@@ -58,11 +60,12 @@ iEvaluateLine::iEvaluateLine():Instruction() {
 }
 QPixmap *iEvaluateLine::draw() {
     if (!cache) {
-        cache = new QBitmap(50,3);
-        cache->clear();
+        cache = new QPixmap(60,3);
+        cache->fill(Qt::transparent);
         QPainter p(cache);
-        p.setPen(Qt::color1);
-        p.drawLine(0,1,50,1);
+        p.setPen(QApplication::palette().color(QPalette::Text));
+        p.drawLine(0,0,60,0);
+        p.drawLine(0,1,60,1);
     }
     return cache;
 }

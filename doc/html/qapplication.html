@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qapplication.cpp -->
 <head>
   <title>Qt 4.2: QApplication Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -58,7 +59,7 @@
 <li><div class="fn"/>virtual void <b><a href="qapplication.html#commitData">commitData</a></b> ( QSessionManager &amp; <i>manager</i> )</li>
 <li><div class="fn"/>QInputContext * <b><a href="qapplication.html#inputContext">inputContext</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qapplication.html#isSessionRestored">isSessionRestored</a></b> () const</li>
-<li><div class="fn"/>virtual bool <b><a href="qapplication.html#macEventFilter">macEventFilter</a></b> ( EventHandlerCallRef, EventRef )</li>
+<li><div class="fn"/>virtual bool <b><a href="qapplication.html#macEventFilter">macEventFilter</a></b> ( EventHandlerCallRef <i>caller</i>, EventRef <i>event</i> )</li>
 <li><div class="fn"/>virtual bool <b><a href="qapplication.html#qwsEventFilter">qwsEventFilter</a></b> ( QWSEvent * <i>event</i> )</li>
 <li><div class="fn"/>void <b><a href="qapplication.html#qwsSetCustomColors">qwsSetCustomColors</a></b> ( QRgb * <i>colorTable</i>, int <i>start</i>, int <i>numColors</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="qapplication.html#saveState">saveState</a></b> ( QSessionManager &amp; <i>manager</i> )</li>
@@ -66,7 +67,6 @@
 <li><div class="fn"/>QString <b><a href="qapplication.html#sessionKey">sessionKey</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qapplication.html#setInputContext">setInputContext</a></b> ( QInputContext * <i>inputContext</i> )</li>
 <li><div class="fn"/>QString <b><a href="qapplication.html#styleSheet-prop">styleSheet</a></b> () const</li>
-<li><div class="fn"/>void <b><a href="qapplication.html#winFocus">winFocus</a></b> ( QWidget *, bool )</li>
 <li><div class="fn"/>virtual bool <b><a href="qapplication.html#x11EventFilter">x11EventFilter</a></b> ( XEvent * <i>event</i> )</li>
 <li><div class="fn"/>int <b><a href="qapplication.html#x11ProcessEvent">x11ProcessEvent</a></b> ( XEvent * <i>event</i> )</li>
 </ul>
@@ -169,7 +169,6 @@
 <li><div class="fn"/>int <b><a href="qapplication.html#wheelScrollLines-prop">wheelScrollLines</a></b> ()</li>
 <li><div class="fn"/>QWidget * <b><a href="qapplication.html#widgetAt">widgetAt</a></b> ( const QPoint &amp; <i>point</i> )</li>
 <li><div class="fn"/>QWidget * <b><a href="qapplication.html#widgetAt-4">widgetAt</a></b> ( int <i>x</i>, int <i>y</i> )</li>
-<li><div class="fn"/>void <b><a href="qapplication.html#winMouseButtonUp">winMouseButtonUp</a></b> ()</li>
 <li><div class="fn"/>QIcon <b><a href="qapplication.html#windowIcon-prop">windowIcon</a></b> ()</li>
 </ul>
 <ul>
@@ -215,7 +214,7 @@
 <tr valign="top" class="odd"><td>GUI Styles</td><td><a href="qapplication.html#style">style</a>(), <a href="qapplication.html#setStyle">setStyle</a>().</td></tr>
 <tr valign="top" class="even"><td>Color usage</td><td><a href="qapplication.html#colorSpec">colorSpec</a>(), <a href="qapplication.html#setColorSpec">setColorSpec</a>(), <a href="qapplication.html#qwsSetCustomColors">qwsSetCustomColors</a>().</td></tr>
 <tr valign="top" class="odd"><td>Text handling</td><td><a href="qcoreapplication.html#installTranslator">installTranslator</a>(), <a href="qcoreapplication.html#removeTranslator">removeTranslator</a>() <a href="qcoreapplication.html#translate">translate</a>().</td></tr>
-<tr valign="top" class="even"><td>Widgets</td><td><a href="qapplication.html#allWidgets">allWidgets</a>(), <a href="qapplication.html#topLevelWidgets">topLevelWidgets</a>(), <a href="qapplication.html#desktop">desktop</a>(), <a href="qapplication.html#activePopupWidget">activePopupWidget</a>(), <a href="qapplication.html#activeModalWidget">activeModalWidget</a>(), <a href="qapplication.html#clipboard">clipboard</a>(), <a href="qapplication.html#focusWidget">focusWidget</a>(), <a href="qapplication.html#winFocus">winFocus</a>(), <a href="qapplication.html#activeWindow">activeWindow</a>(), <a href="qapplication.html#widgetAt">widgetAt</a>().</td></tr>
+<tr valign="top" class="even"><td>Widgets</td><td><a href="qapplication.html#allWidgets">allWidgets</a>(), <a href="qapplication.html#topLevelWidgets">topLevelWidgets</a>(), <a href="qapplication.html#desktop">desktop</a>(), <a href="qapplication.html#activePopupWidget">activePopupWidget</a>(), <a href="qapplication.html#activeModalWidget">activeModalWidget</a>(), <a href="qapplication.html#clipboard">clipboard</a>(), <a href="qapplication.html#focusWidget">focusWidget</a>(), winFocus(), <a href="qapplication.html#activeWindow">activeWindow</a>(), <a href="qapplication.html#widgetAt">widgetAt</a>().</td></tr>
 <tr valign="top" class="odd"><td>Advanced cursor handling</td><td><a href="qapplication.html#overrideCursor">overrideCursor</a>(), <a href="qapplication.html#setOverrideCursor">setOverrideCursor</a>(), <a href="qapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>().</td></tr>
 <tr valign="top" class="even"><td>X Window System synchronization</td><td><a href="qapplication-qt3.html#flushX">flushX</a>(), <a href="qapplication.html#syncX">syncX</a>().</td></tr>
 <tr valign="top" class="odd"><td>Session management</td><td><a href="qapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qapplication.html#sessionId">sessionId</a>(), <a href="qapplication.html#commitData">commitData</a>(), <a href="qapplication.html#saveState">saveState</a>().</td></tr>
@@ -334,7 +333,7 @@
 <li><div class="fn"/><b>QString styleSheet () const</b></li>
 <li><div class="fn"/><b>void setStyleSheet ( const QString &amp; <i>sheet</i> )</b></li>
 </ul>
-<p>See also <a href="qwidget.html#setStyle">QWidget::setStyle</a>() and Customizing Widgets using Style Sheets.</p>
+<p>See also <a href="qwidget.html#setStyle">QWidget::setStyle</a>() and <a href="stylesheet.html">Qt Style Sheets</a>.</p>
 <h3 class="fn"><a name="wheelScrollLines-prop"></a>wheelScrollLines : int</h3>
 <p>This property holds the number of lines to scroll when the mouse wheel is rotated.</p>
 <p>If this number exceeds the number of visible lines in a certain widget, the widget should interpret the scroll operation as a single &quot;page up&quot; or &quot;page down&quot; operation instead.</p>
@@ -355,6 +354,7 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QApplication"></a>QApplication::QApplication ( int &amp; <i>argc</i>, char ** <i>argv</i> )</h3>
 <p>Initializes the window system and constructs an application object with <i>argc</i> command line arguments in <i>argv</i>.</p>
+<p><b>Warning:</b> The data pointed to by <i>argc</i> and <i>argv</i> must stay valid for the entire lifetime of the <a href="qapplication.html">QApplication</a> object.</p>
 <p>The global <tt>qApp</tt> pointer refers to this application object. Only one application object should be created.</p>
 <p>This application object must be constructed before any <a href="qpaintdevice.html">paint devices</a> (including widgets, pixmaps, bitmaps etc.).</p>
 <p>Note that <i>argc</i> and <i>argv</i> might be changed. Qt removes command line arguments that it recognizes. The original <i>argc</i> and <i>argv</i> can be accessed later with <a href="qcoreapplication.html#arguments">arguments</a>().</p>
@@ -467,7 +467,10 @@
 <h3 class="fn"><a name="closeAllWindows"></a>void QApplication::closeAllWindows ()&nbsp;&nbsp;<tt> [static slot]</tt></h3>
 <p>Closes all top-level windows.</p>
 <p>This function is particularly useful for applications with many top-level windows. It could, for example, be connected to a <b>Exit</b> entry in the <b>File</b> menu:</p>
-<pre></pre>
+<pre>     exitAct = new QAction(tr(&quot;E&amp;xit&quot;), this);
+     exitAct-&gt;setShortcut(tr(&quot;Ctrl+Q&quot;));
+     exitAct-&gt;setStatusTip(tr(&quot;Exit the application&quot;));
+     connect(exitAct, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));</pre>
 <p>The windows are closed in random order, until one window does not accept the close event. The application quits when the last window was successfully closed; this can be turned off by setting <a href="qapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a> to false.</p>
 <p>See also <a href="qapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a>, <a href="qapplication.html#lastWindowClosed">lastWindowClosed</a>(), <a href="qwidget.html#close">QWidget::close</a>(), <a href="qwidget.html#closeEvent">QWidget::closeEvent</a>(), <a href="qapplication.html#lastWindowClosed">lastWindowClosed</a>(), <a href="qcoreapplication.html#quit">quit</a>(), <a href="qapplication.html#topLevelWidgets">topLevelWidgets</a>(), and <a href="qwidget.html#isWindow">QWidget::isWindow</a>().</p>
 <h3 class="fn"><a name="colorSpec"></a>int QApplication::colorSpec ()&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -488,9 +491,9 @@
 <p>Note: You should use <a href="qt.html#ConnectionType-enum">Qt::DirectConnection</a> when connecting to this signal.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qapplication.html#isSessionRestored">isSessionRestored</a>(), <a href="qapplication.html#sessionId">sessionId</a>(), <a href="qapplication.html#saveState">saveState</a>(), and <a href="session.html">Session Management</a>.</p>
-<h3 class="fn"><a name="desktop"></a>QDesktopWidget * QApplication::desktop ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="desktop"></a><a href="qdesktopwidget.html">QDesktopWidget</a> * QApplication::desktop ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the desktop widget (also called the root window).</p>
-<p>Note that the desktop may be composed of multiple screens, so it would be incorrect, for example, to attempt to <i>center</i> some widget in the desktop's geometry. QDesktopWidget has various functions for obtaining useful geometries upon the desktop, such as <a href="qdesktopwidget.html#screenGeometry">QDesktopWidget::screenGeometry</a>() and <a href="qdesktopwidget.html#availableGeometry">QDesktopWidget::availableGeometry</a>().</p>
+<p>Note that the desktop may be composed of multiple screens, so it would be incorrect, for example, to attempt to <i>center</i> some widget in the desktop's geometry. <a href="qdesktopwidget.html">QDesktopWidget</a> has various functions for obtaining useful geometries upon the desktop, such as <a href="qdesktopwidget.html#screenGeometry">QDesktopWidget::screenGeometry</a>() and <a href="qdesktopwidget.html#availableGeometry">QDesktopWidget::availableGeometry</a>().</p>
 <p>On X11, it is also possible to draw on the desktop.</p>
 <h3 class="fn"><a name="desktopSettingsAware"></a>bool QApplication::desktopSettingsAware ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if Qt is set to use the system's standard colors, fonts, etc.; otherwise returns false. The default is true.</p>
@@ -563,7 +566,10 @@
 </ul>
 <p>This feature be turned off by setting <a href="qapplication.html#quitOnLastWindowClosed-prop">quitOnLastWindowClosed</a> to false.</p>
 <p>See also <a href="qwidget.html#close">QWidget::close</a>().</p>
-<h3 class="fn"><a name="macEventFilter"></a>bool QApplication::macEventFilter ( EventHandlerCallRef, EventRef )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="macEventFilter"></a>bool QApplication::macEventFilter ( EventHandlerCallRef <i>caller</i>, EventRef <i>event</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p><b>Warning:</b> This virtual function is only implemented under Mac OS X.</p>
+<p>If you create an application that inherits <a href="qapplication.html">QApplication</a> and reimplement this function, you get direct access to all Carbon Events that are received from Mac OS X with this function being called with the <i>caller</i> and the <i>event</i>.</p>
+<p>Return true if you want to stop the event from being processed. Return false for normal event dispatching. The default implementation returns false.</p>
 <h3 class="fn"><a name="mouseButtons"></a><a href="qt.html#MouseButton-enum">Qt::MouseButtons</a> QApplication::mouseButtons ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the current state of the buttons on the mouse. The current state is updated syncronously as the event queue is emptied of events that will spontaneously change the mouse state (QEvent::MousePress and QEvent::MouseRelease events).</p>
 <p>It should be noted this may not reflect the actual buttons held on theinput device at the time of calling but rather the mouse buttons as last reported in one of the above events. If no mouse buttons are being held <a href="qt.html#MouseButton-enum">Qt::NoButton</a> is returned.</p>
@@ -584,9 +590,8 @@
 <p>Returns the palette for widgets of the given <i>className</i>.</p>
 <p>See also <a href="qapplication.html#setPalette">setPalette</a>() and <a href="qwidget.html#palette-prop">QWidget::palette</a>().</p>
 <h3 class="fn"><a name="qwsDecoration"></a><a href="qdecoration.html">QDecoration</a> &amp; QApplication::qwsDecoration ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p><b>Warning:</b></p>
 <p>Return the QWSDecoration used for decorating windows.</p>
-<p>This method is non-portable. It is only available in Qtopia Core.</p>
+<p><b>Warning:</b> This method is non-portable. It is only available in Qtopia Core.</p>
 <p>See also <a href="qdecoration.html">QDecoration</a>.</p>
 <h3 class="fn"><a name="qwsEventFilter"></a>bool QApplication::qwsEventFilter ( <a href="qwsevent.html">QWSEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This virtual function is only implemented under Qtopia Core.</p>
@@ -751,8 +756,6 @@
 <h3 class="fn"><a name="widgetAt-4"></a><a href="qwidget.html">QWidget</a> * QApplication::widgetAt ( int <i>x</i>, int <i>y</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the widget at global screen position (<i>x</i>, <i>y</i>), or 0 if there is no Qt widget there.</p>
-<h3 class="fn"><a name="winFocus"></a>void QApplication::winFocus ( <a href="qwidget.html">QWidget</a> *, bool )</h3>
-<h3 class="fn"><a name="winMouseButtonUp"></a>void QApplication::winMouseButtonUp ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <h3 class="fn"><a name="x11EventFilter"></a>bool QApplication::x11EventFilter ( XEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p><b>Warning:</b> This virtual function is only implemented under X11.</p>
 <p>If you create an application that inherits <a href="qapplication.html">QApplication</a> and reimplement this function, you get direct access to all X events that the are received from the X server. The events are passed in the <i>event</i> parameter.</p>
@@ -851,6 +854,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,0 +1,58 @@
+diff -Nur diff/Ilib-1.1.9/lib/IImage.c Ilib-1.1.9/lib/IImage.c
+--- diff/Ilib-1.1.9/lib/IImage.c	2004-10-25 03:34:53.000000000 +1000
++++ Ilib-1.1.9/lib/IImage.c	2007-03-22 11:25:14.000000000 +1000
+@@ -161,6 +161,37 @@
+   return ( ret );
+ }
+ 
++int IWriteImageFB ( fd, image )
++int fd;
++IImage image;
++{
++    IImageP *imagep = (IImageP *)image;
++    int size = imagep->width * imagep->height;
++
++    unsigned short *fbdata = (unsigned short *)malloc( size * sizeof(unsigned short) );
++    memset( fbdata, '\0', size * sizeof(unsigned short) );
++
++    IColorP colour;
++    int h, w;
++    for ( h = 0; h < imagep->height; h++ ) {
++        for ( w = 0; w < imagep->width; w++ ) {
++            _IGetPointColor( imagep, w, h, colour );
++
++            unsigned short pixel = 0;
++            pixel |= (colour.red & 0x00f8) << 8;
++            pixel |= (colour.green & 0x00fc) << 3;
++            pixel |= (colour.blue & 0x00f8) >> 3;
++
++            fbdata[h*imagep->width + w] = pixel;
++        }
++    }
++
++    int ret = write(fd, fbdata, size * sizeof(unsigned short));
++
++    free( fbdata );
++
++    return ret;
++}
+ 
+ 
+ IError IReadImageFile ( fp, format, options, image_return )
+diff -Nur diff/Ilib-1.1.9/lib/Ilib.h Ilib-1.1.9/lib/Ilib.h
+--- diff/Ilib-1.1.9/lib/Ilib.h	2004-10-26 07:20:38.000000000 +1000
++++ Ilib-1.1.9/lib/Ilib.h	2007-03-22 09:54:05.000000000 +1000
+@@ -372,6 +372,13 @@
+ #endif
+ );
+ 
++int IWriteImageFB (
++#ifndef _NO_PROTO
++  int fd,
++  IImage image
++#endif
++);
++
+ /*
+ ** Creates a graphic context for drawing on an image.
+ */

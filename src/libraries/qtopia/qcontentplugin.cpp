@@ -50,10 +50,25 @@ QContentPlugin::~QContentPlugin()
 */
 
 /*!
-    \fn QContentPlugin::installContent( const QString &filePath, QContent *content )
+    \fn QContentPlugin::installContent( const QString &fileName, QContent *content )
 
-    Populates \a content with data from the file located at \a filePath.  Returns true on success.
+    Populates \a content with data from the file with the file name \a fileName.  Returns true on success.
+
+    Installation is only performed when the content is first identified by the content system, if the file changes
+    after installation updateContent() will be called to ensure the content data is up to date.
 */
+
+/*!
+    Refreshes the content data of \a content following a change to the file it references.
+
+    Returns true if the content data was out of date, false otherwise.
+*/
+bool QContentPlugin::updateContent( QContent *content )
+{
+    Q_UNUSED( content );
+
+    return false;
+}
 
 /*!
     \class QContentFactory
@@ -66,15 +81,33 @@ QContentPlugin::~QContentPlugin()
 Q_GLOBAL_STATIC( ContentPluginManager, pluginManager );
 
 /*!
-    Populates \a content with data from the file located at \a filePath if an appropriate plug-in exists
-    to handle the file.  Returns true on success.
+    Populates \a content with data from the file with the file name \a fileName if an appropriate plug-in exists
+    to handle the file.  Returns true if a plug-in is found to extract the content data.
+
+    Installation is only performed when the content is first identified by the content system, if the file changes
+    after installation updateContent() will be called to ensure the content data is up to date.
 */
-bool QContentFactory::installContent( const QString &filePath, QContent *content )
+bool QContentFactory::installContent( const QString &fileName, QContent *content )
 {
-    QList< QContentPlugin * > plugins = pluginManager()->findPlugins( filePath );
+    QList< QContentPlugin * > plugins = pluginManager()->findPlugins( fileName );
 
     foreach( QContentPlugin *p, plugins )
-        if( p->installContent( filePath, content ) )
+        if( p->installContent( fileName, content ) )
+            return true;
+
+    return false;
+}
+
+/*!
+    Refreshes the content data of \a content following a change to the file it references if an appropriate plug-in exists
+    to handle the file.  Returns true if a plug-in is found to update the content data, and the data is out of date.
+*/
+bool QContentFactory::updateContent( QContent *content )
+{
+    QList< QContentPlugin * > plugins = pluginManager()->findPlugins( content->file() );
+
+    foreach( QContentPlugin *p, plugins )
+        if( p->updateContent( content ) )
             return true;
 
     return false;

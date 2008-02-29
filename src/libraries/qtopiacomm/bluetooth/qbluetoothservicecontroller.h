@@ -23,21 +23,20 @@
 #define __QBLUETOOTHSERVICECONTROLLER_H__
 
 #include <QObject>
-
+#include <QStringList>
 #include <qbluetoothnamespace.h>
 
-class QBluetoothServiceController_Private;
+class QBluetoothServiceControllerPrivate;
 class QTOPIACOMM_EXPORT QBluetoothServiceController : public QObject
 {
-    friend class QBluetoothServiceController_Private;
+    friend class QBluetoothServiceControllerPrivate;
     Q_OBJECT
 
 public:
     enum ServiceState {
-        Stopped,
-        Started,
-        Stopping,
-        Starting
+        NotRunning,
+        Starting,
+        Running
     };
 
     explicit QBluetoothServiceController(QObject *parent = 0);
@@ -51,24 +50,16 @@ public:
                             QBluetooth::SecurityOptions options);
     QBluetooth::SecurityOptions securityOptions(const QString &name) const;
 
-    QString translatableDisplayName(const QString &name) const;
+    QString displayName(const QString &name) const;
 
-    QList<QString> registeredServices() const;
-    bool isRegistered(const QString &name) const;
+    QStringList services() const;
 
 signals:
-    void started(const QString &name,
-                 QBluetooth::ServiceError error,
-                 const QString &errorDesc);
-    void stopped(const QString &name,
-                 QBluetooth::ServiceError error,
-                 const QString &errorDesc);
-    void error(const QString &name,
-               QBluetooth::ServiceError error,
-               const QString &errorDesc);
+    void started(const QString &name, bool error, const QString &description);
+    void stopped(const QString &name);
 
 private:
-    QBluetoothServiceController_Private *m_private;
+    QBluetoothServiceControllerPrivate *m_data;
 };
 
 #endif

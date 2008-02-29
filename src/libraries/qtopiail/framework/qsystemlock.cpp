@@ -23,9 +23,11 @@
 #include <QDebug>
 #include <qtopialog.h>
 #include <QMutex>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 
@@ -358,7 +360,7 @@ public:
 QSystemMutex::QSystemMutex(unsigned int id, bool owner)
     : m_data(new QSystemMutex_Private(id, owner))
 {
-    m_data->semId = ::semget(m_data->id, 1, owner?IPC_CREAT | IPC_EXCL:0);
+    m_data->semId = ::semget(m_data->id, 1, owner?IPC_CREAT | IPC_EXCL | S_IRWXU:0);
     if(-1 == m_data->semId)
         qLog(ILFramework) << "QSystemMutex: Unable to access semaphore"
                           << m_data->id << "(" << ::strerror(errno) << ")";
@@ -367,9 +369,11 @@ QSystemMutex::QSystemMutex(unsigned int id, bool owner)
         union semun arg;
         arg.val = 1;
         int status = ::semctl(m_data->semId, 0, SETVAL, arg);
-        if (status == -1)
+        if (status == -1) {
+            m_data->semId = -1;   // isNull() now return true
             qLog(ILFramework) << "QSystemMutex: Unable to initialize the semaphore"
                               << m_data->id << "(" << ::strerror(errno) << ")";
+        }
     }
 }
 

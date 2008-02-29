@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,15 +42,18 @@
 
 int qAllocMore(int alloc, int extra)
 {
-    const int page = 1<<12;
+    const int page = 1 << 12;
     int nalloc;
     alloc += extra;
     if (alloc < 1<<6) {
         nalloc = (1<<3) + ((alloc >>3) << 3);
     } else  {
-        nalloc = (alloc < page) ? 1<<3 : page;
-        while (nalloc < alloc)
+        nalloc = (alloc < page) ? 1 << 3 : page;
+        while (nalloc < alloc) {
+            if (nalloc <= 0)
+                return INT_MAX;
             nalloc *= 2;
+        }
     }
     return nalloc - extra;
 }
@@ -1298,6 +1311,8 @@ void QByteArray::resize(int size)
         //    QByteArray a(sz);
         //
         Data *x = static_cast<Data *>(qMalloc(sizeof(Data)+size));
+        if (!x)
+            return;
         x->ref.init(1);
         x->alloc = x->size = size;
         x->data = x->array;
@@ -2444,7 +2459,7 @@ QByteArray QByteArray::toLower() const
 QByteArray QByteArray::toUpper() const
 {
     QByteArray s(*this);
-    register char *p = s.data();
+    register uchar *p = reinterpret_cast<uchar *>(s.data());
     if (p) {
         while (*p) {
             *p = QUnicodeTables::upper(*p);
@@ -3292,8 +3307,10 @@ float QByteArray::toFloat(bool *ok) const
 
     \code
         QByteArray text("Qt is great!");
-        text.toBase64();        // returns "UXQgaXMgZ3JlYXRcIQo="
+        text.toBase64();        // returns "UXQgaXMgZ3JlYXQh"
     \endcode
+
+    The algorithm used to encode Base64-encoded data is defined in \l{RFC 2045}.
 
     \sa fromBase64()
 */
@@ -3621,12 +3638,18 @@ QByteArray QByteArray::fromRawData(const char *data, int size)
 }
 
 /*!
-    Returns a decoded copy of the Base64 array \a base64. For example:
+    Returns a decoded copy of the Base64 array \a base64. Input is not checked
+    for validity; invalid characters in the input are skipped, enabling the
+    decoding process to continue with subsequent characters.
+
+    For example:
 
     \code
-        QByteArray text = QByteArray::fromBase64("UXQgaXMgZ3JlYXRcIQo=");
+        QByteArray text = QByteArray::fromBase64("UXQgaXMgZ3JlYXQh");
         text.data();            // returns "Qt is great!"
     \endcode
+
+    The algorithm used to decode Base64-encoded data is defined in \l{RFC 2045}.
 
     \sa toBase64()
 */

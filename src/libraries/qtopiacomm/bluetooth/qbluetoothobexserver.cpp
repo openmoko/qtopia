@@ -125,11 +125,7 @@ QBluetoothObexServer::~QBluetoothObexServer()
 }
 
 /*!
-    This function starts attempts to open a server socket and
-    register itself with the OBEX protocol handler.
-
-    Returns a valid QObexHandle if the registration was
-    completed successfully, and an invalid one otherwise.
+    \reimp
 */
 void *QBluetoothObexServer::registerServer()
 {
@@ -143,7 +139,7 @@ void *QBluetoothObexServer::registerServer()
 
 /*!
     Returns the channel the server is currently listening on.  If the server
-    is not listening, returns -1
+    is not listening, returns -1.
 */
 qint16 QBluetoothObexServer::serverChannel() const
 {
@@ -162,8 +158,7 @@ const QBluetoothAddress & QBluetoothObexServer::serverAddress() const
 }
 
 /*!
-    Returns the next pending connection if there are pending connections, otherwise returns
-    NULL value.  It is responsibility of the caller to make sure the socket is deleted.
+    \reimp
 */
 QObexSocket *QBluetoothObexServer::nextPendingConnection()
 {
@@ -172,11 +167,11 @@ QObexSocket *QBluetoothObexServer::nextPendingConnection()
     if (!handle)
         return NULL;
 
-    QBluetoothObexSocket *socket = new QBluetoothObexSocket();
+    QBluetoothObexSocket *socket = new QBluetoothObexSocket(this);
     socket->setHandle(handle);
 
-    qLog(Bluetooth) << "Socket encryption:" << socket->encrypted() <<
-            "auth:" << socket->authenticated();
+    qLog(Bluetooth) << "Socket encryption:" << socket->isEncrypted() <<
+            "auth:" << socket->isAuthenticated();
 
     return socket;
 }
@@ -186,7 +181,7 @@ QObexSocket *QBluetoothObexServer::nextPendingConnection()
     This method will always return false if the server is not
     actively listening for connections.
  */
-bool QBluetoothObexServer::authenticated() const
+bool QBluetoothObexServer::isAuthenticated() const
 {
     if (!isListening())
         return false;
@@ -199,7 +194,7 @@ bool QBluetoothObexServer::authenticated() const
     This method will always return false if the server is not
     actively listening for connections.
  */
-bool QBluetoothObexServer::encrypted() const
+bool QBluetoothObexServer::isEncrypted() const
 {
     if (!isListening())
         return false;
@@ -215,6 +210,9 @@ bool QBluetoothObexServer::encrypted() const
     The security options specify whether the server should mandate
     to the remote   clients whether the connection will be
     authenticated, encrypted or both.
+
+    Returns true if the security options were successfully set.  Security
+    options cannot be set while listening for connections.
  */
 bool QBluetoothObexServer::setSecurityOptions(QBluetooth::SecurityOptions options)
 {

@@ -312,7 +312,7 @@ QPhoneCall DialerControl::createCall( const QString& callType )
 void DialerControl::dial( const QString &number, bool sendcallerid, const QString& callType, const QUniqueId &contact )
 {
     if ( isDialing() ) {
-        qWarning("BUG! Attempt to dial while there is already a dialing call");
+        //qWarning("BUG! Attempt to dial while there is already a dialing call");
     }
     if( !hasActiveCalls() && !isDialing() )
     {

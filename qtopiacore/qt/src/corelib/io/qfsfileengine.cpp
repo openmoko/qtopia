@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -439,9 +449,6 @@ qint64 QFSFileEngine::read(char *data, qint64 len)
             d->lastIOCommand = QFSFileEnginePrivate::IOReadCommand;
         }
 
-        if (feof(d->fh))
-            return 0;
-
         size_t readBytes = 0;
 #ifdef Q_OS_UNIX
         if (d->sequential) {
@@ -521,8 +528,8 @@ qint64 QFSFileEngine::read(char *data, qint64 len)
 #ifdef Q_OS_WIN
             // Reading on Windows fails with ERROR_NO_SYSTEM_RESOURCES
             // when the chunks are too large, so we limit the block
-            // size to 32MB.
-            const qint64 MaxBlockSize = 32 * 1024 * 1024;
+            // size to 4MB.
+            const qint64 MaxBlockSize = 4 * 1024 * 1024;
             bytesToRead = qMin(bytesToRead, MaxBlockSize);
 #endif
             do {
@@ -600,8 +607,8 @@ qint64 QFSFileEngine::write(const char *data, qint64 len)
 #ifdef Q_OS_WIN
         // Writing on Windows fails with ERROR_NO_SYSTEM_RESOURCES
         // when the chunks are too large, so we limit the block size
-        // to 32MB.
-        const qint64 MaxChunkSize = 32 * 1024 * 1024;
+        // to 4MB.
+        const qint64 MaxChunkSize = 4 * 1024 * 1024;
         bytesToWrite = qMin<qint64>(bytesToWrite, MaxChunkSize);
 #endif
         if (d->fh) {

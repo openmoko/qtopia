@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -498,13 +508,11 @@ QStringList QFileDialog::selectedFiles() const
   Sets the filter used in the file dialog to the given \a filter.
 
   If \a filter contains a pair of parentheses containing one or more
-  of \bold{anything*something}, separated by spaces or by
-  semicolons then only the text contained in the parentheses is used as
-  the filter. This means that these calls are all equivalent:
+  of \bold{anything*something}, separated by semicolons, then only the
+  text contained in the parentheses is used as the filter. This means
+  that these calls are all equivalent:
 
   \code
-     dialog.setFilter("All C++ files (*.cpp *.cc *.C *.cxx *.c++)");
-     dialog.setFilter("*.cpp *.cc *.C *.cxx *.c++");
      dialog.setFilter("All C++ files (*.cpp;*.cc;*.C;*.cxx;*.c++)");
      dialog.setFilter("*.cpp;*.cc;*.C;*.cxx;*.c++");
   \endcode
@@ -539,6 +547,8 @@ void QFileDialog::setFilters(const QStringList &filters)
 {
     Q_D(QFileDialog);
     d->fileTypeCombo->clear();
+    if (filters.isEmpty())
+        return;
     d->fileTypeCombo->addItems(filters);
     d->_q_useFilter(filters.first());
 }

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QAbstractServerInterface Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QAbstractServerInterface Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAbstractServerInterface Class Reference</h1>
 <p>The QAbstractServerInterface class allows the Qtopia Server UI to be replaced. <a href="#details">More...</a></p>
-<pre>    #include &lt;QAbstractServerInterface&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
+<pre>#include &lt;QAbstractServerInterface&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
 <ul>
 <li><a href="qabstractserverinterface-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -24,7 +23,7 @@
 <ul>
 <li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>22 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>20 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -58,18 +57,18 @@
 <p>Some helpful widget and backend classes are provided that make implementing a server UI easier. The documentation for these classes can be perused in the <a href="qtopiaserver.html">QtopiaServer</a> group.</p>
 </li>
 <li>Mark the QAbstractServerInterface implementation as a replacable widget using the <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET">QTOPIA_REPLACE_WIDGET</a>() or <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_OVERRIDE">QTOPIA_REPLACE_WIDGET_OVERRIDE</a>() macros.<p>For example, if creating a new UI implementation class named TestServerInterface, the following stub code may be appropriate:</p>
-<pre><span class="comment">    // testserverinterface.h</span>
+<pre>&nbsp;   // testserverinterface.h
     class TestServerInterface : public QAbstractServerInterface
     {
     Q_OBJECT
     public:
         TestServerInterface(QWidget *parent = 0, Qt::WFlags flags = 0);
-        <span class="comment">// ... declaration ...</span>
+        // ... declaration ...
     };
 
-<span class="comment">    // testserverinterface.cpp</span>
+    // testserverinterface.cpp
 
-<span class="comment">    // ... definition ...</span>
+    // ... definition ...
 
     QTOPIA_REPLACE_WIDGET(QAbstractServerInterface, TestServerInterface);</pre>
 <p>Note that QAbstractServerInterface derived type, like all that use the widget replacement mechanism, must have a standard <tt>(QWidget *, Qt::WFlags)</tt> constructor.</p>
@@ -92,6 +91,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

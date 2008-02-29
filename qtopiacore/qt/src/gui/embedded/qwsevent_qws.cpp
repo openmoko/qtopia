@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -92,26 +102,36 @@ QWSEvent *QWSEvent::factory(int type)
 
     \brief The QWSEvent class encapsulates an event in Qtopia Core.
 
-    When running a \l {Qtopia Core} application, it either runs as a server
-    or connects to an existing server. In the client/server protocol,
-    each event is sent as a QWSEvent object to the server.
+    When running a \l {Qtopia Core} application, it either runs as a
+    server or connects to an existing server. All system generated
+    events are passed to the server application which then propagates
+    the event to the appropiate client.
 
-    QWSEvent provides the Type enum specifying the origin of
-    the event. Internally, each type is represented by a QWSEvent
-    subclass, e.g. QWSKeyEvent.
+    Whenever the server receives an event, it queries its stack of
+    top-level windows to find the window containing the event's
+    position. Each window can identify the client application that
+    created it, and returns its ID to the server upon
+    request. Finally, the server forwards the event, encapsulated by
+    an instance of the QWSEvent class, to the appropiate client.
 
-    Note that the QApplication class provides the virtual \l
-    {QApplication::qwsEventFilter()}{qwsEventFilter()} function which
-    can be reimplemented to get direct access to all QWS (Q Window
-    System) events that are received from the QWS master process.
+    \image qtopiacore-client.png
 
-    \sa QWSServer, QWSClient
+    The server communicates with the client applications over the UNIX
+    domain socket. You can retrieve direct access to all the events a
+    client receives from the server, by reimplementing QApplication's
+    \l {QApplication::}{qwsEventFilter()} function.
+
+    QWSEvent provides the \l Type enum specifying the origin of the
+    event. Internally, each type is represented by a QWSEvent
+    subclass, e.g., \c QWSKeyEvent.
+
+    \sa QWSServer, QWSClient, {Qtopia Core Architecture}
 */
 
 /*!
     \enum QWSEvent::Type
 
-    This enum specifies the event's type.
+    This enum describes the origin of the event.
 
     \value NoEvent No event has occurred.
     \value Connected An application has connected to the server.
@@ -127,15 +147,15 @@ QWSEvent *QWSEvent::factory(int type)
     \value SelectionRequest The server has queried for a selection.
     \value SelectionNotify A new selection has been created.
     \value MaxWindowRect The server has changed the maximum window for an application.
-    \value QCopMessage A new Qt Cop message has appeared.
+    \value QCopMessage A new Qt Cop message has appeared. See also QCopChannel
     \value WindowOperation A window operation, e.g. resizing, has occurred.
     \value IMEvent An input method has been used  to enter text for languages with
               non-Latin alphabets. See also QWSInputMethod.
     \value IMQuery An input method query for a specified property has occurred.
              See also QWSInputMethod.
     \value NEvent The number of events has changed.
-    \value Embed An event used internally to implement
-           \l {QWSEmbedWidget}{embedded windows}.
+    \value Embed An event used internally to implement embedded windows. See also
+           QWSEmbedWidget.
     \omitvalue IMInit
 */
 

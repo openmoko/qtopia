@@ -29,7 +29,23 @@ class ErrorReporter
 {
 public:
     virtual ~ErrorReporter(){}
-    virtual void reportError( const QString &error ) = 0;
+    void reportError( const QString &simpleError, const QString &detailedError = QString() ) 
+    {
+        doReportError( simpleError, detailedError );
+    };
+private:
+    virtual void doReportError( const QString &simpleError, const QString &detailedError ) = 0;
+};
+
+class SimpleErrorReporter:public ErrorReporter
+{
+public:
+    enum ReporterType{ Install, Uninstall, Other };
+    SimpleErrorReporter( ReporterType type, const QString &pkgName = "" ); 
+private:
+    virtual void doReportError( const QString &simpleError, const QString &detailedError );
+    QString packageName;   
+    QString prefix; 
 };
 
 class InstallControl
@@ -45,7 +61,7 @@ public:
     };
     struct PackageInfo
     {
-        PackageInfo() {}
+        PackageInfo() { isEnabled = true; }
         ~PackageInfo() {}
         PackageInfo( const PackageInfo& d ) { *this = d; }
         InstallStatus status;
@@ -60,13 +76,23 @@ public:
         QString md5Sum;
         QStringList files;
         QString version;
+        QString qtopiaVersion;
         QString url;
-        bool isComplete() const
+        bool isEnabled;
+        bool isComplete( bool fromControl = false ) const
         {
-            return !(name.isEmpty() ||
-                description.isEmpty() || size.isEmpty() ||
-                (domain.isEmpty() && section.isEmpty()) ||
-                packageFile.isEmpty() || md5Sum.isEmpty());
+            bool ret = !(name.isEmpty() ||
+                description.isEmpty() || 
+#ifndef QT_NO_SXE
+                domain.isEmpty() || 
+#endif
+                files.isEmpty() ||
+                qtopiaVersion.isEmpty() );   
+            
+            if ( !fromControl )
+                return ( ret && !( md5Sum.isEmpty() || size.isEmpty() ) );
+            else
+                return ret;
         }
         bool isSystemPackage() const
         {
@@ -80,7 +106,8 @@ public:
     InstallControl();
     ~InstallControl();
 
-    bool installPackage( const PackageInfo&, ErrorReporter *reporter = 0 ) const;
+    bool installPackage( const PackageInfo&, const QString &md5Sum, ErrorReporter *reporter = 0 ) const;
+    void uninstallPackage( const PackageInfo &, ErrorReporter *reporter = 0 ) const;
     bool verifyPackage( const QString &, const PackageInfo &, ErrorReporter *reporter = 0 ) const;
     void setInstallMedia( const QString &s ) { m_installMedia = s; }
     QString installMedia() const { return m_installMedia; }
@@ -121,7 +148,7 @@ inline bool InstallControl::PackageInfo::operator< ( const PackageInfo &other ) 
 {
     // for different packages do a name collation
     if ( name != other.name )
-        return ( name < other.name );
+        return ( name.toLower() < other.name.toLower() );
     int thisV = 0, otherV = 0, thisD, otherD;
     int thisPtr = 0, otherPtr = 0;
     int majority = 3;
@@ -151,7 +178,8 @@ inline bool InstallControl::PackageInfo::operator< ( const PackageInfo &other ) 
 */
 inline bool InstallControl::PackageInfo::operator==( const PackageInfo &d ) const
 {
-    return ( name == d.name && version == d.version );
+//    return ( name == d.name && version == d.version );
+      return ( md5Sum == d.md5Sum );
 }
 
 inline InstallControl::PackageInfo &InstallControl::PackageInfo::operator=( const InstallControl::PackageInfo &d )
@@ -167,6 +195,9 @@ inline InstallControl::PackageInfo &InstallControl::PackageInfo::operator=( cons
     md5Sum = d.md5Sum;
     version = d.version;
     url = d.url;
+    qtopiaVersion = d.qtopiaVersion;
+    isEnabled = d.isEnabled;
+    files = d.files;
     return *this;
 }
 

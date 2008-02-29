@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -111,7 +121,7 @@ void QActionPrivate::redoGrabAlternate(QShortcutMap &map)
     }
     if (!autorepeat) {
         foreach (int id, alternateShortcutIds)
-            map.setShortcutEnabled(false, id, q);
+            map.setShortcutAutoRepeat(false, id, q);
     }
 }
 
@@ -233,7 +243,7 @@ QAction::QAction(QObject* parent)
     Option..." becomes "Menu Option") as descriptive text for
     toolbuttons. You can override this by setting a specific
     description with setText(). The same text will be used for
-    tooltips unless you specify a different test using
+    tooltips unless you specify a different text using
     setToolTip().
 
 */
@@ -256,7 +266,7 @@ QAction::QAction(const QString &text, QObject* parent)
     Option..." becomes "Menu Option") as descriptive text for
     toolbuttons. You can override this by setting a specific
     description with setText(). The same text will be used for
-    tooltips unless you specify a different test using
+    tooltips unless you specify a different text using
     setToolTip().
 */
 QAction::QAction(const QIcon &icon, const QString &text, QObject* parent)
@@ -541,8 +551,11 @@ QAction::~QAction()
     if (d->group)
         d->group->removeAction(this);
 #ifndef QT_NO_SHORTCUT
-    if (d->shortcutId && qApp)
+    if (d->shortcutId && qApp) {
         qApp->d_func()->shortcutMap.removeShortcut(d->shortcutId, this);
+        foreach (int id, d->alternateShortcutIds)
+            qApp->d_func()->shortcutMap.removeShortcut(id, this);
+    }
 #endif
 }
 
@@ -1014,11 +1027,13 @@ QAction::setData(const QVariant &data)
 
 
 /*!
-  Updates the status bar for \a widget. If widget is an appropriate
-  QStatusBar found for for this action based on the parent heirarchy will be used.
+  Updates the relevant status bar for the \a widget specified by sending a
+  QStatusTipEvent to its parent widget. Returns true if an event was sent;
+  otherwise returns false.
+
+  If a null widget is specified, the event is sent to the action's parent.
 
   \sa statusTip
-
 */
 bool
 QAction::showStatusText(QWidget *widget)

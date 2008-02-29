@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/graphicsview/qgraphicsitem.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/graphicsview/qgraphicsitem.cpp -->
 <head>
   <title>Qt 4.2: QGraphicsItem Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -209,6 +209,7 @@
      }
  };</pre>
 <p>The <a href="qgraphicsitem.html#boundingRect">boundingRect</a>() function has many different purposes. <a href="qgraphicsscene.html">QGraphicsScene</a> bases its item index on <a href="qgraphicsitem.html#boundingRect">boundingRect</a>(), and <a href="qgraphicsview.html">QGraphicsView</a> uses it both for culling invisible items, and for determining the area that needs to be recomposed when drawing overlapping items. In addition, QGraphicsItem's collision detection mechanisms use <a href="qgraphicsitem.html#boundingRect">boundingRect</a>() to provide an efficient cut-off. The fine grained collision algorithm in <a href="qgraphicsitem.html#collidesWithItem">collidesWithItem</a>() is based on calling <a href="qgraphicsitem.html#shape">shape</a>(), which returns an accurate outline of the item's shape as a <a href="qpainterpath.html">QPainterPath</a>.</p>
+<p><a href="qgraphicsscene.html">QGraphicsScene</a> expects all items <a href="qgraphicsitem.html#boundingRect">boundingRect</a>() and <a href="qgraphicsitem.html#shape">shape</a>() to remain unchanged unless it is notified. If you want to change an item's geometry in any way, you must first call <a href="qgraphicsitem.html#prepareGeometryChange">prepareGeometryChange</a>() to allow <a href="qgraphicsscene.html">QGraphicsScene</a> to update its bookkeeping.</p>
 <p>Collision detection can be done in two ways:</p>
 <ol type="1">
 <li>Reimplement <a href="qgraphicsitem.html#shape">shape</a>() to return an accurate shape for your item, and rely on the default implementation of <a href="qgraphicsitem.html#collidesWithItem">collidesWithItem</a>() to do shape-shape intersection. This can be rather expensive if the shapes are complex.</li>
@@ -282,6 +283,7 @@
 <h3 class="fn"><a name="boundingRect"></a><a href="qrectf.html">QRectF</a> QGraphicsItem::boundingRect () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This pure virtual function defines the outer bounds of the item as a rectangle; all painting must be restricted to inside an item's bounding rect. <a href="qgraphicsview.html">QGraphicsView</a> uses this to determine whether the item requires redrawing.</p>
 <p>Although the item's shape can be arbitrary, the bounding rect is always rectangular, and it is unaffected by the items' transformation (<a href="qgraphicsitem.html#scale">scale</a>(), <a href="qgraphicsitem.html#rotate">rotate</a>(), etc.).</p>
+<p>If you want to change the item's bounding rectangle, you must first call <a href="qgraphicsitem.html#prepareGeometryChange">prepareGeometryChange</a>(). This notifies the scene of the imminent change, so that its can update its item geometry index; otherwise, the scene will be unaware of the item's new geometry, and the results are undefined (typically, rendering artifacts are left around in the view).</p>
 <p>Reimplement this function to let <a href="qgraphicsview.html">QGraphicsView</a> determine what parts of the widget, if any, need to be redrawn.</p>
 <p>Note: For shapes that paint an outline / stroke, it is important to include half the pen width in the bounding rect. It is not necessary to compensate for antialiasing, though.</p>
 <p>Example:</p>
@@ -291,7 +293,7 @@
      return QRectF(-radius - penWidth / 2, -radius - penWidth / 2,
                    diameter + penWidth, diameter + penWidth);
  }</pre>
-<p>See also <a href="qgraphicsitem.html#shape">shape</a>(), <a href="qgraphicsitem.html#contains">contains</a>(), and <a href="graphicsview.html#the-graphics-view-coordinate-system">The Graphics View Coordinate System</a>.</p>
+<p>See also <a href="qgraphicsitem.html#shape">shape</a>(), <a href="qgraphicsitem.html#contains">contains</a>(), <a href="graphicsview.html#the-graphics-view-coordinate-system">The Graphics View Coordinate System</a>, and <a href="qgraphicsitem.html#prepareGeometryChange">prepareGeometryChange</a>().</p>
 <h3 class="fn"><a name="children"></a><a href="qlist.html">QList</a>&lt;QGraphicsItem *&gt; QGraphicsItem::children () const</h3>
 <p>Returns a list of this item's children. The items are returned in no particular order.</p>
 <p>See also <a href="qgraphicsitem.html#setParentItem">setParentItem</a>().</p>
@@ -325,6 +327,15 @@
 <h3 class="fn"><a name="contextMenuEvent"></a>void QGraphicsItem::contextMenuEvent ( <a href="qgraphicsscenecontextmenuevent.html">QGraphicsSceneContextMenuEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented to receive context menu events for this item.</p>
 <p>If you ignore the event, (i.e., by calling <a href="qevent.html#ignore">QEvent::ignore</a>(),) <i>event</i> will propagate to any item beneath this item. If no items accept the event, it will be ignored by the scene, and propagate to the view.</p>
+<p>It's common to open a <a href="qmenu.html">QMenu</a> in response to receiving a context menu event. Example:</p>
+<pre> void CustomItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+ {
+     QMenu menu;
+     QAction *removeAction = menu.addAction(&quot;Remove&quot;);
+     QAction *markAction = menu.addAction(&quot;Mark&quot;);
+     QAction *selectedAction = menu.exec(event-&gt;screenPos());
+     <span class="comment">// ...</span>
+ }</pre>
 <p>The default implementation does nothing.</p>
 <p>See also <a href="qgraphicsitem.html#sceneEvent">sceneEvent</a>().</p>
 <h3 class="fn"><a name="cursor"></a><a href="qcursor.html">QCursor</a> QGraphicsItem::cursor () const</h3>
@@ -345,7 +356,7 @@
  }</pre>
 <p>Qt does not use this feature for storing data; it is provided solely for the convenience of the user.</p>
 <p>See also <a href="qgraphicsitem.html#setData">setData</a>().</p>
-<h3 class="fn"><a name="dragEnterEvent"></a>void QGraphicsItem::dragEnterEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dragEnterEvent"></a>void QGraphicsItem::dragEnterEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented to receive drag enter events for this item. Drag enter events are generated as the cursor enters the item's area.</p>
 <p>By accepting the event, (i.e., by calling <a href="qevent.html#accept">QEvent::accept</a>(),) the item will accept drop events, in addition to receiving drag move and drag leave. Otherwise, the event will be ignored and propagate to the item beneath. If the event is accepted, the item will receive a drag move event before control goes back to the event loop.</p>
 <p>A common implementation of dragEnterEvent accepts or ignores <i>event</i> depending on the associated mime data in <i>event</i>. Example:</p>
@@ -362,19 +373,19 @@
 <p>Items do not receive drag and drop events by default; to enable this feature, call <tt>setAcceptDrops(true)</tt>.</p>
 <p>The default implementation does nothing.</p>
 <p>See also <a href="qgraphicsitem.html#dropEvent">dropEvent</a>(), <a href="qgraphicsitem.html#dragMoveEvent">dragMoveEvent</a>(), and <a href="qgraphicsitem.html#dragLeaveEvent">dragLeaveEvent</a>().</p>
-<h3 class="fn"><a name="dragLeaveEvent"></a>void QGraphicsItem::dragLeaveEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dragLeaveEvent"></a>void QGraphicsItem::dragLeaveEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented to receive drag leave events for this item. Drag leave events are generated as the cursor leaves the item's area. Most often you will not need to reimplement this function, but it can be useful for resetting state in your item (e.g., highlighting).</p>
 <p>Calling <a href="qevent.html#ignore">QEvent::ignore</a>() or <a href="qevent.html#accept">QEvent::accept</a>() on <i>event</i> has no effect.</p>
 <p>Items do not receive drag and drop events by default; to enable this feature, call <tt>setAcceptDrops(true)</tt>.</p>
 <p>The default implementation does nothing.</p>
 <p>See also <a href="qgraphicsitem.html#dragEnterEvent">dragEnterEvent</a>(), <a href="qgraphicsitem.html#dropEvent">dropEvent</a>(), and <a href="qgraphicsitem.html#dragMoveEvent">dragMoveEvent</a>().</p>
-<h3 class="fn"><a name="dragMoveEvent"></a>void QGraphicsItem::dragMoveEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dragMoveEvent"></a>void QGraphicsItem::dragMoveEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented to receive drag move events for this item. Drag move events are generated as the cursor moves around inside the item's area. Most often you will not need to reimplement this function; it is used to indicate that only parts of the item can accept drops.</p>
 <p>Calling <a href="qevent.html#ignore">QEvent::ignore</a>() or <a href="qevent.html#accept">QEvent::accept</a>() on <i>event</i> toggles whether or not the item will accept drops at the position from the event. By default, <i>event</i> is accepted, indicating that the item allows drops at the specified position.</p>
 <p>Items do not receive drag and drop events by default; to enable this feature, call <tt>setAcceptDrops(true)</tt>.</p>
 <p>The default implementation does nothing.</p>
 <p>See also <a href="qgraphicsitem.html#dropEvent">dropEvent</a>(), <a href="qgraphicsitem.html#dragEnterEvent">dragEnterEvent</a>(), and <a href="qgraphicsitem.html#dragLeaveEvent">dragLeaveEvent</a>().</p>
-<h3 class="fn"><a name="dropEvent"></a>void QGraphicsItem::dropEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dropEvent"></a>void QGraphicsItem::dropEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented to receive drop events for this item. Items can only receive drop events if the last drag move event was accepted.</p>
 <p>Calling <a href="qevent.html#ignore">QEvent::ignore</a>() or <a href="qevent.html#accept">QEvent::accept</a>() on <i>event</i> has no effect.</p>
 <p>Items do not receive drag and drop events by default; to enable this feature, call <tt>setAcceptDrops(true)</tt>.</p>
@@ -809,7 +820,7 @@
 <p>See also <a href="qgraphicsitem.html#isVisible">isVisible</a>(), <a href="qgraphicsitem.html#show">show</a>(), and <a href="qgraphicsitem.html#hide">hide</a>().</p>
 <h3 class="fn"><a name="setZValue"></a>void QGraphicsItem::setZValue ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>z</i> )</h3>
 <p>Sets the Z-value, or the elevation, of the item, to <i>z</i>. The elevation decides the stacking order of sibling (neighboring) items. An item of high Z-value will be drawn on top of an item with a lower Z-value if they share the same parent item. In addition, children of an item will always be drawn on top of the parent, regardless of the child's Z-value. Sibling items that share the same Z-value will be drawn in an undefined order, although the order will stay the same for as long as the items live.</p>
-<p>Children of different parents are stacked according to the Z-value of each item's ancestor item which is an immediate child of the two items' closest common ancestor. For example, a robot item might define a torso item as the parent of a head item, two arm items, and two upper-leg items. The upper-leg items would each be parents of one lower-leg item, and each lower-leg item would be parents of one foot item. The stacking order of the feet is the same as the stacking order of each foot's ancestor that is an immediate child of the two feet's common ancestor (i.e., the torso item); so the feet are stacked in the same order as the upper-leg items, regardless of each foot's Z-value.</p>
+<p align="center"><img src="images/graphicsview-zorder.png" /></p><p>Children of different parents are stacked according to the Z-value of each item's ancestor item which is an immediate child of the two items' closest common ancestor. For example, a robot item might define a torso item as the parent of a head item, two arm items, and two upper-leg items. The upper-leg items would each be parents of one lower-leg item, and each lower-leg item would be parents of one foot item. The stacking order of the feet is the same as the stacking order of each foot's ancestor that is an immediate child of the two feet's common ancestor (i.e., the torso item); so the feet are stacked in the same order as the upper-leg items, regardless of each foot's Z-value.</p>
 <p>The Z-value does not affect the item's size in any way.</p>
 <p>The default Z-value is 0.</p>
 <p>See also <a href="qgraphicsitem.html#zValue">zValue</a>().</p>
@@ -823,7 +834,7 @@
      return path;
  }</pre>
 <p>This function is called by the default implementations of <a href="qgraphicsitem.html#contains">contains</a>() and <a href="qgraphicsitem.html#collidesWithPath">collidesWithPath</a>().</p>
-<p>See also <a href="qgraphicsitem.html#boundingRect">boundingRect</a>() and <a href="qgraphicsitem.html#contains">contains</a>().</p>
+<p>See also <a href="qgraphicsitem.html#boundingRect">boundingRect</a>(), <a href="qgraphicsitem.html#contains">contains</a>(), and <a href="qgraphicsitem.html#prepareGeometryChange">prepareGeometryChange</a>().</p>
 <h3 class="fn"><a name="shear"></a>void QGraphicsItem::shear ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>sh</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>sv</i> )</h3>
 <p>Shears the current item transformation by (<i>sh</i>, <i>sv</i>).</p>
 <p>See also <a href="qgraphicsitem.html#setMatrix">setMatrix</a>(), <a href="qgraphicsitem.html#matrix">matrix</a>(), <a href="qgraphicsitem.html#rotate">rotate</a>(), <a href="qgraphicsitem.html#scale">scale</a>(), and <a href="qgraphicsitem.html#translate">translate</a>().</p>
@@ -897,6 +908,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

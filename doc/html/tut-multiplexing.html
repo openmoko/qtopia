@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: Writing a Multiplexer Plug-in</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Tutorial: Writing a Multiplexer Plug-in</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -30,7 +29,7 @@
 <li><tt>detect()</tt></li>
 <li><tt>create()</tt></li>
 </ul>
-<pre>    class FooMultiplexer : public QSerialIODeviceMultiplexerPlugin
+<pre>&nbsp;   class FooMultiplexer : public QSerialIODeviceMultiplexerPlugin
     {
         Q_OBJECT
     public:
@@ -46,15 +45,15 @@
 <a name="gsm-07-10-with-modified-parameters"></a>
 <h2>GSM 07.10 with Modified Parameters</h2>
 <p>Qtopia Phone has a built-in implementation of GSM 07.10 that it will use if there isn't an explicit multiplexer plug-in provided. The default parameters are GSM 07.10 in Basic mode with a frame size of 31. The vendor can change these defaults by writing a multiplexer plug-in. The following example increases the frame size to 256:</p>
-<pre>    bool FooMultiplexer::detect( QSerialIODevice *device )
+<pre>&nbsp;   bool FooMultiplexer::detect( QSerialIODevice *device )
     {
-        <span class="comment">// Determine if the module supports a frame size of 256.</span>
+        // Determine if the module supports a frame size of 256.
         return QGsm0710Multiplexer::cmuxChat( device, 256 );
     }
 
     QSerialIODeviceMultiplexer *FooMultiplexer::create( QSerialIODevice *device )
     {
-        <span class="comment">// Create the GSM 07.10 multiplexer with a frame size of 256.</span>
+        // Create the GSM 07.10 multiplexer with a frame size of 256.
         return new QGsm0710Multiplexer( device, 256 );
     }</pre>
 <p>Once the plug-in has been compiled, into <tt>libfoomultiplex.so</tt> for example, the vendor can set the <tt>QTOPIA_PHONE_VENDOR</tt> environment variable to <i>foo</i> to enable the multiplexer plug-in.</p>
@@ -67,27 +66,27 @@
 <li><tt>/dev/mux2</tt> GPRS data channel.</li>
 </ul>
 <p>To support such a module, first set <tt>QTOPIA_PHONE_DEVICE</tt> to <tt>/dev/mux0</tt> in the <tt>custom.h</tt> file for the platform. Then the <tt>detect()</tt> and <tt>create()</tt> methods would be implemented as follows:</p>
-<pre>    bool FooMultiplexer::detect( QSerialIODevice *device )
+<pre>&nbsp;   bool FooMultiplexer::detect( QSerialIODevice *device )
     {
         return true;
     }
 
     QSerialIODeviceMultiplexer *FooMultiplexer::create( QSerialIODevice *device )
     {
-        <span class="comment">// The primary AT command device, /dev/mux0, is configured</span>
-        <span class="comment">// in the custom.h file as QTOPIA_PHONE_DEVICE and then passed</span>
-        <span class="comment">// down to us in the &quot;device&quot; parameter.</span>
+        // The primary AT command device, /dev/mux0, is configured
+        // in the custom.h file as QTOPIA_PHONE_DEVICE and then passed
+        // down to us in the &quot;device&quot; parameter.
         QMultiPortMultiplexer *mux = new QMultiPortMultiplexer( device );
 
-        <span class="comment">// Add the secondary channel.</span>
+        // Add the secondary channel.
         QSerialPort *secondary = QSerialPort::create( &quot;/dev/mux1&quot; );
         mux-&gt;addChannel( &quot;secondary&quot;, secondary );
 
-        <span class="comment">// Add the data channel.</span>
+        // Add the data channel.
         QSerialPort *data = QSerialPort::create( &quot;/dev/mux2&quot; );
         mux-&gt;addChannel( &quot;data&quot;, data );
 
-        <span class="comment">// Add the data setup channel, which is the same as &quot;data&quot;.</span>
+        // Add the data setup channel, which is the same as &quot;data&quot;.
         mux-&gt;addChannel( &quot;datasetup&quot;, data );
         return mux;
     }</pre>
@@ -100,7 +99,7 @@
 </ul>
 <p>Other channel names are possible. Refer to the documentation for <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a> for further details.</p>
 <p>Some modules only have one AT command channel, not two. For such modules, both <tt>primary</tt> and <tt>secondary</tt> should be set to the same value:</p>
-<pre>    QMultiPortMultiplexer *mux = new QMultiPortMultiplexer( device );
+<pre>&nbsp;   QMultiPortMultiplexer *mux = new QMultiPortMultiplexer( device );
     mux-&gt;addChannel( &quot;secondary&quot;, device );</pre>
 <p>Some modules require that GPRS setup commands such as <tt>AT+CGDCONT</tt> and <tt>ATD</tt> must be sent on the primary AT command channel, not the data channel. For such modules, <tt>datasetup</tt> should be set to the same value as <tt>primary</tt>.</p>
 <a name="complex-multiplexing-over-a-single-serial-port"></a>
@@ -111,6 +110,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

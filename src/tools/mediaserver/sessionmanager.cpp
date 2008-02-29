@@ -19,7 +19,9 @@
 **
 ****************************************************************************/
 
+#include <qdebug.h>
 #include <qtimer.h>
+#include <qtopiaipcenvelope.h>
 
 #include "mediaengine.h"
 #include "mediasession.h"
@@ -31,6 +33,7 @@ namespace mediaserver
 {
 
 
+// {{{ SessionManagerSession
 class SessionManagerSession : public MediaSession
 {
     Q_OBJECT
@@ -79,7 +82,6 @@ public:
         m_mediaSession->stop();
     }
 
-
     void suspend()
     {
         m_mediaSession->suspend();
@@ -120,6 +122,11 @@ public:
         return m_mediaSession->isMuted();
     }
 
+    QtopiaMedia::State playerState() const
+    {
+        return m_mediaSession->playerState();
+    }
+
     QString errorString()
     {
         return m_mediaSession->errorString();
@@ -146,17 +153,27 @@ public:
 private slots:
     void stateChanged(QtopiaMedia::State state)
     {
-        if (state == QtopiaMedia::Stopped ||
-            state == QtopiaMedia::Error)
+        switch (state)
         {
-            m_sessionManager->stopped(m_mediaSession);
+        case QtopiaMedia::Playing:
+            m_sessionManager->sessionPlaying(m_mediaSession);
+            break;
+
+        case QtopiaMedia::Stopped:
+        case QtopiaMedia::Error:
+            m_sessionManager->sessionStopped(m_mediaSession);
+            break;
+
+        default:
+            ;
         }
 
         emit playerStateChanged(state);
     }
 };
+// }}}
 
-
+// {{{ SessionManagerPrivate
 class SessionManagerPrivate
 {
 public:
@@ -165,8 +182,9 @@ public:
     QList<MediaSession*>    nonActivatedSessions;
     MediaSession*           activeSession;
 };
+// }}}
 
-
+// {{{ SessionManager
 SessionManager::SessionManager(MediaEngine* mediaEngine):
     d(new SessionManagerPrivate)
 {
@@ -178,7 +196,6 @@ SessionManager::~SessionManager()
 {
     delete d;
 }
-
 
 MediaSession* SessionManager::manageSession(MediaSession* mediaSession)
 {
@@ -194,8 +211,9 @@ void SessionManager::releaseSession(MediaSession* mediaSession)
 
     if (d->activeSession == mediaSession)
     {
+        sessionStopped(mediaSession);
+
         d->activeSession = 0;
-        QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
     }
     else
     {
@@ -213,43 +231,95 @@ void SessionManager::activeDomainChanged()
     QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
 }
 
+void SessionManager::setVolume(int volume)
+{
+    d->activeSession->setVolume(volume);
+}
+
+void SessionManager::increaseVolume(int increment)
+{
+    int volume = d->activeSession->volume();
+    if (volume + increment > 100)
+        d->activeSession->setVolume(100);
+    else
+        d->activeSession->setVolume(volume + increment);
+}
+
+void SessionManager::decreaseVolume(int decrement)
+{
+    int volume = d->activeSession->volume();
+    if (volume - decrement < 0)
+        d->activeSession->setVolume(0);
+    else
+        d->activeSession->setVolume(volume - decrement);
+}
+
+void SessionManager::setMuted(bool mute)
+{
+    d->activeSession->setMuted(mute);
+}
+
+
 void SessionManager::rescheduleSessions()
 {
+    bool        newActiveSession = false;
+
     QString domain = d->mediaEngine->activeDomain();
 
-    if (d->activeSession == 0)
+    if (domain.isEmpty())
+        domain = "Default";
+
+    if (d->activeSession == 0 ||
+        d->activeSession->playerState() == QtopiaMedia::Stopped ||
+        d->activeSession->playerState() == QtopiaMedia::Error)
     {
-        // Check non-activated sessions in same domain
-        QList<MediaSession*>::iterator  it = d->nonActivatedSessions.begin();
-
-        for (;it != d->nonActivatedSessions.end(); ++it)
+        if (d->nonActivatedSessions.size() > 0)
         {
-            if (domain.compare((*it)->domain(), Qt::CaseInsensitive) == 0)
-            {   // OK, activate it
-                d->activeSession = *it;
-                d->nonActivatedSessions.erase(it);
+            // Check non-activated sessions in same domain
+            QList<MediaSession*>::iterator  it = d->nonActivatedSessions.begin();
 
-                d->activeSession->start();
-                break;
+            for (;it != d->nonActivatedSessions.end(); ++it)
+            {
+                if (domain.compare((*it)->domain(), Qt::CaseInsensitive) == 0)
+                {   // OK, activate it
+                    d->activeSession = *it;
+                    d->nonActivatedSessions.erase(it);
+
+                    d->activeSession->start();
+
+                    newActiveSession = true;
+                    break;
+                }
+            }
+        }
+
+        if (!newActiveSession && d->suspendedSessions.size() > 0)
+        {
+            // Check suspended
+            QList<MediaSession*>::iterator it = d->suspendedSessions.begin();
+
+            for (;it != d->suspendedSessions.end(); ++it)
+            {
+                if (domain.compare((*it)->domain(), Qt::CaseInsensitive) == 0)
+                {
+                    d->activeSession = *it;
+                    d->suspendedSessions.erase(it);
+
+                    d->activeSession->resume();
+                    break;
+                }
             }
         }
     }
-
-    if (d->activeSession == 0)
+    else
     {
-        // Check suspended
-        QList<MediaSession*>::iterator it = d->suspendedSessions.begin();
-
-        for (;it != d->suspendedSessions.end(); ++it)
+        if (domain.compare(d->activeSession->domain(), Qt::CaseInsensitive) != 0)
         {
-            if (domain.compare((*it)->domain(), Qt::CaseInsensitive) == 0)
-            {
-                d->activeSession = *it;
-                d->suspendedSessions.erase(it);
+            d->suspendedSessions.push_front(d->activeSession);
+            d->activeSession->suspend();
+            d->activeSession = 0;
 
-                d->activeSession->resume();
-                break;
-            }
+            QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
         }
     }
 }
@@ -263,16 +333,16 @@ bool SessionManager::canStart(MediaSession* mediaSession)
     {
         rc = true;
     }
-    else if (d->activeSession == 0)
-    {
-        d->activeSession = mediaSession;
-        rc = true;
-    }
     else if (activeDomain.compare("RingTone", Qt::CaseInsensitive) == 0 &&
              mediaSession->domain().compare("RingTone", Qt::CaseInsensitive) != 0)
     {
         d->nonActivatedSessions.push_front(mediaSession);
         rc = false;
+    }
+    else if (d->activeSession == 0)
+    {
+        d->activeSession = mediaSession;
+        rc = true;
     }
     else
     {
@@ -286,14 +356,27 @@ bool SessionManager::canStart(MediaSession* mediaSession)
     return rc;
 }
 
-void SessionManager::stopped(MediaSession* mediaSession)
+void SessionManager::sessionPlaying(MediaSession* mediaSession)
 {
-    if (mediaSession == d->activeSession)
-        d->activeSession = 0;
+    Q_UNUSED(mediaSession);
 
-    QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
+    QtopiaIpcEnvelope   e("QPE/AudioVolumeManager", "setActiveDomain(QString)");
+
+    e << QString("Media");
 }
 
+void SessionManager::sessionStopped(MediaSession* mediaSession)
+{
+    if (mediaSession == d->activeSession)
+    {
+        QTimer::singleShot(500, this, SLOT(rescheduleSessions()));
+    }
+
+    QtopiaIpcEnvelope   e("QPE/AudioVolumeManager", "resetActiveDomain(QString)");
+
+    e << QString("Media");
+}
+// }}}
 
 }   // ns mediaserver
 

@@ -46,7 +46,7 @@ public:
     bool isListening() const;
 
     bool hasPendingConnections() const;
-    virtual QObexSocket *nextPendingConnection();  // Returns obex_t * object
+    virtual QObexSocket *nextPendingConnection();
 
 signals:
     void newConnection();

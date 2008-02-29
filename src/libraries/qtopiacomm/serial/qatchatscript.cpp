@@ -27,7 +27,7 @@
 /*!
     \class QAtChatScript
     \brief The QAtChatScript class provides a mechanism to run pppd chat scripts.
-    \ingroup communication
+    \ingroup telephony::serial
 
     The QAtChatScript class provides a mechanism to run pppd chat scripts,
     such as those described in the chat(1) Unix man page.

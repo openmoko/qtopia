@@ -56,9 +56,6 @@ public:
     virtual void setSortKey(QContactModel::Field k) = 0;
     virtual QContactModel::Field sortKey() const = 0;
 
-    virtual void setCategoryFilter(const QCategoryFilter &) = 0;
-    virtual QCategoryFilter categoryFilter() const = 0;
-
     virtual QContact contact(const QUniqueId &) const = 0;
     virtual QContact contact(int row) const = 0;
 
@@ -89,14 +86,14 @@ signals:
     void labelFormatChanged();
 
 public slots:
-    virtual void checkAdded(const QContact &);
+    virtual void checkAdded(const QUniqueId &);
     virtual void checkRemoved(const QUniqueId &);
     virtual void checkRemoved(const QList<QUniqueId> &);
-    virtual void checkUpdated(const QContact &);
+    virtual void checkUpdated(const QUniqueId &);
 
 protected:
-    void notifyAdded(const QContact &);
-    void notifyUpdated(const QContact &);
+    void notifyAdded(const QUniqueId &);
+    void notifyUpdated(const QUniqueId &);
     void notifyRemoved(const QUniqueId &);
     void notifyRemoved(const QList<QUniqueId> &);
 

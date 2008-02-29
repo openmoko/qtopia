@@ -538,6 +538,8 @@ void QAbstractCommDeviceManager_Private::doOpenSession(int id)
 
     m_sessions.insert(id);
 
+    m_valueSpace->setAttribute("ActiveSessions", QVariant(true));
+
     //Now need to notify the DeviceConnection
     DeviceConnection *conn = m_conns[id];
     conn->sessionCallback(false);
@@ -579,6 +581,8 @@ void QAbstractCommDeviceManager_Private::doCloseSession(int id)
     // There are still sessions open, don't do anything
     if (m_sessions.size())
         return;
+
+    m_valueSpace->setAttribute("ActiveSessions", QVariant(false));
 
     switch( m_state ) {
         case On:
@@ -839,6 +843,8 @@ void QAbstractCommDeviceManager_Private::closeAllSessions()
             iter = m_events.erase(iter);
     }
     m_sessions.clear();
+
+    m_valueSpace->setAttribute("ActiveSessions", QVariant(false));
 }
 
 /*!

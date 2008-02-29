@@ -161,6 +161,8 @@ TodoWindow::TodoWindow( QWidget *parent, Qt::WFlags f) :
     new TasksService(this);
 
     constructorDone = true;
+
+    taskModelReset();
 }
 
 TodoWindow::~TodoWindow()
@@ -196,6 +198,18 @@ void TodoWindow::createUI()
     findAction->setWhatsThis( tr("Search for a task.") );
     connect( findAction, SIGNAL( toggled(bool) ),
              this, SLOT( showFindWidget(bool) ) );
+
+    markDoneAction = new QAction( QIcon( ":icon/ok" ), tr( "Mark task complete" ), this );
+    markDoneAction->setWhatsThis( tr("Mark the current task as completed.") );
+    markDoneAction->setVisible(false);
+    connect( markDoneAction, SIGNAL(triggered()),
+             this, SLOT( markTaskDone() ) );
+
+    markNotDoneAction = new QAction( QIcon( ":icon/phone/reject" ), tr( "Mark task incomplete" ), this );
+    markNotDoneAction->setWhatsThis( tr("Mark the current task as not completed.") );
+    markNotDoneAction->setVisible(false);
+    connect( markNotDoneAction, SIGNAL(triggered()),
+             this, SLOT( markTaskNotDone() ) );
 
     if ( QtopiaSendVia::isDataSupported("text/x-vcalendar")) {
         beamAction = new QAction( QIcon( ":icon/beam" ), tr( "Send" ), this );
@@ -246,14 +260,19 @@ void TodoWindow::createUI()
 #else // else phone
     contextMenu = QSoftMenuBar::menuFor(this);
     contextMenu->addAction(newAction);
+    contextMenu->addAction(markDoneAction);
+    contextMenu->addAction(markNotDoneAction);
     contextMenu->addAction(editAction);
     contextMenu->addAction(deleteAction);
+
+
     if (beamAction)
         contextMenu->addAction(beamAction);
 
     actionCategory = new QAction(QIcon(":icon/viewcategory"), tr("View Category..."), this );
     connect( actionCategory, SIGNAL(triggered()), this, SLOT(selectCategory()));
     contextMenu->addAction(actionCategory);
+
 
     categoryLbl = new QLabel;
     categoryLbl->hide();
@@ -445,8 +464,8 @@ void TodoWindow::createNewEntry()
         if ( !todo.description().isEmpty() ) {
             todo.setUid(model->addTask( todo ));
             findAction->setVisible( true );
-            currentEntryChanged( );
             showDetailView(todo);
+            currentEntryChanged( );
         }
     }
 
@@ -500,8 +519,8 @@ void TodoWindow::deleteCurrentEntry()
             {
                 removeTasksQDLLink( t );
                 model->removeList(t);
-                currentEntryChanged();
                 showListView();
+                currentEntryChanged();
             }
             break;
             case 1: break;
@@ -510,8 +529,8 @@ void TodoWindow::deleteCurrentEntry()
         strName.simplified() ) ) {
         removeTaskQDLLink( task );
         model->removeTask( task );
-        currentEntryChanged();
         showListView();
+        currentEntryChanged();
     }
     if ( !model->count() && findAction->isChecked())
         findAction->setChecked(false);
@@ -521,7 +540,7 @@ void TodoWindow::editCurrentEntry()
 {
     QTask todo;
     if (centralView->currentIndex() == 1)
-        todo= tView->task();
+        todo = tView->task();
     if (todo.uid().isNull())
         todo = table->currentTask();
 
@@ -535,6 +554,7 @@ void TodoWindow::editCurrentEntry()
     if ( ret == QDialog::Accepted ) {
         todo = edit->todoEntry();
         model->updateTask( todo );
+        todo = model->task(todo.uid());
         showDetailView(todo);
     }
 
@@ -567,6 +587,12 @@ void TodoWindow::taskModelReset()
 
 void TodoWindow::currentEntryChanged( )
 {
+    QTask todo;
+    if (centralView->currentIndex() == 1)
+        todo = tView->task();
+    if (todo.uid().isNull())
+        todo = table->currentTask();
+
     bool entrySelected = table->currentIndex().isValid();
 
 #ifndef QTOPIA_PHONE
@@ -574,7 +600,57 @@ void TodoWindow::currentEntryChanged( )
     deleteAction->setVisible(entrySelected);
     if (beamAction) beamAction->setVisible(entrySelected);
 #endif
+
+    if (todo != QTask()) {
+        if (todo.status() == QTask::Completed) {
+            markDoneAction->setVisible(false);
+            markNotDoneAction->setVisible(true);
+        } else {
+            markDoneAction->setVisible(true);
+            markNotDoneAction->setVisible(false);
+        }
+    } else {
+        markDoneAction->setVisible(false);
+        markNotDoneAction->setVisible(false);
+    }
+
     findAction->setVisible(entrySelected);
+}
+
+void TodoWindow::markTaskDone()
+{
+    QTask todo;
+    if (centralView->currentIndex() == 1)
+        todo = tView->task();
+    if (todo.uid().isNull())
+        todo = table->currentTask();
+
+    if (todo != QTask()) {
+        todo.setStatus(QTask::Completed);
+        model->updateTask(todo);
+        todo = model->task(todo.uid());
+        if (centralView->currentIndex() == 1)
+            showDetailView(todo);
+        currentEntryChanged();
+    }
+}
+
+void TodoWindow::markTaskNotDone()
+{
+    QTask todo;
+    if (centralView->currentIndex() == 1)
+        todo = tView->task();
+    if (todo.uid().isNull())
+        todo = table->currentTask();
+
+    if (todo != QTask() && todo.status() == QTask::Completed) {
+        todo.setStatus(QTask::InProgress);
+        model->updateTask(todo);
+        todo = model->task(todo.uid());
+        if (centralView->currentIndex() == 1)
+            showDetailView(todo);
+        currentEntryChanged();
+    }
 }
 
 void TodoWindow::reload()
@@ -777,6 +853,7 @@ void TodoWindow::selectCategory()
 #ifdef QTOPIA_PHONE
     if (!categoryDlg) {
         categoryDlg = new QCategoryDialog(TodoCategoryScope, QCategoryDialog::Filter, this);
+        categoryDlg->setText( tr("Only tasks which have <i>all</i> the selected categories will be shown...") );
         categoryDlg->setObjectName("Todo List");
     }
     categoryDlg->selectFilter(model->categoryFilter());
@@ -862,7 +939,7 @@ QDSData TodoWindow::taskQDLLink( QTask& task )
     // Check if we need to create the QDLLink
     QString keyString = task.customField( QDL::SOURCE_DATA_KEY );
     if ( keyString.isEmpty() ||
-         !QDSData( QLocalUniqueId( keyString ) ).isValid() ) {
+         !QDSData( QUniqueId( keyString ) ).isValid() ) {
         QByteArray dataRef;
         QDataStream refStream( &dataRef, QIODevice::WriteOnly );
         refStream << task.uid();
@@ -873,7 +950,7 @@ QDSData TodoWindow::taskQDLLink( QTask& task )
                       "pics/todolist/TodoList" );
 
         QDSData linkData = link.toQDSData();
-        QLocalUniqueId key = linkData.store();
+        QUniqueId key = linkData.store();
         task.setCustomField( QDL::SOURCE_DATA_KEY, key.toString() );
         model->updateTask( task );
 
@@ -881,7 +958,7 @@ QDSData TodoWindow::taskQDLLink( QTask& task )
     }
 
     // Get the link from the QDSDataStore
-    return QDSData( QLocalUniqueId( keyString ) );
+    return QDSData( QUniqueId( keyString ) );
 }
 
 void TodoWindow::removeTasksQDLLink( QList<QUniqueId>& taskIds )
@@ -907,7 +984,7 @@ void TodoWindow::removeTaskQDLLink( QTask& task )
     QString key = task.customField( QDL::SOURCE_DATA_KEY );
     if ( !key.isEmpty() ) {
         // Break the link in the QDSDataStore
-        QDSData linkData = QDSData( QLocalUniqueId( key ) );
+        QDSData linkData = QDSData( QUniqueId( key ) );
         QDLLink link( linkData );
         link.setBroken( true );
         linkData.modify( link.toQDSData().data() );

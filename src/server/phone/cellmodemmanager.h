@@ -78,6 +78,7 @@ public:
     QString cellLocation() const;
     bool callForwardingEnabled() const;
     bool simToolkitAvailable() const;
+    bool cellModemAvailable() const;
 
     bool planeModeEnabled() const;
     bool planeModeSupported() const;

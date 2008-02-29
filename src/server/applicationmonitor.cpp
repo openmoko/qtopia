@@ -118,7 +118,7 @@ UIApplicationMonitorPrivate::UIApplicationMonitorPrivate()
 
 
     // For tracking busy(QString), notBusy(QString) and appRaised(QString)
-    QtopiaChannel *sysChannel = new QtopiaChannel("QPE/System", this);
+    QtopiaChannel *sysChannel = new QtopiaChannel("QPE/QtopiaApplication", this);
     QObject::connect(sysChannel,
                      SIGNAL(received(const QString &, const QByteArray &)),
                      this,
@@ -403,9 +403,9 @@ UIApplicationMonitorPrivate::applicationState(const QString &app) const
 
   \table
   \header \o To Application \o From Application \o Description
-  \row \o \c {raise()} \o \c {QPE/System:appRaised(QString)} \o Used to raise, and confirm the raise of, the application UI.
-  \row \o \o \c {QPE/System:busy(QString)} \o The application has notified the system that it is busy.
-  \row \o \o \c {QPE/System:notBusy(QString)} \o The application has notified the system that it is not busy.
+  \row \o \c {raise()} \o \c {QPE/QtopiaApplication:appRaised(QString)} \o Used to raise, and confirm the raise of, the application UI.
+  \row \o \o \c {QPE/QtopiaApplication:busy(QString)} \o The application has notified the system that it is busy.
+  \row \o \o \c {QPE/QtopiaApplication:notBusy(QString)} \o The application has notified the system that it is not busy.
   \endtable
 
   Additionally the UIApplicationMonitor class uses the following value space

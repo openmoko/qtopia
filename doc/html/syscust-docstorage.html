@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Document Storage</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Document Storage</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -13,88 +12,83 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document Storage<br /><small></small></h1>
 <a name="top"></a><ul><li><a href="#storage-conf">Storage.conf</a></li>
 <li><a href="#what-do-we-want-to-do">What do we want <tt>Storage.conf</tt> to do?</a></li>
+<ul><li><a href="#parameters">Parameters</a></li>
+<li><a href="#groups-within-storage-conf">Groups within Storage.conf</a></li>
+</ul>
 <li><a href="#filtering">Filtering</a></li>
 <li><a href="#non-removable-vs-removable-storage">Non-removable vs Removable Storage</a></li>
-<li><a href="#using-read-only-file-systems">Using Read-only File Systems</a></li>
+<li><a href="#using-read-only-file-systems">Using read-only File Systems</a></li>
 </ul>
-<a name="removable-storage-cards"></a><a name="storageconf"></a><p>Qtopia identifies storage locations through the <tt>Storage.conf</tt> configuration file.</p>
-<a name="storage-conf"></a>
+<a name="removable-storage-cards"></a><a name="storageconf"></a><a name="storage-conf"></a>
 <h2>Storage.conf</h2>
-<p>Devices are mapped to human-readable names using the <tt>Storage.conf</tt> configuration file. The file will also indicate whether or not a given device is removable or not.</p>
+<p>Qtopia identifies and defines storage locations in the <tt>Storage.conf</tt> configuration file. Devices are mapped to human-readable names and the <tt>Removable</tt> variable defines whether or not a given device is removable.</p>
 <p>For example:</p>
-<pre>    [/dev/hda1]
-    Name = Internal Storage
+<pre>&nbsp;   [MountPoint0]
+    Name[] = Internal Storage
     Removable = 0</pre>
-<p>The device can be anything that appears in the first column of <tt>/proc/mounts</tt>, for example, <tt><span class="comment">//server/path/to/nfsmount</span></tt> is a valid device.</p>
-<p><tt>Storage.conf</tt> refers to devices but Qtopia uses path names and <tt>/proc/mounts</tt> is consulted to determine which device a given path is on. There is <i>special case</i> code for <tt>$HOME</tt> and the non-removable storage location should be located at <tt>$HOME</tt>. By removing the <i>special case</i> status of <tt>$HOME</tt> the requirement to have only one non-removable location is removed.</p>
+<p>The device can be anything that appears in the first column of <tt>/proc/mounts</tt>, for example, <tt>//server/path/to/nfsmount</tt> is a valid device.</p>
+<p><tt>Storage.conf</tt> refers to devices but Qtopia uses path names and <tt>/proc/mounts</tt> is consulted to determine which device a given path is on. There is <i>special case</i> code for <tt>$HOME</tt> and the non-removable storage location should be located at <tt>$HOME</tt>. Removing the <i>special case</i> status of <tt>$HOME</tt> also removes the requirement to have only one non-removable location.</p>
 <a name="what-do-we-want-to-do"></a>
 <h2>What do we want <tt>Storage.conf</tt> to do?</h2>
 <p><tt>Storage.conf</tt> must:</p>
 <ol type="1">
-<li>Identify the various locations that exist on the device.<ul>
+<li>identify the various content locations that exist on the device:<ul>
 <li>HOME</li>
-<li>Non-removable devices (eg /dev/hda1)</li>
-<li>Removable devices (eg /dev/cf)</li>
+<li>non-removable devices (e.g. <tt>/dev/hda1</tt>)</li>
+<li>removable devices (e.g. <tt>/dev/cf</tt>)</li>
+<li>prefix of the Qtopia image directory.</li>
 </ul>
 </li>
-<li>Indicate if a given area allows documents and/or applications to be placed there.</li>
+<li>indicate if a given area allows documents and/or applications to be placed there.</li>
 </ol>
-<p>For example:</p>
-<pre>    [Translation]
-    File=QtopiaDefaults
-    Context=Storage
-
-    [HOME]
-    Name[] = HOME Storage
-    Removable = 0
-    Applications = 0
-    Documents = 1
-    Options = rw
-
-    [/dev/hda2]
-    Name[] = Program Storage
-    Removable = 0
-    Applications = 1
-    Documents = 0
-
-    [/dev/cf]
-    Name[] = CF card
-    Removable = 1
-    Applications = 0
-    Documents = 1
-
-    [/dev/loop1]
-    Name[] = Virtual CF
-    Removable = 1
-    Applications = 1
-    Documents = 1</pre>
-<p>The real system this <tt>Storage.conf</tt> represents could be as follows:</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Path</th><th>Device</th><th>Info</th></tr></thead>
-<tr valign="top" class="odd"><td>/</td><td><tt>/dev/hda1</tt></td><td><tt>jffs2</tt> root (easy upgrades)</td></tr>
-<tr valign="top" class="even"><td><tt>/home/root</tt></td><td><tt>HOME</tt></td><td>This is on <tt>/dev/hda1</tt> but it is treated separately</td></tr>
-<tr valign="top" class="odd"><td><tt>/progfs</tt></td><td><tt>/dev/hda2</tt></td><td>Applications are placed here - separated from the base system</td></tr>
-<tr valign="top" class="even"><td><tt>/mnt/cf</tt></td><td><tt>/dev/cf</tt></td><td><tt>CF</tt> card (no applicationss for security reasons)</td></tr>
-<tr valign="top" class="odd"><td><tt>/mnt/vcf</tt></td><td><tt>/dev/loop1</tt></td><td>The loop back image that is pretending to be a CF card for testing purposes.</td></tr>
+<p>An example <tt>Storage.conf</tt> is available at: <tt>&lt;qtopia-root-dir&gt;/devices/greenphone/Storage.conf</tt>.</p>
+<a name="parameters"></a>
+<h3>Parameters</h3>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" bgcolor="#a2c511"><th>Parameter</th><th>Purpose</th><th>Value Type</th><th>Example</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>Applications</tt></td><td>indicates if the location hold applications</td><td>boolean</td><td>1</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>ApplicationsDefault</tt></td><td>indicates the content source name to use when searching for Applications</td><td>string</td><td><tt>HOME</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>ApplicationsPath</tt></td><td>indicates the subdirectory under this content source to use when searching for Applications</td><td>string</td><td><tt>/Applications</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>ContentDatabase</tt></td><td>indicates the content source used to stored the content database</td><td>boolean</td><td><tt>1</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>Documents</tt></td><td>indicates if the location hold documents</td><td>boolean</td><td><tt>1</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>DocumentsDefault</tt></td><td>indicates the content source name to use when searching for Documents</td><td>string</td><td><tt>HOME</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>DocumentsPath</tt></td><td>indicates the subdirectory under this content source to use when searching for Documents</td><td>string</td><td><tt>/Documents</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>Options</tt></td><td>indicates the options to use instead of the mount options in <tt>/proc/mounts</tt>.</td><td>string</td><td><tt>rw</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>MountPoints</tt></td><td>a comma separated list of content source names to search for</td><td>string</td><td><tt>MountPoint0</tt>, <tt>MountPont1</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>Name[]</tt></td><td>the translatable name shown to the user</td><td>string</td><td><tt>MyDocuments</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>Path</tt></td><td>indicates device path for this content source</td><td>string</td><td><tt>/dev/mmca1</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>Removable</tt></td><td>indicates if the location is removable</td><td>boolean</td><td><tt>1</tt></td></tr>
 </table></p>
-<p>The allowable parameters are:</p>
-<ul>
-<li><tt>Name[]</tt> - the translatable name shown to the user.</li>
-<li><tt>Removable</tt> - indicates if the location is removable</li>
-<li><tt>Applications</tt> - indicates if the location hold applications</li>
-<li><tt>Documents</tt> - indicates if the location hold documents</li>
-<li><tt>Options</tt> - values override the mount options in <tt>/proc/mounts</tt>.</li>
-</ul>
-<p>The <tt>HOME</tt> location defaults to <tt>rw</tt> for its Options value. Qtopia assumes a location is writable only if <tt>Options</tt> contains <tt>rw</tt>. A location's <tt>Options</tt> might need to be overwritten if they don't include <tt>rw</tt> but are writable. For example, SMB mounts on a machine have Options of 0 or if they are overly complex <tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> encode the Options as part of a <tt>;</tt> delimited string.</p>
+<a name="groups-within-storage-conf"></a>
+<h3>Groups within Storage.conf</h3>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" bgcolor="#a2c511"><th colspan="2">MountTable</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b>Purpose</b></td><td>Lists what content sources to search for in <tt>Storage.conf</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><b>Valid Attributes</b></td><td><tt>ApplicationsDefault</tt>, <tt>DocumentsDefault</tt>, <tt>MountPoints</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b>Notes:</b></td><td></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th colspan="2">HOME</th></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><b>Purpose</b></td><td>Specify the content stored in the <tt>HOME</tt> content source. If your <tt>HOME</tt> is on a partition specified by <tt>Storage.conf</tt> and it does not contain Applications or Documents you might want to hide it by setting <tt>&quot;Path</tt> = HIDE&quot;</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><b>Notes:</b></td><td>Set <tt>&quot;Path</tt> = HIDE&quot; to hide it and your HOME is on a partition that is specified by <tt>Storage.conf</tt> and it does not contain Applications or Documents o Set <tt>&quot;Path</tt> = HOME&quot; to use a value of <tt>Qtopia::homePath()</tt></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th colspan="2">&lt;A content source name list in <tt>MountPoints&gt;</tt> : e.g. <tt>MountPoint0</tt></th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b>Purpose</b></td><td>Specify the details of a content source declared in the <tt>MountTable</tt>.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>ContentDatabase</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b>Notes:</b></td><td></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th colspan="2">PREFIX</th></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><b>Purpose</b></td><td>Allow customization of the <tt>prefix</tt> directory.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><b>Valid Attributes</b></td><td><tt>Applications</tt>, <tt>ApplicationsPath</tt>, <tt>ContentDatabase</tt>, <tt>Documents</tt>, <tt>DocumentsPath</tt>, <tt>Options</tt>, <tt>Name[]</tt>, <tt>Removable</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><b>Notes:</b></td><td>Commercial customers please contact support before using this group.</td></tr>
+</table></p>
+<p>The <tt>HOME</tt> location defaults to <tt>rw</tt> for its <tt>Options</tt> value. Qtopia assumes a location is writable only if <tt>Options</tt> contains <tt>rw</tt>. A location's <tt>Options</tt> might need to be overwritten if they don't include <tt>rw</tt> but are writable. For example, SMB mounts on a machine have <tt>Options</tt> of 0 or if they are overly complex; <tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> encode the <tt>Options</tt> as part of a <tt>;</tt> delimited string.</p>
 <a name="filtering"></a>
 <h2>Filtering</h2>
 <p>The <tt>StorageInfo::filesytems()</tt> function provide filtering functionality.</p>
 <p>For example, to extend the <i>Documents</i> file systems use the following:</p>
-<pre>    FileSystemFilter fsf;
+<pre>&nbsp;   FileSystemFilter fsf;
     fsf.documents == FileSystemFilter::Set;
     QList&lt;FileSystem*&gt; filesystems = storage-&gt;filesystems( &amp;fsf );</pre>
 <p>The <tt>FileSystemFilter</tt> is then easily extended as follows:</p>
-<pre>    class WriteableFileSystemFilter : public FileSystemFilter
+<pre>&nbsp;   class WriteableFileSystemFilter : public FileSystemFilter
     {
     public:
         WriteableFileSystemFilter()
@@ -114,22 +108,21 @@
     };</pre>
 <p>This is a simple example however more complex rules can be incorporated. So, putting it all together:</p>
 <ol type="1">
-<li><tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> are now implemented as a filter and a <tt>FileSystem</tt> list to the <tt>String</tt> function.</li>
-<li><tt>LocationCombo</tt> has a new <tt>setFilter()</tt> function used to limit the types of file systems it shows.</li>
-<li>All code using <tt>StorageInfo::fileSystems()</tt> is updated and the filter argument is mandatory.</li>
+<li><tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> are now implemented as a filter and a <tt>FileSystem</tt> list to the <tt>String</tt> function</li>
+<li><tt>LocationCombo</tt> has a new <tt>setFilter()</tt> function used to limit the types of file systems it shows</li>
+<li>all code using <tt>StorageInfo::fileSystems()</tt> is updated and the filter argument is mandatory.</li>
 </ol>
 <a name="non-removable-vs-removable-storage"></a>
 <h2>Non-removable vs Removable Storage</h2>
 <p>Application data is stored in the non-removable location, however documents can be stored in any location. Removable locations are re-scanned on insertion and removal.</p>
 <p>The scanning is triggered when the Qtopia library receives one of the following messages via the <tt>QPE/Card</tt> QCOP channel:</p>
 <ul>
-<li><tt>mtabChanged()</tt> - sent when <tt>/etc/mtab</tt> has changed.</li>
-<li><tt>stabChanged()</tt> - sent when <tt>/var/run/stab</tt>, <tt>/var/state/pcmcia/stab</tt>, or <tt>/var/lib/pcmcia/stab</tt> have changed.</li>
+<li><tt>mtabChanged()</tt> - sent when <tt>/etc/mtab</tt> has changed</li>
+<li><tt>stabChanged()</tt> - sent when <tt>/var/run/stab</tt>, <tt>/var/state/pcmcia/stab</tt>, or <tt>/var/lib/pcmcia/stab</tt> have changed. The <a href="stabmonitor.html">StabMonitor</a> server task provides a default implementation.</li>
 </ul>
-<p>If <tt>QPE_SYSTEM_SYSFILEMONITOR</tt> is defined, Qtopia assumes that the surrounding system generates these messages, for example, by using the <tt>qcop</tt> command in the system <tt>HotPlug</tt> scripts. Otherwise, Qtopia polls every few seconds (wasting CPU).</p>
 <a name="using-read-only-file-systems"></a>
-<h2>Using Read-only File Systems</h2>
-<p>Using read-only file systems have a number of benefitsa:</p>
+<h2>Using read-only File Systems</h2>
+<p>Using read-only file systems have a number of benefits:</p>
 <ul>
 <li>compressed read-only file systems such as <tt>cramfs</tt> and <tt>squashfs</tt> have better compression than read-write file systems such as <tt>jffs2</tt></li>
 <li>read-only file systems provide a measure of protection for system files.</li>
@@ -138,6 +131,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

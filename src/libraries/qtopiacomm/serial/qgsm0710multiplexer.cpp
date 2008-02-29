@@ -27,7 +27,7 @@
 /*!
     \class QGsm0710Multiplexer
     \brief The QGsm0710Multiplexer class provides a multiplexing implementation based on GSM 07.10
-    \ingroup communication
+    \ingroup telephony::serial
 
     The QGsm0710Multiplexer class provides a multiplexing implementation
     based on GSM 07.10.  This is the default multiplexer that is tried
@@ -942,7 +942,7 @@ void QGsm0710Multiplexer::close( int channel )
 /*!
     \class QGsm0710MultiplexerServer
     \brief The QGsm0710MultiplexerServer class provides a server-side multiplexing implementation based on GSM 07.10
-    \ingroup communication
+    \ingroup telephony::serial
 
     The QGsm0710MultiplexerServer class provides a server-side multiplexing
     implementation based on GSM 07.10.

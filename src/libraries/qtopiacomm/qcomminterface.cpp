@@ -24,7 +24,6 @@
 /*!
     \class QCommInterface
     \brief The QCommInterface class provides facilities for implementing client and server communications objects
-    \ingroup communication
 
     The QCommInterface class provides facilities for implementing client and
     server communications objects.  It inherits from QAbstractIpcInterface

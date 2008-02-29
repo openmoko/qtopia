@@ -46,6 +46,8 @@ protected:
     virtual void paintEvent(QPaintEvent *);
     virtual void mousePressEvent(QMouseEvent *);
     virtual bool event(QEvent *);
+    virtual void keyPressEvent(QKeyEvent *);
+    virtual void closeEvent(QCloseEvent *);
 
 private slots:
     void e2Received(const QString &, const QByteArray &);

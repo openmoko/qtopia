@@ -35,6 +35,7 @@
 #include <QLineEdit>
 #include <QAbstractItemView>
 #include <QScrollBar>
+#include <QComboBox>
 #include <QPaintEvent>
 #include <QDesktopWidget>
 #include <QWSManager>
@@ -128,9 +129,9 @@ public:
     void toggleTextColor(QWidget *w) {
         if (w) {
             QPalette pal = w->palette();
-            QColor temptext = pal.color(QPalette::Text);
-            pal.setColor(QPalette::Text, pal.color(QPalette::HighlightedText));
-            pal.setColor(QPalette::HighlightedText, temptext);
+            QColor temptext = pal.color(QPalette::Normal, QPalette::Text);
+            pal.setColor(QPalette::Normal, QPalette::Text, pal.color(QPalette::Normal, QPalette::HighlightedText));
+            pal.setColor(QPalette::Normal, QPalette::HighlightedText, temptext);
             w->setPalette(pal);
         }
     }
@@ -241,7 +242,8 @@ bool QPhoneStylePrivate::eventFilter(QObject *o, QEvent *e)
                 }   
             }
         } else if (e->type() == QEvent::EnterEditFocus || e->type() == QEvent::LeaveEditFocus) {
-            if (wgt->inherits("QLineEdit") || wgt->inherits("QAbstractSpinBox")) {
+            QComboBox *cb = qobject_cast<QComboBox*>(wgt);
+            if (wgt->inherits("QLineEdit") || wgt->inherits("QAbstractSpinBox") || (cb && cb->isEditable())) {
                 toggleTextColor(wgt);
             } else if (QTextEdit *te = qobject_cast<QTextEdit*>(wgt)) {
                 te->viewport()->setBackgroundRole(e->type() == QEvent::EnterEditFocus
@@ -285,18 +287,27 @@ void QPhoneStylePrivate::focusChangedSlot(QWidget *old, QWidget *now)
     te = qobject_cast<QTextEdit*>(now);
     if (te) {
         te->viewport()->setBackgroundRole(QPalette::Background);
-        if (!te->hasEditFocus())    //HACK: there are a few strange cases where we can get edit focus before we get focus
+        if (!te->hasEditFocus())    //isSingleFocusWidget can cause us to get edit focus before we get here
             toggleTextColor(te);
+        else {
+            //because of isSingleFocusWidget (normally taken care of in EnterEditFocus of event filter)
+            te->viewport()->setBackgroundRole(QPalette::Base);   
+        }
         te->installEventFilter(this);
     }
     
-    if (old && (old->inherits("QLineEdit") || old->inherits("QAbstractSpinBox"))) {
+    QComboBox *cb = qobject_cast<QComboBox*>(old);
+    if (old && (old->inherits("QLineEdit") || old->inherits("QAbstractSpinBox")
+                || (cb && cb->isEditable()))) {
         toggleTextColor(old);
         old->removeEventFilter(this);
     }
     
-    if (now && (now->inherits("QLineEdit") || now->inherits("QAbstractSpinBox"))) {
-        toggleTextColor(now);
+    cb = qobject_cast<QComboBox*>(now);
+    if (now && (now->inherits("QLineEdit") || now->inherits("QAbstractSpinBox")
+                || (cb && cb->isEditable()))) {
+        if (!now->hasEditFocus())   //isSingleFocusWidget can cause us to get edit focus before we get here
+            toggleTextColor(now);
         now->installEventFilter(this);
     }
 #endif   
@@ -487,7 +498,7 @@ void QPhoneStyle::polish(QWidget *widget)
                 widget->removeEventFilter(this);
                 d->bgManaged.remove(widget);
             }
-        } else if (widget->parentWidget() && widget->parentWidget()->isWindow()) {
+        } else if (widget->parentWidget() && widget->parentWidget()->isWindow() && !widget->testAttribute(Qt::WA_SetPalette) ) {
             widget->setPalette(d->bgPal);
         }
     }
@@ -846,13 +857,17 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
                         
             if (opt->state & State_HasFocus && !(panel->state & State_HasEditFocus)) {
                 
-                const QRect &r = opt->rect;
-                p->fillRect(r.x()+4, r.y()+4, r.width()-8, r.height()-8,
-                            panel->palette.brush(QPalette::Highlight));
+                QRect r = opt->rect;
+                int m = 4;
+                if (const QComboBox *cb = qobject_cast<const QComboBox *>(widget->parentWidget()))
+                    m = 1;
+                r.adjust(m,m,-m,-m);
+                p->fillRect(r, panel->palette.brush(QPalette::Highlight));
 
+                r.adjust(-1,-1,1,1);
                 QStyleOptionFocusRect focus;
                 focus.QStyleOption::operator=(*panel);
-                focus.rect = QRect(r.x()+3, r.y()+3, r.width()-6, r.height()-6);
+                focus.rect = r;
                 focus.state |= State_FocusAtBorder;
                 focus.backgroundColor = panel->palette.highlight().color();
                 drawPrimitive(PE_FrameFocusRect, &focus, p, widget);
@@ -894,8 +909,10 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
                 pixelMetric(PM_IndicatorWidth, opt, widget),
                 pixelMetric(PM_IndicatorHeight, opt, widget));
         }
-        if (!(opt->state & State_Off) && (opt->rect.height() > 6)) {
+        if (!(opt->state & State_Off)) {
             int hh = opt->rect.height()-6;
+            if (hh < 1)
+                hh = qMax(opt->rect.height(),1);
             QLineF *lines = new QLineF [hh];
             int i, xx, yy;
             xx = opt->rect.x() + 3;
@@ -1277,7 +1294,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                 rect.translate(shiftX, shiftY);
                 drawItemText(p, rect, alignment, toolbutton->palette,
                                 opt->state & State_Enabled, toolbutton->text,
-                                QPalette::ButtonText);
+                                opt->state & State_HasFocus ? QPalette::HighlightedText : QPalette::ButtonText);
                 } else {
                     QPixmap pm;
                     QSize pmSize = toolbutton->iconSize;
@@ -1594,7 +1611,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
         break;
     case CC_Slider:
         if (const QStyleOptionSlider *slider = qstyleoption_cast<const QStyleOptionSlider *>(opt)) {
-            if (slider->state & State_HasFocus) {
+            if (slider->state & State_HasFocus && !(slider->state & State_HasEditFocus)) {
                 QRect r = subElementRect(SE_SliderFocusRect, slider, widget);
                 p->fillRect(r.x()+1, r.y()+1, r.width()-2, r.height()-2,
                     slider->palette.highlight().color());
@@ -1687,6 +1704,9 @@ bool QPhoneStyle::event(QEvent *e)
             }
             if (focusWidget->inherits("QAbstractSpinBox")) {
                 focusWidget->update();
+            }
+            if (QSlider *slider = qobject_cast<QSlider*>(focusWidget)) {
+                slider->update();
             }
             QPoint pos = focusWidget->mapTo(focusWidget->window(), QPoint(0,0));
             if (pos.y() == 0 && pos.x() < 20)

@@ -1,8 +1,7 @@
 qtopia_project(external lib)
-
+license(LGPL)
 TARGET      =   timidity
 VERSION     =   1.0.0
-CONFIG-=warn_on
 
 HEADERS     = src/common.h \
                 src/dls1.h \
@@ -37,13 +36,12 @@ pkg.domain=lib
 patches.files=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/libtimidity/config/*
 patches.path=/etc/timidity
 patches.hint=config files
+INSTALLS+=patches
 
 timidityconfig.commands=$$COMMAND_PREFIX\
     cat $$PWD/timidity.cfg | sed 's:QTOPIA_PREFIX:$$QTOPIA_PREFIX:' >$(INSTALL_ROOT)/etc/timidity/timidity.cfg
 timidityconfig.path=/etc/timidity
-
-
-INSTALLS+=patches timidityconfig
+INSTALLS+=timidityconfig
 
 # FIXME "make syncqtopia"
 dep(INCLUDEPATH+=$$PWD/src)

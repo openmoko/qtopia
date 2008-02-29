@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QIrLocalDevice Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QIrLocalDevice Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QIrLocalDevice Class Reference</h1>
 <p>The QIrLocalDevice class encapsulates a local Infrared (IrDA) device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QIrLocalDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QIrLocalDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qirlocaldevice-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -98,7 +97,7 @@
 <p>Returns true if the infrared device is up and running.</p>
 <h3 class="fn"><a name="queryRemoteAttribute"></a><a href="qvariant.html">QVariant</a> QIrLocalDevice::queryRemoteAttribute ( const <a href="qirremotedevice.html">QIrRemoteDevice</a> &amp; <i>remote</i>, const <a href="qstring.html">QString</a> &amp; <i>className</i>, const <a href="qstring.html">QString</a> &amp; <i>attribName</i> )</h3>
 <p>Tries to query the remote device given by <i>remote</i> for an IAS Database entry with class name given by <i>className</i> and attribute name given by <i>attribName</i>. Returns a valid attribute if the device has an attribute specified, returns false if the device could not be contacted or the attribute does not exist.</p>
-<pre>    QIrIasAttribute ret =
+<pre>&nbsp;   QIrIasAttribute ret =
             dev.queryRemoteAttribute(remote, &quot;OBEX&quot;, &quot;IrDA:TinyTP:LsapSel&quot;);</pre>
 <p>The above code would attempt to query the remote device given by <tt>remote</tt> for whether it supports the OBEX service.</p>
 <h3 class="fn"><a name="remoteDeviceFound"></a>void QIrLocalDevice::remoteDeviceFound ( const <a href="qirremotedevice.html">QIrRemoteDevice</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -111,6 +110,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

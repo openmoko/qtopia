@@ -132,6 +132,10 @@ void VisualizationWidget::setActive( bool active )
 
 void VisualizationWidget::paintEvent( QPaintEvent* e )
 {
+#ifdef NO_VISUALIZATION
+    return;
+#endif
+
     QPainter painter( this );
 
     Flake *flake = m_flakefactory.flakes();

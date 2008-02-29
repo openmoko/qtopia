@@ -210,12 +210,12 @@ void DialerServiceProxy::showDialer( const QString& digits )
 // define PhoneLauncher
 PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     : QAbstractServerInterface(parent, fl), updateTid(0), m_header(0),
-      m_context(0), stack(0), documentsMenu(0), timeId(0),
+      m_context(0), stack(0), documentsMenu(0), 
       registrationMsgId(0),
 #ifdef QTOPIA_PHONEUI
       messageCount(0), missedCallCount(0), activeCalls(0),
 #endif
-      slowUpdates(false), showAlerts(false),
+      showAlerts(false),
 #ifdef QTOPIA_PHONEUI
       serviceMsgBox(0), CBSMessageBox(0),
 #endif
@@ -631,7 +631,10 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         showHomeScreen(0);
     } else if ( message == QLatin1String("showHomeScreenAndToggleKeylock()") ) {
         showHomeScreen(2);
+    } else if ( message == QLatin1String("showHomeScreenAndKeylock()") ) {
+        showHomeScreen(3);
     } else if ( message == "applyStyleSplash()" ) {
+        raise();
         QWaitWidget *waitWidget = new QWaitWidget( this );
         waitWidget->show();
         qApp->processEvents();
@@ -639,6 +642,7 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         polishWindows();
         updateLauncherIconSize();
         delete waitWidget;
+        lower();
     } else if ( message == "applyStyleNoSplash()" ) {
         qApp->processEvents();
         ThemeControl::instance()->refresh();
@@ -679,7 +683,8 @@ void PhoneLauncher::showHomeScreen(int state)
 {
     // state: 0 -> no screensaver calls
     //        1 -> showHomeScreen called by screensaver
-    //        2 -> showHomeScreen called when lock key is pressed
+    //        2 -> showHomeScreen called when lock key is toggled
+    //        3 -> showHomeScreen called to key lock
 
 #ifdef QTOPIA_PHONEUI
     if (state != 0 && activeCalls) {
@@ -698,11 +703,6 @@ void PhoneLauncher::showHomeScreen(int state)
         phoneBrowser()->hide();
     }
 
-    if (timeId)
-        killTimer(timeId);
-    timeId = startTimer(60000); // slow down date and time updates
-    slowUpdates = true;
-
     if (warningBox)
         delete warningBox;
 
@@ -715,10 +715,10 @@ void PhoneLauncher::showHomeScreen(int state)
             if (lockType == "Enabled")
                 homeScreen->setKeyLocked(true);
         }
-    } else if (state == 2) {
+    } else if (state == 2 || state == 3) {
         if (!homeScreen->keyLocked())
             homeScreen->setKeyLocked(true);
-        else
+        else if (state == 2)
             qwsServer->processKeyEvent(0, BasicKeyLock::lockKey(), 0, true, false);
     }
 }
@@ -757,11 +757,6 @@ void PhoneLauncher::showPhoneLauncher()
 
     phoneBrowser()->showMaximized();
     phoneBrowser()->raise();
-
-    slowUpdates = false;
-    if (timeId)
-        killTimer(timeId);
-    timeId = startTimer( 5000 );
 
     if (warningBox)
         delete warningBox;
@@ -822,7 +817,9 @@ void PhoneLauncher::registrationChanged()
     bool roaming = false;
     switch (r) {
         case QTelephony::RegistrationNone:
-            if (cellModem->planeModeEnabled()) {
+            if (!cellModem->cellModemAvailable()) {
+                cellMsg = tr("No modem");
+            } else if (cellModem->planeModeEnabled()) {
                 cellMsg = tr("Airplane safe mode");
                 pix = "aeroplane";
             } else {

@@ -50,7 +50,7 @@ struct QBluetoothObexAgentPrivate {
     QString m_fileName;
     QString m_mimeType;
     QByteArray m_byteArray;
-    QSDAP m_sdap;
+    QBluetoothSdpQuery m_sdap;
     QWaitWidget *m_waitWidget;
     bool m_autoDelete;
     bool m_inProgress;
@@ -90,8 +90,8 @@ QBluetoothObexAgent::QBluetoothObexAgent( const QBluetoothRemoteDevice &remoteDe
     d->m_waitWidget = new QWaitWidget( 0 );
     d->m_waitWidget->setText( tr( "Searching..." ) );
 
-    connect( &d->m_sdap, SIGNAL(searchComplete(const QSDAPSearchResult&)),
-            this, SLOT(searchComplete(const QSDAPSearchResult&)) );
+    connect( &d->m_sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult&)),
+            this, SLOT(searchComplete(const QBluetoothSdpQueryResult&)) );
 }
 
 /*!
@@ -219,13 +219,13 @@ void QBluetoothObexAgent::setAutoDelete( const bool enable )
     d->m_autoDelete = enable;
 }
 
-void QBluetoothObexAgent::searchComplete( const QSDAPSearchResult &result )
+void QBluetoothObexAgent::searchComplete( const QBluetoothSdpQueryResult &result )
 {
     qLog(Bluetooth) << "Service searching complete";
 
     bool success = false;
-    foreach ( QSDPService service, result.services() ) {
-        if ( QSDPService::isInstance( service, d->m_profile ) ) {
+    foreach ( QBluetoothSdpRecord service, result.services() ) {
+        if ( service.isInstance( d->m_profile ) ) {
 
             // check if file format is upported if printing
             if ( d->m_profile == DirectPrintingProfile ) {
@@ -240,7 +240,7 @@ void QBluetoothObexAgent::searchComplete( const QSDAPSearchResult &result )
                }
             }
             // discover REFCOMM server channel
-            int channel = QSDPService::rfcommChannel(service);
+            int channel = QBluetoothSdpRecord::rfcommChannel(service);
 
             // RFCOMM Connection
             QBluetoothObexSocket *socket = new QBluetoothObexSocket( d->m_remoteDevice->address(), channel,
@@ -256,7 +256,11 @@ void QBluetoothObexAgent::searchComplete( const QSDAPSearchResult &result )
                 connect( d->m_sender, SIGNAL(destroyed()),
                         this, SLOT(deleteLater()) );
             }
-            d->m_sender->setAutoDelete( true );
+
+            // auto delete the push client and socket when it's done
+            connect(d->m_sender, SIGNAL(done(bool)), d->m_sender, SLOT(deleteLater()));
+            connect(d->m_sender, SIGNAL(destroyed()), socket, SLOT(deleteLater()));
+
             d->m_sender->connect();
 
             // send file
@@ -265,7 +269,7 @@ void QBluetoothObexAgent::searchComplete( const QSDAPSearchResult &result )
                 d->m_sender->send( file, d->m_fileName );
             else
                 d->m_sender->send( d->m_byteArray, d->m_fileName );
-            d->m_sender->close();
+            d->m_sender->disconnect();
             success = true;
             break;
         }

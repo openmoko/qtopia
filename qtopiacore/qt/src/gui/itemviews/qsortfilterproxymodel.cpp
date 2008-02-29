@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -81,6 +91,7 @@ public:
         QVector<int> proxy_rows;
         QVector<int> proxy_columns;
         QVector<QModelIndex> mapped_children;
+        QMap<QModelIndex, Mapping *>::const_iterator map_iter;
     };
 
     mutable QMap<QModelIndex, Mapping*> source_index_mapping;
@@ -111,8 +122,8 @@ public:
         Q_ASSERT(proxy_index.isValid());
         const void *p = proxy_index.internalPointer();
         Q_ASSERT(p);
-        QMap<QModelIndex, Mapping *>::const_iterator it =
-            reinterpret_cast<QMap<QModelIndex, Mapping *>::const_iterator & >(p);
+        QMap<QModelIndex, Mapping *>::const_iterator it = 
+            static_cast<const Mapping*>(p)->map_iter;
         Q_ASSERT(it != source_index_mapping.constEnd());
         Q_ASSERT(it.value());
         return it;
@@ -121,8 +132,7 @@ public:
     inline QModelIndex create_index(int row, int column,
                                     QMap<QModelIndex, Mapping*>::const_iterator it) const
     {
-        const void *p = static_cast<const void *>(it);
-        return q_func()->createIndex(row, column, const_cast<void *>(p));
+        return q_func()->createIndex(row, column, *it);
     }
 
     void _q_sourceDataChanged(const QModelIndex &source_top_left,
@@ -192,6 +202,9 @@ public:
     void handle_filter_changed(
         QVector<int> &source_to_proxy, QVector<int> &proxy_to_source,
         const QModelIndex &source_parent, Qt::Orientation orient);
+
+    void updateChildrenMapping(const QModelIndex &source_parent, Mapping *parent_mapping,
+                               Qt::Orientation orient, int start, int end, int delta_item_count, bool remove);
 };
 
 typedef QMap<QModelIndex, QSortFilterProxyModelPrivate::Mapping *> IndexMap;
@@ -246,6 +259,7 @@ IndexMap::const_iterator QSortFilterProxyModelPrivate::create_mapping(
     build_source_to_proxy_mapping(m->source_columns, m->proxy_columns);
 
     it = IndexMap::const_iterator(source_index_mapping.insert(source_parent, m));
+    m->map_iter = it;
 
     if (source_parent.isValid()) {
         QModelIndex source_grand_parent = source_parent.parent();
@@ -520,11 +534,13 @@ void QSortFilterProxyModelPrivate::insert_source_items(
     Qt::Orientation orient, bool emit_signal)
 {
     Q_Q(QSortFilterProxyModel);
+    QModelIndex proxy_parent = QSortFilterProxyModelPrivate::source_to_proxy(source_parent);
+    if (!proxy_parent.isValid() && source_parent.isValid())
+        return; // nothing to do (source_parent is not mapped)
+
     QVector<QPair<int, QVector<int> > > proxy_intervals;
     proxy_intervals = proxy_intervals_for_source_items_to_add(
         proxy_to_source, source_items, source_parent, orient);
-
-    QModelIndex proxy_parent = QSortFilterProxyModelPrivate::source_to_proxy(source_parent);
 
     for (int i = proxy_intervals.size()-1; i >= 0; --i) {
         QPair<int, QVector<int> > interval = proxy_intervals.at(i);
@@ -580,6 +596,11 @@ void QSortFilterProxyModelPrivate::source_items_inserted(
                 // Don't care, since we don't have mapping for the grand parent
                 return;
             }
+            Mapping *gm = it.value();
+            if (gm->proxy_rows.at(source_parent.row()) == -1) {
+                // Don't care, since parent is filtered
+                return;
+            }
         }
         it = create_mapping(source_parent);
         Mapping *m = it.value();
@@ -601,6 +622,9 @@ void QSortFilterProxyModelPrivate::source_items_inserted(
 
     int delta_item_count = end - start + 1;
     int old_item_count = source_to_proxy.size();
+
+    updateChildrenMapping(source_parent, m, orient, start, end, delta_item_count, false);
+
     // Expand source-to-proxy mapping to account for new items
     source_to_proxy.insert(start, delta_item_count, -1);
 
@@ -701,31 +725,43 @@ void QSortFilterProxyModelPrivate::source_items_removed(
     }
     build_source_to_proxy_mapping(proxy_to_source, source_to_proxy);
 
+    updateChildrenMapping(source_parent, m, orient, start, end, delta_item_count, true);
+
+}
+
+
+/*!
+  \internal
+  updates the mapping of the children when inserting or removing items
+*/
+void QSortFilterProxyModelPrivate::updateChildrenMapping(const QModelIndex &source_parent, Mapping *parent_mapping,
+                                                         Qt::Orientation orient, int start, int end, int delta_item_count, bool remove)
+{
     // see if any mapped children should be (re)moved
-    QVector<QModelIndex>::iterator it2 = m->mapped_children.begin();
-    for ( ; it2 != m->mapped_children.end(); ) {
+    QVector<QModelIndex>::iterator it2 = parent_mapping->mapped_children.begin();
+    for ( ; it2 != parent_mapping->mapped_children.end();) {
         const QModelIndex source_child_index = *it2;
         const int pos = (orient == Qt::Vertical)
                         ? source_child_index.row()
                         : source_child_index.column();
         if (pos < start) {
-            // not affected by removal
+            // not affected
             ++it2;
-            continue;
-        } else if (pos <= end) {
+        } else if (remove && pos <= end) {
             // in the removed interval
-            it2 = m->mapped_children.erase(it2);
+            it2 = parent_mapping->mapped_children.erase(it2);
             remove_from_mapping(source_child_index);
         } else {
             // below the removed items -- recompute the index
             QModelIndex new_index;
+            const int newpos = remove ? pos - delta_item_count : pos + delta_item_count;
             if (orient == Qt::Vertical) {
-                new_index = model->index(pos - delta_item_count,
+                new_index = model->index(newpos,
                                          source_child_index.column(),
                                          source_parent);
             } else {
                 new_index = model->index(source_child_index.row(),
-                                         pos - delta_item_count,
+                                         newpos,
                                          source_parent);
             }
             *it2 = new_index;
@@ -734,7 +770,7 @@ void QSortFilterProxyModelPrivate::source_items_removed(
             // update mapping
             Mapping *cm = source_index_mapping.take(source_child_index);
             Q_ASSERT(cm);
-            source_index_mapping.insert(new_index, cm);
+            cm->map_iter = source_index_mapping.insert(new_index, cm);
         }
     }
 }
@@ -1377,6 +1413,8 @@ int QSortFilterProxyModel::rowCount(const QModelIndex &parent) const
 {
     Q_D(const QSortFilterProxyModel);
     QModelIndex source_parent = d->proxy_to_source(parent);
+    if (parent.isValid() && !source_parent.isValid())
+        return 0;
     IndexMap::const_iterator it = d->create_mapping(source_parent);
     return it.value()->source_rows.count();
 }
@@ -1388,6 +1426,8 @@ int QSortFilterProxyModel::columnCount(const QModelIndex &parent) const
 {
     Q_D(const QSortFilterProxyModel);
     QModelIndex source_parent = d->proxy_to_source(parent);
+    if (parent.isValid() && !source_parent.isValid())
+        return 0;
     IndexMap::const_iterator it = d->create_mapping(source_parent);
     return it.value()->source_columns.count();
 }
@@ -1399,6 +1439,8 @@ bool QSortFilterProxyModel::hasChildren(const QModelIndex &parent) const
 {
     Q_D(const QSortFilterProxyModel);
     QModelIndex source_parent = d->proxy_to_source(parent);
+    if (parent.isValid() && !source_parent.isValid())
+        return false;
     if (!d->model->hasChildren(source_parent))
         return false;
     QSortFilterProxyModelPrivate::Mapping *m = d->create_mapping(source_parent).value();
@@ -1412,6 +1454,8 @@ QVariant QSortFilterProxyModel::data(const QModelIndex &index, int role) const
 {
     Q_D(const QSortFilterProxyModel);
     QModelIndex source_index = d->proxy_to_source(index);
+    if (index.isValid() && !source_index.isValid())
+        return QVariant();
     return d->model->data(source_index, role);
 }
 
@@ -1422,6 +1466,8 @@ bool QSortFilterProxyModel::setData(const QModelIndex &index, const QVariant &va
 {
     Q_D(QSortFilterProxyModel);
     QModelIndex source_index = d->proxy_to_source(index);
+    if (index.isValid() && !source_index.isValid())
+        return false;
     return d->model->setData(source_index, value, role);
 }
 
@@ -1526,6 +1572,8 @@ bool QSortFilterProxyModel::insertRows(int row, int count, const QModelIndex &pa
     if (row < 0 || count <= 0)
         return false;
     QModelIndex source_parent = d->proxy_to_source(parent);
+    if (parent.isValid() && !source_parent.isValid())
+        return false;
     QSortFilterProxyModelPrivate::Mapping *m = d->create_mapping(source_parent).value();
     if (row > m->source_rows.count())
         return false;
@@ -1544,6 +1592,8 @@ bool QSortFilterProxyModel::insertColumns(int column, int count, const QModelInd
     if (column < 0|| count <= 0)
         return false;
     QModelIndex source_parent = d->proxy_to_source(parent);
+    if (parent.isValid() && !source_parent.isValid())
+        return false;
     QSortFilterProxyModelPrivate::Mapping *m = d->create_mapping(source_parent).value();
     if (column > m->source_columns.count())
         return false;
@@ -1562,6 +1612,8 @@ bool QSortFilterProxyModel::removeRows(int row, int count, const QModelIndex &pa
     if (row < 0 || count <= 0)
         return false;
     QModelIndex source_parent = d->proxy_to_source(parent);
+    if (parent.isValid() && !source_parent.isValid())
+        return false;
     QSortFilterProxyModelPrivate::Mapping *m = d->create_mapping(source_parent).value();
     if (row + count > m->source_rows.count())
         return false;
@@ -1601,6 +1653,8 @@ bool QSortFilterProxyModel::removeColumns(int column, int count, const QModelInd
     if (column < 0 || count <= 0)
         return false;
     QModelIndex source_parent = d->proxy_to_source(parent);
+    if (parent.isValid() && !source_parent.isValid())
+        return false;
     QSortFilterProxyModelPrivate::Mapping *m = d->create_mapping(source_parent).value();
     if (column + count > m->source_columns.count())
         return false;
@@ -1696,6 +1750,8 @@ QSize QSortFilterProxyModel::span(const QModelIndex &index) const
 {
     Q_D(const QSortFilterProxyModel);
     QModelIndex source_index = d->proxy_to_source(index);
+    if (index.isValid() && !source_index.isValid())
+        return QSize();
     return d->model->span(source_index);
 }
 

@@ -23,6 +23,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QCopChannel>
+#include <QCloseEvent>
 #include <QPainter>
 #include <QKeyEvent>
 #include <QShowEvent>
@@ -109,6 +110,16 @@ void E1ServerInterface::paintEvent(QPaintEvent *)
 
     QPainter p(this);
     p.drawTiledPixmap(rect(), m_wallpaper);
+}
+
+void E1ServerInterface::keyReleaseEvent(QKeyEvent *e)
+{
+    e->accept();
+}
+
+void E1ServerInterface::closeEvent(QCloseEvent *e)
+{
+    e->ignore();
 }
 
 void E1ServerInterface::keyPressEvent(QKeyEvent *e)

@@ -70,6 +70,8 @@ public:
 
     void send( const QString& command );
 
+    void registerErrorPrefix( const QString& type );
+
 signals:
     void pduNotification( const QString& type, const QByteArray& pdu );
     void callNotification( const QString& type );

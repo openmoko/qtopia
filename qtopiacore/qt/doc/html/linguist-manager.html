@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/linguist-manual.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/linguist-manual.qdoc -->
 <head>
   <title>Qt 4.2: Qt Linguist Manual: Release Manager</title>
   <link rel="prev" href="linguist-manual.html" />
@@ -25,7 +25,8 @@
 <a name="qt-project-files"></a>
 <h2>Qt Project Files</h2>
 <p><a href="#lupdate">lupdate</a> and <a href="#lrelease">lrelease</a> depend on information in the application's <tt>.pro</tt> Qt project file. There must be an entry in the <tt>TRANSLATIONS</tt> section of the project file for each language that is additional to the native language. A typical entry looks like this:</p>
-<pre></pre>
+<pre> TRANSLATIONS = arrowpad_fr.ts \
+                arrowpad_nl.ts</pre>
 <p>Using a locale within the translation file name is useful for determining which language to load at runtime. This is explained in the <a href="linguist-programmers.html">Programmers</a> chapter.</p>
 <p>An example of a complete <tt>.pro</tt> file with four translation source files:</p>
 <pre> HEADERS         = main-dlg.h \
@@ -96,6 +97,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

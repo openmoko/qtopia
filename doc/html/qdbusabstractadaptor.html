@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/tools/qdbus/src/qdbusabstractadaptor.cpp -->
 <head>
   <title>Qt 4.2: QDBusAbstractAdaptor Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -38,7 +39,7 @@
 <a name="macros"></a>
 <h3>Macros</h3>
 <ul>
-<li><div class="fn"/><b><a href="qdbusabstractadaptor.html#Q_ASYNC">Q_ASYNC</a></b></li>
+<li><div class="fn"/><b><a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a></b></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -73,17 +74,17 @@
 <p>See also <a href="qdbusabstractadaptor.html#autoRelaySignals">autoRelaySignals</a>().</p>
 <hr />
 <h2>Macro Documentation</h2>
-<h3 class="fn"><a name="Q_ASYNC"></a>Q_ASYNC</h3>
-<p>The Q_ASYNC macro can be used to mark a method to be called and not wait for it to finish processing before returning from <a href="qdbusabstractinterface.html#call">QDBusInterface::call</a>(). The called method cannot return any output arguments and, if it does, any such arguments will be discarded.</p>
+<h3 class="fn"><a name="Q_NOREPLY"></a>Q_NOREPLY</h3>
+<p>The Q_NOREPLY macro can be used to mark a method to be called and not wait for it to finish processing before returning from <a href="qdbusabstractinterface.html#call">QDBusInterface::call</a>(). The called method cannot return any output arguments and, if it does, any such arguments will be discarded.</p>
 <p>You can use this macro in your own adaptors by placing it before your method's return value (which must be &quot;void&quot;) in the class declaration, as shown in the example:</p>
-<pre> Q_ASYNC void myMethod();</pre>
+<pre> Q_NOREPLY void myMethod();</pre>
 <p>Its presence in the method implementation (outside the class declaration) is optional.</p>
 <p>This function was introduced in Qt 4.2.</p>
-<p>See also <a href="usingadaptors.html">Using adaptors</a>.</p>
+<p>See also <a href="usingadaptors.html">Using QtDBus Adaptors</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -24,7 +24,7 @@
 
 #include <qbluetoothremotedevice.h>
 #include <qbluetoothnamespace.h>
-#include <qsdap.h>
+#include <qbluetoothsdpquery.h>
 #include <qcontent.h>
 
 class QBluetoothObexAgentPrivate;
@@ -52,7 +52,7 @@ signals:
     void done( bool error );
 
 private slots:
-    void searchComplete( const QSDAPSearchResult &result );
+    void searchComplete( const QBluetoothSdpQueryResult &result );
     void progress( qint64, qint64 );
 
 private:

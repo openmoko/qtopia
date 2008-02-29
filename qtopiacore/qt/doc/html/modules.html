@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/modules.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/modules.qdoc -->
 <head>
   <title>Qt 4.2: Qt's Modules</title>
   <link rel="next" href="qtcore.html" />
@@ -35,7 +35,7 @@
 </table></p>
 <p>The following extension modules are available in the <a href="commercialeditions.html">Qt Commercial Editions</a> on Windows:</p>
 <p><table width="80%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td>QAxContainer</td><td>Extension for accessing ActiveX controls</td></tr>
+<tr valign="top" class="odd"><td><a href="qaxcontainer.html">QAxContainer</a></td><td>Extension for accessing ActiveX controls</td></tr>
 <tr valign="top" class="even"><td><a href="qaxserver.html">QAxServer</a></td><td>Extension for writing ActiveX servers</td></tr>
 </table></p>
 <p>The following extension module is available in all <a href="editions.html">Qt Editions</a> on Unix platforms:</p>
@@ -44,6 +44,7 @@
 </table></p>
 <p>If you use <a href="qmake-manual.html#qmake">qmake</a> to build your projects, the <a href="qtcore.html">QtCore</a> and <a href="qtgui.html">QtGui</a> modules are included by default. To link only against <a href="qtcore.html">QtCore</a>, add the following line to your <tt>.pro</tt> file:</p>
 <pre> QT -= gui</pre>
+<p>On Windows, if you do not use <a href="qmake-manual.html#qmake">qmake</a> or the <a href="http://www.trolltech.com/products/qt/indepth/vs-integration">Visual Studio Integration</a> available to <a href="commercialeditions.html">commercial licensees</a>, you also need to link against the <tt>qtmain</tt> library.</p>
 <p>See also <a href="classes.html">Qt's Classes</a>.</p>
 <p>
 [Next: <a href="qtcore.html">QtCore Module</a>]
@@ -52,6 +53,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

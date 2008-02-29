@@ -50,7 +50,8 @@
 /*!
     \class QSerialIODevice
     \brief The QSerialIODevice class is the base for all serial devices.
-    \ingroup communication
+    \ingroup io
+    \ingroup telephony::serial
 
     The abstract QSerialIODevice class extends QIODevice with functionality
     that is specific to serial devices.  Subclasses implement specific kinds
@@ -490,7 +491,7 @@ void QPseudoTtyProcess::deviceReady()
 /*!
     \class QNullSerialIODevice
     \brief The QNullSerialIODevice class provides a null implementation of serial device functionality
-    \ingroup communication
+    \ingroup io
 
     The QNullSerialIODevice class provides a null implementation of
     serial device functionality.  All bytes written to the device

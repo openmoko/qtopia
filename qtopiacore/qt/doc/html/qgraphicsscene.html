@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/graphicsview/qgraphicsscene.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/graphicsview/qgraphicsscene.cpp -->
 <head>
   <title>Qt 4.2: QGraphicsScene Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -66,7 +66,7 @@
 <li><div class="fn"/>ItemIndexMethod <b><a href="qgraphicsscene.html#itemIndexMethod-prop">itemIndexMethod</a></b> () const</li>
 <li><div class="fn"/>QList&lt;QGraphicsItem *&gt; <b><a href="qgraphicsscene.html#items">items</a></b> () const</li>
 <li><div class="fn"/>QList&lt;QGraphicsItem *&gt; <b><a href="qgraphicsscene.html#items-2">items</a></b> ( const QPointF &amp; <i>pos</i> ) const</li>
-<li><div class="fn"/>QList&lt;QGraphicsItem *&gt; <b><a href="qgraphicsscene.html#items-3">items</a></b> ( const QRectF &amp; <i>rect</i>, Qt::ItemSelectionMode <i>mode</i> = Qt::IntersectsItemShape ) const</li>
+<li><div class="fn"/>QList&lt;QGraphicsItem *&gt; <b><a href="qgraphicsscene.html#items-3">items</a></b> ( const QRectF &amp; <i>rectangle</i>, Qt::ItemSelectionMode <i>mode</i> = Qt::IntersectsItemShape ) const</li>
 <li><div class="fn"/>QList&lt;QGraphicsItem *&gt; <b><a href="qgraphicsscene.html#items-4">items</a></b> ( const QPolygonF &amp; <i>polygon</i>, Qt::ItemSelectionMode <i>mode</i> = Qt::IntersectsItemShape ) const</li>
 <li><div class="fn"/>QList&lt;QGraphicsItem *&gt; <b><a href="qgraphicsscene.html#items-5">items</a></b> ( const QPainterPath &amp; <i>path</i>, Qt::ItemSelectionMode <i>mode</i> = Qt::IntersectsItemShape ) const</li>
 <li><div class="fn"/>QRectF <b><a href="qgraphicsscene.html#itemsBoundingRect">itemsBoundingRect</a></b> () const</li>
@@ -225,7 +225,7 @@
 <h3 class="fn"><a name="sceneRect-prop"></a>sceneRect : <a href="qrectf.html">QRectF</a></h3>
 <p>This property holds the scene rectangle; the bounding rectangle of the scene.</p>
 <p>The scene rectangle defines the extent of the scene. It is primarily used by <a href="qgraphicsview.html">QGraphicsView</a> to determine the view's default scrollable area, and by <a href="qgraphicsscene.html">QGraphicsScene</a> to manage item indexing.</p>
-<p>If unset, sceneRect() will return the largest bounding rect of all items on the scene since the scene was created (i.e., a rectangle that grows when items are added to or moved in the scene, but never shrinks).</p>
+<p>If unset, or if set to a null <a href="qrectf.html">QRectF</a>, sceneRect() will return the largest bounding rect of all items on the scene since the scene was created (i.e., a rectangle that grows when items are added to or moved in the scene, but never shrinks).</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>QRectF sceneRect () const</b></li>
@@ -306,20 +306,20 @@
 <p>This event handler, for event <i>contextMenuEvent</i>, can be reimplemented in a subclass to receive context menu events. The default implementation forwards the event to the item at the scene position provided by the event.</p>
 <p>See also <a href="qgraphicsitem.html#contextMenuEvent">QGraphicsItem::contextMenuEvent</a>().</p>
 <h3 class="fn"><a name="createItemGroup"></a><a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> * QGraphicsScene::createItemGroup ( const <a href="qlist.html">QList</a>&lt;<a href="qgraphicsitem.html">QGraphicsItem</a> *&gt; &amp; <i>items</i> )</h3>
-<p>Groups all items in <i>items</i> into a new <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a>, and returns a pointer to the group. The group is created with the common ancestor of <i>items</i> as its parent, and with position (0, 0). The items are all reparented to the group, and their positions and transformations are mapped to the group.</p>
+<p>Groups all items in <i>items</i> into a new <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a>, and returns a pointer to the group. The group is created with the common ancestor of <i>items</i> as its parent, and with position (0, 0). The items are all reparented to the group, and their positions and transformations are mapped to the group. If <i>items</i> is empty, this function will return an empty top-level <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a>.</p>
 <p><a href="qgraphicsscene.html">QGraphicsScene</a> has ownership of the group item; you do not need to delete it. To dismantle (ungroup) a group, call <a href="qgraphicsscene.html#destroyItemGroup">destroyItemGroup</a>().</p>
 <p>See also <a href="qgraphicsscene.html#destroyItemGroup">destroyItemGroup</a>() and <a href="qgraphicsitemgroup.html#addToGroup">QGraphicsItemGroup::addToGroup</a>().</p>
 <h3 class="fn"><a name="destroyItemGroup"></a>void QGraphicsScene::destroyItemGroup ( <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> * <i>group</i> )</h3>
 <p>Reparents all items in <i>group</i> to <i>group</i>'s parent item, then removes <i>group</i> from the scene, and finally deletes it. The items' positions and transformations are mapped from the group to the group's parent.</p>
 <p>See also <a href="qgraphicsscene.html#createItemGroup">createItemGroup</a>() and <a href="qgraphicsitemgroup.html#removeFromGroup">QGraphicsItemGroup::removeFromGroup</a>().</p>
-<h3 class="fn"><a name="dragEnterEvent"></a>void QGraphicsScene::dragEnterEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dragEnterEvent"></a>void QGraphicsScene::dragEnterEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive drag enter events for the scene.</p>
 <p>The default implementation accepts the event and prepares the scene to accept drag move events.</p>
 <p>See also <a href="qgraphicsitem.html#dragEnterEvent">QGraphicsItem::dragEnterEvent</a>(), <a href="qgraphicsscene.html#dragMoveEvent">dragMoveEvent</a>(), <a href="qgraphicsscene.html#dragLeaveEvent">dragLeaveEvent</a>(), and <a href="qgraphicsscene.html#dropEvent">dropEvent</a>().</p>
-<h3 class="fn"><a name="dragLeaveEvent"></a>void QGraphicsScene::dragLeaveEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dragLeaveEvent"></a>void QGraphicsScene::dragLeaveEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive drag leave events for the scene.</p>
 <p>See also <a href="qgraphicsitem.html#dragLeaveEvent">QGraphicsItem::dragLeaveEvent</a>(), <a href="qgraphicsscene.html#dragEnterEvent">dragEnterEvent</a>(), <a href="qgraphicsscene.html#dragMoveEvent">dragMoveEvent</a>(), and <a href="qgraphicsscene.html#dropEvent">dropEvent</a>().</p>
-<h3 class="fn"><a name="dragMoveEvent"></a>void QGraphicsScene::dragMoveEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dragMoveEvent"></a>void QGraphicsScene::dragMoveEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive drag move events for the scene.</p>
 <p>See also <a href="qgraphicsitem.html#dragMoveEvent">QGraphicsItem::dragMoveEvent</a>(), <a href="qgraphicsscene.html#dragEnterEvent">dragEnterEvent</a>(), <a href="qgraphicsscene.html#dragLeaveEvent">dragLeaveEvent</a>(), and <a href="qgraphicsscene.html#dropEvent">dropEvent</a>().</p>
 <h3 class="fn"><a name="drawBackground"></a>void QGraphicsScene::drawBackground ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
@@ -350,7 +350,7 @@
      }
  }</pre>
 <p>See also <a href="qgraphicsscene.html#drawBackground">drawBackground</a>() and <a href="qgraphicsscene.html#drawForeground">drawForeground</a>().</p>
-<h3 class="fn"><a name="dropEvent"></a>void QGraphicsScene::dropEvent ( QGraphicsSceneDragDropEvent * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dropEvent"></a>void QGraphicsScene::dropEvent ( <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive drop events for the scene.</p>
 <p>See also <a href="qgraphicsitem.html#dropEvent">QGraphicsItem::dropEvent</a>(), <a href="qgraphicsscene.html#dragEnterEvent">dragEnterEvent</a>(), <a href="qgraphicsscene.html#dragMoveEvent">dragMoveEvent</a>(), and <a href="qgraphicsscene.html#dragLeaveEvent">dragLeaveEvent</a>().</p>
 <h3 class="fn"><a name="event"></a>bool QGraphicsScene::event ( <a href="qevent.html">QEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
@@ -376,9 +376,10 @@
 <h3 class="fn"><a name="height"></a><a href="qtglobal.html#qreal-typedef">qreal</a> QGraphicsScene::height () const</h3>
 <p>This convenience function is equivalent to calling <tt>sceneRect().height()</tt>.</p>
 <p>See also <a href="qgraphicsscene.html#width">width</a>().</p>
-<h3 class="fn"><a name="helpEvent"></a>void QGraphicsScene::helpEvent ( QGraphicsSceneHelpEvent * <i>helpEvent</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This event handler, for event <i>helpEvent</i>, can be reimplemented in a subclass to receive help events. The default implementation uses the event to show tooltips for items.</p>
-<p>See also <a href="qgraphicsitem.html#toolTip">QGraphicsItem::toolTip</a>().</p>
+<h3 class="fn"><a name="helpEvent"></a>void QGraphicsScene::helpEvent ( <a href="qgraphicsscenehelpevent.html">QGraphicsSceneHelpEvent</a> * <i>helpEvent</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<p>This event handler, for event <i>helpEvent</i>, can be reimplemented in a subclass to receive help events. The events are of type <a href="qevent.html#Type-enum">QEvent::ToolTip</a>, which are created when a tooltip is requested.</p>
+<p>The default implementation shows the tooltip of the topmost item, i.e., the item with the highest z-value, at the mouse cursor position. If no item has a tooltip set, this function does nothing.</p>
+<p>See also <a href="qgraphicsitem.html#toolTip">QGraphicsItem::toolTip</a>() and <a href="qgraphicsscenehelpevent.html">QGraphicsSceneHelpEvent</a>.</p>
 <h3 class="fn"><a name="inputMethodEvent"></a>void QGraphicsScene::inputMethodEvent ( <a href="qinputmethodevent.html">QInputMethodEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This event handler, for event <i>event</i>, can be reimplemented in a subclass to receive input method events for the scene.</p>
 <p>The default implementation forwards the event to the <a href="qgraphicsscene.html#focusItem">focusItem</a>(). If no item currently has focus, this function does nothing.</p>
@@ -401,8 +402,11 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns all visible items at position <i>pos</i> in the scene. The items are listed in descending Z order (i.e., the first item in the list is the top-most item, and the last item is the bottom-most item).</p>
 <p>See also <a href="qgraphicsscene.html#itemAt">itemAt</a>().</p>
-<h3 class="fn"><a name="items-3"></a><a href="qlist.html">QList</a>&lt;<a href="qgraphicsitem.html">QGraphicsItem</a> *&gt; QGraphicsScene::items ( const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i>, <a href="qt.html#ItemSelectionMode-enum">Qt::ItemSelectionMode</a> <i>mode</i> = Qt::IntersectsItemShape ) const</h3>
+<h3 class="fn"><a name="items-3"></a><a href="qlist.html">QList</a>&lt;<a href="qgraphicsitem.html">QGraphicsItem</a> *&gt; QGraphicsScene::items ( const <a href="qrectf.html">QRectF</a> &amp; <i>rectangle</i>, <a href="qt.html#ItemSelectionMode-enum">Qt::ItemSelectionMode</a> <i>mode</i> = Qt::IntersectsItemShape ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns all visible items that, depending on <i>mode</i>, are either inside or intersect with the specified <i>rectangle</i>.</p>
+<p>The default value for <i>mode</i> is <a href="qt.html#ItemSelectionMode-enum">Qt::IntersectsItemShape</a>; all items whose exact shape intersects with or is contained by <i>rectangle</i> are returned.</p>
+<p>See also <a href="qgraphicsscene.html#itemAt">itemAt</a>().</p>
 <h3 class="fn"><a name="items-4"></a><a href="qlist.html">QList</a>&lt;<a href="qgraphicsitem.html">QGraphicsItem</a> *&gt; QGraphicsScene::items ( const <a href="qpolygonf.html">QPolygonF</a> &amp; <i>polygon</i>, <a href="qt.html#ItemSelectionMode-enum">Qt::ItemSelectionMode</a> <i>mode</i> = Qt::IntersectsItemShape ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns all visible items that, depending on <i>mode</i>, are either inside or intersect with the polygon <i>polygon</i>.</p>
@@ -482,7 +486,7 @@
 <p>See also <a href="qgraphicsscene.html#focusItem">focusItem</a>(), <a href="qgraphicsscene.html#hasFocus">hasFocus</a>(), and <a href="qgraphicsscene.html#setFocus">setFocus</a>().</p>
 <h3 class="fn"><a name="setSelectionArea"></a>void QGraphicsScene::setSelectionArea ( const <a href="qpainterpath.html">QPainterPath</a> &amp; <i>path</i> )</h3>
 <p>Sets the selection area to <i>path</i>. All items within this area will be marked as selected. You can get the list of all selected items by calling <a href="qgraphicsscene.html#selectedItems">selectedItems</a>().</p>
-<p>For an item to be selected, it must be marked as <i>selectable</i> (<a href="qgraphicsitem.html#GraphicsItemFlag-enum">QGraphicsItem::ItemIsSelectable</a>). Items are selectable by default.</p>
+<p>For an item to be selected, it must be marked as <i>selectable</i> (<a href="qgraphicsitem.html#GraphicsItemFlag-enum">QGraphicsItem::ItemIsSelectable</a>).</p>
 <p>See also <a href="qgraphicsscene.html#clearSelection">clearSelection</a>().</p>
 <h3 class="fn"><a name="update"></a>void QGraphicsScene::update ( const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> = QRectF() )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Schedules a redraw of the area <i>rect</i> on the scene.</p>
@@ -501,6 +505,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

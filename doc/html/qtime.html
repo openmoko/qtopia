@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qdatetime.cpp -->
 <head>
   <title>Qt 4.2: QTime Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -56,8 +57,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qtime.html#operator-lt-lt-37">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QTime &amp; <i>time</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qtime.html#operator-gt-gt-19">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QTime &amp; <i>time</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qtime.html#operator-lt-lt-38">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QTime &amp; <i>time</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qtime.html#operator-gt-gt-20">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QTime &amp; <i>time</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -217,7 +218,7 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the time as a string. Milliseconds are not included. The <i>f</i> parameter determines the format of the string.</p>
 <p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::TextDate</a>, the string format is HH:MM:SS; e.g. 1 second before midnight would be &quot;23:59:59&quot;.</p>
-<p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::ISODate</a>, the string format corresponds to the ISO 8601 extended specification for representations of dates, which is also HH:MM:SS.</p>
+<p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::ISODate</a>, the string format corresponds to the ISO 8601 extended specification for representations of dates, which is also HH:MM:SS. (However, unlike that ISO 8601 specifies, dates before 1582 are handled as Julian dates, not Gregorian dates. This might change in a future version of Qt.)</p>
 <p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::LocalDate</a> or <a href="qt.html#DateFormat-enum">Qt::SystemLocaleDate</a>, the string format depends on the locale settings of the system. Identical to calling <a href="qlocale.html#system">QLocale::system</a>().toString(time, <a href="qlocale.html#FormatType-enum">QLocale::ShortFormat</a>). <i><a href="qt.html#DateFormat-enum">Qt::LocalDate</a> has been deprecated, please use <a href="qt.html#DateFormat-enum">Qt::SystemLocaleDate</a> instead.</i></p>
 <p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::LocaleDate</a>, the string format depends on the default application locale. This is the locale set with <a href="qlocale.html#setDefault">QLocale::setDefault</a>(), or the system locale if no default locale has been set. Identical to calling QLocale().toString(time, <a href="qlocale.html#FormatType-enum">QLocale::ShortFormat</a>);</p>
 <p>If <i>f</i> is <a href="qt.html#DateFormat-enum">Qt::LocalDate</a>, the string format depends on the locale settings of the system.</p>
@@ -236,11 +237,11 @@
 <p>Returns true if this time is later than or equal to <i>t</i>; otherwise returns false.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-37"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QTime &amp; <i>time</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-38"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QTime &amp; <i>time</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes <i>time</i> to stream <i>out</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-19"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QTime &amp; <i>time</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-20"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QTime &amp; <i>time</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a time from stream <i>in</i> into the given <i>time</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -260,6 +261,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

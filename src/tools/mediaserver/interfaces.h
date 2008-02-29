@@ -22,7 +22,7 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
-#include <qtopiamedia/observer.h>
+#include "observer.h"
 
 #include <QtPlugin>
 

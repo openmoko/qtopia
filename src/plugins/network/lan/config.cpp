@@ -45,8 +45,6 @@
 #include <qsoftmenubar.h>
 #endif
 
-#include <sys/socket.h>
-#include <linux/wireless.h>
 
 class LanUI : public QDialog
 {

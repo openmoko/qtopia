@@ -67,7 +67,7 @@ public:
         InvalidArguments,
         NotAuthorized,
         OutOfMemory,
-        NoSuchAdapter,
+        NoSuchAdaptor,
         UnknownAddress,
         ConnectionAttemptFailed,
         NotConnected,
@@ -88,7 +88,8 @@ public:
     ~QBluetoothLocalDevice();
 
     bool isValid() const;
-    QBluetoothLocalDevice::Error lastError() const;
+    QBluetoothLocalDevice::Error error() const;
+    QString errorString() const;
 
     QString deviceName() const;
     QBluetoothAddress address() const;
@@ -126,6 +127,16 @@ public:
     bool setRemoteAlias(const QBluetoothAddress &addr, const QString &alias);
     bool removeRemoteAlias(const QBluetoothAddress &addr);
 
+    QBluetoothReply<QList<QBluetoothAddress> > knownDevices() const;
+    QBluetoothReply<QList<QBluetoothAddress> > knownDevices(const QDateTime &time) const;
+
+    bool setPeriodicDiscoveryEnabled(bool enabled);
+    QBluetoothReply<bool> isPeriodicDiscoveryEnabled() const;
+
+    QBluetoothReply<uchar> pinCodeLength(const QBluetoothAddress &addr) const;
+
+    bool disconnectRemoteDevice(const QBluetoothAddress &addr);
+
 public slots:
     bool discoverRemoteDevices();
     bool cancelDiscovery();
@@ -140,6 +151,7 @@ signals:
 
     void discoveryStarted();
     void remoteDeviceFound(const QBluetoothRemoteDevice &device);
+    void remoteDeviceDisappeared(const QBluetoothAddress &addr);
     void remoteDevicesFound(const QList<QBluetoothRemoteDevice> &devices);
     void discoveryCancelled();
     void discoveryCompleted();
@@ -151,7 +163,20 @@ signals:
     void remoteAliasChanged(const QBluetoothAddress &addr, const QString &alias);
     void remoteAliasRemoved(const QBluetoothAddress &addr);
 
+    void remoteNameUpdated(const QBluetoothAddress &addr, const QString &name);
+    void remoteNameFailed(const QBluetoothAddress &addr);
+    void remoteClassUpdated(const QBluetoothAddress &addr,
+                            QBluetooth::DeviceMajor major, quint8 minor,
+                            QBluetooth::ServiceClasses serviceClasses);
+
+    void discoverableTimeoutChanged(uint timeout);
+
+    void remoteDeviceDisconnectRequested(const QBluetoothAddress &addr);
+
 private:
+    virtual void connectNotify(const char *signal);
+    virtual void disconnectNotify(const char *signal);
+
     Q_DISABLE_COPY(QBluetoothLocalDevice)
     QBluetoothLocalDevice_Private *m_data;
 };

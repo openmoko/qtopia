@@ -23,16 +23,15 @@
 #define QTOPIA_TASKMODEL_H
 
 #include <QStyleOptionViewItem>
-#include <QAbstractListModel>
-#include <QAbstractItemDelegate>
 #include <QSharedDataPointer>
+#include <QPimModel>
 
 #include <qcategorymanager.h>
 #include <qtopia/pim/qtask.h>
 #include <qtopia/pim/qpimsource.h>
 
 class QTaskModelData;
-class QTOPIAPIM_EXPORT QTaskModel : public QAbstractItemModel
+class QTOPIAPIM_EXPORT QTaskModel : public QPimModel
 {
     Q_OBJECT
 public:
@@ -63,16 +62,6 @@ public:
     static QString fieldIdentifier(Field);
     static Field identifierField(const QString &);
 
-    const QList<QTaskContext*> &contexts() const;
-    QSet<QPimSource> visibleSources() const;
-    void setVisibleSources(const QSet<QPimSource> &);
-    QSet<QPimSource> availableSources() const;
-
-    QPimSource source(const QUniqueId &) const;
-    QTaskContext *context(const QUniqueId &) const;
-
-    bool sourceExists(const QPimSource &source, const QUniqueId &id) const;
-    int rowCount(const QModelIndex & = QModelIndex()) const;
     int columnCount(const QModelIndex & = QModelIndex()) const;
 
     // overridden so can change later and provide drag-n-drop (via vcard)
@@ -87,18 +76,6 @@ public:
     QMap<int, QVariant> itemData ( const QModelIndex & index ) const;
     bool setItemData(const QModelIndex &, const QMap<int,QVariant> &);
     QVariant headerData(int, Qt::Orientation orientation, int = Qt::DisplayRole ) const;
-
-    int count() const;
-    bool contains(const QModelIndex &) const;
-    bool contains(const QUniqueId &) const;
-    bool exists(const QUniqueId &) const;
-
-    QModelIndex index(const QUniqueId &) const;
-    QUniqueId id(const QModelIndex &) const;
-    QUniqueId id(int) const;
-    QModelIndex index(int r,int c = 0,const QModelIndex & = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &) const;
-    bool hasChildren(const QModelIndex & = QModelIndex()) const;
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
 
@@ -116,9 +93,11 @@ public:
 
     bool removeList(const QList<QUniqueId> &);
 
+    QUniqueId addRecord(const QByteArray &, const QPimSource &, const QString &format = QString());
+    bool updateRecord(const QUniqueId &id, const QByteArray &, const QString &format = QString());
+    QByteArray record(const QUniqueId &id, const QString &format = QString()) const;
 
-    void setCategoryFilter(const QCategoryFilter &categories);
-    QCategoryFilter categoryFilter() const;
+    bool removeRecord(const QUniqueId &id) { return removeTask(id); }
 
     // convienience.
     // does not affect other filter roles.
@@ -127,12 +106,6 @@ public:
 
     QModelIndexList match(const QModelIndex &start, int role, const QVariant &,
             int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const;
-
-    bool flush();
-    bool refresh();
-
-private slots:
-    void voidCache();
 
 private:
     void setSortField(Field);

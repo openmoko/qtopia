@@ -49,17 +49,29 @@ Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QContentId, QContentId);
 Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QContentIdList, QContentIdList);
 Q_IMPLEMENT_USER_METATYPE_ENUM(QContent::ChangeType);
 
-static QCache<QContentId, QContent> *contentCache = 0;
+typedef QCache<QContentId, QContent> QContentCache;
+Q_GLOBAL_STATIC_WITH_ARGS(QContentCache, contentCache, (ContentCacheSize));
 static QMutex contentCacheMutex(QMutex::Recursive);
 static QReadWriteLock databaseLock;
 
 /*!
-    \typedef QContentId
+    \relates QContent
+    \typedef QtopiaDatabaseId
 
-    A QContentId is a globally unique identifier for a QContent record.
+    A QtopiaDatabaseId is a globally unique identifier for a QContent backing store.
+    Synonym for quint32.
 */
 
 /*!
+    \relates QContent
+    \typedef QContentId
+
+    A QContentId is a globally unique identifier for a QContent record.
+    Synonym for QPair<QtopiaDatabaseId, quint64>.
+*/
+
+/*!
+    \relates QContent
     \typedef QContentIdList
 
     Synonym for QList<QContentId>.
@@ -81,7 +93,7 @@ static QReadWriteLock databaseLock;
   providing access to metadata about the content contained in a file
   or stream.
 
-  A server process calls \c install(...) and i\c uninstall(...) to update the
+  A server process calls \c install(...) and \c uninstall(...) to update the
   records of metadata in the backing store in response to hardware and
   software events such as:
   \list
@@ -170,9 +182,7 @@ QContent::QContent( QContentId id )
         return;
     }
     contentCacheMutex.lock();
-    if (!contentCache)
-        contentCache = new QCache<QContentId, QContent>(ContentCacheSize);
-    QContent *cached = contentCache->object(id);
+    QContent *cached = contentCache()->object(id);
 
     if (cached) {
         *this = *cached;
@@ -198,7 +208,7 @@ QContent::QContent( QContentId id )
     databaseLock.unlock();
 
     contentCacheMutex.lock();
-    contentCache->insert(id, new QContent(*this));
+    contentCache()->insert(id, new QContent(*this));
     contentCacheMutex.unlock();
     Q_ASSERT(d != NULL);
 }
@@ -253,91 +263,40 @@ void QContent::init( const QFileInfo &fi, bool store )
     }
     // note - this method is slow on Unix (see doco for QFileInfo)
     const QString filepath=fi.absoluteFilePath();
-
-    QContentId internalId = InvalidId;
-
     const bool isLink = fi.suffix() == QLatin1String("desktop") || filepath.endsWith(QLatin1String(".directory"));
     databaseLock.lockForRead();
     QHash<QString, QVariant> databaseLink = QContent::database()->linkByPath(filepath, isLink);
     databaseLock.unlock();
-    bool newerDesktop = false;
-    QContent *contentMatch = 0;
 
     if( !databaseLink.isEmpty() )
     {
-        contentMatch = new QContent();
-
-        contentMatch->create( databaseLink );
-
-        internalId = contentMatch->id();
-    }
-
-    if (contentMatch && isLink && (contentMatch->lastUpdated().isNull() || contentMatch->lastUpdated() < fi.lastModified())) {
-        newerDesktop = true;
-
-        qLog(DocAPI) << "Desktop out of date";
-    }
-    else if ( contentMatch ) {
-        newerDesktop = contentMatch->type() == "application/octet-stream" &&
-                QMimeType( contentMatch->file() ).id() != "application/octet-stream";
-    }
-
-    if ( internalId == InvalidId || newerDesktop)
-    {
-        qLog(DocAPI) << "Installing QContent for:" << filepath;
-
-        if( !installContent( filepath ) )
-            return;
-
-        Q_ASSERT(d != NULL);
-        if ( d != NULL && d->isValid() && store == true)
+        QContentId id(databaseLink[QLatin1String("database")].toUInt(), databaseLink[QLatin1String("cid")].toULongLong());
+        if(isCached(id))
+            *this = QContent(id);
+        else
         {
-            databaseLock.lockForWrite();
-            ChangeType change = QContent::Added;
-            d->cId = database()->postLink( d.data(), change );
+            create( databaseLink );
 
-            if( d->cId != InvalidId)
+            static const char *unknownMime =  "application/octet-stream";
+
+            if( ( lastUpdated().isNull() || lastUpdated() < fi.lastModified() ||
+                ( type() == unknownMime && QMimeType( file() ).id() != unknownMime ) ) && updateContent() )
             {
-                database()->removeCategoryMap(id());
-
-                foreach( QString cat, d->cCategories )
-                    database()->appendNewCategoryMap( cat, d->um == Application ? QLatin1String("Applications") : QLatin1String("Documents"), d->cId );
-
-#ifdef QTOPIA_CONTENT_INSTALLER
-                d->cPropertyList[QPair<QString,QString>(QString("Preloaded"),QString())] = QString("y");
-#endif
-
-                QMap<QPair<QString,QString>,QString>::const_iterator pit = d->cPropertyList.constBegin();
-                while (pit != d->cPropertyList.constEnd()) {
-                    QPair<QString, QString> realKey = pit.key();
-                    database()->writeProperty(id(), realKey.first, pit.value(), realKey.second);
-                    pit++;
-                }
-
-                if( !d->cMimeTypeIcons.isEmpty() )
-                    database()->writeProperty( d->cId, QLatin1String("MimeTypeIcons"), d->cMimeTypeIcons.join( QLatin1String(";") ), QLatin1String("Desktop Entry") );
-
-                databaseLock.unlock();
-                contentCacheMutex.lock();
-                if (contentCache)
-                    contentCache->insert(d->cId, new QContent(*this));
-                contentCacheMutex.unlock();
-                d->cContentState = ContentLinkPrivate::Committed;
-                updateSets(id(), change);
+                d->cContentState = ContentLinkPrivate::Uncommited;
             }
             else
-            {
-                d->cContentState = ContentLinkPrivate::Edited;
-                databaseLock.unlock();
-            }
+                d->cContentState = ContentLinkPrivate::Committed;
         }
     }
-    else if (contentMatch)
+    else if( installContent( filepath ) )
     {
-        *this = *contentMatch;
-
-        delete contentMatch;
+        d->cContentState = ContentLinkPrivate::Uncommited;
     }
+    else
+        return;
+
+    if( store )
+        commit();
 }
 
 /*!
@@ -352,11 +311,8 @@ bool QContent::installContent( const QString &filePath )
     Q_ASSERT(d != NULL);
     if (d == NULL)
         return false;
-    
-    QString path = !d->fileKnown() ? filePath : d->file();
 
-    if( linkFileKnown() )
-        return true;
+    QString path = !d->fileKnown() ? filePath : d->file();
 
     if( path.isEmpty() || !QFile::exists( path ) )
         return false;
@@ -368,7 +324,7 @@ bool QContent::installContent( const QString &filePath )
         d->drm = QContent::Protected;
     }
     else if( !QContentFactory::installContent( path, this ) && QFileInfo( path ).isDir() )
-    {   // If a neither a DRM or content plugin can identify a folder as a content item ignore it.
+    {   // If neither a DRM or content plugin can identify a folder as a content item ignore it.
         return false;
     }
 
@@ -386,11 +342,39 @@ bool QContent::installContent( const QString &filePath )
     if( d->um == QContent::UnknownUsage )
         setRole( QContent::Document );
 
+    d->cLastUpdated = QDateTime::currentDateTime();
     d->cContentState = ContentLinkPrivate::Edited;
 
     return true;
 }
 
+/*!
+    Updates the content meta-data when the associated file has changed.
+*/
+bool QContent::updateContent()
+{
+    bool changed = false;
+
+    d->cContentState = ContentLinkPrivate::New;
+
+    if( DrmContentPrivate::updateContent( this ) || d->drm != Protected && QContentFactory::updateContent( this ) )
+    {
+        return true;
+    }
+    else if( fileKnown() && type() == "application/octet-stream" )
+    {
+        QMimeType mime( file() );
+
+        if( mime.id() != "application/octet-stream" )
+        {
+            setType( mime.id() );
+
+            changed = true;
+        }
+    }
+
+    return changed;
+}
 
 /*!
   Create a content link by copying the \a other content object.
@@ -903,7 +887,7 @@ void QContent::setMimeTypes( const QStringList &mimeTypes )
     Q_ASSERT(d != NULL);
     if (d == NULL)
         return;
-    
+
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -921,14 +905,7 @@ QStringList QContent::categories() const
     if (d == NULL)
         return QStringList();
     
-    if (!(d->cExtraLoaded & ContentLinkPrivate::Categories)) {
-        QContent *that = const_cast<QContent*>(this);
-        databaseLock.lockForRead();
-        that->d->cCategories = that->database()->categoriesById(id());
-        databaseLock.unlock();
-        that->d->cExtraLoaded |= ContentLinkPrivate::Categories;
-    }
-    return d->cCategories;
+    return d->categories();
 }
 
 /*!
@@ -937,7 +914,7 @@ QStringList QContent::categories() const
 QContent &QContent::operator=( const QContent &other )
 {
     d = other.d;   // shallow QSharedData copy
-    Q_ASSERT(d != NULL);
+    Q_ASSERT(d.constData() != NULL);
     return (*this);
 }
 
@@ -948,7 +925,11 @@ QContent &QContent::operator=( const QContent &other )
 */
 bool QContent::operator==( const QContent &other ) const
 {
-    return (id() == other.id());
+    if(id() == QContent::InvalidId && other.id() == QContent::InvalidId) {
+        return *d == *other.d;
+    } else {
+        return (id() == other.id());
+    }
 }
 
 /*!
@@ -1259,7 +1240,7 @@ void QContent::setCategories( const QStringList &categoryList )
     Q_ASSERT(d != NULL);
     if (d == NULL)
         return;
-    
+
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -1288,14 +1269,32 @@ bool QContent::commit(ChangeType &change)
         return false;
 #endif
 
-    if( d->cContentState == ContentLinkPrivate::New )
-        init( QFileInfo( linkFileKnown() ? linkFile() : file() ), false );
-    else if(d->cNameChanged)
-        d->syncFileName();
+    switch( d->cContentState )
+    {
+    case ContentLinkPrivate::New:
+        if( !installContent( linkFileKnown() ? linkFile() : file() ) )
+            return false;
+        else
+            break;
+    case ContentLinkPrivate::Committed:
+        if( !lastUpdated().isNull() && lastUpdated() >= QFileInfo( linkFileKnown() ? linkFile() : file() ).lastModified() )
+            return true;
+    case ContentLinkPrivate::Edited:
+        {
+            if(d->cNameChanged)
+                d->syncFileName();
+
+            updateContent();
+        }
+        break;
+    case ContentLinkPrivate::Uncommited:
+        break;
+    }
 
     databaseLock.lockForWrite();
     d->cId = database()->postLink( d.data(), change );
-    if (id() != InvalidId) {
+    if( id() != InvalidId )
+    {
         invalidate(d->cId);
         if( d->cExtraLoaded & ContentLinkPrivate::Categories )
         {
@@ -1315,11 +1314,15 @@ bool QContent::commit(ChangeType &change)
         d->cContentState = ContentLinkPrivate::Committed;
         if(!d->batchLoading)
             updateSets(id(), change);
+
+        return true;
     }
     else
+    {
         databaseLock.unlock();
 
-    return id() != InvalidId;
+        return false;
+    }
 }
 
 /*!
@@ -1330,7 +1333,7 @@ void QContent::setFile( const QString& filename )
     Q_ASSERT(d != NULL);
     if (d == NULL)
         return;
-    
+
 #ifndef QTOPIA_CONTENT_INSTALLER
     if( d->contentState() == ContentLinkPrivate::New )
     {
@@ -1379,7 +1382,7 @@ void QContent::setLinkFile( const QString& filename )
     Q_ASSERT(d != NULL);
     if (d == NULL)
         return;
-    
+
 #ifndef QTOPIA_CONTENT_INSTALLER
     if( d->contentState() == ContentLinkPrivate::New )
     {
@@ -1414,7 +1417,11 @@ bool QContent::setMedia( const QString &media )
     if (d == NULL)
         return false;
     else
+    {
+        if( d->contentState() == ContentLinkPrivate::Committed )
+            d->cContentState = ContentLinkPrivate::Edited;
         return d->setMedia( media );
+    }
 }
 
 /*!
@@ -1442,11 +1449,8 @@ QIODevice *QContent::open(QIODevice::OpenMode mode)
     if (d == NULL)
         return NULL;
 
-    bool newFile = d->contentState() == ContentLinkPrivate::New && QFile( file() ).size() == 0;
-
     QIODevice *dev = d ? d->open(mode) : 0;
-    if (dev && !newFile && mode & QIODevice::WriteOnly || mode & QIODevice::Append
-        || mode & QIODevice::Truncate) {
+    if (dev && mode & (QIODevice::WriteOnly | QIODevice::Append | QIODevice::Truncate)) {
         commit();
     }
 
@@ -1478,7 +1482,7 @@ bool QContent::save(const QByteArray &data)
     Q_ASSERT(d != NULL);
     if (d == NULL)
         return false;
-    
+
     QIODevice *dev = open(QIODevice::WriteOnly);
     if (!dev)
         return false;
@@ -1492,8 +1496,10 @@ bool QContent::save(const QByteArray &data)
         return false;
     }
 
-    if( d->contentState() == ContentLinkPrivate::New )
-        commit();
+    if( d->contentState() != ContentLinkPrivate::New )
+        d->cContentState = ContentLinkPrivate::Edited;
+
+    commit();
 
     return true;
 }
@@ -1544,7 +1550,7 @@ bool QContent::copyTo(const QString &newPath)
     Q_ASSERT(d != NULL);
     if (d == NULL)
         return false;
-    
+
     bool ok;
     if(!isValid())
         return false;
@@ -1584,16 +1590,13 @@ bool QContent::moveTo(const QString &newPath)
 void QContent::invalidate(QContentId id)
 {
     contentCacheMutex.lock();
-    if (contentCache)
-        contentCache->remove(id);
+    contentCache()->remove(id);
     contentCacheMutex.unlock();
 }
 
 bool QContent::isCached(QContentId id)
 {
-    if (contentCache)
-        return contentCache->contains(id);
-    return false;
+    return contentCache()->contains(id);
 }
 
 void QContent::cache(const QContentIdList &idList)
@@ -1601,10 +1604,8 @@ void QContent::cache(const QContentIdList &idList)
     databaseLock.lockForRead();
     QContentIdList internalidList;
     QMutexLocker guard(&contentCacheMutex);
-    if (!contentCache)
-        contentCache = new QCache<QContentId, QContent>(ContentCacheSize);
     foreach(QContentId id, idList)
-        if(!contentCache->contains(id))
+        if(!contentCache()->contains(id))
             internalidList.append(id);
     QList< QHash<QString, QVariant> > results = QContent::database()->linksById(internalidList);
     databaseLock.unlock();
@@ -1613,7 +1614,7 @@ void QContent::cache(const QContentIdList &idList)
         foreach( result, results ) {
             QContent *c = new QContent();
             c->create( result );
-            contentCache->insert(c->id(), c);
+            contentCache()->insert(c->id(), c);
         }
     }
 }
@@ -1682,6 +1683,8 @@ void QContent::create(QHash<QString, QVariant> result)
         //ChangeType change = QContent::Updated;
         //d->cId = database()->postLink( d.data(), change );
     }
+    QMutexLocker guard(&contentCacheMutex);
+    contentCache()->insert(id, new QContent(*this));
 }
 
 /*!

@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1930,11 +1940,8 @@ static bool qt_isect_curve_horizontal(const QBezier &bezier, qreal y, qreal x1, 
 
         QBezier first_half, second_half;
         bezier.split(&first_half, &second_half);
-        qreal midpoint = x1 + (x2 - x1) / 2;
-        if (qt_isect_curve_horizontal(first_half, y, x1, midpoint)
-            || qt_isect_curve_horizontal(first_half, y, midpoint, x2)
-            || qt_isect_curve_horizontal(second_half, y, x1, midpoint)
-            || qt_isect_curve_horizontal(second_half, y, midpoint, x2))
+        if (qt_isect_curve_horizontal(first_half, y, x1, x2)
+            || qt_isect_curve_horizontal(second_half, y, x1, x2))
             return true;
     }
     return false;
@@ -1945,21 +1952,18 @@ static bool qt_isect_curve_vertical(const QBezier &bezier, qreal x, qreal y1, qr
     QRectF bounds = bezier.bounds();
 
     if (x >= bounds.left() && x < bounds.right()
-        && bounds.top() >= y1 && bounds.bottom() < y2) {
+        && bounds.bottom() >= y1 && bounds.top() < y2) {
         const qreal lower_bound = .01;
         if (bounds.width() < lower_bound && bounds.height() < lower_bound)
             return true;
 
         QBezier first_half, second_half;
         bezier.split(&first_half, &second_half);
-        qreal midpoint = y1 + (y2 - y1) / 2;
-        if (qt_isect_curve_horizontal(first_half, x, y1, midpoint)
-            || qt_isect_curve_horizontal(first_half, x, midpoint, y2)
-            || qt_isect_curve_horizontal(second_half, x, y1, midpoint)
-            || qt_isect_curve_horizontal(second_half, x, midpoint, y2))
+        if (qt_isect_curve_vertical(first_half, x, y1, y2)
+            || qt_isect_curve_vertical(second_half, x, y1, y2))
             return true;
     }
-    return false;
+     return false;
 }
 
 /*

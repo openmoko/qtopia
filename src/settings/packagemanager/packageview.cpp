@@ -49,19 +49,6 @@
 
 #include "packagemanagerservice.h"
 
-#include "ui_packagedetails.h"
-
-class PackageDetails : public QDialog, public Ui::PackageDetails
-{
-public:
-    PackageDetails(QWidget *parent, bool modal)
-        : QDialog(parent)
-    {
-        setupUi(this);
-        setModal(modal);
-    }
-};
-
 PackageView *PackageView::latestInstance;
 
 PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
@@ -114,7 +101,7 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
 #ifdef QTOPIA_PHONE
     QMenu* contextMenu = QSoftMenuBar::menuFor( this );
     contextMenu->addMenu( menuServers );
-    contextMenu->addMenu( menuTarget );
+    //contextMenu->addMenu( menuTarget );
 
     // under phone, the select key ("OK") activates installSelection()
     QSoftMenuBar::setLabel( view, Qt::Key_Select, QSoftMenuBar::Ok, QSoftMenuBar::EditFocus );
@@ -122,7 +109,7 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
     QMenuBar *mb = new QMenuBar( this );
     vb->setMenuBar( mb );
     mb->addMenu( menuServers );
-    mb->addMenu( menuTarget );
+    //mb->addMenu( menuTarget );
     QPushButton* pbShowDetails = new QPushButton( QIcon( ":icon/details" ),
             tr( "Details" ), this );
     connect( pbShowDetails, SIGNAL(clicked()),
@@ -176,8 +163,7 @@ void PackageView::init()
     view->resizeColumnToContents( 1 );
     view->header()->hide();
     QItemSelectionModel *sel = new QItemSelectionModel( model );
-    sel->select( model->index( 1, 0, QModelIndex() ),
-            QItemSelectionModel::SelectCurrent );
+    sel->setCurrentIndex( model->index( 1, 0, QModelIndex()), QItemSelectionModel::Select ); 
     view->setSelectionModel( sel );
     connect( sel, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             this, SLOT(updateText(const QModelIndex&, const QModelIndex&)) );
@@ -203,7 +189,15 @@ void PackageView::postDomainUpdate( const QString &dom )
 #ifndef QT_NO_SXE
     QModelIndex curIndex = view->currentIndex();
     QVariant packageName = model->data( curIndex, Qt::DisplayRole );
-    info->setHtml( DomainInfo::explain( dom, packageName.toString() ));
+
+    if( model->hasSensitiveDomains( dom ) )
+    {
+        info->setHtml( tr( "%1 utilizes protected resources" ).arg( packageName.toString() ) );
+    }
+    else
+    {
+        info->setHtml( DomainInfo::explain( dom, packageName.toString() ));
+    }
 #else
     Q_UNUSED( dom );
 #endif
@@ -332,28 +326,76 @@ void PackageView::showDetails( const QModelIndex &item )
     if( !item.isValid() || !item.parent().isValid() )
         return;
 
-    QString name = model->data( item, Qt::DisplayRole ).toString();
+    QString name = model->data( item, Qt::DisplayRole ).toString(); //package name
+    bool enabled = model->data( item, Qt::StatusTipRole ).toBool(); //whether package enabled
+
     PackageDetails *pd = new PackageDetails( this, true );
     QString op = model->getOperation( item );
     pd->installButton->setText( op );
+
+    QtopiaApplication::setMenuLike( pd, true );
+
+    if ( enabled )
+        pd->reenableButton->setVisible( false );
+    else
+        pd->reenableButton->setVisible( true );
+
     pd->setWindowTitle( name );
     QString details;
     if ( op == "Install" )
-        details = tr( "<font color=\"#66CC00\"><b>Installing package</b></font> %1 <b>Go ahead?</b>" )
+    {
 #ifndef QT_NO_SXE
-                .arg( DomainInfo::explain( model->data( item, Qt::UserRole ).toString(), name ));
+        if( model->hasSensitiveDomains( model->data( item, Qt::WhatsThisRole ).toString() ) )
+        {
+            details = tr( "The package <font color=\"#0000FF\">%1</font> <b>cannot be installed</b> as it utilizes protected resources" ).arg( name );
+
+            pd->installButton->setVisible( false );
+            pd->cancelButton->setText( tr( "OK" ) );
+        }
+        else
+        {
+#endif
+            details = tr( "<font color=\"#66CC00\"><b>Installing package</b></font> %1 <b>Go ahead?</b>" )
+#ifndef QT_NO_SXE
+                .arg( DomainInfo::explain( model->data( item, Qt::WhatsThisRole ).toString(), name ));
+
+            pd->installButton->setVisible( true );
+            pd->cancelButton->setText( tr( "Cancel" ) );
+        }
 #else
                 .arg( model->data( item, Qt::DisplayRole ).toString() );
 #endif
+    }
     else if ( op == "Uninstall" )
-        details = tr(
-                "<font color=\"#FF9900\"><b>Uninstalling package</b></font> %1 <b>Go ahead?</b>"
-                ).arg( model->data( item, Qt::UserRole ).toString() );
+    {
+#ifndef QT_NO_SXE
+        pd->installButton->setVisible( true );
+        pd->cancelButton->setText( tr( "Cancel" ) );
+#endif
+        if ( enabled )
+        {
+            details = tr( "<font color=\"#FF9900\"><b>Uninstalling package</b></font> %1 <b>Go ahead?</b>" )
+                      .arg( model->data( item, Qt::WhatsThisRole ).toString() );
+        } else
+        {
+            details = tr( "<font color=\"#FF9900\"><b>Uninstalling/Re-enabling package</b></font> %1" )
+                      .arg( model->data( item, Qt::WhatsThisRole ).toString() );
+
+        }
+    }
+
     pd->description->setHtml( details );
     qLog(Package) << "show details" << ( name.isNull() ? "no valid name" : name );
     pd->showMaximized();
-    if ( pd->exec() )
-        model->activateItem( item );
+    switch ( pd->exec() )
+    {
+        case ( QDialog::Accepted ):
+            model->activateItem( item );
+            break;
+        case ( PackageDetails::Reenable ):
+            model->reenableItem( item );
+            break;
+    }
 }
 
 void PackageView::installSelection()

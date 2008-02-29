@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Dependencies and Prerequisites</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Dependencies and Prerequisites</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -29,9 +28,6 @@
 <ul>
 <li>a suitable <a href="#supported-compilers">compiler</a> must be installed</li>
 <li>Linux kernel that provides shared memory, mmap, and sockets.</li>
-<li>If Qtopia is being built with <a href="sxe.html">Safe Execution Environment - (SXE)</a> support, then the kernel must be patched to have LIDS support.</li>
-<li>If Qtopia is being built with <a href="docsys-drmintegr.html">Digital Rights Management</a>(DRM) support, then version 2.3.1 of <tt>drmagent</tt> from BeepScience must be installed.<p><b>Note:</b> A commercial license from <a href="http://www.beepscience.com">BeepScience</a> is required to use the BeepScience <tt>drmagent</tt>.</p>
-</li>
 <li>If Qtopia is being built with Helix please refer to <a href="syscust-mediaplayer.html">Helix</a> for further information about using Helix with Qtopia.</li>
 <li>Linux with Framebuffer support.</li>
 <li>For dependancies related to playing sounds see <a href="#sounds-and-qtopia">Sounds and Qtopia</a></li>
@@ -45,11 +41,12 @@
 <h2>Supported Compilers</h2>
 <p>In general terms any version of GCC greater than or equal to 3.2 may be used to compile/cross-compile Qtopia. The following table provides additional information about the status of a given versions of GCC.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Property</th><th>Version(s)</th></tr></thead>
-<tr valign="top" class="odd"><td>Minimum</td><td>GCC 3.2</td></tr>
-<tr valign="top" class="even"><td>Recommended</td><td>GCC 3.2.1, GCC 3.3.3, GCC 3.3.5, GCC 3.4.3, GCC 4.1.1 (uses symbol visibility)</td></tr>
-<tr valign="top" class="odd"><td>Not recommended</td><td>GCC 3.3.1, GCC 4.0.2</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Property</th><th>Version(s)</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Minimum</td><td>GCC 3.2</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Recommended</td><td>GCC 3.2.1, GCC 3.3.3, GCC 3.3.5, GCC 3.4.3, GCC 4.1.1 (uses symbol visibility)</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Not recommended</td><td>GCC 3.3.1, GCC 4.0.2</td></tr>
 </table></p>
+<p>For further product-specific requirements please refer to the relevant product on the Trolltech website, for example: <a href="http://www.trolltech.com/products/qtopia/phone_edition/requirements">Phone Edition</a>.</p>
 <p>For further information about GCC see: <a href="http://www.gnu.org">http://www.gnu.org</a></p>
 <a name="sounds-and-qtopia"></a>
 <h2>Sounds and Qtopia</h2>
@@ -82,7 +79,7 @@
 <p>The <tt>libjpeg</tt> library can be downloaded from the <a href="http://www.ijg.org/">http://www.ijg.org/ </a> site.</p>
 <p>Alternately if you have a SuSE Linux distribution it is likely to be provided by the package <tt>libjpeg</tt>. The library should be in the standard location, for example, <tt>/usr/lib/libjpeg.so</tt>.</p>
 <p>To check that the <tt>libjpeg</tt> package is installed use your package management tool, for example:</p>
-<pre>    rpm -qa | grep libjpeg</pre>
+<pre>&nbsp;   rpm -qa | grep libjpeg</pre>
 <p>. If it is not there then install it (and any dependencies) from your distributor's CD or local mirror.</p>
 <p>Information about cross compiling <tt>libjpeg</tt> can be found at <a href="syscust-3rdparty.html#compiling-libjpeg62">Compiling libjpeg62</a>.</p>
 <a name="xorg-or-x11-usage-in-qtopia"></a>
@@ -104,6 +101,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

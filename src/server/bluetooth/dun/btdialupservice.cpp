@@ -29,6 +29,8 @@
 #include <qbluetoothrfcommserver.h>
 #include <qbluetoothrfcommserialport.h>
 #include <qbluetoothremotedevice.h>
+#include <qtopianamespace.h>
+
 #include <qcommdevicesession.h>
 #include <qtopiaservices.h>
 #include <qtopialog.h>
@@ -40,12 +42,10 @@ class BtDialupServiceProvider : public QBluetoothAbstractService
 public:
     BtDialupServiceProvider( BtDialupService* parent );
 
-    void start(int channel);
+    void start();
     void stop();
     void setSecurityOptions( QBluetooth::SecurityOptions options );
     void allowPendingConnection( bool isAllowed );
-
-    QString translatableDisplayName() const;
 
 private slots:
     void newConnection();
@@ -58,6 +58,7 @@ private:
 private:
     BtDialupService* m_parent;
     QBluetoothRfcommServer* server;
+    quint32 m_sdpRecordHandle;
     QBluetoothLocalDevice* localDev;
 
     QList<QBluetoothRfcommSerialPort*> pendingConnections;
@@ -69,7 +70,7 @@ private:
 };
 
 BtDialupServiceProvider::BtDialupServiceProvider( BtDialupService* parent )
-    : QBluetoothAbstractService( QLatin1String("DialupNetworking"), parent ),
+    : QBluetoothAbstractService( QLatin1String("DialupNetworking"), tr("Dial-up Networking Service"), parent ),
         localDev( 0 )
 {
     m_parent = parent;
@@ -77,18 +78,16 @@ BtDialupServiceProvider::BtDialupServiceProvider( BtDialupService* parent )
     connect( server, SIGNAL(newConnection()), this, SLOT(newConnection()) );
     modemEmulatorVS = new QValueSpaceItem( QLatin1String("/Communications/ModemEmulator/serialPorts"), this );
     connect( modemEmulatorVS, SIGNAL(contentsChanged()), this, SLOT(emulatorStateChanged()) );
-    initialize();
 
     m_session = 0;
 }
 
-void BtDialupServiceProvider::start(int ch)
+void BtDialupServiceProvider::start()
 {
     QBluetoothLocalDeviceManager manager;
     QBluetoothLocalDevice dev( manager.defaultDevice() );
     if ( !dev.isValid() ) {
-        emit started( QBluetooth::NoSuchAdapter,
-                tr("Cannot find local Bluetooth device") );
+        emit started( true, tr("Cannot find local Bluetooth device") );
         return;
     }
 
@@ -96,34 +95,38 @@ void BtDialupServiceProvider::start(int ch)
     if ( server->isListening() )
         server->close();
 
-    if ( !server->listen( dev.address(), ch) ) {
-        emit started(QBluetooth::NotRunning, tr("Cannot listen for incoming connections.") );
-        return;
-    }
-
-    if ( !sdpRegister( dev.address(), QBluetooth::DialupNetworkingProfile, ch ) )
-    {
-        server->close();
-        emit started(QBluetooth::SDPServerError,
+    // register the SDP service
+    m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/dun.xml");
+    if (m_sdpRecordHandle == 0) {
+        emit started(true,
                 tr("Error registering with SDP server") );
         return;
     }
-    emit started(QBluetooth::NoError, QLatin1String(""));
+
+    // For now, hard code in the channel, which has to be the same channel as
+    // the one in the XML file passed in the registerRecord() call above
+    int channel = 2;
+
+    if ( !server->listen( dev.address(), channel) ) {
+        unregisterRecord(m_sdpRecordHandle);
+        emit started(true, tr("Cannot listen for incoming connections.") );
+        return;
+    }
+
+    emit started(false, QLatin1String(""));
     qLog(Bluetooth) << QLatin1String("Dial-up Networking Service started");
 }
 
 void BtDialupServiceProvider::stop()
 {
-    if ( !sdpUnregister() ) {
-        emit stopped( QBluetooth::SDPServerError,
-                tr("Error unregistering from SDP server") );
-    }
-
     if ( server->isListening() )
         server->close();
     cleanActiveConnections();
 
-    emit stopped(QBluetooth::NoError, QString());
+    if ( !unregisterRecord(m_sdpRecordHandle) )
+        qLog(Bluetooth) << "BtDialupServiceProvider::stop() error unregistering SDP service";
+
+    emit stopped();
     qLog(Bluetooth) << QLatin1String("Dial-up Networking Service stopped");
 }
 
@@ -157,8 +160,8 @@ void BtDialupServiceProvider::newConnection()
     while ( server->hasPendingConnections() ) {
         QBluetoothRfcommSocket* s =
                 static_cast<QBluetoothRfcommSocket *>(server->nextPendingConnection());
-        QBluetoothRfcommSerialPort* port = new QBluetoothRfcommSerialPort( this );
-        QString dev = port->createTty( s );
+        QBluetoothRfcommSerialPort* port = new QBluetoothRfcommSerialPort( s, 0, this );
+        QString dev = port->device();
         if ( !dev.isEmpty() ) {
             pendingConnections.append ( port );
         } else {
@@ -172,19 +175,13 @@ void BtDialupServiceProvider::newConnection()
     QTimer::singleShot( 100, this, SLOT(initiateModemEmulator()) );
 }
 
-
-QString BtDialupServiceProvider::translatableDisplayName() const
-{
-    return tr("Dial-up Networking Service");
-}
-
 void BtDialupServiceProvider::initiateModemEmulator()
 {
     while ( !pendingConnections.isEmpty() ) {
         QBluetoothRfcommSerialPort* port = pendingConnections.takeFirst();
          // Send a message to the modem emulator to add the serial port.
         QtopiaServiceRequest req( "ModemEmulator", "addSerialPort(QString)" );
-        req << port->boundDevice();
+        req << port->device();
         req.send();
 
         runningConnections.append( port );
@@ -207,7 +204,7 @@ void BtDialupServiceProvider::emulatorStateChanged()
     QBluetoothRfcommSerialPort* port = 0;
     while ( iter.hasNext() ) {
         port = iter.next();
-        QString devName = port->boundDevice();
+        QString devName = port->device();
         if ( devName.isEmpty() || !serialPorts.contains(devName) ) {
             qLog(Bluetooth) << "Bluetooth Dialup session on" << devName  <<" terminated.";
             iter.remove();

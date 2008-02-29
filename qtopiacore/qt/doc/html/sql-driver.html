@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/sql-driver.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/sql-driver.qdoc -->
 <head>
   <title>Qt 4.2: SQL Database Drivers</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -32,6 +32,7 @@
 </ul>
 <li><a href="#qodbc-for-open-database-connectivity-odbc">QODBC for Open Database Connectivity (ODBC)</a></li>
 <ul><li><a href="#general-information">General Information</a></li>
+<li><a href="#stored-procedure-support">Stored Procedure Support</a></li>
 <li><a href="#unicode-support">Unicode Support</a></li>
 <li><a href="#how-to-build-the-plugin-on-unix-and-mac-os-x">How to Build the Plugin on Unix and Mac OS X</a></li>
 <li><a href="#how-to-build-the-plugin-on-windows">How to Build the Plugin on Windows</a></li>
@@ -129,6 +130,9 @@
 <pre>     cd $QTDIR/src/plugins/sqldrivers/mysql
      qmake -o Makefile &quot;INCLUDEPATH+=/usr/local/include&quot; &quot;LIBS+=-L/usr/local/lib -lmysqlclient_r&quot; mysql.pro
      make</pre>
+<p>After installing Qt, as described in the <a href="install-x11.html">Installing Qt/X11</a> document, you also need to install the plugin in the standard location:</p>
+<pre>     cd $QTDIR/src/plugins/sqldrivers/mysql
+     make install</pre>
 <a name="how-to-build-the-plugin-on-windows"></a>
 <h4>How to Build the Plugin on Windows</h4>
 <p>You need to get the MySQL installation files. Run <tt>SETUP.EXE</tt> and choose &quot;Custom Install&quot;. Install the &quot;Libs &amp; Include Files&quot; Module. Build the plugin as follows (here it is assumed that MySQL is installed in <tt>C:\MySQL</tt>):</p>
@@ -188,6 +192,14 @@
 <p>Be aware that when connecting to an ODBC datasource you must pass in the name of the ODBC datasource to the <a href="qsqldatabase.html#setDatabaseName">QSqlDatabase::setDatabaseName</a>() function rather than the actual database name.</p>
 <p>The QODBC Plugin needs an ODBC compliant driver manager version 2.0 or later to work. Some ODBC drivers claim to be version 2.0 compliant, but do not offer all the necessary functionality. The QODBC plugin therefore checks whether the data source can be used after a connection has been established and refuses to work if the check fails. If you don't like this behavior, you can remove the <tt>#define ODBC_CHECK_DRIVER</tt> line from the file <tt>qsql_odbc.cpp</tt>. Do this at your own risk!</p>
 <p>If you experience very slow access of the ODBC datasource, make sure that ODBC call tracing is turned off in the ODBC datasource manager.</p>
+<a name="stored-procedure-support"></a>
+<h4>Stored Procedure Support</h4>
+<p>With Microsoft SQL Server the result set returned by a stored procedure that uses the return statement, or returns multiple result sets, will be accessible only if you set the query's forward only mode to <i>forward</i> using <a href="qsqlquery.html#setForwardOnly">QSqlQuery::setForwardOnly</a>().</p>
+<pre> \\ STORED_PROC uses the return statement or returns multiple result sets
+ QSqlQuery query;
+ query.setForwardOnly(true);
+ query.exec(&quot;{call STORED_PROC}&quot;);</pre>
+<p><b>Note:</b> The value returned by the stored procedure's return statement is discarded. If the stored procedure returns multiple result sets only the first will be accessible.</p>
 <a name="unicode-support"></a>
 <h4>Unicode Support</h4>
 <p>The QODBC Plugin will use the Unicode API if UNICODE is defined. On Windows NT based systems, this is the default. Note that the ODBC driver and the DBMS must also support Unicode.</p>
@@ -226,6 +238,9 @@
 <pre>     cd $QTDIR/src/plugins/sqldrivers/psql
      qmake -o Makefile &quot;INCLUDEPATH+=/usr/include/pgsql&quot; &quot;LIBS+=-L/usr/lib -lpq&quot; psql.pro
      make</pre>
+<p>After installing Qt, as described in the <a href="install-x11.html">Installing Qt/X11</a> document, you also need to install the plugin in the standard location:</p>
+<pre>     cd $QTDIR/src/plugins/sqldrivers/psql
+     make install</pre>
 <a name="how-to-build-the-plugin-on-windows"></a>
 <h4>How to Build the Plugin on Windows</h4>
 <p>Install the PostgreSQL developer libraries. Assuming that PostgreSQL was installed in <tt>C:\psql</tt>, build the plugin as follows:</p>
@@ -264,6 +279,9 @@
 <pre>     cd $QTDIR/src/plugins/sqldrivers/db2
      qmake -o Makefile &quot;INCLUDEPATH+=$DB2DIR/include&quot; &quot;LIBS+=-L$DB2DIR/lib -ldb2&quot;
      make</pre>
+<p>After installing Qt, as described in the <a href="install-x11.html">Installing Qt/X11</a> document, you also need to install the plugin in the standard location:</p>
+<pre>     cd $QTDIR/src/plugins/sqldrivers/db2
+     make install</pre>
 <a name="how-to-build-the-plugin-on-windows"></a>
 <h4>How to Build the Plugin on Windows</h4>
 <p>The DB2 header and include files should already be installed in the right directories. You just have to build the plugin as follows:</p>
@@ -280,7 +298,7 @@
 <h4>General Information</h4>
 <p>The Qt <a href="3rdparty.html#sqlite">SQLite</a> plugin makes it possible to access <a href="3rdparty.html#sqlite">SQLite</a> databases. <a href="3rdparty.html#sqlite">SQLite</a> is an in-process database, which means that it is not necessary to have a database server. <a href="3rdparty.html#sqlite">SQLite</a> operates on a single file, which must be set as the database name when opening a connection. If the file does not exist, <a href="3rdparty.html#sqlite">SQLite</a> will try to create it. <a href="3rdparty.html#sqlite">SQLite</a> also supports in-memory databases, simply pass &quot;:memory:&quot; as the database name.</p>
 <p><a href="3rdparty.html#sqlite">SQLite</a> has some restrictions regarding multiple users and multiple transactions. If you try to read/write on a resource from different transactions, your application might freeze until one transaction commits or rolls back. The Qt <a href="3rdparty.html#sqlite">SQLite</a> driver will retry to write to a locked resource until it runs into a timeout (see <tt>QSQLITE_BUSY_TIMEOUT</tt> at <a href="qsqldatabase.html#setConnectOptions">QSqlDatabase::setConnectOptions</a>()).</p>
-<p><a href="3rdparty.html#sqlite">SQLite</a> has no support for types, every value is treated as character data.</p>
+<p><a href="3rdparty.html#sqlite">SQLite</a> doesn't have a type-system like other databases, so Qt will interpret fields as strings.</p>
 <p>You can find information about <a href="3rdparty.html#sqlite">SQLite</a> on <a href="http://www.sqlite.org">http://www.sqlite.org</a>.</p>
 <a name="how-to-build-the-plugin"></a>
 <h4>How to Build the Plugin</h4>
@@ -289,6 +307,9 @@
 <pre>     cd $QTDIR/src/plugins/sqldrivers/sqlite
      qmake -o Makefile &quot;INCLUDEPATH+=$SQLITE/include&quot; &quot;LIBS+=-L$SQLITE/lib -lsqlite&quot;
      make</pre>
+<p>After installing Qt, as described in the <a href="install-x11.html">Installing Qt/X11</a> document, you also need to install the plugin in the standard location:</p>
+<pre>     cd $QTDIR/src/plugins/sqldrivers/sqlite
+     make install</pre>
 <p>On Windows:</p>
 <pre>     cd %QTDIR%\src\plugins\sqldrivers\sqlite
      qmake -o Makefile &quot;INCLUDEPATH+=C:\SQLITE\INCLUDE&quot; &quot;LIBS+=C:\SQLITE\LIB\SQLITE3.LIB&quot; sqlite.pro
@@ -392,6 +413,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

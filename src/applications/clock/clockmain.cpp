@@ -30,12 +30,8 @@
 #include <qsettings.h>
 #include <qtimestring.h>
 #include <QtopiaServiceRequest>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
-
 #include <qtabwidget.h>
-#include <qstackedwidget.h>
 #include <qmessagebox.h>
 #include <qmenu.h>
 
@@ -52,7 +48,6 @@ ClockMain::ClockMain(QWidget *parent, Qt::WFlags f)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-#ifndef QTOPIA_PHONE
     tabWidget = new QTabWidget(this);
     layout->addWidget(tabWidget);
     clock = new Clock(tabWidget);
@@ -65,35 +60,10 @@ ClockMain::ClockMain(QWidget *parent, Qt::WFlags f)
     stopwatchIndex = tabWidget->addTab(stopWatch, tr("Stop Watch"));
     alarmIndex = tabWidget->addTab(alarm, tr("Alarm"));
 
-    connect(tabWidget, SIGNAL(currentChanged(int)),
-            this, SLOT(pageRaised(int)));
-#else
-    stack = new QStackedWidget(this);
-    layout->addWidget(stack);
-    clock = new Clock(stack);
-    stopWatch = new StopWatch(stack);
-    alarm = new Alarm(stack);
-
-    // Add each widget to the stacked widget, and save the index for each so that
-    // we can refer to it later.
-    clockIndex = stack->addWidget(clock);
-    stopwatchIndex = stack->addWidget(stopWatch);
-    alarmIndex = stack->addWidget(alarm);
-    connect(stack, SIGNAL(currentChanged(int)), this, SLOT(pageRaised(int)));
-
     contextMenu = QSoftMenuBar::menuFor(this);
-    connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(raisePage(QAction*)));
-    actionClock = contextMenu->addAction(tr("Clock"));
-    actionStopWatch = contextMenu->addAction(tr("Stop Watch"));
-    actionAlarm = contextMenu->addAction(QIcon(":icon/alarmbell"), tr("Alarm"));
-    stack->setCurrentIndex(clockIndex);
-    actionClock->setEnabled(false);
-
     QAction *action = contextMenu->addAction(tr("Set Time..."));
     connect(action, SIGNAL(triggered()), this, SLOT(setTime()));
 
-    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
-#endif
 
     connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
             this, SLOT(appMessage(const QString&,const QByteArray&)) );
@@ -110,20 +80,12 @@ ClockMain::~ClockMain()
 
 void ClockMain::showClock()
 {
-#ifndef QTOPIA_PHONE
     tabWidget->setCurrentIndex(clockIndex);
-#else
-    stack->setCurrentIndex(clockIndex);
-#endif
 }
 
 void ClockMain::editAlarm()
 {
-#ifndef QTOPIA_PHONE
     tabWidget->setCurrentIndex(alarmIndex);
-#else
-    stack->setCurrentIndex(alarmIndex);
-#endif
 }
 
 void ClockMain::setDailyEnabled( bool enable )
@@ -140,37 +102,6 @@ void ClockMain::appMessage( const QString &msg, const QByteArray &data )
         ds >> when >> t;
         alarm->triggerAlarm(when, t);
     }
-}
-
-void ClockMain::raisePage(QAction *a)
-{
-#ifdef QTOPIA_PHONE
-    int page = -1;
-    if (a == actionStopWatch)
-        page = stopwatchIndex;
-    else if (a == actionAlarm)
-        page = alarmIndex;
-    else if (a == actionClock)
-        page = clockIndex;
-    if (page >= 0 && stack->currentWidget() != stack->widget(page))
-        stack->setCurrentIndex(page);
-#else
-    Q_UNUSED(a);
-#endif
-}
-
-void ClockMain::pageRaised(int idx)
-{
-    if (idx == clockIndex) {
-        setObjectName("clock"); // No tr
-    } else if (idx == alarmIndex) {
-        setObjectName("alarms"); // No tr
-    } else if (idx == stopwatchIndex) {
-        setObjectName("stopwatch"); // No tr
-    }
-    actionClock->setEnabled(idx != clockIndex);
-    actionStopWatch->setEnabled(idx != stopwatchIndex);
-    actionAlarm->setEnabled(idx != alarmIndex);
 }
 
 void ClockMain::closeEvent( QCloseEvent *e )

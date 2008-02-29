@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,7 +45,6 @@
 #include <qstackedwidget.h>
 #include <qpushbutton.h>
 #include <qtoolbar.h>
-#include <qdockwidget.h>
 #include <qlabel.h>
 
 #include <qt_windows.h>
@@ -55,7 +64,13 @@
 #endif
 
 #include <uxtheme.h>
+
+#if WINVER >= 0x0600
+#include <vssym32.h>
+#else
 #include <tmschema.h>
+#endif
+
 #include <limits.h>
 
 // Undefined for some compile environments
@@ -1520,8 +1535,8 @@ void QWindowsXPStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt
 
     case PE_PanelButtonTool:
         if (widget && widget->inherits("QDockWidgetTitleButton")) {
-            if (const QDockWidget *dw = qobject_cast<const QDockWidget *>(widget->parent()))
-                if (dw->isFloating())
+            if (const QWidget *dw = widget->parentWidget())
+                if (dw->isWindow())
                     return;
         }
         name = "TOOLBAR";
@@ -2357,8 +2372,7 @@ case CE_DockWidgetTitle:
             int buttonMargin = 4;
             int mw = pixelMetric(QStyle::PM_DockWidgetTitleMargin, dwOpt, widget);
             int fw = pixelMetric(PM_DockWidgetFrameWidth, dwOpt, widget);
-            const QDockWidget *dw = qobject_cast<const QDockWidget *>(widget);
-            bool isFloating = dw != 0 && dw->isFloating();
+            bool isFloating = widget && widget->isWindow();
             bool isActive = dwOpt->state & State_Active;
 
             QRect r = option->rect.adjusted(0, 2, -1, -3);
@@ -3682,14 +3696,12 @@ QPixmap QWindowsXPStyle::standardPixmap(StandardPixmap standardPixmap, const QSt
     case SP_TitleBarCloseButton:
         if (const QStyleOptionDockWidget *dwOpt = qstyleoption_cast<const QStyleOptionDockWidget *>(option))
         {
-            if (const QDockWidget *dw = qobject_cast<const QDockWidget *>(widget)) {
-                if (dw->isFloating()) {
-                    XPThemeData theme(widget, 0, "WINDOW", WP_SMALLCLOSEBUTTON, CBS_NORMAL);
-                    if (theme.isValid()) {
-                        SIZE sz;
-                        pGetThemePartSize(theme.handle(), 0, theme.partId, theme.stateId, 0, TS_TRUE, &sz);
-                        return QStyle::standardIcon(standardPixmap, option, widget).pixmap(QSize(sz.cx, sz.cy));
-                    }
+            if (widget && widget->isWindow()) {
+                XPThemeData theme(widget, 0, "WINDOW", WP_SMALLCLOSEBUTTON, CBS_NORMAL);
+                if (theme.isValid()) {
+                    SIZE sz;
+                    pGetThemePartSize(theme.handle(), 0, theme.partId, theme.stateId, 0, TS_TRUE, &sz);
+                    return QStyle::standardIcon(standardPixmap, option, widget).pixmap(QSize(sz.cx, sz.cy));
                 }
             }
         }
@@ -3741,10 +3753,8 @@ QIcon QWindowsXPStyle::standardIconImplementation(StandardPixmap standardIcon,
                     d->dockFloat.addPixmap(pm, QIcon::Disabled, QIcon::Off);  // Disabled
                 }
             }
-            if (widget)
-                if (const QDockWidget *dw = qobject_cast<const QDockWidget *>(widget))
-                    if (dw->isFloating())
-                        return d->dockFloat;
+            if (widget && widget->isWindow())
+                return d->dockFloat;
 
         }
         break;
@@ -3778,10 +3788,8 @@ QIcon QWindowsXPStyle::standardIconImplementation(StandardPixmap standardIcon,
                     d->dockClose.addPixmap(pm, QIcon::Disabled, QIcon::Off);  // Disabled
                 }
             }
-            if (widget)
-                if (const QDockWidget *dw = qobject_cast<const QDockWidget *>(widget))
-                    if (dw->isFloating())
-                        return d->dockClose;
+            if (widget && widget->isWindow())
+                return d->dockClose;
         }
         break;
         case SP_TitleBarNormalButton:
@@ -3814,10 +3822,8 @@ QIcon QWindowsXPStyle::standardIconImplementation(StandardPixmap standardIcon,
                     d->dockFloat.addPixmap(pm, QIcon::Disabled, QIcon::Off);  // Disabled
                 }
             }
-            if (widget)
-                if (const QDockWidget *dw = qobject_cast<const QDockWidget *>(widget))
-                    if (dw->isFloating())
-                        return d->dockFloat;
+            if (widget && widget->isWindow())
+                return d->dockFloat;
 
         }
         break;

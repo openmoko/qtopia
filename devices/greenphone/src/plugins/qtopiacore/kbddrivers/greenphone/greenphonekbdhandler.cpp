@@ -24,6 +24,7 @@
 #ifdef QT_QWS_GREENPHONE
 #include <QScreen>
 #include <QSocketNotifier>
+//#include <QTimer>
 
 #include "qscreen_qws.h"
 #include "qwindowsystem_qws.h"
@@ -53,13 +54,18 @@ static int vtQws = 0;
 GreenphoneKbdHandler::GreenphoneKbdHandler()
 {
     qLog(Input) << "Loaded Greenphone keypad plugin";
+
     setObjectName( "Greenphone Keypad Handler" );
-    kbdFD = ::open("/dev/tty0", O_RDONLY|O_NDELAY, 0);
-    if (kbdFD >= 0) {
+
+    kbdFD = ::open("/dev/tty0", O_RDONLY | O_NDELAY, 0);
+    if (kbdFD >= 0)
+    {
         qLog(Input) << "Opened tty0 as keypad input";
-        m_notify = new QSocketNotifier( kbdFD, QSocketNotifier::Read, this );
-        connect( m_notify, SIGNAL(activated(int)), this, SLOT(readKbdData()));
-    } else {
+        m_notify = new QSocketNotifier(kbdFD, QSocketNotifier::Read, this);
+        connect(m_notify, SIGNAL(activated(int)), this, SLOT(readKbdData()));
+    }
+    else
+    {
         qWarning("Cannot open tty0 for keypad (%s)", strerror(errno));
         return;
     }
@@ -96,15 +102,21 @@ GreenphoneKbdHandler::GreenphoneKbdHandler()
     struct vt_stat vtStat;
     ioctl(kbdFD, VT_GETSTATE, &vtStat);
     vtQws = vtStat.v_active;
+
+#if 0
+    m_timer = new QTimer(this);
+    m_timer->setSingleShot(true);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(repeat()));
+#endif
 }
 
 GreenphoneKbdHandler::~GreenphoneKbdHandler()
 {
-    if (kbdFD >= 0) {
+    if (kbdFD >= 0)
+    {
         ioctl(kbdFD, KDSKBMODE, K_XLATE);
         tcsetattr(kbdFD, TCSANOW, &origTermData);
         ::close(kbdFD);
-        kbdFD = -1;
     }
 }
 
@@ -130,131 +142,105 @@ void GreenphoneKbdHandler::handleTtySwitch(int sig)
 
 void GreenphoneKbdHandler::readKbdData()
 {
-    unsigned char  buf[81];
-    unsigned short key_code;
-    unsigned short Phkey;
-    unsigned short unicode;
-    unsigned int   key_code2;
-    int            modifiers;
+    unsigned char           buf[80];
+    unsigned short          driverKeyCode;
+    unsigned short          unicode;
+    unsigned int            qtKeyCode;
+    bool                    isPressed;
+    Qt::KeyboardModifiers   modifiers = Qt::NoModifier;
 
     int n = ::read(kbdFD, buf, 80);
 
-    for ( int loop = 0; loop < n; loop++ ) {
-        key_code = (unsigned short)buf[loop];
-        key_code2 = 0;
-        unicode = 0xffff;
-        modifiers = 0;
-        qLog(Input) << "keypressed: code=" << key_code << " (" << (((key_code & 0x80)==0) ? "Down":"Up") << ")";
-        qLog(Performance) << "keypressed: code=" << key_code << " (" << (((key_code & 0x80)==0) ? "Down":"Up") << ")"
+    for (int loop = 0; loop < n; loop++)
+    {
+        driverKeyCode   = (unsigned short)buf[loop];
+        qtKeyCode       = 0;
+        unicode         = 0xffff;
+        isPressed       = (driverKeyCode & 0x80) == 0;
+
+        qLog(Input) << "keypressed: code=" << driverKeyCode << " (" << (isPressed ? "Down" : "Up") << ")";
+        qLog(Performance) << "keypressed: code=" << driverKeyCode << " (" << (isPressed ? "Down" : "Up") << ")"
                           << " : " << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
-        Phkey = key_code & 0x7F;
 
-        switch(Phkey)
+        switch (driverKeyCode & 0x7f)
         {
-            case 0x2e: key_code2 = Qt::Key_0; unicode  = 0x30; break;
-            case 0x02: key_code2 = Qt::Key_1; unicode  = 0x31; break;
-            case 0x03: key_code2 = Qt::Key_2; unicode  = 0x32; break;
-            case 0x04: key_code2 = Qt::Key_3; unicode  = 0x33; break;
-            case 0x05: key_code2 = Qt::Key_4; unicode  = 0x34; break;
-            case 0x06: key_code2 = Qt::Key_5; unicode  = 0x35; break;
-            case 0x08: key_code2 = Qt::Key_6; unicode  = 0x36; break;
-            case 0x09: key_code2 = Qt::Key_7; unicode  = 0x37; break;
-            case 0x0a: key_code2 = Qt::Key_8; unicode  = 0x38; break;
-            case 0x0b: key_code2 = Qt::Key_9; unicode  = 0x39; break;
+            // Keypad
+            case 0x2e: qtKeyCode = Qt::Key_0; unicode  = 0x30; break;
+            case 0x02: qtKeyCode = Qt::Key_1; unicode  = 0x31; break;
+            case 0x03: qtKeyCode = Qt::Key_2; unicode  = 0x32; break;
+            case 0x04: qtKeyCode = Qt::Key_3; unicode  = 0x33; break;
+            case 0x05: qtKeyCode = Qt::Key_4; unicode  = 0x34; break;
+            case 0x06: qtKeyCode = Qt::Key_5; unicode  = 0x35; break;
+            case 0x08: qtKeyCode = Qt::Key_6; unicode  = 0x36; break;
+            case 0x09: qtKeyCode = Qt::Key_7; unicode  = 0x37; break;
+            case 0x0a: qtKeyCode = Qt::Key_8; unicode  = 0x38; break;
+            case 0x0b: qtKeyCode = Qt::Key_9; unicode  = 0x39; break;
 
-            case 0x1e:
-                       key_code2 = Qt::Key_Asterisk;
+            case 0x1e: qtKeyCode = Qt::Key_Asterisk;
                        unicode  = 0x2A;
                        break;
-            case 0x20:
-                       key_code2 = Qt::Key_NumberSign;
+            case 0x20: qtKeyCode = Qt::Key_NumberSign;
                        unicode  = 0x23;
                        break;
 
-            case 0x32:
-                       key_code2 = Qt::Key_Call;
-                       unicode = 0xffff;
-                       break;
-            case 0x16:
-                       key_code2 = Qt::Key_Hangup;
-                       unicode = 0xffff;
-                       break;
-
-            case 0x19:
-                       key_code2 = Qt::Key_Context1;
-                       unicode = 0xffff;
-                       break;
-            case 0x26:
-                       key_code2 = Qt::Key_Back;
-                       unicode = 0xffff;
-                       break;
-
-            case 0x12:
-                       key_code2 = Qt::Key_Up;
-                       unicode = 0xffff;
-                       break;
-            case 0x24:
-                       key_code2 = Qt::Key_Down;
-                       unicode = 0xffff;
-                       break;
-            case 0x21:
-                       key_code2 = Qt::Key_Left;
-                       unicode = 0xffff;
-                       break;
-            case 0x17:
-                       key_code2 = Qt::Key_Right;
-                       unicode = 0xffff;
-                       break;
-
-            case 0x22:
-                       key_code2 = Qt::Key_Select;
-                       unicode = 0xffff;
-                       break;
+            // Navigation+
+            case 0x32: qtKeyCode = Qt::Key_Call; break;
+            case 0x16: qtKeyCode = Qt::Key_Hangup; break;
+            case 0x19: qtKeyCode = Qt::Key_Context1; break;
+            case 0x26: qtKeyCode = Qt::Key_Back; break;
+            case 0x12: qtKeyCode = Qt::Key_Up; break;
+            case 0x24: qtKeyCode = Qt::Key_Down; break;
+            case 0x21: qtKeyCode = Qt::Key_Left; break;
+            case 0x17: qtKeyCode = Qt::Key_Right; break;
+            case 0x22: qtKeyCode = Qt::Key_Select; break;
 
             // Keys on left hand side of device
-            case 0x07: key_code2 = Qt::Key_VolumeUp;
-                       break;
-            case 0x14: key_code2 = Qt::Key_VolumeDown;
-                       break;
+            case 0x07: qtKeyCode = Qt::Key_VolumeUp; break;
+            case 0x14: qtKeyCode = Qt::Key_VolumeDown; break;
 
             // Keys on right hand side of device
-            // Key +
-            case 0x31:
-                       key_code2 = Qt::Key_F7;
-                       unicode = 0xffff;
-                       break;
-            // Key -
-            case 0x30: key_code2 = Qt::Key_F8;
-                       unicode = 0xffff;
-                       break;
+            case 0x31: qtKeyCode = Qt::Key_F7; break;   // Key +
+            case 0x30: qtKeyCode = Qt::Key_F8; break;   // Key -
+
             // Camera
-            case 0x23: key_code2 = Qt::Key_F4;
-                       unicode = 0xffff;
-                       break;
+            case 0x23: qtKeyCode = Qt::Key_F4; break;
 
             // Lock key on top of device
-            case 0x36:
-                       key_code2 = Qt::Key_F29;
-                       unicode = 0xffff;
-                       break;
+            case 0x36: qtKeyCode = Qt::Key_F29; break;
 
             // Key on headphones
-            case 0x33:
-                       key_code2 = Qt::Key_F28;
-                       unicode = 0xffff;
-                       break;
+            case 0x33: qtKeyCode = Qt::Key_F28; break;
         }
 
-        qLog(Input) << "processKeyEvent(): key=" << key_code2 << ", unicode=" << unicode;
-        processKeyEvent(unicode, key_code2, (Qt::KeyboardModifiers)modifiers, !(key_code & 0x80), false);
-        if((key_code & 0x80) == 0) {
-            // Down
-            beginAutoRepeat(unicode, key_code2, (Qt::KeyboardModifiers)modifiers);
-        } else {
-            // Released
+        qLog(Input) << "processKeyEvent(): key=" << qtKeyCode << ", unicode=" << unicode;
+
+        processKeyEvent(unicode, qtKeyCode, modifiers, isPressed, false);
+
+        if (isPressed)
+            beginAutoRepeat(unicode, qtKeyCode, modifiers);
+        else
             endAutoRepeat();
+
+#if 0
+        if (isPressed)
+        {
+            m_repeatKeyCode = qtKeyCode;
+            m_unicode = unicode;
+            m_timer->start(400);
         }
+        else
+            m_timer->stop();
+#endif
     }
 }
+
+#if 0
+void GreenphoneKbdHandler::repeat()
+{
+//    processKeyEvent(m_unicode, m_repeatKeyCode, Qt::NoModifier, false, true);
+    processKeyEvent(m_unicode, m_repeatKeyCode, Qt::NoModifier, true, true);
+    m_timer->start(80);
+}
+#endif
 
 #endif // QT_QWS_GREENPHONE

@@ -20,138 +20,174 @@
 ****************************************************************************/
 
 #include "bluetoothservicemanager.h"
-#include "qtopiaserverapplication.h"
 
-#include <QtopiaIpcEnvelope>
-#include <QtopiaIpcSendEnvelope>
+#include "qtopiaserverapplication.h"
+#include <QBluetoothServiceController>
 #include <QValueSpaceObject>
 #include <QValueSpaceItem>
-#include <QTranslatableSettings>
-#include <QTimer>
-#include <QSet>
-#include <QSetIterator>
-#include <QList>
-
-#include <qcommservicemanager.h>
-#include <qbluetoothservicecontroller.h>
-#include <qbluetoothlocaldevicemanager.h>
-#include <qbluetoothlocaldevice.h>
-#include <qsdp.h>
-#include <qsdap.h>
-#include <qsdpservice.h>
-#include <qbluetoothnamespace.h>
-#include <qbluetoothservicecontrol.h>
-
 #include <qtopiaipcadaptor.h>
 #include <qtopialog.h>
 
-class BluetoothServiceManagerShutdownHandler : public SystemShutdownHandler
+#include <QSettings>
+#include <QHash>
+#include <QSet>
+
+
+// default security for a service
+static int DEFAULT_SERVICE_SECURITY =
+        int(QBluetooth::Authenticated | QBluetooth::Encrypted);
+
+static const QString VALUE_SPACE_PATH = "Communications/Bluetooth/Services";
+static const QString SERVICE_SETTINGS = "BluetoothServices";
+
+
+class BluetoothServiceSettings
 {
-    Q_OBJECT
 public:
-    BluetoothServiceManagerShutdownHandler(BluetoothServiceManager *manager)
-        : m_serviceManager(manager),
-          m_serviceController(new QBluetoothServiceController(this)),
-          m_sdap(new QSDAP())
-    {
-        m_localDevice = new QBluetoothLocalDevice(this);
-    }
+    BluetoothServiceSettings();
+    ~BluetoothServiceSettings();
 
-    bool systemRestart()
-    {
-        return doShutdown();
-    }
+    QHash<QString, QVariant> loadSettings(const QString &name);
 
-    bool systemShutdown()
-    {
-        return doShutdown();
-    }
+    void setValue(const QString &name, const QString &key, const QVariant &value);
+    void setAllValues(const QString &name, const QHash<QString, QVariant> &settings);
 
-    bool doShutdown()
-    {
-        qLog(Bluetooth) << "Initiating shutdown of BluetoothServiceManager";
+    QVariant value(const QString &name, const QString &key);
 
-        connect(m_serviceController, SIGNAL(stopped(const QString &,
-                   QBluetooth::ServiceError, const QString &)),
-                SLOT(serviceStopped(const QString &,
-                    QBluetooth::ServiceError,
-                    const QString &)));
-
-        QList<QString> services = m_serviceController->registeredServices();
-        m_registeredServicesCount = services.size();
-        foreach (QString service, services) {
-            if (m_serviceController->state(service) ==
-                    QBluetoothServiceController::Started) {
-                m_serviceManager->stopService(service, true);
-            }
-        }
-
-        // in case the services aren't stopped, don't block the shut down
-        // process
-        QTimer::singleShot( 5000, this, SLOT(finished()));
-
-        return false;
-    }
-
-private slots:
-    void serviceStopped(const QString &/*name*/,
-                        QBluetooth::ServiceError /*error*/,
-                        const QString &/*errorDesc*/)
-    {
-        m_registeredServicesCount--;
-        if (m_registeredServicesCount == 0) {
-            // now find all remaining sdp services and stop them too
-            connect(m_sdap, SIGNAL(searchComplete(const QSDAPSearchResult &)),
-                    SLOT(foundLocalServices(const QSDAPSearchResult &)));
-            m_sdap->browseLocalServices(*m_localDevice);
-            m_searching = true;
-        }
-    }
-
-    void foundLocalServices(const QSDAPSearchResult &result)
-    {
-        QSDP sdp;
-        foreach (QSDPService service, result.services()) {
-            sdp.unregisterService(*m_localDevice, service);
-        }
-        finished();
-    }
-
-    void finished()
-    {
-        static bool m_finished = false;
-        if (m_finished)
-            return;
-        m_finished = true;
-
-        if (m_searching)
-            m_sdap->cancelSearch();
-
-        qLog(Network) << "Shutdown of BluetoothServiceManager complete" ;
-        emit proceed();
-    }
-
-private:
-    BluetoothServiceManager *m_serviceManager;
-    QBluetoothServiceController *m_serviceController;
-    int m_registeredServicesCount;
-    QSDAP *m_sdap;
-    QBluetoothLocalDevice *m_localDevice;
-    bool m_searching;
+    QSettings m_settingsFile;
+    QValueSpaceObject *m_settingsValueSpace;
+    QSet<QString> m_persistentSettings;
 };
 
-/*
-    Communicates with those who want to receive messages about services,
-    or send messages to change service settings (e.g. BTSettings).
+BluetoothServiceSettings::BluetoothServiceSettings()
+    : m_settingsFile("Trolltech", SERVICE_SETTINGS),
+      m_settingsValueSpace(new QValueSpaceObject(VALUE_SPACE_PATH))
+{
+    // These are the settings that need to be stored across reboots (i.e. in
+    // the QSettings object and not just the Value Space)
+    m_persistentSettings << "Autostart" << "Security";
+}
+
+BluetoothServiceSettings::~BluetoothServiceSettings()
+{
+    delete m_settingsValueSpace;
+}
+
+/*!
+    Returns the saved settings for service \a name. If there are no saved
+    settings, returns the default settings.
  */
-class ServiceListenerController : public QtopiaIpcAdaptor
+QHash<QString, QVariant> BluetoothServiceSettings::loadSettings(const QString &name)
+{
+    // Temporary settings that are only written to the value space
+    QHash<QString, QVariant> settings;
+    settings["DisplayName"] = QString();    // translatable name
+    settings["State"] = (int)QBluetoothServiceController::NotRunning;
+
+    // Persistent settings (these are also in value space, but get saved
+    // permanently too)
+    // Use defaults if no settings saved for this service
+    QSettings saved("Trolltech", SERVICE_SETTINGS);
+    saved.beginGroup(name);
+    settings["Autostart"] = saved.value("Autostart", true).toBool();
+    settings["Security"] = saved.value("Security", DEFAULT_SERVICE_SECURITY).toInt();
+
+    return settings;
+}
+
+
+void BluetoothServiceSettings::setValue(const QString &name, const QString &key, const QVariant &value)
+{
+    m_settingsValueSpace->setAttribute(name + "/" + key, value);
+
+    // some settings need to be saved into config for persistence
+    if (m_persistentSettings.contains(key))
+        m_settingsFile.setValue(name + "/" + key, value);
+}
+
+void BluetoothServiceSettings::setAllValues(const QString &name, const QHash<QString, QVariant> &settings)
+{
+    QList<QString> keys = settings.keys();
+    for (int i=0; i<keys.size(); i++)
+        setValue(name, keys[i], settings.value(keys[i]));
+}
+
+QVariant BluetoothServiceSettings::value(const QString &name, const QString &key)
+{
+    return QValueSpaceItem(VALUE_SPACE_PATH + "/" + name).value(key);
+}
+
+
+
+//=============================================================
+
+
+/*
+    \internal
+    \class Messenger
+    Passes messages (over IPC) between a BluetoothServiceManager and a QBluetoothAbstractService.
+ */
+class ServiceMessenger : public QtopiaIpcAdaptor
+{
+    friend class BluetoothServiceManager;
+    Q_OBJECT
+public:
+    ServiceMessenger(BluetoothServiceManager *manager);
+
+    BluetoothServiceManager *m_manager;
+
+public slots:
+    void registerService(const QString &name, const QString &displayName);
+    void serviceStarted(const QString &name, bool error, const QString &desc);
+    void serviceStopped(const QString &name);
+
+signals:
+    void startService(const QString &name);
+    void stopService(const QString &name);
+    void setSecurityOptions(const QString &name, QBluetooth::SecurityOptions options);
+};
+
+ServiceMessenger::ServiceMessenger(BluetoothServiceManager *manager)
+    : QtopiaIpcAdaptor("QPE/BluetoothServiceProviders", manager),
+      m_manager(manager)
+{
+    publishAll(SignalsAndSlots);
+}
+
+void ServiceMessenger::registerService(const QString &name, const QString &displayName)
+{
+    m_manager->registerService(name, displayName);
+}
+
+void ServiceMessenger::serviceStarted(const QString &name, bool error, const QString &desc)
+{
+    m_manager->serviceStarted(name, error, desc);
+}
+
+void ServiceMessenger::serviceStopped(const QString &name)
+{
+    m_manager->serviceStopped(name);
+}
+
+
+//===============================================================
+
+
+/*
+    \internal
+    \class ServiceUserMessenger
+    Passes messages (over IPC) between a BluetoothServiceManager and those
+    who want to receive messages about services, or send messages to change
+    service settings (e.g. QBluetoothServiceController).
+ */
+class ServiceUserMessenger : public QtopiaIpcAdaptor
 {
     friend class BluetoothServiceManager;
     Q_OBJECT
 
 public:
-    ServiceListenerController(BluetoothServiceManager *parent);
-    ~ServiceListenerController();
+    ServiceUserMessenger(BluetoothServiceManager *parent);
+    ~ServiceUserMessenger();
 
 public slots:
     void startService(const QString &name);
@@ -159,646 +195,165 @@ public slots:
     void setServiceSecurity(const QString &name, QBluetooth::SecurityOptions);
 
 signals:
-    void serviceStarted(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc);
-    void serviceStopped(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc);
-    void serviceError(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc);
+    void serviceStarted(const QString &name, bool error, const QString &desc);
+    void serviceStopped(const QString &name);
 
 private:
-    BluetoothServiceManager *m_parent;
+    BluetoothServiceManager *m_manager;
 };
 
-ServiceListenerController::ServiceListenerController(BluetoothServiceManager *parent)
+ServiceUserMessenger::ServiceUserMessenger(BluetoothServiceManager *parent)
     : QtopiaIpcAdaptor("QPE/BluetoothServiceListeners", parent),
-      m_parent(parent)
+      m_manager(parent)
 {
     publishAll(SignalsAndSlots);
 }
 
-ServiceListenerController::~ServiceListenerController()
+ServiceUserMessenger::~ServiceUserMessenger()
 {
 }
 
-void ServiceListenerController::startService(const QString &name)
+void ServiceUserMessenger::startService(const QString &name)
 {
-    m_parent->startService(name);
+    m_manager->startService(name);
 }
 
-void ServiceListenerController::stopService(const QString &name)
+void ServiceUserMessenger::stopService(const QString &name)
 {
-    m_parent->stopService(name, false);
+    m_manager->stopService(name);
 }
 
-void ServiceListenerController::setServiceSecurity(const QString &name,
-    QBluetooth::SecurityOptions options)
+void ServiceUserMessenger::setServiceSecurity(const QString &name,
+        QBluetooth::SecurityOptions options)
 {
-    qLog(Bluetooth) << "ServiceListenerController::setServiceSecurity" << options;
-    m_parent->setServiceSecurity(name, options);
-}
-
-/*
-    Wraps QBluetoothServiceControl messages and passes them onto
-    BluetoothServiceManager with the service name added.
- */
-class ServiceControlHandler : public QObject
-{
-    Q_OBJECT
-
-public:
-    ServiceControlHandler(QBluetoothServiceControl *control, BluetoothServiceManager *manager);
-    ~ServiceControlHandler();
-public slots:
-    //void registerService(const QString &displayname);
-    void started(QBluetooth::ServiceError, const QString &);
-    void stopped(QBluetooth::ServiceError, const QString &);
-    void error(QBluetooth::ServiceError, const QString &);
-private slots:
-    void disconnected();
-private:
-    QBluetoothServiceControl *m_control;
-    BluetoothServiceManager *m_manager;
-};
-
-ServiceControlHandler::ServiceControlHandler(QBluetoothServiceControl *control, BluetoothServiceManager *manager)
-    : QObject(control),
-      m_control(control),
-      m_manager(manager)
-{
-    connect(control, SIGNAL(started(QBluetooth::ServiceError, const QString &)),
-        SLOT(started(QBluetooth::ServiceError, const QString &))),
-    connect(control, SIGNAL(stopped(QBluetooth::ServiceError, const QString &)),
-        SLOT(stopped(QBluetooth::ServiceError, const QString &))),
-    connect(control, SIGNAL(error(QBluetooth::ServiceError, const QString &)),
-        SLOT(error(QBluetooth::ServiceError, const QString &)));
-
-    connect(control, SIGNAL(disconnected()), SLOT(disconnected()));
-}
-
-ServiceControlHandler::~ServiceControlHandler()
-{
-}
-
-void ServiceControlHandler::started(QBluetooth::ServiceError error, const QString &errorDesc)
-{
-    m_manager->serviceStarted(m_control->service(), error, errorDesc);
-}
-
-void ServiceControlHandler::stopped(QBluetooth::ServiceError error, const QString &errorDesc)
-{
-    m_manager->serviceStopped(m_control->service(), error, errorDesc);
-}
-
-void ServiceControlHandler::error(QBluetooth::ServiceError error, const QString &errorDesc)
-{
-    m_manager->serviceError(m_control->service(), error, errorDesc);
-}
-
-void ServiceControlHandler::disconnected()
-{
-    qLog(Bluetooth) << "ServiceControlHandler::disconnected, unregistering"
-        << m_control->service();
-    m_manager->unregisterService(m_control->service());
+    m_manager->setServiceSecurity(name, options);
 }
 
 
-const QString BluetoothServiceManager::SETTINGS_VALUE_SPACE_PATH = "Communications/Bluetooth/Services";
-const QString BluetoothServiceManager::SETTINGS_CONFIG_NAME = "BluetoothServices";
-
-int BluetoothServiceManager::RFCOMM_CHANNELS_START = 1;
-int BluetoothServiceManager::RFCOMM_CHANNELS_END = 31;
-
-const QList<QString> BluetoothServiceManager::persistentSettings =
-        BluetoothServiceManager::persistentServiceSettings();
+//===============================================================
 
 
 BluetoothServiceManager::BluetoothServiceManager(QObject *parent)
     : QObject(parent),
-      m_commServiceManager(new QCommServiceManager(this)),
-      m_listenerMessenger(new ServiceListenerController(this)),
-      m_servicesValueSpace(new QValueSpaceObject(
-            SETTINGS_VALUE_SPACE_PATH, this)),
-      m_configSettings(new QTranslatableSettings(
-            "Trolltech", SETTINGS_CONFIG_NAME, this)),
-      m_sdap(new QSDAP()),
-      m_serviceCommObjects(new QHash<QString, QBluetoothServiceControl *>())
+      m_settings(new BluetoothServiceSettings),
+      m_serviceIpc(new ServiceMessenger(this)),
+      m_serviceUserIpc(new ServiceUserMessenger(this))
 {
-    loadConfig();
-    initAvailableChannels();
-    initReservedChannels();
-
-    connect(m_commServiceManager, SIGNAL(serviceAdded(const QString &)),
-        SLOT(commServiceAdded(const QString &)));
-    connect(m_commServiceManager, SIGNAL(serviceRemoved(const QString &)),
-        SLOT(commServiceRemoved(const QString &)));
-
-    // respond if the local device is added/removed
-    QBluetoothLocalDeviceManager *manager = new QBluetoothLocalDeviceManager(this);
-    connect(manager, SIGNAL(deviceAdded(const QString &)),
-        SLOT(localDeviceAdded(const QString &)));
-    connect(manager, SIGNAL(deviceRemoved(const QString &)),
-        SLOT(localDeviceRemoved(const QString &)));
-
-    // stop all services when qtopia shuts down
-    QtopiaServerApplication::addAggregateObject(this,
-        new BluetoothServiceManagerShutdownHandler(this));
-
-    qLog(Bluetooth) << "Created BluetoothServiceManager";
 }
 
 BluetoothServiceManager::~BluetoothServiceManager()
 {
-    if (m_sdap)
-        delete m_sdap;
-
-    const QList<QString> keys = m_serviceCommObjects->keys();
-    foreach( QString k, keys ) {
-        delete m_serviceCommObjects->take( k );
-    }
-    delete m_serviceCommObjects;
-
-}
-
-QHash<QString, QVariant> BluetoothServiceManager::defaultServiceSettings()
-{
-    // These are all the settings that will be in the value space for a service.
-
-    // The "Registered" setting is basically to tell whether a service has been
-    // created yet, because a service's details might have been loaded from the
-    // config (i.e. the service was created in a previous qtopia session) but
-    // it mightn't been created/registered yet in *this* session.
-
-    QHash<QString, QVariant> settings;
-    settings["DisplayName"] = QVariant(QString()); // the translatable name
-    settings["Registered"] = QVariant(false);
-    settings["Enabled"] = QVariant(false);
-    settings["ChangingState"] = QVariant(false);
-    settings["Autostart"] = QVariant(true); // whether to start when registered
-    settings["Security"] = QVariant(QBluetooth::Authenticated | QBluetooth::Encrypted);
-    settings["Channel"] = QVariant(-1);
-    return settings;
-}
-
-QList<QString> BluetoothServiceManager::persistentServiceSettings()
-{
-    QList<QString> settings;
-    settings.append("DisplayName");
-    settings.append("Autostart");
-    settings.append("Security");
-    settings.append("Channel");
-    return settings;
-}
-
-void BluetoothServiceManager::commServiceAdded(const QString &name)
-{
-    QCommServiceManager manager;
-    if ( !(manager.interfaces(name).contains("QBluetoothServiceControl")) )
-        return;
-
-    qLog(Bluetooth) << "BluetoothServiceManager adding service" << name;
-
-    // comm object for talking to this service
-    QBluetoothServiceControl *control = new QBluetoothServiceControl(name);
-    new ServiceControlHandler(control, this);
-    m_serviceCommObjects->insert(name, control);
-
-    registerService(name, control->translatableDisplayName());
-}
-
-void BluetoothServiceManager::commServiceRemoved(const QString &name)
-{
-    qLog(Bluetooth) << "BluetoothServiceManager::commServiceRemoved" << name;
-
-    QBluetoothServiceControl *control = m_serviceCommObjects->take(name);
-    if (control)
-        delete control;
-
-    qLog(Bluetooth) << "BluetoothServiceManager::commServiceRemoved DONE" << name;
-}
-
-void BluetoothServiceManager::localDeviceAdded(const QString &deviceName)
-{
-    qLog(Bluetooth) << "BluetoothServiceManager::localDeviceAdded()" << deviceName;
-
-    // When the local device is added, (re)start all services.
-
-    // check that it isn't a second added device, cos then the services would
-    // already running
-    QBluetoothLocalDeviceManager manager;
-    if (manager.devices().size() == 1) {
-        // wait a bit for local device to start up (otherwise it will be invalid)
-        QTimer::singleShot(200, this, SLOT(startAllServices()));
-    }
-}
-
-void BluetoothServiceManager::localDeviceRemoved(const QString &deviceName)
-{
-    qLog(Bluetooth) << "BluetoothServiceManager:localDeviceRemoved()" << deviceName;
-
-    // When the local device is removed, shut down all services.
-
-    // check there are no available devices left
-    QBluetoothLocalDeviceManager manager;
-    if (manager.devices().size() == 0) {
-        stopAllServices();
-
-        // maybe these channels will work next time
-        m_badRfcommChannels.clear();
-    }
-}
-
-void BluetoothServiceManager::startAllServices()
-{
-    qLog(Bluetooth) << "BtPowerServiceTask::startAllServices";
-
-    QBluetoothLocalDevice device;
-    if (device.isValid()) {
-        qLog(Bluetooth) << "BluetoothServiceManager: (re)starting known services";
-
-        QList<QString> registeredServices = m_configSettings->childGroups();
-        for (int i=0; i<registeredServices.size(); i++) {
-            if (serviceValue(registeredServices[i], "Autostart").toBool())
-                startService(registeredServices[i]);
-        }
-    }
-}
-
-void BluetoothServiceManager::stopAllServices()
-{
-    qLog(Bluetooth) << "BluetoothServiceManager: stopping known services";
-
-    QList<QString> registeredServices = m_configSettings->childGroups();
-    for (int i=0; i<registeredServices.size(); i++) {
-        if (serviceValue(registeredServices[i], "Enabled").toBool())
-            stopService(registeredServices[i], true);
-    }
-}
-
-void BluetoothServiceManager::registerService(const QString &name, const QString &translatableDisplayName)
-{
-    // request from a service provider to register a service.
-
-    qLog(Bluetooth) << "BluetoothServiceManager registering" << name << translatableDisplayName;
-
-    initServiceSettings(name, translatableDisplayName);
-    setServiceValue(name, "Registered", QVariant(true));
-
-    if (serviceValue(name, "Autostart").toBool())
-        startService(name);
-}
-
-void BluetoothServiceManager::unregisterService(const QString &name)
-{
-    // request from a service provider to unregister a service.
-
-    if (isRegistered(name)) {
-        qLog(Bluetooth) << "BluetoothServiceManager unregistering" << name;
-
-        setServiceValue(name, "Registered", QVariant(false));
-    }
-}
-
-void BluetoothServiceManager::serviceStarted(const QString &name,  QBluetooth::ServiceError error, const QString &errorDesc)
-{
-    // message from a service provider that a service has been started.
-
-    if (!isRegistered(name))
-        return;
-
-    // a channel should have been assigned when the service got a "start"
-    // message but this must be changed when considering more than just RFCOMM
-    // channels!
-    QString errorDescMod = errorDesc;
-    int channel = m_usedRfcommChannels.key(name);
-    if (channel == 0) {
-        error = QBluetooth::UnknownService;
-        errorDescMod = tr("Unknown service, no RFCOMM channel assigned to this service");
-    }
-
-    if (error) {
-        // couldn't start service, remove from used channels
-        m_usedRfcommChannels.remove(channel);
-
-    } else {
-        qLog(Bluetooth) << "BluetoothServiceManager serviceStarted" << name;
-
-        setServiceValue(name, "Enabled", QVariant(true));
-        setServiceValue(name, "Channel", QVariant(channel));
-    }
-
-    // service has finished starting
-    setServiceValue(name, "ChangingState", QVariant(false));
-
-    // if it's SDP error and we haven't tried to fix it once already, try to
-    // fix it by starting the service again on a different channel
-    if (error == QBluetooth::SDPServerError &&
-            !m_servicesWithSdpError.contains(name)) {
-        qLog(Bluetooth) << "BluetoothServiceManager: Service" << name
-            << "got SDP error on start(), try to restart it on different channel";
-
-        // trying to fix error now, don't try again next time if there's another
-        // SDP error (just emit the error)
-        m_servicesWithSdpError.insert(name);
-
-        // reset the reserved channel for this service
-        setServiceValue(name, "Channel", -1);
-        m_badRfcommChannels.insert(channel);    // assume can't use it any more
-
-        // Try again. This will start the service again, on a different channel
-        startService(name);
-
-        return;
-    }
-
-    // clear any noted SDP error for this service
-    m_servicesWithSdpError.remove(name);
-
-    // pass on message to e.g. BTSettings
-    emit m_listenerMessenger->serviceStarted(name, error, errorDescMod);
-}
-
-void BluetoothServiceManager::serviceStopped(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc)
-{
-    // message from a service provider that a service has been stopped.
-
-    if (!isRegistered(name))
-        return;
-
-    if (!error) {
-        qLog(Bluetooth) << "BluetoothServiceManager serviceStopped" << name;
-        handleServiceTerminated(name);
-    }
-
-    // service has finished stopping
-    setServiceValue(name, "ChangingState", QVariant(false));
-
-    // pass on message to e.g. BTSettings
-    emit m_listenerMessenger->serviceStopped(name, error, errorDesc);
-}
-
-void BluetoothServiceManager::serviceError(
-                                const QString &name,
-                                QBluetooth::ServiceError error,
-                                const QString &errorDesc)
-{
-    // message from a service provider that a service error has occured.
-
-    if (!isRegistered(name))
-        return;
-
-    qLog(Bluetooth) << "BluetoothServiceManager::serviceError" << name
-        << errorDesc;
-
-    handleServiceTerminated(name);
-
-    // pass on message to e.g. BTSettings
-    emit m_listenerMessenger->serviceError(name, error, errorDesc);
-}
-
-void BluetoothServiceManager::handleServiceTerminated(const QString &name)
-{
-    setServiceValue(name, "Enabled", QVariant(false));
-    int channel = serviceValue(name, "Channel").toInt();
-    m_usedRfcommChannels.remove(channel);
-}
-
-void BluetoothServiceManager::startService(const QString &name)
-{
-    // request (e.g. from BTSettings) to start a service.
-
-    qLog(Bluetooth) << "called BluetoothServiceManager::startService" << name;
-
-    if (!isRegistered(name)) {
-        ServiceListenerController controller(this);
-        emit controller.serviceStarted(name, QBluetooth::UnknownService,
-            tr("Unknown service, service must first be registered"));
-        return;
-    }
-
-    int channel = findAvailableRfcommChannel(name);
-    if (channel == -1) {
-        qLog(Bluetooth) << "BluetoothServiceManager: no available channels"
-            << "left, cannot start service" << name;
-
-        // tell listeners about error
-        ServiceListenerController controller(this);
-        emit controller.serviceStarted(name, QBluetooth::NoAvailablePort,
-            tr("No service channels available"));
-
-    } else {
-        qLog(Bluetooth) << "BluetoothServiceManager starting" << name
-            << "on channel" << channel;
-
-        Q_ASSERT(m_serviceCommObjects->contains(name));
-
-        // this channel should not be assigned to other services now
-        m_usedRfcommChannels.insert(channel, name);
-
-        // set the security options before starting the service, to ensure
-        // service knows what security should be used to start with
-        setServiceSecurity(name, QBluetooth::SecurityOptions(
-                                   serviceValue(name, "Security").toInt()));
-
-        // tell service to start
-        m_serviceCommObjects->value(name)->start(channel);
-
-        // note that service is busy starting up
-        setServiceValue(name, "ChangingState", QVariant(true));
-
-        // Since the service has been started, set to autostart it next time.
-        // This allows for autostarts across reboots
-        setServiceValue(name, "Autostart", QVariant(true));
-    }
-}
-
-void BluetoothServiceManager::stopService(const QString &name, bool systemCall)
-{
-    // request (e.g. from BTSettings) to stop a service.
-
-    qLog(Bluetooth) << "called BluetoothServiceManager::stopService" << name;
-
-    if (!isRegistered(name)) {
-        ServiceListenerController controller(this);
-        emit controller.serviceStopped(name, QBluetooth::UnknownService,
-            tr("Unknown service, service must first be registered"));
-        return;
-    }
-
-    qLog(Bluetooth) << "BluetoothServiceManager stopping" << name;
-
-    // pass on message to service provider.
-    Q_ASSERT(m_serviceCommObjects->contains(name));
-    m_serviceCommObjects->value(name)->stop();
-
-    // note that service is busy stopping
-    setServiceValue(name, "ChangingState", QVariant(true));
-
-    // If the user app requested that the service be stopped, don't autostart
-    // it next time
-    // This allows for controlling auto-starting of services across reboots
-    // (and also across powering on/off the local bluetooth device)
-    if (!systemCall)
-        setServiceValue(name, "Autostart", QVariant(false));
-}
-
-void BluetoothServiceManager::setServiceSecurity(const QString &name,
-    QBluetooth::SecurityOptions options)
-{
-    // request (e.g. from BTSettings) to set a service's security options.
-
-    if (!isRegistered(name)) {
-        qLog(Bluetooth) << "BluetoothServiceManager can't set security"
-            << "for unknown (unregistered) service:" << name;
-        return;
-    }
-
-    setServiceValue(name, "Security", QVariant(options));
-
-    // pass on message to service provider.
-    if (m_serviceCommObjects->contains(name)) {
-        m_serviceCommObjects->value(name)->setSecurityOptions(options);
-    }
-}
-
-void BluetoothServiceManager::initAvailableChannels()
-{
-    // browse for local services to note channels already in use
-    connect(m_sdap, SIGNAL(searchComplete(const QSDAPSearchResult &)),
-            SLOT(foundLocalServices(const QSDAPSearchResult &)));
-    QBluetoothLocalDevice device;
-    if (device.isValid())
-        m_sdap->browseLocalServices(device);
-}
-
-void BluetoothServiceManager::initReservedChannels()
-{
-    // reserve the channels that each service used last time -- better that
-    // services always start on the same channels if possible
-    QList<QString> registeredServices = m_configSettings->childGroups();
-    foreach (QString service, registeredServices)
-        m_reservedRfcommChannels.insert(serviceValue(service, "Channel").toInt());
-}
-
-int BluetoothServiceManager::findAvailableRfcommChannel(const QString &name) const
-{
-    int channel = -1;
-
-    // return the saved channel if there is one and it's available
-    // (the saved channel should also be in the "reserved" channels)
-    QVariant savedChannel = serviceValue(name, "Channel");
-    if (savedChannel.isValid()) {
-        channel = savedChannel.toInt();
-        if (channel != -1 && !m_usedRfcommChannels.contains(channel))
-            return channel;
-    }
-
-    // find an available channel
-    for (int i=RFCOMM_CHANNELS_START; i<RFCOMM_CHANNELS_END; i++) {
-        if (!m_usedRfcommChannels.contains(i) && !m_reservedRfcommChannels.contains(i) && !m_badRfcommChannels.contains(i))
-            return i;
-    }
-
-    // as a last resort, return a channel that's normally reserved but is not
-    // actually being used at the moment
-    // (but this shouldn't happen since there are RFCOMM 30 channels available...)
-    for (int i=0; i<m_reservedRfcommChannels.size(); i++) {
-        if (!m_usedRfcommChannels.contains(i))
-            return i;
-    }
-
-    return -1;
-}
-
-
-void BluetoothServiceManager::foundLocalServices(const QSDAPSearchResult &result)
-{
-    QBluetoothLocalDevice device;
-    QSDP sdp;
-
-    foreach (QSDPService service, result.services()) {
-
-        // clear all services on start-up, so that all the channels are freed up
-        sdp.unregisterService(device, service);
-
-        // or, if you prefer to not clear all services on start-up, just
-        // mark these channels as "in use"
-        /*
-        int channel = QSDPService::rfcommChannel(service);
-        if (channel != -1)
-            m_usedRfcommChannels.insert(channel);
-        */
-    }
-
-    delete m_sdap;
-    m_sdap = 0;
+    delete m_settings;
 }
 
 /*!
-    Add the details for a new service to the value space.
+    Called when a service first registers itself. If the service is set to
+    autostart (in the config settings), the manager will immediately send a
+    start() message to the service.
  */
-void BluetoothServiceManager::initServiceSettings(const QString &name,
-    const QString &translatableName)
+void BluetoothServiceManager::registerService(const QString &name, const QString &displayName)
 {
-    // set only settings with no current value (e.g. if security setting was
-    // saved in config, don't override it)
-    QHash<QString, QVariant> defaultSettings = defaultServiceSettings();
-    foreach(QString setting, defaultSettings.keys()) {
-        if (serviceValue(name, setting).isNull())
-            setServiceValue(name, setting, defaultSettings[setting]);
+    // request from a service provider to register a service.
+
+    qLog(Bluetooth) << "BluetoothServiceManager: registering" << name;
+
+    // load saved/default settings for this service
+    QHash<QString, QVariant> settings = m_settings->loadSettings(name);
+    settings["DisplayName"] = displayName;
+
+    // write settings to value space / conf files so everyone
+    // (i.e. QBluetoothServiceController) can see them
+    m_settings->setAllValues(name, settings);
+
+    if (settings["Autostart"].toBool())
+        startService(name);
+}
+
+/*!
+    Start the service \a name.
+ */
+void BluetoothServiceManager::startService(const QString &name)
+{
+    qLog(Bluetooth) << "BluetoothServiceManager: start service" << name;
+
+    m_settings->setValue(name, "State", (int)QBluetoothServiceController::Starting);
+
+    // set the security options before starting the service, in case the
+    // service has trouble setting its security if it has already started
+    int options = m_settings->value(name, "Security").toInt();
+    emit m_serviceIpc->setSecurityOptions(name, QBluetooth::SecurityOptions(options));
+
+    // tell service to start
+    emit m_serviceIpc->startService(name);
+}
+
+/*!
+    Called when service \a name emits its started() signal with \a error and \a desc.
+ */
+void BluetoothServiceManager::serviceStarted(const QString &name, bool error, const QString &desc)
+{
+    qLog(Bluetooth) << "BluetoothServiceManager::serviceStarted()" << name << error << desc;
+
+    if (error) {
+        m_settings->setValue(name, "State", (int)QBluetoothServiceController::NotRunning);
+
+    } else {
+        m_settings->setValue(name, "State", (int)QBluetoothServiceController::Running);
+
+        // Since the service has been started, set to autostart it next time.
+        // This allows for autostarts across reboots
+        m_settings->setValue(name, "Autostart", true);
     }
 
-    // overwrite default (null) name setting
-    setServiceValue(name, "DisplayName", translatableName);
+    // pass on message to e.g. QBluetoothServiceController
+    emit m_serviceUserIpc->serviceStarted(name, error, desc);
 }
 
-bool BluetoothServiceManager::isRegistered(const QString &name) const
+/*!
+    Stop the service \a name.
+ */
+void BluetoothServiceManager::stopService(const QString &name)
 {
-    QVariant registered = serviceValue(name, "Registered");
-    return (registered.isValid() && registered.toBool());
+    qLog(Bluetooth) << "BluetoothServiceManager: stop service" << name;
+
+    //m_settings->setValue(name, "ChangingState", true);
+
+    // Don't autostart it next time
+    // This allows for controlling auto-starting of services across reboots
+    m_settings->setValue(name, "Autostart", false);
+
+    // tell service to stop
+    emit m_serviceIpc->stopService(name);
 }
 
-void BluetoothServiceManager::setServiceValue(const QString &name, const QString &attr, const QVariant &value)
+/*!
+    Called when service \a name emits its stopped() signal.
+ */
+void BluetoothServiceManager::serviceStopped(const QString &name)
 {
-    m_servicesValueSpace->setAttribute(name + "/" + attr, value);
+    qLog(Bluetooth) << "BluetoothServiceManager::serviceStopped()" << name;
 
-    // some settings need to be saved into config for persistence
-    if (persistentSettings.contains(attr))
-        m_configSettings->setValue(name + "/" + attr, value);
+    m_settings->setValue(name, "State", (int)QBluetoothServiceController::NotRunning);
+    m_settings->setValue(name, "Autostart", false);
+
+    // pass on message to e.g. QBluetoothServiceController
+    emit m_serviceUserIpc->serviceStopped(name);
 }
 
-QVariant BluetoothServiceManager::serviceValue(
-    const QString &name, const QString &attribute) const
+/*!
+    Sets security \a options for the service \a name.
+ */
+void BluetoothServiceManager::setServiceSecurity(const QString &name, QBluetooth::SecurityOptions options)
 {
-    return QValueSpaceItem(m_servicesValueSpace->objectPath() + "/"
-        + name).value(attribute);
+    qLog(Bluetooth) << "BluetoothServiceManager::setServiceSecurity" << name;
+    m_settings->setValue(name, "Security", (int)options);
+
+    // tell service to set security options (we just have to assume it worked)
+    emit m_serviceIpc->setSecurityOptions(name, options);
 }
 
-void BluetoothServiceManager::loadConfig()
-{
-    QList<QString> registeredServices = m_configSettings->childGroups();
-    foreach (QString service, registeredServices) {
-        // first check this is a valid service (should have a display name)
-        QString displayname = m_configSettings->value(service + "/"
-            + "DisplayName").toString();
-        if (!displayname.isNull()) {
-            // Load saved settings.
 
-            // get the saved settings, call endGroup() cos setServiceValue()
-            // assumes no group has been started
-            m_configSettings->beginGroup(service);
-            QStringList childKeys = m_configSettings->childKeys();
-            m_configSettings->endGroup();
-
-            for (int i=0; i<childKeys.size(); i++) {
-                setServiceValue(service, childKeys[i],
-                        m_configSettings->value(service + "/" + childKeys[i]));
-            }
-
-            // load default values for other settings
-            initServiceSettings(service, displayname);
-        }
-    }
-}
-
+// Make this a QPE server task
 QTOPIA_TASK(BluetoothServiceManager, BluetoothServiceManager);
-QTOPIA_TASK_PROVIDES(BluetoothServiceManager, SystemShutdownHandler);
 
 #include "bluetoothservicemanager.moc"

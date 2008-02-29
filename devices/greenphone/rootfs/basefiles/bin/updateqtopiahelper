@@ -1,0 +1,45 @@
+#!/bin/sh
+
+cd /
+
+case "$1" in
+    killqtopia)
+        kill $( pidof qpe.sh ) 2>&1 >/dev/null
+    	if grep ' /opt/Qtopia.rom ' /proc/mounts 2>&1 >/dev/null; then
+            fuser -m /opt/Qtopia.rom -k
+        fi    
+        exit 0
+        ;;
+    unmountqtopia)
+        if grep ' /opt/Qtopia.rom ' /proc/mounts 2>&1 >/dev/null; then
+            sleep 1
+            umount /opt/Qtopia.rom
+        fi
+        exit 0
+        ;;
+    createtemp)
+        [ $# -eq 2 ] || exit 1
+        MNTPNT=$( mktemp -d /tmp/updateqtopia.XXXXXX )
+        mount -t tmpfs -o size=$2 tmpfs $MNTPNT
+        echo $MNTPNT
+        exit 0
+        ;;
+    deletetemp)
+        [ $# -eq 2 ] || exit 1
+        umount $2
+        rmdir $2
+        exit 0
+        ;;
+    flash)
+        shift
+        # Fall through the case and source /mnt/sd/trolltech_flash.sh
+        ;;
+    *)
+        echo "unknown option: $1"
+        exit 1
+        ;;
+esac        
+
+# This script is used as a wrapper for trolltech_flash.sh to work around LIDS.
+. /mnt/sd/trolltech_flash.sh
+

@@ -101,6 +101,8 @@ public:
     virtual void setDate(const QDate &d);
     QDate date() const;
 
+    virtual void setDaySpan(int start, int end);
+
     virtual QDateTime start() const;
     virtual QDateTime end() const;
 

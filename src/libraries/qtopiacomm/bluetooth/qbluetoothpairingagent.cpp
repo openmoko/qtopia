@@ -160,7 +160,7 @@ void QBluetoothPairingAgent::startPairing()
         return;
     }
 
-    if ( m_addr.valid() && m_local->requestPairing( m_addr ) ) {
+    if ( m_addr.isValid() && m_local->requestPairing( m_addr ) ) {
         qLog(Bluetooth) << "Starting pair request";
     } else {
         qLog(Bluetooth) << "Unable to start pairing process";
@@ -170,17 +170,17 @@ void QBluetoothPairingAgent::startPairing()
 
 void QBluetoothPairingAgent::pairingFailed( const QBluetoothAddress & )
 {
-    qLog(Bluetooth) << "Pairing failed" << m_local->lastError();
+    qLog(Bluetooth) << "Pairing failed" << m_local->error();
 
     // if got InProgress error, try pairing again later (user can cancel)
-    if ( m_local->lastError() == QBluetoothLocalDevice::InProgress ) {
+    if ( m_local->error() == QBluetoothLocalDevice::InProgress ) {
         qLog(Bluetooth) << "Device busy, delaying pairing";
         m_delayedStart = true;
         QTimer::singleShot( 200, this, SLOT(startPairing()) );
         return;
     }
 
-    if ( m_local->lastError() == QBluetoothLocalDevice::AuthenticationCancelled )
+    if ( m_local->error() == QBluetoothLocalDevice::AuthenticationCancelled )
         finished( Cancelled );
     else
         finished( Failed );

@@ -27,8 +27,6 @@
 #include <QCoreApplication>
 #include <QThread>
 
-QContentUpdateManager *QContentUpdateManager::manager = 0;
-
 QContentUpdateManager::QContentUpdateManager(QObject *parent)
     : QObject(parent), mutex(QMutex::Recursive)
 {
@@ -67,12 +65,6 @@ void QContentUpdateManager::sendUpdate()
         updateList.clear();
     }
     qLog(DocAPI) << "updated, now has: " << updateList.count() << "content objects";
-}
-
-QContentUpdateManager *QContentUpdateManager::instance()
-{
-    Q_ASSERT(manager != NULL);
-    return manager;
 }
 
 void QContentUpdateManager::addUpdated(QContentId id, QContent::ChangeType c)
@@ -122,6 +114,16 @@ void QContentUpdateManager::endSendingUpdates()
     updateAtom.deref();
     if((int)updateAtom==0)
         vsoDocuments->setAttribute("Updating", false);
+}
+
+class QContentUpdateManagerPrivate
+{
+public:
+Q_GLOBAL_STATIC(QContentUpdateManager,instance);
+};
+QContentUpdateManager *QContentUpdateManager::instance()
+{
+    return QContentUpdateManagerPrivate::instance();
 }
 
 QValueSpaceProxyObject::QValueSpaceProxyObject( const QString & objectPath, QObject * parent )

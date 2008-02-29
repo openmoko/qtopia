@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>ThemePixmapItem Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>ThemePixmapItem Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ThemePixmapItem Class Reference</h1>
 <p>The ThemePixmapItem class contains common functionality for image based items in a <a href="themedview.html">ThemedView</a>. <a href="#details">More...</a></p>
-<pre>    #include &lt;ThemePixmapItem&gt;</pre><p>Inherits <a href="themegraphicitem.html">ThemeGraphicItem</a>.</p>
+<pre>#include &lt;ThemePixmapItem&gt;</pre><p>Inherits <a href="themegraphicitem.html">ThemeGraphicItem</a>.</p>
 <p>Inherited by <a href="themeanimationitem.html">ThemeAnimationItem</a>, <a href="themeimageitem.html">ThemeImageItem</a>, and <a href="themestatusitem.html">ThemeStatusItem</a>.</p>
 <ul>
 <li><a href="themepixmapitem-members.html">List of all members, including inherited members</a></li>
@@ -26,7 +25,7 @@
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
-<li><div class="fn"/>QImage <b><a href="themepixmapitem.html#colorizeImage">colorizeImage</a></b> ( const QImage &amp; <i>src</i>, const QColor &amp; <i>col</i>, int <i>alpha</i>, bool <i>blendColor</i> = true )</li>
+<li><div class="fn"/>void <b><a href="themepixmapitem.html#colorizeImage">colorizeImage</a></b> ( QImage &amp; <i>img</i>, const QColor &amp; <i>col</i>, int <i>alpha</i>, bool <i>blendColor</i> = true )</li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -54,8 +53,8 @@
 <p>Constructs a <a href="themepixmapitem.html">ThemePixmapItem</a>. <i>p</i>, <i>v</i> and <i>atts</i> are passed to the base class constructor.</p>
 <h3 class="fn"><a name="dtor.ThemePixmapItem"></a>ThemePixmapItem::~ThemePixmapItem ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="themepixmapitem.html">ThemePixmapItem</a>.</p>
-<h3 class="fn"><a name="colorizeImage"></a><a href="qimage.html">QImage</a> ThemePixmapItem::colorizeImage ( const <a href="qimage.html">QImage</a> &amp; <i>src</i>, const <a href="qcolor.html">QColor</a> &amp; <i>col</i>, int <i>alpha</i>, bool <i>blendColor</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Blend the color <i>col</i> and the alpha value <i>alpha</i> with the image <i>src</i> if <i>blendColor</i> is true (the default). If <i>blendColor</i> is false, only the alpha value <i>alpha</i> is blended.</p>
+<h3 class="fn"><a name="colorizeImage"></a>void ThemePixmapItem::colorizeImage ( <a href="qimage.html">QImage</a> &amp; <i>img</i>, const <a href="qcolor.html">QColor</a> &amp; <i>col</i>, int <i>alpha</i>, bool <i>blendColor</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Blend the color <i>col</i> and the alpha value <i>alpha</i> with the image <i>img</i> if <i>blendColor</i> is true (the default). If <i>blendColor</i> is false, only the alpha value <i>alpha</i> is blended. This function modifies <i>img</i> directly.</p>
 <h3 class="fn"><a name="horizontalScale"></a>bool ThemePixmapItem::horizontalScale () const&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Returns true if the pixmap will be scaled horizontally.</p>
 <p>See also <a href="themepixmapitem.html#setHorizontalScale">setHorizontalScale</a>().</p>
@@ -80,6 +79,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

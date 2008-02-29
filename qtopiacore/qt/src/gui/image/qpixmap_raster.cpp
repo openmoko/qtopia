@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -31,6 +41,8 @@
 #include "qimagewriter.h"
 #include "qdebug.h"
 #include "qpaintengine.h"
+
+extern int qt_defaultDpi();
 
 typedef void (*_qt_pixmap_cleanup_hook)(int);
 Q_GUI_EXPORT _qt_pixmap_cleanup_hook qt_pixmap_cleanup_hook = 0;
@@ -204,6 +216,10 @@ void QPixmap::fill(const QColor &fillColor)
                           fillColor.green() * alpha / 255,
                           fillColor.blue() * alpha / 255,
                           alpha);
+#ifdef Q_WS_QWS
+        } else if (data->image.depth() == 16) {
+            pixel = qt_convRgbTo16(fillColor.rgba());
+#endif
         } else {
             pixel = fillColor.rgba();
         }
@@ -420,8 +436,7 @@ QImage QPixmap::toImage() const
 QPixmap QPixmap::fromImage(const QImage &image, Qt::ImageConversionFlags flags )
 {
     Q_UNUSED(flags);
-    // ### This will create a temporary image.
-    QPixmap pixmap(image.width(), image.height());
+    QPixmap pixmap;
 
     switch (image.format()) {
     case QImage::Format_Mono:
@@ -441,7 +456,6 @@ QPixmap QPixmap::fromImage(const QImage &image, Qt::ImageConversionFlags flags )
         pixmap.data->image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
         break;
     }
-
     return pixmap;
 }
 
@@ -560,7 +574,36 @@ bool QPixmap::convertFromImage(const QImage &image, ColorMode mode)
 
 int QPixmap::metric(PaintDeviceMetric metric) const
 {
-    return data->image.metric(metric);
+    // override the image dpi with the screen dpi when rendering to a pixmap
+
+    int dpm = qRound(qt_defaultDpi()*100./2.54);
+    switch (metric) {
+    case PdmWidthMM:
+        return qRound(data->image.width() * 1000 / dpm);
+        break;
+
+    case PdmHeightMM:
+        return qRound(data->image.height() * 1000 / dpm);
+        break;
+
+    case PdmDpiX:
+        return qRound(dpm * 0.0254);
+        break;
+
+    case PdmDpiY:
+        return qRound(dpm * 0.0254);
+        break;
+
+    case PdmPhysicalDpiX:
+        return qRound(dpm * 0.0254);
+        break;
+
+    case PdmPhysicalDpiY:
+        return qRound(dpm * 0.0254);
+        break;
+    default:
+        return data->image.metric(metric);
+    }
 }
 
 bool QPixmap::doImageIO(QImageWriter *writer, int quality) const
@@ -581,16 +624,20 @@ void QPixmap::init(int w, int h, Type type)
     data = new QPixmapData;
     data->type = type;
     data->detach_no = 0;
-    if (type == PixmapType) {
-        data->image = QImage(w, h, QImage::Format_RGB32);
-    } else {
-        data->image = data->createBitmapImage(w, h);
+    if (w > 0 && h > 0) {
+        if (type == PixmapType) {
+            data->image = QImage(w, h, QImage::Format_RGB32);
+        } else {
+            data->image = data->createBitmapImage(w, h);
+        }
     }
 }
 
 void QPixmap::deref()
 {
     if(data && data->deref()) { // Destroy image if last ref
+        if (qt_pixmap_cleanup_hook)
+            qt_pixmap_cleanup_hook(serialNumber());
         delete data;
         data = 0;
     }

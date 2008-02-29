@@ -8,6 +8,13 @@
         <keyword ref="alarmcontrol.html#instance">instance</keyword>
         <section ref="alarmcontrol-members.html" title="List of all members"/>
     </section>
+    <section ref="alarmserverservice.html" title="AlarmServerService Class Reference">
+        <keyword ref="alarmserverservice.html">AlarmServerService</keyword>
+        <keyword ref="alarmserverservice.html#addAlarm">addAlarm</keyword>
+        <keyword ref="alarmserverservice.html#dailyAlarmEnabled">dailyAlarmEnabled</keyword>
+        <keyword ref="alarmserverservice.html#deleteAlarm">deleteAlarm</keyword>
+        <section ref="alarmserverservice-members.html" title="List of all members"/>
+    </section>
     <section ref="alarmservice.html" title="AlarmService Class Reference">
         <keyword ref="alarmservice.html">AlarmService</keyword>
         <keyword ref="alarmservice.html#editAlarm">editAlarm</keyword>
@@ -162,6 +169,7 @@
         <keyword ref="cellmodemmanager.html#callForwardingEnabledChanged">callForwardingEnabledChanged</keyword>
         <keyword ref="cellmodemmanager.html#cellLocation">cellLocation</keyword>
         <keyword ref="cellmodemmanager.html#cellLocationChanged">cellLocationChanged</keyword>
+        <keyword ref="cellmodemmanager.html#cellModemAvailable">cellModemAvailable</keyword>
         <keyword ref="cellmodemmanager.html#disableProfilesControlModem">disableProfilesControlModem</keyword>
         <keyword ref="cellmodemmanager.html#emergencyNumbers">emergencyNumbers</keyword>
         <keyword ref="cellmodemmanager.html#networkOperator">networkOperator</keyword>
@@ -197,15 +205,12 @@
     </section>
     <section ref="consoleapplicationlauncher.html" title="ConsoleApplicationLauncher Class Reference">
         <keyword ref="consoleapplicationlauncher.html">ConsoleApplicationLauncher</keyword>
-        <keyword ref="consoleapplicationlauncher.html#applicationState">applicationState</keyword>
-        <keyword ref="consoleapplicationlauncher.html#canLaunch">canLaunch</keyword>
-        <keyword ref="consoleapplicationlauncher.html#kill">kill</keyword>
-        <keyword ref="consoleapplicationlauncher.html#launch">launch</keyword>
-        <keyword ref="consoleapplicationlauncher.html#routeMessage">routeMessage</keyword>
         <section ref="consoleapplicationlauncher-members.html" title="List of all members"/>
     </section>
     <section ref="contactsphoneservice.html" title="ContactsPhoneService Class Reference">
         <keyword ref="contactsphoneservice.html">ContactsPhoneService</keyword>
+        <keyword ref="contactsphoneservice.html#pushVCard">pushVCard</keyword>
+        <keyword ref="contactsphoneservice.html#smsBusinessCard">smsBusinessCard</keyword>
         <section ref="contactsphoneservice-members.html" title="List of all members"/>
     </section>
     <section ref="contactsservice.html" title="ContactsService Class Reference">
@@ -243,11 +248,8 @@
         <keyword ref="dateservice.html#editDate">editDate</keyword>
         <section ref="dateservice-members.html" title="List of all members"/>
     </section>
-    <section ref="desktoppoweralerter.html" title="DesktopPowerAlerter Class Reference">
-        <keyword ref="desktoppoweralerter.html">DesktopPowerAlerter</keyword>
-        <keyword ref="desktoppoweralerter.html#alert">alert</keyword>
-        <keyword ref="desktoppoweralerter.html#hideEvent">hideEvent</keyword>
-        <section ref="desktoppoweralerter-members.html" title="List of all members"/>
+    <section ref="dbmigratetask.html" title="DBMigrateTask Class Reference">
+        <keyword ref="dbmigratetask.html">DBMigrateTask</keyword>
     </section>
     <section ref="devicebuttontask.html" title="DeviceButtonTask Class Reference">
         <keyword ref="devicebuttontask.html">DeviceButtonTask</keyword>
@@ -308,9 +310,6 @@
         <keyword ref="dialerservice.html#showDialer">showDialer</keyword>
         <section ref="dialerservice-members.html" title="List of all members"/>
     </section>
-    <section ref="dissipate2legal.html" title="Dissipate2Legal Class Reference">
-        <keyword ref="dissipate2legal.html">Dissipate2Legal</keyword>
-    </section>
     <section ref="emailservice.html" title="EmailService Class Reference">
         <keyword ref="emailservice.html">EmailService</keyword>
         <keyword ref="emailservice.html#cleanupMessages">cleanupMessages</keyword>
@@ -322,8 +321,6 @@
     </section>
     <section ref="environmentsetuptask.html" title="EnvironmentSetupTask Class Reference">
         <keyword ref="environmentsetuptask.html">EnvironmentSetupTask</keyword>
-        <keyword ref="environmentsetuptask.html#validateTheme">validateTheme</keyword>
-        <section ref="environmentsetuptask-members.html" title="List of all members"/>
     </section>
     <section ref="exeapplicationlauncher.html" title="ExeApplicationLauncher Class Reference">
         <keyword ref="exeapplicationlauncher.html">ExeApplicationLauncher</keyword>
@@ -349,6 +346,12 @@
         <keyword ref="gsmkeyfilter.html">GsmKeyFilter</keyword>
         <keyword ref="gsmkeyfilter.html#Flag-enum">Flag</keyword>
         <keyword ref="gsmkeyfilter.html#Flag-enum">Flags</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::TestOnly</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Incoming</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Send</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Immediate</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::OnCall</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::BeforeDial</keyword>
         <keyword ref="gsmkeyfilter.html#ServiceAction-enum">ServiceAction</keyword>
         <keyword ref="gsmkeyfilter.html#ServiceAction-enum">GsmKeyFilter::Erasure</keyword>
         <keyword ref="gsmkeyfilter.html#ServiceAction-enum">GsmKeyFilter::Interrogate</keyword>
@@ -393,9 +396,12 @@
     </section>
     <section ref="inputmethodservice.html" title="InputMethodService Class Reference">
         <keyword ref="inputmethodservice.html">InputMethodService</keyword>
+        <keyword ref="inputmethodservice.html#changeInputMethod">changeInputMethod</keyword>
         <keyword ref="inputmethodservice.html#hideInputMethod">hideInputMethod</keyword>
         <keyword ref="inputmethodservice.html#inputMethodHint">inputMethodHint</keyword>
         <keyword ref="inputmethodservice.html#inputMethodPasswordHint">inputMethodPasswordHint</keyword>
+        <keyword ref="inputmethodservice.html#setInputMethod">setInputMethod</keyword>
+        <keyword ref="inputmethodservice.html#setNextInputMethod">setNextInputMethod</keyword>
         <keyword ref="inputmethodservice.html#showInputMethod">showInputMethod</keyword>
         <section ref="inputmethodservice-members.html" title="List of all members"/>
     </section>
@@ -514,7 +520,6 @@
     </section>
     <section ref="phonetouchdialerscreen.html" title="PhoneTouchDialerScreen Class Reference">
         <keyword ref="phonetouchdialerscreen.html">PhoneTouchDialerScreen</keyword>
-        <keyword ref="phonetouchdialerscreen.html#keyEntered">keyEntered</keyword>
         <section ref="phonetouchdialerscreen-members.html" title="List of all members"/>
     </section>
     <section ref="photoeditservice.html" title="PhotoEditService Class Reference">
@@ -762,51 +767,36 @@
         <keyword ref="qappointmentmodel.html#QAppointmentModelRole-enum">QAppointmentModelRole</keyword>
         <keyword ref="qappointmentmodel.html#QAppointmentModelRole-enum">QAppointmentModel::LabelRole</keyword>
         <keyword ref="qappointmentmodel.html#addAppointment">addAppointment</keyword>
+        <keyword ref="qappointmentmodel.html#addRecord">addRecord</keyword>
         <keyword ref="qappointmentmodel.html#appointment">appointment</keyword>
         <keyword ref="qappointmentmodel.html#appointmentField">appointmentField</keyword>
-        <keyword ref="qappointmentmodel.html#availableSources">availableSources</keyword>
-        <keyword ref="qappointmentmodel.html#categoryFilter">categoryFilter</keyword>
         <keyword ref="qappointmentmodel.html#columnCount">columnCount</keyword>
-        <keyword ref="qappointmentmodel.html#context">context</keyword>
-        <keyword ref="qappointmentmodel.html#contexts">contexts</keyword>
-        <keyword ref="qappointmentmodel.html#count">count</keyword>
         <keyword ref="qappointmentmodel.html#data">data</keyword>
         <keyword ref="qappointmentmodel.html#durationType">durationType</keyword>
-        <keyword ref="qappointmentmodel.html#editable">editable</keyword>
-        <keyword ref="qappointmentmodel.html#exists">exists</keyword>
         <keyword ref="qappointmentmodel.html#fieldIcon">fieldIcon</keyword>
         <keyword ref="qappointmentmodel.html#fieldIdentifier">fieldIdentifier</keyword>
         <keyword ref="qappointmentmodel.html#fieldLabel">fieldLabel</keyword>
-        <keyword ref="qappointmentmodel.html#flush">flush</keyword>
-        <keyword ref="qappointmentmodel.html#hasChildren">hasChildren</keyword>
         <keyword ref="qappointmentmodel.html#headerData">headerData</keyword>
-        <keyword ref="qappointmentmodel.html#id">id</keyword>
         <keyword ref="qappointmentmodel.html#identifierField">identifierField</keyword>
-        <keyword ref="qappointmentmodel.html#index">index</keyword>
         <keyword ref="qappointmentmodel.html#itemData">itemData</keyword>
         <keyword ref="qappointmentmodel.html#mimeData">mimeData</keyword>
         <keyword ref="qappointmentmodel.html#mimeTypes">mimeTypes</keyword>
-        <keyword ref="qappointmentmodel.html#parent">parent</keyword>
         <keyword ref="qappointmentmodel.html#rangeEnd">rangeEnd</keyword>
         <keyword ref="qappointmentmodel.html#rangeStart">rangeStart</keyword>
-        <keyword ref="qappointmentmodel.html#refresh">refresh</keyword>
+        <keyword ref="qappointmentmodel.html#record">record</keyword>
         <keyword ref="qappointmentmodel.html#removeAppointment">removeAppointment</keyword>
         <keyword ref="qappointmentmodel.html#removeList">removeList</keyword>
         <keyword ref="qappointmentmodel.html#removeOccurrence">removeOccurrence</keyword>
+        <keyword ref="qappointmentmodel.html#removeRecord">removeRecord</keyword>
         <keyword ref="qappointmentmodel.html#replaceOccurrence">replaceOccurrence</keyword>
         <keyword ref="qappointmentmodel.html#replaceRemaining">replaceRemaining</keyword>
-        <keyword ref="qappointmentmodel.html#rowCount">rowCount</keyword>
         <keyword ref="qappointmentmodel.html#setAppointmentField">setAppointmentField</keyword>
-        <keyword ref="qappointmentmodel.html#setCategoryFilter">setCategoryFilter</keyword>
         <keyword ref="qappointmentmodel.html#setData">setData</keyword>
         <keyword ref="qappointmentmodel.html#setDurationType">setDurationType</keyword>
         <keyword ref="qappointmentmodel.html#setItemData">setItemData</keyword>
         <keyword ref="qappointmentmodel.html#setRange">setRange</keyword>
-        <keyword ref="qappointmentmodel.html#setVisibleSources">setVisibleSources</keyword>
-        <keyword ref="qappointmentmodel.html#source">source</keyword>
-        <keyword ref="qappointmentmodel.html#sourceExists">sourceExists</keyword>
         <keyword ref="qappointmentmodel.html#updateAppointment">updateAppointment</keyword>
-        <keyword ref="qappointmentmodel.html#visibleSources">visibleSources</keyword>
+        <keyword ref="qappointmentmodel.html#updateRecord">updateRecord</keyword>
         <section ref="qappointmentmodel-members.html" title="List of all members"/>
     </section>
     <section ref="qatchat.html" title="QAtChat Class Reference">
@@ -818,6 +808,7 @@
         <keyword ref="qatchat.html#dead">dead</keyword>
         <keyword ref="qatchat.html#deadTimeout">deadTimeout</keyword>
         <keyword ref="qatchat.html#pduNotification">pduNotification</keyword>
+        <keyword ref="qatchat.html#registerErrorPrefix">registerErrorPrefix</keyword>
         <keyword ref="qatchat.html#registerNotificationType">registerNotificationType</keyword>
         <keyword ref="qatchat.html#requestNextLine">requestNextLine</keyword>
         <keyword ref="qatchat.html#resume">resume</keyword>
@@ -1027,10 +1018,11 @@
         <keyword ref="qbluetoothabstractserver.html#ServerError-enum">QBluetoothAbstractServer::BindError</keyword>
         <keyword ref="qbluetoothabstractserver.html#close">close</keyword>
         <keyword ref="qbluetoothabstractserver.html#createSocket">createSocket</keyword>
+        <keyword ref="qbluetoothabstractserver.html#error">error</keyword>
+        <keyword ref="qbluetoothabstractserver.html#errorString">errorString</keyword>
         <keyword ref="qbluetoothabstractserver.html#hasPendingConnections">hasPendingConnections</keyword>
         <keyword ref="qbluetoothabstractserver.html#initiateListen">initiateListen</keyword>
         <keyword ref="qbluetoothabstractserver.html#isListening">isListening</keyword>
-        <keyword ref="qbluetoothabstractserver.html#lastError">lastError</keyword>
         <keyword ref="qbluetoothabstractserver.html#maxPendingConnections">maxPendingConnections</keyword>
         <keyword ref="qbluetoothabstractserver.html#newConnection">newConnection</keyword>
         <keyword ref="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</keyword>
@@ -1042,25 +1034,23 @@
     </section>
     <section ref="qbluetoothabstractservice.html" title="QBluetoothAbstractService Class Reference">
         <keyword ref="qbluetoothabstractservice.html">QBluetoothAbstractService</keyword>
-        <keyword ref="qbluetoothabstractservice.html#error">error</keyword>
-        <keyword ref="qbluetoothabstractservice.html#initialize">initialize</keyword>
-        <keyword ref="qbluetoothabstractservice.html#sdpError">sdpError</keyword>
-        <keyword ref="qbluetoothabstractservice.html#sdpRegister">sdpRegister</keyword>
-        <keyword ref="qbluetoothabstractservice.html#sdpUnregister">sdpUnregister</keyword>
+        <keyword ref="qbluetoothabstractservice.html#displayName">displayName</keyword>
+        <keyword ref="qbluetoothabstractservice.html#name">name</keyword>
+        <keyword ref="qbluetoothabstractservice.html#registerRecord">registerRecord</keyword>
         <keyword ref="qbluetoothabstractservice.html#setSecurityOptions">setSecurityOptions</keyword>
         <keyword ref="qbluetoothabstractservice.html#start">start</keyword>
         <keyword ref="qbluetoothabstractservice.html#started">started</keyword>
         <keyword ref="qbluetoothabstractservice.html#stop">stop</keyword>
         <keyword ref="qbluetoothabstractservice.html#stopped">stopped</keyword>
-        <keyword ref="qbluetoothabstractservice.html#translatableDisplayName">translatableDisplayName</keyword>
+        <keyword ref="qbluetoothabstractservice.html#unregisterRecord">unregisterRecord</keyword>
         <section ref="qbluetoothabstractservice-members.html" title="List of all members"/>
     </section>
     <section ref="qbluetoothabstractsocket.html" title="QBluetoothAbstractSocket Class Reference">
         <keyword ref="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">SocketError</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::NetworkError</keyword>
+        <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::TimeoutError</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::AccessError</keyword>
-        <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::TimedoutError</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::NoError</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::UnknownError</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::ConnectionRefused</keyword>
@@ -1073,6 +1063,7 @@
         <keyword ref="qbluetoothabstractsocket.html#SocketState-enum">QBluetoothAbstractSocket::ConnectedState</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketState-enum">QBluetoothAbstractSocket::UnconnectedState</keyword>
         <keyword ref="qbluetoothabstractsocket.html#SocketState-enum">QBluetoothAbstractSocket::ConnectingState</keyword>
+        <keyword ref="qbluetoothabstractsocket.html#SocketState-enum">QBluetoothAbstractSocket::BoundState</keyword>
         <keyword ref="qbluetoothabstractsocket.html#abort">abort</keyword>
         <keyword ref="qbluetoothabstractsocket.html#atEnd">atEnd</keyword>
         <keyword ref="qbluetoothabstractsocket.html#bytesAvailable">bytesAvailable</keyword>
@@ -1085,24 +1076,27 @@
         <keyword ref="qbluetoothabstractsocket.html#error">error</keyword>
         <keyword ref="qbluetoothabstractsocket.html#flush">flush</keyword>
         <keyword ref="qbluetoothabstractsocket.html#initiateConnect">initiateConnect</keyword>
-        <keyword ref="qbluetoothabstractsocket.html#lastError">lastError</keyword>
         <keyword ref="qbluetoothabstractsocket.html#readBufferSize">readBufferSize</keyword>
+        <keyword ref="qbluetoothabstractsocket.html#readMtu">readMtu</keyword>
         <keyword ref="qbluetoothabstractsocket.html#readSocketParameters">readSocketParameters</keyword>
         <keyword ref="qbluetoothabstractsocket.html#resetSocketParameters">resetSocketParameters</keyword>
         <keyword ref="qbluetoothabstractsocket.html#setError">setError</keyword>
         <keyword ref="qbluetoothabstractsocket.html#setReadBufferSize">setReadBufferSize</keyword>
+        <keyword ref="qbluetoothabstractsocket.html#setReadMtu">setReadMtu</keyword>
         <keyword ref="qbluetoothabstractsocket.html#setSocketDescriptor">setSocketDescriptor</keyword>
+        <keyword ref="qbluetoothabstractsocket.html#setWriteMtu">setWriteMtu</keyword>
         <keyword ref="qbluetoothabstractsocket.html#socketDescriptor">socketDescriptor</keyword>
         <keyword ref="qbluetoothabstractsocket.html#state">state</keyword>
         <keyword ref="qbluetoothabstractsocket.html#stateChanged">stateChanged</keyword>
         <keyword ref="qbluetoothabstractsocket.html#waitForConnected">waitForConnected</keyword>
         <keyword ref="qbluetoothabstractsocket.html#waitForDisconnected">waitForDisconnected</keyword>
+        <keyword ref="qbluetoothabstractsocket.html#writeMtu">writeMtu</keyword>
         <section ref="qbluetoothabstractsocket-members.html" title="List of all members"/>
     </section>
     <section ref="qbluetoothaddress.html" title="QBluetoothAddress Class Reference">
         <keyword ref="qbluetoothaddress.html">QBluetoothAddress</keyword>
+        <keyword ref="qbluetoothaddress.html#isValid">isValid</keyword>
         <keyword ref="qbluetoothaddress.html#toString">toString</keyword>
-        <keyword ref="qbluetoothaddress.html#valid">valid</keyword>
         <keyword ref="qbluetoothaddress.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qbluetoothaddress.html#operator-eq">operator=</keyword>
         <keyword ref="qbluetoothaddress.html#operator-eq-eq">operator==</keyword>
@@ -1135,36 +1129,47 @@
         <keyword ref="qbluetoothaudiogateway.html#speakerVolumeChanged">speakerVolumeChanged</keyword>
         <section ref="qbluetoothaudiogateway-members.html" title="List of all members"/>
     </section>
-    <section ref="qbluetoothdeviceselector.html" title="QBluetoothDeviceSelector Class Reference">
-        <keyword ref="qbluetoothdeviceselector.html">QBluetoothDeviceSelector</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#addDeviceAction">addDeviceAction</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#deviceDiscoveryCompleted">deviceDiscoveryCompleted</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#deviceDiscoveryStarted">deviceDiscoveryStarted</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#deviceSelectionChanged">deviceSelectionChanged</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#displayedDevices">displayedDevices</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#filter">filter</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#forcePairing">forcePairing</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#getRemoteDevice">getRemoteDevice</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#removeDeviceAction">removeDeviceAction</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#selectedDevice">selectedDevice</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#setFilter">setFilter</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#setForcePairing">setForcePairing</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#setValidationProfiles">setValidationProfiles</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#startDeviceDiscovery">startDeviceDiscovery</keyword>
-        <keyword ref="qbluetoothdeviceselector.html#validationProfiles">validationProfiles</keyword>
-        <section ref="qbluetoothdeviceselector-members.html" title="List of all members"/>
+    <section ref="qbluetoothl2capdatagramsocket.html" title="QBluetoothL2CapDatagramSocket Class Reference">
+        <keyword ref="qbluetoothl2capdatagramsocket.html">QBluetoothL2CapDatagramSocket</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#bind">bind</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#connect">connect</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#incomingMtu">incomingMtu</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#isAuthenticated">isAuthenticated</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#isEncrypted">isEncrypted</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#localAddress">localAddress</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#localPsm">localPsm</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#outgoingMtu">outgoingMtu</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#readDatagram">readDatagram</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#remoteAddress">remoteAddress</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#remotePsm">remotePsm</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#securityOptions">securityOptions</keyword>
+        <keyword ref="qbluetoothl2capdatagramsocket.html#setSecurityOptions">setSecurityOptions</keyword>
+        <section ref="qbluetoothl2capdatagramsocket-members.html" title="List of all members"/>
     </section>
-    <section ref="qbluetoothdeviceselectorfilter.html" title="QBluetoothDeviceSelectorFilter Class Reference">
-        <keyword ref="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</keyword>
-        <keyword ref="qbluetoothdeviceselectorfilter.html#acceptedDeviceMajors">acceptedDeviceMajors</keyword>
-        <keyword ref="qbluetoothdeviceselectorfilter.html#acceptedServiceClasses">acceptedServiceClasses</keyword>
-        <keyword ref="qbluetoothdeviceselectorfilter.html#filterAcceptsDevice">filterAcceptsDevice</keyword>
-        <keyword ref="qbluetoothdeviceselectorfilter.html#setAcceptedDeviceMajors">setAcceptedDeviceMajors</keyword>
-        <keyword ref="qbluetoothdeviceselectorfilter.html#setAcceptedServiceClasses">setAcceptedServiceClasses</keyword>
-        <keyword ref="qbluetoothdeviceselectorfilter.html#operator-eq">operator=</keyword>
-        <keyword ref="qbluetoothdeviceselectorfilter.html#operator-eq-eq">operator==</keyword>
-        <section ref="qbluetoothdeviceselectorfilter-members.html" title="List of all members"/>
+    <section ref="qbluetoothl2capserver.html" title="QBluetoothL2CapServer Class Reference">
+        <keyword ref="qbluetoothl2capserver.html">QBluetoothL2CapServer</keyword>
+        <keyword ref="qbluetoothl2capserver.html#isAuthenticated">isAuthenticated</keyword>
+        <keyword ref="qbluetoothl2capserver.html#isEncrypted">isEncrypted</keyword>
+        <keyword ref="qbluetoothl2capserver.html#listen">listen</keyword>
+        <keyword ref="qbluetoothl2capserver.html#mtu">mtu</keyword>
+        <keyword ref="qbluetoothl2capserver.html#securityOptions">securityOptions</keyword>
+        <keyword ref="qbluetoothl2capserver.html#serverAddress">serverAddress</keyword>
+        <keyword ref="qbluetoothl2capserver.html#serverPsm">serverPsm</keyword>
+        <keyword ref="qbluetoothl2capserver.html#setSecurityOptions">setSecurityOptions</keyword>
+        <section ref="qbluetoothl2capserver-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbluetoothl2capsocket.html" title="QBluetoothL2CapSocket Class Reference">
+        <keyword ref="qbluetoothl2capsocket.html">QBluetoothL2CapSocket</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#connect">connect</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#incomingMtu">incomingMtu</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#isAuthenticated">isAuthenticated</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#isEncrypted">isEncrypted</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#localAddress">localAddress</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#outgoingMtu">outgoingMtu</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#remoteAddress">remoteAddress</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#remotePsm">remotePsm</keyword>
+        <keyword ref="qbluetoothl2capsocket.html#securityOptions">securityOptions</keyword>
+        <section ref="qbluetoothl2capsocket-members.html" title="List of all members"/>
     </section>
     <section ref="qbluetoothlocaldevice.html" title="QBluetoothLocalDevice Class Reference">
         <keyword ref="qbluetoothlocaldevice.html">QBluetoothLocalDevice</keyword>
@@ -1176,13 +1181,13 @@
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::NoError</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::UnknownError</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::DoesNotExist</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::NoSuchAdaptor</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::NotConnected</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::InvalidArguments</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::OutOfMemory</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::InProgress</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::AuthenticationTimeout</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::AuthenticationFailed</keyword>
-        <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::NoSuchAdapter</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::UnknownAddress</keyword>
         <keyword ref="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::AuthenticationCancelled</keyword>
         <keyword ref="qbluetoothlocaldevice.html#State-enum">State</keyword>
@@ -1196,18 +1201,22 @@
         <keyword ref="qbluetoothlocaldevice.html#connectable">connectable</keyword>
         <keyword ref="qbluetoothlocaldevice.html#connections">connections</keyword>
         <keyword ref="qbluetoothlocaldevice.html#deviceName">deviceName</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#disconnectRemoteDevice">disconnectRemoteDevice</keyword>
         <keyword ref="qbluetoothlocaldevice.html#discoverRemoteDevices">discoverRemoteDevices</keyword>
         <keyword ref="qbluetoothlocaldevice.html#discoverable">discoverable</keyword>
         <keyword ref="qbluetoothlocaldevice.html#discoverableTimeout">discoverableTimeout</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#discoverableTimeoutChanged">discoverableTimeoutChanged</keyword>
         <keyword ref="qbluetoothlocaldevice.html#discoveryCancelled">discoveryCancelled</keyword>
         <keyword ref="qbluetoothlocaldevice.html#discoveryCompleted">discoveryCompleted</keyword>
         <keyword ref="qbluetoothlocaldevice.html#discoveryStarted">discoveryStarted</keyword>
         <keyword ref="qbluetoothlocaldevice.html#error">error</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#errorString">errorString</keyword>
         <keyword ref="qbluetoothlocaldevice.html#isConnected">isConnected</keyword>
         <keyword ref="qbluetoothlocaldevice.html#isPaired">isPaired</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#isPeriodicDiscoveryEnabled">isPeriodicDiscoveryEnabled</keyword>
         <keyword ref="qbluetoothlocaldevice.html#isUp">isUp</keyword>
         <keyword ref="qbluetoothlocaldevice.html#isValid">isValid</keyword>
-        <keyword ref="qbluetoothlocaldevice.html#lastError">lastError</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#knownDevices">knownDevices</keyword>
         <keyword ref="qbluetoothlocaldevice.html#lastSeen">lastSeen</keyword>
         <keyword ref="qbluetoothlocaldevice.html#lastUsed">lastUsed</keyword>
         <keyword ref="qbluetoothlocaldevice.html#manufacturer">manufacturer</keyword>
@@ -1217,13 +1226,19 @@
         <keyword ref="qbluetoothlocaldevice.html#pairingCreated">pairingCreated</keyword>
         <keyword ref="qbluetoothlocaldevice.html#pairingFailed">pairingFailed</keyword>
         <keyword ref="qbluetoothlocaldevice.html#pairingRemoved">pairingRemoved</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#pinCodeLength">pinCodeLength</keyword>
         <keyword ref="qbluetoothlocaldevice.html#remoteAlias">remoteAlias</keyword>
         <keyword ref="qbluetoothlocaldevice.html#remoteAliasChanged">remoteAliasChanged</keyword>
         <keyword ref="qbluetoothlocaldevice.html#remoteAliasRemoved">remoteAliasRemoved</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#remoteClassUpdated">remoteClassUpdated</keyword>
         <keyword ref="qbluetoothlocaldevice.html#remoteDeviceConnected">remoteDeviceConnected</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#remoteDeviceDisappeared">remoteDeviceDisappeared</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#remoteDeviceDisconnectRequested">remoteDeviceDisconnectRequested</keyword>
         <keyword ref="qbluetoothlocaldevice.html#remoteDeviceDisconnected">remoteDeviceDisconnected</keyword>
         <keyword ref="qbluetoothlocaldevice.html#remoteDeviceFound">remoteDeviceFound</keyword>
         <keyword ref="qbluetoothlocaldevice.html#remoteDevicesFound">remoteDevicesFound</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#remoteNameFailed">remoteNameFailed</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#remoteNameUpdated">remoteNameUpdated</keyword>
         <keyword ref="qbluetoothlocaldevice.html#removePairing">removePairing</keyword>
         <keyword ref="qbluetoothlocaldevice.html#removeRemoteAlias">removeRemoteAlias</keyword>
         <keyword ref="qbluetoothlocaldevice.html#requestPairing">requestPairing</keyword>
@@ -1231,6 +1246,7 @@
         <keyword ref="qbluetoothlocaldevice.html#setConnectable">setConnectable</keyword>
         <keyword ref="qbluetoothlocaldevice.html#setDiscoverable">setDiscoverable</keyword>
         <keyword ref="qbluetoothlocaldevice.html#setName">setName</keyword>
+        <keyword ref="qbluetoothlocaldevice.html#setPeriodicDiscoveryEnabled">setPeriodicDiscoveryEnabled</keyword>
         <keyword ref="qbluetoothlocaldevice.html#setRemoteAlias">setRemoteAlias</keyword>
         <keyword ref="qbluetoothlocaldevice.html#stateChanged">stateChanged</keyword>
         <keyword ref="qbluetoothlocaldevice.html#turnOff">turnOff</keyword>
@@ -1241,6 +1257,7 @@
     <section ref="qbluetoothlocaldevicemanager.html" title="QBluetoothLocalDeviceManager Class Reference">
         <keyword ref="qbluetoothlocaldevicemanager.html">QBluetoothLocalDeviceManager</keyword>
         <keyword ref="qbluetoothlocaldevicemanager.html#defaultDevice">defaultDevice</keyword>
+        <keyword ref="qbluetoothlocaldevicemanager.html#defaultDeviceChanged">defaultDeviceChanged</keyword>
         <keyword ref="qbluetoothlocaldevicemanager.html#deviceAdded">deviceAdded</keyword>
         <keyword ref="qbluetoothlocaldevicemanager.html#deviceRemoved">deviceRemoved</keyword>
         <keyword ref="qbluetoothlocaldevicemanager.html#devices">devices</keyword>
@@ -1248,10 +1265,8 @@
     </section>
     <section ref="qbluetoothobexserver.html" title="QBluetoothObexServer Class Reference">
         <keyword ref="qbluetoothobexserver.html">QBluetoothObexServer</keyword>
-        <keyword ref="qbluetoothobexserver.html#authenticated">authenticated</keyword>
-        <keyword ref="qbluetoothobexserver.html#encrypted">encrypted</keyword>
-        <keyword ref="qbluetoothobexserver.html#nextPendingConnection">nextPendingConnection</keyword>
-        <keyword ref="qbluetoothobexserver.html#registerServer">registerServer</keyword>
+        <keyword ref="qbluetoothobexserver.html#isAuthenticated">isAuthenticated</keyword>
+        <keyword ref="qbluetoothobexserver.html#isEncrypted">isEncrypted</keyword>
         <keyword ref="qbluetoothobexserver.html#securityOptions">securityOptions</keyword>
         <keyword ref="qbluetoothobexserver.html#serverAddress">serverAddress</keyword>
         <keyword ref="qbluetoothobexserver.html#serverChannel">serverChannel</keyword>
@@ -1267,7 +1282,8 @@
         <keyword ref="qbluetoothpasskeyagent.html#Error-enum">QBluetoothPasskeyAgent::DoesNotExist</keyword>
         <keyword ref="qbluetoothpasskeyagent.html#Error-enum">QBluetoothPasskeyAgent::UnknownAddress</keyword>
         <keyword ref="qbluetoothpasskeyagent.html#cancelRequest">cancelRequest</keyword>
-        <keyword ref="qbluetoothpasskeyagent.html#lastError">lastError</keyword>
+        <keyword ref="qbluetoothpasskeyagent.html#confirmPasskey">confirmPasskey</keyword>
+        <keyword ref="qbluetoothpasskeyagent.html#error">error</keyword>
         <keyword ref="qbluetoothpasskeyagent.html#name">name</keyword>
         <keyword ref="qbluetoothpasskeyagent.html#registerDefault">registerDefault</keyword>
         <keyword ref="qbluetoothpasskeyagent.html#registerForAddress">registerForAddress</keyword>
@@ -1317,6 +1333,27 @@
         <keyword ref="qbluetoothremotedevice.html#operator-eq-eq">operator==</keyword>
         <section ref="qbluetoothremotedevice-members.html" title="List of all members"/>
     </section>
+    <section ref="qbluetoothremotedevicedialog.html" title="QBluetoothRemoteDeviceDialog Class Reference">
+        <keyword ref="qbluetoothremotedevicedialog.html">QBluetoothRemoteDeviceDialog</keyword>
+        <keyword ref="qbluetoothremotedevicedialog.html#filter">filter</keyword>
+        <keyword ref="qbluetoothremotedevicedialog.html#getRemoteDevice">getRemoteDevice</keyword>
+        <keyword ref="qbluetoothremotedevicedialog.html#selectedDevice">selectedDevice</keyword>
+        <keyword ref="qbluetoothremotedevicedialog.html#setFilter">setFilter</keyword>
+        <keyword ref="qbluetoothremotedevicedialog.html#setValidationProfiles">setValidationProfiles</keyword>
+        <keyword ref="qbluetoothremotedevicedialog.html#validationProfiles">validationProfiles</keyword>
+        <section ref="qbluetoothremotedevicedialog-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbluetoothremotedevicedialogfilter.html" title="QBluetoothRemoteDeviceDialogFilter Class Reference">
+        <keyword ref="qbluetoothremotedevicedialogfilter.html">QBluetoothRemoteDeviceDialogFilter</keyword>
+        <keyword ref="qbluetoothremotedevicedialogfilter.html#acceptedDeviceMajors">acceptedDeviceMajors</keyword>
+        <keyword ref="qbluetoothremotedevicedialogfilter.html#acceptedServiceClasses">acceptedServiceClasses</keyword>
+        <keyword ref="qbluetoothremotedevicedialogfilter.html#filterAcceptsDevice">filterAcceptsDevice</keyword>
+        <keyword ref="qbluetoothremotedevicedialogfilter.html#setAcceptedDeviceMajors">setAcceptedDeviceMajors</keyword>
+        <keyword ref="qbluetoothremotedevicedialogfilter.html#setAcceptedServiceClasses">setAcceptedServiceClasses</keyword>
+        <keyword ref="qbluetoothremotedevicedialogfilter.html#operator-eq">operator=</keyword>
+        <keyword ref="qbluetoothremotedevicedialogfilter.html#operator-eq-eq">operator==</keyword>
+        <section ref="qbluetoothremotedevicedialogfilter-members.html" title="List of all members"/>
+    </section>
     <section ref="qbluetoothreply.html" title="QBluetoothReply Class Reference">
         <keyword ref="qbluetoothreply.html">QBluetoothReply</keyword>
         <keyword ref="qbluetoothreply.html#isError">isError</keyword>
@@ -1326,11 +1363,30 @@
     </section>
     <section ref="qbluetoothrfcommserialport.html" title="QBluetoothRfcommSerialPort Class Reference">
         <keyword ref="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</keyword>
-        <keyword ref="qbluetoothrfcommserialport.html#boundDevice">boundDevice</keyword>
-        <keyword ref="qbluetoothrfcommserialport.html#createTty">createTty</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Error-enum">Error</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Error-enum">QBluetoothRfcommSerialPort::ConnectionCancelled</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Error-enum">QBluetoothRfcommSerialPort::NoError</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Error-enum">QBluetoothRfcommSerialPort::SocketNotConnected</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Error-enum">QBluetoothRfcommSerialPort::CreationError</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Error-enum">QBluetoothRfcommSerialPort::ConnectionFailed</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Flag-enum">Flag</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Flag-enum">Flags</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#Flag-enum">QBluetoothRfcommSerialPort::KeepAlive</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#connect">connect</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#connected">connected</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#device">device</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#disconnect">disconnect</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#disconnected">disconnected</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#error">error</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#errorString">errorString</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#flags">flags</keyword>
         <keyword ref="qbluetoothrfcommserialport.html#id">id</keyword>
-        <keyword ref="qbluetoothrfcommserialport.html#listBindings">listBindings</keyword>
-        <keyword ref="qbluetoothrfcommserialport.html#releaseTty">releaseTty</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#listDevices">listDevices</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#localAddress">localAddress</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#releaseDevice">releaseDevice</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#remoteAddress">remoteAddress</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#remoteChannel">remoteChannel</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#setError">setError</keyword>
         <section ref="qbluetoothrfcommserialport-members.html" title="List of all members"/>
     </section>
     <section ref="qbluetoothrfcommserver.html" title="QBluetoothRfcommServer Class Reference">
@@ -1369,29 +1425,112 @@
         <keyword ref="qbluetoothscosocket.html#remoteAddress">remoteAddress</keyword>
         <section ref="qbluetoothscosocket-members.html" title="List of all members"/>
     </section>
+    <section ref="qbluetoothsdpalternative.html" title="QBluetoothSdpAlternative Class Reference">
+        <keyword ref="qbluetoothsdpalternative.html">QBluetoothSdpAlternative</keyword>
+        <section ref="qbluetoothsdpalternative-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbluetoothsdpquery.html" title="QBluetoothSdpQuery Class Reference">
+        <keyword ref="qbluetoothsdpquery.html">QBluetoothSdpQuery</keyword>
+        <keyword ref="qbluetoothsdpquery.html#browseServices">browseServices</keyword>
+        <keyword ref="qbluetoothsdpquery.html#cancelSearch">cancelSearch</keyword>
+        <keyword ref="qbluetoothsdpquery.html#searchCancelled">searchCancelled</keyword>
+        <keyword ref="qbluetoothsdpquery.html#searchComplete">searchComplete</keyword>
+        <keyword ref="qbluetoothsdpquery.html#searchServices">searchServices</keyword>
+        <section ref="qbluetoothsdpquery-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbluetoothsdpqueryresult.html" title="QBluetoothSdpQueryResult Class Reference">
+        <keyword ref="qbluetoothsdpqueryresult.html">QBluetoothSdpQueryResult</keyword>
+        <keyword ref="qbluetoothsdpqueryresult.html#addService">addService</keyword>
+        <keyword ref="qbluetoothsdpqueryresult.html#error">error</keyword>
+        <keyword ref="qbluetoothsdpqueryresult.html#isValid">isValid</keyword>
+        <keyword ref="qbluetoothsdpqueryresult.html#reset">reset</keyword>
+        <keyword ref="qbluetoothsdpqueryresult.html#services">services</keyword>
+        <keyword ref="qbluetoothsdpqueryresult.html#setError">setError</keyword>
+        <keyword ref="qbluetoothsdpqueryresult.html#operator-eq">operator=</keyword>
+        <section ref="qbluetoothsdpqueryresult-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbluetoothsdprecord.html" title="QBluetoothSdpRecord Class Reference">
+        <keyword ref="qbluetoothsdprecord.html">QBluetoothSdpRecord</keyword>
+        <keyword ref="qbluetoothsdprecord.html#addAttribute">addAttribute</keyword>
+        <keyword ref="qbluetoothsdprecord.html#attribute">attribute</keyword>
+        <keyword ref="qbluetoothsdprecord.html#attributeIds">attributeIds</keyword>
+        <keyword ref="qbluetoothsdprecord.html#browseGroups">browseGroups</keyword>
+        <keyword ref="qbluetoothsdprecord.html#clearAttributes">clearAttributes</keyword>
+        <keyword ref="qbluetoothsdprecord.html#docURL">docURL</keyword>
+        <keyword ref="qbluetoothsdprecord.html#execURL">execURL</keyword>
+        <keyword ref="qbluetoothsdprecord.html#group">group</keyword>
+        <keyword ref="qbluetoothsdprecord.html#iconURL">iconURL</keyword>
+        <keyword ref="qbluetoothsdprecord.html#id">id</keyword>
+        <keyword ref="qbluetoothsdprecord.html#isInstance">isInstance</keyword>
+        <keyword ref="qbluetoothsdprecord.html#providerName">providerName</keyword>
+        <keyword ref="qbluetoothsdprecord.html#recordHandle">recordHandle</keyword>
+        <keyword ref="qbluetoothsdprecord.html#removeAttribute">removeAttribute</keyword>
+        <keyword ref="qbluetoothsdprecord.html#rfcommChannel">rfcommChannel</keyword>
+        <keyword ref="qbluetoothsdprecord.html#serviceDescription">serviceDescription</keyword>
+        <keyword ref="qbluetoothsdprecord.html#serviceName">serviceName</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setBrowseGroups">setBrowseGroups</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setDocURL">setDocURL</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setExecURL">setExecURL</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setGroup">setGroup</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setIconURL">setIconURL</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setId">setId</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setProviderName">setProviderName</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setRecordHandle">setRecordHandle</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setServiceDescription">setServiceDescription</keyword>
+        <keyword ref="qbluetoothsdprecord.html#setServiceName">setServiceName</keyword>
+        <keyword ref="qbluetoothsdprecord.html#operator-eq">operator=</keyword>
+        <section ref="qbluetoothsdprecord-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbluetoothsdpsequence.html" title="QBluetoothSdpSequence Class Reference">
+        <keyword ref="qbluetoothsdpsequence.html">QBluetoothSdpSequence</keyword>
+        <section ref="qbluetoothsdpsequence-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbluetoothsdpuuid.html" title="QBluetoothSdpUuid Class Reference">
+        <keyword ref="qbluetoothsdpuuid.html">QBluetoothSdpUuid</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#Type-enum">Type</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#Type-enum">QBluetoothSdpUuid::UUID16</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#Type-enum">QBluetoothSdpUuid::UUID128</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#Type-enum">QBluetoothSdpUuid::UUID32</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#create128Bit">create128Bit</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#create16Bit">create16Bit</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#create32Bit">create32Bit</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#fromProfile">fromProfile</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#isValid">isValid</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#toString">toString</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#toUuid128">toUuid128</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#type">type</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#uuid">uuid</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#operator-not-eq">operator!=</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#operator-eq">operator=</keyword>
+        <keyword ref="qbluetoothsdpuuid.html#operator-eq-eq">operator==</keyword>
+        <section ref="qbluetoothsdpuuid-members.html" title="List of all members"/>
+    </section>
     <section ref="qbluetoothservicecontroller.html" title="QBluetoothServiceController Class Reference">
         <keyword ref="qbluetoothservicecontroller.html">QBluetoothServiceController</keyword>
         <keyword ref="qbluetoothservicecontroller.html#ServiceState-enum">ServiceState</keyword>
-        <keyword ref="qbluetoothservicecontroller.html#ServiceState-enum">QBluetoothServiceController::Stopping</keyword>
-        <keyword ref="qbluetoothservicecontroller.html#ServiceState-enum">QBluetoothServiceController::Stopped</keyword>
-        <keyword ref="qbluetoothservicecontroller.html#ServiceState-enum">QBluetoothServiceController::Started</keyword>
+        <keyword ref="qbluetoothservicecontroller.html#ServiceState-enum">QBluetoothServiceController::NotRunning</keyword>
+        <keyword ref="qbluetoothservicecontroller.html#ServiceState-enum">QBluetoothServiceController::Running</keyword>
         <keyword ref="qbluetoothservicecontroller.html#ServiceState-enum">QBluetoothServiceController::Starting</keyword>
-        <keyword ref="qbluetoothservicecontroller.html#error">error</keyword>
-        <keyword ref="qbluetoothservicecontroller.html#isRegistered">isRegistered</keyword>
-        <keyword ref="qbluetoothservicecontroller.html#registeredServices">registeredServices</keyword>
+        <keyword ref="qbluetoothservicecontroller.html#displayName">displayName</keyword>
         <keyword ref="qbluetoothservicecontroller.html#securityOptions">securityOptions</keyword>
+        <keyword ref="qbluetoothservicecontroller.html#services">services</keyword>
         <keyword ref="qbluetoothservicecontroller.html#setSecurityOptions">setSecurityOptions</keyword>
         <keyword ref="qbluetoothservicecontroller.html#start">start</keyword>
         <keyword ref="qbluetoothservicecontroller.html#started">started</keyword>
         <keyword ref="qbluetoothservicecontroller.html#state">state</keyword>
         <keyword ref="qbluetoothservicecontroller.html#stop">stop</keyword>
         <keyword ref="qbluetoothservicecontroller.html#stopped">stopped</keyword>
-        <keyword ref="qbluetoothservicecontroller.html#translatableDisplayName">translatableDisplayName</keyword>
         <section ref="qbluetoothservicecontroller-members.html" title="List of all members"/>
     </section>
     <section ref="qbootsourceaccessory.html" title="QBootSourceAccessory Class Reference">
         <keyword ref="qbootsourceaccessory.html">QBootSourceAccessory</keyword>
         <keyword ref="qbootsourceaccessory.html#Source-enum">Source</keyword>
+        <keyword ref="qbootsourceaccessory.html#Source-enum">QBootSourceAccessory::Unknown</keyword>
+        <keyword ref="qbootsourceaccessory.html#Source-enum">QBootSourceAccessory::Watchdog</keyword>
+        <keyword ref="qbootsourceaccessory.html#Source-enum">QBootSourceAccessory::Software</keyword>
+        <keyword ref="qbootsourceaccessory.html#Source-enum">QBootSourceAccessory::Charger</keyword>
+        <keyword ref="qbootsourceaccessory.html#Source-enum">QBootSourceAccessory::Alarm</keyword>
+        <keyword ref="qbootsourceaccessory.html#Source-enum">QBootSourceAccessory::PowerKey</keyword>
         <keyword ref="qbootsourceaccessory.html#bootSource">bootSource</keyword>
         <keyword ref="qbootsourceaccessory.html#bootSourceModified">bootSourceModified</keyword>
         <section ref="qbootsourceaccessory-members.html" title="List of all members"/>
@@ -1682,6 +1821,17 @@
         <keyword ref="qcontact.html#operator-eq-eq">operator==</keyword>
         <section ref="qcontact-members.html" title="List of all members"/>
     </section>
+    <section ref="qcontactaddress.html" title="QContactAddress Class Reference">
+        <keyword ref="qcontactaddress.html">QContactAddress</keyword>
+        <keyword ref="qcontactaddress.html#isEmpty">isEmpty</keyword>
+        <keyword ref="qcontactaddress.html#operator-eq-eq">operator==</keyword>
+        <keyword ref="qcontactaddress.html#city-var">city</keyword>
+        <keyword ref="qcontactaddress.html#country-var">country</keyword>
+        <keyword ref="qcontactaddress.html#state-var">state</keyword>
+        <keyword ref="qcontactaddress.html#street-var">street</keyword>
+        <keyword ref="qcontactaddress.html#zip-var">zip</keyword>
+        <section ref="qcontactaddress-members.html" title="List of all members"/>
+    </section>
     <section ref="qcontactcontext.html" title="QContactContext Class Reference">
         <keyword ref="qcontactcontext.html">QContactContext</keyword>
         <keyword ref="qcontactcontext.html#addContact">addContact</keyword>
@@ -1695,10 +1845,12 @@
     </section>
     <section ref="qcontactdelegate.html" title="QContactDelegate Class Reference">
         <keyword ref="qcontactdelegate.html">QContactDelegate</keyword>
-        <keyword ref="qcontactdelegate.html#mainFont">mainFont</keyword>
-        <keyword ref="qcontactdelegate.html#paint">paint</keyword>
-        <keyword ref="qcontactdelegate.html#secondaryFont">secondaryFont</keyword>
-        <keyword ref="qcontactdelegate.html#sizeHint">sizeHint</keyword>
+        <keyword ref="qcontactdelegate.html#backgroundStyle">backgroundStyle</keyword>
+        <keyword ref="qcontactdelegate.html#decorationsSizeHint">decorationsSizeHint</keyword>
+        <keyword ref="qcontactdelegate.html#drawDecorations">drawDecorations</keyword>
+        <keyword ref="qcontactdelegate.html#subTextAlignment">subTextAlignment</keyword>
+        <keyword ref="qcontactdelegate.html#subTexts">subTexts</keyword>
+        <keyword ref="qcontactdelegate.html#subTextsCountHint">subTextsCountHint</keyword>
         <section ref="qcontactdelegate-members.html" title="List of all members"/>
     </section>
     <section ref="qcontactlistview.html" title="QContactListView Class Reference">
@@ -1709,7 +1861,6 @@
         <keyword ref="qcontactlistview.html#selectedContactIds">selectedContactIds</keyword>
         <keyword ref="qcontactlistview.html#selectedContacts">selectedContacts</keyword>
         <keyword ref="qcontactlistview.html#setModel">setModel</keyword>
-        <keyword ref="qcontactlistview.html#slotCurrentChanged">slotCurrentChanged</keyword>
         <section ref="qcontactlistview-members.html" title="List of all members"/>
     </section>
     <section ref="qcontactmodel.html" title="QContactModel Class Reference">
@@ -1725,32 +1876,22 @@
         <keyword ref="qcontactmodel.html#QContactModelRole-enum">QContactModel::StatusIconRole</keyword>
         <keyword ref="qcontactmodel.html#QContactModelRole-enum">QContactModel::SubLabelRole</keyword>
         <keyword ref="qcontactmodel.html#addContact">addContact</keyword>
-        <keyword ref="qcontactmodel.html#availableSources">availableSources</keyword>
-        <keyword ref="qcontactmodel.html#categoryFilter">categoryFilter</keyword>
+        <keyword ref="qcontactmodel.html#addRecord">addRecord</keyword>
         <keyword ref="qcontactmodel.html#clearFilter">clearFilter</keyword>
         <keyword ref="qcontactmodel.html#clearPersonalDetails">clearPersonalDetails</keyword>
         <keyword ref="qcontactmodel.html#columnCount">columnCount</keyword>
         <keyword ref="qcontactmodel.html#contact">contact</keyword>
         <keyword ref="qcontactmodel.html#contactField">contactField</keyword>
-        <keyword ref="qcontactmodel.html#contains">contains</keyword>
-        <keyword ref="qcontactmodel.html#context">context</keyword>
-        <keyword ref="qcontactmodel.html#contexts">contexts</keyword>
-        <keyword ref="qcontactmodel.html#count">count</keyword>
         <keyword ref="qcontactmodel.html#data">data</keyword>
-        <keyword ref="qcontactmodel.html#exists">exists</keyword>
         <keyword ref="qcontactmodel.html#fieldIcon">fieldIcon</keyword>
         <keyword ref="qcontactmodel.html#fieldIdentifier">fieldIdentifier</keyword>
         <keyword ref="qcontactmodel.html#fieldLabel">fieldLabel</keyword>
         <keyword ref="qcontactmodel.html#filterFlags">filterFlags</keyword>
         <keyword ref="qcontactmodel.html#filterText">filterText</keyword>
         <keyword ref="qcontactmodel.html#flags">flags</keyword>
-        <keyword ref="qcontactmodel.html#flush">flush</keyword>
-        <keyword ref="qcontactmodel.html#hasChildren">hasChildren</keyword>
         <keyword ref="qcontactmodel.html#hasPersonalDetails">hasPersonalDetails</keyword>
         <keyword ref="qcontactmodel.html#headerData">headerData</keyword>
-        <keyword ref="qcontactmodel.html#id">id</keyword>
         <keyword ref="qcontactmodel.html#identifierField">identifierField</keyword>
-        <keyword ref="qcontactmodel.html#index">index</keyword>
         <keyword ref="qcontactmodel.html#isPersonalDetails">isPersonalDetails</keyword>
         <keyword ref="qcontactmodel.html#isSIMCardContact">isSIMCardContact</keyword>
         <keyword ref="qcontactmodel.html#itemData">itemData</keyword>
@@ -1760,28 +1901,23 @@
         <keyword ref="qcontactmodel.html#mimeTypes">mimeTypes</keyword>
         <keyword ref="qcontactmodel.html#mirrorAll">mirrorAll</keyword>
         <keyword ref="qcontactmodel.html#mirrorToSource">mirrorToSource</keyword>
-        <keyword ref="qcontactmodel.html#parent">parent</keyword>
         <keyword ref="qcontactmodel.html#personalDetails">personalDetails</keyword>
         <keyword ref="qcontactmodel.html#personalID">personalID</keyword>
         <keyword ref="qcontactmodel.html#phoneFields">phoneFields</keyword>
         <keyword ref="qcontactmodel.html#phoneSource">phoneSource</keyword>
-        <keyword ref="qcontactmodel.html#refresh">refresh</keyword>
+        <keyword ref="qcontactmodel.html#record">record</keyword>
         <keyword ref="qcontactmodel.html#removeContact">removeContact</keyword>
         <keyword ref="qcontactmodel.html#removeList">removeList</keyword>
-        <keyword ref="qcontactmodel.html#rowCount">rowCount</keyword>
-        <keyword ref="qcontactmodel.html#setCategoryFilter">setCategoryFilter</keyword>
+        <keyword ref="qcontactmodel.html#removeRecord">removeRecord</keyword>
         <keyword ref="qcontactmodel.html#setContactField">setContactField</keyword>
         <keyword ref="qcontactmodel.html#setData">setData</keyword>
         <keyword ref="qcontactmodel.html#setFilter">setFilter</keyword>
         <keyword ref="qcontactmodel.html#setItemData">setItemData</keyword>
         <keyword ref="qcontactmodel.html#setPersonalDetails">setPersonalDetails</keyword>
-        <keyword ref="qcontactmodel.html#setVisibleSources">setVisibleSources</keyword>
         <keyword ref="qcontactmodel.html#simSource">simSource</keyword>
         <keyword ref="qcontactmodel.html#sort">sort</keyword>
-        <keyword ref="qcontactmodel.html#source">source</keyword>
-        <keyword ref="qcontactmodel.html#sourceExists">sourceExists</keyword>
         <keyword ref="qcontactmodel.html#updateContact">updateContact</keyword>
-        <keyword ref="qcontactmodel.html#visibleSources">visibleSources</keyword>
+        <keyword ref="qcontactmodel.html#updateRecord">updateRecord</keyword>
         <keyword ref="qcontactmodel.html#writeVCard">writeVCard</keyword>
         <section ref="qcontactmodel-members.html" title="List of all members"/>
     </section>
@@ -1882,11 +2018,15 @@
         <keyword ref="qcontent.html#usageMode">usageMode</keyword>
         <keyword ref="qcontent.html#operator-eq">operator=</keyword>
         <keyword ref="qcontent.html#operator-eq-eq">operator==</keyword>
+        <keyword ref="qcontent.html#QContentId-typedef">QContentId</keyword>
+        <keyword ref="qcontent.html#QContentIdList-typedef">QContentIdList</keyword>
+        <keyword ref="qcontent.html#QtopiaDatabaseId-typedef">QtopiaDatabaseId</keyword>
         <section ref="qcontent-members.html" title="List of all members"/>
     </section>
     <section ref="qcontentfactory.html" title="QContentFactory Class Reference">
         <keyword ref="qcontentfactory.html">QContentFactory</keyword>
         <keyword ref="qcontentfactory.html#installContent">installContent</keyword>
+        <keyword ref="qcontentfactory.html#updateContent">updateContent</keyword>
         <section ref="qcontentfactory-members.html" title="List of all members"/>
     </section>
     <section ref="qcontentfilter.html" title="QContentFilter Class Reference">
@@ -1980,6 +2120,7 @@
         <keyword ref="qcontentplugin.html">QContentPlugin</keyword>
         <keyword ref="qcontentplugin.html#installContent">installContent</keyword>
         <keyword ref="qcontentplugin.html#keys">keys</keyword>
+        <keyword ref="qcontentplugin.html#updateContent">updateContent</keyword>
         <section ref="qcontentplugin-members.html" title="List of all members"/>
     </section>
     <section ref="qcontentset.html" title="QContentSet Class Reference">
@@ -2330,6 +2471,7 @@
         <keyword ref="qdrmcontentplugin.html#thumbnail">thumbnail</keyword>
         <keyword ref="qdrmcontentplugin.html#types">types</keyword>
         <keyword ref="qdrmcontentplugin.html#unencryptedSize">unencryptedSize</keyword>
+        <keyword ref="qdrmcontentplugin.html#updateContent">updateContent</keyword>
         <section ref="qdrmcontentplugin-members.html" title="List of all members"/>
     </section>
     <section ref="qdrmrights.html" title="QDrmRights Class Reference">
@@ -2704,8 +2846,6 @@
     <section ref="qirobexserver.html" title="QIrObexServer Class Reference">
         <keyword ref="qirobexserver.html">QIrObexServer</keyword>
         <keyword ref="qirobexserver.html#deviceClasses">deviceClasses</keyword>
-        <keyword ref="qirobexserver.html#nextPendingConnection">nextPendingConnection</keyword>
-        <keyword ref="qirobexserver.html#registerServer">registerServer</keyword>
         <keyword ref="qirobexserver.html#service">service</keyword>
         <section ref="qirobexserver-members.html" title="List of all members"/>
     </section>
@@ -2734,14 +2874,6 @@
     <section ref="qkeypadlightaccessoryprovider.html" title="QKeypadLightAccessoryProvider Class Reference">
         <keyword ref="qkeypadlightaccessoryprovider.html">QKeypadLightAccessoryProvider</keyword>
         <section ref="qkeypadlightaccessoryprovider-members.html" title="List of all members"/>
-    </section>
-    <section ref="qlocaluniqueid.html" title="QLocalUniqueId Class Reference">
-        <keyword ref="qlocaluniqueid.html">QLocalUniqueId</keyword>
-        <keyword ref="qlocaluniqueid.html#fromLocalContextDataStream">fromLocalContextDataStream</keyword>
-        <keyword ref="qlocaluniqueid.html#toByteArray">toByteArray</keyword>
-        <keyword ref="qlocaluniqueid.html#toLocalContextDataStream">toLocalContextDataStream</keyword>
-        <keyword ref="qlocaluniqueid.html#toString">toString</keyword>
-        <section ref="qlocaluniqueid-members.html" title="List of all members"/>
     </section>
     <section ref="qmallocpool.html" title="QMallocPool Class Reference">
         <keyword ref="qmallocpool.html">QMallocPool</keyword>
@@ -2948,30 +3080,52 @@
     </section>
     <section ref="qobexpushclient.html" title="QObexPushClient Class Reference">
         <keyword ref="qobexpushclient.html">QObexPushClient</keyword>
+        <keyword ref="qobexpushclient.html#Error-enum">Error</keyword>
+        <keyword ref="qobexpushclient.html#Error-enum">QObexPushClient::NoError</keyword>
+        <keyword ref="qobexpushclient.html#Error-enum">QObexPushClient::RequestFailed</keyword>
+        <keyword ref="qobexpushclient.html#Error-enum">QObexPushClient::UnknownError</keyword>
+        <keyword ref="qobexpushclient.html#Error-enum">QObexPushClient::Aborted</keyword>
+        <keyword ref="qobexpushclient.html#Error-enum">QObexPushClient::LinkError</keyword>
+        <keyword ref="qobexpushclient.html#Error-enum">QObexPushClient::TransportConnectionError</keyword>
+        <keyword ref="qobexpushclient.html#State-enum">State</keyword>
+        <keyword ref="qobexpushclient.html#State-enum">QObexPushClient::Disconnecting</keyword>
+        <keyword ref="qobexpushclient.html#State-enum">QObexPushClient::Closed</keyword>
+        <keyword ref="qobexpushclient.html#State-enum">QObexPushClient::Connecting</keyword>
+        <keyword ref="qobexpushclient.html#State-enum">QObexPushClient::Ready</keyword>
+        <keyword ref="qobexpushclient.html#State-enum">QObexPushClient::Streaming</keyword>
         <keyword ref="qobexpushclient.html#abort">abort</keyword>
-        <keyword ref="qobexpushclient.html#autoDelete">autoDelete</keyword>
-        <keyword ref="qobexpushclient.html#close">close</keyword>
+        <keyword ref="qobexpushclient.html#clearPendingCommands">clearPendingCommands</keyword>
         <keyword ref="qobexpushclient.html#commandFinished">commandFinished</keyword>
         <keyword ref="qobexpushclient.html#commandStarted">commandStarted</keyword>
         <keyword ref="qobexpushclient.html#connect">connect</keyword>
+        <keyword ref="qobexpushclient.html#currentId">currentId</keyword>
         <keyword ref="qobexpushclient.html#disconnect">disconnect</keyword>
         <keyword ref="qobexpushclient.html#done">done</keyword>
         <keyword ref="qobexpushclient.html#error">error</keyword>
         <keyword ref="qobexpushclient.html#exchangeBusinessCard">exchangeBusinessCard</keyword>
+        <keyword ref="qobexpushclient.html#hasPendingCommands">hasPendingCommands</keyword>
         <keyword ref="qobexpushclient.html#progress">progress</keyword>
         <keyword ref="qobexpushclient.html#requestBusinessCard">requestBusinessCard</keyword>
         <keyword ref="qobexpushclient.html#send">send</keyword>
         <keyword ref="qobexpushclient.html#sendBusinessCard">sendBusinessCard</keyword>
-        <keyword ref="qobexpushclient.html#setAutoDelete">setAutoDelete</keyword>
         <keyword ref="qobexpushclient.html#state">state</keyword>
         <keyword ref="qobexpushclient.html#stateChanged">stateChanged</keyword>
         <section ref="qobexpushclient-members.html" title="List of all members"/>
     </section>
     <section ref="qobexpushservice.html" title="QObexPushService Class Reference">
         <keyword ref="qobexpushservice.html">QObexPushService</keyword>
-        <keyword ref="qobexpushservice.html#aboutToDelete">aboutToDelete</keyword>
+        <keyword ref="qobexpushservice.html#Error-enum">Error</keyword>
+        <keyword ref="qobexpushservice.html#Error-enum">QObexPushService::NoError</keyword>
+        <keyword ref="qobexpushservice.html#Error-enum">QObexPushService::UnknownError</keyword>
+        <keyword ref="qobexpushservice.html#Error-enum">QObexPushService::Aborted</keyword>
+        <keyword ref="qobexpushservice.html#Error-enum">QObexPushService::LinkError</keyword>
+        <keyword ref="qobexpushservice.html#State-enum">State</keyword>
+        <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Disconnecting</keyword>
+        <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Closed</keyword>
+        <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Connecting</keyword>
+        <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Ready</keyword>
+        <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Streaming</keyword>
         <keyword ref="qobexpushservice.html#acceptFile">acceptFile</keyword>
-        <keyword ref="qobexpushservice.html#autoDelete">autoDelete</keyword>
         <keyword ref="qobexpushservice.html#businessCard">businessCard</keyword>
         <keyword ref="qobexpushservice.html#close">close</keyword>
         <keyword ref="qobexpushservice.html#done">done</keyword>
@@ -2981,7 +3135,6 @@
         <keyword ref="qobexpushservice.html#progress">progress</keyword>
         <keyword ref="qobexpushservice.html#putRequest">putRequest</keyword>
         <keyword ref="qobexpushservice.html#requestComplete">requestComplete</keyword>
-        <keyword ref="qobexpushservice.html#setAutoDelete">setAutoDelete</keyword>
         <keyword ref="qobexpushservice.html#setIncomingDirectory">setIncomingDirectory</keyword>
         <keyword ref="qobexpushservice.html#socket">socket</keyword>
         <keyword ref="qobexpushservice.html#state">state</keyword>
@@ -2999,6 +3152,15 @@
         <keyword ref="qobexserver.html#registerServer">registerServer</keyword>
         <keyword ref="qobexserver.html#spawnReceiver">spawnReceiver</keyword>
         <section ref="qobexserver-members.html" title="List of all members"/>
+    </section>
+    <section ref="qobexsocket.html" title="QObexSocket Class Reference">
+        <keyword ref="qobexsocket.html">QObexSocket</keyword>
+        <keyword ref="qobexsocket.html#close">close</keyword>
+        <keyword ref="qobexsocket.html#connect">connect</keyword>
+        <keyword ref="qobexsocket.html#handle">handle</keyword>
+        <keyword ref="qobexsocket.html#isConnected">isConnected</keyword>
+        <keyword ref="qobexsocket.html#setHandle">setHandle</keyword>
+        <section ref="qobexsocket-members.html" title="List of all members"/>
     </section>
     <section ref="qoccurrence.html" title="QOccurrence Class Reference">
         <keyword ref="qoccurrence.html">QOccurrence</keyword>
@@ -3223,6 +3385,72 @@
         <keyword ref="qpimcontext.html#visibleSources">visibleSources</keyword>
         <section ref="qpimcontext-members.html" title="List of all members"/>
     </section>
+    <section ref="qpimdelegate.html" title="QPimDelegate Class Reference">
+        <keyword ref="qpimdelegate.html">QPimDelegate</keyword>
+        <keyword ref="qpimdelegate.html#BackgroundStyle-enum">BackgroundStyle</keyword>
+        <keyword ref="qpimdelegate.html#BackgroundStyle-enum">QPimDelegate::None</keyword>
+        <keyword ref="qpimdelegate.html#BackgroundStyle-enum">QPimDelegate::SelectedOnly</keyword>
+        <keyword ref="qpimdelegate.html#BackgroundStyle-enum">QPimDelegate::Gradient</keyword>
+        <keyword ref="qpimdelegate.html#SubTextAlignment-enum">SubTextAlignment</keyword>
+        <keyword ref="qpimdelegate.html#SubTextAlignment-enum">QPimDelegate::Independent</keyword>
+        <keyword ref="qpimdelegate.html#SubTextAlignment-enum">QPimDelegate::CuddledPerItem</keyword>
+        <keyword ref="qpimdelegate.html#backgroundStyle">backgroundStyle</keyword>
+        <keyword ref="qpimdelegate.html#decorationsSizeHint">decorationsSizeHint</keyword>
+        <keyword ref="qpimdelegate.html#differentFont">differentFont</keyword>
+        <keyword ref="qpimdelegate.html#drawBackground">drawBackground</keyword>
+        <keyword ref="qpimdelegate.html#drawDecorations">drawDecorations</keyword>
+        <keyword ref="qpimdelegate.html#drawForeground">drawForeground</keyword>
+        <keyword ref="qpimdelegate.html#mainFont">mainFont</keyword>
+        <keyword ref="qpimdelegate.html#mainText">mainText</keyword>
+        <keyword ref="qpimdelegate.html#paint">paint</keyword>
+        <keyword ref="qpimdelegate.html#secondaryFont">secondaryFont</keyword>
+        <keyword ref="qpimdelegate.html#secondaryHeaderFont">secondaryHeaderFont</keyword>
+        <keyword ref="qpimdelegate.html#sizeHint">sizeHint</keyword>
+        <keyword ref="qpimdelegate.html#subTextAlignment">subTextAlignment</keyword>
+        <keyword ref="qpimdelegate.html#subTexts">subTexts</keyword>
+        <keyword ref="qpimdelegate.html#subTextsCountHint">subTextsCountHint</keyword>
+        <keyword ref="qpimdelegate.html#textRectangle">textRectangle</keyword>
+        <section ref="qpimdelegate-members.html" title="List of all members"/>
+    </section>
+    <section ref="qpimmodel.html" title="QPimModel Class Reference">
+        <keyword ref="qpimmodel.html">QPimModel</keyword>
+        <keyword ref="qpimmodel.html#abortSyncTransaction">abortSyncTransaction</keyword>
+        <keyword ref="qpimmodel.html#access">access</keyword>
+        <keyword ref="qpimmodel.html#accessModels">accessModels</keyword>
+        <keyword ref="qpimmodel.html#accessRow">accessRow</keyword>
+        <keyword ref="qpimmodel.html#addAccess">addAccess</keyword>
+        <keyword ref="qpimmodel.html#addContext">addContext</keyword>
+        <keyword ref="qpimmodel.html#addRecord">addRecord</keyword>
+        <keyword ref="qpimmodel.html#added">added</keyword>
+        <keyword ref="qpimmodel.html#availableSources">availableSources</keyword>
+        <keyword ref="qpimmodel.html#categoryFilter">categoryFilter</keyword>
+        <keyword ref="qpimmodel.html#commitSyncTransaction">commitSyncTransaction</keyword>
+        <keyword ref="qpimmodel.html#contains">contains</keyword>
+        <keyword ref="qpimmodel.html#context">context</keyword>
+        <keyword ref="qpimmodel.html#contexts">contexts</keyword>
+        <keyword ref="qpimmodel.html#count">count</keyword>
+        <keyword ref="qpimmodel.html#editable">editable</keyword>
+        <keyword ref="qpimmodel.html#exists">exists</keyword>
+        <keyword ref="qpimmodel.html#flush">flush</keyword>
+        <keyword ref="qpimmodel.html#hasChildren">hasChildren</keyword>
+        <keyword ref="qpimmodel.html#id">id</keyword>
+        <keyword ref="qpimmodel.html#index">index</keyword>
+        <keyword ref="qpimmodel.html#modified">modified</keyword>
+        <keyword ref="qpimmodel.html#parent">parent</keyword>
+        <keyword ref="qpimmodel.html#record">record</keyword>
+        <keyword ref="qpimmodel.html#refresh">refresh</keyword>
+        <keyword ref="qpimmodel.html#removeRecord">removeRecord</keyword>
+        <keyword ref="qpimmodel.html#removed">removed</keyword>
+        <keyword ref="qpimmodel.html#rowCount">rowCount</keyword>
+        <keyword ref="qpimmodel.html#setCategoryFilter">setCategoryFilter</keyword>
+        <keyword ref="qpimmodel.html#setVisibleSources">setVisibleSources</keyword>
+        <keyword ref="qpimmodel.html#source">source</keyword>
+        <keyword ref="qpimmodel.html#sourceExists">sourceExists</keyword>
+        <keyword ref="qpimmodel.html#startSyncTransaction">startSyncTransaction</keyword>
+        <keyword ref="qpimmodel.html#updateRecord">updateRecord</keyword>
+        <keyword ref="qpimmodel.html#visibleSources">visibleSources</keyword>
+        <section ref="qpimmodel-members.html" title="List of all members"/>
+    </section>
     <section ref="qpimrecord.html" title="QPimRecord Class Reference">
         <keyword ref="qpimrecord.html">QPimRecord</keyword>
         <keyword ref="qpimrecord.html#categories">categories</keyword>
@@ -3339,93 +3567,6 @@
         <keyword ref="qretryatchat.html#done">done</keyword>
         <section ref="qretryatchat-members.html" title="List of all members"/>
     </section>
-    <section ref="qsdap.html" title="QSDAP Class Reference">
-        <keyword ref="qsdap.html">QSDAP</keyword>
-        <keyword ref="qsdap.html#browseLocalServices">browseLocalServices</keyword>
-        <keyword ref="qsdap.html#browseServices">browseServices</keyword>
-        <keyword ref="qsdap.html#cancelSearch">cancelSearch</keyword>
-        <keyword ref="qsdap.html#searchComplete">searchComplete</keyword>
-        <keyword ref="qsdap.html#searchLocalServices">searchLocalServices</keyword>
-        <keyword ref="qsdap.html#searchServices">searchServices</keyword>
-        <section ref="qsdap-members.html" title="List of all members"/>
-    </section>
-    <section ref="qsdapsearchresult.html" title="QSDAPSearchResult Class Reference">
-        <keyword ref="qsdapsearchresult.html">QSDAPSearchResult</keyword>
-        <keyword ref="qsdapsearchresult.html#addService">addService</keyword>
-        <keyword ref="qsdapsearchresult.html#clear">clear</keyword>
-        <keyword ref="qsdapsearchresult.html#clearError">clearError</keyword>
-        <keyword ref="qsdapsearchresult.html#error">error</keyword>
-        <keyword ref="qsdapsearchresult.html#errorOccurred">errorOccurred</keyword>
-        <keyword ref="qsdapsearchresult.html#services">services</keyword>
-        <keyword ref="qsdapsearchresult.html#setError">setError</keyword>
-        <keyword ref="qsdapsearchresult.html#operator-eq">operator=</keyword>
-        <section ref="qsdapsearchresult-members.html" title="List of all members"/>
-    </section>
-    <section ref="qsdp.html" title="QSDP Class Reference">
-        <keyword ref="qsdp.html">QSDP</keyword>
-        <keyword ref="qsdp.html#error">error</keyword>
-        <keyword ref="qsdp.html#registerService">registerService</keyword>
-        <keyword ref="qsdp.html#unregisterService">unregisterService</keyword>
-        <section ref="qsdp-members.html" title="List of all members"/>
-    </section>
-    <section ref="qsdpalternative.html" title="QSDPAlternative Class Reference">
-        <keyword ref="qsdpalternative.html">QSDPAlternative</keyword>
-        <section ref="qsdpalternative-members.html" title="List of all members"/>
-    </section>
-    <section ref="qsdpsequence.html" title="QSDPSequence Class Reference">
-        <keyword ref="qsdpsequence.html">QSDPSequence</keyword>
-        <section ref="qsdpsequence-members.html" title="List of all members"/>
-    </section>
-    <section ref="qsdpservice.html" title="QSDPService Class Reference">
-        <keyword ref="qsdpservice.html">QSDPService</keyword>
-        <keyword ref="qsdpservice.html#addAttribute">addAttribute</keyword>
-        <keyword ref="qsdpservice.html#attribute">attribute</keyword>
-        <keyword ref="qsdpservice.html#attributeIds">attributeIds</keyword>
-        <keyword ref="qsdpservice.html#browseGroups">browseGroups</keyword>
-        <keyword ref="qsdpservice.html#docURL">docURL</keyword>
-        <keyword ref="qsdpservice.html#execURL">execURL</keyword>
-        <keyword ref="qsdpservice.html#group">group</keyword>
-        <keyword ref="qsdpservice.html#iconURL">iconURL</keyword>
-        <keyword ref="qsdpservice.html#id">id</keyword>
-        <keyword ref="qsdpservice.html#isInstance">isInstance</keyword>
-        <keyword ref="qsdpservice.html#providerName">providerName</keyword>
-        <keyword ref="qsdpservice.html#recordHandle">recordHandle</keyword>
-        <keyword ref="qsdpservice.html#removeAttribute">removeAttribute</keyword>
-        <keyword ref="qsdpservice.html#rfcommChannel">rfcommChannel</keyword>
-        <keyword ref="qsdpservice.html#serviceDescription">serviceDescription</keyword>
-        <keyword ref="qsdpservice.html#serviceName">serviceName</keyword>
-        <keyword ref="qsdpservice.html#setBrowseGroups">setBrowseGroups</keyword>
-        <keyword ref="qsdpservice.html#setDocURL">setDocURL</keyword>
-        <keyword ref="qsdpservice.html#setExecURL">setExecURL</keyword>
-        <keyword ref="qsdpservice.html#setGroup">setGroup</keyword>
-        <keyword ref="qsdpservice.html#setIconURL">setIconURL</keyword>
-        <keyword ref="qsdpservice.html#setId">setId</keyword>
-        <keyword ref="qsdpservice.html#setProviderName">setProviderName</keyword>
-        <keyword ref="qsdpservice.html#setRecordHandle">setRecordHandle</keyword>
-        <keyword ref="qsdpservice.html#setServiceDescription">setServiceDescription</keyword>
-        <keyword ref="qsdpservice.html#setServiceName">setServiceName</keyword>
-        <keyword ref="qsdpservice.html#operator-eq">operator=</keyword>
-        <section ref="qsdpservice-members.html" title="List of all members"/>
-    </section>
-    <section ref="qsdpuuid.html" title="QSDPUUID Class Reference">
-        <keyword ref="qsdpuuid.html">QSDPUUID</keyword>
-        <keyword ref="qsdpuuid.html#SDPUUIDType-enum">SDPUUIDType</keyword>
-        <keyword ref="qsdpuuid.html#SDPUUIDType-enum">QSDPUUID::UUID16</keyword>
-        <keyword ref="qsdpuuid.html#SDPUUIDType-enum">QSDPUUID::UUID128</keyword>
-        <keyword ref="qsdpuuid.html#SDPUUIDType-enum">QSDPUUID::UUID32</keyword>
-        <keyword ref="qsdpuuid.html#create128Bit">create128Bit</keyword>
-        <keyword ref="qsdpuuid.html#create16Bit">create16Bit</keyword>
-        <keyword ref="qsdpuuid.html#create32Bit">create32Bit</keyword>
-        <keyword ref="qsdpuuid.html#fromProfile">fromProfile</keyword>
-        <keyword ref="qsdpuuid.html#toString">toString</keyword>
-        <keyword ref="qsdpuuid.html#toUUID128">toUUID128</keyword>
-        <keyword ref="qsdpuuid.html#type">type</keyword>
-        <keyword ref="qsdpuuid.html#uuid">uuid</keyword>
-        <keyword ref="qsdpuuid.html#operator-not-eq">operator!=</keyword>
-        <keyword ref="qsdpuuid.html#operator-eq">operator=</keyword>
-        <keyword ref="qsdpuuid.html#operator-eq-eq">operator==</keyword>
-        <section ref="qsdpuuid-members.html" title="List of all members"/>
-    </section>
     <section ref="qserialcommaccessory.html" title="QSerialCommAccessory Class Reference">
         <keyword ref="qserialcommaccessory.html">QSerialCommAccessory</keyword>
         <keyword ref="qserialcommaccessory.html#ConnectionType-enum">ConnectionType</keyword>
@@ -3533,6 +3674,25 @@
         <keyword ref="qsignalintercepter.html">QSignalIntercepter</keyword>
         <section ref="qsignalintercepter-members.html" title="List of all members"/>
     </section>
+    <section ref="qsignalsource.html" title="QSignalSource Class Reference">
+        <keyword ref="qsignalsource.html">QSignalSource</keyword>
+        <keyword ref="qsignalsource.html#Availability-enum">Availability</keyword>
+        <keyword ref="qsignalsource.html#Availability-enum">QSignalSource::Invalid</keyword>
+        <keyword ref="qsignalsource.html#Availability-enum">QSignalSource::NotAvailable</keyword>
+        <keyword ref="qsignalsource.html#Availability-enum">QSignalSource::Available</keyword>
+        <keyword ref="qsignalsource.html#availability">availability</keyword>
+        <keyword ref="qsignalsource.html#availabilityChanged">availabilityChanged</keyword>
+        <keyword ref="qsignalsource.html#signalStrength">signalStrength</keyword>
+        <keyword ref="qsignalsource.html#signalStrengthChanged">signalStrengthChanged</keyword>
+        <keyword ref="qsignalsource.html#type">type</keyword>
+        <section ref="qsignalsource-members.html" title="List of all members"/>
+    </section>
+    <section ref="qsignalsourceprovider.html" title="QSignalSourceProvider Class Reference">
+        <keyword ref="qsignalsourceprovider.html">QSignalSourceProvider</keyword>
+        <keyword ref="qsignalsourceprovider.html#setAvailability">setAvailability</keyword>
+        <keyword ref="qsignalsourceprovider.html#setSignalStrength">setSignalStrength</keyword>
+        <section ref="qsignalsourceprovider-members.html" title="List of all members"/>
+    </section>
     <section ref="qslotinvoker.html" title="QSlotInvoker Class Reference">
         <keyword ref="qslotinvoker.html">QSlotInvoker</keyword>
         <section ref="qslotinvoker-members.html" title="List of all members"/>
@@ -3552,11 +3712,14 @@
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Options</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Back</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Previous</keyword>
+        <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Deselect</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Edit</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Cancel</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::BackSpace</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Ok</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::Select</keyword>
+        <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::RevertEdit</keyword>
+        <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::EndEdit</keyword>
         <keyword ref="qsoftmenubar.html#StandardLabel-enum">QSoftMenuBar::NoLabel</keyword>
         <keyword ref="qsoftmenubar.html#addMenuTo">addMenuTo</keyword>
         <keyword ref="qsoftmenubar.html#clearLabel">clearLabel</keyword>
@@ -3694,6 +3857,7 @@
         <keyword ref="qtask.html#percentCompleted">percentCompleted</keyword>
         <keyword ref="qtask.html#priority">priority</keyword>
         <keyword ref="qtask.html#readVCalendar">readVCalendar</keyword>
+        <keyword ref="qtask.html#readVCalendarData">readVCalendarData</keyword>
         <keyword ref="qtask.html#setCompleted">setCompleted</keyword>
         <keyword ref="qtask.html#setCompletedDate">setCompletedDate</keyword>
         <keyword ref="qtask.html#setDescription">setDescription</keyword>
@@ -3741,6 +3905,39 @@
         <keyword ref="qtasklistview.html#taskDelegate">taskDelegate</keyword>
         <keyword ref="qtasklistview.html#taskModel">taskModel</keyword>
         <section ref="qtasklistview-members.html" title="List of all members"/>
+    </section>
+    <section ref="qtaskmodel.html" title="QTaskModel Class Reference">
+        <keyword ref="qtaskmodel.html">QTaskModel</keyword>
+        <keyword ref="qtaskmodel.html#Field-enum">Field</keyword>
+        <keyword ref="qtaskmodel.html#addRecord">addRecord</keyword>
+        <keyword ref="qtaskmodel.html#addTask">addTask</keyword>
+        <keyword ref="qtaskmodel.html#columnCount">columnCount</keyword>
+        <keyword ref="qtaskmodel.html#data">data</keyword>
+        <keyword ref="qtaskmodel.html#fieldIcon">fieldIcon</keyword>
+        <keyword ref="qtaskmodel.html#fieldIdentifier">fieldIdentifier</keyword>
+        <keyword ref="qtaskmodel.html#fieldLabel">fieldLabel</keyword>
+        <keyword ref="qtaskmodel.html#filterCompleted">filterCompleted</keyword>
+        <keyword ref="qtaskmodel.html#flags">flags</keyword>
+        <keyword ref="qtaskmodel.html#headerData">headerData</keyword>
+        <keyword ref="qtaskmodel.html#identifierField">identifierField</keyword>
+        <keyword ref="qtaskmodel.html#itemData">itemData</keyword>
+        <keyword ref="qtaskmodel.html#match">match</keyword>
+        <keyword ref="qtaskmodel.html#mimeData">mimeData</keyword>
+        <keyword ref="qtaskmodel.html#mimeTypes">mimeTypes</keyword>
+        <keyword ref="qtaskmodel.html#record">record</keyword>
+        <keyword ref="qtaskmodel.html#removeList">removeList</keyword>
+        <keyword ref="qtaskmodel.html#removeRecord">removeRecord</keyword>
+        <keyword ref="qtaskmodel.html#removeTask">removeTask</keyword>
+        <keyword ref="qtaskmodel.html#setData">setData</keyword>
+        <keyword ref="qtaskmodel.html#setFilterCompleted">setFilterCompleted</keyword>
+        <keyword ref="qtaskmodel.html#setItemData">setItemData</keyword>
+        <keyword ref="qtaskmodel.html#setTaskField">setTaskField</keyword>
+        <keyword ref="qtaskmodel.html#sort">sort</keyword>
+        <keyword ref="qtaskmodel.html#task">task</keyword>
+        <keyword ref="qtaskmodel.html#taskField">taskField</keyword>
+        <keyword ref="qtaskmodel.html#updateRecord">updateRecord</keyword>
+        <keyword ref="qtaskmodel.html#updateTask">updateTask</keyword>
+        <section ref="qtaskmodel-members.html" title="List of all members"/>
     </section>
     <section ref="qtaskselector.html" title="QTaskSelector Class Reference">
         <keyword ref="qtaskselector.html">QTaskSelector</keyword>
@@ -3832,6 +4029,52 @@
         <keyword ref="qtopia.html#Lockflags-enum">Qtopia::LockBlock</keyword>
         <keyword ref="qtopia.html#Lockflags-enum">Qtopia::LockShare</keyword>
         <keyword ref="qtopia.html#Lockflags-enum">Qtopia::LockWrite</keyword>
+        <keyword ref="qtopia.html#actionConfirmation">actionConfirmation</keyword>
+        <keyword ref="qtopia.html#addAlarm">addAlarm</keyword>
+        <keyword ref="qtopia.html#addWords">addWords</keyword>
+        <keyword ref="qtopia.html#addedDawg">addedDawg</keyword>
+        <keyword ref="qtopia.html#applicationFileName">applicationFileName</keyword>
+        <keyword ref="qtopia.html#architecture">architecture</keyword>
+        <keyword ref="qtopia.html#confirmDelete">confirmDelete</keyword>
+        <keyword ref="qtopia.html#dawg">dawg</keyword>
+        <keyword ref="qtopia.html#dehyphenate">dehyphenate</keyword>
+        <keyword ref="qtopia.html#deleteAlarm">deleteAlarm</keyword>
+        <keyword ref="qtopia.html#deviceId">deviceId</keyword>
+        <keyword ref="qtopia.html#documentDir">documentDir</keyword>
+        <keyword ref="qtopia.html#execute">execute</keyword>
+        <keyword ref="qtopia.html#findDisplayFont">findDisplayFont</keyword>
+        <keyword ref="qtopia.html#fixedDawg">fixedDawg</keyword>
+        <keyword ref="qtopia.html#hasKey">hasKey</keyword>
+        <keyword ref="qtopia.html#helpPaths">helpPaths</keyword>
+        <keyword ref="qtopia.html#homePath">homePath</keyword>
+        <keyword ref="qtopia.html#installPaths">installPaths</keyword>
+        <keyword ref="qtopia.html#isDocumentFileName">isDocumentFileName</keyword>
+        <keyword ref="qtopia.html#isFileLocked">isFileLocked</keyword>
+        <keyword ref="qtopia.html#languageList">languageList</keyword>
+        <keyword ref="qtopia.html#lockFile">lockFile</keyword>
+        <keyword ref="qtopia.html#mousePreferred">mousePreferred</keyword>
+        <keyword ref="qtopia.html#msleep">msleep</keyword>
+        <keyword ref="qtopia.html#ownerName">ownerName</keyword>
+        <keyword ref="qtopia.html#packagePath">packagePath</keyword>
+        <keyword ref="qtopia.html#qtopiaDir">qtopiaDir</keyword>
+        <keyword ref="qtopia.html#qtopiaReloadWords">qtopiaReloadWords</keyword>
+        <keyword ref="qtopia.html#removeWords">removeWords</keyword>
+        <keyword ref="qtopia.html#setWeekStartsOnMonday">setWeekStartsOnMonday</keyword>
+        <keyword ref="qtopia.html#shellQuote">shellQuote</keyword>
+        <keyword ref="qtopia.html#simplifyMultiLineSpace">simplifyMultiLineSpace</keyword>
+        <keyword ref="qtopia.html#sleep">sleep</keyword>
+        <keyword ref="qtopia.html#soundAlarm">soundAlarm</keyword>
+        <keyword ref="qtopia.html#statusMessage">statusMessage</keyword>
+        <keyword ref="qtopia.html#stringQuote">stringQuote</keyword>
+        <keyword ref="qtopia.html#tempDir">tempDir</keyword>
+        <keyword ref="qtopia.html#tempName">tempName</keyword>
+        <keyword ref="qtopia.html#translate">translate</keyword>
+        <keyword ref="qtopia.html#truncateFile">truncateFile</keyword>
+        <keyword ref="qtopia.html#unlockFile">unlockFile</keyword>
+        <keyword ref="qtopia.html#usleep">usleep</keyword>
+        <keyword ref="qtopia.html#version">version</keyword>
+        <keyword ref="qtopia.html#weekStartsOnMonday">weekStartsOnMonday</keyword>
+        <keyword ref="qtopia.html#writeHWClock">writeHWClock</keyword>
         <section ref="qtopia-members.html" title="List of all members"/>
     </section>
     <section ref="qtopiaabstractservice.html" title="QtopiaAbstractService Class Reference">
@@ -4086,6 +4329,20 @@
         <keyword ref="qtopiapowermanagerservice.html#setIntervals">setIntervals</keyword>
         <section ref="qtopiapowermanagerservice-members.html" title="List of all members"/>
     </section>
+    <section ref="qtopiaprinterinterface.html" title="QtopiaPrinterInterface Class Reference">
+        <keyword ref="qtopiaprinterinterface.html">QtopiaPrinterInterface</keyword>
+        <keyword ref="qtopiaprinterinterface.html#abort">abort</keyword>
+        <keyword ref="qtopiaprinterinterface.html#isAvailable">isAvailable</keyword>
+        <keyword ref="qtopiaprinterinterface.html#name">name</keyword>
+        <keyword ref="qtopiaprinterinterface.html#print">print</keyword>
+        <keyword ref="qtopiaprinterinterface.html#printFile">printFile</keyword>
+        <keyword ref="qtopiaprinterinterface.html#printHtml">printHtml</keyword>
+        <section ref="qtopiaprinterinterface-members.html" title="List of all members"/>
+    </section>
+    <section ref="qtopiaprinterplugin.html" title="QtopiaPrinterPlugin Class Reference">
+        <keyword ref="qtopiaprinterplugin.html">QtopiaPrinterPlugin</keyword>
+        <section ref="qtopiaprinterplugin-members.html" title="List of all members"/>
+    </section>
     <section ref="qtopiaserverapplication.html" title="QtopiaServerApplication Class Reference">
         <keyword ref="qtopiaserverapplication.html">QtopiaServerApplication</keyword>
         <keyword ref="qtopiaserverapplication.html#ShutdownType-enum">ShutdownType</keyword>
@@ -4171,57 +4428,26 @@
         <keyword ref="qtranslatablesettings.html#value">value</keyword>
         <section ref="qtranslatablesettings-members.html" title="List of all members"/>
     </section>
-    <section ref="qtsslsocket.html" title="QtSslSocket Class Reference">
-        <keyword ref="qtsslsocket.html">QtSslSocket</keyword>
-        <keyword ref="qtsslsocket.html#Mode-enum">Mode</keyword>
-        <keyword ref="qtsslsocket.html#Mode-enum">QtSslSocket::Server</keyword>
-        <keyword ref="qtsslsocket.html#Mode-enum">QtSslSocket::Client</keyword>
-        <keyword ref="qtsslsocket.html#VerifyResult-enum">VerifyResult</keyword>
-        <keyword ref="qtsslsocket.html#VerifyResult-enum">QtSslSocket::UnableToVerify</keyword>
-        <keyword ref="qtsslsocket.html#VerifyResult-enum">QtSslSocket::NotYetValid</keyword>
-        <keyword ref="qtsslsocket.html#VerifyResult-enum">QtSslSocket::SelfSigned</keyword>
-        <keyword ref="qtsslsocket.html#VerifyResult-enum">QtSslSocket::VerifyOk</keyword>
-        <keyword ref="qtsslsocket.html#VerifyResult-enum">QtSslSocket::Expired</keyword>
-        <keyword ref="qtsslsocket.html#ciphers">ciphers</keyword>
-        <keyword ref="qtsslsocket.html#connectToHost">connectToHost</keyword>
-        <keyword ref="qtsslsocket.html#connectToHostImplementation">connectToHostImplementation</keyword>
-        <keyword ref="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</keyword>
-        <keyword ref="qtsslsocket.html#disconnectFromHost">disconnectFromHost</keyword>
-        <keyword ref="qtsslsocket.html#disconnectFromHostImplementation">disconnectFromHostImplementation</keyword>
-        <keyword ref="qtsslsocket.html#localCertificate">localCertificate</keyword>
-        <keyword ref="qtsslsocket.html#pathToCACertDir">pathToCACertDir</keyword>
-        <keyword ref="qtsslsocket.html#pathToCACertFile">pathToCACertFile</keyword>
-        <keyword ref="qtsslsocket.html#pathToCertificate">pathToCertificate</keyword>
-        <keyword ref="qtsslsocket.html#pathToPrivateKey">pathToPrivateKey</keyword>
-        <keyword ref="qtsslsocket.html#peerCertificate">peerCertificate</keyword>
-        <keyword ref="qtsslsocket.html#setCiphers">setCiphers</keyword>
-        <keyword ref="qtsslsocket.html#setPathToCACertDir">setPathToCACertDir</keyword>
-        <keyword ref="qtsslsocket.html#setPathToCACertFile">setPathToCACertFile</keyword>
-        <keyword ref="qtsslsocket.html#setPathToCertificate">setPathToCertificate</keyword>
-        <keyword ref="qtsslsocket.html#setPathToPrivateKey">setPathToPrivateKey</keyword>
-        <keyword ref="qtsslsocket.html#setSocket">setSocket</keyword>
-        <keyword ref="qtsslsocket.html#socket">socket</keyword>
-        <keyword ref="qtsslsocket.html#sslAccept">sslAccept</keyword>
-        <keyword ref="qtsslsocket.html#sslConnect">sslConnect</keyword>
-        <section ref="qtsslsocket-members.html" title="List of all members"/>
-    </section>
     <section ref="quickexeapplicationlauncher.html" title="QuickExeApplicationLauncher Class Reference">
         <keyword ref="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</keyword>
         <section ref="quickexeapplicationlauncher-members.html" title="List of all members"/>
     </section>
     <section ref="quniqueid.html" title="QUniqueId Class Reference">
         <keyword ref="quniqueid.html">QUniqueId</keyword>
+        <keyword ref="quniqueid.html#constructApplicationLocalUniqueId">constructApplicationLocalUniqueId</keyword>
         <keyword ref="quniqueid.html#context">context</keyword>
-        <keyword ref="quniqueid.html#device">device</keyword>
         <keyword ref="quniqueid.html#fromLocalContextDataStream">fromLocalContextDataStream</keyword>
+        <keyword ref="quniqueid.html#fromUInt">fromUInt</keyword>
         <keyword ref="quniqueid.html#index">index</keyword>
         <keyword ref="quniqueid.html#isNull">isNull</keyword>
         <keyword ref="quniqueid.html#isTemporary">isTemporary</keyword>
+        <keyword ref="quniqueid.html#mappedContext">mappedContext</keyword>
         <keyword ref="quniqueid.html#toByteArray">toByteArray</keyword>
         <keyword ref="quniqueid.html#toLocalContextByteArray">toLocalContextByteArray</keyword>
         <keyword ref="quniqueid.html#toLocalContextDataStream">toLocalContextDataStream</keyword>
         <keyword ref="quniqueid.html#toLocalContextString">toLocalContextString</keyword>
         <keyword ref="quniqueid.html#toString">toString</keyword>
+        <keyword ref="quniqueid.html#toUInt">toUInt</keyword>
         <keyword ref="quniqueid.html#operator-not-eq">operator!=</keyword>
         <keyword ref="quniqueid.html#operator-lt">operator&lt;</keyword>
         <keyword ref="quniqueid.html#operator-lt-eq">operator&lt;=</keyword>
@@ -4236,6 +4462,7 @@
         <keyword ref="quniqueidgenerator.html#constructUniqueId">constructUniqueId</keyword>
         <keyword ref="quniqueidgenerator.html#createUniqueId">createUniqueId</keyword>
         <keyword ref="quniqueidgenerator.html#isValid">isValid</keyword>
+        <keyword ref="quniqueidgenerator.html#mappedContext">mappedContext</keyword>
         <keyword ref="quniqueidgenerator.html#temporaryID">temporaryID</keyword>
         <section ref="quniqueidgenerator-members.html" title="List of all members"/>
     </section>
@@ -4452,6 +4679,10 @@
         <keyword ref="smsservice.html#writeSms">writeSms</keyword>
         <section ref="smsservice-members.html" title="List of all members"/>
     </section>
+    <section ref="stabmonitor.html" title="StabMonitor Class Reference">
+        <keyword ref="stabmonitor.html">StabMonitor</keyword>
+        <section ref="stabmonitor-members.html" title="List of all members"/>
+    </section>
     <section ref="standarddevicefeatures.html" title="StandardDeviceFeatures Namespace Reference">
         <keyword ref="standarddevicefeatures.html">StandardDeviceFeatures</keyword>
         <keyword ref="standarddevicefeatures.html#disableBatteryMonitor">disableBatteryMonitor</keyword>
@@ -4482,12 +4713,6 @@
         <keyword ref="suspendservice.html">SuspendService</keyword>
         <keyword ref="suspendservice.html#suspend">suspend</keyword>
         <section ref="suspendservice-members.html" title="List of all members"/>
-    </section>
-    <section ref="sysfilemonitor.html" title="SysFileMonitor Class Reference">
-        <keyword ref="sysfilemonitor.html">SysFileMonitor</keyword>
-        <keyword ref="sysfilemonitor.html#restart">restart</keyword>
-        <keyword ref="sysfilemonitor.html#suspend">suspend</keyword>
-        <section ref="sysfilemonitor-members.html" title="List of all members"/>
     </section>
     <section ref="systemshutdownhandler.html" title="SystemShutdownHandler Class Reference">
         <keyword ref="systemshutdownhandler.html">SystemShutdownHandler</keyword>
@@ -4641,7 +4866,6 @@
     <section ref="themelayoutitem.html" title="ThemeLayoutItem Class Reference">
         <keyword ref="themelayoutitem.html">ThemeLayoutItem</keyword>
         <keyword ref="themelayoutitem.html#layout">layout</keyword>
-        <keyword ref="themelayoutitem.html#paint">paint</keyword>
         <keyword ref="themelayoutitem.html#rtti">rtti</keyword>
         <section ref="themelayoutitem-members.html" title="List of all members"/>
     </section>
@@ -4693,7 +4917,6 @@
     <section ref="themepageitem.html" title="ThemePageItem Class Reference">
         <keyword ref="themepageitem.html">ThemePageItem</keyword>
         <keyword ref="themepageitem.html#base">base</keyword>
-        <keyword ref="themepageitem.html#isTransparent">isTransparent</keyword>
         <keyword ref="themepageitem.html#rtti">rtti</keyword>
         <keyword ref="themepageitem.html#sizeHint">sizeHint</keyword>
         <section ref="themepageitem-members.html" title="List of all members"/>
@@ -4872,6 +5095,9 @@
     <section ref="buildsystem-user-guide.html" title="Build System User Guide">
         <keyword ref="buildsystem-user-guide.html">Build System User Guide</keyword>
     </section>
+    <section ref="syscust-helix.html" title="Building Helix Modules Externally">
+        <keyword ref="syscust-helix.html">Building Helix Modules Externally</keyword>
+    </section>
     <section ref="build-from-source.html" title="Building Qtopia from Source">
         <keyword ref="build-from-source.html">Building Qtopia from Source</keyword>
     </section>
@@ -4919,6 +5145,9 @@
     </section>
     <section ref="styleguide.html" title="Designing Applications">
         <keyword ref="styleguide.html">Designing Applications</keyword>
+    </section>
+    <section ref="syscust-partitionlayout.html" title="Device Partition Layout">
+        <keyword ref="syscust-partitionlayout.html">Device Partition Layout</keyword>
     </section>
     <section ref="sycust-distrib.html" title="Distribution Packaging">
         <keyword ref="sycust-distrib.html">Distribution Packaging</keyword>
@@ -4976,6 +5205,9 @@
     </section>
     <section ref="theme-graphdes.html" title="Graphic Designer's Reference">
         <keyword ref="theme-graphdes.html">Graphic Designer's Reference</keyword>
+    </section>
+    <section ref="greenphone-integration-guide.html" title="Greenphone Integration Guide">
+        <keyword ref="greenphone-integration-guide.html">Greenphone Integration Guide</keyword>
     </section>
     <section ref="groups.html" title="Grouped Classes">
         <keyword ref="groups.html">Grouped Classes</keyword>
@@ -5049,6 +5281,9 @@
     <section ref="model-view.html" title="Model/View Classes">
         <keyword ref="model-view.html">Model/View Classes</keyword>
     </section>
+    <section ref="telephony-modem.html" title="Modem Classes">
+        <keyword ref="telephony-modem.html">Modem Classes</keyword>
+    </section>
     <section ref="modem-simulator.html" title="Modem Simulator">
         <keyword ref="modem-simulator.html">Modem Simulator</keyword>
     </section>
@@ -5091,6 +5326,9 @@
     <section ref="qpepim-class-overview.html" title="PIM Library: Class Overview">
         <keyword ref="qpepim-class-overview.html">PIM Library: Class Overview</keyword>
     </section>
+    <section ref="plugins.html" title="Plug-in Classes">
+        <keyword ref="plugins.html">Plug-in Classes</keyword>
+    </section>
     <section ref="plugins.html" title="Plugin Classes">
         <keyword ref="plugins.html">Plugin Classes</keyword>
     </section>
@@ -5108,6 +5346,9 @@
     </section>
     <section ref="release-4-2-1.html" title="Qtopia - 4.2.1 Release Notes">
         <keyword ref="release-4-2-1.html">Qtopia - 4.2.1 Release Notes</keyword>
+    </section>
+    <section ref="release-4-2-2.html" title="Qtopia - 4.2.2 Release Notes">
+        <keyword ref="release-4-2-2.html">Qtopia - 4.2.2 Release Notes</keyword>
     </section>
     <section ref="docwidget.html" title="Qtopia - Main Document Widget">
         <keyword ref="docwidget.html">Qtopia - Main Document Widget</keyword>
@@ -5135,6 +5376,12 @@
     </section>
     <section ref="syscust-mediaplayer.html" title="Qtopia Helix Integration">
         <keyword ref="syscust-mediaplayer.html">Qtopia Helix Integration</keyword>
+    </section>
+    <section ref="qpeinputmethod-class-overview.html" title="Qtopia Input Methods: Class Overview">
+        <keyword ref="qpeinputmethod-class-overview.html">Qtopia Input Methods: Class Overview</keyword>
+    </section>
+    <section ref="qtopiaipc.html" title="Qtopia IPC Layer">
+        <keyword ref="qtopiaipc.html">Qtopia IPC Layer</keyword>
     </section>
     <section ref="syscust-java.html" title="Qtopia Java Integration">
         <keyword ref="syscust-java.html">Qtopia Java Integration</keyword>
@@ -5169,6 +5416,9 @@
     <section ref="styleguide-widgets.html" title="Qtopia Style Guide: Widgets">
         <keyword ref="styleguide-widgets.html">Qtopia Style Guide: Widgets</keyword>
     </section>
+    <section ref="qtopia3rdparty.html" title="Qtopia Third-party">
+        <keyword ref="qtopia3rdparty.html">Qtopia Third-party</keyword>
+    </section>
     <section ref="valuespace.html" title="Qtopia Value Space">
         <keyword ref="valuespace.html">Qtopia Value Space</keyword>
     </section>
@@ -5181,14 +5431,14 @@
     <section ref="running-qtopia.html" title="Running Qtopia">
         <keyword ref="running-qtopia.html">Running Qtopia</keyword>
     </section>
-    <section ref="sxe.html" title="Safe Execution Environment (SXE)">
-        <keyword ref="sxe.html">Safe Execution Environment (SXE)</keyword>
-    </section>
     <section ref="script.html" title="Script Classes">
         <keyword ref="script.html">Script Classes</keyword>
     </section>
     <section ref="sdk.html" title="SDK">
         <keyword ref="sdk.html">SDK</keyword>
+    </section>
+    <section ref="telephony-serial.html" title="Serial Device Classes">
+        <keyword ref="telephony-serial.html">Serial Device Classes</keyword>
     </section>
     <section ref="qtopiaserver-inputmethods.html" title="Server Handling for Input Methods">
         <keyword ref="qtopiaserver-inputmethods.html">Server Handling for Input Methods</keyword>
@@ -5217,59 +5467,20 @@
     <section ref="syscust-stdfonts.html" title="Standard Fonts">
         <keyword ref="syscust-stdfonts.html">Standard Fonts</keyword>
     </section>
-    <section ref="sxe-alp.html" title="SXE - Application Level Policy">
-        <keyword ref="sxe-alp.html">SXE - Application Level Policy</keyword>
-    </section>
-    <section ref="sxe-pkgmgr-ctlfile.html" title="SXE - Control File">
-        <keyword ref="sxe-pkgmgr-ctlfile.html">SXE - Control File</keyword>
-    </section>
-    <section ref="sxe-pkgmgr-dispsec.html" title="SXE - Display Security">
-        <keyword ref="sxe-pkgmgr-dispsec.html">SXE - Display Security</keyword>
-    </section>
-    <section ref="sxe-glossary.html" title="SXE - Glossary of Terms">
-        <keyword ref="sxe-glossary.html">SXE - Glossary of Terms</keyword>
-    </section>
-    <section ref="sxe-impacts.html" title="SXE - Impact and Implications">
-        <keyword ref="sxe-impacts.html">SXE - Impact and Implications</keyword>
-    </section>
-    <section ref="sxe-pkgmgr.html" title="SXE - Installer/Package Manager Overview">
-        <keyword ref="sxe-pkgmgr.html">SXE - Installer/Package Manager Overview</keyword>
-    </section>
-    <section ref="sxe-mac.html" title="SXE - Mandatory Access Control">
-        <keyword ref="sxe-mac.html">SXE - Mandatory Access Control</keyword>
-    </section>
-    <section ref="sxe-pkgmgr-download.html" title="SXE - Package Download Protocols">
-        <keyword ref="sxe-pkgmgr-download.html">SXE - Package Download Protocols</keyword>
-    </section>
-    <section ref="sxe-pkgmgr-keying.html" title="SXE - Package Keying and Manifest">
-        <keyword ref="sxe-pkgmgr-keying.html">SXE - Package Keying and Manifest</keyword>
-    </section>
-    <section ref="sxe-pkgtrusts.html" title="SXE - Package Trusts">
-        <keyword ref="sxe-pkgtrusts.html">SXE - Package Trusts</keyword>
-    </section>
-    <section ref="sxe-pkgmgr-profiles.html" title="SXE - Policy Profiles and Domains">
-        <keyword ref="sxe-pkgmgr-profiles.html">SXE - Policy Profiles and Domains</keyword>
-    </section>
-    <section ref="sxe-procmonitor.html" title="SXE - Process Monitor">
-        <keyword ref="sxe-procmonitor.html">SXE - Process Monitor</keyword>
-    </section>
-    <section ref="sxe-requirements.html" title="SXE - Requirements">
-        <keyword ref="sxe-requirements.html">SXE - Requirements</keyword>
-    </section>
-    <section ref="sxe-sandbox.html" title="SXE - Sand-boxing">
-        <keyword ref="sxe-sandbox.html">SXE - Sand-boxing</keyword>
-    </section>
     <section ref="syscust-sxe.html" title="SXE - System Integration">
         <keyword ref="syscust-sxe.html">SXE - System Integration</keyword>
     </section>
     <section ref="syscust-index.html" title="System Customization">
         <keyword ref="syscust-index.html">System Customization</keyword>
     </section>
-    <section ref="telephony.html" title="Telephony">
-        <keyword ref="telephony.html">Telephony</keyword>
+    <section ref="qtopiatest-systemtest.html" title="System Testing">
+        <keyword ref="qtopiatest-systemtest.html">System Testing</keyword>
     </section>
-    <section ref="telephony.html" title="Telephony">
-        <keyword ref="telephony.html">Telephony</keyword>
+    <section ref="qtopia-telephony.html" title="Telephony">
+        <keyword ref="qtopia-telephony.html">Telephony</keyword>
+    </section>
+    <section ref="telephony.html" title="Telephony Classes">
+        <keyword ref="telephony.html">Telephony Classes</keyword>
     </section>
     <section ref="text.html" title="Text Related Classes">
         <keyword ref="text.html">Text Related Classes</keyword>
@@ -5360,6 +5571,9 @@
     </section>
     <section ref="tut-index.html" title="Tutorials">
         <keyword ref="tut-index.html">Tutorials</keyword>
+    </section>
+    <section ref="qtopiatest-unittest.html" title="Unit Testing">
+        <keyword ref="qtopiatest-unittest.html">Unit Testing</keyword>
     </section>
     <section ref="userinput.html" title="User Input Processing">
         <keyword ref="userinput.html">User Input Processing</keyword>

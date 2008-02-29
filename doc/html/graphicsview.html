@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/graphicsview.qdoc -->
 <head>
   <title>Qt 4.2: The Graphics View Framework</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -124,7 +125,7 @@
  };</pre>
 <p>The slots could be connected to <a href="qtoolbutton.html">QToolButtons</a> with <a href="qabstractbutton.html#autoRepeat-prop">autoRepeat</a> enabled.</p>
 <p><a href="qgraphicsview.html">QGraphicsView</a> keeps the center of the view aligned when you transform the view.</p>
-<p>See also the Elastic Nodes example for code that shows how to implement basic zooming features.</p>
+<p>See also the <a href="graphicsview-elasticnodes.html">Elastic Nodes</a> example for code that shows how to implement basic zooming features.</p>
 <a name="printing"></a>
 <h3>Printing</h3>
 <p>Graphics View provides single-line printing through its rendering functions, <a href="qgraphicsscene.html#render">QGraphicsScene::render</a>() and <a href="qgraphicsview.html#render">QGraphicsView::render</a>(). The functions provide the same API: You can have the scene or the view render all or parts of their contents into any paint device by passing a <a href="qpainter.html">QPainter</a> to either of the rendering functions. This example shows how to print the whole scene into a full page, using <a href="qprinter.html">QPrinter</a>.</p>
@@ -151,31 +152,31 @@
 <p>When the source and target areas' sizes do not match, the source contents are stretched to fit into the target area. By passing a <a href="qt.html#AspectRatioMode-enum">Qt::AspectRatioMode</a> to the rendering function you are using, you can choose to maintain or ignore the aspect ratio of the scene when the contents are stretched.</p>
 <a name="drag-and-drop"></a>
 <h3>Drag and Drop</h3>
-<p>Because <a href="qgraphicsview.html">QGraphicsView</a> inherits <a href="qwidget.html">QWidget</a> indirectly, it already provides the same drag and drop functionality that <a href="qwidget.html">QWidget</a> provides. In addition, as a convenience, the Graphics View framework provides drag and drop support for the scene, and for each and every item. As the view receives a drag, it translates the drag and drop events into a QGraphicsSceneDragDropEvent, which is then forwarded to the scene. The scene takes over scheduling of this event, and sends it to the first item under the mouse cursor that accepts drops.</p>
+<p>Because <a href="qgraphicsview.html">QGraphicsView</a> inherits <a href="qwidget.html">QWidget</a> indirectly, it already provides the same drag and drop functionality that <a href="qwidget.html">QWidget</a> provides. In addition, as a convenience, the Graphics View framework provides drag and drop support for the scene, and for each and every item. As the view receives a drag, it translates the drag and drop events into a <a href="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</a>, which is then forwarded to the scene. The scene takes over scheduling of this event, and sends it to the first item under the mouse cursor that accepts drops.</p>
 <p>To start a drag from an item, create a <a href="qdrag.html">QDrag</a> object, passing a pointer to the widget that starts the drag. Items can be observed by many views at the same time, but only one view can start the drag. Drags are in most cases started as a result of pressing or moving the mouse, so in mousePressEvent() or mouseMoveEvent(), you can get the originating widget pointer from the event. For example:</p>
 <pre> void CustomItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
  {
      QMimeData *data = new QMimeData;
      data-&gt;setColor(Qt::green);
 
-     QDrag drag(event-&gt;widget());
-     drag.setMimeData(data);
-     drag.start();
+     QDrag *drag = new QDrag(event-&gt;widget());
+     drag-&gt;setMimeData(data);
+     drag-&gt;start();
  }</pre>
 <p>To intercept drag and drop events for the scene, you reimplement <a href="qgraphicsscene.html#dragEnterEvent">QGraphicsScene::dragEnterEvent</a>() and whichever event handlers your particular scene needs, in a <a href="qgraphicsitem.html">QGraphicsItem</a> subclass. You can read more about drag and drop in Graphics View in the documentation for each of <a href="qgraphicsscene.html">QGraphicsScene</a>'s event handlers.</p>
 <p>Items can enable drag and drop support by calling <a href="qgraphicsitem.html#setAcceptDrops">QGraphicsItem::setAcceptDrops</a>(). To handle the incoming drag, reimplement <a href="qgraphicsitem.html#dragEnterEvent">QGraphicsItem::dragEnterEvent</a>(), <a href="qgraphicsitem.html#dragMoveEvent">QGraphicsItem::dragMoveEvent</a>(), <a href="qgraphicsitem.html#dragLeaveEvent">QGraphicsItem::dragLeaveEvent</a>(), and <a href="qgraphicsitem.html#dropEvent">QGraphicsItem::dropEvent</a>().</p>
-<p>See also the Drag and Drop Robot example for a demonstration of Graphics View's support for drag and drop operations.</p>
+<p>See also the <a href="graphicsview-dragdroprobot.html">Drag and Drop Robot</a> example for a demonstration of Graphics View's support for drag and drop operations.</p>
 <a name="cursors-and-tooltips"></a>
 <h3>Cursors and Tooltips</h3>
 <p>Like <a href="qwidget.html">QWidget</a>, <a href="qgraphicsitem.html">QGraphicsItem</a> also supports cursors (<a href="qgraphicsitem.html#setCursor">QGraphicsItem::setCursor</a>()), and tooltips (<a href="qgraphicsitem.html#setToolTip">QGraphicsItem::setToolTip</a>()). The cursors and tooltips are activated by <a href="qgraphicsview.html">QGraphicsView</a> as the mouse cursor enters the item's area (detected by calling <a href="qgraphicsitem.html#contains">QGraphicsItem::contains</a>()).</p>
 <p>You can also set a default cursor directly on the view by calling <a href="qwidget.html#cursor-prop">QGraphicsView::setCursor</a>().</p>
-<p>See also the Drag and Drop Robot example for code that implements tooltips and cursor shape handling.</p>
+<p>See also the <a href="graphicsview-dragdroprobot.html">Drag and Drop Robot</a> example for code that implements tooltips and cursor shape handling.</p>
 <a name="animation"></a>
 <h3>Animation</h3>
 <p>Graphics View supports animation at several levels. You can easily assemble animation paths by associating a <a href="qgraphicsitemanimation.html">QGraphicsItemAnimation</a> with your item. This allows timeline controlled animations that operate at a steady speed on all platforms (although the frame rate may vary depending on the platform's performance). <a href="qgraphicsitemanimation.html">QGraphicsItemAnimation</a> allows you to create a path for an item's position, rotation, scale, shear and translation. The animation can be controlled by a <a href="qslider.html">QSlider</a>, or more commonly by <a href="qtimeline.html">QTimeLine</a>.</p>
 <p>Another option is to create a custom item that inherits from <a href="qobject.html">QObject</a> and <a href="qgraphicsitem.html">QGraphicsItem</a>. The item can the set up its own timers, and control animations with incremental steps in <a href="qobject.html#timerEvent">QObject::timerEvent</a>().</p>
 <p>A third option, which is mostly available for compatibility with <a href="porting4.html#qcanvas">QCanvas</a> in Qt 3, is to <i>advance</i> the scene by calling <a href="qgraphicsscene.html#advance">QGraphicsScene::advance</a>(), which in turn calls <a href="qgraphicsitem.html#advance">QGraphicsItem::advance</a>().</p>
-<p>See also the Drag and Drop Robot example for an illustration of timeline-based animation techniques.</p>
+<p>See also the <a href="graphicsview-dragdroprobot.html">Drag and Drop Robot</a> example for an illustration of timeline-based animation techniques.</p>
 <a name="opengl-rendering"></a>
 <h3>OpenGL Rendering</h3>
 <p>To enable OpenGL rendering, you simply set a new <a href="qglwidget.html">QGLWidget</a> as the viewport of <a href="qgraphicsview.html">QGraphicsView</a> by calling <a href="qabstractscrollarea.html#setViewport">QGraphicsView::setViewport</a>(). If you want OpenGL with antialiasing, you need OpenGL sample buffer support (see <a href="qglformat.html#sampleBuffers">QGLFormat::sampleBuffers</a>()).</p>
@@ -190,6 +191,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

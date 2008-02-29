@@ -39,6 +39,7 @@ public:
 
     virtual QStringList keys() const;
     virtual bool installContent( const QString &filePath, QContent *content );
+    virtual bool updateContent( QContent *content );
 
 private:
     bool readFile( QFile *file, QContent *content );

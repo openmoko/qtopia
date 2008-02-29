@@ -68,9 +68,13 @@ help.hint=help
 pics.files=$$QTOPIA_DEPOT_PATH/pics/calculator/*
 pics.path=/pics/calculator
 pics.hint=pics
-plugindir.files=$$QTOPIA_DEPOT_PATH/plugins/calculator/.directory
-plugindir.path=/plugins/calculator/
-INSTALLS+=desktop help pics plugindir
+INSTALLS+=desktop help pics
+
+!enable_singleexec {
+    plugindir.files=$$QTOPIA_DEPOT_PATH/plugins/calculator/.directory
+    plugindir.path=/plugins/calculator/
+    INSTALLS+=plugindir
+}
 
 pkg.name=qpe-calculator
 pkg.desc=A pluggable calculator for Qtopia that includes a simple interface.

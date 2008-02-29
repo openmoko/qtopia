@@ -28,6 +28,7 @@
 #ifndef QT_NO_SXE
 #include <private/qtransportauth_qws_p.h>
 #include <qsxepolicy.h>
+#include <qpackageregistry.h>
 #endif
 #endif
 
@@ -252,7 +253,6 @@ void QtopiaApplicationLifeCycle::reinit()
                 ++iter)
             obj->setAttribute("Tasks/" + iter.key(), true);
 
-        updateLazyShutdown();
         recalculateQuit();
         recalculateInfo();
     }
@@ -470,6 +470,7 @@ private slots:
             w->setWindowFlags(Qt::Popup);
             w->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
             w->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
+            w->setGridVisible(true);
             connect(w, SIGNAL(activated(const QDate &)),
                     this, SLOT(selectDate(const QDate &)));
             QWidget *table = w->findChild<QWidget*>("qt_calendar_calendarview");
@@ -536,6 +537,16 @@ class CalendarTextNavigation : public QObject
 public:
     CalendarTextNavigation(QObject *parent = 0)
         : QObject(parent), dateText(0), dateFrame(0) { }
+
+    static void ensureNavigationFor(QCalendarWidget * w)
+    {
+        if (!navMap.contains(w)) {
+            CalendarTextNavigation *nav = new CalendarTextNavigation();
+            connect(w, SIGNAL(destroyed()), nav, SLOT(targetDestroyed()));
+            nav->setTargetWidget(w);
+            navMap.insert(w, nav);
+        }
+    }
 
     void setTargetWidget(QCalendarWidget *widget) {
         if ( targetWidget ) {
@@ -653,6 +664,13 @@ public:
             hideDateLabel();
     }
 
+private slots:
+    void targetDestroyed()
+    {
+        navMap.remove(sender());
+        deleteLater();
+    }
+
 private:
     QLabel *dateText;
     QFrame *dateFrame;
@@ -660,7 +678,11 @@ private:
     QtopiaDateParser dateParser;
     QString inputText;
     QPointer<QCalendarWidget> targetWidget;
+
+    static QMap<QObject *, CalendarTextNavigation*> navMap;
 };
+
+QMap<QObject *, CalendarTextNavigation *> CalendarTextNavigation::navMap;
 
 class ShadowWidget : public QWidget
 {
@@ -713,7 +735,7 @@ void ShadowWidget::setTarget(QWidget *w)
 
 bool ShadowWidget::eventFilter(QObject *o, QEvent *e)
 {
-    if (e->type() == QEvent::Resize && widget && (QWidget*)o == widget) {
+    if ((e->type() == QEvent::Resize || e->type() == QEvent::Move) && widget && (QWidget*)o == widget) {
         setGeometry(widget->x()+shadowSize(),
                 widget->y()+shadowSize(),
                 widget->width(), widget->height());
@@ -1376,7 +1398,6 @@ public:
 #ifdef QTOPIA_KEYPAD_NAVIGATION
     QPointer<QMenu> editMenu;
     QPointer<CalendarMenu> calendarMenu;
-    QPointer<CalendarTextNavigation> calendarNav;
     QBasicTimer singleFocusTimer;
 # ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
     QBasicTimer fadeInTimer;
@@ -1444,47 +1465,77 @@ static void setVolume(int t=0, int percent=-1)
 
   By using QtopiaApplication instead of QApplication, a standard Qt
   application becomes a Qtopia application. It automatically follows
-  style changes, quits and raises, and in the
-  case of \l {Qtopia - Main Document Widget}{document-oriented} applications,
+  style changes, quits and raises, and in the case of 
+  \l {Qtopia - Main Document Widget}{document-oriented} applications,
   changes the currently displayed document in response to the environment.
 
-  To create a \l {Qtopia - Main Document Widget}{document-oriented}
-  application use showMainDocumentWidget(); to create a
-  non-document-oriented application use showMainWidget().
+  The QtopiaApplication class also controls the life cycle of a Qtopia 
+  application.  Applications are automatically started by Qtopia when a QCop 
+  message or service request is sent to their application channel.  The QCop
+  application channel is an implicit, application specific channel of the form 
+  \c QPE/Application/<application name>.
 
-  A variety of signals are emitted when certain events occur, for
-  example:
-  \list
-  \o timeChanged()
-  \o clockChanged()
-  \o weekChanged(),
-  \o dateFormatChanged()
-  \o volumeChanged()
-  \endlist
-  The following signals are emitted:
-  \list
-  \o appMessage() - if the application receives a \l {Qtopia IPC Layer}{Qtopia IPC} message on the
-  QPE/Application/\i{appname} channel.
-  \o flush() - when synching begins
-  \o reload() - when syching ends.
+  Conceptually a Qtopia application will continue running as long as it has 
+  work to do.  Concretely, it will not terminate so long as;
+
+  \list 1
+  \i There are subsequent QCop messages or service requests to process,
+  \i The application has visible UI, or
+  \i The application has running "tasks"
   \endlist
 
-  When synching begins or ends the application should save and reload any data files involved in synching.
-  Most of these signals will intially be received and unfiltered through the appMessage() signal.
+  Visible UI is defined as top level widgets that are not 
+  \l QWidget::isHidden() hidden, although they may be obscured by other 
+  windows.  Most UI-centric applications can rely on the visible UI rule to 
+  implicitly indicate to QtopiaApplication that there is still "work to do", and
+  thus correctly manage their execution.  As the user explores the application,
+  new windows (or widgets in the case of an application that utilizes 
+  QStackedWidget) are created and when they back out, each window is closed 
+  until none remain and the application terminates.
 
-  This class also provides a set of useful static functions as follows:
-  \list
-  \o grabKeyboard() and ungrabKeyboard() - determine if the application takes control of the physical device buttons.
-     For example, application launch keys.
-  \o setStylusOperation() - sets the mode of operation of the stylus
-  \o stylusOperation() - retrieve the mode of operation of the stylus
-  \o qpeDir() - returns the qpeDir path
-  \o documentDir() - returns the documentDir path
-  \o setStylusOperation() - sets the mode of operation of the stylus
-  \o stylusOperation() - retrieves the mode of operation of the stylus
-  \o setInputMethodHint() - sets the input method hint
-  \o inputMethodHint() - retrieves the input method hint.
- \endlist
+  Conversely, tasks are used by an application to explicitly communicate to 
+  QtopiaApplication that there is still work to do.  Tasks are used by 
+  applications that need to continue to run even if they are displaying no UI.
+  System daemons or background applications that respond to service requests
+  but otherwise display no UI, are obvious cases, but even traditionally UI-centric
+  applications may need to continue after the user has "closed" them to 
+  complete, for example, transmitting a file or saving state.  Applications
+  may register and unregister tasks at any time by calling the 
+  registerRunningTask() and unregisterRunningTask() methods.
+
+  There are two optimizations, to the conceptual life cycle model.  To improve 
+  system performance, Qtopia supports preloaded applications and a special 
+  termination mode known as lazy application shutdown.  Preloaded applications 
+  are automatically launched at system startup and remain running, but hidden, 
+  continuously.  Applications may be marked as preloaded by adding their name 
+  to the \c {AppLoading\PreloadApps} list in the \c {Trolltech/Launcher} 
+  configuration file.  For example, the following would preload the 
+  \c addressbook and \c qtmail applications.
+
+  \code
+  [AppLoading]
+  PreloadApps=addressbook,qtmail
+  \endcode
+
+  Lazy application shutdown is a similar, system-wide optimization.  When 
+  enabled, applications will continue running in a hidden state even if they 
+  have no work to do until they are explicitly shutdown by the Qtopia system 
+  server when the system becomes too loaded, or too many such applications are
+  superfluously running.  While preloaded applications allow a system 
+  configurator to improve performance of a preselected few applications, the 
+  rationale behind lazy application shutdown is to allow the system to 
+  dynamically tune itself to improve performance of the most frequently run 
+  applications.  For example, if the user constantly switched between the
+  \c addressbook and \c todo applications, these would remain in the lazy 
+  shutdown state which would improve the startup time of subsequent 
+  "launches".  To enable lazy application shutdown, set the 
+  \c {AppLoading/LazyShutdown} key in the \c {Trolltech/Launcher} configuration
+  file to true.  For example,
+
+  \code
+  [AppLoading]
+  LazyShutdown=true
+  \endcode
 
   \ingroup environment
 */
@@ -1590,7 +1641,7 @@ static void setVolume(int t=0, int percent=-1)
 \code
     void MyWidget::receive( const QString& msg, const QByteArray& data )
     {
-        QDataStream stream( data, QIODevice::ReadOnly );
+        QDataStream stream( data );
         if ( msg == "someMessage(int,int,int)" ) {
             int a,b,c;
             stream >> a >> b >> c;
@@ -1601,7 +1652,7 @@ static void setVolume(int t=0, int percent=-1)
     }
 \endcode
 
-   Note: Messages received here may be processed by QtopiaApplication
+   \bold{Note:} Messages received here may be processed by QtopiaApplication
    and emitted as signals, such as flush() and reload().
 */
 
@@ -1639,9 +1690,9 @@ bool QtopiaApplication::willKeepRunning() const
 
   \table
   \header \o name \o Description
-  \row \o \c {UI} \o An implied system task that is "running" whenever the application has visible UI.  Visible UI is defined as toplevel widgets that are not hidden (as determined by QWidget::isHidden()), although they may be obscured by other windows.
-  \row \o \c {QtopiaPreload} \o A task used by the system to keep preloaded applications running indefinately.
-  \row \o \c {Qtopia*} \o All task names begining with "Qtopia" are reserved for future use.
+  \row \o \c {UI} \o An implied system task that is "running" whenever the application has visible UI.  Visible UI is defined as top level widgets that are not hidden (as determined by QWidget::isHidden()), although they may be obscured by other windows.
+  \row \o \c {QtopiaPreload} \o A task used by the system to keep pre-loaded applications running indefinately.
+  \row \o \c {Qtopia*} \o All task names beginning with "Qtopia" are reserved for future use.
   \endtable
   */
 void QtopiaApplication::registerRunningTask(const QString &name,
@@ -1832,9 +1883,11 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
     {
         QTransportAuth *a = QTransportAuth::getInstance();
         SXEPolicyManager *p = SXEPolicyManager::getInstance();
+        QString confPath = QPackageRegistry::getInstance()->sxeConfPath();
         a->registerPolicyReceiver( p );
-        a->setKeyFilePath( Qtopia::qtopiaDir() + QLatin1String("etc/") + QSXE_KEYFILE );
+        a->setKeyFilePath( confPath );  // this is now the dir, not the file
         a->setLogFilePath( Qtopia::tempDir() + QLatin1String("sxe_discovery.log") );
+        a->setPackageRegistry( QPackageRegistry::getInstance() );
     }
 #endif
 #endif
@@ -1927,7 +1980,7 @@ QtopiaApplication::QtopiaApplication( int& argc, char **argv, Type t )
     loadTranslations(qms);
 #endif
 
-    QContentUpdateManager::manager = new QContentUpdateManager(this);
+    QContentUpdateManager::instance();
 
     if ( type() == GuiServer ) {
         setVolume();
@@ -1945,7 +1998,9 @@ void QtopiaApplication::initApp( int argc, char **argv )
 {
     QString channel = QString(argv[0]);
     d->appFullPath = channel;
-    channel.replace(QRegExp(QLatin1String(".*/")),"");
+    int slashPos = channel.lastIndexOf('/');
+    if (slashPos >= 0)
+        channel = channel.mid(slashPos+1);
     d->appName = channel;
     qApp->setApplicationName(d->appName);
 
@@ -2313,7 +2368,7 @@ bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
     } else if ( e->type == QWSEvent::Focus ) {
         if ( !d->notbusysent ) {
             if ( qApp->type() != QApplication::GuiServer ) {
-                QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("notBusy(QString)") );
+                QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
                 e << d->appName;
             }
             d->notbusysent=true;
@@ -2367,7 +2422,7 @@ QtopiaApplication::~QtopiaApplication()
         // maybe we didn't map a window - still tell the server we're not
         // busy anymore.
         if ( qApp->type() != QApplication::GuiServer ) {
-            QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("notBusy(QString)") );
+            QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("notBusy(QString)") );
             e << d->appName;
         }
     }
@@ -2381,7 +2436,6 @@ QtopiaApplication::~QtopiaApplication()
 #ifdef QTOPIA_KEYPAD_NAVIGATION
     delete d->editMenu;
     delete d->calendarMenu;
-    delete d->calendarNav;
 #endif
     delete d;
 }
@@ -2449,7 +2503,7 @@ void QtopiaApplication::applyStyle()
     color = config.value( QLatin1String("Text"), QLatin1String("#000000") ).toString();
     pal.setColor( QPalette::Text, QColor(color) );
     color = config.value( QLatin1String("ButtonText"), QLatin1String("#000000") ).toString();
-    pal.setColor( QPalette::Active, QPalette::ButtonText, QColor(color) );
+    pal.setColor( QPalette::ButtonText, QColor(color) );
 
     QString val = config.value( QLatin1String("Shadow") ).toString();
     if (!val.isEmpty()) {
@@ -2705,7 +2759,7 @@ bool QtopiaApplication::raiseAppropriateWindow()
             r = true;
         else if (d->preloaded) {
             // We are preloaded and not visible.. pretend we just started..
-            QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("fastAppShowing(QString)"));
+            QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("fastAppShowing(QString)"));
             e << d->appName;
         }
 
@@ -2754,7 +2808,7 @@ bool QtopiaApplication::raiseAppropriateWindow()
         topm->activateWindow();
         // If we haven't already handled the fastAppShowing message
         if (!top && d->preloaded) {
-            QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("fastAppShowing(QString)"));
+            QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("fastAppShowing(QString)"));
             e << d->appName;
         }
         r = false;
@@ -2789,7 +2843,7 @@ void QtopiaApplication::pidMessage( const QString &msg, const QByteArray & data)
         d->notbusysent = false;
         raiseAppropriateWindow();
         // Tell the system we're still chugging along...
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("appRaised(QString)"));
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("appRaised(QString)"));
         e << d->appName;
     } else if ( msg == QLatin1String("flush()") ) {
         emit flush();
@@ -2815,7 +2869,7 @@ void QtopiaApplication::pidMessage( const QString &msg, const QByteArray & data)
         }
         raiseAppropriateWindow();
         // Tell the system we're still chugging along...
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("appRaised(QString)"));
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("appRaised(QString)"));
         e << d->appName;
     } else if ( msg == QLatin1String("TimeMonitor::timeChange(QString)") ) {
         // Same as the QPE/System message
@@ -3124,6 +3178,11 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
         } else if ( ke->key() == Qt::Key_Hangup && e->type() == QEvent::KeyPress ) {
             /* XXX QComboBox does not ignore key events that it does not handle (qt 4.2.2) */
             if ( qobject_cast<QComboBox*>(o) != NULL ) {
+                e->ignore();
+                return true;
+            }
+            /* Ignore the hangup key events so the server can handle. */
+            if ( qobject_cast<QDialog*>(o) != NULL ) {
                 e->ignore();
                 return true;
             }
@@ -3613,9 +3672,7 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
                 yearButton->setFocusPolicy(Qt::NoFocus);
                 //yearEdit->setFocusPolicy(Qt::NoFocus);
 
-                if (!d->calendarNav)
-                    d->calendarNav = new CalendarTextNavigation();
-                d->calendarNav->setTargetWidget(w);
+                CalendarTextNavigation::ensureNavigationFor(w);
 #endif
 // end-of-fix
             }
@@ -3734,7 +3791,7 @@ int QtopiaApplication::exec()
     return QApplication::exec();
 
     {
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("closing(QString)") );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("closing(QString)") );
         e << d->appName;
     }
 
@@ -3753,7 +3810,7 @@ void QtopiaApplication::tryQuit()
         return; // Inside modal loop or konsole. Too hard to save state.
 
     {
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("closing(QString)") );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("closing(QString)") );
         e << d->appName;
     }
 
@@ -3782,7 +3839,7 @@ void QtopiaApplication::hideOrQuit()
     // If we are a preloaded application we don't actually quit, so emit
     // a System message indicating we're quasi-closing.
     if ( d->preloaded && d->qpe_main_widget ) {
-        QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("fastAppHiding(QString)") );
+        QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("fastAppHiding(QString)") );
         e << d->appName;
         d->qpe_main_widget->hide();
     } else if(d->qpe_main_widget) {

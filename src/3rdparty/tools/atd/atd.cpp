@@ -35,7 +35,7 @@
 
 /*!
  \class atd
- \brief The atd class is a placeholder for licensing information.
+ \brief The atd class is a place-holder for licensing information.
  \legalese
  The atd program is based on Russ Nelson's lightweight At daemon.
  It is distributed under the terms of the GNU General Public License.

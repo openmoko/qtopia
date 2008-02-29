@@ -41,7 +41,7 @@
 
 /*!
   \class IValueSpaceLayer
-  \ingroup ValueSpace
+  \ingroup ipc
   \brief The IValueSpaceLayer class provides support for adding new logical data
   layers to the Qtopia Value Space.
   
@@ -257,7 +257,7 @@ Q_GLOBAL_STATIC(QValueSpaceManager, valueSpaceManager);
 ///////////////////////////////////////////////////////////////////////////////
 /*!
   \namespace QValueSpace
-  \ingroup ValueSpace
+  \ingroup ipc
 
   \brief The QValueSpace namespace provides methods that are useful to Value
   Space layer implementors.
@@ -908,7 +908,7 @@ struct QValueSpaceItemPrivateWrite : public QValueSpaceItemPrivate
   \class QValueSpaceItem
   \brief The QValueSpaceItem class allows access to Value Space items.
 
-  \ingroup ValueSpace
+  \ingroup ipc
 
   For an overview of the Qtopia Value Space, please see the \l ValueSpace 
   documentation.

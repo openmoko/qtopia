@@ -346,7 +346,7 @@ void E2CallHistory::updateState()
 
         QContactModel contacts;
 
-        QCallListItem::CallType match;
+        QCallListItem::CallType match(QCallListItem::Missed);
         QString text;
 
         switch(m_state) {
@@ -365,6 +365,7 @@ void E2CallHistory::updateState()
                 text = "Dialed Calls";
                 break;
             default:
+                Q_UNUSED(match);
                 qFatal("Unknown call type");
                 break;
         }
@@ -760,7 +761,7 @@ void E2FSCallHistoryScreen::updateScreen()
         m_list->addItem("Missed Calls(" + QString::number(missed) + ")");
         m_list->addItem("Dialed Calls(" + QString::number(dialed) + ")");
     } else {
-        QCallListItem::CallType match;
+        QCallListItem::CallType match(QCallListItem::Missed);
 
         switch(m_type) {
             case Answered:
@@ -775,6 +776,7 @@ void E2FSCallHistoryScreen::updateScreen()
                 match = QCallListItem::Dialed;
                 break;
             default:
+                Q_UNUSED(match);
                 qFatal("Unknown call type");
                 break;
         }

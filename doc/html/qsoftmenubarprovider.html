@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QSoftMenuBarProvider Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QSoftMenuBarProvider Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QSoftMenuBarProvider Class Reference</h1>
 <p>The QSoftMenuBarProvider class provides the backend for the <a href="qsoftmenubar.html">QSoftMenuBar</a> API. <a href="#details">More...</a></p>
-<pre>    #include &lt;QSoftMenuBarProvider&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QSoftMenuBarProvider&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qsoftmenubarprovider-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -58,16 +57,16 @@
 <p>The <a href="qsoftmenubar.html">QSoftMenuBar</a> class allows applications to control a context specific soft key bar. The QSoftMenuBarProvider manages the state of the soft bar on behalf of a specific UI implementation.</p>
 <p>Internally the <a href="qsoftmenubar.html">QSoftMenuBar</a> class sends QCop messages to communicate with the QSoftMenuBarProvider instance. The &quot;context specific&quot; aspects of the bar are managed in the <a href="qsoftmenubar.html">QSoftMenuBar</a> instance and messages are only sent when the bar UI needs to update. Three QCop messages are used on the <tt>QPE/QSoftMenuBar</tt> channel.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Message</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>setLabelText(int,int,QString)</tt></td><td><i>setLabelText(int winId, int key, <a href="qstring.html">QString</a> text)</i><p>Sets the button bound to <i>key</i> to <i>text</i>. <i>winId</i> is the integer identifier of the active window from the application's perspective. This is to resolve the race condition where application <tt>A</tt> sends an update, application <tt>B</tt> becomes active and sends its update but the provider receives application <tt>A</tt>'s update after application <tt>B</tt>'s incorrectly applying it. The label will only be updated if <i>winId</i> is equal to the currently active windows id.</p>
+<tr valign="top" bgcolor="#a2c511"><th>Message</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>setLabelText(int,int,QString)</tt></td><td><i>setLabelText(int winId, int key, <a href="qstring.html">QString</a> text)</i><p>Sets the button bound to <i>key</i> to <i>text</i>. <i>winId</i> is the integer identifier of the active window from the application's perspective. This is to resolve the race condition where application <tt>A</tt> sends an update, application <tt>B</tt> becomes active and sends its update but the provider receives application <tt>A</tt>'s update after application <tt>B</tt>'s incorrectly applying it. The label will only be updated if <i>winId</i> is equal to the currently active windows id.</p>
 </td></tr>
-<tr valign="top" class="even"><td><tt>setLabelPixmap(int,int,QString)</tt></td><td><i>setLabelPixmap(int winId, int key, <a href="qstring.html">QString</a> pixmapName)</i><p>Sets the button for <i>key</i> to display the given <i>pixmapName</i>. <i>winId</i> is used to resolve the race condition outlined above. The pixmap returned from <a href="qsoftmenubarprovider-menubutton.html#pixmap">MenuButton::pixmap</a>() will be resolved as <tt>&quot;:icon/&quot; + pixmapName</tt>.</p>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>setLabelPixmap(int,int,QString)</tt></td><td><i>setLabelPixmap(int winId, int key, <a href="qstring.html">QString</a> pixmapName)</i><p>Sets the button for <i>key</i> to display the given <i>pixmapName</i>. <i>winId</i> is used to resolve the race condition outlined above. The pixmap returned from <a href="qsoftmenubarprovider-menubutton.html#pixmap">MenuButton::pixmap</a>() will be resolved as <tt>&quot;:icon/&quot; + pixmapName</tt>.</p>
 </td></tr>
-<tr valign="top" class="odd"><td><tt>clearLabel(int,int)</tt></td><td><i>clearLabel(int winId, int key)</i><p>Clears the button for <i>key</i>. The button text will be set to a null string, and the image a null image. <i>winId</i> is used to resolve the race condition outlined above.</p>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>clearLabel(int,int)</tt></td><td><i>clearLabel(int winId, int key)</i><p>Clears the button for <i>key</i>. The button text will be set to a null string, and the image a null image. <i>winId</i> is used to resolve the race condition outlined above.</p>
 </td></tr>
 </table></p>
 <p>The soft keys available on a device are configured in the <tt>SoftKeys</tt> group of the <tt>defaultbuttons.conf</tt> configuration file. For example, the following snippet configures three softkeys - <tt>Context1</tt>, <tt>Select</tt> and <tt>Back</tt>.</p>
-<pre>    [SoftKeys]
+<pre>&nbsp;   [SoftKeys]
     Count=3
     Key0=Context1
     Key1=Select
@@ -91,6 +90,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

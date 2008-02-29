@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Building Qtopia from Source</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Building Qtopia from Source</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -36,35 +35,35 @@
 <p>A Qtopia source package is a combination of Qtopia and Qt sources.</p>
 <p>Qtopia packages can be installed anywhere, as long as the user has read/write access to the directories. There are some limits to the acceptable characters in directories however; spaces and characters that can be interpreted as a regular expression (<tt>regexp</tt>) are not allowed and spaces in file and directory names are not supported.</p>
 <p>To install the package, <tt>cd</tt> into the directory where the package is to be installed and run the following command:</p>
-<pre>    tar -xzf mypackage (where 'mypackage' is the fully qualified path + filename of the package to be installed)</pre>
+<pre>&nbsp;   tar -xzf mypackage (where 'mypackage' is the fully qualified path + filename of the package to be installed)</pre>
 <p>After execution of the <tt>tar</tt> command a sub-directory is created that forms the root directory of the Qtopia source package. For the various Qtopia products the product base directory name will be as follows:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Product</th><th>Directory Name</th></tr></thead>
-<tr valign="top" class="odd"><td>Qtopia Platform Edition</td><td>qtopia-platform-&lt;version&gt;</td></tr>
-<tr valign="top" class="even"><td>Qtopia Phone Edition</td><td>qtopia-phone-&lt;version&gt;</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Product</th><th>Directory Name</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Qtopia Platform Edition</td><td>qtopia-platform-&lt;version&gt;</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Qtopia Phone Edition</td><td>qtopia-phone-&lt;version&gt;</td></tr>
 </table></p>
 <p>For the rest of this documentation it is assumed that the package was unpacked in:</p>
-<pre>    ~/src/qtopia</pre>
+<pre>&nbsp;   ~/src/qtopia</pre>
 <p>and that the unpacked package was a phone source package. That is, there will now be a:</p>
-<pre>    ~/src/qtopia/qtopia-phone-&lt;version&gt;</pre>
+<pre>&nbsp;   ~/src/qtopia/qtopia-phone-&lt;version&gt;</pre>
 <p>directory, referred to as <tt>&lt;qtopia-depot-dir&gt;</tt>.</p>
 <p>The following sub-directories are found in <tt>&lt;qtopia-depot-dir&gt;</tt>:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Sub-directory</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>doc/html</td><td>contains the reference documentation (you're reading it!).</td></tr>
-<tr valign="top" class="even"><td>help</td><td>contains the help files that will be installed on a device.</td></tr>
-<tr valign="top" class="odd"><td>bin</td><td>contains binaries and scripts needed to build Qtopia.</td></tr>
-<tr valign="top" class="even"><td>src</td><td>contains the Qtopia source files.</td></tr>
-<tr valign="top" class="odd"><td>scripts</td><td>contains additional scripts.</td></tr>
-<tr valign="top" class="even"><td>qtopiacore/qt</td><td>contains the Qtopia Core (and some X11) source files.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Sub-directory</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>doc/html</td><td>contains the reference documentation (you're reading it!).</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>help</td><td>contains the help files that will be installed on a device.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>bin</td><td>contains binaries and scripts needed to build Qtopia.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>src</td><td>contains the Qtopia source files.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>scripts</td><td>contains additional scripts.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>qtopiacore/qt</td><td>contains the Qtopia Core (and some X11) source files.</td></tr>
 </table></p>
 <p>The following files and scripts are also contained in <tt>&lt;qtopia-depot-dir&gt;</tt>:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>File/Script</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>LICENSE</td><td>a text that describes the license that is applicable to the package. <b>Note:</b> For an evaluation package the LICENSE file will not be available until the configure command has been executed at least once.</td></tr>
-<tr valign="top" class="even"><td>LODI</td><td>List Of Deliverable Items, that is, a list of all files that can be found in the package.</td></tr>
-<tr valign="top" class="odd"><td>README.html</td><td>a basic introduction that guides the user to the help documentation.</td></tr>
-<tr valign="top" class="even"><td>configure</td><td>the script that is used to configure Qtopia.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>File/Script</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>LICENSE</td><td>a text that describes the license that is applicable to the package. <b>Note:</b> For an evaluation package the LICENSE file will not be available until the configure command has been executed at least once.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>LODI</td><td>List Of Deliverable Items, that is, a list of all files that can be found in the package.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>README.html</td><td>a basic introduction that guides the user to the help documentation.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>configure</td><td>the script that is used to configure Qtopia.</td></tr>
 </table></p>
 <a name="additional-add-on-source-packages"></a>
 <h2>Additional add-on source packages</h2>
@@ -75,14 +74,14 @@
 <li>additional third party modules (such as Helix).</li>
 </ul>
 <p>All of these packages are installed in exactly the same manner: cd into the directory where the qtopia sources are installed and then untar the package</p>
-<pre>    cd &lt;qtopia-depot-dir&gt;
+<pre>&nbsp;   cd &lt;qtopia-depot-dir&gt;
     tar -xzf my-add-on-package (where 'my-add-on-package' is the fully qualified path + filename of the package to be installed)</pre>
 <p>The file naming convention of the add on packages is as follows:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Add on product</th><th>File Name convention</th></tr></thead>
-<tr valign="top" class="odd"><td>Device package</td><td>qtopia-device-&lt;devicename&gt;-&lt;version&gt;.tar.gz</td></tr>
-<tr valign="top" class="even"><td>Language Pack</td><td>qtopia-language-&lt;language-name&gt;-&lt;version&gt;.tar.gz</td></tr>
-<tr valign="top" class="odd"><td>Thirdparty add-on</td><td>qtopia-&lt;thirdparty-product&gt;-[commercial|opensource]-&lt;version&gt;.tar.gz</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Add on product</th><th>File Name convention</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Device package</td><td>qtopia-device-&lt;devicename&gt;-&lt;version&gt;.tar.gz</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Language Pack</td><td>qtopia-language-&lt;language-name&gt;-&lt;version&gt;.tar.gz</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Thirdparty add-on</td><td>qtopia-&lt;thirdparty-product&gt;-[commercial|opensource]-&lt;version&gt;.tar.gz</td></tr>
 </table></p>
 <p>In all cases &lt;version&gt; refers to the Qtopia version number to which the add-on package is applicable. Generally speaking, the version number of the add-on package must match the version number of the installed Qtopia src package.</p>
 <p>For information on how to obtain add-on packages please contact <a href="mailto:sales@trolltech">sales@trolltech</a>.com</p>
@@ -92,9 +91,9 @@
 <a name="how-to-build-qtopia"></a>
 <h2>How to Build Qtopia</h2>
 <p>It is recommended to build Qtopia in a so called shadow build directory. This is a directory other than &lt;qtopia-depot-dir&gt; that will contain all the intermediate files (such as object files) and the produced binaries. When using a shadow build directory the &lt;qtopia-depot-dir&gt; will remain free of any build specific files and the same Qtopia sources can be used for many different configurations. For the rest of this documentation it is assumed that the build will be performed in</p>
-<pre>    ~/src/qtopia/build-&lt;version&gt;</pre>
+<pre>&nbsp;   ~/src/qtopia/build-&lt;version&gt;</pre>
 <p>, referred to as <tt>&lt;qtopia-build-dir&gt;</tt>.</p>
-<pre>     cd &lt;qtopia-build-dir&gt;
+<pre>&nbsp;    cd &lt;qtopia-build-dir&gt;
      &lt;qtopia-depot-dir&gt;/configure -edition &lt;phone|platform&gt;
      make
      make install</pre>
@@ -104,29 +103,29 @@
 <h3>Configure options</h3>
 <p>The configure script can build all configurations of Qtopia with additional configuration options controlled via command-line options to the <tt>configure</tt> script.</p>
 <p>For a full overview of all possible options use the following command:</p>
-<pre>    &lt;qtopia-depot-dir&gt;/configure -help -verbose</pre>
+<pre>&nbsp;   &lt;qtopia-depot-dir&gt;/configure -help -verbose</pre>
 <a name="use-of-the-qpedir-environment-variable"></a>
 <h3>Use of the QPEDIR environment variable</h3>
 <p>Starting with Qtopia 4.1.x the QPEDIR environment variable is deprecated when running configure. So please make sure that QPEDIR is unset when running configure by typing &quot;export QPEDIR=&quot; or &quot;unset QPEDIR&quot;. Please be advised that QPEDIR still <tt>must</tt> be set when running scripts though.</p>
 <a name="silently-building-qtopia"></a>
 <h3>Silently building Qtopia</h3>
 <p>It is possible to suppress most of the compiler command output by configuring Qtopia with the &quot;-silent&quot; option. The resulting make output is much more compact and 'friendly to the eye'. In ad-hoc situations where a more verbose output <tt>is</tt> required the verbose output can be re-enabled by adding 'loud' to the make command:</p>
-<pre>      make loud</pre>
+<pre>&nbsp;     make loud</pre>
 <a name="configuring-for-a-device"></a>
 <h3>Configuring for a Device</h3>
 <p>The default Qtopia configuration is to build for an x86 target, running from &lt;qtopia-build-dir&gt;/image. If you wish to configure Qtopia for your device at some stage, it is recommended to use a device-specific add-on package. These packages are provided by Trolltech or by the device manufacturer. You will also need to use the -prefix argument to configure to specify the location that Qtopia will run from. This is typically /opt/Qtopia though it may differ from device to device.</p>
 <p>As a rule, a device also requires a specific tool chain that allows cross-compiling for the specific device. These tool chains are usually provided by the device manufacturer or are freely available on the internet.</p>
 <p>Once the device package is installed a subdirectory for that device will exist in <tt>&lt;qtopia-depot-dir&gt;/devices</tt>. Building for a device is really simple:</p>
-<pre>      ./configure -edition &lt;phone|platform&gt; -device &lt;device-name&gt; -prefix /opt/Qtopia
+<pre>&nbsp;     ./configure -edition &lt;phone|platform&gt; -device &lt;device-name&gt; -prefix /opt/Qtopia
       make
       make install</pre>
 <p>Please refer to the following links for further information:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Link</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><a href="howtobuild.html">How To Build Qtopia</a></td><td>detailed instructions for building Qtopia.</td></tr>
-<tr valign="top" class="even"><td><a href="syscust-index.html">System Customization</a></td><td>details how to customize many aspects of Qtopia.</td></tr>
-<tr valign="top" class="odd"><td><a href="buildsystem-user-guide.html">Build System User Guide</a></td><td>User guide for the build system.</td></tr>
-<tr valign="top" class="even"><td><a href="buildsystem-reference.html">Build System Reference</a></td><td>Detailed description of the build system.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Link</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><a href="howtobuild.html">How To Build Qtopia</a></td><td>detailed instructions for building Qtopia.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><a href="syscust-index.html">System Customization</a></td><td>details how to customize many aspects of Qtopia.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><a href="buildsystem-user-guide.html">Build System User Guide</a></td><td>User guide for the build system.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><a href="buildsystem-reference.html">Build System Reference</a></td><td>Detailed description of the build system.</td></tr>
 </table></p>
 <a name="now-what"></a>
 <h2>Now What?</h2>
@@ -136,6 +135,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

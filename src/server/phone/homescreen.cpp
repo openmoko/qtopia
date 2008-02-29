@@ -211,27 +211,33 @@ void ThemeBackground::rightsExpired( const QDrmContent &content )
 HomeScreen::HomeScreen(QWidget *parent, Qt::WFlags f)
     : PhoneThemedView(parent, f), keyLock(0),
 #ifdef QTOPIA_CELL
-      simLock(0),
+      emLock(0), simLock(0),
 #endif
-      lockTimer(0), lockMsgId(0), infoMsgId(0), missedCalls(0), bgIface(0)
+      lockMsgId(0), infoMsgId(0), missedCalls(0), bgIface(0)
 {
     keyLock = new BasicKeyLock(this);
 
-    QObject::connect(keyLock, SIGNAL(stateChanged(BasicKeyLock::State,QString)),
+    QObject::connect(keyLock, SIGNAL(stateChanged(BasicKeyLock::State)),
                      this, SLOT(showLockInformation()));
     QObject::connect(keyLock, SIGNAL(keyLockDetected()),
                      keyLock, SLOT(lock()));
 
 #ifdef QTOPIA_CELL
+    emLock = new BasicEmergencyLock(this);
     simLock = new BasicSimPinLock(this);
 
+    QObject::connect(emLock,
+                     SIGNAL(stateChanged(BasicEmergencyLock::State,QString)),
+                     this, SLOT(showLockInformation()));
     QObject::connect(simLock,
                      SIGNAL(stateChanged(BasicSimPinLock::State,QString)),
                      this, SLOT(showLockInformation()));
-    QObject::connect(keyLock, SIGNAL(dialEmergency(QString)),
+    QObject::connect(emLock, SIGNAL(dialEmergency(QString)),
                      this, SIGNAL(callEmergency(QString)));
-    QObject::connect(simLock, SIGNAL(dialEmergency(QString)),
-                     this, SIGNAL(callEmergency(QString)));
+    QObject::connect(emLock, SIGNAL(dialEmergency(QString)),
+                     simLock, SLOT(reset()));
+    QObject::connect(emLock, SIGNAL(dialEmergency(QString)),
+                     keyLock, SLOT(reset()));
 #endif
 
     setAttribute(Qt::WA_NoSystemBackground);
@@ -453,35 +459,14 @@ void HomeScreen::showLockInformation()
             QtopiaApplication::setInputMethodHint(this, "phoneonly");
         else
             qwsServer->resumeMouse();
-    } else if(keyLock->emergency()
+    } 
 #ifdef QTOPIA_CELL
-              || simLock->emergency()
-#endif
-              ) {
-        // Emergency dial!
-        bool partial = false;
-        QString number;
+    else if(emLock->emergency()) {
 
-#ifdef QTOPIA_CELL
-        if(simLock->state() == BasicSimPinLock::EmergencyNumber) {
-            partial = false;
-            number = simLock->number();
-        } else
-#endif
-        if(keyLock->state() == BasicKeyLock::EmergencyNumber) {
-            partial = false;
-            number = keyLock->emergencyNumber();
-        } else
-#ifdef QTOPIA_CELL
-        if(simLock->state() == BasicSimPinLock::PartialEmergencyNumber) {
-            partial = true;
-            number = simLock->number();
-        } else
-#endif
-        if(keyLock->state() == BasicKeyLock::PartialEmergencyNumber) {
-            partial = true;
-            number = keyLock->emergencyNumber();
-                }
+        // Emergency dial!
+        bool partial = 
+            (BasicEmergencyLock::PartialEmergencyNumber == emLock->state());
+        QString number = emLock->emergencyNumber();
 
         if(partial) {
             text = QString("<b>")+number+QString("</b>");
@@ -490,7 +475,9 @@ void HomeScreen::showLockInformation()
                       "<font color=#008800>Call</font> to dial.").arg(number);
             pix = "emergency";
                     }
-    } else if(keyLock->locked()) {
+    } 
+#endif
+    else if(keyLock->locked()) {
         // Key lock
         switch(keyLock->state()) {
             case BasicKeyLock::KeyLocked:
@@ -652,11 +639,15 @@ bool HomeScreen::eventFilter(QObject *, QEvent *e)
     }
 
     if(locked && e->type() == QEvent::KeyPress) {
-        if(keyLock->locked())
-            keyLock->processKeyEvent((QKeyEvent *)e);
 #ifdef QTOPIA_CELL
-        else
-            simLock->processKeyEvent((QKeyEvent *)e);
+        if(!emLock->processKeyEvent((QKeyEvent *)e)) {
+#endif
+            if(keyLock->locked()) 
+                keyLock->processKeyEvent((QKeyEvent *)e);
+#ifdef QTOPIA_CELL
+            else
+                simLock->processKeyEvent((QKeyEvent *)e);
+        }
 #endif
 
         return true;
@@ -687,6 +678,16 @@ QWidget* HomeScreen::newWidget( ThemeWidgetItem* input, const QString& name )
     // Now create any non-homescreen widgets
 
     return 0;
+}
+
+void HomeScreen::focusInEvent(QFocusEvent *)
+{
+    // Avoid repaint.
+}
+
+void HomeScreen::focusOutEvent(QFocusEvent *)
+{
+    // Avoid repaint.
 }
 
 void HomeScreen::keyPressEvent(QKeyEvent *k)

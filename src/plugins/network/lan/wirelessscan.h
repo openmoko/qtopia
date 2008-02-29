@@ -26,17 +26,32 @@
 #include "wnet.h"
 #ifndef NO_WIRELESS_LAN
 
+//must be defined to be able to include kernel includes
+#ifndef __user
+#define __user
+#endif
+
+#include <linux/types.h>    /* required for wireless.h */
+#include <sys/socket.h>     /* required for wireless.h */
+#include <net/if.h>         /* required for wireless.h */
+
+/* A lot of wireless.h have kernel includes which should be protected by
+   #ifdef __KERNEL__. They course include errors due to redefinitions of types.
+   This prevents those kernel headers being included by Qtopia.  
+   */
+#ifndef _LINUX_IF_H
+#define _LINUX_IF_H
+#endif
+#ifndef _LINUX_SOCKET_H
+#define _LINUX_SOCKET_H
+#endif
+#include <linux/wireless.h>
+
 #include <QObject>
 #include <QWidget>
 #include <QList>
 
 #include <qtopianetworkinterface.h>
-
-#include <sys/socket.h>
-#include <net/ethernet.h>
-#include <linux/wireless.h>
-
-#include "wnet.h"
 
 class WirelessScan : public QObject {
     Q_OBJECT
@@ -55,10 +70,11 @@ public:
 
     QString currentAccessPoint() const;
     QString currentESSID() const;
+    int currentSignalStrength() const;
     ConnectionState deviceState() const;
     bool isScanning() { return sockfd != -1; } ;
 
-    void rangeInfo( struct iw_range* range, int* weVersion );
+    void rangeInfo( struct iw_range* range, int* weVersion ) const;
 
 public slots:
     bool startScanning();
@@ -68,10 +84,10 @@ private slots:
     void checkResults();
 private:
     void readData( unsigned char* data, int length, int weVersion, struct iw_range* range );
+    void ensureScanESSID();
 
     QString iface;
     QList<WirelessNetwork> entries;
-    //QList<WRecord> entries;
     int sockfd;
 };
 

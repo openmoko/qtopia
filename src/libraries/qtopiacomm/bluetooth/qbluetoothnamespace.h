@@ -90,17 +90,6 @@ namespace QBluetooth
     };
 
     Q_DECLARE_FLAGS(SecurityOptions, SecurityOption)
-
-    enum ServiceError {
-        NoError = 0,
-        NotRunning,
-        AlreadyRunning,
-        SDPServerError,
-        NoAvailablePort,
-        NoSuchAdapter,
-        UnknownService,
-        UnknownError = 100
-    };
 }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QBluetooth::ServiceClasses)
@@ -122,7 +111,6 @@ struct qint128 {
 
 Q_DECLARE_USER_METATYPE_ENUM(QBluetooth::SDPProfile);
 Q_DECLARE_USER_METATYPE_ENUM(QBluetooth::SecurityOptions);
-Q_DECLARE_USER_METATYPE_ENUM(QBluetooth::ServiceError);
 Q_DECLARE_METATYPE(qint128);
 Q_DECLARE_METATYPE(quint128);
 Q_DECLARE_METATYPE(qint8);  //TODO: Should Qt support this out of the box?

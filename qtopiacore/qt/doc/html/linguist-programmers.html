@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/linguist-manual.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/linguist-manual.qdoc -->
 <head>
   <title>Qt 4.2: Qt Linguist Manual: Programmers</title>
   <link rel="prev" href="linguist-translators.html" />
@@ -37,15 +37,31 @@
 <li>When a release of the application is needed <a href="linguist-manager.html#lrelease">lrelease</a> is run to read the <tt>.ts</tt> files and produce the <tt>.qm</tt> files used by the application at runtime.</li>
 </ol>
 <p>For <a href="linguist-manager.html#lupdate">lupdate</a> to work successfully, it must know which translation files to produce. The files are simply listed in the application's <tt>.pro</tt> Qt project file, for example:</p>
-<pre></pre>
+<pre> TRANSLATIONS = arrowpad_fr.ts \</pre>
 <p>See the <a href="linguist-manager.html#lupdate">lupdate</a> and <a href="linguist-manager.html#lrelease">lrelease</a> sections.</p>
 <a name="loading-translations"></a>
 <h3>Loading Translations</h3>
-<pre></pre>
+<pre> int main(int argc, char *argv[])
+ {
+     QApplication app(argc, argv);</pre>
 <p>This is how a simple <tt>main()</tt> function of a Qt application begins.</p>
-<pre></pre>
+<pre> int main(int argc, char *argv[])
+ {
+     QApplication app(argc, argv);
+
+     QTranslator translator;
+     translator.load(&quot;hellotr_la&quot;);
+     app.installTranslator(&amp;translator);</pre>
 <p>For a translation-aware application a translator object is created, a translation is loaded and the translator object installed into the application.</p>
-<pre></pre>
+<pre> int main(int argc, char *argv[])
+ {
+     QApplication app(argc, argv);
+
+     QString locale = QLocale::system().name();
+
+     QTranslator translator;
+     translator.load(QString(&quot;arrowpad_&quot;) + locale);
+     app.installTranslator(&amp;translator);</pre>
 <p>In production applications a more flexible approach, for example, loading translations according to locale, might be more appropriate. If the <tt>.ts</tt> files are all named according to a convention such as <i>appname_locale</i>, e.g. <tt>tt2_fr</tt>, <tt>tt2_de</tt> etc, then the code above will load the current locale's translation at runtime.</p>
 <p>If there is no translation file for the current locale the application will fall back to using the original source text.</p>
 <a name="making-the-application-translate-user-visible-strings"></a>
@@ -66,7 +82,8 @@
 <p>and</p>
 <pre>    rbh = new QRadioButton(tr(&quot;Enabled&quot;, &quot;Hue frame&quot;), this);</pre>
 <p>Ctrl key accelerators are also translatable:</p>
-<pre></pre>
+<pre>     exitAct = new QAction(tr(&quot;E&amp;xit&quot;), this);
+     exitAct-&gt;setShortcut(tr(&quot;Ctrl+Q&quot;, &quot;Quit&quot;));</pre>
 <p>It is strongly recommended that the two argument form of <tt>tr()</tt> is used for Ctrl key accelerators. The second argument is the only clue the translator has as to the function performed by the accelerator.</p>
 <a name="helping-the-translator-with-navigation-information"></a>
 <h3>Helping the Translator with Navigation Information</h3>
@@ -139,9 +156,9 @@
 <h2>Tutorials</h2>
 <p>Three tutorials are presented:</p>
 <ol type="1">
-<li>Hello tr() demonstrates the creation of a <a href="qtranslator.html">QTranslator</a> object. It also shows the simplest use of the <tt>tr()</tt> function to mark user-visible source text for translation.</li>
-<li>Arrow Pad explains how to make the application load the translation file applicable to the current locale. It also shows the use of the two-argument form of <tt>tr()</tt> which provides additional information to the translator.</li>
-<li>Troll Print explains how identical source texts can be distinguished even when they occur in the same context. This tutorial also discusses how the translation tools help minimize the translator's work when an application is upgraded.</li>
+<li><a href="linguist-hellotr.html">Hello tr()</a> demonstrates the creation of a <a href="qtranslator.html">QTranslator</a> object. It also shows the simplest use of the <tt>tr()</tt> function to mark user-visible source text for translation.</li>
+<li><a href="linguist-arrowpad.html">Arrow Pad</a> explains how to make the application load the translation file applicable to the current locale. It also shows the use of the two-argument form of <tt>tr()</tt> which provides additional information to the translator.</li>
+<li><a href="linguist-trollprint.html">Troll Print</a> explains how identical source texts can be distinguished even when they occur in the same context. This tutorial also discusses how the translation tools help minimize the translator's work when an application is upgraded.</li>
 </ol>
 <p>These tutorials cover all that you need to know to prepare your Qt applications for translation.</p>
 <p>At the beginning of a project add the translation source files to be used to the project file and add calls to <a href="linguist-manager.html#lupdate">lupdate</a> and <a href="linguist-manager.html#lrelease">lrelease</a> to the makefile.</p>
@@ -154,6 +171,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

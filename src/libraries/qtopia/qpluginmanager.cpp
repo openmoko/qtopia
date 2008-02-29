@@ -494,19 +494,21 @@ QString QPluginManager::stripSystem( const QString &libFile ) const
     return name;
 }
 
-void QPluginManager::loaded( QObject *iface, QPluginLoader *lib, QString name ) {
+void QPluginManager::loaded( QObject *iface, QPluginLoader *lib, QString name )
+{
     d->interfaces.insert( iface, lib );
     connect(iface, SIGNAL(destroyed()), this, SLOT(instanceDestroyed()));
-    QString type = name;
 #ifndef Q_OS_WIN32
-    type = "lib" + type;
+    QString type = QLatin1String("/lib") + name + QLatin1String(".qm");
+#else
+    QString type = QLatin1Char('/') + name + QLatin1String(".qm");
 #endif
     QStringList langs = languageList();
     QStringList qpepaths = Qtopia::installPaths();
     for (QStringList::ConstIterator qit = qpepaths.begin(); qit!=qpepaths.end(); ++qit) {
+        QString path(*qit+QLatin1String("i18n/"));
         for (QStringList::ConstIterator lit = langs.begin(); lit!=langs.end(); ++lit) {
-            QString lang = *lit;
-            QString tfn = *qit+"i18n/"+lang+"/"+type+".qm";
+            QString tfn = path + *lit + QLatin1Char('/') + type;
             if ( QFile::exists(tfn) ) {
                 QTranslator * trans = new QTranslator(qApp);
                 if ( trans->load( tfn ))

@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -102,64 +112,34 @@ static inline int inotify_rm_watch(int fd, __u32 wd)
     return syscall(__NR_inotify_rm_watch, fd, wd);
 }
 
-// from linux/inotify.h
-// ---------- inotify.h begin -------
-// Copyright (C) 2005 John McCutchan
-
+// the following struct and values are documented in linux/inotify.h
 extern "C" {
 
-/*
- * struct inotify_event - structure read from the inotify device for each event
- *
- * When you are watching a directory, you will receive the filename for events
- * such as IN_CREATE, IN_DELETE, IN_OPEN, IN_CLOSE, ..., relative to the wd.
- */
 struct inotify_event {
-        __s32           wd;             /* watch descriptor */
-        __u32           mask;           /* watch mask */
-        __u32           cookie;         /* cookie to synchronize two events */
-        __u32           len;            /* length (including nulls) of name */
-        char            name[0];        /* stub for possible name */
+        __s32           wd;
+        __u32           mask;
+        __u32           cookie;
+        __u32           len;
+        char            name[0];
 };
 
-/* the following are legal, implemented events that user-space can watch for */
-#define IN_ACCESS               0x00000001      /* File was accessed */
-#define IN_MODIFY               0x00000002      /* File was modified */
-#define IN_ATTRIB               0x00000004      /* Metadata changed */
-#define IN_CLOSE_WRITE          0x00000008      /* Writtable file was closed */
-#define IN_CLOSE_NOWRITE        0x00000010      /* Unwrittable file closed */
-#define IN_OPEN                 0x00000020      /* File was opened */
-#define IN_MOVED_FROM           0x00000040      /* File was moved from X */
-#define IN_MOVED_TO             0x00000080      /* File was moved to Y */
-#define IN_CREATE               0x00000100      /* Subfile was created */
-#define IN_DELETE               0x00000200      /* Subfile was deleted */
-#define IN_DELETE_SELF          0x00000400      /* Self was deleted */
-#define IN_MOVE_SELF            0x00000800      /* Self was moved */
+#define IN_ACCESS               0x00000001
+#define IN_MODIFY               0x00000002
+#define IN_ATTRIB               0x00000004
+#define IN_CLOSE_WRITE          0x00000008
+#define IN_CLOSE_NOWRITE        0x00000010
+#define IN_OPEN                 0x00000020
+#define IN_MOVED_FROM           0x00000040
+#define IN_MOVED_TO             0x00000080
+#define IN_CREATE               0x00000100
+#define IN_DELETE               0x00000200
+#define IN_DELETE_SELF          0x00000400
+#define IN_MOVE_SELF            0x00000800
+#define IN_UNMOUNT              0x00002000
+#define IN_Q_OVERFLOW           0x00004000
 
-/* the following are legal events.  they are sent as needed to any watch */
-#define IN_UNMOUNT              0x00002000      /* Backing fs was unmounted */
-#define IN_Q_OVERFLOW           0x00004000      /* Event queued overflowed */
-#define IN_IGNORED              0x00008000      /* File was ignored */
-
-/* helper events */
-#define IN_CLOSE                (IN_CLOSE_WRITE | IN_CLOSE_NOWRITE) /* close */
-#define IN_MOVE                 (IN_MOVED_FROM | IN_MOVED_TO) /* moves */
-
-/* special flags */
-#define IN_MASK_ADD             0x20000000
-#define IN_ISDIR                0x40000000      /* event occurred against dir */
-#define IN_ONESHOT              0x80000000      /* only send event once */
-
-/*
- * All of the events - we build the list by hand so that we can add flags in
- * the future and not break backward compatibility.  Apps will get only the
- * events that they originally wanted.  Be sure to add new events here!
- */
-#define IN_ALL_EVENTS   (IN_ACCESS | IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE | \
-                         IN_CLOSE_NOWRITE | IN_OPEN | IN_MOVED_FROM | \
-                         IN_MOVED_TO | IN_DELETE | IN_CREATE | IN_DELETE_SELF | \
-                         IN_MOVE_SELF)
-
+#define IN_CLOSE                (IN_CLOSE_WRITE | IN_CLOSE_NOWRITE)
+#define IN_MOVE                 (IN_MOVED_FROM | IN_MOVED_TO)
 }
 
 // --------- inotify.h end ----------

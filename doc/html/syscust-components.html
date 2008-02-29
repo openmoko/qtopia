@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Customizing Components</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Customizing Components</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -29,16 +28,16 @@
 <h2>Removing Components</h2>
 <p>Choosing not to build a component, for example, <tt>Todo</tt>, can easily be done by editing <tt>$QPEDIR/src/custom.pri</tt> and re-configuring Qtopia.</p>
 <p>For example add the following to <tt>custom.pri</tt>:</p>
-<pre>    APP_PROJECTS-=applications/todo</pre>
+<pre>&nbsp;   APP_PROJECTS-=applications/todo</pre>
 <p>For further information refer to: <tt>$QPEDIR/src/custom.pri</tt> and <a href="buildsystem-user-guide.html">Build System User Guide</a>.</p>
 <a name="developer-only-components"></a><a name="developer-only-components"></a>
 <h2>Developer-Only Components</h2>
 <p>The following are applications/features supplied with Qtopia that are not intended to be shipped with production devices:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Application/Feature</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>Rotation Setting</td><td>Provided to test and demonstrate Qtopia's ability to display in different orientations. It may be helpful during development if the device uses the transformation display driver.</td></tr>
-<tr valign="top" class="even"><td>Shutdown Setting</td><td>Provided as a development tool and is not necessary on a production device. It can be removed by deleting <tt>apps/Settings/quit.desktop</tt>. On most devices it is expected that there is a physical power button, therefore the user is not expected to manually run or shutdown Qtopia.</td></tr>
-<tr valign="top" class="odd"><td><tt>Screensize</tt> Applet</td><td>Allows changing the maximum window size for testing different screen sizes during development. This is a development tool only and is not intended for end-users.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Application/Feature</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Rotation Setting</td><td>Provided to test and demonstrate Qtopia's ability to display in different orientations. It may be helpful during development if the device uses the transformation display driver.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Shutdown Setting</td><td>Provided as a development tool and is not necessary on a production device. It can be removed by deleting <tt>apps/Settings/quit.desktop</tt>. On most devices it is expected that there is a physical power button, therefore the user is not expected to manually run or shutdown Qtopia.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>Screensize</tt> Applet</td><td>Allows changing the maximum window size for testing different screen sizes during development. This is a development tool only and is not intended for end-users.</td></tr>
 </table></p>
 <a name="unsupported-components"></a>
 <h2>Unsupported Components</h2>
@@ -55,7 +54,7 @@
 <li>respond to the <tt>QtopiaApplication::linkChanged(const QString&amp; link)</tt> signal when <tt>link</tt> is a relevant camera item (for example, updating lists).</li>
 </ul>
 <p>The Qtopia Camera application uses the <tt>Video4Linux</tt> API, facilitating interoperability. Substitute applications should consider also using this API.</p>
-<p>The Qtopia Camera application uses the <tt>QDirectPainter</tt> class in simple cases. Substitute applications should always use this class in cases appropriate for the target device.</p>
+<p>The Qtopia Camera application uses the <a href="qdirectpainter.html">QDirectPainter</a> class in simple cases. Substitute applications should always use this class in cases appropriate for the target device.</p>
 <p>Playback in a <tt>Camcorder</tt> function should follow the <a href="#video">Guidelines for Video Applications</a>.</p>
 <a name="music"></a><a name="music"></a>
 <h2>Music</h2>
@@ -96,6 +95,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

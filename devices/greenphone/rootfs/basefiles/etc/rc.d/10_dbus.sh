@@ -1,10 +1,11 @@
+#!/bin/sh
 
 case $1 in
 start)
     dbus-daemon --system
     ;;
 stop)
-    killall dbus-daemon
+    kill $( pidof dbus-daemon ) 2>/dev/null
     ;;
 *)
     echo "usage: $0 { start | stop }"
@@ -13,4 +14,5 @@ stop)
 esac
 
 exit 0
+
 

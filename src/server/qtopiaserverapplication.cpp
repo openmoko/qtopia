@@ -127,39 +127,6 @@ public slots:
 Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
 
 
-#ifdef QTOPIA_TEST
-
-/*!
-    \internal
-    This filter is used by the test framework to record events.
-*/
-class TestKeyFilter : public QObject, QtopiaServerApplication::QWSEventFilter
-{
-Q_OBJECT
-public:
-    TestKeyFilter(QtopiaServerTestSlave *slave) : m_serverSlave(slave)
-    {
-        QtopiaServerApplication::instance()->installQWSEventFilter(this);
-    }
-    ~TestKeyFilter()
-    {
-        QtopiaServerApplication::instance()->removeQWSEventFilter(this);
-    }
-
-protected:
-    virtual bool qwsEventFilter(QWSEvent *e)
-    {
-        m_serverSlave->qwsEventFilter(e);
-        return false;
-    }
-
-private:
-    QtopiaServerTestSlave *m_serverSlave;
-};
-
-#endif
-
-
 /*!
   \class QtopiaServerApplication
   \ingroup QtopiaServer
@@ -598,7 +565,8 @@ QtopiaServerApplication::QtopiaServerApplication(int& argc, char **argv)
     qtopiaServerTasks()->enableTaskReporting();
 
 #ifdef QTOPIA_TEST
-    m_testKeyFilter = new TestKeyFilter(&m_serverSlave);
+    m_serverSocket = new QtopiaTestServerSocket();
+    m_testFilter = new TestEventFilter(this);
 #endif
 }
 
@@ -610,7 +578,8 @@ QtopiaServerApplication::~QtopiaServerApplication()
     m_instance = 0;
 
 #ifdef QTOPIA_TEST
-    delete m_testKeyFilter;
+    delete m_serverSocket;
+    delete m_testFilter;
 #endif
 }
 
@@ -1703,5 +1672,62 @@ bool SystemShutdownHandler::systemShutdown()
 {
     return true;
 }
+
+#ifdef QTOPIA_TEST
+/*
+    This simple class sets up a TCP server that will listen for incoming connections from the Qt Test Framework.
+    An incoming connection will be hooked up to the testserver slave instance.
+
+    A default port value is used, but an alternative value may be specified with the -remote <port> command line option.
+
+    Note that the test classes only exist if Qtopia is configured with -test.
+*/
+QtopiaTestServerSocket::QtopiaTestServerSocket() : QTcpServer()
+{
+    setMaxPendingConnections( 1 );
+
+    quint16 my_port = 5656;
+ 
+    bool found = false;
+    for (int i = 1; i<qApp->arguments().count(); i++) {
+        if (qApp->arguments()[i] == "-remote") {
+            if (found)
+                qWarning("Multiple -remote arguments found, only the first will be used");
+            else {
+                found = true;
+                QString ip_port = qApp->argv()[i+1];
+                int pos = ip_port.indexOf( ":" );
+                if (pos >= 0)
+                    my_port = ip_port.mid(pos+1).toInt();
+                else
+                    my_port = ip_port.toInt();
+            }
+        }
+    }
+
+    listen( QHostAddress::Any, my_port );
+
+    if (this->serverPort() == 0) {
+        qWarning( QString("ERROR: port '%1' is already in use. System testing is not possible.").arg(my_port).toAscii() );
+//        QApplication::exit(777);
+    } else {
+        qWarning( QString("QtopiaTest is using port '%1' for System testing.").arg(my_port).toAscii() );
+    }
+}
+
+QtopiaTestServerSocket::~QtopiaTestServerSocket()
+{
+}
+
+void QtopiaTestServerSocket::incomingConnection( int socket )
+{
+    QtopiaServerApplication *app = QtopiaServerApplication::instance();
+    if (app) {
+        // hook up our internal system test slave to an incoming test connection
+        app->m_serverSlave.close();
+        app->m_serverSlave.setSocket( socket );
+    }
+}
+#endif //ifdef QTOPIA_TEST
 
 #include "qtopiaserverapplication.moc"

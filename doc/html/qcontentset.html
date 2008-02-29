@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QContentSet Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QContentSet Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContentSet Class Reference</h1>
 <p>The QContentSet class represents a set of <a href="qcontent.html">QContent</a> objects. <a href="#details">More...</a></p>
-<pre>    #include &lt;QContentSet&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QContentSet&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qcontentset-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -110,7 +109,7 @@
 <li>When a <tt>QContentSet</tt> object is created it opens a <tt>QCop</tt> listener on the <tt>QContent</tt> channel internally.</li>
 <li>If a call to the API changes one or more metadata records, a message is sent on the <tt>QContent</tt> channel containing a datastream of all the record numbers affected.</li>
 <li>If a <tt>QContentSet</tt> receives a message on the <tt>QCop</tt> channel reflecting a change in a record held in the set, or it makes a change to such a record itself, then the following signal is emitted:<ul>
-<li>the changed QContentIdList signal - for a change affecting one or more specific records.</li>
+<li>the changed <a href="qcontent.html#QContentIdList-typedef">QContentIdList</a> signal - for a change affecting one or more specific records.</li>
 <li>the <a href="qcontentset.html#changed">changed</a>() signal - for a change affecting many records.</li>
 </ul>
 </li>
@@ -154,7 +153,7 @@
 <p>Joins a group of filtering criteria <i>filters</i> to the current filter set using the given <i>operand</i>.</p>
 <h3 class="fn"><a name="appendFrom"></a>void QContentSet::appendFrom ( QContentSet &amp; <i>other</i> )</h3>
 <p>Appends the contents of <i>other</i> to this <tt>QContentSet</tt>. Currently it appends them as explicit items to the current QContenSet, in the future, it will concatenate the two filter sets to create a new aggregate filter set.</p>
-<h3 class="fn"><a name="changed"></a>void QContentSet::changed ( const QContentIdList &amp; <i>idList</i>, <a href="qcontent.html#ChangeType-enum">QContent::ChangeType</a> <i>type</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="changed"></a>void QContentSet::changed ( const <a href="qcontent.html#QContentIdList-typedef">QContentIdList</a> &amp; <i>idList</i>, <a href="qcontent.html#ChangeType-enum">QContent::ChangeType</a> <i>type</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when <tt>QContent</tt> with Ids <i>idList</i>, included in the filter expression for this <tt>QContentSet</tt> are changed, for example, by another application.</p>
 <p><i>type</i> specifies the type of change <a href="qcontent.html#ChangeType-enum">QContent::ChangeType</a>.</p>
 <h3 class="fn"><a name="changed-2"></a>void QContentSet::changed ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -194,7 +193,7 @@
 <p>Store the meta information objects into the backing store, and create a file on the file system if the content type is appropriate.</p>
 <h3 class="fn"><a name="isEmpty"></a>bool QContentSet::isEmpty () const</h3>
 <p>Returns true if this set is empty; otherwise false.</p>
-<h3 class="fn"><a name="itemIds"></a>QContentIdList QContentSet::itemIds () const</h3>
+<h3 class="fn"><a name="itemIds"></a><a href="qcontent.html#QContentIdList-typedef">QContentIdList</a> QContentSet::itemIds () const</h3>
 <p>Return a <tt>QContentIdList</tt> of content Ids in this set.</p>
 <p>It is a snapshot of the currently known content in the list, which could go out of date immediately after it is obtained.</p>
 <p>When considering using this method first examine the process of retrieving a pointer to the internal model and using an MVC solution.</p>
@@ -233,6 +232,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

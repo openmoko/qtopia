@@ -26,7 +26,7 @@
 /*!
     \class QAtResultParser
     \brief The QAtResultParser class provides support for parsing the response to AT modem commands
-    \ingroup communication
+    \ingroup telephony::serial
 
     The QAtResultParser provides functions that support parsing the response
     from AT modem commands and unsolicited notifications.

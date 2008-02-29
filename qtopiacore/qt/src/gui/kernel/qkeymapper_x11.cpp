@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -246,10 +256,12 @@ QList<int> QKeyMapperPrivate::possibleKeysXKB(QKeyEvent *event)
     const int xkeycode = event->nativeScanCode();
     const uint xmodifiers = event->nativeModifiers();
 
-    // translate key without any modifiers first
+    // first, translate key only using lock modifiers (there are no Qt equivalents for these, so we must
+    // always use them when determining the baseKeySym)
     KeySym baseKeySym;
     uint consumedModifiers;
-    if (!XkbLookupKeySym(X11->display, xkeycode, 0, &consumedModifiers, &baseKeySym))
+    if (!XkbLookupKeySym(X11->display, xkeycode, (xmodifiers & (LockMask | qt_num_lock_mask)),
+                         &consumedModifiers, &baseKeySym))
         return QList<int>();
 
     QList<int> result;
@@ -332,10 +344,12 @@ QList<int> QKeyMapperPrivate::possibleKeysCore(QKeyEvent *event)
     const int xkeycode = event->nativeScanCode();
     const uint xmodifiers = event->nativeModifiers();
 
-    // translate key without any modifiers first
+    // first, translate key only using lock modifiers (there are no Qt equivalents for these, so we must
+    // always use them when determining the baseKeySym)
     KeySym baseKeySym;
     uint consumedModifiers;
-    if (!qt_XTranslateKey(&coreDesc, xkeycode, 0, &consumedModifiers, &baseKeySym))
+    if (!qt_XTranslateKey(&coreDesc, xkeycode, (xmodifiers & (LockMask | qt_num_lock_mask)),
+                          &consumedModifiers, &baseKeySym))
         return QList<int>();
 
     QList<int> result;
@@ -1171,8 +1185,12 @@ static QString translateKeySym(KeySym keysym, uint xmodifiers,
         // convert chars (8bit) to text (unicode).
         if (mapper)
             text = mapper->toUnicode(chars.data(), count, 0);
-        else
+        if (text.isEmpty()) {
+            // no mapper, or codec couldn't convert to unicode (this
+            // can happen when running in the C locale or with no LANG
+            // set). try converting from latin-1
             text = QString::fromLatin1(chars);
+        }
     }
 
     modifiers = X11->translateModifiers(xmodifiers);

@@ -281,7 +281,7 @@ bool ContextKeyManager::updateContextLabel(QWidget *w, bool modal, int key)
         || (w->windowFlags() & Qt::Popup)) {
         QList<ClassModalState>::Iterator cit;
         for (cit = contextClass.begin(); cit != contextClass.end(); ++cit) {
-            if (w->inherits((*cit).className.toAscii().constData())) {
+            if (w->inherits((*cit).className)) {
                 KeyMap::Iterator it = (*cit).keyMap.find(key);
                 if (it != (*cit).keyMap.end()) {
                     switch ((*it).type(modal)) {
@@ -329,7 +329,7 @@ QWidget *ContextKeyManager::findTargetWidget(QWidget *w, int key, bool modal)
     if (w->focusPolicy() != Qt::NoFocus) {
         QList<ClassModalState>::Iterator cit;
         for (cit = contextClass.begin(); cit != contextClass.end(); ++cit) {
-            if (w->inherits((*cit).className.toAscii().constData())) {
+            if (w->inherits((*cit).className)) {
                 KeyMap::Iterator it = (*cit).keyMap.find(key);
                 if (it != (*cit).keyMap.end()) {
                     if ((*it).type(modal) != ModalState::NoLabel)
@@ -447,7 +447,7 @@ void ContextKeyManager::clearContextLabel(QWidget *w, int key, QSoftMenuBar::Foc
     updateContextLabels();
 }
 
-void ContextKeyManager::setClassText(const QString &className, int key, const QString &t, QSoftMenuBar::FocusState state)
+void ContextKeyManager::setClassText(const QByteArray &className, int key, const QString &t, QSoftMenuBar::FocusState state)
 {
     ClassModalState cms(className);
 
@@ -468,7 +468,7 @@ void ContextKeyManager::setClassText(const QString &className, int key, const QS
     }
 }
 
-void ContextKeyManager::setClassPixmap(const QString &className, int key, const QString &t, QSoftMenuBar::FocusState state)
+void ContextKeyManager::setClassPixmap(const QByteArray &className, int key, const QString &t, QSoftMenuBar::FocusState state)
 {
     ClassModalState cms(className);
 
@@ -489,7 +489,7 @@ void ContextKeyManager::setClassPixmap(const QString &className, int key, const 
     }
 }
 
-void ContextKeyManager::setClassStandardLabel(const QString &className, int key, QSoftMenuBar::StandardLabel label, QSoftMenuBar::FocusState state)
+void ContextKeyManager::setClassStandardLabel(const QByteArray &className, int key, QSoftMenuBar::StandardLabel label, QSoftMenuBar::FocusState state)
 {
     ClassModalState cms(className);
 

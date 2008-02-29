@@ -141,9 +141,9 @@ private:
 };
 
 EmailClient::EmailClient( QWidget* parent, const QString name, Qt::WFlags fl )
-        : QMainWindow( parent, fl ), accountIdCount(0), emailHandler(0), mb(0),
-          fetchTimer(this), showMessageType(MailAccount::SMS),
-          autoDownloadMail(false)
+        : QMainWindow( parent, fl ), accountIdCount(0), emailHandler(0),
+        enableMessageActions(false), mb(0), fetchTimer(this),
+        showMessageType(MailAccount::SMS), autoDownloadMail(false)
 {
     setObjectName( name );
 #ifdef QTOPIA_PHONE
@@ -153,10 +153,10 @@ EmailClient::EmailClient( QWidget* parent, const QString name, Qt::WFlags fl )
 #endif
 
     connect( &fetchTimer, SIGNAL(timeout()), this, SLOT( automaticFetch() ) );
+    waitingForNewMessage = false;
     autoGetMail = false;
 
     mailboxList = new MailboxList(this);
-
     accountList = new AccountList(this, "accountList");
 
     getPath("enclosures/", true);  //create directory enclosures
@@ -180,8 +180,6 @@ EmailClient::EmailClient( QWidget* parent, const QString name, Qt::WFlags fl )
     connect(sysMessagesChannel, SIGNAL(received(const QString&,const QByteArray&)),
              this, SLOT( handleSysMessages(const QString&, const QByteArray&)));
 
-    
-
     connect(folderView, SIGNAL(folderSelected(Folder*)), this, SLOT(folderSelected(Folder*)) );
     connect(folderView, SIGNAL( emptyFolder() ), this, SLOT( emptyFolder() ) );
 
@@ -200,13 +198,10 @@ EmailClient::EmailClient( QWidget* parent, const QString name, Qt::WFlags fl )
     queueStatus = 0;
     
     accountList->readAccounts();
-    
     createEmailHandler();
-    
-    updateAccounts();
     folderView->setupFolders(accountList );
-
     readSettings();
+    initActions(); 
 
     nosuspend = 0;
     filesRead = false;
@@ -268,11 +263,10 @@ void EmailClient::openFiles()
         folderView->changeToSystemFolder(InboxString);
       else
         folderSelected( folderView->currentFolder() );
-      showFolderList();
 
       displayPreviousMail();
     }
-    
+
     qLog(Messaging) << "Mail boxes connected";
 }
 
@@ -322,9 +316,13 @@ void EmailClient::delayedShowMessage(MailAccount::AccountType acct, QUuid id, bo
     QtopiaApplication::instance()->registerRunningTask(QLatin1String("display"));
     showMsgList = showList;
     showMessageType = acct;
-    showMessageTimer.setSingleShot( true );
-    showMessageTimer.start( 700 );
     showMsgId = id;
+    if (showMessageType == MailAccount::SMS && !showList) {
+	waitingForNewMessage = true;
+    } else {
+	showMessageTimer.setSingleShot( true );
+	showMessageTimer.start( 700 );
+    }
 }
 
 void EmailClient::displayRecentMessage()
@@ -349,7 +347,19 @@ void EmailClient::displayRecentMessage()
         tr("Should this mail be saved in Drafts before viewing the new mail?"),
         tr("View Mail message will be ignored")) )
         return;
+    
+    updateListViews();
+    if (!showMsgList)
+        queryItemSelected();
+}
 
+// Ensure the folder list and message list are synchronized with the ReadMail widget
+void EmailClient::updateListViews()
+{
+    showMessageList();
+    // Required for up/down to function in message list
+    mMessageView->setEditFocus(true);
+    
     Folder *folder = 0;
     QListIterator<MailAccount*> it = accountList->accountIterator();
     while ( it.hasNext() ) {
@@ -392,7 +402,7 @@ void EmailClient::displayRecentMessage()
     closeAfterView = false;
     folderView->setCurrentItem( item );
     folderSelected( folderView->currentFolder() );
-    showMessageList();
+
     if (!showMsgList) {
         if (!showMsgId.isNull()) {
             EmailListItem *item = messageView()->getRef(showMsgId);
@@ -403,7 +413,6 @@ void EmailClient::displayRecentMessage()
                 messageView()->scrollToItem(item);
             }
         }
-        queryItemSelected();
     }
 
     closeAfterView = oldCloseAfterView;
@@ -510,41 +519,21 @@ void EmailClient::createEmailHandler()
      }
 }
 
-void EmailClient::init()
+void EmailClient::initActions()
 {
-    mReadMail = 0;
-    mWriteMail = 0;
-
-    pm_folder = new QIcon(":icon/folder");
-    pm_trash = new QIcon(":icon/trash");
-
-    vbox = new QFrame(this);
-    vboxLayout = new QVBoxLayout(vbox);
-    vboxLayout->setMargin( 0 );
-    vboxLayout->setSpacing( 0 );
-
-#ifndef QTOPIA_PHONE
-    bar = new QToolBar( this );
-    bar->setMovable( false );
-#ifdef QTOPIA4_TODO
-    bar->setHorizontalStretchable( true );
-#endif
-
-    mb = new QMenuBar( bar );
-
-    QMenu *mail = mb->addMenu( tr( "&Mail" ) );
-    configure = mb->addMenu( tr( "&Accounts" ) );
-    connect(configure, SIGNAL(triggered(QAction*)),
-            this, SLOT(editAccount(QAction*)));
-
-    bar = new QToolBar( this );
-    bar->setMovable( false );
-#endif
-
-//     sendMailButton = new QAction( QIcon(":icon/sendmail"), tr("Send all mail"), this );
-//     connect(sendMailButton, SIGNAL(triggered()), this, SLOT(sendAllQueuedMail()) );
-//     sendMailButton->setWhatsThis( tr("Send all mail in the Outbox.") );
-
+    if (selectAccountMenu)
+	return; // Already inited
+    
+    QWidget *widget_4 = mailboxView->widget( folderId );
+    QWidget *widget_3 = mailboxView->widget( messageId );
+    QMenu *folderContext = QSoftMenuBar::menuFor( widget_4 );
+    QMenu *messageContext = QSoftMenuBar::menuFor( widget_3 );
+        
+    if (!pm_folder)
+	pm_folder = new QIcon(":icon/folder");
+    if (!pm_trash)
+	pm_trash = new QIcon(":icon/trash");
+    
     selectAccountMenu = new QMenu(mb);
     connect(selectAccountMenu, SIGNAL(triggered(QAction*)),
             this, SLOT(selectAccount(QAction*)));
@@ -553,12 +542,10 @@ void EmailClient::init()
     connect(getMailButton, SIGNAL(triggered()), this, SLOT(getAllNewMail()) );
     getMailButton->setWhatsThis( tr("Get new mail from all your accounts.") );
 
-
     cancelButton = new QAction( QIcon(":icon/reset"), tr("Cancel transfer"), this );
     connect(cancelButton, SIGNAL(triggered()), this, SLOT(cancel()) );
     cancelButton->setWhatsThis( tr("Abort all transfer of mail.") );
     cancelButton->setVisible(false);
-
 
     movePop = new QMenu(this);
     copyPop = new QMenu(this);
@@ -581,61 +568,66 @@ void EmailClient::init()
     emptyTrashAction = new QAction(tr("Empty Trash"), this );
     connect(emptyTrashAction, SIGNAL(triggered()), this, SLOT(emptyFolder()));
 
-#ifdef QTOPIA_PHONE
     moveAction = new QAction( tr("Move mail..."), this );
     connect(moveAction, SIGNAL(triggered()), this, SLOT(moveMessage()));
     copyAction = new QAction( tr("Copy mail..."), this );
     connect(copyAction, SIGNAL(triggered()), this, SLOT(copyMessage()));
     selectAllAction = new QAction( tr("Select all"), this );
     connect(selectAllAction, SIGNAL(triggered()), this, SLOT(selectAll()));
-#endif
 
     deleteMailAction = new QAction( *pm_trash, tr("Delete mail"), this );
     connect(deleteMailAction, SIGNAL(triggered()), this, SLOT(deleteMailItem()));
 
-#ifndef QTOPIA_PHONE
-//     mail->addAction( sendMailButton );
-    mail->addSeparator();
-    mail->addAction( getMailButton );
-    QAction *selectAccountMenuAction = mail->addMenu( selectAccountMenu );
-    selectAccountMenuAction->setText( tr("Get Mail in") );
-    mail->addSeparator();
-    mail->addAction( cancelButton );
-    mail->addSeparator();
-    QAction *movePopMenuAction = mail->addMenu( movePop );
-    movePopMenuAction->setText( tr("Move to") );
-    QAction *copyPopMenuAction = mail->addMenu( copyPop );
-    copyPopMenuAction->setText( tr("Copy to") );
-    mail->addAction( deleteMailAction );
-    mail->addSeparator();
-    mail->addAction( emptyTrashAction );
-    mail->addSeparator();
-    mail->addAction( composeButton );
-    mail->addAction( searchButton );
+    folderContext->addAction( composeButton );
+    folderContext->addAction( getMailButton );
+    folderContext->addAction( searchButton );
+    folderContext->addAction( cancelButton );
+    folderContext->addAction( emptyTrashAction );
+    folderContext->addAction( settingsAction );
 
-//     bar->addAction( sendMailButton );
-    bar->addAction( getMailButton );
+    messageContext->addAction( composeButton );
+    messageContext->addAction( deleteMailAction );
+    messageContext->addAction( moveAction );
+    messageContext->addAction( copyAction );
+    messageContext->addAction( selectAllAction );
 
-    if ( QApplication::desktop()->screenGeometry().width() > 176 ) {
-        bar->addAction( composeButton );
-        bar->addAction( searchButton );
-    }
-#endif
+    updateAccounts();
 
-#ifdef QTOPIA_PHONE
+    deleteMailAction->setVisible( enableMessageActions );
+    moveAction->setVisible( enableMessageActions );
+    copyAction->setVisible( enableMessageActions );
+    selectAllAction->setVisible( enableMessageActions );
+    
+    int count = mailboxList->mailbox(TrashString)->mailCount("all");
+    emptyTrashAction->setVisible(count > 0);
+}
+
+void EmailClient::init()
+{
+    mReadMail = 0;
+    mWriteMail = 0;
+    selectAccountMenu = 0;
+    getMailButton = 0;
+    cancelButton = 0;
+    movePop = 0;
+    copyPop = 0;
+    composeButton = 0;
+    searchButton = 0;
+    settingsAction = 0;
+    emptyTrashAction = 0;
+    moveAction = 0;
+    copyAction = 0;
+    selectAllAction = 0;
+    deleteMailAction = 0;
+
+    vbox = new QFrame(this);
+    vboxLayout = new QVBoxLayout(vbox);
+    vboxLayout->setMargin( 0 );
+    vboxLayout->setSpacing( 0 );
+
     mailboxView = new QStackedWidget( vbox );
     mailboxView->setObjectName( "mailboxView" );
     vboxLayout->addWidget( mailboxView );
-#else
-    mailboxView = new QTabWidget( vbox );
-    mailboxView->setObjectName( "mailboxView" );
-    vboxLayout->addWidget( mailboxView );
-    // remove unnecessary border.
-    QStackedWidget *sw;
-    sw = mailboxView->findChild<QStackedWidget*>( "QStackedWidget" );
-    if (sw)
-	sw->setFrameStyle( QFrame::NoFrame );
-#endif
 
     widget_3 = new QWidget( mailboxView );
     widget_3->setObjectName( "widget_3" );
@@ -653,29 +645,12 @@ void EmailClient::init()
     connect(folderView, SIGNAL(viewMessageList()),  this, SLOT(showMessageList()) );
     gridFolder->addWidget(folderView, 1, 1 );
 
-#ifdef QTOPIA_PHONE
     folderId = mailboxView->addWidget( widget_4 );
     messageId = mailboxView->addWidget( widget_3 );
 
     /* Create context menus for list of folders and messages */
     QMenu *folderContext = QSoftMenuBar::menuFor( widget_4 );
-    folderContext->addAction( composeButton );
-    folderContext->addAction( getMailButton );
-    folderContext->addAction( searchButton );
-    folderContext->addAction( cancelButton );
-    folderContext->addAction( emptyTrashAction );
-    folderContext->addAction( settingsAction );
-
     QMenu *messageContext = QSoftMenuBar::menuFor( widget_3 );
-    messageContext->addAction( composeButton );
-    messageContext->addAction( deleteMailAction );
-    messageContext->addAction( moveAction );
-    messageContext->addAction( copyAction );
-    messageContext->addAction( selectAllAction );
-#else
-    mailboxView->addTab( widget_4, tr( "Folders" ) );
-    mailboxView->addTab( widget_3, appTitle );
-#endif
 
     /*  Folder and Message View specific init not related to placement  */
     QStringList columns;
@@ -691,28 +666,9 @@ void EmailClient::init()
     QAction *fvWhatsThis = QWhatsThis::createAction( folderView );
     fvWhatsThis->setText( tr("A list of your folders.  You can tap Outbox and then tap the Messages tab to see the messages currently in the outbox.") );
 
-#ifdef QTOPIA_PHONE
     folderView->header()->resizeSection( 0,
                         QApplication::desktop()->availableGeometry().width() );
     folderView->folderParentMenu(mb);
-#else
-    QMenu *options = folderView->folderParentMenu(mb);
-    options->setTitle( tr( "&Options" ) );
-    mb->addMenu( options );
-
-    /* Corner button    */
-    QPushButton *cornerButton = new QPushButton(widget_3);
-    cornerButton->setIcon( QIcon(":image/qtmail/menu") );
-    connect(cornerButton, SIGNAL( clicked() ),
-            this, SLOT( cornerButtonClicked() ) );
-
-    QAction *cbWhatsThis = QWhatsThis::createAction( cornerButton );
-    cbWhatsThis->setText( tr("Toggle display of the column headers by tapping this icon.") );
-
-#ifdef QTOPIA4_TODO
-    messageView()->setCornerWidget( cornerButton );
-#endif
-#endif
 
     progressBar = new StatusProgressBar( vbox );
     vboxLayout->addWidget( progressBar );
@@ -1793,7 +1749,12 @@ void EmailClient::queryItemSelected()
 
     QtopiaIpcEnvelope e( "QPE/TaskBar", "setLed(int,bool)" );
     e << LED_MAIL << false;
+    
+    resetNewMailCount();
+}
 
+void EmailClient::resetNewMailCount()
+{
     // Reading a mail resets the new mail count
     QListIterator<MailAccount*> it = accountList->accountIterator();
     while ( it.hasNext() ) {
@@ -1814,28 +1775,43 @@ void EmailClient::queryItemSelected()
             }
         }
     }
+}
 
-#if 0
-    bool allread = true;
-    QListIterator<Email> it = mailboxList->mailbox("inbox")->entryIterator();
-    for ( ; it.current(); ++it) {
-        EmailListItem *item = (EmailListItem *)it.current();
-        if ( !it.current()->mail()->read() ) {
-            allread = false;
-            break;
-            }
-        }
-        if ( allread ) {
-            QtopiaIpcEnvelope e( "QPE/TaskBar", "setLed(int,bool)" );
-            e << LED_MAIL << false;
-        }
-#endif
+void EmailClient::displayNewMessage( Email *mail )
+{
+    QString accountId = mail->fromAccount();
+    MailAccount *account = accountList->getAccountById( accountId );
+	
+    if (waitingForNewMessage
+	&& showMessageType == MailAccount::SMS // can't handle MMS fast yet
+	&& account
+	&& account->accountType() == showMessageType) {
+    
+	waitingForNewMessage = false;
+	QtopiaApplication::instance()->unregisterRunningTask(QLatin1String("display"));
+	if ( checkMailConflict(
+		 tr("Should this mail be saved in Drafts before viewing the new mail?"),
+		 tr("View Mail message will be ignored")) )
+	    return;
+	
+	emit raiseWidget( readMailWidget(), tr("Read mail") );
+	mReadMail->showMail( mail );
+	showMsgId = mail->uuid();
+	
+	QTimer::singleShot( 0, this, SLOT( updateListViews() ) );
+	resetNewMailCount();
+    }
 }
 
 void EmailClient::mailFromDisk(Email *mail, const QString &mailbox)
 {
-    updateQuery( mail, mailbox );
+    // Don't create new messageView, i.e. if showing newly arrived message
+    if (mMessageView) 
+	updateQuery( mail, mailbox );
     updateFolderCount( mailbox );
+    
+    // check for new message here and display
+    displayNewMessage( mail );
 }
 
 void EmailClient::mailMoved(Email* m, const QString& sourceBox, const QString& destBox)
@@ -2113,38 +2089,7 @@ void EmailClient::updateAccounts()
 {
     queuedAccountIds.clear();
     newAccountId = -1;
-#ifdef QTOPIA_PHONE
     updateGetMailButton(true);
-//     sendMailButton->setVisible(false);
-#else
-    //rebuild menus, clear all first
-    configure->clear();
-    selectAccountMenu->clear();
-    QMapIterator<QAction*, int> i(actionMap);
-    while ( i.hasNext() ) {
-        i.next();
-        delete i.key();
-    }
-    actionMap.clear();
-    QAction *action = configure->addAction( QIcon(":icon/new"), tr("New Account") );
-    actionMap.insert( action, newAccountId );
-    configure->addSeparator();
-
-    int idCount = 0;
-    QListIterator<MailAccount*> it = accountList->accountIterator();
-    while ( it.hasNext() ) {
-        QString accountName = it.next()->accountName();
-        action = configure->addAction( accountName + "..." );
-        actionMap.insert( action, idCount );
-
-        if ( it.peekPrevious()->accountType() != MailAccount::Synchronized ) {
-            action = selectAccountMenu->addAction( accountName );
-            actionMap.insert( action, idCount );
-        }
-
-        idCount++;
-    }
-#endif
 
     // accounts has been changed, update writemailwidget if it's created
     if ( mWriteMail )
@@ -2272,6 +2217,8 @@ void EmailClient::showItemMenu(EmailListItem *item)
     QAction *action;
     uint pos = 0;
     for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
+	if (!pm_folder)
+	    pm_folder = new QIcon(":icon/folder");
         action = movePop->addAction(*pm_folder, mailboxTrName(*it) );
         moveMap.insert(action, pos);
         action = copyPop->addAction(*pm_folder, mailboxTrName(*it) );
@@ -2283,6 +2230,8 @@ void EmailClient::showItemMenu(EmailListItem *item)
     copyPop->setTitle( tr("Copy to") );
     popFolder->addMenu( movePop );
     popFolder->addMenu( copyPop );
+    if (!pm_trash)
+	pm_trash = new QIcon(":icon/folder");
     popFolder->addAction(*pm_trash, tr("Delete mail"), this, SLOT( deleteMailItem() ) );
     popFolder->popup( QCursor::pos() );
 }
@@ -2760,6 +2709,7 @@ void EmailClient::folderSelected(Folder *folder)
         progressBar->reset();
 
     //  Rebuild mail move/copy menus as they don't include the currently selected folder
+    initActions();
     movePop->clear();
     copyPop->clear();
     QMapIterator<QAction*, int> i(moveMap);
@@ -2772,6 +2722,8 @@ void EmailClient::folderSelected(Folder *folder)
     QAction *action;
     uint pos = 0;
     for ( QStringList::Iterator itList = list.begin(); itList != list.end(); ++itList ) {
+	if (!pm_folder)
+	    pm_folder = new QIcon(":icon/folder");
         action = movePop->addAction(*pm_folder, mailboxTrName(*itList) );
         moveMap.insert(action, pos);
         action = copyPop->addAction(*pm_folder, mailboxTrName(*itList) );
@@ -3153,6 +3105,10 @@ void EmailClient::collectSysMessages()
 
 void EmailClient::setEnableMessageActions( bool enabled )
 {
+    enableMessageActions = enabled;
+    if (!moveAction)
+	return; // initActions hasn't been called yet
+    
     moveAction->setVisible( enabled );
     copyAction->setVisible( enabled );
     selectAllAction->setVisible( enabled );
@@ -3446,6 +3402,7 @@ void EmailClient::deleteMailRequested(EmailListItem *item)
 
 void EmailClient::showEvent(QShowEvent* e)
 {
+    Q_UNUSED(e);
     closeAfterTransmissions = false;
 }
 
@@ -3566,16 +3523,19 @@ void EmailClient::updateFolderCount(const QString &mailbox, bool folderListOnly)
     folderView->updateFolderStatus( mailbox, s, highlight, col);
 
 #ifdef QTOPIA_PHONE
-    if (mailbox == TrashString) {
+    if (mailbox == TrashString && emptyTrashAction) {
         int count = mailboxList->mailbox(TrashString)->mailCount("all");
         emptyTrashAction->setVisible(count > 0);
     }
 
-    // Update delete mail action
-    deleteMailAction->setVisible( allCount );
-    moveAction->setVisible( allCount );
-    copyAction->setVisible( allCount );
-    selectAllAction->setVisible( allCount );
+    // Update actions
+    enableMessageActions = (bool)allCount;
+    if (deleteMailAction) {
+	deleteMailAction->setVisible( enableMessageActions );
+	moveAction->setVisible( enableMessageActions );
+	copyAction->setVisible( enableMessageActions );
+	selectAllAction->setVisible( enableMessageActions );
+    } // else initActions hasn't been called yet
 #endif
 
     // statusbar updates

@@ -17,11 +17,13 @@ if ( $isWindows ) {
 
 use constant DEBUG => 0;
 
-# Usage: nct_lupdate [ -depot path ] DQTDIR "lang1 lang2 ... langn" files
+# Usage: nct_lupdate [ -nowarn ] [ -depot path ] [ -content trtarget ] DQTDIR "lang1 lang2 ... langn" files
 
 my $global = 0;
 my $depot;
 my $warn_on = 1;
+my $content = 0;
+my $trtarget = "";
 if ( $ARGV[0] eq "-nowarn" ) {
     shift(@ARGV);
     $warn_on = 0;
@@ -31,11 +33,39 @@ if ( $ARGV[0] eq "-depot" ) {
     $global = 1;
     $depot = shift(@ARGV);
 }
+if ( $ARGV[0] eq "-content" ) {
+    shift(@ARGV);
+    $content = 1;
+    $trtarget = shift(@ARGV);
+}
 my $DQTDIR = shift(@ARGV);
 my @LANGS = split(/\s+/,shift(@ARGV));
 my %contextinfo;
 
-for my $file ( @ARGV ) {
+my @files;
+if ( $content ) {
+    my $i = 0;
+    for my $file ( @ARGV ) {
+        $i++;
+        my $tmp = "content_$i.desktop";
+        open OUT, ">$tmp" or die "Can't write $tmp";
+        my $name = basename($file);
+        $name =~ s/\..*$//;
+        print OUT <<END;
+[Desktop Entry]
+Name[]=$name
+[Translation]
+File=$trtarget
+Context=Content
+END
+        close OUT;
+        push(@files, $tmp);
+    }
+} else {
+    @files = @ARGV;
+}
+
+for my $file ( @files ) {
     open CONFIG, "$file" or die "Cannot read $file\n";
     my @contents = <CONFIG>;
     DEBUG and print "FL $file\n";
@@ -174,5 +204,12 @@ for my $tsfile ( keys %contextinfo ) {
     }
     unlink $tmp;
 }
+
+if ( $content ) {
+    for ( @files ) {
+        unlink $_;
+    }
+}
+
 exit 0;
 

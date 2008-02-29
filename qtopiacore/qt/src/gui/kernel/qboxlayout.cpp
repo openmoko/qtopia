@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -653,9 +663,6 @@ void QBoxLayout::addItem(QLayoutItem *item)
     Inserts \a item into this box layout at position \a index. If \a
     index is negative, the item is added at the end.
 
-    \warning Do not call QLayout::insertChildLayout() if \a item is
-    a QLayout.
-
     \sa addItem(), insertWidget(), insertLayout(), insertStretch(),
         insertSpacing()
 */
@@ -671,13 +678,13 @@ void QBoxLayout::insertItem(int index, QLayoutItem *item)
 }
 
 /*!
-    Inserts a non-stretchable space at position \a index, with size \a
-    size. If \a index is negative the space is added at the end.
+    Inserts a non-stretchable space (a QSpacerItem) at position \a index, with
+    size \a size. If \a index is negative the space is added at the end.
 
     The box layout has default margin and spacing. This function adds
     additional space.
 
-    \sa addSpacing(), insertItem()
+    \sa addSpacing(), insertItem(), QSpacerItem
 */
 void QBoxLayout::insertSpacing(int index, int size)
 {
@@ -700,11 +707,11 @@ void QBoxLayout::insertSpacing(int index, int size)
 }
 
 /*!
-    Inserts a stretchable space at position \a index, with zero
-    minimum size and stretch factor \a stretch. If \a index is
-    negative the space is added at the end.
+    Inserts a stretchable space (a QSpacerItem) at position \a
+    index, with zero minimum size and stretch factor \a stretch. If \a
+    index is negative the space is added at the end.
 
-    \sa addStretch(), insertItem()
+    \sa addStretch(), insertItem(), QSpacerItem
 */
 void QBoxLayout::insertStretch(int index, int stretch)
 {
@@ -782,11 +789,11 @@ void QBoxLayout::insertWidget(int index, QWidget *widget, int stretch,
 }
 
 /*!
-    Adds a non-stretchable space with size \a size to the end of this
-    box layout. QBoxLayout provides default margin and spacing. This
-    function adds additional space.
+    Adds a non-stretchable space (a QSpacerItem) with size \a size
+    to the end of this box layout. QBoxLayout provides default margin
+    and spacing. This function adds additional space.
 
-    \sa insertSpacing(), addItem()
+    \sa insertSpacing(), addItem(), QSpacerItem
 */
 void QBoxLayout::addSpacing(int size)
 {
@@ -794,10 +801,10 @@ void QBoxLayout::addSpacing(int size)
 }
 
 /*!
-    Adds a stretchable space with zero minimum size and stretch factor
-    \a stretch to the end of this box layout.
+    Adds a stretchable space (a QSpacerItem) with zero minimum
+    size and stretch factor \a stretch to the end of this box layout.
 
-    \sa insertStretch(), addItem()
+    \sa insertStretch(), addItem(), QSpacerItem
 */
 void QBoxLayout::addStretch(int stretch)
 {

@@ -24,6 +24,7 @@
 #include "qdsaction.h"
 #include "qdsaction_p.h"
 #include "qdsactionrequest.h"
+#include <QtopiaApplication>
 
 // Qt includes
 #include <QTimer>
@@ -33,6 +34,9 @@
 #include <QtopiaServiceRequest>
 #include <qtopialog.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 // ============================================================================
 //
 //  QDSActionPrivate
@@ -40,9 +44,6 @@
 // ============================================================================
 
 // Created with uuidgen
-QUniqueIdGenerator QDSActionPrivate::mIdGen(
-    "ccd2d4cd-ecca-4b6c-96ef-a87645f5c52c" ); // No tr
-
 QDSActionPrivate::QDSActionPrivate()
 :   QObject(),
     mId(),
@@ -81,7 +82,7 @@ QDSActionPrivate::QDSActionPrivate( const QString& name,
     mErrorMsg(),
     mResponseCode( QDSAction::Invalid )
 {
-    mId = mIdGen.createUniqueId();
+    mId = QUniqueId::constructApplicationLocalUniqueId();
 }
 
 QDSActionPrivate::QDSActionPrivate( const QDSServiceInfo& serviceInfo )
@@ -95,6 +96,7 @@ QDSActionPrivate::QDSActionPrivate( const QDSServiceInfo& serviceInfo )
     mErrorMsg(),
     mResponseCode( QDSAction::Invalid )
 {
+    mId = QUniqueId::constructApplicationLocalUniqueId();
 }
 
 QDSActionPrivate::~QDSActionPrivate()
@@ -252,7 +254,7 @@ void QDSActionPrivate::startTimer()
 QString QDSActionPrivate::responseChannel()
 {
     QString channel = "QPE/QDSResponse/";
-    channel += mId.toString();
+    channel += QString::number(mId.toUInt()) + ":" + QString::number(::getpid());
 
     return channel;
 }
@@ -271,19 +273,19 @@ void QDSActionPrivate::reset()
 void QDSActionPrivate::connectToAction( QDSAction* action )
 {
     connect( this,
-             SIGNAL( response( const QLocalUniqueId& ) ),
+             SIGNAL( response( const QUniqueId& ) ),
              action,
-             SIGNAL( response( const QLocalUniqueId& ) ) );
+             SIGNAL( response( const QUniqueId& ) ) );
 
     connect( this,
-             SIGNAL( response( const QLocalUniqueId&, const QDSData& ) ),
+             SIGNAL( response( const QUniqueId&, const QDSData& ) ),
              action,
-             SIGNAL( response( const QLocalUniqueId&, const QDSData& ) ) );
+             SIGNAL( response( const QUniqueId&, const QDSData& ) ) );
 
     connect( this,
-             SIGNAL( error( const QLocalUniqueId&, const QString& ) ),
+             SIGNAL( error( const QUniqueId&, const QString& ) ),
              action,
-             SIGNAL( error( const QLocalUniqueId&, const QString& ) ) );
+             SIGNAL( error( const QUniqueId&, const QString& ) ) );
 }
 
 // ============================================================================
@@ -307,14 +309,14 @@ void QDSActionPrivate::connectToAction( QDSAction* action )
 */
 
 /*!
-    \fn void QDSAction::response( const QLocalUniqueId& actionId )
+    \fn void QDSAction::response( const QUniqueId& actionId )
 
     Signal that is emitted when a response is received from the service provider
     for action identified by \a actionId.
 */
 
 /*!
-    \fn void QDSAction::response( const QLocalUniqueId& actionId, const QDSData&
+    \fn void QDSAction::response( const QUniqueId& actionId, const QDSData&
     responseData )
 
     Signal that is emitted when a response is received from the service provider,
@@ -323,7 +325,7 @@ void QDSActionPrivate::connectToAction( QDSAction* action )
 */
 
 /*!
-    \fn void QDSAction::error( const QLocalUniqueId& actionId, const QString& message )
+    \fn void QDSAction::error( const QUniqueId& actionId, const QString& message )
 
     Signal that is emitted when a error message \a message is received for the
     action identified by \a actionId.
@@ -452,7 +454,7 @@ bool QDSAction::isActive() const
 /*!
     Returns the unique identifier for the QDSAction
 */
-QLocalUniqueId QDSAction::id() const
+QUniqueId QDSAction::id() const
 {
     return d->mId;
 }
@@ -588,6 +590,8 @@ int QDSAction::exec()
     invoke();
 
     QEventLoop eventLoop;
+    QtopiaApplication::instance()->
+        registerRunningTask( "QDSAction/" + d->mId.toString(), &eventLoop );
     d->mEventLoop = &eventLoop;
     (void) eventLoop.exec();
     d->mEventLoop = 0;
@@ -634,6 +638,8 @@ int QDSAction::exec( const QDSData& requestData, const QByteArray& auxiliary )
     invoke( requestData, auxiliary );
 
     QEventLoop eventLoop;
+    QtopiaApplication::instance()->
+        registerRunningTask( "QDSAction/" + d->mId.toString(), &eventLoop );
     d->mEventLoop = &eventLoop;
     (void) eventLoop.exec();
     d->mEventLoop = 0;

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/global/qglobal.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/global/qglobal.cpp -->
 <head>
   <title>Qt 4.2: &lt;QtGlobal&gt; - Global Qt Declarations</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -53,6 +53,8 @@
 <li><div class="fn"/>int <b><a href="qtglobal.html#qRound">qRound</a></b> ( qreal <i>value</i> )</li>
 <li><div class="fn"/>const char * <b><a href="qtglobal.html#qVersion">qVersion</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qtglobal.html#qWarning">qWarning</a></b> ( const char * <i>msg</i>, ... )</li>
+<li><div class="fn"/>int <b><a href="qtglobal.html#qrand">qrand</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtglobal.html#qsrand">qsrand</a></b> ( uint <i>seed</i> )</li>
 <li><div class="fn"/>void <b><a href="qtglobal.html#qt_set_sequence_auto_mnemonic">qt_set_sequence_auto_mnemonic</a></b> ( bool <i>on</i> )</li>
 </ul>
 <a name="Macrosx"></a>
@@ -255,6 +257,10 @@
      if (!file.exists())
          qCritical(&quot;File '%s' does not exist!&quot;, qPrintable(fileName));
  }</pre>
+<p>If you include &lt;QtDebug&gt;, a more convenitent syntax is also available:</p>
+<pre> qCritical() &lt;&lt; &quot;Brush:&quot; &lt;&lt; myQBrush &lt;&lt; &quot;Other
+ value:&quot; &lt;&lt; i;</pre>
+<p>A space is inserted between the items, and a newline is appended at the end.</p>
 <p><b>Warning:</b> The internal buffer is limited to 8192 bytes, including the '\0'-terminator.</p>
 <p><b>Warning:</b> Passing (const char *)0 as argument to qCritical might lead to crashes on certain platforms due to the platforms printf implementation.</p>
 <p>See also <a href="qtglobal.html#qDebug">qDebug</a>(), <a href="qtglobal.html#qWarning">qWarning</a>(), <a href="qtglobal.html#qFatal">qFatal</a>(), <a href="qtglobal.html#qInstallMsgHandler">qInstallMsgHandler</a>(), and <a href="debug.html">Debugging Techniques</a>.</p>
@@ -369,9 +375,26 @@
      if (c &gt; 200)
          qWarning(&quot;f: bad argument, c == %d&quot;, c);
  }</pre>
+<p>If you include &lt;QtDebug&gt;, a more convenient syntax is also available:</p>
+<pre> qWarning() &lt;&lt; &quot;Brush:&quot; &lt;&lt; myQBrush &lt;&lt; &quot;Other value:&quot;
+ &lt;&lt; i;</pre>
+<p>This syntax inserts a space between each item, and appends a newline at the end.</p>
 <p><b>Warning:</b> The internal buffer is limited to 8192 bytes, including the '\0'-terminator.</p>
 <p><b>Warning:</b> Passing (const char *)0 as argument to qWarning might lead to crashes on certain platforms due to the platforms printf implementation.</p>
 <p>See also <a href="qtglobal.html#qDebug">qDebug</a>(), <a href="qtglobal.html#qCritical">qCritical</a>(), <a href="qtglobal.html#qFatal">qFatal</a>(), <a href="qtglobal.html#qInstallMsgHandler">qInstallMsgHandler</a>(), and <a href="debug.html">Debugging Techniques</a>.</p>
+<h3 class="fn"><a name="qrand"></a>int qrand ()</h3>
+<p>Thread-safe version of the standard C++ <tt>rand()</tt> function.</p>
+<p>Returns a value between 0 and <tt>RAND_MAX</tt> (defined in <tt>&lt;cstdlib&gt;</tt> and <tt>&lt;stdlib.h&gt;</tt>), the next number in the current sequence of pseudo-random integers.</p>
+<p>Use <tt>qsrand()</tt> to initialize the pseudo-random number generator with a seed value.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qtglobal.html#qsrand">qsrand</a>().</p>
+<h3 class="fn"><a name="qsrand"></a>void qsrand ( <a href="qtglobal.html#uint-typedef">uint</a> <i>seed</i> )</h3>
+<p>Thread-safe version of the standard C++ <tt>srand()</tt> function.</p>
+<p>Sets the argument <i>seed</i> to be used to generate a new random number sequence of pseudo random integers to be returned by <a href="qtglobal.html#qrand">qrand</a>().</p>
+<p>If no seed value is provided, <a href="qtglobal.html#qrand">qrand</a>() is automatically seeded with a value of 1.</p>
+<p>The sequence of random numbers generated is deterministic per thread. For example, if two threads call qsrand(1) and subsequently calls <a href="qtglobal.html#qrand">qrand</a>(), the threads will get the same random number sequence.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qtglobal.html#qrand">qrand</a>().</p>
 <h3 class="fn"><a name="qt_set_sequence_auto_mnemonic"></a>void qt_set_sequence_auto_mnemonic ( bool <i>on</i> )</h3>
 <p>Enables automatic mnemonics on Mac if <i>on</i> is true; otherwise this feature is disabled.</p>
 <p>Note that this function is only available on Mac where mnemonics are disabled by default.</p>
@@ -651,6 +674,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

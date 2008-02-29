@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/model-view-programming.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/model-view-programming.qdoc -->
 <head>
   <title>Qt 4.2: Delegate Classes</title>
   <link rel="prev" href="model-view-selection.html" />
@@ -34,8 +34,8 @@
 <h2>Concepts</h2>
 <p>Unlike the Model-View-Controller pattern, the model/view design does not include a completely separate component for managing interaction with the user. Generally, the view is responsible for the presentation of model data to the user, and for processing user input. To allow some flexibility in the way this input is obtained, the interaction is performed by delegates. These components provide input capabilities and are also responsible for rendering individual items in some views. The standard interface for controlling delegates is defined in the <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a> class.</p>
 <p>Delegates are expected to be able to render their contents themselves by implementing the <a href="qitemdelegate.html#paint">paint()</a> and <a href="qitemdelegate.html#sizeHint">sizeHint()</a> functions. However, simple widget-based delegates can subclass <a href="qitemdelegate.html">QItemDelegate</a> instead of <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, and take advantage of the default implementations of these functions.</p>
-<p>Editors for delegates can be implemented either by using widgets to manage the editing process or by handling events directly. The first approach is covered later in this chapter, and it is also shown in the Spin Box Delegate example.</p>
-<p>The Pixelator example shows how to create a custom delegate that performs specialized rendering for a table view.</p>
+<p>Editors for delegates can be implemented either by using widgets to manage the editing process or by handling events directly. The first approach is covered later in this chapter, and it is also shown in the <a href="itemviews-spinboxdelegate.html">Spin Box Delegate</a> example.</p>
+<p>The <a href="itemviews-pixelator.html">Pixelator</a> example shows how to create a custom delegate that performs specialized rendering for a table view.</p>
 <a name="using-an-existing-delegate"></a>
 <h2>Using an Existing Delegate</h2>
 <p>The standard views provided with Qt use instances of <a href="qitemdelegate.html">QItemDelegate</a> to provide editing facilities. This default implementation of the delegate interface renders items in the usual style for each of the standard views: <a href="qlistview.html">QListView</a>, <a href="qtableview.html">QTableView</a>, and <a href="qtreeview.html">QTreeView</a>.</p>
@@ -45,29 +45,73 @@
 <h2>A Simple Delegate</h2>
 <p>The delegate implemented here uses a <a href="qspinbox.html">QSpinBox</a> to provide editing facilities, and is mainly intended for use with models that display integers. Although we set up a custom integer-based table model for this purpose, we could easily have used <a href="qstandarditemmodel.html">QStandardItemModel</a> instead since the custom delegate will control data entry. We construct a table view to display the contents of the model, and this will use the custom delegate for editing.</p>
 <p align="center"><img src="images/spinboxdelegate-example.png" /></p><p>We subclass the delegate from <a href="qitemdelegate.html">QItemDelegate</a> because we do not want to write custom display functions. However, we must still provide functions to manage the editor widget:</p>
-<pre></pre>
+<pre> class SpinBoxDelegate : public QItemDelegate
+ {
+     Q_OBJECT
+
+ public:
+     SpinBoxDelegate(QObject *parent = 0);
+
+     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &amp;option,
+                           const QModelIndex &amp;index) const;
+
+     void setEditorData(QWidget *editor, const QModelIndex &amp;index) const;
+     void setModelData(QWidget *editor, QAbstractItemModel *model,
+                       const QModelIndex &amp;index) const;
+
+     void updateEditorGeometry(QWidget *editor,
+         const QStyleOptionViewItem &amp;option, const QModelIndex &amp;index) const;
+ };</pre>
 <p>Note that no editor widgets are set up when the delegate is constructed. We only construct an editor widget when it is needed.</p>
 <a name="providing-an-editor"></a>
 <h3>Providing an Editor</h3>
 <p>In this example, when the table view needs to provide an editor, it asks the delegate to provide an editor widget that is appropriate for the item being modified. The <a href="qabstractitemdelegate.html#createEditor">createEditor()</a> function is supplied with everything that the delegate needs to be able to set up a suitable widget:</p>
-<pre></pre>
+<pre> QWidget *SpinBoxDelegate::createEditor(QWidget *parent,
+     const QStyleOptionViewItem &amp;/* option */,
+     const QModelIndex &amp;/* index */) const
+ {
+     QSpinBox *editor = new QSpinBox(parent);
+     editor-&gt;setMinimum(0);
+     editor-&gt;setMaximum(100);
+
+     return editor;
+ }</pre>
 <p>Note that we do not need to keep a pointer to the editor widget because the view takes responsibility for destroying it when it is no longer needed.</p>
 <p>We install the delegate's default event filter on the editor to ensure that it provides the standard editing shortcuts that users expect. Additional shortcuts can be added to the editor to allow more sophisticated behavior; these are discussed in the section on <a href="#editinghints">Editing Hints</a>.</p>
 <p>The view ensures that the editor's data and geometry are set correctly by calling functions that we define later for these purposes. We can create different editors depending on the model index supplied by the view. For example, if we have a column of integers and a column of strings we could return either a <tt>QSpinBox</tt> or a <tt>QLineEdit</tt>, depending on which column is being edited.</p>
 <p>The delegate must provide a function to copy model data into the editor. In this example, we read the data stored in the <a href="qt.html#ItemDataRole-enum">display role</a>, and set the value in the spin box accordingly.</p>
-<pre></pre>
+<pre> void SpinBoxDelegate::setEditorData(QWidget *editor,
+                                     const QModelIndex &amp;index) const
+ {
+     int value = index.model()-&gt;data(index, Qt::DisplayRole).toInt();
+
+     QSpinBox *spinBox = static_cast&lt;QSpinBox*&gt;(editor);
+     spinBox-&gt;setValue(value);
+ }</pre>
 <p>In this example, we know that the editor widget is a spin box, but we could have provided different editors for different types of data in the model, in which case we would need to cast the widget to the appropriate type before accessing its member functions.</p>
 <a name="submitting-data-to-the-model"></a>
 <h3>Submitting Data to the Model</h3>
 <p>When the user has finished editing the value in the spin box, the view asks the delegate to store the edited value in the model by calling the <a href="qabstractitemdelegate.html#setModelData">setModelData()</a> function.</p>
-<pre></pre>
+<pre> void SpinBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+                                    const QModelIndex &amp;index) const
+ {
+     QSpinBox *spinBox = static_cast&lt;QSpinBox*&gt;(editor);
+     spinBox-&gt;interpretText();
+     int value = spinBox-&gt;value();
+
+     model-&gt;setData(index, value);
+ }</pre>
 <p>Since the view manages the editor widgets for the delegate, we only need to update the model with the contents of the editor supplied. In this case, we ensure that the spin box is up-to-date, and update the model with the value it contains using the index specified.</p>
 <p>The standard <a href="qitemdelegate.html">QItemDelegate</a> class informs the view when it has finished editing by emitting the <a href="qabstractitemdelegate.html#closeEditor">closeEditor()</a> signal. The view ensures that the editor widget is closed and destroyed. In this example, we only provide simple editing facilities, so we need never emit this signal.</p>
 <p>All the operations on data are performed through the interface provided by <a href="qabstractitemmodel.html">QAbstractItemModel</a>. This makes the delegate mostly independent from the type of data it manipulates, but some assumptions must be made in order to use certain types of editor widgets. In this example, we have assumed that the model always contains integer values, but we can still use this delegate with different kinds of models because <a href="qvariant.html">QVariant</a> provides sensible default values for unexpected data.</p>
 <a name="updating-the-editor-s-geometry"></a>
 <h3>Updating the Editor's Geometry</h3>
 <p>It is the responsibility of the delegate to manage the editor's geometry. The geometry must be set when the editor is created, and when the item's size or position in the view is changed. Fortunately, the view provides all the necessary geometry information inside a <a href="qstyleoptionviewitem.html">view option</a> object.</p>
-<pre></pre>
+<pre> void SpinBoxDelegate::updateEditorGeometry(QWidget *editor,
+     const QStyleOptionViewItem &amp;option, const QModelIndex &amp;/* index */</span>) const
+ {
+     editor-&gt;setGeometry(option.rect);
+ }</pre>
 <p>In this case, we just use the geometry information provided by the view option in the item rectangle. A delegate that renders items with several elements would not use the item rectangle directly. It would position the editor in relation to the other elements in the item.</p>
 <a name="editinghints"></a><a name="editing-hints"></a>
 <h3>Editing Hints</h3>
@@ -84,6 +128,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

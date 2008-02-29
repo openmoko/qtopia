@@ -23,7 +23,7 @@
 #include "dialercontrol.h"
 #include "homescreen.h"
 #include "servercontactmodel.h"
-
+#include "qabstractmessagebox.h"
 #include <QAction>
 #include <QApplication>
 #include <QDateTime>
@@ -625,6 +625,11 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
         secondaryCallScreen = new SecondaryCallScreen;
         secondaryCallScreen->setGeometry(QApplication::desktop()->availableGeometry(1));
     }
+
+    QObject::connect(control, 
+                     SIGNAL(requestFailed(QPhoneCall,QPhoneCall::Request)),
+                     this,
+                     SLOT(requestFailed(QPhoneCall,QPhoneCall::Request)));
 }
 
 bool CallScreen::dialNumbers(const QString & numbers)
@@ -993,6 +998,23 @@ void CallScreen::stateChanged()
     else
         dtmfActiveCall = QString();
     update();
+}
+
+void CallScreen::requestFailed(const QPhoneCall &,QPhoneCall::Request r)
+{
+    QString title, text;
+    if(r == QPhoneCall::HoldFailed) {
+        title = tr("Hold");
+        text = tr("Hold attempt failed");
+    } else {
+        title = tr("Join/Transfer");
+        text = tr("Join/transfer attempt failed");
+    }
+
+    QAbstractMessageBox *box = QAbstractMessageBox::messageBox(0, title, text, QAbstractMessageBox::Warning);
+    box->setTimeout(3000, QAbstractMessageBox::NoButton);
+    QtopiaApplication::execDialog(box);
+    delete box;
 }
 
 CallItemEntry *CallScreen::findCall(const QPhoneCall &call, CallItemModel *m)

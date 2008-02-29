@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the Qt Designer of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -748,13 +758,21 @@ DomConnections *SignalSlotEditor::toUi() const
     return result;
 }
 
-QObject *SignalSlotEditor::objectByName(QWidget *topLevel, const QString &name)
+QObject *SignalSlotEditor::objectByName(QWidget *topLevel, const QString &name) const
 {
-    Q_ASSERT(topLevel);
-    if (topLevel->objectName() == name)
-        return topLevel;
+    if (name.isEmpty())
+        return 0;
 
-    return qFindChild<QObject*>(topLevel, name);
+    Q_ASSERT(topLevel);
+    QObject *object = 0;
+    if (topLevel->objectName() == name)
+        object = topLevel;
+    else
+        object = qFindChild<QObject*>(topLevel, name);
+    const QDesignerMetaDataBaseInterface *mdb = formWindow()->core()->metaDataBase();
+    if (mdb->item(object))
+        return object;
+    return 0;
 }
 
 void SignalSlotEditor::fromUi(DomConnections *connections, QWidget *parent)
@@ -864,15 +882,13 @@ void SignalSlotEditor::setSource(Connection *_con, const QString &obj_name)
 {
     SignalSlotConnection *con = static_cast<SignalSlotConnection*>(_con);
 
-    if (con->sender() == obj_name)
+   if (con->sender() == obj_name)
         return;
 
     m_form_window->beginCommand(QApplication::translate("Command", "Change sender"));
     ConnectionEdit::setSource(con, obj_name);
 
     QObject *sourceObject = con->object(EndPoint::Source);
-    Q_ASSERT(sourceObject != 0);
-
     QStringList member_list = memberList(m_form_window, sourceObject, SignalMember);
 
     if (!member_list.contains(con->signal()))
@@ -891,8 +907,8 @@ void SignalSlotEditor::setTarget(Connection *_con, const QString &obj_name)
     m_form_window->beginCommand(QApplication::translate("Command", "Change receiver"));
     ConnectionEdit::setTarget(con, obj_name);
 
-    QWidget *w = con->widget(EndPoint::Target);
-    QStringList member_list = memberList(m_form_window, w, SlotMember);
+    QObject *targetObject = con->object(EndPoint::Target);
+    QStringList member_list = memberList(m_form_window, targetObject, SlotMember);
 
     if (!member_list.contains(con->slot()))
         undoStack()->push(new SetMemberCommand(con, EndPoint::Target, QString(), this));

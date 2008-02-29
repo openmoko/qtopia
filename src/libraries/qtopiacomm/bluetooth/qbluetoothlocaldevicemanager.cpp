@@ -37,6 +37,7 @@ public:
 public slots:
     void deviceAdded(const QString &device);
     void deviceRemoved(const QString &device);
+    void defaultDeviceChanged(const QString &device);
 
 public:
     QBluetoothLocalDeviceManager *m_parent;
@@ -48,7 +49,7 @@ QBluetoothLocalDeviceManager_Private::QBluetoothLocalDeviceManager_Private(
 {
     QDBusConnection dbc = QDBusConnection::systemBus();
     if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
     }
 
@@ -63,6 +64,8 @@ QBluetoothLocalDeviceManager_Private::QBluetoothLocalDeviceManager_Private(
                 this, SIGNAL(deviceAdded(const QString &)));
     dbc.connect("org.bluez", "/org/bluez", "org.bluez.Manager", "AdapterRemoved",
                 this, SIGNAL(deviceRemoved(const QString &)));
+    dbc.connect("org.bluez", "/org/bluez", "org.bluez.Manager", "DefaultAdapterChanged",
+                this, SIGNAL(defaultDeviceChanged(const QString &)));
 }
 
 void QBluetoothLocalDeviceManager_Private::deviceAdded(const QString &device)
@@ -75,6 +78,10 @@ void QBluetoothLocalDeviceManager_Private::deviceRemoved(const QString &device)
     emit m_parent->deviceRemoved(device.mid(11));
 }
 
+void QBluetoothLocalDeviceManager_Private::defaultDeviceChanged(const QString &device)
+{
+    emit m_parent->defaultDeviceChanged(device.mid(11));
+}
 
 /*!
   \class QBluetoothLocalDeviceManager
@@ -162,5 +169,12 @@ QString QBluetoothLocalDeviceManager::defaultDevice()
     The \a device parameter contains the representation of the device which
     was removed.
  */
+
+/*!
+    \fn void QBluetoothLocalDeviceManager::defaultDeviceChanged(const QString &device)
+
+    This signal is emitted whenever the default device has changed.  The \a device 
+    parameter contains the representation of the new default device.
+*/
 
 #include "qbluetoothlocaldevicemanager.moc"

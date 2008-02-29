@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QPacketProtocol Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QPacketProtocol Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPacketProtocol Class Reference</h1>
 <p>The QPacketProtocol class encapsulates communicating discrete packets across fragmented IO channels, such as TCP sockets. <a href="#details">More...</a></p>
-<pre>    #include &lt;QPacketProtocol&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QPacketProtocol&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qpacketprotocol-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -59,28 +58,28 @@
 <p>The QPacketProtocol class encapsulates communicating discrete packets across fragmented IO channels, such as TCP sockets.</p>
 <p>As transmission boundaries are not respected, sending packets over protocols like TCP frequently involves &quot;stitching&quot; them back together at the receiver. QPacketProtocol makes this easier by performing this task for you. Packet data sent using QPacketProtocol is prepended with a 4-byte size header allowing the receiving QPacketProtocol to buffer the packet internally until it has all been received. QPacketProtocol does not perform any sanity checking on the size or on the data, so this class should only be used in prototyping or trusted situations where DOS attacks are unlikely.</p>
 <p>QPacketProtocol does not perform any communications itself. Instead it can operate on any <a href="qiodevice.html">QIODevice</a> that supports the <a href="qiodevice.html#readyRead">QIODevice::readyRead</a>() signal. A logical &quot;packet&quot; is encapsulated by the companion <a href="qpacket.html">QPacket</a> class. The following example shows two ways to send data using QPacketProtocol. The transmitted data is equivalent in both.</p>
-<pre>    QTcpSocket socket;
-<span class="comment">    // ... connect socket ...</span>
+<pre>&nbsp;   QTcpSocket socket;
+    // ... connect socket ...
 
     QPacketProtocol protocol(&amp;socket);
 
-<span class="comment">    // Send packet the quick way</span>
+    // Send packet the quick way
     protocol.send() &lt;&lt; 12 &lt;&lt; &quot;Hello world&quot;;
 
-<span class="comment">    // Send packet the longer way</span>
+    // Send packet the longer way
     QPacket packet;
     packet &lt;&lt; 12 &lt;&lt; &quot;Hello world&quot;;
     protocol.send(packet);</pre>
 <p>Likewise, the following shows how to read data from QPacketProtocol, assuming that the <a href="qpacketprotocol.html#readyRead">QPacketProtocol::readyRead</a>() signal has been emitted.</p>
-<pre><span class="comment">    // ... QPacketProtocol::readyRead() is emitted ...</span>
+<pre>&nbsp;   // ... QPacketProtocol::readyRead() is emitted ...
 
     int a;
     QByteArray b;
 
-<span class="comment">    // Receive packet the quick way</span>
+    // Receive packet the quick way
     protocol.read() &gt;&gt; a &gt;&gt; b;
 
-<span class="comment">    // Receive packet the longer way</span>
+    // Receive packet the longer way
     QPacket packet = protocol.read();
     p &gt;&gt; a &gt;&gt; b;</pre>
 <hr />
@@ -108,7 +107,7 @@
 <p>Emitted whenever a new packet is received. Applications may use <a href="qpacketprotocol.html#read">QPacketProtocol::read</a>() to retrieve this packet.</p>
 <h3 class="fn"><a name="send"></a>QPacketAutoSend QPacketProtocol::send ()</h3>
 <p>Returns a streamable object that is transmitted on destruction. For example</p>
-<pre>    protocol.send() &lt;&lt; 10 &lt;&lt; &quot;Hello world&quot;;</pre>
+<pre>&nbsp;   protocol.send() &lt;&lt; 10 &lt;&lt; &quot;Hello world&quot;;</pre>
 <h3 class="fn"><a name="send-2"></a>void QPacketProtocol::send ( const <a href="qpacket.html">QPacket</a> &amp; <i>packet</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Transmit the <i>packet</i>.</p>
@@ -119,6 +118,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

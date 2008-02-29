@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qtopia Resource System</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Qtopia Resource System</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -13,7 +12,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Resource System<br /><small></small></h1>
 <p>The Qtopia resource system allows application programmers to access common application resources such as images, icons and sounds without having to concern themselves with the exact installation location or file types. The Qtopia resource system is built on top of the Qtopia Core resource model.</p>
 <p>Rather than accessing resource files directly from disk, applications should use resource syntax inplace of a regular file name. For example, the following lines refer to the same image:</p>
-<pre>    QPixmap pix1(&quot;/opt/Qtopia/pics/addressbook/email.png&quot;);
+<pre>&nbsp;   QPixmap pix1(&quot;/opt/Qtopia/pics/addressbook/email.png&quot;);
     QPixmap pix2(&quot;:image/addressbook/email&quot;);</pre>
 <p>When Qtopia detects the use of the special &quot;:&quot; prefix, searches in various locations - depending on the resource type - and for various file types to locate the actual resource. In addition to improving the efficiency of reference for the programmer, the Qtopia resource system improves the efficiency of access for the system. Using a special file, known as a resource database, Qtopia can bundle many separate images and icons into a single archive that is both quick to access and efficiently shared across processes.</p>
 <p>A resource database is created using the Qtopia Core <tt>rcc</tt> tool in binary mode. Any type of Qtopia supported image and icon can be added to a resource database. A special image type, known as a <i>QRAW</i> image, is also exclusively supported in resource databases. A <i>QRAW</i> image is an uncompressed raw image that can be mmap'ed directly from disk and efficiently displayed on screen with no resident in-memory copies. As the <i>QRAW</i> format is uncompressed, it is best reserved for small images, very frequently used images, or images stored on compressed filesystems. <i>QRAW</i> images can be created from other image types using the <tt>mkqraw</tt> tool included with Qtopia.</p>
@@ -37,17 +36,17 @@
 <p><tt>pics/&lt;app name&gt;/&lt;image&gt;.&lt;image extension&gt;</tt></p>
 <p>In the listing above, <tt>&lt;language&gt;</tt> corresponds to Qtopia's configured language and <tt>&lt;locale&gt;</tt> its configured locale. The supported &lt;image extensions&gt; are currently &quot;png&quot;, &quot;jpg&quot;, &quot;mng&quot; and no extension.</p>
 <p>For example, in the &quot;addressbook&quot; application</p>
-<pre><span class="comment">    // /opt/Qtopia/pics/addressbook/qtopia.rdb#email</span>
-<span class="comment">    // /opt/Qtopia/pics/qtopia.rdb#addressbook/email</span>
-<span class="comment">    // /opt/Qtopia/pics/qtopia.rdb#email</span>
-<span class="comment">    // /opt/Qtopia/pics/addressbook/email.png</span>
-<span class="comment">    // /opt/Qtopia/pics/addressbook/email.jpg</span>
-<span class="comment">    // /opt/Qtopia/pics/addressbook/email.mng</span>
-<span class="comment">    // /opt/Qtopia/pics/addressbook/email</span>
-<span class="comment">    // /opt/Qtopia/pics/email.png</span>
-<span class="comment">    // /opt/Qtopia/pics/email.jpg</span>
-<span class="comment">    // /opt/Qtopia/pics/email.mng</span>
-<span class="comment">    // /opt/Qtopia/pics/email</span>
+<pre>&nbsp;   // /opt/Qtopia/pics/addressbook/qtopia.rdb#email
+    // /opt/Qtopia/pics/qtopia.rdb#addressbook/email
+    // /opt/Qtopia/pics/qtopia.rdb#email
+    // /opt/Qtopia/pics/addressbook/email.png
+    // /opt/Qtopia/pics/addressbook/email.jpg
+    // /opt/Qtopia/pics/addressbook/email.mng
+    // /opt/Qtopia/pics/addressbook/email
+    // /opt/Qtopia/pics/email.png
+    // /opt/Qtopia/pics/email.jpg
+    // /opt/Qtopia/pics/email.mng
+    // /opt/Qtopia/pics/email
     QPixmap pix(&quot;:image/email&quot;);</pre>
 <a name="icons"></a>
 <h2>Icons</h2>
@@ -75,6 +74,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

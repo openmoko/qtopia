@@ -25,11 +25,11 @@
 #ifdef QT_QWS_GREENPHONE
 
 #include <QObject>
+#include <QProcess>
 
 #include <qvaluespace.h>
 
 class QSocketNotifier;
-class QProcess;
 class QtopiaIpcAdaptor;
 class QSpeakerPhoneAccessoryProvider;
 class QBootSourceAccessoryProvider;
@@ -55,6 +55,7 @@ private:
     int detectFd;
 
     QProcess *mountProc;
+    QString sdCardDevice;
 
     QtopiaIpcAdaptor *adaptor;
 
@@ -78,6 +79,8 @@ private slots:
 
     void mountSD();
     void unmountSD();
+    void fsckFinished(int, QProcess::ExitStatus);
+    void mountFinished(int, QProcess::ExitStatus);
 
     void onSpeakerModified();
 };

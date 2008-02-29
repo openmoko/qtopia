@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/i18n.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/i18n.qdoc -->
 <head>
   <title>Qt 4.2: Internationalization with Qt</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -24,6 +24,7 @@
 <li><a href="#localize">Localize</a></li>
 </ul>
 <li><a href="#dynamic-translation">Dynamic Translation</a></li>
+<li><a href="#translating-non-qt-classes">Translating Non-Qt Classes</a></li>
 <li><a href="#system-support">System Support</a></li>
 <ul><li><a href="#unix-x11">Unix/X11</a></li>
 <li><a href="#windows">Windows</a></li>
@@ -134,7 +135,8 @@
 <a name="use-qkeysequence-for-accelerator-values"></a>
 <h3>Use QKeySequence() for Accelerator Values</h3>
 <p>Accelerator values such as Ctrl+Q or Alt+F need to be translated too. If you hardcode <a href="qt.html#Modifier-enum">Qt::CTRL</a> + <a href="qt.html#Key-enum">Qt::Key_Q</a> for &quot;quit&quot; in your application, translators won't be able to override it. The correct idiom is</p>
-<pre></pre>
+<pre>     exitAct = new QAction(tr(&quot;E&amp;xit&quot;), this);
+     exitAct-&gt;setShortcut(tr(&quot;Ctrl+Q&quot;));</pre>
 <a name="use-qstring-arg-for-dynamic-text"></a>
 <h3>Use QString::arg() for Dynamic Text</h3>
 <p>The <a href="qstring.html#arg">QString::arg</a>() functions offer a simple means for substituting arguments:</p>
@@ -243,6 +245,20 @@
  }</pre>
 <p>All other change events should be passed on by calling the default implementation of the function.</p>
 <p>The default event handler for <a href="qwidget.html">QWidget</a> subclasses responds to the <a href="qevent.html#Type-enum">QEvent::LanguageChange</a> event, and will call this function when necessary; other application components can also force widgets to update themselves by posting the <a href="qevent.html#Type-enum">LanguageChange</a> event to them.</p>
+<a name="translating-non-qt-classes"></a>
+<h2>Translating Non-Qt Classes</h2>
+<p>It is sometimes necessary to provide internationalization support for strings used in classes that do not inherit <a href="qobject.html">QObject</a> or use the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro to enable translation features. Since Qt translates strings at run-time based on the class they are associated with and <tt>lupdate</tt> looks for translatable strings in the source code, non-Qt classes must use mechanisms that also provide this information.</p>
+<p>One way to do this is to add translation support to a non-Qt class using the <a href="qcoreapplication.html#Q_DECLARE_TR_FUNCTIONS">Q_DECLARE_TR_FUNCTIONS</a>() macro; for example:</p>
+<pre> class MyClass
+ {
+     Q_DECLARE_TR_FUNCTIONS(MyClass)
+
+ public:
+     MyClass();
+     ...
+ };</pre>
+<p>This provides the class with <a href="qobject.html#tr">tr()</a> functions that can be used to translate strings associated with the class, and makes it possible for <tt>lupdate</tt> to find translatable strings in the source code.</p>
+<p>Alternatively, the <a href="qcoreapplication.html#translate">QCoreApplication::translate</a>() function can be called with a specific context, and this will be recognized by <tt>lupdate</tt> and Qt Linguist.</p>
 <a name="system-support"></a>
 <h2>System Support</h2>
 <p>Some of the operating systems and windowing systems that Qt runs on only have limited support for Unicode. The level of support available in the underlying system has some influence on the support that Qt can provide on those platforms, although in general Qt applications need not be too concerned with platform-specific limitations.</p>
@@ -279,6 +295,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

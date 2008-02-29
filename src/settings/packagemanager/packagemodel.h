@@ -38,7 +38,7 @@ class AbstractPackageController;
 class PackageModel : public QAbstractItemModel
 {
     Q_OBJECT
-
+    friend class PackageServiceInstaller;
 public:
     PackageModel( QObject* parent = 0 );
     ~PackageModel();
@@ -60,6 +60,10 @@ public:
     QStringList getServers() const;
     QString getOperation( const QModelIndex & );
     InstallControl *installControl();
+
+#ifndef QT_NO_SXE
+    bool hasSensitiveDomains( const QString &domain );
+#endif
 signals:
     void targetsUpdated( const QStringList & );
     void serversUpdated( const QStringList & );
@@ -69,14 +73,15 @@ signals:
     void rowsAboutToBeRemoved(const QModelIndex&,int,int);
 public slots:
     void setInstallTarget( const QString & );
-    void activateItem(const QModelIndex&);
+    void activateItem( const QModelIndex& );
+    void reenableItem( const QModelIndex& );
     void sendUpdatedText( const QModelIndex& );
     void userTargetChoice( const QString & );
     void populateLists();
 private slots:
     void publishTargets();
     void controllerUpdate();
-    void packageInstalled( const InstallControl::PackageInfo & );
+    void packageInstalled( const InstallControl::PackageInfo &, bool );
 private:
     unsigned int getParent( qint64 ) const;
     unsigned int getColumn( qint64 ) const;
@@ -85,11 +90,15 @@ private:
     // QList<QVariant> columnHeads;
     QList<AbstractPackageController *> rootItems;
     mutable QStorageMetaInfo *storage;
-    AbstractPackageController *networked, *locally, *installed;
+    AbstractPackageController *networked, *installed;
     QString currentInstallTarget;
 
     QHash<QString,QString> activeServers;
     QHash<QString,QString> mediaNames;
+
+#ifndef QT_NO_SXE
+    QStringList sensitiveDomains;
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -41,7 +51,8 @@ ClearCacheFunc QScreen::clearCacheFunc = 0;
     \class QScreenCursor
     \ingroup qws
 
-    \brief The QScreenCursor class manages the screen cursor.
+    \brief The QScreenCursor class is a base class for screen cursors
+    in Qtopia Core.
 
     Note that this class is non-portable, and that it is only
     available in \l {Qtopia Core}.
@@ -298,9 +309,22 @@ void QScreenCursor::initSoftwareCursor()
 class QScreenPrivate
 {
 public:
+    QScreenPrivate(QScreen *parent) : q_ptr(parent) {}
+    QImage::Format preferredImageFormat() const;
+
     QPoint offset;
     QList<QScreen*> subScreens;
+    QScreen *q_ptr;
 };
+
+QImage::Format
+QScreenPrivate::preferredImageFormat() const
+{
+    if (q_ptr->depth() <= 16)
+        return QImage::Format_RGB16;
+    else
+        return QImage::Format_ARGB32_Premultiplied;
+}
 
 /*!
     \class QScreen
@@ -325,7 +349,9 @@ public:
     client to render its widgets as well as its decorations into
     memory, while the server copies the memory content to the device's
     framebuffer using the screen driver. See the \l {Qtopia Core
-    Architecture} overview for details.
+    Architecture} overview for details (note that it is possible for
+    the clients to manipulate and control the underlying hardware
+    directly as well).
 
     Starting with \l {Qtopia Core} 4.2, it is also possible to add an
     accelerated graphics driver to take advantage of available
@@ -389,8 +415,7 @@ public:
     clients have updated their memory buffer. Then the server calls
     the exposeRegion() function that composes the window surfaces and
     copies the content of memory to screen by calling the blit() and
-    solidFill() functions. See the \l {Qtopia Core Architecture}
-    overview for details.
+    solidFill() functions.
 
     The blit() function copies a given region in a given image to a
     specified point using device coordinates, while the solidFill()
@@ -809,7 +834,7 @@ public:
 */
 
 QScreen::QScreen(int display_id)
-    : d_ptr(new QScreenPrivate)
+    : d_ptr(new QScreenPrivate(this))
 {
     pixeltype=NormalPixel;
     data = 0;
@@ -1071,6 +1096,7 @@ Q_GUI_EXPORT QScreen* qt_get_screen(int display_id, const char *spec)
     int colon = displaySpec.indexOf(':');
     if (colon >= 0)
         driver.truncate(colon);
+    driver = driver.trimmed();
 
     bool foundDriver = false;
     QString driverName = driver;
@@ -1127,6 +1153,24 @@ void QScreen::exposeRegion(QRegion r, int changing)
     r &= region();
     if (r.isEmpty())
         return;
+
+#ifdef QTOPIA_PERFTEST
+    static enum { PerfTestUnknown, PerfTestOn, PerfTestOff } perfTestState = PerfTestUnknown;
+    if(PerfTestUnknown == perfTestState) {
+        if(::getenv("QTOPIA_PERFTEST"))
+            perfTestState = PerfTestOn;
+        else
+            perfTestState = PerfTestOff;
+    }
+    if(PerfTestOn == perfTestState) {
+        QWSWindow *changed = qwsServer->clientWindows().at(changing);
+        if(!changed->client()->identity().isEmpty())
+            qDebug() << "Performance  :  expose_region  :"
+                     << changed->client()->identity()
+                     << r.boundingRect() << ": "
+                     << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+    }
+#endif
 
     const QRect bounds = r.boundingRect();
     QRegion blendRegion;
@@ -1846,8 +1890,11 @@ void QScreen::compose(int level, const QRegion &exposed, QRegion &blend,
         } else {
             const QImage &img = surface->image();
             QPoint winoff = off - win->requestedRegion().boundingRect().topLeft();
+            // convert win->opacity() from scale [0..255] to [0..256]
+            int const_alpha = win->opacity();
+            const_alpha += (const_alpha >> 7);
             spanData.type = QSpanData::Texture;
-            spanData.initTexture(&img, win->opacity());
+            spanData.initTexture(&img, const_alpha);
             spanData.dx = winoff.x();
             spanData.dy = winoff.y();
         }
@@ -1893,14 +1940,14 @@ void QScreen::paintBackground(const QRegion &r)
     if (bs == Qt::SolidPattern) {
         solidFill(bg.color(), r);
     } else {
-        QRect br = r.boundingRect();
-        QImage img(br.size(), QImage::Format_ARGB32_Premultiplied);
+        const QRect br = r.boundingRect();
+        QImage img(br.size(), d_ptr->preferredImageFormat());
         QPoint off = br.topLeft();
         QRasterBuffer rb;
         rb.prepare(&img);
         QSpanData spanData;
         spanData.init(&rb);
-        spanData.setup(bg, 255);
+        spanData.setup(bg, 256);
         spanData.dx = off.x();
         spanData.dy = off.y();
         Q_ASSERT(spanData.blend);

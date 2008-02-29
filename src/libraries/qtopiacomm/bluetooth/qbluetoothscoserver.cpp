@@ -102,8 +102,20 @@ bool QBluetoothScoServer::listen(const QBluetoothAddress &local)
     memcpy(&addr.sco_bdaddr, &localBdaddr, sizeof(bdaddr_t));
 
     bool ret = initiateListen(fd, (struct sockaddr *)&addr, sizeof(addr));
-    if (ret)
+    if (ret) {
         m_data->m_address = local;
+
+        struct sockaddr_sco addr;
+        socklen_t len = sizeof(addr);
+        memset(&addr, 0, sizeof(addr));
+
+        if (::getsockname(fd, (struct sockaddr *) &addr, &len) == 0) {
+            bdaddr_t localBdaddr;
+            memcpy(&localBdaddr, &addr.sco_bdaddr, sizeof(bdaddr_t));
+            QString str = bdaddr2str(&localBdaddr);
+            m_data->m_address = QBluetoothAddress(str);
+        }
+    }
 
     return ret;
 }

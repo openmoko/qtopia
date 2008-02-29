@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1393,7 +1403,7 @@ bool QUnixSocket::isSequential() const
 }
 
 /*! \internal */
-bool QUnixSocket::waitForReadyRead(int msec)
+bool QUnixSocket::waitForReadyRead(int msecs)
 {
     if(UnconnectedState == d->state)
         return false;
@@ -1404,33 +1414,46 @@ bool QUnixSocket::waitForReadyRead(int msec)
 
     Q_ASSERT(-1 != d->fd);
 
-    struct timeval tv;
-    struct timeval *ptrTv = 0;
-    if(-1 != msec) {
-        tv.tv_sec = msec / 1000;
-        tv.tv_usec = (msec % 1000) * 1000;
-        ptrTv = &tv;
+    int     timeout = msecs;
+    struct  timeval tv;
+    struct  timeval *ptrTv = 0;
+    QTime   stopWatch;
+
+    stopWatch.start();
+
+    do
+    {
+        fd_set readset;
+
+        FD_ZERO(&readset);
+        FD_SET(d->fd, &readset);
+
+        if(-1 != msecs) {
+            tv.tv_sec = timeout / 1000;
+            tv.tv_usec = (timeout % 1000) * 1000;
+            ptrTv = &tv;
+        }
+
+        int rv = ::select(d->fd + 1, &readset, 0, 0, ptrTv);
+        switch(rv) {
+            case 0:
+                // timeout
+                return false;
+            case 1:
+                // ok
+                d->readActivated();
+                return true;
+            default:
+                if (errno != EINTR)
+                    abort();    // error
+                break;
+        }
+
+        timeout = msecs - stopWatch.elapsed();
     }
+    while (timeout > 0);
 
-    fd_set readset;
-    FD_ZERO(&readset);
-    FD_SET(d->fd, &readset);
-
-    int rv = ::select(d->fd + 1, &readset, 0, 0, ptrTv);
-
-    switch(rv) {
-        case 0:
-            // timeout
-            return false;
-        case 1:
-            // ok
-            d->readActivated();
-            return true;
-        default:
-            // error
-            abort();
-            return false;
-    }
+    return false;
 }
 
 bool QUnixSocket::waitForBytesWritten(int msecs)

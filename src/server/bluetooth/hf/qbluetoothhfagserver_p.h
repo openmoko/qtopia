@@ -25,14 +25,14 @@
 #include <qtopia/comm/qbluetoothaudiogateway.h>
 #include <qtopiaglobal.h>
 
-class QBluetoothHandsfreeService;
+class QBluetoothHandsfreeCommInterface;
 
 class QBluetoothHandsfreeAudioGatewayServer : public QBluetoothAudioGateway
 {
     Q_OBJECT
 
 public:
-    QBluetoothHandsfreeAudioGatewayServer(QBluetoothHandsfreeService *parent,
+    QBluetoothHandsfreeAudioGatewayServer(QBluetoothHandsfreeCommInterface *parent,
                                         const QString &audioDev,
                                         const QString& service);
     ~QBluetoothHandsfreeAudioGatewayServer();
@@ -48,7 +48,7 @@ public slots:
     void connectAudio();
 
 private:
-    QBluetoothHandsfreeService *m_parent;
+    QBluetoothHandsfreeCommInterface *m_parent;
 };
 
 #endif

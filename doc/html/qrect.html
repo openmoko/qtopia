@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qrect.cpp -->
 <head>
   <title>Qt 4.2: QRect Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -92,9 +93,9 @@
 <h3>Related Non-Members</h3>
 <ul>
 <li><div class="fn"/>Q_CORE_EXPORT_INLINE <b><a href="qrect.html#operator-not-eq-15">operator!=</a></b> ( const QRect &amp; <i>r1</i>, const QRect &amp; <i>r2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qrect.html#operator-lt-lt-52">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QRect &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qrect.html#operator-lt-lt-53">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QRect &amp; <i>rectangle</i> )</li>
 <li><div class="fn"/>Q_CORE_EXPORT_INLINE <b><a href="qrect.html#operator-eq-eq-24">operator==</a></b> ( const QRect &amp; <i>r1</i>, const QRect &amp; <i>r2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qrect.html#operator-gt-gt-28">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QRect &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qrect.html#operator-gt-gt-29">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QRect &amp; <i>rectangle</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -113,6 +114,7 @@
 <tr valign="top" class="even"><td><a href="qrect.html#intersected">intersected</a>()</td><td><a href="qrect.html#united">united</a>()</td></tr>
 </table></p>
 <p>The <a href="qrect.html#isEmpty">isEmpty</a>() function returns true if <a href="qrect.html#left">left</a>() &gt; <a href="qrect.html#right">right</a>() or <a href="qrect.html#top">top</a>() &gt; <a href="qrect.html#bottom">bottom</a>(). Note that an empty rectangle is not valid: The <a href="qrect.html#isValid">isValid</a>() function returns true if <a href="qrect.html#left">left</a>() &lt;= <a href="qrect.html#right">right</a>() <i>and</i> <a href="qrect.html#top">top</a>() &lt;= <a href="qrect.html#bottom">bottom</a>(). A null rectangle (<a href="qrect.html#isNull">isNull</a>() == true) on the other hand, has both width and height set to 0.</p>
+<p>Note that due to the way QRect and <a href="qrectf.html">QRectF</a> are defined, an empty QRect is defined in essentially the same way as <a href="qrectf.html">QRectF</a>.</p>
 <p>Finally, QRect objects can be streamed as well as compared.</p>
 <ul><li><a href="#rendering">Rendering</a></li>
 <li><a href="#coordinates">Coordinates</a></li>
@@ -172,7 +174,7 @@
 <p>Returns the center point of the rectangle.</p>
 <p>See also <a href="qrect.html#moveCenter">moveCenter</a>().</p>
 <h3 class="fn"><a name="contains"></a>bool QRect::contains ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i>, bool <i>proper</i> = false ) const</h3>
-<p>Returns true if the the given <i>point</i> is inside or on the edge of the rectangle, otherwise returns false. If <i>proper</i> is true, this function only returns true if the given <i>point</i> is <i>inside</i> the rectangle (i.e. not on the edge).</p>
+<p>Returns true if the the given <i>point</i> is inside or on the edge of the rectangle, otherwise returns false. If <i>proper</i> is true, this function only returns true if the given <i>point</i> is <i>inside</i> the rectangle (i.e., not on the edge).</p>
 <p>See also <a href="qrect.html#intersects">intersects</a>().</p>
 <h3 class="fn"><a name="contains-2"></a>bool QRect::contains ( int <i>x</i>, int <i>y</i>, bool <i>proper</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -197,21 +199,21 @@
 <p align="center"><img src="images/qrect-intersect.png" /></p><p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qrect.html#intersects">intersects</a>(), <a href="qrect.html#united">united</a>(), and <a href="qrect.html#operator-and-eq">operator&amp;=</a>().</p>
 <h3 class="fn"><a name="intersects"></a>bool QRect::intersects ( const QRect &amp; <i>rectangle</i> ) const</h3>
-<p>Returns true if this rectangle intersects with the given <i>rectangle</i> (i.e. there is at least one pixel that is within both rectangles), otherwise returns false.</p>
+<p>Returns true if this rectangle intersects with the given <i>rectangle</i> (i.e., there is at least one pixel that is within both rectangles), otherwise returns false.</p>
 <p>The intersection rectangle can be retrieved using the <a href="qrect.html#intersected">intersected</a>() function.</p>
 <p>See also <a href="qrect.html#contains">contains</a>().</p>
 <h3 class="fn"><a name="isEmpty"></a>bool QRect::isEmpty () const</h3>
 <p>Returns true if the rectangle is empty, otherwise returns false.</p>
-<p>An empty rectangle has a <a href="qrect.html#left">left</a>() &gt; <a href="qrect.html#right">right</a>() or <a href="qrect.html#top">top</a>() &gt; <a href="qrect.html#bottom">bottom</a>(). An empty rectangle is not valid (i.e isEmpty() == !<a href="qrect.html#isValid">isValid</a>()).</p>
+<p>An empty rectangle has a <a href="qrect.html#left">left</a>() &gt; <a href="qrect.html#right">right</a>() or <a href="qrect.html#top">top</a>() &gt; <a href="qrect.html#bottom">bottom</a>(). An empty rectangle is not valid (i.e., isEmpty() == !<a href="qrect.html#isValid">isValid</a>()).</p>
 <p>Use the <a href="qrect.html#normalized">normalized</a>() function to retrieve a rectangle where the corners are swapped.</p>
 <p>See also <a href="qrect.html#isNull">isNull</a>(), <a href="qrect.html#isValid">isValid</a>(), and <a href="qrect.html#normalized">normalized</a>().</p>
 <h3 class="fn"><a name="isNull"></a>bool QRect::isNull () const</h3>
 <p>Returns true if the rectangle is a null rectangle, otherwise returns false.</p>
-<p>A null rectangle has both the width and the height set to 0 (i.e. <a href="qrect.html#right">right</a>() == <a href="qrect.html#left">left</a>() - 1 and <a href="qrect.html#bottom">bottom</a>() == <a href="qrect.html#top">top</a>() - 1). A null rectangle is also empty, and hence is not valid.</p>
+<p>A null rectangle has both the width and the height set to 0 (i.e., <a href="qrect.html#right">right</a>() == <a href="qrect.html#left">left</a>() - 1 and <a href="qrect.html#bottom">bottom</a>() == <a href="qrect.html#top">top</a>() - 1). A null rectangle is also empty, and hence is not valid.</p>
 <p>See also <a href="qrect.html#isEmpty">isEmpty</a>() and <a href="qrect.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="isValid"></a>bool QRect::isValid () const</h3>
 <p>Returns true if the rectangle is valid, otherwise returns false.</p>
-<p>A valid rectangle has a <a href="qrect.html#left">left</a>() &lt; <a href="qrect.html#right">right</a>() and <a href="qrect.html#top">top</a>() &lt; <a href="qrect.html#bottom">bottom</a>(). Note that non-trivial operations like intersections are not defined for invalid rectangles. A valid rectangle is not empty (i.e. isValid() == !<a href="qrect.html#isEmpty">isEmpty</a>()).</p>
+<p>A valid rectangle has a <a href="qrect.html#left">left</a>() &lt; <a href="qrect.html#right">right</a>() and <a href="qrect.html#top">top</a>() &lt; <a href="qrect.html#bottom">bottom</a>(). Note that non-trivial operations like intersections are not defined for invalid rectangles. A valid rectangle is not empty (i.e., isValid() == !<a href="qrect.html#isEmpty">isEmpty</a>()).</p>
 <p>See also <a href="qrect.html#isNull">isNull</a>(), <a href="qrect.html#isEmpty">isEmpty</a>(), and <a href="qrect.html#normalized">normalized</a>().</p>
 <h3 class="fn"><a name="left"></a>int QRect::left () const</h3>
 <p>Returns the x-coordinate of the rectangle's left edge. Equivalent to <a href="qrect.html#x">x</a>().</p>
@@ -250,7 +252,7 @@
 <p>Moves the rectangle, leaving the top-right corner at the given <i>position</i>. The rectangle's size is unchanged.</p>
 <p>See also <a href="qrect.html#setTopRight">setTopRight</a>(), <a href="qrect.html#moveTop">moveTop</a>(), and <a href="qrect.html#moveRight">moveRight</a>().</p>
 <h3 class="fn"><a name="normalized"></a>QRect QRect::normalized () const</h3>
-<p>Returns a normalized rectangle; i.e. a rectangle that has a non-negative width and height.</p>
+<p>Returns a normalized rectangle; i.e., a rectangle that has a non-negative width and height.</p>
 <p>If <a href="qrect.html#width">width</a>() &lt; 0 the function swaps the left and right corners, and it swaps the top and bottom corners if <a href="qrect.html#height">height</a>() &lt; 0.</p>
 <p>See also <a href="qrect.html#isValid">isValid</a>() and <a href="qrect.html#isEmpty">isEmpty</a>().</p>
 <h3 class="fn"><a name="right"></a>int QRect::right () const</h3>
@@ -361,14 +363,14 @@
 <h3 class="fn"><a name="operator-not-eq-15"></a>Q_CORE_EXPORT_INLINE operator!= ( const QRect &amp; <i>r1</i>, const QRect &amp; <i>r2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the rectangles <i>r1</i> and <i>r2</i> are different, otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-lt-52"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QRect &amp; <i>rectangle</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-53"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QRect &amp; <i>rectangle</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given <i>rectangle</i> to the given <i>stream</i>, and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
 <h3 class="fn"><a name="operator-eq-eq-24"></a>Q_CORE_EXPORT_INLINE operator== ( const QRect &amp; <i>r1</i>, const QRect &amp; <i>r2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the rectangles <i>r1</i> and <i>r2</i> are equal, otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-gt-28"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QRect &amp; <i>rectangle</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-29"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QRect &amp; <i>rectangle</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a rectangle from the given <i>stream</i> into the given <i>rectangle</i>, and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
@@ -388,7 +390,7 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Use the <a href="qrect.html#translate">translate</a>() function instead.</p>
 <h3 class="fn"><a name="normalize"></a>QRect QRect::normalize () const</h3>
-<p>Returns a normalized rectangle, i.e. a rectangle that has a non-negative width and height.</p>
+<p>Returns a normalized rectangle; i.e., a rectangle that has a non-negative width and height.</p>
 <p>Use the <a href="qrect.html#normalized">normalized</a>() function instead</p>
 <h3 class="fn"><a name="rBottom"></a>int &amp; QRect::rBottom ()</h3>
 <p>Returns a reference to the bottom coordinate of the rectangle.</p>
@@ -410,6 +412,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

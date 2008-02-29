@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/painting/qcolor.cpp -->
 <head>
   <title>Qt 4.2: QColor Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -118,8 +119,8 @@
 <li><div class="fn"/>int <b><a href="qcolor.html#qRed">qRed</a></b> ( QRgb <i>rgb</i> )</li>
 <li><div class="fn"/>QRgb <b><a href="qcolor.html#qRgb">qRgb</a></b> ( int <i>r</i>, int <i>g</i>, int <i>b</i> )</li>
 <li><div class="fn"/>QRgb <b><a href="qcolor.html#qRgba">qRgba</a></b> ( int <i>r</i>, int <i>g</i>, int <i>b</i>, int <i>a</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-lt-lt-85">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-gt-gt-50">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QColor &amp; <i>color</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-lt-lt-86">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-gt-gt-51">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QColor &amp; <i>color</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -145,7 +146,7 @@
 </ul>
 <a name="integer-vs-floating-point-precision"></a>
 <h3>Integer vs. Floating Point Precision</h3>
-<p>QColor supports floating point precision and provides floating point versions of all the color components functions, e.g. <a href="qcolor.html#getRgbF">getRgbF</a>(), <a href="qcolor.html#hueF">hueF</a>() and <a href="qcolor.html#fromCmykF">fromCmykF</a>(). Note that since the components is stored using 16-bit integers, there might be minor deviations between the values set using, for example, <a href="qcolor.html#setRgbF">setRgbF</a>() and the values returned by the <a href="qcolor.html#getRgbF">getRgbF</a>() function due to rounding.</p>
+<p>QColor supports floating point precision and provides floating point versions of all the color components functions, e.g. <a href="qcolor.html#getRgbF">getRgbF</a>(), <a href="qcolor.html#hueF">hueF</a>() and <a href="qcolor.html#fromCmykF">fromCmykF</a>(). Note that since the components are stored using 16-bit integers, there might be minor deviations between the values set using, for example, <a href="qcolor.html#setRgbF">setRgbF</a>() and the values returned by the <a href="qcolor.html#getRgbF">getRgbF</a>() function due to rounding.</p>
 <p>While the integer based functions take values in the range 0-255 (except <a href="qcolor.html#hue">hue</a>() which must can be specified within the range 0-359), the floating point functions accept values in the range 0.0 - 1.0.</p>
 <a name="alpha-blended-drawing"></a>
 <h3>Alpha-Blended Drawing</h3>
@@ -497,11 +498,11 @@
 <h3 class="fn"><a name="qRgba"></a><a href="qcolor.html#QRgb-typedef">QRgb</a> qRgba ( int <i>r</i>, int <i>g</i>, int <i>b</i>, int <i>a</i> )</h3>
 <p>Returns the ARGB quadruplet (<i>a</i>, <i>r</i>, <i>g</i>, <i>b</i>).</p>
 <p>See also <a href="qcolor.html#qRgb">qRgb</a>(), <a href="qcolor.html#qRed">qRed</a>(), <a href="qcolor.html#qGreen">qGreen</a>(), and <a href="qcolor.html#qBlue">qBlue</a>().</p>
-<h3 class="fn"><a name="operator-lt-lt-85"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-86"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the <i>color</i> to the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-50"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QColor &amp; <i>color</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-51"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QColor &amp; <i>color</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the <i>color</i> from the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
@@ -533,6 +534,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

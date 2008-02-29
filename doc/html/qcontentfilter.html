@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QContentFilter Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QContentFilter Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContentFilter Class Reference</h1>
 <p>The QContentFilter class defines criteria for defining a sub-set of all available content. <a href="#details">More...</a></p>
-<pre>    #include &lt;QContentFilter&gt;</pre><ul>
+<pre>#include &lt;QContentFilter&gt;</pre><ul>
 <li><a href="qcontentfilter-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-types"></a>
@@ -57,40 +56,40 @@
 <p>Content sets and document selectors use content filters to define their visible set of content. A basic filter is composed of a string value and an attribute of <a href="qcontent.html">QContent</a> specified by the <a href="qcontentfilter.html#FilterType-enum">FilterType</a> enum, any content with whose specified attribute matches the given value is passed. These basic filters can be combined by using the and (&amp;), or (|) and negation (~) operators to create complex filters which pass any content that matches the logical combination of the base filters.</p>
 <p><a href="qcontentfilter.html#FilterType-enum">Location</a> and <a href="qcontentfilter.html#FilterType-enum">Directory</a> filters filter content based on their file path, they differ in that a Directory filter will only pass content in the directory given in the argument of the filter whereas the Location filter will also pass content in any sub-directory of that directory. Directory filter arguments may include a wild card.</p>
 <p>Filter for all content in the &quot;/Documents&quot; directory:</p>
-<pre>    QContentFilter filter( QContentFilter::Directory, &quot;/Documents&quot; );</pre>
+<pre>&nbsp;   QContentFilter filter( QContentFilter::Directory, &quot;/Documents&quot; );</pre>
 <p>Filter for all content in the sub-directories of &quot;/Documents&quot; but not in the directory itself:</p>
-<pre>    QContentFilter filter( QContentFilter::Directory, &quot;/Documents/*&quot; );</pre>
+<pre>&nbsp;   QContentFilter filter( QContentFilter::Directory, &quot;/Documents/*&quot; );</pre>
 <p>Filter for all content in the &quot;/Documents&quot; directory or any of it's sub-directories:</p>
-<pre>    QContentFilter filter( QContentFilter::Location, &quot;/Documents&quot; );</pre>
+<pre>&nbsp;   QContentFilter filter( QContentFilter::Location, &quot;/Documents&quot; );</pre>
 <p>Alternatively this could be acheived by combining two directory filters:</p>
-<pre>    QContentFilter filter
+<pre>&nbsp;   QContentFilter filter
             = QContentFilter( QContentFilter::Directory, &quot;/Documents&quot; )
             | QContentFilter( QContentFilter::Directory, &quot;/Documents/*&quot; );</pre>
 <p><a href="qcontentfilter.html#FilterType-enum">Role</a> filters filter content based on the <a href="qcontent.html#role">QContent::role</a>() attribute which defines the intended usage of the <a href="qcontent.html">QContent</a>. A role filter may be constructed using the Role filter type or from the <a href="qcontent.html#Role-enum">QContent::Role</a> enum. Most application content sets will only be interested in displaying user documents and so should apply a role filter on <a href="qcontent.html#Role-enum">QContent::Document</a> to all content sets.</p>
 <p>Limiting an existing filter to only include documents with the &quot;Document&quot; role:</p>
-<pre>    QContentFilter final = existingFilter &amp; QContentFilter( QContentFilter::Role, &quot;Document&quot; );</pre>
+<pre>&nbsp;   QContentFilter final = existingFilter &amp; QContentFilter( QContentFilter::Role, &quot;Document&quot; );</pre>
 <p>The same filter constructed from a the <a href="qcontent.html#Role-enum">QContent::Role</a> enum:</p>
-<pre>    QContentFilter final = existingFilter &amp; QContentFilter( QContent::Document );</pre>
+<pre>&nbsp;   QContentFilter final = existingFilter &amp; QContentFilter( QContent::Document );</pre>
 <p><a href="qcontentfilter.html#FilterType-enum">MimeType</a> filters filters content on the <a href="qcontent.html#type">QContent::type</a>() attribute, they may be constructed using the <a href="qcontentfilter.html#FilterType-enum">MimeType</a> filter type or from a <a href="qmimetype.html">QMimeType</a>. Wildcards may be used on mime type arguments to match the major type only.</p>
 <p>Filter for all PNG images:</p>
-<pre>    QContentFilter png( QContentFilter::MimeType, &quot;image/png&quot; );</pre>
+<pre>&nbsp;   QContentFilter png( QContentFilter::MimeType, &quot;image/png&quot; );</pre>
 <p>The same filter using <a href="qmimetype.html">QMimeType</a>:</p>
-<pre>    QContentFilter png( QMimeType( &quot;image/png&quot; ) );</pre>
+<pre>&nbsp;   QContentFilter png( QMimeType( &quot;image/png&quot; ) );</pre>
 <p>Filter for all images:</p>
-<pre>    QContentFilter image( QContentFilter::MimeType, &quot;image/*&quot; );</pre>
+<pre>&nbsp;   QContentFilter image( QContentFilter::MimeType, &quot;image/*&quot; );</pre>
 <p><a href="qcontentfilter.html#FilterType-enum">Category</a> filters filter content based on the categories they've been assigned. The argument for a category filter is the ID of the category, alternatively a category filter can be constructed from a <a href="qcategoryfilter.html">QCategoryFilter</a>.</p>
 <p>Filter for content with the Business or Personal categories:</p>
-<pre>    QContentFilter categories
+<pre>&nbsp;   QContentFilter categories
         = QContentFilter( QContentFilter::Category, &quot;Business&quot; )
         | QContentFilter( QContentFilter::Category, &quot;Personal&quot; );</pre>
 <p>Filter for unfiled content using a <a href="qcategoryfilter.html">QCategoryFilter</a>:</p>
-<pre>    QContentFilter unfiled( QCategoryFilter( QCategoryFilter::Unfiled ) );</pre>
+<pre>&nbsp;   QContentFilter unfiled( QCategoryFilter( QCategoryFilter::Unfiled ) );</pre>
 <p><a href="qcontentfilter.html#FilterType-enum">DRM</a> filters filter content based on the <a href="qcontent.html#drmState">QContent::drmState</a>() attribute. The only valid arguments for a DRM filter are &quot;Protected&quot; and &quot;Unprotected&quot; which filter protected and unprotected content respectively.</p>
 <p><a href="qcontentfilter.html#FilterType-enum">Synthetic</a> filters filter content based on their properties. The argument for a synthetic filter is composed of the property group and key concatenated with the expected value in the form &quot;[group]/[key]/[value]&quot;, if the property does not belong to a group the argument should be of the form &quot;none/[key]/[value]&quot;. If the property belongs to the <a href="qcontent.html#Property-enum">QContent::Property</a> enum the filter may be constructed from that enum and the expected value.</p>
 <p>Filter for content with the author Trolltech:</p>
-<pre>    QContentFilter author( QContentFilter::Synthetic, &quot;none/Author/Trolltech&quot; );</pre>
+<pre>&nbsp;   QContentFilter author( QContentFilter::Synthetic, &quot;none/Author/Trolltech&quot; );</pre>
 <p>The same filter using the <a href="qcontent.html#Property-enum">QContent::Property</a> enum:</p>
-<pre>    QContentFilter author( QContent::Author, &quot;Trolltech&quot; );</pre>
+<pre>&nbsp;   QContentFilter author( QContent::Author, &quot;Trolltech&quot; );</pre>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="FilterType-enum"></a>enum QContentFilter::FilterType</h3>
@@ -176,6 +175,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

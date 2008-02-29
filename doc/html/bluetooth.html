@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Bluetooth Support</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Bluetooth Support</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -34,40 +33,20 @@
 <p>Qtopia supports Bluetooth communications hardware and software profiles by relying on BlueZ, the official Linux Bluetooth stack. Qtopia provides implementations of Bluetooth profiles; settings applications for device and profile configuration; and advanced framework classes that enable implementation of custom profiles.</p>
 <a name="hardware-requirements"></a>
 <h3>Hardware Requirements</h3>
-<p>Qtopia does not have any special hardware requirements. For Bluetooth support to work correctly, the target device must be supported by the BlueZ Bluetooth stack.</p>
+<p>Qtopia does not directly support any hardware, instead it relies on the BlueZ Bluetooth stack. Thus for any hardware to be supported by Qtopia, it must be supported by BlueZ. For more information, please visit the BlueZ website at http://www.bluez.org.</p>
 <a name="software-requirements"></a>
 <h3>Software Requirements</h3>
-<p>Qtopia 4.2 supports the BlueZ Bluetooth framework Version 3 and above (For exact requirements, please check the release notes for your specific version of Qtopia). BlueZ consists of several daemons and tools that allow the system to manipulate local Bluetooth devices and discover remote devices and services.</p>
-<p>BlueZ libraries and daemons must be installed and running prior to Qtopia startup as Qtopia relies on information provided by the daemons to detect local host adapters and services.</p>
-<p>BlueZ consists of three main daemons as follows:</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Daemon</th><th>Desciption</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>hcid</tt></td><td><ul>
-<li>maintains the local Bluetooth host adapter</li>
-<li>initiates remote device discovery</li>
-<li>handles all aspects of the Bluetooth security and authentication mechanisms.</li>
-</ul>
-</td></tr>
-<tr valign="top" class="even"><td><tt>sdpd</tt></td><td><ul>
-<li>maintains a database of services supported by the local host</li>
-<li>communicates with <tt>sdp</tt> services on remote Bluetooth hosts in order to discover services presence.</li>
-</ul>
-</td></tr>
-<tr valign="top" class="odd"><td><tt>rfcommd</tt></td><td><ul>
-<li>binds RFCOMM Bluetooth connections to a local serial port.</li>
-</ul>
-<p><b>Note:</b> This daemon is not currently used by Qtopia.</p>
-</td></tr>
-</table></p>
-<p>Qtopia uses the DBUS interface of hcid to communicate with the BlueZ stack. Thus Qtopia also requires DBUS libraries in order to support Bluetooth.</p>
+<p>Qtopia 4.2.2 requires BlueZ Bluetooth framework Version 3.9. This means both the bluez-libs-3.9 and bluez-utils-3.9 must be installed on your system. For more information about installing BlueZ, please refer to the BlueZ website at http://www.bluez.org.</p>
+<p>BlueZ uses the DBUS communications protocol to expose a rich and complex API. Qtopia uses this API to manage Bluetooth devices. Thus Qtopia requires DBUS to be configured and running in order to successfully communicate with hcid. Qtopia does not link to the BlueZ libraries, however correct version of the bluez-lib package must be installed as it is used by bluez-utils.</p>
+<p>Qtopia requires the BlueZ hcid daemon to be running. In addition, depending on your BlueZ configuration, the sdpd daemon should be running as well.</p>
 <a name="qtopia-configuration"></a>
 <h3>Qtopia Configuration</h3>
-<p>In order to build Qtopia with Bluetooth support enabled, you must pass the following options:</p>
+<p>Qtopia has several configure options which relate to Bluetoth support. These options are documented in the table below:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>-bluetooth</td><td>Turns Bluetooth Support on</td></tr>
-<tr valign="top" class="even"><td>-dbus</td><td>Bluetooth support requires DBUS. This turns on DBUS support.</td></tr>
-<tr valign="top" class="odd"><td>-dbuspath</td><td><b>This option is optional.</b> If your DBUS installation is not in /usr, this specifies the DBUS installation path.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Option</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>-bluetooth</td><td>Turns Bluetooth Support on. This option also implies -dbus.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>-dbus</td><td>Bluetooth support requires DBUS. This turns on DBUS support. By default, configure searches for DBUS installation hierarchy under /usr. Thus the libdbus-1.so will be found in /usr/lib/libdbus-1.so. If a useable version of the DBUS library is not found, the DBUS and Bluetooth support will be disabled. Use -dbuspath option to manually specify where DBUS library resides.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>-dbuspath</td><td><b>This option is optional.</b> If your DBUS installation is not in /usr, this specifies the DBUS installation path.</td></tr>
 </table></p>
 <a name="integration"></a>
 <h2>Integration</h2>
@@ -80,7 +59,7 @@
 <h3>Device Configuration</h3>
 <p>Each Bluetooth device or local Bluetooth host adapter has an associated Bluetooth address that is stored as a six byte array and is commonly represented as six hexadecimal bytes separated by colons. For example: <tt>FF:FF:FF:FF:FF:FF</tt>.</p>
 <p>BlueZ and Qtopia support multiple local Bluetooth host adapters, however the most common case is to use a single adapter.</p>
-<p>The local host adapter can be controlled through the <tt>QBluetoothLocalDevice</tt> class where the adapter can be switched on/off and device visibility can be controlled. Visibility is controlled by two variables:</p>
+<p>The local host adapter can be controlled through the <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> class where the adapter can be switched on/off and device visibility can be controlled. Visibility is controlled by two variables:</p>
 <ol type="1">
 <li><tt>page scan</tt> - controls whether remote devices can connect to the local device.</li>
 <li><tt>inquiry scan</tt> - controls whether remote devices can discover the local device.</li>
@@ -90,7 +69,7 @@
 <h3>GAP</h3>
 <p>Qtopia fully supports Bluetooth GAP which handles the discovery and establishment of connections between Bluetooth devices. GAP defines how secure connections are established between two devices by a mechanism referred to as <i>pairing</i> and also defines the basic user interface paradigm that must be used by all Bluetooth devices.</p>
 <p>Qtopia Bluetooth API allows its clients to discover remote devices and various relevant attributes, such as device name, device manufacturer, Bluetooth protocol version supported, etc. Additionally, establishment of trust relationships by pairing remote devices is also supported.</p>
-<p>The functionality used to implement this profile is accessible through the <tt>QBluetoothLocalDevice</tt> class.</p>
+<p>The functionality used to implement this profile is accessible through the <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> class.</p>
 <a name="sdap"></a>
 <h3>SDAP</h3>
 <p>SDAP describes how an application should use the Service Discovery Protocol (SDP) to discover services on a remote device. Using the Qtopia Bluetooth API, clients can enable any application to discover services running on a remote device.</p>
@@ -124,12 +103,12 @@
 <h3>Service Management Framework</h3>
 <p>Qtopia provides a framework for creating and managing Bluetooth services. A Bluetooth service can be created and registered within this framework by subclassing the <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a> class. The framework allows registered services to be controlled by external sources through IPC messages. For example, Qtopia's Bluetooth Settings application allows end users to enable or disable registered services, and also modify the security settings of registered services.</p>
 <p>The service management framework stores various settings for each known service in the <tt>BluetoothServices.conf</tt> configuration file. This configuration file can be modified to provide default settings for registered services. As an example, a default configuration file is provided at <tt>etc/default/Trolltech/BluetoothServices.conf</tt>. This file sets the default security for the OBEX Object Push Service to 0, as Object Push services do not generally require authentication or encryption.</p>
-<p>The service management framework is implemented through the service manager in <tt>src/server/bluetoothservicemanager.h</tt> and the service control interface (for external control through IPC) in <tt>/src/libraries/qtopiacomm/bluetooth/bluetoothservicecontroller.h</tt>.</p>
+<p>The service management framework is implemented through the service manager in <tt>src/server/bluetoothservicemanager.h</tt>.</p>
 <p>For more information, see the <a href="bluetooth-servicemanager.html">Bluetooth Service Management Framework</a> page.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

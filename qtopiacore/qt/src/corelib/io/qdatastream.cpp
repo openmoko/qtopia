@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -752,6 +762,9 @@ QDataStream &QDataStream::operator>>(float &f)
     return *this;
 }
 
+#if defined(Q_DOUBLE_FORMAT)
+#define Q_DF(x) Q_DOUBLE_FORMAT[(x)] - '0'
+#endif
 
 /*!
     \overload
@@ -765,6 +778,7 @@ QDataStream &QDataStream::operator>>(double &f)
 {
     f = 0.0;
     CHECK_STREAM_PRECOND(*this)
+#ifndef Q_DOUBLE_FORMAT
     if (noswap) {
         if (dev->read((char *)&f, 8) != 8) {
             f = 0.0;
@@ -786,6 +800,34 @@ QDataStream &QDataStream::operator>>(double &f)
             setStatus(ReadPastEnd);
         }
     }
+#else
+    //non-standard floating point format
+    register uchar *p = (uchar *)(&f);
+    char b[8];
+    if (dev->read(b, 8) == 8) {
+        if (noswap) {
+            *p++ = b[Q_DF(0)];
+            *p++ = b[Q_DF(1)];
+            *p++ = b[Q_DF(2)];
+            *p++ = b[Q_DF(3)];
+            *p++ = b[Q_DF(4)];
+            *p++ = b[Q_DF(5)];
+            *p++ = b[Q_DF(6)];
+            *p = b[Q_DF(7)];
+        } else {
+            *p++ = b[Q_DF(7)];
+            *p++ = b[Q_DF(6)];
+            *p++ = b[Q_DF(5)];
+            *p++ = b[Q_DF(4)];
+            *p++ = b[Q_DF(3)];
+            *p++ = b[Q_DF(2)];
+            *p++ = b[Q_DF(1)];
+            *p = b[Q_DF(0)];
+        }
+    } else {
+        setStatus(ReadPastEnd);
+    }
+#endif
     return *this;
 }
 
@@ -1054,6 +1096,7 @@ QDataStream &QDataStream::operator<<(float f)
 QDataStream &QDataStream::operator<<(double f)
 {
     CHECK_STREAM_PRECOND(*this)
+#ifndef Q_DOUBLE_FORMAT
     if (noswap) {
         dev->write((char *)&f, sizeof(double));
     } else {
@@ -1069,6 +1112,30 @@ QDataStream &QDataStream::operator<<(double f)
         b[0] = *p;
         dev->write(b, 8);
     }
+#else
+    register uchar *p = (uchar *)(&f);
+    char b[8];
+    if (noswap) {
+        b[Q_DF(0)] = *p++;
+        b[Q_DF(1)] = *p++;
+        b[Q_DF(2)] = *p++;
+        b[Q_DF(3)] = *p++;
+        b[Q_DF(4)] = *p++;
+        b[Q_DF(5)] = *p++;
+        b[Q_DF(6)] = *p++;
+        b[Q_DF(7)] = *p;
+    } else {
+        b[Q_DF(7)] = *p++;
+        b[Q_DF(6)] = *p++;
+        b[Q_DF(5)] = *p++;
+        b[Q_DF(4)] = *p++;
+        b[Q_DF(3)] = *p++;
+        b[Q_DF(2)] = *p++;
+        b[Q_DF(1)] = *p++;
+        b[Q_DF(0)] = *p;
+    }
+    dev->write(b, 8);
+#endif
     return *this;
 }
 
@@ -1134,7 +1201,7 @@ int QDataStream::writeRawData(const char *s, int len)
 
     Skips \a len bytes from the device. Returns the number of bytes
     actually skipped, or -1 on error.
-    
+
     This is equivalent to calling readRawData() on a buffer of length
     \a len and ignoring the buffer.
 

@@ -21,7 +21,7 @@
 
 #include "activitymonitor.h"
 
-void ActivityMonitor::update( Subject* )
+void ActivityMonitor::update()
 {
     if( isActive() ) {
         m_updateCalled = true;

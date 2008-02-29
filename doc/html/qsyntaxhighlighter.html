@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/text/qsyntaxhighlighter.cpp -->
 <head>
   <title>Qt 4.2: QSyntaxHighlighter Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -118,7 +119,7 @@
  }</pre>
 <p>In the example above, we first set the current block state to 0. Then, if the previous block ended within a comment, we higlight from the beginning of the current block (<tt>startIndex = 0</tt>). Otherwise, we search for the given start expression. If the specified end expression cannot be found in the text block, we change the current block state by calling <a href="qsyntaxhighlighter.html#setCurrentBlockState">setCurrentBlockState</a>(), and make sure that the rest of the block is higlighted.</p>
 <p>In addition you can query the current formatting and user data using the <a href="qsyntaxhighlighter.html#format">format</a>() and <a href="qsyntaxhighlighter.html#currentBlockUserData">currentBlockUserData</a>() functions respectively. You can also attach user data to the current text block using the <a href="qsyntaxhighlighter.html#setCurrentBlockUserData">setCurrentBlockUserData</a>() function. <a href="qtextblockuserdata.html">QTextBlockUserData</a> can be used to store custom settings. In the case of syntax highlighting, it is in particular interesting as cache storage for information that you may figure out while parsing the paragraph's text. For an example, see the <a href="qsyntaxhighlighter.html#setCurrentBlockUserData">setCurrentBlockUserData</a>() documentation.</p>
-<p>See also <a href="qtextedit.html">QTextEdit</a> and Syntax Highlighter Example.</p>
+<p>See also <a href="qtextedit.html">QTextEdit</a> and <a href="richtext-syntaxhighlighter.html">Syntax Highlighter Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QSyntaxHighlighter"></a>QSyntaxHighlighter::QSyntaxHighlighter ( <a href="qobject.html">QObject</a> * <i>parent</i> )</h3>
@@ -211,6 +212,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

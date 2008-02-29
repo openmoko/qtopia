@@ -1,3 +1,4 @@
 #!/bin/sh
 
-network-services.sh start
+/etc/rc.d/usbnet_services.sh start
+

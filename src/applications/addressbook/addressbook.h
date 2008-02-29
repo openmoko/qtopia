@@ -49,7 +49,6 @@
 #endif
 #endif
 
-class AbEditor;
 class AbLabel;
 class QPopupMenu;
 class QToolButton;
@@ -66,6 +65,9 @@ class QContactDelegate;
 class QUniqueId;
 class QDSData;
 class QDSActionRequest;
+class AbEditor;
+class AbFullEditor;
+class AbSimEditor;
 
 #ifdef QTOPIA_PHONE
 class QLineEditWithPreeditNotification;
@@ -87,7 +89,6 @@ protected:
     void editEntry(const QContact &cnt);
     void closeEvent(QCloseEvent *e);
     void keyPressEvent(QKeyEvent *);
-    AbEditor *editor();
     void showEvent(QShowEvent *e);
 
 #ifdef QTOPIA_PHONE
@@ -182,8 +183,6 @@ private:
 
     QContactModel *contacts;
 
-    bool mAllowCloseEvent;
-    bool mResetKeyChars;
     bool mCloseAfterView;
     bool mFindMode;
     bool mHasSim;
@@ -195,13 +194,18 @@ private:
 
     QWidget *listView;
     QVBoxLayout *listViewLayout;
-    AbEditor *abEditor;
     AbLabel *mView;
     QContactListView *abList;
 
     QToolBar *searchBar;
     QLineEdit *searchEdit;
     QPopupMenu *viewmenu;
+
+    AbEditor *editor(const QUniqueId &);
+    AbFullEditor *abFullEditor;
+#ifdef QTOPIA_PHONE
+    AbSimEditor *abSimEditor;
+#endif
 
     QAction *actionNew,
             *actionEdit,
@@ -225,8 +229,6 @@ private:
     bool showingPersonal;
 
     QString sel_href;
-
-    QContactDelegate* contactDelegate;
 
     QAction *actionSend;
     QAction *actionSendCat;

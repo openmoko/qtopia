@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/opengl/qglpixelbuffer.cpp -->
 <head>
   <title>Qt 4.2: QGLPixelBuffer Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -40,7 +41,7 @@
 <li><div class="fn"/>void <b><a href="qglpixelbuffer.html#updateDynamicTexture">updateDynamicTexture</a></b> ( GLuint <i>texture_id</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -63,7 +64,7 @@
 <li><b>On systems that support it, we can bind the pbuffer to an OpenGL texture.</b> The texture is then updated automatically when the pbuffer contents change, eliminating the need for additional copy operations. This is supported only on Windows and Mac OS X systems that provide the <tt>render_texture</tt> extension.</li>
 </ol>
 <p>Pbuffers are provided by the OpenGL <tt>pbuffer</tt> extension; call hasOpenGLPbuffer() to find out if the system provides pbuffers.</p>
-<p>See also Pbuffers Example.</p>
+<p>See also <a href="opengl-pbuffers.html">Pbuffers Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QGLPixelBuffer"></a>QGLPixelBuffer::QGLPixelBuffer ( const <a href="qsize.html">QSize</a> &amp; <i>size</i>, const <a href="qglformat.html">QGLFormat</a> &amp; <i>format</i> = QGLFormat::defaultFormat(), <a href="qglwidget.html">QGLWidget</a> * <i>shareWidget</i> = 0 )</h3>
@@ -148,6 +149,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -158,7 +158,7 @@ public:
         }
         else if( index.isValid() )
         {
-            return sourceModel() ? sourceModel()->data( mapToSource( index ), role ) : 0;
+            return sourceModel() ? sourceModel()->data( mapToSource( index ), role ) : QVariant();
         }
 
         return QVariant();

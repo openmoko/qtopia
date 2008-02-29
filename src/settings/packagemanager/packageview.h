@@ -35,10 +35,31 @@ class QTextEdit;
 class QAction;
 class QShowEvent;
 
+#include "ui_packagedetails.h"
+class PackageDetails : public QDialog, public Ui::PackageDetails
+{
+public:
+    enum{ Reenable = 3 };
+    PackageDetails(QWidget *parent, bool modal)
+                    : QDialog(parent)
+    {
+        setupUi(this);
+        setModal(modal);
+        connect( reenableButton, SIGNAL(clicked()),
+             this, SLOT(reenable()) );
+        reenableButton->setVisible( false );
+    }
+
+    Q_OBJECT
+private slots:
+    void reenable() { done(Reenable); }
+};
+
 class PackageView : public QDialog
 {
     Q_OBJECT
     friend class PackageManagerService;
+    friend class PackageServiceInstaller;
 public:
 
     PackageView(QWidget* parent = 0, Qt::WFlags flags = 0);

@@ -26,7 +26,7 @@
 /*!
     \class QAbstractIpcInterfaceGroup
     \brief The QAbstractIpcInterfaceGroup class provides a convenient wrapper to create the interfaces within a server group.
-    \ingroup communication
+    \ingroup ipc
 
     The QAbstractIpcInterfaceGroup class provides a convenient wrapper to
     create the interfaces within a server group.

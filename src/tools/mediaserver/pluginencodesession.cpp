@@ -36,10 +36,11 @@ namespace qtopia_helix
 
 struct PluginEncodeSession::PluginEncodeSessionPrivate
 {
-    QContent        file;
-    QMediaEncoder*  mediaEncoder;
-    QMediaDevice*   inputDevice;
-    QMediaDevice*   outputDevice;
+    QContent            file;
+    QMediaEncoder*      mediaEncoder;
+    QMediaDevice*       inputDevice;
+    QMediaDevice*       outputDevice;
+    QtopiaMedia::State  state;
 };
 
 
@@ -135,6 +136,11 @@ void PluginEncodeSession::setMuted(bool)
 bool PluginEncodeSession::isMuted() const
 {
     return false;
+}
+
+QtopiaMedia::State PluginEncodeSession::playerState() const
+{
+    return d->state;
 }
 
 QString PluginEncodeSession::errorString()

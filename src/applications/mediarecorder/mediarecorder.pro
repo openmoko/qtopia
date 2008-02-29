@@ -34,4 +34,4 @@ INSTALLS+=desktop help pics voicerecorderservice qdsservice
 #INSTALLS+=categories
 
 pkg.desc=Media recorder for Qtopia.
-pkg.domain=window,qds,mediarecorder,mediasession,screensaver,cardreader,docapi{video/*:image/*:audio/*}
+pkg.domain=window,qds,mediarecorder,mediasession,screensaver,cardreader,lightandpower,docapi{video/*:image/*:audio/*}

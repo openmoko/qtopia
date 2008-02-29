@@ -1,16 +1,6 @@
+qtopia_project(qtopia app)
 TARGET=printserver
-#CONFIG+=no_tr
-
-enable_singleexec {
-    qtopia_project(qtopia qtopia app)
-    instSymlink.path=$$bindir
-    instSymlink.commands=$$COMMAND_HEADER\
-        rm -f $(INSTALL_ROOT)$${instSymlink.path}/$${TARGET} $$LINE_SEP_VERBOSE\
-        ln -sf qpe $(INSTALL_ROOT)$${instSymlink.path}/$${TARGET}
-    INSTALLS+=instSymlink
-} else {
-    qtopia_project(qtopia qtopia app)
-}
+CONFIG+=singleexec_main
 
 HEADERS+= printserver.h
 
@@ -19,7 +9,6 @@ SOURCES+= main.cpp \
 
 service.files=$$QTOPIA_DEPOT_PATH/services/Print/printserver
 service.path=/services/Print
-
 INSTALLS+=service
 
 depends(libraries/qtopiaprinting)

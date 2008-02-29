@@ -38,7 +38,7 @@ class DateBookCategorySelector : public QCategorySelector
 {
     public:
         DateBookCategorySelector(QWidget *parent = 0)
-            : QCategorySelector(DateBookCategoryScope, QCategorySelector::Editor, parent)
+            : QCategorySelector(DateBookCategoryScope, QCategorySelector::Editor | QCategorySelector::DialogView, parent)
             {
             }
 

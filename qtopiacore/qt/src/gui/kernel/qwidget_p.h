@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -140,7 +150,7 @@ struct QWExtra {
     uint explicitMinSize : 2;
     uint autoFillBackground : 1;
 
-    QStyle *style;
+    QPointer<QStyle> style;
     QString styleSheet;
 };
 
@@ -160,6 +170,7 @@ public:
 #endif
 #ifdef Q_WS_QWS
     QWindowSurface *currentWindowSurface();
+    void setMaxWindowState_helper();
 #endif
     void init(QWidget *desktopWidget, Qt::WindowFlags f);
     void create_sys(WId window, bool initializeWindow, bool destroyOldWindow);
@@ -289,6 +300,10 @@ public:
     void setWindowIconText_helper(const QString &cap);
     void setWindowTitle_sys(const QString &cap);
 
+#ifdef Q_OS_WIN
+    void grabMouseWhileInWindow();
+#endif
+
 #ifndef QT_NO_CURSOR
     void setCursor_sys(const QCursor &cursor);
     void unsetCursor_sys();
@@ -303,8 +318,8 @@ public:
 #endif
     void setWindowTitle_helper(const QString &cap);
 
-    bool setMinimumSize_helper(int minw, int minh);
-    bool setMaximumSize_helper(int maxw, int maxh);
+    bool setMinimumSize_helper(int &minw, int &minh);
+    bool setMaximumSize_helper(int &maxw, int &maxh);
     void setConstraints_sys();
 
 #if defined(Q_WS_QWS)

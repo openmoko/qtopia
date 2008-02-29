@@ -24,15 +24,15 @@
 
 #include <qtopiaglobal.h>
 
-class QTOPIACOMM_EXPORT QObexSocket
+class QTOPIACOMM_EXPORT QObexSocket : public QObject
 {
+    Q_OBJECT
 public:
-    QObexSocket();
-
+    QObexSocket(QObject *parent = 0);
     virtual ~QObexSocket();
 
     virtual bool connect() = 0;
-    virtual bool close();
+    virtual void close();
 
     void setHandle(void *handle) { m_handle = handle; }
     void * handle() { return m_handle; }

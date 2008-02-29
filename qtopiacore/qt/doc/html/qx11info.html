@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/kernel/qx11info_x11.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qx11info_x11.cpp -->
 <head>
   <title>Qt 4.2: QX11Info Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -59,8 +59,8 @@
 <h2>Detailed Description</h2>
 <p>The QX11Info class provides information about the X display configuration.</p>
 <p>The class provides two APIs: a set of non-static functions that provide information about a specific widget or pixmap, and a set of static functions that provide the default information for the application.</p>
-<p><b>Warning:</b> This class is only available on X11. For querying per-screen information in a portable way, use QDesktopWidget.</p>
-<p>See also <a href="qwidget.html#x11Info">QWidget::x11Info</a>(), <a href="qpixmap.html#x11Info">QPixmap::x11Info</a>(), and QDesktopWidget.</p>
+<p><b>Warning:</b> This class is only available on X11. For querying per-screen information in a portable way, use <a href="qdesktopwidget.html">QDesktopWidget</a>.</p>
+<p>See also <a href="qwidget.html#x11Info">QWidget::x11Info</a>(), <a href="qpixmap.html#x11Info">QPixmap::x11Info</a>(), and <a href="qdesktopwidget.html">QDesktopWidget</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QX11Info"></a>QX11Info::QX11Info ()</h3>
@@ -71,36 +71,36 @@
 <p>Destroys the <a href="qx11info.html">QX11Info</a> object.</p>
 <h3 class="fn"><a name="appCells"></a>int QX11Info::appCells ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the number of cells used by the application on the given <i>screen</i>.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#cells">cells</a>().</p>
 <h3 class="fn"><a name="appClass"></a>const char * QX11Info::appClass ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the X11 application class.</p>
 <p>See also <a href="qx11info.html#display">display</a>().</p>
 <h3 class="fn"><a name="appColormap"></a><a href="qt.html#HANDLE-typedef">Qt::HANDLE</a> QX11Info::appColormap ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a handle for the application's color map on the given <i>screen</i>.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#colormap">colormap</a>() and <a href="qx11info.html#defaultColormap">defaultColormap</a>().</p>
 <h3 class="fn"><a name="appDefaultColormap"></a>bool QX11Info::appDefaultColormap ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if the application has a default color map on the given <i>screen</i>; otherwise returns false.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <h3 class="fn"><a name="appDefaultVisual"></a>bool QX11Info::appDefaultVisual ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if the application has a default visual on the given <i>screen</i>; otherwise returns false.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <h3 class="fn"><a name="appDepth"></a>int QX11Info::appDepth ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the color depth (bits per pixel) used by the application on the given <i>screen</i>.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#depth">depth</a>().</p>
 <h3 class="fn"><a name="appDpiX"></a>int QX11Info::appDpiX ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the horizontal resolution of the given <i>screen</i> in terms of the number of dots per inch.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#setAppDpiX">setAppDpiX</a>() and <a href="qx11info.html#appDpiY">appDpiY</a>().</p>
 <h3 class="fn"><a name="appDpiY"></a>int QX11Info::appDpiY ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the vertical resolution of the given <i>screen</i> in terms of the number of dots per inch.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#setAppDpiY">setAppDpiY</a>() and <a href="qx11info.html#appDpiX">appDpiX</a>().</p>
 <h3 class="fn"><a name="appRootWindow"></a><a href="qt.html#HANDLE-typedef">Qt::HANDLE</a> QX11Info::appRootWindow ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a handle for the applications root window on the given <i>screen</i>.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qapplication.html#desktop">QApplication::desktop</a>().</p>
 <h3 class="fn"><a name="appScreen"></a>int QX11Info::appScreen ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the number of the screen where the application is being displayed.</p>
@@ -113,7 +113,7 @@
 <p>See also <a href="qx11info.html#setAppUserTime">setAppUserTime</a>() and <a href="qx11info.html#appTime">appTime</a>().</p>
 <h3 class="fn"><a name="appVisual"></a>void * QX11Info::appVisual ( int <i>screen</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the current visual used by the application on the given <i>screen</i>.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#visual">visual</a>() and <a href="qx11info.html#defaultVisual">defaultVisual</a>().</p>
 <h3 class="fn"><a name="cells"></a>int QX11Info::cells () const</h3>
 <p>Returns the number of cells.</p>
@@ -135,15 +135,15 @@
 <p>See also <a href="qx11info.html#appScreen">appScreen</a>().</p>
 <h3 class="fn"><a name="screen"></a>int QX11Info::screen () const</h3>
 <p>Returns the number of the screen currently in use.</p>
-<p>The return value is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The return value is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#appScreen">appScreen</a>().</p>
 <h3 class="fn"><a name="setAppDpiX"></a>void QX11Info::setAppDpiX ( int <i>screen</i>, int <i>xdpi</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the horizontal resolution of the given <i>screen</i> to the number of dots per inch specified by <i>xdpi</i>.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#appDpiX">appDpiX</a>() and <a href="qx11info.html#setAppDpiY">setAppDpiY</a>().</p>
 <h3 class="fn"><a name="setAppDpiY"></a>void QX11Info::setAppDpiY ( int <i>screen</i>, int <i>ydpi</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the vertical resolution of the given <i>screen</i> to the number of dots per inch specified by <i>ydpi</i>.</p>
-<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use QDesktopWidget to query for information about Xinerama screens.</p>
+<p>The <i>screen</i> argument is an X screen number. Be aware that if the user's system uses Xinerama (as opposed to traditional X11 multiscreen), there is only one X screen. Use <a href="qdesktopwidget.html">QDesktopWidget</a> to query for information about Xinerama screens.</p>
 <p>See also <a href="qx11info.html#appDpiY">appDpiY</a>() and <a href="qx11info.html#setAppDpiX">setAppDpiX</a>().</p>
 <h3 class="fn"><a name="setAppTime"></a>void QX11Info::setAppTime ( unsigned long <i>time</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the X11 time to the value specified by <i>time</i>.</p>
@@ -160,6 +160,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

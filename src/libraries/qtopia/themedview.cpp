@@ -25,6 +25,7 @@
 #include <qpluginmanager.h>
 #include <qexpressionevaluator.h>
 #include <qtopiaipcenvelope.h>
+#include <qtopialog.h>
 
 #include <qxml.h>
 #include <QFile>
@@ -1888,8 +1889,14 @@ int ThemeLayoutItem::rtti() const
     return ThemedView::Layout;
 }
 
+/*!
+  \reimp
+*/
 void ThemeLayoutItem::paint(QPainter *p, const QRect &r)
 {
+    Q_UNUSED(p);
+    Q_UNUSED(r);
+    qLog(UI) << "ThemeLayoutItem::paint has been called, a ThemeLayoutItem subclass is missing an implementation of paint?";
 }
 
 /*!
@@ -2597,6 +2604,7 @@ int ThemeTextItem::rtti() const
 */
 void ThemeTextItem::paint(QPainter *p, const QRect &rect)
 {
+    Q_UNUSED(rect);
     QFont defaultFnt = font( QLatin1String("font"), state() );
     if (!d->displayText.isEmpty()) {
         QFont fnt(defaultFnt);
@@ -2693,6 +2701,7 @@ void ThemeTextItem::paint(QPainter *p, const QRect &rect)
                 p->setClipRect(cr);
                 layout->draw(p, context);
                 p->setClipping(false); // clear our call to setClipRect()
+                p->translate(-x, -y);
             }
         } else {
             p->setPen(getColor(col, role));
@@ -2738,19 +2747,30 @@ void ThemeTextItem::drawOutline(QPainter *p, const QRect &r, int flags, const QS
 {
     QColor outlineColor = color( QLatin1String("outline"), state() );
     int outlineRole = attribute( QLatin1String("outlineRole"), state() );
-    QPen oldPen = p->pen();
-    p->setPen(getColor(outlineColor, outlineRole));
-    QRect sr(r);
-    sr.translate(-1,0);
-    p->drawText(sr, flags, text);
-    sr.translate(2,0);
-    p->drawText(sr, flags, text);
-    sr.translate(-1,-1);
-    p->drawText(sr, flags, text);
-    sr.translate(0,2);
-    p->drawText(sr, flags, text);
 
-    p->setPen(oldPen);
+    // Cheaper to paint into pixmap and blit that four times than
+    // to draw text four times.
+    QFontMetrics fm(p->font());
+    QRect br = fm.boundingRect(r, flags, text);
+    QImage img(br.size(), QImage::Format_ARGB32_Premultiplied);
+    img.fill(qRgba(0,0,0,0));
+    QPainter ppm(&img);
+    ppm.setFont(p->font());
+    ppm.setPen(getColor(outlineColor, outlineRole));
+    ppm.translate(r.topLeft()-br.topLeft());
+    ppm.drawText(r, flags, text);
+
+
+    QPoint pos(br.topLeft());
+    pos += QPoint(-1,0);
+    p->drawImage(pos, img);
+    pos += QPoint(2,0);
+    p->drawImage(pos, img);
+    pos += QPoint(-1,-1);
+    p->drawImage(pos, img);
+    pos += QPoint(0,2);
+    p->drawImage(pos, img);
+
     p->drawText(r, flags, text);
 }
 
@@ -2863,6 +2883,7 @@ int ThemeRectItem::rtti() const
 */
 void ThemeRectItem::paint(QPainter *p, const QRect &rect)
 {
+    Q_UNUSED(rect);
     QBrush oldBrush = p->brush(); // change back what we change. faster than using Painter save/restore()
     QPen oldPen = p->pen();
     int fgRole = attribute( QLatin1String("fgRole"), state() );
@@ -3070,14 +3091,14 @@ static inline QRgb blendYuv(QRgb rgb, int /*sr*/, int /*sg*/, int /*sb*/, int sy
 }
 
 /*!
-  Blend the color \a col and the alpha value \a alpha with the image \a src if \a blendColor is true (the default).
+  Blend the color \a col and the alpha value \a alpha with the image \a img if \a blendColor is true (the default).
   If \a blendColor is false, only the alpha value \a alpha is blended.
+  This function modifies \a img directly.
 */
-QImage ThemePixmapItem::colorizeImage( const QImage& src, const QColor& col, int alpha, bool blendColor )
+void ThemePixmapItem::colorizeImage( QImage& img, const QColor& col, int alpha, bool blendColor )
 {
     QColor colour = col;
-    QImage img = src;
-    Q_ASSERT( !src.isNull() );
+    Q_ASSERT( !img.isNull() );
     Q_ASSERT( col.isValid() );
     int count;
     int sr, sg, sb;
@@ -3091,7 +3112,8 @@ QImage ThemePixmapItem::colorizeImage( const QImage& src, const QColor& col, int
         img = img.convertToFormat(QImage::Format_ARGB32);
     }
     if (img.depth() == 32) {
-        QRgb *rgb = (QRgb*)img.bits();
+        const QImage &cimg = img; // avoid QImage::detach().
+        QRgb *rgb = (QRgb*)cimg.bits();
         count = img.bytesPerLine()/sizeof(QRgb)*img.height();
         for (int i = 0; i < count; i++, rgb++)
             *rgb = blendYuv(*rgb, sr, sg, sb, sy, su, sv, alpha,
@@ -3103,7 +3125,6 @@ QImage ThemePixmapItem::colorizeImage( const QImage& src, const QColor& col, int
                     blendColor);
         img.setColorTable(ctable);
     }
-    return img;
 }
 
 /*!
@@ -3147,7 +3168,7 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
             doc.load(QLatin1String(":image/")+view()->defaultPics()+imgName);
         doc.render(&painter);
         if( colour.isValid() ) // only call colorizeImage if the colour isValid
-            buffer = colorizeImage( buffer, colour, alpha, colorRole != QPalette::NColorRoles );
+            colorizeImage( buffer, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = QPixmap::fromImage(buffer);
         QPixmapCache::insert(key, pm);
         return pm;
@@ -3167,7 +3188,7 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         if ( img.isNull() )
             return pm;
         if( colour.isValid() ) // only call colorizeImage if the colour isValid
-            img = colorizeImage( img, colour, alpha, colorRole != QPalette::NColorRoles );
+            colorizeImage( img, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = pm.fromImage( img );
     } else {
         if (!imgName.startsWith(dflt_path))
@@ -3507,7 +3528,7 @@ const QString &width, const QString &loop, const QString &looprev, const QString
 */
 void ThemeAnimationItem::setFrame(int f)
 {
-    if (f >= 0 && f < attribute(QLatin1String("count"), state())) {
+    if (f >= 0 && f < attribute(QLatin1String("count"), state()) && d->currFrame != f) {
         d->currFrame = f;
         if (isVisible())
             update();
@@ -5559,62 +5580,20 @@ void ThemedView::paintItem(QPainter *p, ThemeItem *item, const QRect &clip)
     if(!clip.isEmpty() && 
        (!item->transient() || item->active()) && 
        item->isVisible()) {
+        QRect geom = item->geometry();
+        QRect myClip = clip.intersected(geom).translated(-geom.topLeft());
+        if (!myClip.isEmpty()) {
+            p->translate(geom.topLeft());
+            p->setClipRect(myClip);
+            item->paint(p, myClip);
 
-        p->save();
-        p->setClipRect(clip);
-        item->paint(p, clip);
+            QList<ThemeItem*> children = item->children();
+            foreach( ThemeItem *child, children ) { 
+                paintItem(p, child, myClip);
+            }
 
-        QList<ThemeItem*> children = item->children();
-        foreach( ThemeItem *child, children ) { 
-            // do any children, including children of widget-based items
-            p->save();
-
-            QRect cGeometry = child->geometry();
-            
-            // Calculate clip rect for child relative to parent
-            QRect cClip = clip.intersected(cGeometry);
-           
-            // Adjust the child clip rect and (0,0) coords appropriately to
-            // be relative to the child
-            int translateX = cGeometry.x();
-            int translateY = cGeometry.y();
-            cClip.moveTo(cClip.x() - translateX, cClip.y() - translateY);
-
-            p->translate(translateX, translateY);
-            paintItem(p, child, cClip);
-
-            p->restore();
+            p->translate(-geom.topLeft());
         }
-        
-        p->restore();
-/*
-
-
-
-
-        int tx = item->geometry().x();
-        int ty = item->geometry().y();
-        // QRect clipRect = clip.intersected(item->geometry());
-
-        p->save();
-
-        p->translate(tx, ty);
-
-        QRect crect(clip);
-        crect.translate(-item->geometry().x(), -item->geometry().y());
-        QRect clipRect = crect & QRect(0, 0, item->geometry().width(), item->geometry().height());
-        p->setClipRect(clipRect);
-
-
-        item->paint(p, crect & QRect(0, 0, item->geometry().width(), item->geometry().height()));
-
-        QList<ThemeItem*> c = item->children();
-        foreach ( ThemeItem *itm, c ) { 
-            // do any children, including children of widget-based items
-            paintItem(p, itm, crect);
-        }
-
-        p->restore(); */
     }
 }
 

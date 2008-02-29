@@ -44,12 +44,14 @@ signals:
 
 protected:
     void keyPressEvent( QKeyEvent * );
-    QString createPreviewText( const QAppointment &ev );
+    QString createPreviewText( const QOccurrence &ev );
+    static QString formatDateTimes(const QOccurrence& ev, const QDate& today);
+    static QString formatDate(const QDate& date, const QDate& today);
 
 private:
     QWidget   *previousDetails;
-    QString   previousText;
     QOccurrence mOccurrence;
+    bool mIconsLoaded;
 };
 
 #endif

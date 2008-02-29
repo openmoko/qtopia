@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qmenubar.cpp -->
 <head>
   <title>Qt 4.2: QMenuBar Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -42,14 +43,13 @@
 <li><div class="fn"/>QAction * <b><a href="qmenubar.html#insertMenu">insertMenu</a></b> ( QAction * <i>before</i>, QMenu * <i>menu</i> )</li>
 <li><div class="fn"/>QAction * <b><a href="qmenubar.html#insertSeparator">insertSeparator</a></b> ( QAction * <i>before</i> )</li>
 <li><div class="fn"/>bool <b><a href="qmenubar.html#defaultUp-prop">isDefaultUp</a></b> () const</li>
-<li><div class="fn"/>MenuRef <b><a href="qmenubar.html#macMenu">macMenu</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qmenubar.html#setActiveAction">setActiveAction</a></b> ( QAction * <i>act</i> )</li>
 <li><div class="fn"/>void <b><a href="qmenubar.html#defaultUp-prop">setDefaultUp</a></b> ( bool )</li>
 </ul>
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -81,8 +81,9 @@
 <p>The ampersand in the menu item's text sets Alt+F as a shortcut for this menu. (You can use &quot;&amp;&amp;&quot; to get a real ampersand in the menu bar.)</p>
 <p>There is no need to lay out a menu bar. It automatically sets its own geometry to the top of the parent widget and changes it appropriately whenever the parent is resized.</p>
 <p>In most main window style applications you would use the menuBar() provided in <a href="qmainwindow.html">QMainWindow</a>, adding <a href="qmenu.html">QMenu</a>s to the menu bar and adding <a href="qaction.html">QAction</a>s to the popup menus.</p>
-<p>Example (from the Menus example):</p>
-<pre></pre>
+<p>Example (from the <a href="mainwindows-menus.html">Menus</a> example):</p>
+<pre>     fileMenu = menuBar()-&gt;addMenu(tr(&quot;&amp;File&quot;));
+     fileMenu-&gt;addAction(newAct);</pre>
 <p>Menu items may be removed with <a href="qwidget.html#removeAction">removeAction</a>().</p>
 <a name="platform-dependent-look-and-feel"></a>
 <h3>Platform Dependent Look and Feel</h3>
@@ -102,11 +103,13 @@
 <tr valign="top" class="odd"><td>quit or exit</td><td>Application Menu | Quit &lt;application name&gt;</td><td>If this entry is not found a default Quit item will be created to call <a href="qcoreapplication.html#quit">QApplication::quit</a>()</td></tr>
 </table></p>
 <p>You can override this behavior by using the <a href="qaction.html#menuRole-prop">QAction::menuRole</a>() property.</p>
+<p>If you wish to make all windows in a Mac application share the same menubar, you need to create a menu bar that does not have a parent. The menubar is created like this:</p>
+<pre>   QMenuBar *menuBar = new QMenuBar(0);</pre>
 <p><b>Note:</b> The text used for the application name in the menu bar is obtained from the value set in the <tt>Info.plist</tt> file in the application's bundle. See <a href="deployment-mac.html">Deploying an Application on Qt/Mac</a> for more information.</p>
 <a name="examples"></a>
 <h3>Examples</h3>
-<p>The Menus example shows how to use QMenuBar and <a href="qmenu.html">QMenu</a>. The other main window application examples also provide menus using these classes.</p>
-<p>See also <a href="qmenu.html">QMenu</a>, <a href="qshortcut.html">QShortcut</a>, <a href="qaction.html">QAction</a>, <a href="http://developer.apple.com/documentation/UserExperience/Conceptual/OSXHIGuidelines/index.html">Introduction to Apple Human Interface Guidelines</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Menu Bar</a>, and Menus Example.</p>
+<p>The <a href="mainwindows-menus.html">Menus</a> example shows how to use QMenuBar and <a href="qmenu.html">QMenu</a>. The other <a href="examples.html#main-window-examples">main window application examples</a> also provide menus using these classes.</p>
+<p>See also <a href="qmenu.html">QMenu</a>, <a href="qshortcut.html">QShortcut</a>, <a href="qaction.html">QAction</a>, <a href="http://developer.apple.com/documentation/UserExperience/Conceptual/OSXHIGuidelines/index.html">Introduction to Apple Human Interface Guidelines</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Menu Bar</a>, and <a href="mainwindows-menus.html">Menus Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="defaultUp-prop"></a>defaultUp : bool</h3>
@@ -160,7 +163,6 @@
 <h3 class="fn"><a name="insertSeparator"></a><a href="qaction.html">QAction</a> * QMenuBar::insertSeparator ( <a href="qaction.html">QAction</a> * <i>before</i> )</h3>
 <p>This convenience function creates a new separator action, i.e. an action with <a href="qaction.html#isSeparator">QAction::isSeparator</a>() returning true. The function inserts the newly created action into this menubar's list of actions before action <i>before</i> and returns it.</p>
 <p>See also <a href="qwidget.html#insertAction">QWidget::insertAction</a>() and <a href="qmenubar.html#addSeparator">addSeparator</a>().</p>
-<h3 class="fn"><a name="macMenu"></a>MenuRef QMenuBar::macMenu ()</h3>
 <h3 class="fn"><a name="setActiveAction"></a>void QMenuBar::setActiveAction ( <a href="qaction.html">QAction</a> * <i>act</i> )</h3>
 <p>Sets the currently highlighted action to <i>act</i>.</p>
 <p>This function was introduced in Qt 4.1.</p>
@@ -318,6 +320,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

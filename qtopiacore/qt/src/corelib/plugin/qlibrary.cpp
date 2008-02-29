@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -126,22 +136,25 @@ Q_GLOBAL_STATIC(QMutex, qt_library_mutex)
 /*!
     \enum QLibrary::LoadHint
 
-    This enum gives hints as to how symbols are resolved by 
-    specifying load hints with the \c setLoadHints() function. 
-      
+    This enum describes the possible hints that can be used to change the way
+    libraries are handled when they are loaded. These values indicate how
+    symbols are resolved when libraries are loaded, and are specified using
+    the setLoadHints() function.
+
     \value ResolveAllSymbolsHint
-	This value indicates that all symbols should be resolved at
-	load time, not when \c resolve() is called.	
+    Causes all symbols in a library to be resolved when it is loaded, not
+    simply when resolve() is called.
     \value ExportExternalSymbolsHint
-	This makes external symbols in the library available for
-	subsequent loaded libraries.	
+    Exports unresolved and external symbols in the library so that they can be
+    resolved in other dynamically-loaded libraries loaded later.
     \value LoadArchiveMemberHint
-	If this hint is given, the filename of the library consists of
-	two parts:
-	A path which is a reference to an archive file followed by 
-	the second component which is the reference to the archive 
-	member.	
-    \sa setLoadHints()
+    Allows the file name of the library to specify a particular object file
+    within an archive file.
+    If this hint is given, the filename of the library consists of
+    a path, which is a reference to an archive file, followed by
+    a reference to the archive member.
+
+    \sa loadHints
 */
 
 struct qt_token_info
@@ -915,22 +928,6 @@ QString QLibrary::errorString() const
 {
     return d->errorString.isEmpty() ? tr("Unknown error") : d->errorString;
 }
-
-/*!
-    \enum QLibrary::LoadHint
-
-    This enum describes the possible hints that can be used to change the way
-    libraries are handled when they are loaded.
-
-    \value ResolveAllSymbolsHint   Try to resolve all symbols in a library as
-           soon as it is loaded.
-    \value ExportExternalSymbolsHint   Export unresolved symbols in the library
-           so that they can be resolved in other dynamically-loaded libraries.
-    \value LoadArchiveMemberHint   Allow the file name of the library to specify
-           a particular object file within an archive file.
-
-    \sa loadHints
-*/
 
 /*!
     \property QLibrary::loadHints

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/widgets/qabstractspinbox.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qabstractspinbox.cpp -->
 <head>
   <title>Qt 4.2: QAbstractSpinBox Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -80,7 +80,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -134,7 +134,7 @@
 </ol>
 <p>QAbstractSpinBox provides a virtual <a href="qabstractspinbox.html#stepBy">stepBy</a>() function that is called whenever the user triggers a step. This function takes an integer value to signify how many steps were taken. E.g. Pressing <a href="qt.html#Key-enum">Qt::Key_Down</a> will trigger a call to stepBy(-1).</p>
 <p>QAbstractSpinBox also provide a virtual function <a href="qabstractspinbox.html#stepEnabled">stepEnabled</a>() to determine whether stepping up/down is allowed at any point. This function returns a bitset of <a href="qabstractspinbox.html#StepEnabledFlag-enum">StepEnabled</a>.</p>
-<p>See also <a href="qabstractslider.html">QAbstractSlider</a>, <a href="qspinbox.html">QSpinBox</a>, <a href="qdoublespinbox.html">QDoubleSpinBox</a>, <a href="qdatetimeedit.html">QDateTimeEdit</a>, and Spin Boxes Example.</p>
+<p>See also <a href="qabstractslider.html">QAbstractSlider</a>, <a href="qspinbox.html">QSpinBox</a>, <a href="qdoublespinbox.html">QDoubleSpinBox</a>, <a href="qdatetimeedit.html">QDateTimeEdit</a>, and <a href="widgets-spinboxes.html">Spin Boxes Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="ButtonSymbols-enum"></a>enum QAbstractSpinBox::ButtonSymbols</h3>
@@ -233,7 +233,12 @@
 <p>This property holds the special-value text.</p>
 <p>If set, the spin box will display this text instead of a numeric value whenever the current value is equal to minimum(). Typical use is to indicate that this choice has a special (default) meaning.</p>
 <p>For example, if your spin box allows the user to choose a scale factor (or zoom level) for displaying an image, and your application is able to automatically choose one that will enable the image to fit completely within the display window, you can set up the spin box like this:</p>
-<pre></pre>
+<pre>     QSpinBox *zoomSpinBox = new QSpinBox;
+     zoomSpinBox-&gt;setRange(0, 1000);
+     zoomSpinBox-&gt;setSingleStep(10);
+     zoomSpinBox-&gt;setSuffix(&quot;%&quot;);
+     zoomSpinBox-&gt;setSpecialValueText(tr(&quot;Automatic&quot;));
+     zoomSpinBox-&gt;setValue(100);</pre>
 <p>The user will then be able to choose a scale from 1% to 1000% or select &quot;Auto&quot; to leave it up to the application to choose. Your code must then interpret the spin box value of 0 as a request from the user to scale the image to fit inside the window.</p>
 <p>All values are displayed with the prefix and suffix (if set), <i>except</i> for the special value, which only shows the special value text. This special text is passed in the <a href="qspinbox.html#valueChanged">QSpinBox::valueChanged</a>() signal that passes a <a href="qstring.html">QString</a>.</p>
 <p>To turn off the special-value text display, call this function with an empty string. The default is no special-value text, i.e. the numeric value is shown as usual.</p>
@@ -310,6 +315,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

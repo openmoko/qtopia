@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/styles/qstyleoption.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/styles/qstyleoption.cpp -->
 <head>
   <title>Qt 4.2: QStyleOptionGroupBox Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -37,6 +37,7 @@
 <a name="public-variables"></a>
 <h3>Public Variables</h3>
 <ul>
+<li><div class="fn"/>QStyleOptionFrameV2::FrameFeatures <b><a href="qstyleoptiongroupbox.html#features-var">features</a></b></li>
 <li><div class="fn"/>int <b><a href="qstyleoptiongroupbox.html#lineWidth-var">lineWidth</a></b></li>
 <li><div class="fn"/>int <b><a href="qstyleoptiongroupbox.html#midLineWidth-var">midLineWidth</a></b></li>
 <li><div class="fn"/>QString <b><a href="qstyleoptiongroupbox.html#text-var">text</a></b></li>
@@ -54,7 +55,7 @@
 <p><a href="qstyleoptionbutton.html">QStyleOptionButton</a> contains all the information that <a href="qstyle.html">QStyle</a> functions need the various graphical elements of a group box.</p>
 <p>It holds the <a href="qstyleoptiongroupbox.html#lineWidth-var">lineWidth</a> and the <a href="qstyleoptiongroupbox.html#midLineWidth-var">midLineWidth</a> for drawing the panel, the group box's <a href="qstyleoptiongroupbox.html#text-var">title</a> and the title's <a href="qstyleoptiongroupbox.html#textAlignment-var">alignment</a> and <a href="qstyleoptiongroupbox.html#textColor-var">color</a>.</p>
 <p>For performance reasons, the access to the member variables is direct (i.e., using the <tt>.</tt> or <tt>-&gt;</tt> operator). This low-level feel makes the structures straightforward to use and emphasizes that these are simply parameters used by the style functions.</p>
-<p>For an example demonstrating how style options can be used, see the Styles example.</p>
+<p>For an example demonstrating how style options can be used, see the <a href="widgets-styles.html">Styles</a> example.</p>
 <p>See also <a href="qstyleoption.html">QStyleOption</a>, <a href="qstyleoptioncomplex.html">QStyleOptionComplex</a>, and <a href="qgroupbox.html">QGroupBox</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -82,13 +83,17 @@
 <p>Constructs a copy of the <i>other</i> style option.</p>
 <hr />
 <h2>Member Variable Documentation</h2>
+<h3 class="fn"><a name="features-var"></a><a href="qstyleoptionframev2.html#FrameFeature-enum">QStyleOptionFrameV2::FrameFeatures</a> QStyleOptionGroupBox::features</h3>
+<p>This variable holds the features of the group box frame.</p>
+<p>The frame is flat by default.</p>
+<p>See also <a href="qstyleoptionframev2.html#FrameFeature-enum">QStyleOptionFrameV2::FrameFeature</a>.</p>
 <h3 class="fn"><a name="lineWidth-var"></a>int QStyleOptionGroupBox::lineWidth</h3>
 <p>This variable holds the line width for drawing the panel.</p>
-<p>The default value is 0.</p>
+<p>The value of this variable is, currently, always 1.</p>
 <p>See also <a href="qframe.html#lineWidth-prop">QFrame::lineWidth</a>.</p>
 <h3 class="fn"><a name="midLineWidth-var"></a>int QStyleOptionGroupBox::midLineWidth</h3>
 <p>This variable holds the mid-line width for drawing the panel.</p>
-<p>The mid-line width is usually used when drawing sunken or raised group box frames. The default value is 0.</p>
+<p>The mid-line width is usually used when drawing sunken or raised group box frames. The value of this variable is, currently, always 0.</p>
 <p>See also <a href="qframe.html#midLineWidth-prop">QFrame::midLineWidth</a>.</p>
 <h3 class="fn"><a name="text-var"></a><a href="qstring.html">QString</a> QStyleOptionGroupBox::text</h3>
 <p>This variable holds the text of the group box.</p>
@@ -105,6 +110,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: Screen Themes</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Tutorial: Screen Themes</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -23,7 +22,7 @@
 <p>The Qtopia theme displays the status indicators in the title bar when the home screen is visible, so it is not necessary to define them in the home screen.</p>
 <a name="example-without-pin-entry-pad"></a>
 <h3>Example without PIN Entry Pad</h3>
-<pre>    &lt;page name=&quot;home&quot; base=&quot;themes/qtopia&quot;&gt;
+<pre>&nbsp;   &lt;page name=&quot;home&quot; base=&quot;themes/qtopia&quot;&gt;
         &lt;group name=&quot;background&quot;&gt;
             &lt;image name=&quot;background&quot; rect=&quot;0,-235,0,0&quot; src=&quot;background&quot; color=&quot;Highlight&quot; tile=&quot;yes&quot;/&gt;
             &lt;plug-in name=&quot;bgplug-in&quot;/&gt;
@@ -53,7 +52,7 @@
 <p>The calls and messages notifications are declared transient so that they will not appear unless there is actually missed calls or new messages. This leaves as little clutter as possible on the home screen, which in turn leaves more of the user's chosen background image visible.</p>
 <a name="example-with-pin-entry-pad"></a>
 <h3>Example with PIN Entry Pad</h3>
-<pre>        &lt;layout name=&quot;pinbox&quot; rect=&quot;0,21,0,0&quot; orientation=&quot;vertical&quot; transient=&quot;yes&quot; active=&quot;no&quot;&gt;
+<pre>&nbsp;       &lt;layout name=&quot;pinbox&quot; rect=&quot;0,21,0,0&quot; orientation=&quot;vertical&quot; transient=&quot;yes&quot; active=&quot;no&quot;&gt;
             &lt;rect name=&quot;pinbox&quot; rect=&quot;0,0,0,40&quot; color=&quot;#72715a&quot; brush=&quot;Base&quot;&gt;
                 &lt;image name=&quot;pinbox&quot; rect=&quot;0,0,40x40&quot;/&gt;
                 &lt;text name=&quot;pinbox&quot; rect=&quot;40,0,-3,50&quot; size=&quot;12&quot; color=&quot;Text&quot; align=&quot;hcenter,vcenter&quot;/&gt;
@@ -120,7 +119,7 @@
 <a name="tutcallscreen"></a><a name="call-screen"></a>
 <h2>Call Screen</h2>
 <p>The following code defines the Call screen for the Qtopia theme:</p>
-<pre>    &lt;page name=&quot;callscreen&quot; base=&quot;themes/default&quot;&gt;
+<pre>&nbsp;   &lt;page name=&quot;callscreen&quot; base=&quot;themes/default&quot;&gt;
         &lt;rect color=&quot;None&quot; brush=&quot;Background&quot;/&gt;
         &lt;image name=&quot;background&quot; src=&quot;callscreen_bg&quot; tile=&quot;yes&quot; color=&quot;Background&quot;/&gt;
         &lt;input name=&quot;callscreen&quot; rect=&quot;0,0,0x32768&quot; separator=&quot;1&quot;&gt;
@@ -170,6 +169,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

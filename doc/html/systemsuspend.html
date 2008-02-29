@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>SystemSuspend Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>SystemSuspend Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SystemSuspend Class Reference</h1>
 <p>The SystemSuspend class manages entering and leaving system suspend. <a href="#details">More...</a></p>
-<pre>    #include &lt;SystemSuspend&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;SystemSuspend&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="systemsuspend-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -58,11 +57,12 @@
 <p>The SystemSuspend class manages entering and leaving system suspend.</p>
 <p>The system suspend state is expected to be a very low, but non-destructive, power saving state.</p>
 <p>Some hardware devices may need to be shutdown before or reinitialized after entry into the suspend state. Integrators can provide objects that implement the <a href="systemsuspendhandler.html">SystemSuspendHandler</a> interface that will be called before the system enters suspend and after the system leaves it.</p>
-<p>While the SystemSuspend class is an abstract interfaces - that conceivably allows replacement of the suspend sub-system - a default implementation is provided under the task name <tt>SystemSuspend</tt> which should generally be adequate.</p>
+<p>While the SystemSuspend class is an abstract interface - that conceivably allows replacement of the suspend sub-system - a default implementation is provided under the task name <tt>SystemSuspend</tt> which should generally be adequate.</p>
 <p>See also <a href="systemsuspendhandler.html">SystemSuspendHandler</a> and <a href="suspendservice.html">SuspendService</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="SystemSuspend"></a>SystemSuspend::SystemSuspend ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Construct a new <a href="systemsuspend.html">SystemSuspend</a> instance with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="suspendSystem"></a>bool SystemSuspend::suspendSystem ()&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Request that the system be suspended. The system will block in this method until execution is resumed. The method returns true if the suspension was successful, and false otherwise.</p>
 <p>When called, all tasks in the system that implement the <a href="systemsuspendhandler.html">SystemSuspendHandler</a> are instantiated. If any of these tasks returns false from the <a href="systemsuspendhandler.html#canSuspend">SystemSuspendHandler::canSuspend</a>() method, the suspend is canceled and the <a href="systemsuspend.html#systemSuspendCanceled">systemSuspendCanceled</a>() signal is emitted. Otherwise, the <a href="systemsuspendhandler.html#suspend">SystemSuspendHandler::suspend</a>() methods are called on the tasks in reverse order. That is, the task with the highest interface priority is called last. It is assumed that this last task will actually perform the hardware suspend - possibly using the standard &quot;apm --suspend&quot; system call.</p>
@@ -80,6 +80,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

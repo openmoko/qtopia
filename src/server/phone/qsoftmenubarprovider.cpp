@@ -330,12 +330,15 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
 
             int idx = d->keyToIdx(btn);
             if(-1 != idx) {
-                d->buttons[idx].d->text = label;
-                d->buttons[idx].d->pix = QPixmap();
-                d->buttons[idx].d->pixName = QString();
-                d->buttons[idx].d->pixStale = false;
-                if(!d->blockUpdates)
-                    emit keyChanged(key(idx));
+                QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
+                if (btn->text != label || !btn->pixName.isEmpty()) {
+                    btn->text = label;
+                    btn->pix = QPixmap();
+                    btn->pixName = QString();
+                    btn->pixStale = false;
+                    if(!d->blockUpdates)
+                        emit keyChanged(key(idx));
+                }
             }
         }
     } else if (msg == "setLabelPixmap(int,int,QString)") {
@@ -349,12 +352,15 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
 
             int idx = d->keyToIdx(btn);
             if(-1 != idx) {
-                d->buttons[idx].d->text = QString();
-                d->buttons[idx].d->pix = QPixmap();
-                d->buttons[idx].d->pixName = label;
-                d->buttons[idx].d->pixStale = true;
-                if(!d->blockUpdates)
-                    emit keyChanged(key(idx));
+                QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
+                if (!btn->text.isEmpty() || btn->pixName != label) {
+                    btn->text = QString();
+                    btn->pix = QPixmap();
+                    btn->pixName = label;
+                    btn->pixStale = true;
+                    if(!d->blockUpdates)
+                        emit keyChanged(key(idx));
+                }
             }
         }
     } else if (msg == "clearLabel(int,int)") {
@@ -366,13 +372,15 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
 
             int idx = d->keyToIdx(btn);
             if(-1 != idx) {
-                d->buttons[idx].d->text = QString();
-                d->buttons[idx].d->pix = QPixmap();
-                d->buttons[idx].d->pixName = QString();
-                d->buttons[idx].d->pixStale = false;
-
-                if(!d->blockUpdates)
-                    emit keyChanged(key(idx));
+                QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
+                if (!btn->text.isEmpty() || !btn->pixName.isEmpty()) {
+                    btn->text = QString();
+                    btn->pix = QPixmap();
+                    btn->pixName = QString();
+                    btn->pixStale = false;
+                    if(!d->blockUpdates)
+                        emit keyChanged(key(idx));
+                }
             }
         }
     } else if (msg == "blockUpdates(int)") {

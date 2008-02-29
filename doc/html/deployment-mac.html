@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/deployment.qdoc -->
 <head>
   <title>Qt 4.2: Deploying an Application on Qt/Mac</title>
   <link rel="contents" href="deployment.html" />
@@ -15,7 +16,7 @@
 [<a href="deployment.html">Deploying Qt Applications</a>]
 </p>
 <h1 align="center">Deploying an Application on Qt/Mac<br /><small></small></h1>
-<p>This documentation will describe how to create a bundle, and how to make sure that the application will find the resources it needs at run-time. We will demonstrate the procedures in terms of deploying the Plug &amp; Paint application that is provided in Qt's examples directory.</p>
+<p>This documentation will describe how to create a bundle, and how to make sure that the application will find the resources it needs at run-time. We will demonstrate the procedures in terms of deploying the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application that is provided in Qt's examples directory.</p>
 <ul><li><a href="#the-bundle">The Bundle</a></li>
 <li><a href="#xcode">Xcode</a></li>
 <li><a href="#static-linking">Static Linking</a></li>
@@ -66,7 +67,7 @@
 <p>Now, provided that everything compiled and linked without any errors, we should have a <tt>plugandpaint.app</tt> bundle that is ready for deployment. One easy way to check that the application really can be run stand-alone is to copy the bundle to a machine that doesn't have Qt or any Qt applications installed, and run the application on that machine.</p>
 <p>You can check what other libraries your application links to using the <tt>otool</tt>:</p>
 <pre> otool -L plugandpaint.app/Contents/MacOs/plugandpaint</pre>
-<p>Here is what the output looks like for the static Plug &amp; Paint:</p>
+<p>Here is what the output looks like for the static <a href="tools-plugandpaint.html">Plug &amp; Paint</a>:</p>
 <pre> plugandpaint.app/Contents/MacOS/plugandpaint:
  /System/Library/Frameworks/Carbon.framework/Versions/A/Carbon
          (compatibility version 2.0.0, current version 128.0.0)
@@ -89,10 +90,10 @@
 <pre> -lQtGui</pre>
 <p>with</p>
 <pre> /where/static/qt/lib/is/libQtGui.a</pre>
-<p>The Plug &amp; Paint example consists of several components: The core application (Plug &amp; Paint), and the Basic Tools and Extra Filters plugins. Since we cannot deploy plugins using the static linking approach, the bundle we have prepared so far is incomplete. The application will run, but the functionality will be disabled due to the missing plugins. To deploy plugin-based applications we should use the framework approach.</p>
+<p>The <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example consists of several components: The core application (<a href="tools-plugandpaint.html">Plug &amp; Paint</a>), and the <a href="tools-plugandpaintplugins-basictools.html">Basic Tools</a> and <a href="tools-plugandpaintplugins-extrafilters.html">Extra Filters</a> plugins. Since we cannot deploy plugins using the static linking approach, the bundle we have prepared so far is incomplete. The application will run, but the functionality will be disabled due to the missing plugins. To deploy plugin-based applications we should use the framework approach.</p>
 <a name="frameworks"></a>
 <h2>Frameworks</h2>
-<p>We have two challenges when deploying the Plug &amp; Paint application using frameworks: The Qt runtime has to be correctly redistributed along with the application bundle, and the plugins have to be installed in the correct location so that the application can find them.</p>
+<p>We have two challenges when deploying the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application using frameworks: The Qt runtime has to be correctly redistributed along with the application bundle, and the plugins have to be installed in the correct location so that the application can find them.</p>
 <p>When distributing Qt with your application using frameworks, you have two options: You can either distribute Qt as a private framework within your application bundle, or you can distribute Qt as a standard framework (alternatively use the Qt frameworks in the installed binary). These two approaches are essentially the same. The latter option is good if you have many Qt applications and you would prefer to save memory. The former is good if you have Qt built in a special way, or want to make sure the framework is there. It just comes down to where you place the Qt frameworks.</p>
 <a name="building-qt-as-frameworks"></a>
 <h3>Building Qt as Frameworks</h3>
@@ -100,7 +101,7 @@
 <p>When installing, the identification name of the frameworks will also be set. The identification name is what the dynamic linker (<tt>dyld</tt>) uses to find the libraries for your application.</p>
 <a name="linking-the-application-to-qt-as-frameworks"></a>
 <h3>Linking the Application to Qt as Frameworks</h3>
-<p>After ensuring that Qt is built as frameworks, we can build the Plug &amp; Paint application. First, we must go into the directory that contains the application:</p>
+<p>After ensuring that Qt is built as frameworks, we can build the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application. First, we must go into the directory that contains the application:</p>
 <pre> cd /path/to/Qt/examples/tools/plugandpaint</pre>
 <p>Now run qmake to create a new makefile for the application, and do a clean build to create the dynamically linked executable:</p>
 <pre> make clean
@@ -162,7 +163,7 @@
          @executable_path/../Frameworks/QtCore.framework/Versions/4.0/QtCore
          plugandpaint.app/Contents/Frameworks/QtGui.framework/Versions/4.0/QtGui</pre>
 <p>After all this we can run <tt>otool</tt> again and see that the application will look in the right locations.</p>
-<p>Of course, the thing that makes the Plug &amp; Paint example interesting are its plugins. The basic steps we need to follow with plugins are:</p>
+<p>Of course, the thing that makes the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example interesting are its plugins. The basic steps we need to follow with plugins are:</p>
 <ul>
 <li>Put the plugins inside the bundle</li>
 <li>Make sure that the plugins use the correct library using the <tt>install_name_tool</tt></li>
@@ -170,7 +171,7 @@
 </ul>
 <p>While we can put the plugins anywhere we want in the bundle, the best location to put them is under Contents/Plugins. When we built the Plug &amp; Paint plugins, the <tt>DESTDIR</tt> variable in their <tt>.pro</tt> file put the plugins' <tt>.dylib</tt> files in a <tt>plugins</tt> subdirectory in the <tt>plugandpaint</tt> directory. So, in this example, all we need to do is move this directory:</p>
 <pre> mv plugins plugandpaint.app/Contents</pre>
-<p>If we run <tt>otool</tt> on for example the Basic Tools plugin's <tt>.dylib</tt> file we get the following information.</p>
+<p>If we run <tt>otool</tt> on for example the <a href="tools-plugandpaintplugins-basictools.html">Basic Tools</a> plugin's <tt>.dylib</tt> file we get the following information.</p>
 <pre> libpnp_basictools.dylib:
  libpnp_basictools.dylib
         (compatibility version 0.0.0, current version 0.0.0)
@@ -277,6 +278,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

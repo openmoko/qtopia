@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qtopia Phone Library</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Qtopia Phone Library</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -17,54 +16,54 @@
 <li><a href="#automatic-starting-of-telephony-services">Automatic Starting of Telephony Services</a></li>
 <li><a href="#modem-services">Modem Services</a></li>
 </ul>
-<p>This document describes the design of the Qtopia Phone Library. The complete list of library classes can be found on the Phone Classes page.</p>
+<p>This document describes the design of the Qtopia Phone Library. The complete list of library classes can be found on the <a href="telephony.html">Telephony Classes</a> page.</p>
 <a name="services-and-interfaces"></a>
 <h2>Services and Interfaces</h2>
 <p>Handlers in the telephony system are referred to as <i>services</i>. Each service has a unique name, such as <tt>modem</tt>, <tt>voip</tt>, etc. By convention, service names are lower case. Within each service is a list of interfaces for functionality areas such as network registration, phone calls, SMS, SIM Application Toolkit, etc.</p>
 <p>Interface names correspond to class names in the Qtopia Telephony API. For example, the QNetworkRegistration interface provides access to network registration features, and the QSMSSender interface provides methods to send SMS messages. The following table summarises the interfaces in the Qtopia Phone Library:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Interface</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>QAdviceOfCharge</td><td>Advice of charge information during a call.</td></tr>
-<tr valign="top" class="even"><td>QBandSelection</td><td>Selection of GSM bands - 850 MHz, 900 MHz, 1800 MHz, 1900 MHz, dual, and tri-band.</td></tr>
-<tr valign="top" class="odd"><td>QCallBarring</td><td>Settings related to call barring.</td></tr>
-<tr valign="top" class="even"><td>QCallForwarding</td><td>Settings related to call forwarding.</td></tr>
-<tr valign="top" class="odd"><td>QCallSettings</td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
-<tr valign="top" class="even"><td>QCellBroadcast</td><td>Access to cell broadcast messages.</td></tr>
-<tr valign="top" class="odd"><td>QGprsNetworkRegistration</td><td>Notification of GPRS registration state.</td></tr>
-<tr valign="top" class="even"><td>QNetworkRegistration</td><td>Notification of general network registration state, plus operator selection.</td></tr>
-<tr valign="top" class="odd"><td>QPhoneBook</td><td>Access to phone books that are stored on a SIM.</td></tr>
-<tr valign="top" class="even"><td>QPhoneCallManager</td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
-<tr valign="top" class="odd"><td>QPhoneRfFunctionality</td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
-<tr valign="top" class="even"><td>QPinManager</td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
-<tr valign="top" class="odd"><td>QPreferredNetworkOperators</td><td>Access to the preferred network operator list in a SIM.</td></tr>
-<tr valign="top" class="even"><td>QPresence</td><td>VoIP presence information.</td></tr>
-<tr valign="top" class="odd"><td>QServiceChecker</td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
-<tr valign="top" class="even"><td>QServiceNumbers</td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
-<tr valign="top" class="odd"><td>QSimFiles</td><td>Raw access to files on the SIM.</td></tr>
-<tr valign="top" class="even"><td>QSimInfo</td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
-<tr valign="top" class="odd"><td>QSimToolkit</td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
-<tr valign="top" class="even"><td>QSMSReader</td><td>Access to the incoming SMS message queue.</td></tr>
-<tr valign="top" class="odd"><td>QSMSSender</td><td>Access to the outgoing SMS message queue.</td></tr>
-<tr valign="top" class="even"><td>QSupplementaryServices</td><td>SS and USSD support for GSM networks.</td></tr>
-<tr valign="top" class="odd"><td>QTelephonyConfiguration</td><td>Service configuration interface and miscellaneous settings.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Interface</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QAdviceOfCharge</td><td>Advice of charge information during a call.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QBandSelection</td><td>Selection of GSM bands - 850 MHz, 900 MHz, 1800 MHz, 1900 MHz, dual, and tri-band.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QCallBarring</td><td>Settings related to call barring.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QCallForwarding</td><td>Settings related to call forwarding.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QCallSettings</td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QCellBroadcast</td><td>Access to cell broadcast messages.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QGprsNetworkRegistration</td><td>Notification of GPRS registration state.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QNetworkRegistration</td><td>Notification of general network registration state, plus operator selection.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QPhoneBook</td><td>Access to phone books that are stored on a SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QPhoneCallManager</td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QPhoneRfFunctionality</td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QPinManager</td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QPreferredNetworkOperators</td><td>Access to the preferred network operator list in a SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QPresence</td><td>VoIP presence information.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QServiceChecker</td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QServiceNumbers</td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QSimFiles</td><td>Raw access to files on the SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QSimInfo</td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QSimToolkit</td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QSMSReader</td><td>Access to the incoming SMS message queue.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QSMSSender</td><td>Access to the outgoing SMS message queue.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QSupplementaryServices</td><td>SS and USSD support for GSM networks.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QTelephonyConfiguration</td><td>Service configuration interface and miscellaneous settings.</td></tr>
 </table></p>
 <p>Not all services have all of these interfaces. For example, VoIP services may only have QNetworkRegistration, QPresence, QPhoneCallManager, and QTelephonyConfiguration. GSM services will not typically have QPresence, and may not have QSimToolkit if the modem does not support it.</p>
 <p>Client applications can use the <a href="qcommservicemanager.html">QCommServiceManager</a> class to determine if an interface is supported by a service:</p>
-<pre>    QCommServiceManager mgr;
+<pre>&nbsp;   QCommServiceManager mgr;
     if ( mgr.supports&lt;QSimToolkit&gt;( &quot;modem&quot; ) ) {
        ...
     }</pre>
 <a name="using-telephony-interfaces"></a>
 <h2>Using Telephony Interfaces</h2>
 <p>Client applications access the features of an interface by creating an instance of the corresponding class. For example, the following can be used to send an SMS message using the default service that supports the QSMSSender interface:</p>
-<pre>    QSMSSender sender;
+<pre>&nbsp;   QSMSSender sender;
     QSMSMessage msg;
     msg.setRecipient( &quot;1234567&quot; );
     msg.setText( &quot;Hello!&quot; );
     sender.send( msg );</pre>
 <p>When creating an interface instance, the client application can specify an explicit service name, if more than one service implements the same interface, or leave the service name empty to use the default service for that interface. For example, if the VoIP implementation supported SMS over SIP, then the following could be used to send the same message via the <tt>voip</tt> service:</p>
-<pre>    QSMSSender sender( &quot;voip&quot; );
-    if ( sender.serviceAvailable() ) {
+<pre>&nbsp;   QSMSSender sender( &quot;voip&quot; );
+    if ( sender.available() ) {
         QSMSMessage msg;
         msg.setRecipient( &quot;1234567&quot; );
         msg.setText( &quot;Hello!&quot; );
@@ -73,12 +72,12 @@
         QMessageBox::warning( 0, tr(&quot;SMS&quot;), tr(&quot;SMS over SIP is not available&quot;) );
     }</pre>
 <p>This time, we have checked that the service is available before trying to send the message. The <a href="qcommservicemanager.html">QCommServiceManager</a> class can be used to locate all services that implement a particular interface, to allow the user to select which one they want to use:</p>
-<pre>    QCommServiceManager mgr;
+<pre>&nbsp;   QCommServiceManager mgr;
     QStringList services = mgr.supports&lt;QSMSSender&gt;();</pre>
 <a name="implementing-telephony-interfaces"></a>
 <h2>Implementing Telephony Interfaces</h2>
 <p>Telephony services implement interfaces by inheriting from the client-side class and overriding its public slots with a new implementation. To demonstrate how this works, we will implement the hypothetical &quot;SMS over SIP&quot; referred to in the previous section.</p>
-<pre>    class VoIPSMSSender : public QSMSSender
+<pre>&nbsp;   class VoIPSMSSender : public QSMSSender
     {
         Q_OBJECT
     public:
@@ -94,11 +93,11 @@
     {
         ...
     }</pre>
-<p>The VoIP service creates an instance of <tt>VoIPSMSSender</tt>, passing the <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Server</a> flag to the base class constructor. This tells the Qtopia Phone Library to advertise <tt>VoIPSMSSender</tt> as the implementation of the interface QSMSSender for the service <tt>voip</tt>. The Qtopia Phone Library uses Qtopia IPC and the <a href="valuespace.html">value space</a> to effect communication between the client application and the service. There is more information on how this process works in the documentation for <a href="qabstractipcinterface.html">QAbstractIpcInterface</a>, which is the base class for all telephony interfaces.</p>
+<p>The VoIP service creates an instance of <tt>VoIPSMSSender</tt>, passing the <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Server</a> flag to the base class constructor. This tells the Qtopia Phone Library to advertise <tt>VoIPSMSSender</tt> as the implementation of the interface QSMSSender for the service <tt>voip</tt>. The Qtopia Phone Library uses <a href="qtopiaipc.html">Qtopia IPC</a> and the <a href="valuespace.html">value space</a> to effect communication between the client application and the service. There is more information on how this process works in the documentation for <a href="qabstractipcinterface.html">QAbstractIpcInterface</a>, which is the base class for all telephony interfaces.</p>
 <p>The <tt>VoIPSMSSender</tt> instance can be created anywhere in the system, usually in the daemon that implements the VoIP telephony service. The example VoIP implementation that comes with Qtopia is implemented by the <tt>sipagent</tt> daemon.</p>
 <p>Telephony services do not need to be part of the <tt>qpe</tt> process, or any other special Qtopia application, although they can be. The default implementation of the GSM <tt>modem</tt> service is created by <tt>qpe</tt>, but other modem implementations could be in separate daemons.</p>
 <p>Most telephony services will have more than one interface. The QTelephonyService class makes it easy to create large numbers of related interfaces within a service. Our VoIP implementation would look something like this:</p>
-<pre>    class VoIPService : public QTelephonyService
+<pre>&nbsp;   class VoIPService : public QTelephonyService
     {
         Q_OBJECT
     public:
@@ -123,13 +122,13 @@
 <a name="automatic-starting-of-telephony-services"></a>
 <h2>Automatic Starting of Telephony Services</h2>
 <p>Third-party telephony services can be easily added to Qtopia by adding a file to the directory <tt>$QPEDIR/services/Telephony</tt> whose name is the same as the daemon binary. Its contents should be as follows:</p>
-<pre>    [Extensions]
+<pre>&nbsp;   [Extensions]
     [Standard]
     Version = 100</pre>
 <p>When Qtopia starts up, any daemons that are registered under <tt>$QPEDIR/services/Telephony</tt> will be automatically started by sending the service a <tt>start()</tt> message. The services then create instances of every interface that they support and wait for requests to arrive from client applications.</p>
 <p>The example VoIP implementation that comes with Qtopia, <tt>sipagent</tt>, demonstrates how to write such a service and integrate it with the rest of Qtopia.</p>
 <p>Because telephony services do not normally have a user interface associated with them, it is necessary to register the daemon as a running task to prevent Qtopia from telling it to exit soon after startup. You should place a line of code in your startup logic such as the following:</p>
-<pre>    QtopiaApplication::instance()-&gt;registerRunningTask( &quot;Telephony&quot;, obj );</pre>
+<pre>&nbsp;   QtopiaApplication::instance()-&gt;registerRunningTask( &quot;Telephony&quot;, obj );</pre>
 <p>where <tt>obj</tt> is a <a href="qobject.html">QObject</a> in your application that will stay in existence while the telephony service is running (the QTelephonyService instance may be a good candidate).</p>
 <a name="modem-services"></a>
 <h2>Modem Services</h2>
@@ -140,6 +139,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: Theming Files</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Tutorial: Theming Files</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -23,7 +22,7 @@
 <a name="projtheme"></a><a name="theme-project-file"></a>
 <h2>Theme Project File</h2>
 <p>A project file in <tt>&lt;qtopia-root-dir&gt;/etc/themes/</tt> is required to define the files to be installed for the theme:</p>
-<pre>    include($$(QPEDIR)/etc/themes/stub.pri)
+<pre>&nbsp;   include($$(QPEDIR)/etc/themes/stub.pri)
     !builtin_theme {
         PACKAGE_NAME=&lt;name of the package&gt;
         PACKAGE_DEPENDS=&lt;name of package this depends upon&gt;
@@ -42,7 +41,7 @@
     INSTALLS+=&lt;theme name&gt;conf &lt;theme name&gt;data
     PICS_INSTALLS+=&lt;theme name&gt;pics</pre>
 <p>For example, the Portal theme project file: <tt>&lt;qtopia-root-dir&gt;/etc/themes/portal/portal.pro</tt> contains:</p>
-<pre>    include($$(QPEDIR)/etc/themes/stub.pri)
+<pre>&nbsp;   include($$(QPEDIR)/etc/themes/stub.pri)
     !builtin_theme {
         PACKAGE_NAME=qpe-theme-portal
         PACKAGE_DEPENDS=qpe-taskbar
@@ -63,7 +62,7 @@
 <a name="configtheme"></a><a name="theme-configuration-file"></a>
 <h2>Theme Configuration File</h2>
 <p>A configuration file in <tt>&lt;qtopia-root-dir&gt;/etc/themes/</tt> is required to define a theme as follows:</p>
-<pre>    [Theme]
+<pre>&nbsp;   [Theme]
     Name = &lt;name of theme (translatable)&gt;
     Style = &lt;name of the Style plug-in that handles widget drawing&gt;
     WidgetsConfig = &lt;path for the configuration file (for the themed widget style)&gt;
@@ -76,7 +75,7 @@
     IconPath = &lt;list of semi-colon separated paths to substitute icons&gt;
     WidgetConfig = &lt;base name for widget pixmaps for the default widget style&gt;</pre>
 <p>For example, the Portal theme is defined by: &lt;qtopia-root-dir&gt;/etc/themes/portal.conf:</p>
-<pre>    [Theme]
+<pre>&nbsp;   [Theme]
     Name[] = Portal
     Style = Qtopia
     TitleConfig = portal/title.xml
@@ -91,6 +90,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

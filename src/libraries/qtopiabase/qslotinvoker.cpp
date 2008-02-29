@@ -169,7 +169,7 @@ int *QSlotInvoker::parameterTypes() const
     \internal
     Get the number of parameter types associated with this member.
 */
-int QSlotInvoker::numParameterTypes() const
+int QSlotInvoker::parameterTypesCount() const
 {
     return d->numArgs;
 }

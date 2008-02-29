@@ -67,6 +67,7 @@ for(it,INSTALLS) {
         # Help files might be available in multiple languages
         INSTALLS-=$$it
         source=$$eval($${it}.source)
+        resolveRelativeFiles(source)
         files=$$eval($${it}.files)
         eval($${it}.source=)
         eval($${it}.files=)
@@ -143,24 +144,29 @@ for(it,INSTALLS) {
         }
         !isEmpty(dep):eval(sdk.depends+=\$$dep)
     }
-    contains(hint,desktop) {
+    contains(hint,desktop)|contains(hint,content) {
         # .desktop file installer (docapi uses a database instead of .desktop files)
         eval($${it}.CONFIG+=no_default_install)
         files=$$eval($${it}.files)
+        resolveRelativeFiles(files)
+        categories=$$eval($${it}.categories)
         path=$$eval($${it}.path)
         pkg.targets+=install_$${it}
         command=\
-            $$fixpath($$QPEDIR/bin/content_installer) $(INSTALL_ROOT)\
-                $$QTOPIA_DEPOT_PATH $$QTOPIA_PREFIX $$fixpath($$files)
+            $$fixpath($$QPEDIR/bin/content_installer) $$fixpath($(INSTALL_ROOT)/qtopia_db.sqlite)\
+                $$QTOPIA_PREFIX $$fixpath($$path) $$LITERAL_QUOTE$$categories$$LITERAL_QUOTE $$fixpath($$files)
         eval(docapi_$${it}.commands=\$$command)
         eval(docapi_$${it}.CONFIG=no_path)
         INSTALLS+=docapi_$$it
         pkg.no_install+=docapi_$$it
+        # for content items we want the files to be installed too
+        contains(hint,content):eval(docapi_$${it}.depends=install_\$$it)
     }
     contains(hint,dawg) {
         # .dawg generator
         INSTALLS-=$$it
         files=$$eval($${it}.files)
+        resolveRelativeFiles(files)
         path=$$eval($${it}.path)
         eval($${it}.files=)
         eval($${it}.path=)
@@ -174,6 +180,7 @@ for(it,INSTALLS) {
         # background image, scale to the size passed to configure
         INSTALLS-=$$it
         files=$$eval($${it}.files)
+        resolveRelativeFiles(files)
         path=$$eval($${it}.path)
         eval($${it}.files=)
         eval($${it}.path=)
@@ -190,6 +197,7 @@ for(it,INSTALLS) {
         # script "preprocessor" (ie. set QPEDIR to a useful value)
         INSTALLS-=$$it
         files=$$eval($${it}.files)
+        resolveRelativeFiles(files)
         path=$$eval($${it}.path)
         eval($${it}.files=)
         eval($${it}.path=)

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QBluetoothPasskeyRequest Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QBluetoothPasskeyRequest Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothPasskeyRequest Class Reference</h1>
 <p>The QBluetoothPasskeyRequest class encapsulates a Bluetooth PIN request. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothPasskeyRequest&gt;</pre><ul>
+<pre>#include &lt;QBluetoothPasskeyRequest&gt;</pre><ul>
 <li><a href="qbluetoothpasskeyrequest-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -40,7 +39,7 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QBluetoothPasskeyRequest"></a>QBluetoothPasskeyRequest::QBluetoothPasskeyRequest ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remoteDevice</i> )</h3>
-<p>Constructs a <a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a>. The <i>localDevice</i> parameter specifies the local bluetooth adapter the request came in on. The <i>remoteDevice</i> parameter specifies the remote device being paired to.</p>
+<p>Constructs a <a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a>. The <i>localDevice</i> parameter specifies the local bluetooth adapter the request came in on. This string should be in the form hciX, such that it can be passed to <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> constructor. The <i>remoteDevice</i> parameter specifies the remote device being paired to.</p>
 <p>By default, the request is set to be rejected.</p>
 <h3 class="fn"><a name="QBluetoothPasskeyRequest-2"></a>QBluetoothPasskeyRequest::QBluetoothPasskeyRequest ( const QBluetoothPasskeyRequest &amp; <i>other</i> )</h3>
 <p>Copy constructor. Constructs a <a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a> from <i>other</i>.</p>
@@ -49,7 +48,7 @@
 <h3 class="fn"><a name="isRejected"></a>bool QBluetoothPasskeyRequest::isRejected () const</h3>
 <p>Returns true if the request has been rejected.</p>
 <h3 class="fn"><a name="localDevice"></a>const <a href="qstring.html">QString</a> &amp; QBluetoothPasskeyRequest::localDevice () const</h3>
-<p>Returns the name of the local device adapter. This can be passed in to the <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> constructor.</p>
+<p>Returns the name of the local device adapter. The string returned is of the form hciX. This can be passed in to the <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> constructor.</p>
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a>.</p>
 <h3 class="fn"><a name="passkey"></a>const <a href="qstring.html">QString</a> &amp; QBluetoothPasskeyRequest::passkey () const</h3>
 <p>Returns the passkey for the request.</p>
@@ -72,6 +71,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

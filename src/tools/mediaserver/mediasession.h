@@ -51,6 +51,8 @@ public:
     virtual void setMuted(bool mute) = 0;
     virtual bool isMuted() const = 0;
 
+    virtual QtopiaMedia::State playerState() const = 0;
+
     virtual QString errorString() = 0;
 
     virtual void setDomain(QString const& domain) = 0;

@@ -29,6 +29,7 @@
 
 #include <colormap.h>
 
+
 #define GETBITMAPCOLOR(x) GetBitmapColor( (HXBitmapInfo*)(x) )
 #define GETBITMAPPITCH(x) GetBitmapPitch( (HXBitmapInfo*)(x) )
 
@@ -49,8 +50,10 @@ static int NullConverter( unsigned char*, int, int, int, int, int, int, int,
     return 0;
 }
 
-GenericVideoSurface::GenericVideoSurface()
-    : m_refCount( 0 ), Converter( 0 )
+GenericVideoSurface::GenericVideoSurface():
+    m_refCount(0),
+    Converter(0),
+    m_paintObserver(0)
 {
     m_library = load_color_library();
 
@@ -68,29 +71,44 @@ STDMETHODIMP GenericVideoSurface::BeginOptimizedBlt( HXBitmapInfoHeader *pBitmap
     return HXR_NOTIMPL;
 }
 
+static inline bool is16Bit()
+{
+    return qt_screen->depth() == 16;
+}
+
 STDMETHODIMP GenericVideoSurface::Blt( UCHAR* pImageBits, HXBitmapInfoHeader* pBitmapInfo, REF(HXxRect) rDestRect, REF(HXxRect) rSrcRect )
 {
-    if( m_buffer.isNull() ) {
+    // Init
+    if (m_buffer.isNull())
+    {
         // Assume rDestRect does not change
-        m_buffer = QImage( rDestRect.right - rDestRect.left,
-            rDestRect.bottom - rDestRect.top,
-            QImage::Format_RGB32 );
+        m_bufferWidth = rDestRect.right - rDestRect.left;
+        m_bufferHeight = rDestRect.bottom - rDestRect.top;
+
+        m_buffer = QImage(m_bufferWidth, m_bufferHeight, is16Bit() ? QImage::Format_RGB16 : QImage::Format_RGB32);
     }
 
     // Obtain color converter
-    if( !Converter ) {
-        if( m_library.GetColorConverter ) {
+    if (!Converter)
+    {
+        if (m_library.GetColorConverter)
+        {
             HXBitmapInfoHeader bufferInfo;
             memset( &bufferInfo, 0, sizeof(HXBitmapInfoHeader) );
 
-            bufferInfo.biWidth = m_buffer.width();
-            bufferInfo.biHeight = m_buffer.height();
+            bufferInfo.biWidth = m_bufferWidth;
+            bufferInfo.biHeight = m_bufferHeight;
             bufferInfo.biPlanes = 1;
-            bufferInfo.biCompression = HX_RGB;
-            bufferInfo.biBitCount = 32;
-            bufferInfo.biSizeImage = bufferInfo.biHeight * (( (bufferInfo.biWidth * 4) + 3) & ~3);
+            if( is16Bit() ) {
+                bufferInfo.biCompression = HXCOLOR_RGB565_ID;
+                bufferInfo.biBitCount = 16;
+            } else {
+                bufferInfo.biCompression = HX_RGB;
+                bufferInfo.biBitCount = 32;
+            }
+            bufferInfo.biSizeImage = bufferInfo.biWidth * bufferInfo.biHeight * bufferInfo.biBitCount / 8;
 
-            m_bufferPitch = (((bufferInfo.biWidth * 4) + 3) & ~3);
+            m_bufferPitch = GETBITMAPPITCH( &bufferInfo );
             m_inPitch = GETBITMAPPITCH( pBitmapInfo );
 
             int bufferCID = GETBITMAPCOLOR( &bufferInfo );
@@ -106,13 +124,27 @@ STDMETHODIMP GenericVideoSurface::Blt( UCHAR* pImageBits, HXBitmapInfoHeader* pB
         }
     }
 
-    Converter( m_buffer.bits(), m_buffer.width(), m_buffer.height(), m_bufferPitch,
-        0, 0, m_buffer.width(), m_buffer.height(),
-        pImageBits, pBitmapInfo->biWidth, pBitmapInfo->biHeight, m_inPitch,
-        rSrcRect.left, rSrcRect.top, rSrcRect.right - rSrcRect.left, rSrcRect.bottom - rSrcRect.top );
+    Converter(m_buffer.bits(),
+              m_bufferWidth,
+              m_bufferHeight,
+              m_bufferPitch,
+              0,
+              0,
+              m_bufferWidth,
+              m_bufferHeight,
 
-    // Notify observers
-    notify();
+              pImageBits,
+              pBitmapInfo->biWidth,
+              pBitmapInfo->biHeight,
+              m_inPitch,
+              rSrcRect.left,
+              rSrcRect.top,
+              rSrcRect.right - rSrcRect.left,
+              rSrcRect.bottom - rSrcRect.top);
+
+    // Notify observer
+    if (m_paintObserver != 0)
+        m_paintObserver->paintNotification();
 
     return HXR_OK;
 }
@@ -178,25 +210,33 @@ STDMETHODIMP GenericVideoSurface::QueryInterface( REFIID riid, void** object )
     return HXR_NOINTERFACE;
 }
 
+void GenericVideoSurface::addPaintObserver(PaintObserver* paintObserver)
+{
+    m_paintObserver = paintObserver;
+}
+
 GenericVideoWidget::GenericVideoWidget( GenericVideoSurface* surface, QWidget* parent )
     : QWidget( parent ), m_surface( surface )
 {
     HX_ADDREF( m_surface );
 
-    m_surface->attach( this );
+    m_surface->addPaintObserver(this);
 
     // Optimize paint event
-    setAttribute( Qt::WA_NoSystemBackground );
+    setAttribute(Qt::WA_NoSystemBackground);
+
+    QPalette pal(palette());
+    pal.setBrush(QPalette::Window, Qt::black);
+
+    setPalette(pal);
 }
 
 GenericVideoWidget::~GenericVideoWidget()
 {
-    m_surface->detach( this );
-
-    HX_RELEASE( m_surface );
+    HX_RELEASE(m_surface);
 }
 
-void GenericVideoWidget::update( Subject* )
+void GenericVideoWidget::paintNotification()
 {
     QWidget::update();
 }
@@ -204,9 +244,9 @@ void GenericVideoWidget::update( Subject* )
 void GenericVideoWidget::paintEvent( QPaintEvent* )
 {
     QPainter painter( this );
-    painter.fillRect( rect(), Qt::black );
+    painter.setCompositionMode( QPainter::CompositionMode_Source );
 
-    QImage buffer = m_surface->buffer();
+    QImage const& buffer = m_surface->buffer();
     if( !buffer.isNull() ) {
         QSize scaled = buffer.size();
         scaled.scale( width(), height(), Qt::KeepAspectRatio ); // ### optimize
@@ -217,59 +257,58 @@ void GenericVideoWidget::paintEvent( QPaintEvent* )
 }
 
 
-DirectPainterVideoWidget::DirectPainterVideoWidget( GenericVideoSurface* surface, QWidget* parent )
-    : QWidget( parent ), m_surface( surface )
+DirectPainterVideoWidget::DirectPainterVideoWidget( GenericVideoSurface* surface, QWidget* parent ):
+    QWidget(parent),
+    m_surface(surface),
+    m_clear(true),
+    m_isVisible(false),
+    m_firstPaintCalc(true)
 {
-    HX_ADDREF( m_surface );
+    HX_ADDREF(m_surface);
 
-    m_surface->attach( this );
+    m_surface->addPaintObserver(this);
 
     // Optimize paint event
-    setAttribute( Qt::WA_NoSystemBackground );
+    setAttribute(Qt::WA_NoSystemBackground);
 }
 
 DirectPainterVideoWidget::~DirectPainterVideoWidget()
 {
-    QDirectPainter::reserveRegion( QRegion() );
+    QDirectPainter::reserveRegion(QRegion());
 
-    m_surface->detach( this );
-
-    HX_RELEASE( m_surface );
+    HX_RELEASE(m_surface);
 }
 
-void DirectPainterVideoWidget::update( Subject* )
+void DirectPainterVideoWidget::paintNotification()
 {
-    QImage buffer = m_surface->buffer();
-
-    if( m_buffer.isNull() ||
-        m_buffer.width() != buffer.width() ||
-        m_buffer.height() != buffer.height() ) {
-            m_buffer = buffer;
+    if (m_isVisible)
+    {
+        if (m_firstPaintCalc)
+        {
             calcDestRect();
-    } else {
-            m_buffer = buffer;
-    }
+            m_firstPaintCalc = false;
+        }
 
-    QWidget::update();
+        paint();
+    }
 }
 
 int DirectPainterVideoWidget::isSupported()
 {
-    return QDirectPainter::screenDepth() == 32 && !qt_screen->isTransformed();
+    return true;
 }
 
 static bool isQVFb()
 {
     static bool result, test = true;
 
-    if( test ) {
-        QByteArray display_spec( getenv( "QWS_DISPLAY" ) );
-
+    if (test)
+    {
         test = false;
-        if( display_spec.startsWith( "QVFb" ) ) {
-            return result = true;
-        }
-        return result = false;
+
+        QByteArray display_spec(getenv("QWS_DISPLAY"));
+
+        result = display_spec.startsWith("QVFb");
     }
 
     return result;
@@ -277,72 +316,69 @@ static bool isQVFb()
 
 void DirectPainterVideoWidget::paintEvent( QPaintEvent* )
 {
-    static const int PRECISION = 16;
-
-    if( !m_buffer.isNull() ) {
-        // Clear widget
-        QRgb *o = ( QRgb* )QDirectPainter::frameBuffer();
-        QRect clearrect = QRect( mapToGlobal( QPoint( 0, 0 ) ), size() );
-        for( int j = clearrect.top(); j <= clearrect.bottom(); ++j ) {
-            for( int i = clearrect.left(); i <= clearrect.right(); ++i ) {
-                *(o + j*QDirectPainter::screenWidth() + i) = qRgb( 0, 0, 0 );
-            }
-        }
-
-        // Paint buffer
-        // Calculate mapping factors
-        uint factor_x = ( m_buffer.width() << PRECISION ) / m_destrect.width();
-        uint factor_y = ( m_buffer.height() << PRECISION ) / m_destrect.height();
-
-        QRgb *src = ( QRgb* )m_buffer.bits();
-        QRgb *dest = ( QRgb* )QDirectPainter::frameBuffer();
-        // For each pixel in buffer
-        uint y = 0;
-        for( int j = m_destrect.top(); j <= m_destrect.bottom(); ++j ) {
-            uint yd = y >> PRECISION;
-            uint x = 0;
-            for( int i = m_destrect.left(); i <= m_destrect.right(); ++i ) {
-                // Calculate position in image
-                // Copy pixel value from image into buffer
-                *(dest + j*QDirectPainter::screenWidth() + i) = *(src + yd*m_buffer.width() + (x >> PRECISION));
-                x += factor_x;
-            }
-            y += factor_y;
-        }
-
-        if( isQVFb() ) {
-            // Inform QVFb of change in framebuffer
-            QScreen::instance()->setDirty( m_destrect );
-        }
-    }
+    m_clear = true;
+    paint();
 }
 
-void DirectPainterVideoWidget::resizeEvent( QResizeEvent* )
+void DirectPainterVideoWidget::resizeEvent(QResizeEvent*)
 {
     calcDestRect();
 
-    QDirectPainter::reserveRegion( QRect( mapToGlobal( QPoint( 0, 0 ) ), size() ) );
+    m_reservedRegion = QDirectPainter::reserveRegion(QRect(mapToGlobal(QPoint(0, 0)), size()));
 }
 
-void DirectPainterVideoWidget::showEvent( QShowEvent* )
+void DirectPainterVideoWidget::showEvent(QShowEvent*)
 {
-    QDirectPainter::reserveRegion( QRect( mapToGlobal( QPoint( 0, 0 ) ), size() ) );
+    m_isVisible = true;
+    m_reservedRegion = QDirectPainter::reserveRegion(QRect(mapToGlobal(QPoint(0, 0)), size()));
 }
 
 void DirectPainterVideoWidget::hideEvent( QHideEvent* )
 {
-    QDirectPainter::reserveRegion( QRegion() );
+    m_isVisible = false;
+    m_reservedRegion = QDirectPainter::reserveRegion(QRegion());
+}
+
+void DirectPainterVideoWidget::paint()
+{
+    // Clear widget
+    if (m_clear)
+    {
+        m_clear = false;
+
+        qt_screen->solidFill(Qt::black, m_reservedRegion);
+    }
+
+    QImage const& buffer = m_surface->buffer();
+
+    if (!buffer.isNull())
+    {
+        qt_screen->blit(buffer.scaled(m_destSize),
+                                      m_destTopLeft,
+                                      m_bufferRegion);
+
+        if (isQVFb())
+        {
+            // Inform QVFb of change in framebuffer
+            QScreen::instance()->setDirty(m_destrect);
+        }
+    }
 }
 
 void DirectPainterVideoWidget::calcDestRect()
 {
-    if( !m_buffer.isNull() ) {
-        QSize destsize = m_buffer.size();
-        destsize.scale( size(), Qt::KeepAspectRatio );
+    QImage const& buffer = m_surface->buffer();
+    if (!buffer.isNull())
+    {
+        m_destSize = buffer.size();
 
-        QPoint desttopleft = QPoint( (width() - destsize.width()) / 2,
-            (height() - destsize.height()) / 2 );
+        m_destSize.scale(size(), Qt::KeepAspectRatio);
 
-        m_destrect = QRect( mapToGlobal( desttopleft ), destsize );
+        m_destTopLeft = mapToGlobal(QPoint((width() - m_destSize.width()) / 2,
+                                           (height() - m_destSize.height()) / 2));
+
+        m_destrect = QRect(m_destTopLeft, m_destSize);
+
+        m_bufferRegion = QRegion(m_destrect);
     }
 }

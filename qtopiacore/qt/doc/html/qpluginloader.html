@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/plugin/qpluginloader.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/plugin/qpluginloader.cpp -->
 <head>
   <title>Qt 4.2: QPluginLoader Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -73,7 +73,7 @@
 <p>In order to speed up loading and validation of plugins, some of the information that is collected during loading is cached in persistent memory (through <a href="qsettings.html">QSettings</a>). For instance, the result of a load operation (e.g. succeeded or failed) is stored in the cache, so that subsequent load operations don't try to load an invalid plugin. However, if the &quot;last modified&quot; timestamp of a plugin has changed, the plugin's cache entry is invalidated and the plugin is reloaded regardless of the values in the cache entry. The cache entry is then updated with the new result of the load operation.</p>
 <p>This also means that the timestamp must be updated each time the plugin or any dependent resources (such as a shared library) is updated, since the dependent resources might influence the result of loading a plugin.</p>
 <p>See <a href="plugins-howto.html">How to Create Qt Plugins</a> for more information about how to make your application extensible through plugins.</p>
-<p>See also <a href="qlibrary.html">QLibrary</a> and Plug &amp; Paint Example.</p>
+<p>See also <a href="qlibrary.html">QLibrary</a> and <a href="tools-plugandpaint.html">Plug &amp; Paint Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="fileName-prop"></a>fileName : <a href="qstring.html">QString</a></h3>
@@ -123,6 +123,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

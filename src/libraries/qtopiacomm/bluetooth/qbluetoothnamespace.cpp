@@ -21,11 +21,14 @@
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
+#include <bluetooth/l2cap.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <qtopianamespace.h>
 #include <qbluetoothnamespace.h>
+#include <qbluetoothremotedevice.h>
 #include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include <qtopialog.h>
 
 #include <QString>
 #include <QStringList>
@@ -60,7 +63,7 @@ using namespace QBluetooth;
 
 /*!
     \enum QBluetooth::ServiceClass
-    Defines the service classes
+    Defines the service classes.
 
     \value Positioning Device has Positioning services (Location identification)
     \value Networking Device has Networking services (LAN, Ad hoc, ...)
@@ -88,19 +91,6 @@ using namespace QBluetooth;
     \value Uncategorized Uncategorized device
 */
 
-/*!
-    \enum QBluetooth::ServiceError
-    Defines the possible errors that occur during service start / stop.
-
-    \value NoError No error has occurred.
-    \value NotRunning The service is not running.
-    \value AlreadyRunning The service is already running.
-    \value SDPServerError Trouble registering / unregistering from the SDP server.
-    \value NoAvailablePort No ports free.
-    \value NoSuchAdapter The local adapter is not valid.
-    \value UnknownService The name of the service is invalid.
-    \value UnknownError An unknown error has occurred.
-*/
 
 // Device class consists of 24 bits
 // 11 LSB bits are Major service class
@@ -442,6 +432,26 @@ QBluetooth::DeviceMajor major_to_device_major(quint8 major)
     return static_cast<QBluetooth::DeviceMajor>(major);
 }
 
+QIcon find_device_icon(const QBluetoothRemoteDevice &remote)
+{
+    if (remote.deviceMajor() == QBluetooth::Computer)
+        return QIcon(":icon/icons/computer");
+    if (remote.deviceMajor() == QBluetooth::Phone)
+        return QIcon(":icon/phone/phone");
+
+    if (remote.deviceMinorAsString() == "Printer")
+        return QIcon(":icon/icons/print");
+    if (remote.deviceMinorAsString() == "Camera")
+        return QIcon(":icon/icons/camera");
+
+    if (remote.deviceMinorAsString() == "Headphones" ||
+        remote.deviceMinorAsString() == "Wearable Headset Device") {
+        return QIcon(":icon/icons/headset");
+    }
+
+    return QIcon();
+}
+
 qint128::qint128()
 {
     for (unsigned int i = 0; i < 16; i++)
@@ -468,7 +478,7 @@ quint128::quint128(const quint8 indata[16])
 
 /*! \internal
     Converts a QSDPProfile enum into something that can be used by the bluez hcitool command.
-    Here since both QSDP and QSDAP use this functionality.
+    Here since both QSDP and QBluetoothSdpQuery use this functionality.
 
     \ingroup qtopiabluetooth
  */
@@ -607,21 +617,6 @@ QString bdaddr2str(const bdaddr_t *bdaddr)
     return arr;
 }
 
-QString find_sdptool()
-{
-
-    QStringList paths = Qtopia::installPaths();
-    for(int i = 0; i < paths.count(); ++i) {
-        QString sdptool;
-        sdptool.append(paths.at(i) + "bin/" + "sdptool");
-        if (QFile::exists(sdptool)) {
-            return sdptool;
-        }
-    }
-
-    return QString();
-}
-
 /*!
     \internal
 
@@ -630,7 +625,7 @@ QString find_sdptool()
 bool _q_getSecurityOptions(int sockfd, QBluetooth::SecurityOptions &options)
 {
     int lm = 0;
-    socklen_t len;
+    socklen_t len = sizeof(lm);
 
     if (getsockopt(sockfd, SOL_RFCOMM, RFCOMM_LM, &lm, &len) < 0) {
         options = 0;
@@ -647,17 +642,72 @@ bool _q_getSecurityOptions(int sockfd, QBluetooth::SecurityOptions &options)
     return options;
 }
 
+/*!
+    \internal
+
+    Set the security options.
+ */
 bool _q_setSecurityOptions(int sockfd, QBluetooth::SecurityOptions options)
 {
     int lm = 0;
+
     if (options & QBluetooth::Authenticated)
         lm |= RFCOMM_LM_AUTH;
     if (options & QBluetooth::Encrypted)
         lm |= RFCOMM_LM_ENCRYPT;
-    if (options & QBluetooth::Secure);
+    if (options & QBluetooth::Secure)
         lm |= RFCOMM_LM_SECURE;
 
     if (lm && setsockopt(sockfd, SOL_RFCOMM, RFCOMM_LM, &lm, sizeof(lm)) < 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+/*!
+    \internal
+
+    Get the L2CAP security options.
+ */
+bool _q_getL2CapSecurityOptions(int sockfd, QBluetooth::SecurityOptions &options)
+{
+    int lm = 0;
+    socklen_t len = sizeof(lm);
+
+    if (getsockopt(sockfd, SOL_L2CAP, L2CAP_LM, &lm, &len) < 0) {
+        options = 0;
+        return false;
+    }
+
+    if (lm & L2CAP_LM_AUTH)
+        options |= QBluetooth::Authenticated;
+    if (lm & L2CAP_LM_ENCRYPT)
+        options |= QBluetooth::Encrypted;
+    if (lm & L2CAP_LM_SECURE)
+        options |= QBluetooth::Secure;
+
+    return options;
+}
+
+/*!
+    \internal
+
+    Set the L2CAP security options.
+ */
+bool _q_setL2CapSecurityOptions(int sockfd, QBluetooth::SecurityOptions options)
+{
+    int lm = 0;
+
+    if (options & QBluetooth::Authenticated)
+        lm |= L2CAP_LM_AUTH;
+    if (options & QBluetooth::Encrypted)
+        lm |= L2CAP_LM_ENCRYPT;
+    if (options & QBluetooth::Secure)
+        lm |= L2CAP_LM_SECURE;
+
+    if (lm && setsockopt(sockfd, SOL_L2CAP, L2CAP_LM, &lm, sizeof(lm)) < 0)
     {
         return false;
     }
@@ -672,7 +722,7 @@ public:
 
 RegisterMetaTypes::RegisterMetaTypes()
 {
-//    qRegisterMetaType<QSDPUUID>("QSDPUUID");
+//    qRegisterMetaType<QBluetoothSdpUuid>("QBluetoothSdpUuid");
     qRegisterMetaType<qint128>("qint128");
     qRegisterMetaType<quint128>("quint128");
     qRegisterMetaType<qint8>("qint8");
@@ -682,5 +732,3 @@ RegisterMetaTypes sdpMetaTypes;
 
 Q_IMPLEMENT_USER_METATYPE_ENUM(QBluetooth::SDPProfile);
 Q_IMPLEMENT_USER_METATYPE_ENUM(QBluetooth::SecurityOptions);
-Q_IMPLEMENT_USER_METATYPE_ENUM(QBluetooth::ServiceError);
-

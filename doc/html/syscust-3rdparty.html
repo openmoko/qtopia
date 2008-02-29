@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Compiling 3rd-party Libraries</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Compiling 3rd-party Libraries</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -31,7 +30,7 @@
 <a name="compiling-liblcms"></a>
 <h2>Compiling liblcms</h2>
 <p>To compile the <tt>liblcms</tt> library for a device run the following:</p>
-<pre>    ./configure --host=arm-linux --prefix=$(TOOLCHAIN_TARGET_DIR)
+<pre>&nbsp;   ./configure --host=arm-linux --prefix=$(TOOLCHAIN_TARGET_DIR)
      make
      make install # as root if required</pre>
 <a name="compiling-libmng"></a>
@@ -40,14 +39,14 @@
 <a name="compiling-libjpeg62"></a>
 <h2>Compiling libjpeg62</h2>
 <p>To compile for the device a <tt>libjpeg</tt> library which has been downloaded separately run the following:</p>
-<pre>    CFLAGS=&quot;-D_REENTRANT -O2 -Wall&quot; ./configure --prefix=/usr --mandir=/usr/share/man --enable-static \
+<pre>&nbsp;   CFLAGS=&quot;-D_REENTRANT -O2 -Wall&quot; ./configure --prefix=/usr --mandir=/usr/share/man --enable-static \
         --enable-shared --build=$(TOOLCHAIN_TARGET_DIR) --host=arm-linux
     make CC=&quot;arm-linux-gcc&quot; AR=&quot;arm-linux-ar rv&quot; AR2=&quot;arm-linux-ranlib&quot; CXX=&quot;arm-linux-g++&quot;  \
         DESTDIR=&quot;$(TOOLCHAIN_TARGET_DIR)&quot;</pre>
 <a name="compiling-libz"></a>
 <h2>Compiling libz</h2>
 <p>To compile the <tt>libz</tt> library for a device run the following:</p>
-<pre>    ./configure --prefix=/usr --shared
+<pre>&nbsp;   ./configure --prefix=/usr --shared
     make LDSHARED=&quot;arm-linux-gcc -shared -Wl,-soname,libz.so.1&quot; CC_FOR_BUILD=&quot;arm-linux-gcc&quot; \
         CC=&quot;arm-linux-gcc&quot; LD=&quot;arm-linux-ld&quot; CPP=&quot;arm-linux-g++ -E&quot; AR=&quot;arm-linux-ar rc&quot;  \
         prefix=$(TOOLCHAIN_TARGET_DIR) CFLAGS=&quot;-fPIC&quot; libz.so.1.2.3 libz.a
@@ -55,7 +54,7 @@
 <a name="compiling-tslib"></a>
 <h2>Compiling tslib</h2>
 <p>To compile the <tt>tslib</tt> library for a device run the following:</p>
-<pre>    autogen.sh
+<pre>&nbsp;   autogen.sh
     CC=arm-linux-gcc CXX=arm-linux-g++ PLUGIN_DIR=/usr/local/arm/tslib/plugins \
     ./configure -prefix=$(TOOLCHAIN_TARGET_DIR) -host=arm-linux
     make -k
@@ -64,6 +63,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

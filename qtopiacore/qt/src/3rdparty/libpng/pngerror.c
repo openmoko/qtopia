@@ -212,6 +212,8 @@ png_default_error(png_structp png_ptr, png_const_charp error_message)
 #endif
 
 #ifdef PNG_SETJMP_SUPPORTED
+   if (png_ptr)
+   {
 #  ifdef USE_FAR_KEYWORD
    {
       jmp_buf jmpbuf;
@@ -220,10 +222,9 @@ png_default_error(png_structp png_ptr, png_const_charp error_message)
    }
 #  else
    longjmp(png_ptr->jmpbuf, 1);
-# endif
+#  endif
+   }
 #else
-   /* make compiler happy */ ;
-   if (png_ptr)
    PNG_ABORT();
 #endif
 #ifdef PNG_NO_CONSOLE_IO

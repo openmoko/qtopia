@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -97,84 +107,134 @@ void QMainWindowPrivate::init()
 
 /*!
     \class QMainWindow
-    \brief The QMainWindow class provides a main application window.
-
+    \brief The QMainWindow class provides a main application
+	   window.
     \ingroup application
     \mainclass
 
-    QMainWindow provides a main application window, with a menu bar,
-    tool bars, dock widgets and a status bar around a large central
-    widget, such as a text edit, drawing canvas or QWorkspace (for MDI
-    applications).
-
-    Note that QMainWindow comes with its own customized layout and
-    that setting a layout on a QMainWindow, or creating a layout with
-    a QMainWindow as a parent is considered an error. You should set
-    your own layout on the \l{centralWidget()}{central widget}
-    instead.
-
-    Topics:
-
     \tableofcontents
+    
+    \section1 Qt Main Window Framework
 
-    \section1 Saving and restoring state
+    A main window provides a framework for building an
+    application's user interface. Qt has QMainWindow and its \l{Main
+    Window and Related Classes}{related classes} for main window
+    management. QMainWindow has its own layout to which you can add
+    \l{QToolBar}{QToolBar}s, \l{QDockWindow}{QDockWindow}s, a
+    QMenuBar, and a QStatusBar. The layout has a center area that can
+    be occupied by any kind of widget. You can see an image of the
+    layout below.
+    
+    \image mainwindowlayout.png 
+ 
+    \section1 Creating Main Window Components
+    
+    A central widget will typically be a standard Qt widget such
+    as a QTextEdit or a QGraphicsView. Custom widgets can also be
+    used for advanced applications. You set the central widget with \c
+    setCentralWidget(). 
+    
+    Main windows have either a single (SDI) or multiple (MDI)
+    document interface. You create MDI applications in Qt by using a
+    QWorkspace as the central widget.
+    
+    We will now examine each of the other widgets that can be
+    added to a main window. We give examples on how to create and add
+    them.
+    
+    \section2 Creating Menus
+    
+    Qt implements menus in QMenu and QMainWindow keeps them in a
+    QMenuBar. \l{QAction}{QAction}s are added to the menus, which
+    display them as menu items.
+    
+    You can add new menus to the main window's menu bar by calling
+    \c menuBar(), which returns the QMenuBar for the window, and then
+    add a menu with QMenuBar::addMenu().
+    
+    QMainWindow comes with a default menu bar, but you can also
+    set one yourself with \c setMenuBar(). If you wish to implement a
+    custom menu bar (i.e., not use the QMenuBar widget), you can set it
+    with \c setMenuWidget().
 
-    The saveState() and restoreState() functions provide a means to
-    save and restore the layout of the QToolBars and QDockWidgets in
-    the QMainWindow.  These functions work by storing the \link
-    QObject::objectName objectName\endlink of each QToolBar and
-    QDockWidget together with information about placement, size, etc.
+    An example of how to create menus follows:
+    
+    \quotefromfile mainwindows/application/mainwindow.cpp
+    \skipto /::createMenus/
+    \printuntil /saveAct/
+    
+    The \c createPopupMenu() function creates popup menus when the
+    main window receives context menu events.  The default
+    implementation generates a menu with the checkable actions from
+    the dock widgets and toolbars. You can reimplement \c
+    createPopupMenu() for a custom menu.
+    
+    \section2 Creating Toolbars
+    
+    Toolbars are implemented in the QToolBar class.  You add a
+    toolbar to a main window with \c addToolBar().
+    
+    You control the initial position of toolbars by assigning them
+    to a specific Qt::ToolBarArea. You can split an area by inserting
+    a toolbar break - think of this as a line break in text editing -
+    with \c addToolBarBreak() or \c insertToolBarBreak(). You can also
+    restrict placement by the user with QToolBar::setAllowedAreas()
+    and QToolBar::setMovable(). 
+    
+    The size of toolbar icons can be retrieved with \c iconSize().
+    The sizes are platform dependent; you can set a fixed size with \c
+    setIconSize(). You can alter the appearance of all tool buttons in
+    the toolbars with \c setToolButtonStyle(). 
+    
+    An example of toolbar creation follows:
+    
+    \quotefromfile mainwindows/application/mainwindow.cpp
+    \skipto /::createToolBars/
+    \printuntil /fileToolBar->addAction/
+    
+    \section2 Creating Dock Widgets
+    
+    Dock widgets are implemented in the QDockWidget class. A dock
+    widget is a window that can be docked into the main window.  You
+    add dock widgets to a main window with \c addDockWidget().
+    
+    There are four dock widget areas as given by the
+    Qt::DockWidgetArea enum: left, right, top, and bottom. You can
+    specify which dock widget area that should occupy the corners
+    where the areas overlap with \c setDockWidgetCorner(). By default
+    each area can only contain one row (vertical or horizontal) of
+    dock widgets, but if you enable nesting with \c
+    setDockNestingEnabled(), dock widgets can be added in either
+    direction.
+    
+    Two dock widgets may also be stacked on top of each other. A
+    QTabBar is then used to select which of the widgets that should be
+    displayed.
+    
+    We give an example of how to create and add dock widgets to a
+    main window:
+    
+    \quotefromfile snippets/mainwindowsnippet.cpp
+    \skipto /QDockWidget \*dockWidget/
+    \printuntil /addDockWidget/
 
-    \section1 Behavior of Dock Widgets
+    \section2 The Status Bar    
 
-    \target dock-widget-separators
-    \section2 Dock Widget Separators
-
-    QMainWindow uses separators to separate QDockWidgets from each
-    other and the \l{centralWidget()}{central widget}. These
-    separators let the user control the size of QDockWidgets by
-    dragging the boundary between them.
-
-    A QDockWidget can be as large or as small as the user wishes,
-    between the minimumSizeHint() (or minimumSize()) and
-    maximumSize() of the QDockWidget. When a QDockWidget reaches its
-    minimum size, space will be taken from other QDockWidgets in the
-    direction of the user's drag, if possible. Once all QDockWidgets
-    have reached their minimum sizes, further dragging does nothing.
-    When a QDockWidget reaches its maximium size, space will be given
-    to other QDockWidgets in the opposite direction of the user's
-    drag, if possible. Once all QDockWidgets have reached their
-    minimum size, futher dragging does nothing.
-
-    \target dragging-dock-widgets
-    \section2 Dragging Dock Widgets
-
-    QDockWidget displays a title bar to let the user drag the dock
-    widget to a new location. A QDockWidget can be moved to any
-    location provided enough space is available. (QMainWindow won't
-    resize itself to a larger size in an attempt to provide more
-    space.)
-
-    A QRubberBand is shown while dragging the QDockWidget. This
-    QRubberBand provides an indication to the user about where the
-    QDockWidget will be placed when the mouse button is released.
-
-    \section3 Managing Dock Widgets and Toolbars
-
-    By default, QMainWindow provides a context menu that can be used to toggle
-    the visibility of the toolbars and dock widgets attached to a main window.
-    This menu is usually accessed by right-clicking on a dock window or toolbar,
-    but it can also be obtained programmatically by calling createPopupMenu().
-
-    \image mainwindow-contextmenu.png A typical main window context menu.
-
-    This popup menu can be replaced or customized to suit the specific needs
-    of an application: In a QMainWindow subclass, reimplement createPopupMenu()
-    to either create a custom popup menu by constructing a new QMenu on demand,
-    or to modify the QMenu object obtained by calling the default implementation.
-
-    \sa QMenuBar, QToolBar, QStatusBar, QDockWidget, {Application Example},
-        {Dock Widgets Example}, {MDI Example}, {SDI Example}
+    You can set a status bar with \c setStatusBar(), but one is
+    created the first time \c statusBar() (which returns the main
+    window's status bar) is called. See QStatusBar for information on
+    how to use it.
+    
+    \section1 Storing State
+    
+    QMainWindow can store the state of its layout with \c
+    saveState(); it can later be retrieved with \c restoreState(). It
+    is the position and size (relative to the size of the main window)
+    of the toolbars and dock widgets that are stored.
+    
+    \sa QMenuBar, QToolBar, QStatusBar, QDockWidget, {Application
+    Example}, {Dock Widgets Example}, {MDI Example}, {SDI Example},
+    {Menus Example}
 */
 
 /*!

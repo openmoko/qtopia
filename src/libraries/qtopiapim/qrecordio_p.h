@@ -26,6 +26,8 @@
 #include <QVariant>
 
 #include <QUniqueId>
+#include <QCategoryManager>
+#include "qpimsource.h"
 
 class QRecordIO : public QObject
 {
@@ -38,6 +40,16 @@ public:
     virtual bool exists(const QUniqueId &) const = 0;
     virtual bool contains(const QUniqueId &) const = 0;
 
+    // acts on visible sources.
+    virtual bool startSyncTransaction(const QSet<QPimSource> &, const QDateTime &) = 0;
+    virtual bool abortSyncTransaction() = 0;
+    virtual bool commitSyncTransaction() = 0;
+
+    // acts on visible sources.
+    virtual QList<QUniqueId> removed(const QSet<QPimSource> &, const QDateTime &) const = 0;
+    virtual QList<QUniqueId> added(const QSet<QPimSource> &, const QDateTime &) const = 0;
+    virtual QList<QUniqueId> modified(const QSet<QPimSource> &, const QDateTime &) const = 0;
+
     virtual QUuid contextId() const = 0;
 
     // needs to be comparable?
@@ -47,8 +59,12 @@ public:
 
     virtual int predictedRow(const QVariant &, const QUniqueId &) const;
 
+    virtual void setCategoryFilter(const QCategoryFilter &) = 0;
+    virtual QCategoryFilter categoryFilter() const = 0;
+
 signals:
     void recordsUpdated();
+    void filtersUpdated();
 };
 
 #endif // PIMIO_PRIVATE_H

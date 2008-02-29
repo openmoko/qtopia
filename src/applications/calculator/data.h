@@ -25,7 +25,7 @@
 #include <qtopiaglobal.h>
 #include <QString>
 #include <QPainter>
-#include <QBitmap>
+#include <QPixmap>
 
 class Data {
 public:
@@ -39,7 +39,7 @@ public:
     virtual QString getType();
     virtual QString getFormattedOutput();
     virtual QPixmap *draw();
-    QBitmap *cache;
+    QPixmap *cache;
 protected:
     QString formattedOutput, cachedOutput;
 };

@@ -70,7 +70,7 @@ QVPNClient* QVPNFactory::create( uint vpnID,  QObject* parent )
 
     const QStringList files = dir.entryList( QStringList("*.conf") );
     bool foundVPN = false;
-    QVPNClient::Type type;
+    QVPNClient::Type type = QVPNClient::OpenVPN;
     QString file;
     foreach( QString entry, files ) {
         file = dir.filePath(entry);

@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -318,6 +328,29 @@ bool QTreeModel::setData(const QModelIndex &index, const QVariant &value, int ro
         return true;
     }
     return false;
+}
+
+QMap<int, QVariant> QTreeModel::itemData(const QModelIndex &index) const
+{
+    QMap<int, QVariant> roles;
+    QTreeWidgetItem *itm = item(index);
+    if (itm) {
+        int column = index.column();
+        for (int i = 0; i < itm->values.at(column).count(); ++i) {
+            roles.insert(itm->values.at(column).at(i).role,
+                         itm->values.at(column).at(i).value);
+        }
+
+        // the two special cases
+        QVariant displayValue = itm->data(column, Qt::DisplayRole);
+        if (displayValue.isValid())
+            roles.insert(Qt::DisplayRole, displayValue);
+
+        QVariant checkValue = itm->data(column, Qt::CheckStateRole);
+        if (checkValue.isValid())
+            roles.insert(Qt::CheckStateRole, checkValue);
+    }
+    return roles;
 }
 
 /*!
@@ -1668,10 +1701,12 @@ void QTreeWidgetItem::insertChild(int index, QTreeWidgetItem *child)
 */
 QTreeWidgetItem *QTreeWidgetItem::takeChild(int index)
 {
+    // we move this outside the check of the index to allow executing
+    // pending sorts from inline functions, using this function (hack)
+    QTreeModel *model = (view ? ::qobject_cast<QTreeModel*>(view->model()) : 0);
+    if (model && model->executePendingSort())
+        model = 0; // no need to emit signals
     if (index >= 0 && index < children.count()) {
-        QTreeModel *model = (view ? ::qobject_cast<QTreeModel*>(view->model()) : 0);
-        if (model && model->executePendingSort())
-            model = 0; // no need to emit signals
         if (model) model->beginRemoveItems(this, index, 1);
         QTreeWidgetItem *item = children.takeAt(index);
         item->par = 0;

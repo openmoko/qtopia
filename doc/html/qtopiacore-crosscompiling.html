@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/emb-crosscompiling.qdoc -->
 <head>
   <title>Qt 4.2: Cross-Compiling Qtopia Core Applications</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -38,13 +39,13 @@
 <h2>Step 3: Provide Architecture Specific Files</h2>
 <p>Starting with Qt 4, all of Qt's implicitly shared classes can safely be copied across threads like any other value classes, i.e., they are fully reentrant. This is accomplished by implementing reference counting operations using atomic hardware instructions on all the different platforms supported by Qt.</p>
 <p>To support a new architecture, it is important to ensure that these platform-specific atomic operations are implemented in a corresponding header file (<tt>qatomic_ARCH.h</tt>), and that this file is located in Qt's <tt>src/corelib/arch</tt> directory. For example, the Intel 80386 implementation is located in <tt>src/corelib/arch/qatomic_i386.h</tt>.</p>
-<p>See the Implementing Atomic Operations documentation for details.</p>
+<p>See the <a href="atomic-operations.html">Implementing Atomic Operations</a> documentation for details.</p>
 <a name="step-4-provide-hardware-drivers"></a>
 <h2>Step 4: Provide Hardware Drivers</h2>
 <p>Without the proper mouse and keyboard drivers, you will not be able to give any input to your application when it is installed on the target device. You must also ensure that the appropriate screen driver is present to make the server process able to put the application's widgets on screen.</p>
 <p><a href="qtopiacore.html">Qtopia Core</a> provides several ready-made mouse, keyboard and screen drivers, see the <a href="qtopiacore-pointer.html">pointer handling</a>, <a href="qtopiacore-charinput.html">character input</a> and <a href="qtopiacore-displaymanagement.html">display management</a> documentation for details.</p>
 <p>In addition, custom drivers can be added by deriving from the <a href="qwsmousehandler.html">QWSMouseHandler</a>, <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="qscreen.html">QScreen</a> classes respectively, and by creating corresponding plugins to make use of Qt's plugin mechanism (dynamically loading the drivers into the server application at runtime). Note that the plugins must be located in a location where Qt will look for plugins, e.g., the standard <tt>plugin</tt> directory.</p>
-<p>See the <a href="plugins-howto.html">How to Create Qt Plugins</a> documentation and the Plug &amp; Paint example for details.</p>
+<p>See the <a href="plugins-howto.html">How to Create Qt Plugins</a> documentation and the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example for details.</p>
 <a name="step-5-build-the-target-specific-executable"></a>
 <h2>Step 5: Build the Target Specific Executable</h2>
 <p>Before building the executable, you must specify the target architecture as well as the target specific hardware drivers by running the <tt>configure</tt> script:</p>
@@ -70,6 +71,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

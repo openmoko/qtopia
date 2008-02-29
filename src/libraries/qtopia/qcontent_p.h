@@ -57,6 +57,7 @@ class QValueSpaceProxyObject : public QObject
         QString path;
 };
 
+class QContentUpdateManagerPrivate;
 class QContentUpdateManager : public QObject
 {
     Q_OBJECT
@@ -65,7 +66,7 @@ class QContentUpdateManager : public QObject
         void requestRefresh();
 
         static QContentUpdateManager *instance();
-
+        
     signals:
         void refreshRequested();
 
@@ -80,14 +81,13 @@ class QContentUpdateManager : public QObject
 
     private:
         QContentUpdateManager(QObject *parent=NULL);
+        friend class QContentUpdateManagerPrivate;
         QList<QPair<QContentId,QContent::ChangeType> > updateList;
         QTimer updateTimer;
         QMutex mutex;
         QAtomic installAtom;
         QAtomic updateAtom;
         QValueSpaceProxyObject *vsoDocuments;
-        static QContentUpdateManager *manager;
-        friend class QtopiaApplication;
 };
 
 #endif

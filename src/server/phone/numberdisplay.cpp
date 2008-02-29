@@ -224,12 +224,12 @@ void NumberDisplayMultiTap::stopPressTimer()
   */
 NumberDisplay::NumberDisplay( QWidget *parent )
 : QWidget( parent ), mLargestCharWidth( 0 ), mFontSizes(),
-  composeKey(Qt::Key_unknown)
+  composeKey(Qt::Key_unknown), delayEmitNumberChanged(false)
 {
     QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::BackSpace);
 
     QMenu *menu = QSoftMenuBar::menuFor( this );
-    mSendMessage = new QAction( QIcon( ":icon/email" ), tr("Send Message"), this );
+    mSendMessage = new QAction( QIcon( ":icon/txt" ), tr("Send Message"), this );
     connect( mSendMessage, SIGNAL(triggered()), this, SLOT(sendMessage()) );
     menu->addAction( mSendMessage );
     mNewAC = new QAction( QIcon( ":image/addressbook/AddressBook" ), tr("Save to Contacts"), this );
@@ -314,6 +314,7 @@ void NumberDisplay::appendNumber( const QString &numbers, bool speedDial )
         tid_speeddial = 0;
     }
 
+    delayEmitNumberChanged = false;
     QString origNumber = number();
 
     mNumber += numbers.left(numbers.count() - 1);
@@ -332,14 +333,23 @@ void NumberDisplay::appendNumber( const QString &numbers, bool speedDial )
 
     if(number() != origNumber) {
         update();
-        emit numberChanged( number() );
+        // if we are waiting for a release to stop speeddial, delay sending
+        // numberChanged() until keyRelease, otherwise the long processing
+        // time for contact filtering may cause speeddial to fire before
+        // the release event is processed.
+        if (tid_speeddial)
+            delayEmitNumberChanged = true;
+        else
+            emit numberChanged( number() );
     }
 }
 
 void NumberDisplay::setNumber( const QString &n )
 {
-    if ( tid_speeddial > 0 )
+    if ( tid_speeddial > 0 ) {
         killTimer(tid_speeddial);
+    }
+    delayEmitNumberChanged = false;
     tap->reset();
     tid_speeddial = 0;
     mNumber = n;
@@ -438,6 +448,11 @@ void NumberDisplay::paintEvent( QPaintEvent *e )
 
 void NumberDisplay::keyReleaseEvent( QKeyEvent *e )
 {
+    if (delayEmitNumberChanged) {
+        delayEmitNumberChanged = false;
+        emit numberChanged(number());
+    }
+
     if(!e->isAutoRepeat())
         tap->processKeyReleaseEvent(QChar(e->key()));
 
@@ -452,6 +467,7 @@ void NumberDisplay::timerEvent( QTimerEvent *e )
     if ( e->timerId() == tid_speeddial ) {
         killTimer(tid_speeddial);
         tid_speeddial = 0;
+        delayEmitNumberChanged = false;
         if ( (int)number().length() <= SPEEDDIAL_MAXDIGITS )
             emit speedDialed(number());
     }

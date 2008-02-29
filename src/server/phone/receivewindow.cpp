@@ -482,6 +482,7 @@ void ReceiveWindow::fileSelected(const QModelIndex &index)
         }
         device->close();
         delete device;
+        doc.commit();
     }
     else {
         qLog(Obex) << "Failed to save file" << doc.file();

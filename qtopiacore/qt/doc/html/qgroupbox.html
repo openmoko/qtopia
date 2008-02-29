@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/widgets/qgroupbox.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qgroupbox.cpp -->
 <head>
   <title>Qt 4.2: QGroupBox Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -55,7 +55,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -93,12 +93,25 @@
 <p>QGroupBox also lets you set the <a href="qgroupbox.html#title-prop">title</a> (normally set in the constructor) and the title's <a href="qgroupbox.html#alignment-prop">alignment</a>. Group boxes can be <a href="qgroupbox.html#checkable-prop">checkable</a>; child widgets in checkable group boxes are enabled or disabled depending on whether or not the group box is <a href="qgroupbox.html#checked-prop">checked</a>.</p>
 <p>You can minimize the space consumption of a group box by enabling the <a href="qgroupbox.html#flat-prop">flat</a> property. In most <a href="qstyle.html">styles</a>, enabling this property results in the removal of the left, right and bottom edges of the frame.</p>
 <p>QGroupBox doesn't automatically lay out the child widgets (which are often <a href="qcheckbox.html">QCheckBox</a>es or <a href="qradiobutton.html">QRadioButton</a>s but can be any widgets). The following example shows how we can set up a QGroupBox with a layout:</p>
-<pre></pre>
+<pre>     QGroupBox *groupBox = new QGroupBox(tr(&quot;Exclusive Radio Buttons&quot;));
+
+     QRadioButton *radio1 = new QRadioButton(tr(&quot;&amp;Radio button 1&quot;));
+     QRadioButton *radio2 = new QRadioButton(tr(&quot;R&amp;adio button 2&quot;));
+     QRadioButton *radio3 = new QRadioButton(tr(&quot;Ra&amp;dio button 3&quot;));
+
+     radio1-&gt;setChecked(true);
+
+     QVBoxLayout *vbox = new QVBoxLayout;
+     vbox-&gt;addWidget(radio1);
+     vbox-&gt;addWidget(radio2);
+     vbox-&gt;addWidget(radio3);
+     vbox-&gt;addStretch(1);
+     groupBox-&gt;setLayout(vbox);</pre>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/windowsxp-groupbox.png" alt="Screenshot of a Windows XP style group box" /></td><td><img src="images/macintosh-groupbox.png" alt="Screenshot of a Macintosh style group box" /></td><td><img src="images/plastique-groupbox.png" alt="Screenshot of a Plastique style group box" /></td></tr>
 <tr valign="top" class="even"><td>A <a href="gallery-windowsxp.html">Windows XP style</a> group box.</td><td>A <a href="gallery-macintosh.html">Macintosh style</a> group box.</td><td>A <a href="gallery-plastique.html">Plastique style</a> group box.</td></tr>
 </table></p>
-<p>See also <a href="qbuttongroup.html">QButtonGroup</a> and Group Box Example.</p>
+<p>See also <a href="qbuttongroup.html">QButtonGroup</a> and <a href="widgets-groupbox.html">Group Box Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="alignment-prop"></a>alignment : <a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a></h3>
@@ -186,6 +199,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

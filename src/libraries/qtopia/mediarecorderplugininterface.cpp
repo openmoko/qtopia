@@ -49,7 +49,7 @@
 
   \sa QIODevice, MediaRecorderPluginInterface, begin()
 
-  \ingroup qtopiaemb
+  \ingroup multimedia
 */
 
 /*!

@@ -45,9 +45,12 @@ public:
 
     QIcon icon() const; // default empty
     QString description() const;
+
+    using QContactContext::title;
     QString title() const;
 
     // better to be flags ?
+    using QContactContext::editable;
     bool editable() const; // default true
 
     QPimSource defaultSource() const;
@@ -56,6 +59,7 @@ public:
     QSet<QPimSource> sources() const;
     QUuid id() const;
 
+    using QContactContext::exists;
     bool exists(const QUniqueId &) const;
     QPimSource source(const QUniqueId &) const;
 
@@ -67,6 +71,7 @@ public:
 
     QList<QContact> exportContacts(const QPimSource &, bool &) const;
     QContact exportContact(const QUniqueId &id, bool &) const;
+
 private:
     ContactSqlIO *mAccess;
     QPreparedSqlQuery importQuery;
@@ -98,6 +103,19 @@ public:
     QCategoryFilter categoryFilter() const { return QPimSqlIO::categoryFilter(); }
 
     void setContextFilter(const QSet<int> &, ContextFilterType = ExcludeContexts );
+
+    bool startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime) { return QPimSqlIO::startSync(sources, syncTime); }
+    bool abortSyncTransaction() { return QPimSqlIO::abortSync(); }
+    bool commitSyncTransaction() { return QPimSqlIO::commitSync(); }
+
+    QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+    { return QPimSqlIO::removed(sources, timestamp); }
+
+    QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+    { return QPimSqlIO::added(sources, timestamp); }
+
+    QList<QUniqueId> modified(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
+    { return QPimSqlIO::modified(sources, timestamp); }
 
     QVariant contactField(int row, QContactModel::Field k) const;
     bool setContactField(int row, QContactModel::Field k,  const QVariant &);
@@ -138,14 +156,19 @@ public:
     QUniqueId matchPhoneNumber(const QString &, int &) const;
 #endif
     void invalidateCache();
+
+    void checkAdded(const QUniqueId &) { invalidateCache(); }
+    void checkRemoved(const QUniqueId &) { invalidateCache(); }
+    void checkRemoved(const QList<QUniqueId> &) { invalidateCache(); }
+    void checkUpdated(const QUniqueId &) { invalidateCache(); }
 protected:
     void bindFields(const QPimRecord &, QSqlQuery &) const;
     QStringList sortColumns() const;
     QString sqlColumn(QContactModel::Field k) const;
 
-    bool updateExtraTables(const QByteArray &, const QPimRecord &);
-    bool insertExtraTables(const QByteArray &, const QPimRecord &);
-    bool removeExtraTables(const QByteArray &);
+    bool updateExtraTables(uint, const QPimRecord &);
+    bool insertExtraTables(uint, const QPimRecord &);
+    bool removeExtraTables(uint);
 
 private slots:
     void updateSqlLabel();

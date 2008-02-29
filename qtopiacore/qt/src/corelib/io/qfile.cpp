@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -633,11 +643,11 @@ QFile::rename(const QString &newName)
         QFile in(fileName());
         QFile out(newName);
         if (in.open(QIODevice::ReadOnly)) {
-            if(out.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            if (out.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
                 bool error = false;
-                char block[1024];
+                char block[4096];
                 while (!in.atEnd()) {
-                    qint64 read = in.read(block, 1024);
+                    qint64 read = in.read(block, sizeof(block));
                     if (read == -1) {
                         d->setError(QFile::RenameError, in.errorString());
                         error = true;
@@ -740,6 +750,13 @@ QFile::copy(const QString &newName)
         qWarning("QFile::copy: Empty or null file name");
         return false;
     }
+    if (QFile(newName).exists()) {
+        // ### Race condition. If a file is moved in after this, it /will/ be
+        // overwritten. On Unix, the proper solution is to use hardlinks:
+        // return ::link(old, new) && ::remove(old); See also rename().
+        d->setError(QFile::CopyError, QLatin1String("Destination file exists"));
+        return false;
+    }
     close();
     if(error() == QFile::NoError) {
         if(fileEngine()->copy(newName)) {
@@ -752,15 +769,20 @@ QFile::copy(const QString &newName)
                 QString errorMessage = QLatin1String("Cannot open %1 for input");
                 d->setError(QFile::CopyError, errorMessage.arg(d->fileName));
             } else {
-                QTemporaryFile out;
-                if(!out.open()) {
-                    close();
-                    error = true;
-                    d->setError(QFile::CopyError, QLatin1String("Cannot open for output"));
-                } else {
-                    char block[1024];
+                QString fileTemplate = QLatin1String("%1/qt_temp.XXXXXX");
+                QTemporaryFile out(fileTemplate.arg(QFileInfo(newName).path()));
+                if (!out.open()) {
+                    out.setFileTemplate(fileTemplate.arg(QDir::tempPath()));
+                    if (!out.open()) {
+                        close();
+                        error = true;
+                        d->setError(QFile::CopyError, QLatin1String("Cannot open for output"));
+                    }
+                }
+                if (!error) {
+                    char block[4096];
                     while(!atEnd()) {
-                        qint64 in = read(block, 1024);
+                        qint64 in = read(block, sizeof(block));
                         if(in == -1)
                             break;
                         if(in != out.write(block, in)) {
@@ -769,11 +791,14 @@ QFile::copy(const QString &newName)
                             break;
                         }
                     }
-                    if(!error && !out.rename(newName)) {
+
+                    if (!error && !out.rename(newName)) {
                         error = true;
                         QString errorMessage = QLatin1String("Cannot create %1 for output");
                         d->setError(QFile::CopyError, errorMessage.arg(newName));
                     }
+                    if (!error)
+                        out.setAutoRemove(false);
                 }
             }
             if(!error) {
@@ -886,7 +911,15 @@ bool QFile::open(OpenMode mode)
     able to seek(). See QIODevice::isSequentialAccess() for more
     information.
 
-    \sa close()
+    \bold{Note:} On Windows, you need to enable support for console applications
+    in order to use the stdin, stdout and stderr streams at the console. To do
+    this, add the following declaration to your application's project file:
+
+    \code
+    CONFIG += console
+    \endcode
+
+    \sa close(), {qmake Variable Reference#CONFIG}{qmake Variable Reference}
 */
 bool QFile::open(FILE *fh, OpenMode mode)
 {

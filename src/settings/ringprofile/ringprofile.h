@@ -127,6 +127,7 @@ private:
     bool deleteDays;
     bool isNew;
     bool editVolume;
+    int mvOrigValue;
     QPhoneProfile::Schedule schedule;
 
     QMenu *contextMenu;

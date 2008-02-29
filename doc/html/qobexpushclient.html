@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QObexPushClient Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QObexPushClient Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,27 +11,33 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QObexPushClient Class Reference</h1>
 <p>The QObexPushClient class encapsulates an OBEX PUSH client. <a href="#details">More...</a></p>
-<pre>    #include &lt;QObexPushClient&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QObexPushClient&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qobexpushclient-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qobexpushclient.html#Error-enum">Error</a></b> { NoError, LinkError, TransportConnectionError, RequestFailed, Aborted, UnknownError }</li>
+<li><div class="fn"/>enum <b><a href="qobexpushclient.html#State-enum">State</a></b> { Ready, Connecting, Disconnecting, Streaming, Closed }</li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qobexpushclient.html#QObexPushClient">QObexPushClient</a></b> ( QObexSocket * <i>socket</i>, QObject * <i>parent</i> = 0 )</li>
 <li><div class="fn"/>virtual <b><a href="qobexpushclient.html#dtor.QObexPushClient">~QObexPushClient</a></b> ()</li>
-<li><div class="fn"/>bool <b><a href="qobexpushclient.html#autoDelete">autoDelete</a></b> () const</li>
-<li><div class="fn"/>int <b><a href="qobexpushclient.html#close">close</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#clearPendingCommands">clearPendingCommands</a></b> ()</li>
 <li><div class="fn"/>int <b><a href="qobexpushclient.html#connect">connect</a></b> ()</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#currentId">currentId</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qobexpushclient.html#disconnect">disconnect</a></b> ()</li>
-<li><div class="fn"/>QObex::Error <b><a href="qobexpushclient.html#error">error</a></b> () const</li>
+<li><div class="fn"/>Error <b><a href="qobexpushclient.html#error">error</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qobexpushclient.html#exchangeBusinessCard">exchangeBusinessCard</a></b> ( QIODevice * <i>mine</i>, QIODevice * <i>theirs</i>, int * <i>putId</i> = 0, int * <i>getId</i> = 0 )</li>
+<li><div class="fn"/>bool <b><a href="qobexpushclient.html#hasPendingCommands">hasPendingCommands</a></b> () const</li>
 <li><div class="fn"/>int <b><a href="qobexpushclient.html#requestBusinessCard">requestBusinessCard</a></b> ( QIODevice * <i>vcard</i> )</li>
 <li><div class="fn"/>int <b><a href="qobexpushclient.html#send">send</a></b> ( QIODevice * <i>device</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>mimetype</i> = QString() )</li>
 <li><div class="fn"/>int <b><a href="qobexpushclient.html#send-2">send</a></b> ( const QByteArray &amp; <i>array</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>mimetype</i> = QString() )</li>
 <li><div class="fn"/>int <b><a href="qobexpushclient.html#sendBusinessCard">sendBusinessCard</a></b> ( QIODevice * <i>vcard</i> )</li>
-<li><div class="fn"/>void <b><a href="qobexpushclient.html#setAutoDelete">setAutoDelete</a></b> ( bool <i>enable</i> )</li>
-<li><div class="fn"/>QObex::State <b><a href="qobexpushclient.html#state">state</a></b> () const</li>
+<li><div class="fn"/>State <b><a href="qobexpushclient.html#state">state</a></b> () const</li>
 </ul>
 <ul>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
@@ -52,7 +57,7 @@
 <li><div class="fn"/>void <b><a href="qobexpushclient.html#commandStarted">commandStarted</a></b> ( int <i>id</i> )</li>
 <li><div class="fn"/>void <b><a href="qobexpushclient.html#done">done</a></b> ( bool <i>error</i> )</li>
 <li><div class="fn"/>void <b><a href="qobexpushclient.html#progress">progress</a></b> ( qint64 <i>completed</i>, qint64 <i>total</i> )</li>
-<li><div class="fn"/>void <b><a href="qobexpushclient.html#stateChanged">stateChanged</a></b> ( QObex::State <i>state</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#stateChanged">stateChanged</a></b> ( QObexPushClient::State <i>state</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
@@ -71,31 +76,59 @@
 <h2>Detailed Description</h2>
 <p>The QObexPushClient class encapsulates an OBEX PUSH client.</p>
 <p>The QObexPushClient class can be used to send files to an OBEX Push server. The file sent can either be a business card (vCard), calendar (vCal), or any other file type. This class can also be used to request a business card, or a business card exchange.</p>
-<p>Here is an example of sending a file over Bluetooth</p>
-<pre>    QBluetoothObexSocket *sock =
-        new QBluetoothObexSocket(&quot;00:00:00:00:00:01&quot;, 1); <span class="comment">// Fake address, rfcomm channel 1</span>
+<p>Here is an example of sending a file over Bluetooth:</p>
+<pre>&nbsp;   QBluetoothObexSocket *sock =
+        new QBluetoothObexSocket(&quot;00:00:00:00:00:01&quot;, 1); // Fake address, rfcomm channel 1
 
     if (sock-&gt;connect()) {
-        QObexPushService *sender = new QObexPushService(sock);
-        sender-&gt;setAutoDelete(true);
+        QObexPushClient *sender = new QObexPushClient(sock);
         sender-&gt;connect();
         QByteArray data = getSomeData();
         sender-&gt;send(data, &quot;MyData.txt&quot;);
         sender-&gt;disconnect();
     }</pre>
+<p>The functions <a href="qobexpushclient.html#connect">connect</a>(), <a href="qobexpushclient.html#disconnect">disconnect</a>(), <a href="qobexpushclient.html#send">send</a>(), <a href="qobexpushclient.html#sendBusinessCard">sendBusinessCard</a>(), <a href="qobexpushclient.html#requestBusinessCard">requestBusinessCard</a>() and <a href="qobexpushclient.html#exchangeBusinessCard">exchangeBusinessCard</a>() are all asynchronous. When called, they return immediately, returning a unique identifier for that particular operation. If the command cannot be performed immediately because another command is in progress, the command is scheduled for later execution.</p>
+<p>When the execution of a command starts, the <a href="qobexpushclient.html#commandStarted">commandStarted</a>() signal is emitted with the identifier of the command. When it is finished, the <a href="qobexpushclient.html#commandFinished">commandFinished</a>() signal is emitted with the identifier and also a bool to indicate whether the command finished with an error.</p>
+<p>The <a href="qobexpushclient.html#done">done</a>() signal is emitted when all pending commands have finished. This can be used to automatically delete the client object when it has finished its operations, by connecting the client's <a href="qobexpushclient.html#done">done</a>() signal to the client's <a href="qobject.html#deleteLater">QObject::deleteLater</a>() slot. (The socket object can similarly be connected to automatically delete the socket object when the client has finished.)</p>
+<p>If an error occurs during the execution of one of the commands in a sequence of commands, all the pending commands (i.e. scheduled, but not yet executed commands) are cleared and no signals are emitted for them. In this case, the <a href="qobexpushclient.html#done">done</a>() signal is emitted with the error argument set to <tt>true</tt>.</p>
+<p><b>Note:</b> Once a client has been disconnected, it cannot perform any more commands.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="Error-enum"></a>enum QObexPushClient::Error</h3>
+<p>Defines the possible errors for a push client.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QObexPushClient::NoError</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">No error has occurred.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::LinkError</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">A connection link has been interrupted. If this error occurs, the client state will change to <a href="qobexpushclient.html#State-enum">QObexPushClient::Closed</a> and the client cannot be used for any more operations.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::TransportConnectionError</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Error while connecting the underlying socket transport.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::RequestFailed</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The client's request was refused by the remote service, or an error occured while sending the request.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::Aborted</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The command was aborted by a call to <a href="qobexpushclient.html#abort">abort</a>().</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::UnknownError</tt></td><td align="center" valign="top"><tt>100</tt></td><td valign="top">An error other than those specified above occurred.</td></tr>
+</table></p>
+<h3 class="fn"><a name="State-enum"></a>enum QObexPushClient::State</h3>
+<p>Defines the possible states for a push client.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QObexPushClient::Ready</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The client is ready to send requests to an OBEX service. This is the default state.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::Connecting</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The client is connecting to the server.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::Disconnecting</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The client is disconnecting from the server.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::Streaming</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">A file transfer operation is in progress.</td></tr>
+<tr><td valign="top"><tt>QObexPushClient::Closed</tt></td><td align="center" valign="top"><tt>100</tt></td><td valign="top">The client has been closed and cannot perform any more commands.</td></tr>
+</table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QObexPushClient"></a>QObexPushClient::QObexPushClient ( QObexSocket * <i>socket</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a new Bluetooth OBEX Client object. The OBEX socket to use is given by <i>socket</i>. The socket should generally be connected, however if it is not, the QObexSocket::connect method of the socket will be executed first. The <i>parent</i> parameter specifies the <tt>QObject</tt> parent.</p>
+<h3 class="fn"><a name="QObexPushClient"></a>QObexPushClient::QObexPushClient ( <a href="qobexsocket.html">QObexSocket</a> * <i>socket</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new OBEX Push Client. The OBEX socket to use is given by <i>socket</i>. The socket should generally be connected, however if it is not, the <a href="qobexsocket.html#connect">QObexSocket::connect</a>() method of the socket will be executed first. The <i>parent</i> parameter specifies the <tt>QObject</tt> parent.</p>
 <h3 class="fn"><a name="dtor.QObexPushClient"></a>QObexPushClient::~QObexPushClient ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Deconstructs a Bluetooth OBEX Sender.</p>
+<p>Deconstructs an OBEX Push Client.</p>
 <h3 class="fn"><a name="abort"></a>void QObexPushClient::abort ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Attempts to abort the file send operation.</p>
-<h3 class="fn"><a name="autoDelete"></a>bool QObexPushClient::autoDelete () const</h3>
-<p>Returns whether <tt>autoDelete</tt> property is enabled.</p>
-<p>See also <a href="qobexpushclient.html#setAutoDelete">setAutoDelete</a>().</p>
-<h3 class="fn"><a name="close"></a>int QObexPushClient::close ()</h3>
-<p>Disconnects from the server.</p>
+<p>Aborts the current file transfer operation and deletes all scheduled commands.</p>
+<p>If there is a file transfer operation in progress, an <tt>ABORT</tt> command will be sent to the server. When the server replies that the command is aborted, the <a href="qobexpushclient.html#commandFinished">commandFinished</a>() signal will be emitted with the <tt>error</tt> argument set to <tt>true</tt>, and the <a href="qobexpushclient.html#error">error</a>() function will return <a href="qobexpushclient.html#Error-enum">QObexPushClient::Aborted</a>.</p>
+<p>If there is no file transfer operation in progress, or the operation finishes before it can be aborted, the operation will be completed normally and the <tt>error</tt> argument for the <a href="qobexpushclient.html#commandFinished">commandFinished</a>() signal will be set to <tt>false</tt>.</p>
+<p>If no other commands are started after the call to abort(), there will be no scheduled commands and the <a href="qobexpushclient.html#done">done</a>() signal will be emitted.</p>
+<h3 class="fn"><a name="clearPendingCommands"></a>void QObexPushClient::clearPendingCommands ()</h3>
+<p>Deletes all pending commands from the list of scheduled commands. This does not affect the command that is being executed. If you want to stop this command as well, use <a href="qobexpushclient.html#abort">abort</a>().</p>
+<p>See also <a href="qobexpushclient.html#hasPendingCommands">hasPendingCommands</a>() and <a href="qobexpushclient.html#currentId">currentId</a>().</p>
 <h3 class="fn"><a name="commandFinished"></a>void QObexPushClient::commandFinished ( int <i>id</i>, bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a queued command has been performed. The <i>id</i> parameter holds the id of the command finished. The <i>error</i> parameter holds whether an error occurred.</p>
 <p>See also <a href="qobexpushclient.html#commandStarted">commandStarted</a>().</p>
@@ -105,17 +138,24 @@
 <h3 class="fn"><a name="connect"></a>int QObexPushClient::connect ()</h3>
 <p>Requests the client to connect to the server. The <tt>QObexSocket</tt> will be used to establish the connection if the socket is not yet connected. After this, the OBEX <b>CONNECT</b> command will be sent. This method returns immediately after queuing the command to be performed. One can track the progress of the command by using the commandFinished and commandStarted.</p>
 <p>See also <a href="qobexpushclient.html#disconnect">disconnect</a>().</p>
+<h3 class="fn"><a name="currentId"></a>int QObexPushClient::currentId () const</h3>
+<p>Returns the identifier of the command that is being executed, or 0 if there is no command being executed.</p>
 <h3 class="fn"><a name="disconnect"></a>int QObexPushClient::disconnect ()</h3>
 <p>Queues a disconnect request. The OBEX <b>DISCONNECT</b> comand will be sent, after which the socket will be closed. This method returns immediately after queuing the command to be performed. One can track the progress of the command by using the commandFinished and commandStarted signals.</p>
 <p>Returns the id of the command.</p>
 <p>See also <a href="qobexpushclient.html#connect">connect</a>().</p>
 <h3 class="fn"><a name="done"></a>void QObexPushClient::done ( bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever all pending requests have been completed. The <i>error</i> parameter reports whether an error occurred during processing.</p>
-<h3 class="fn"><a name="error"></a><a href="qobex.html#Error-enum">QObex::Error</a> QObexPushClient::error () const</h3>
-<p>Returns the error condition of the last command executed</p>
+<h3 class="fn"><a name="error"></a><a href="qobexpushclient.html#Error-enum">Error</a> QObexPushClient::error () const</h3>
+<p>Returns the last error that occurred. This is useful for finding out what happened when receiving a <a href="qobexpushclient.html#commandFinished">commandFinished</a>() or <a href="qobexpushclient.html#done">done</a>() signal that has the <tt>error</tt> argument set to <tt>true</tt>.</p>
+<p>If you start a new command, the error status is reset to <tt>NoError</tt>.</p>
 <h3 class="fn"><a name="exchangeBusinessCard"></a>void QObexPushClient::exchangeBusinessCard ( <a href="qiodevice.html">QIODevice</a> * <i>mine</i>, <a href="qiodevice.html">QIODevice</a> * <i>theirs</i>, int * <i>putId</i> = 0, int * <i>getId</i> = 0 )</h3>
 <p>Performs a business card exchange operation, by first pushing own business card given by <i>mine</i>, and requesting a business card from the remote device. The results will be placed in <i>theirs</i>. The <b>PUT</b> command id is returned in <i>putId</i>. The <b>GET</b> command id is returned in <i>getId</i>.</p>
 <p>Note that this method is equivalent to first calling the <tt>sendBusinessCard</tt> method and then calling the <tt>requestBusinessCard</tt> method.</p>
+<h3 class="fn"><a name="hasPendingCommands"></a>bool QObexPushClient::hasPendingCommands () const</h3>
+<p>Returns true if there are any commands scheduled that have not yet been executed; otherwise returns false.</p>
+<p>The command that is being executed is not considered as a scheduled command.</p>
+<p>See also <a href="qobexpushclient.html#clearPendingCommands">clearPendingCommands</a>() and <a href="qobexpushclient.html#currentId">currentId</a>().</p>
 <h3 class="fn"><a name="progress"></a>void QObexPushClient::progress ( qint64 <i>completed</i>, qint64 <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted reports the progress of the file send operation. The <i>completed</i> parameter reports how many bytes were sent, and <i>total</i> parameter reports the total number of bytes to send.</p>
 <h3 class="fn"><a name="requestBusinessCard"></a>int QObexPushClient::requestBusinessCard ( <a href="qiodevice.html">QIODevice</a> * <i>vcard</i> )</h3>
@@ -128,17 +168,15 @@
 <p>This is a convenience method. It functions essentially like the above method. The <i>array</i> contains the contents to be pushed to the server, while <i>filename</i> and <i>mimetype</i> function as in the above method.</p>
 <h3 class="fn"><a name="sendBusinessCard"></a>int QObexPushClient::sendBusinessCard ( <a href="qiodevice.html">QIODevice</a> * <i>vcard</i> )</h3>
 <p>Performs a push operation on a business card to the server. The contents of the business card are given by <i>vcard</i>.</p>
-<h3 class="fn"><a name="setAutoDelete"></a>void QObexPushClient::setAutoDelete ( bool <i>enable</i> )</h3>
-<p>Sets the object <tt>autoDelete</tt> property to <i>enable</i>. If <tt>autoDelete</tt> is enabled, then the sender object will automatically delete itself once it completes its request or is aborted. If <tt>autoDelete</tt> is disabled, the programmer has to manually handle the destruction of the object.</p>
-<p>See also <a href="qobexpushclient.html#autoDelete">autoDelete</a>().</p>
-<h3 class="fn"><a name="state"></a><a href="qobex.html#State-enum">QObex::State</a> QObexPushClient::state () const</h3>
-<p>Returns the current state of the object</p>
-<h3 class="fn"><a name="stateChanged"></a>void QObexPushClient::stateChanged ( <a href="qobex.html#State-enum">QObex::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="state"></a><a href="qobexpushclient.html#State-enum">State</a> QObexPushClient::state () const</h3>
+<p>Returns the current state of the object. When the state changes, the <a href="qobexpushclient.html#stateChanged">stateChanged</a>() signal is emitted.</p>
+<p>See also <a href="qobexpushclient.html#stateChanged">stateChanged</a>().</p>
+<h3 class="fn"><a name="stateChanged"></a>void QObexPushClient::stateChanged ( <a href="qobexpushclient.html#State-enum">QObexPushClient::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a sender object changes state. The <i>state</i> parameter holds the current state.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

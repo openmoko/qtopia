@@ -65,8 +65,6 @@ class QMenu;
 #endif
 class QDLEditClient;
 
-
-
 //-----------------------------------------------------------------------
 
 class PhoneFieldType
@@ -138,6 +136,7 @@ public:
     void add( const QString &number, const PhoneFieldType &type );
     void addEmpty();
     bool isFull() const;
+    bool isEmpty() const;
 
     void setTypes( const QList<PhoneFieldType> &newTypes );
     QList<PhoneFieldType> types() const;
@@ -265,26 +264,49 @@ class AbEditor : public QDialog
 {
     Q_OBJECT
 public:
-    AbEditor( QWidget* parent = 0, Qt::WFlags fl = 0 );
-    ~AbEditor();
+    AbEditor( QWidget* parent = 0, Qt::WFlags fl = 0 )
+        : QDialog(parent, fl)
+    {}
+    ~AbEditor()
+    {}
+
+    virtual QContact entry() const = 0;
+
+    virtual bool isEmpty() const = 0;
+
+    virtual void setEntry(const QContact &entry, bool newEntry = false) = 0;
+
+    virtual bool imageModified() const { return false; }
+
+protected:
+#ifdef QTOPIA_PHONE
+    void keyPressEvent(QKeyEvent *e);
+#endif
+
+};
+
+class QDelayedScrollArea;
+class AbFullEditor : public AbEditor
+{
+    Q_OBJECT
+public:
+    AbFullEditor( QWidget* parent = 0, Qt::WFlags fl = 0 );
+    ~AbFullEditor();
 
     void setCategory(int);
     void setNameFocus();
     QContact entry() const { return ent; }
 
-    bool isEmpty();
+    bool isEmpty() const;
 
     bool imageModified() const;
 
+    void setEntry(const QContact &entry, bool newEntry = false);
+
+    bool eventFilter(QObject *sender, QEvent *e);
+
 signals:
     void categoriesChanged(); // for Qtopia Desktop only
-
-public slots:
-    void setEntry(const QContact &entry, bool newEntry = false
-#ifdef QTOPIA_PHONE
-        , bool simEntry = false
-#endif
-        );
 
 protected slots:
     void editPhoto();
@@ -303,28 +325,28 @@ protected slots:
     void reject();
     void tabClicked( QWidget *tab );
     void editEmails();
-    void tabChanged(int);
+    void prepareTab(int);
 
 protected:
     void closeEvent(QCloseEvent *e);
     void showEvent( QShowEvent *e );
 
-#ifdef QTOPIA_PHONE
-    void keyPressEvent(QKeyEvent *e);
-#endif
-
 private:
     void init();
     void initMainUI();
 
-#if QTOPIA_PHONE
-    void initSimUI();
-#endif
 
     void setupTabs();
+
+    void setupTabCommon();
+    void setupTabWork();
+    void setupTabHome();
     void setupTabOther();
+
     void setupPhoneFields( QWidget *parent = 0 );
-    void buildLineEditList();
+
+    void setEntryWork();
+    void setEntryHome();
     void setEntryOther();
 
     void contactFromFields(QContact &);
@@ -339,14 +361,9 @@ private:
     QTextEdit *txtNote;
     QDLEditClient *txtNoteQC;
     QTabWidget *tabs;
-    QScrollArea *contactTab, *businessTab, *personalTab, *otherTab;
+    QDelayedScrollArea *contactTab, *businessTab, *personalTab, *otherTab;
     QWidget *summaryTab;
     QTextEdit *summary;
-
-    bool mainUIInit;
-#ifdef QTOPIA_PHONE
-    bool simUIInit;
-#endif
 
     PhoneFieldType  mHPType, mHMType, mHFType, mBPType, mBMType,
                     mBFType, mBPAType;
@@ -358,17 +375,6 @@ private:
     QMap<QContactModel::Field, QLineEdit *> lineEdits;
 
     QVBoxLayout* mainVBox;
-
-    //
-    //  SIM-plified contact dialog
-    //
-
-#ifdef QTOPIA_PHONE
-    QWidget *simEditor;
-    QLineEdit *simName;
-    QLineEdit *simNumber;
-    bool editingSim;
-#endif
 
     //
     //  Contact Tab
@@ -386,7 +392,6 @@ private:
     QGroupBox *bdayCheck;
     QGroupBox *anniversaryCheck;
     QHBox *ehb;
-    bool quitExplicitly;
 
 #ifdef QTOPIA_VOIP
     QLineEdit *voipIdLE;
@@ -424,11 +429,46 @@ private:
 #ifdef QTOPIA_CELL
     RingToneButton *editTonePB;
 #endif
-    bool tabOtherInit;
     QWidget *wOtherTab;
     QWidget *wBusinessTab;
     QWidget *wPersonalTab;
 };
+
+#ifdef QTOPIA_PHONE
+class AbSimEditor : public AbEditor
+{
+    Q_OBJECT
+public:
+    AbSimEditor( QWidget* parent = 0, Qt::WFlags fl = 0 );
+    ~AbSimEditor();
+
+    void setNameFocus();
+
+    QContact entry() const { return ent; }
+
+    bool isEmpty() const;
+
+    void setEntry(const QContact &entry, bool newEntry = false);
+
+protected slots:
+    void accept();
+    void reject();
+private:
+    void initSimUI();
+
+    //
+    //  SIM-plified contact dialog
+    //
+
+    QWidget *simEditor;
+    QLineEdit *simName;
+    QLineEdit *simNumber;
+
+    QContact ent;
+
+    bool mNewEntry;
+};
+#endif
 
 //-----------------------------------------------------------------------
 

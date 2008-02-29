@@ -16,13 +16,16 @@ QTOPIAPIM_HEADERS+=\
     qtask.h\
     qappointment.h\
     qcontact.h\
+    qpimmodel.h\
     qtaskmodel.h\
     qappointmentmodel.h\
     qcontactmodel.h\
+    qappointmentview.h\
     qcontactview.h\
     qtaskview.h\
     qpimsource.h\
     qpimsourcemodel.h\
+    qpimdelegate.h\
     qphonenumber.h
 
 QTOPIAPIM_PRIVATE_HEADERS+=\
@@ -53,9 +56,11 @@ QTOPIAPIM_SOURCES+=\
     qappointment.cpp\
     qappointmentsqlio.cpp\
     qcontact.cpp\
+    qpimmodel.cpp\
     qtaskmodel.cpp\
     qcontactmodel.cpp\
     qappointmentmodel.cpp\
+    qappointmentview.cpp\
     qcontactview.cpp\
     qtaskview.cpp\
     qpimsource.cpp\
@@ -64,7 +69,8 @@ QTOPIAPIM_SOURCES+=\
     qcontactsqlio.cpp\
     qrecordiomerge.cpp\
     qpimsourcemodel.cpp\
-    qphonenumber.cpp
+    qphonenumber.cpp\
+    qpimdelegate.cpp
 
 enable_ssl {
     QTOPIAPIM_PRIVATE_HEADERS+=qgooglecontext_p.h

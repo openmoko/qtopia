@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/sql/models/qsqlrelationaldelegate.cpp -->
 <head>
   <title>Qt 4.2: QSqlRelationalDelegate Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -43,8 +44,10 @@
 <h2>Detailed Description</h2>
 <p>The QSqlRelationalDelegate class provides a delegate that is used to display and edit data from a <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a>.</p>
 <p>Unlike the default delegate, QSqlRelationalDelegate provides a combobox for fields that are foreign keys into other tables. To use the class, simply call <a href="qabstractitemview.html#setItemDelegate">QAbstractItemView::setItemDelegate</a>() on the view with an instance of QSqlRelationalDelegate:</p>
-<pre></pre>
-<p>The Relational Table Model example (shown below) illustrates how to use QSqlRelationalDelegate in conjunction with <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> to provide tables with foreign key support.</p>
+<pre>     QTableView *view = new QTableView;
+     view-&gt;setModel(model);
+     view-&gt;setItemDelegate(new QSqlRelationalDelegate(view));</pre>
+<p>The <a href="sql-relationaltablemodel.html">Relational Table Model</a> example (shown below) illustrates how to use QSqlRelationalDelegate in conjunction with <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> to provide tables with foreign key support.</p>
 <p align="center"><img src="images/relationaltable.png" /></p><p>See also <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> and <a href="model-view-programming.html">Model/View Programming</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -56,6 +59,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

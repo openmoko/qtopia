@@ -18,9 +18,12 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
 #include "instruction.h"
 #include "engine.h"
 
+#include <QApplication>
+#include <QPalette>
 
 Instruction::Instruction() {
     precedence = 0;
@@ -36,12 +39,12 @@ void Instruction::eval(){qWarning("empty instruction called");}
 
 QPixmap* Instruction::draw() {
     if (!cache) {
-        QFont myFont = QFont( "helvetica", 11, QFont::Bold );
+        QFont myFont = QFont( "dejavu", 9, QFont::Bold );
         QRect bRect = QFontMetrics(myFont).boundingRect(0,0,240,20,Qt::AlignLeft,displayString);
-        cache = new QBitmap(bRect.size());
-        cache->clear();
+        cache = new QPixmap(bRect.size());
+        cache->fill(Qt::transparent);
         QPainter p(cache);
-        p.setPen(Qt::color1);
+        p.setPen(QApplication::palette().color(QPalette::Text));
         p.setFont(myFont);
         p.drawText(0,0,bRect.width(),bRect.height(),Qt::AlignRight,displayString);
     }

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/model-view-programming.qdoc -->
 <head>
   <title>Qt 4.2: Creating New Models</title>
   <link rel="prev" href="model-view-model.html" />
@@ -37,12 +38,12 @@
 <p>The <a href="qabstractitemmodel.html">QAbstractItemModel</a> class provides an interface that is flexible enough to support data sources that arrange information in hierarchical structures, allowing for the possibility that data will be inserted, removed, modified, or sorted in some way. It also provides support for drag and drop operations.</p>
 <p>The <a href="qabstractlistmodel.html">QAbstractListModel</a> and <a href="qabstracttablemodel.html">QAbstractTableModel</a> classes provide support for interfaces to simpler non-hierarchical data structures, and are easier to use as a starting point for simple list and table models.</p>
 <p>In this chapter, we create a simple read-only model to explore the basic principles of the model/view architecture. Later in this chapter, we will adapt this simple model so that items can be modified by the user.</p>
-<p>For an example of a more complex model, see the Simple Tree Model example.</p>
+<p>For an example of a more complex model, see the <a href="itemviews-simpletreemodel.html">Simple Tree Model</a> example.</p>
 <p>The requirements of <a href="qabstractitemmodel.html">QAbstractItemModel</a> subclasses is described in more detail in the <a href="model-view-model-subclassing.html">Model Subclassing Reference</a> document.</p>
 <a name="designing-a-model"></a>
 <h2>Designing a Model</h2>
 <p>When creating a new model for an existing data structure, it is important to consider which type of model should be used to provide an interface onto the data. If the data structure can be represented as a list or table of items, you can subclass <a href="qabstractlistmodel.html">QAbstractListModel</a> or <a href="qabstracttablemodel.html">QAbstractTableModel</a> since these classes provide suitable default implementations for many functions.</p>
-<p>However, if the underlying data structure can only be represented by a hierarchical tree structure, it is necessary to subclass <a href="qabstractitemmodel.html">QAbstractItemModel</a>. This approach is taken in the Simple Tree Model example.</p>
+<p>However, if the underlying data structure can only be represented by a hierarchical tree structure, it is necessary to subclass <a href="qabstractitemmodel.html">QAbstractItemModel</a>. This approach is taken in the <a href="itemviews-simpletreemodel.html">Simple Tree Model</a> example.</p>
 <p>In this chapter, we will implement a simple model based on a list of strings, so the <a href="qabstractlistmodel.html">QAbstractListModel</a> provides an ideal base class on which to build.</p>
 <p>Whatever form the underlying data structure takes, it is usually a good idea to supplement the standard <a href="qabstractitemmodel.html">QAbstractItemModel</a> API in specialized models with one that allows more natural access to the underlying data structure. This makes it easier to populate the model with data, yet still enables other general model/view components to interact with it using the standard API. The model described below provides a custom constructor for just this purpose.</p>
 <a name="a-read-only-example-model"></a>
@@ -184,6 +185,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

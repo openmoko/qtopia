@@ -4,7 +4,6 @@
 #include <qtranslatablesettings.h>
 #include <QPixmapCache>
 #include <QPainter>
-#include <QDebug>
 
 // could later move all this info into conf file?
 struct MatcherConfig {
@@ -89,7 +88,7 @@ InputMatcher::InputMatcher(const QString &n) : mIndex(null_index), mReplaces(nul
 	index++;
     }
 
-    QStringList cl = chosenLanguages(); 
+    QStringList cl = chosenLanguages();
     // named dictionary.  mIndex is still dict, but name isn't
     if (tmpName.left(5) == "dict-" && cl.indexOf(tmpName.mid(5)) >= 0) {
 	mId = tmpName;
@@ -428,6 +427,8 @@ static InputMatcherFunc funcNameToEnum(const QString &s, QString& arg, bool* sho
 	return insertSpace;
     if (s == "symbol")
 	return insertSymbol;
+    if (s == "changeim")
+        return changeInputMethod;
     return noFunction;
 }
 
@@ -501,14 +502,14 @@ QStringList InputMatcher::searchDict(bool prefixfallback,
 	if (nerror < minError)
 	    minError = nerror;
 
-	if ( !prefix ) {
-	    QStringList deleted = findWords(Qtopia::dawg("deleted").root(),start,end,"",0, prefix, predict).asStringList();
-	    for ( QStringList::ConstIterator i=deleted.begin(); i!=deleted.end(); ++i)
-		r.remove(*i);
-	}
-	if ( !prefixfallback )
-	    break;
+        QStringList deleted = findWords(Qtopia::dawg("deleted").root(),start,end,"",0, prefix, predict).asStringList();
+        for ( QStringList::ConstIterator i=deleted.begin(); i!=deleted.end(); ++i) {
+            r.remove(*i);
+        };
+        if ( !prefixfallback )
+            break;
     }
+
 
     if (me)
 	*me = minError;
@@ -804,7 +805,13 @@ void InputMatcher::init()
 {
     longestEnd = 0;
     qualifiedSets = 0;
+
+    QSettings locale_cfg("Trolltech","locale");
+    locale_cfg.beginGroup("Language");
+    QString current_System_Language = locale_cfg.value("Language").toString();
+
     if (isNamedMode()) {
+        qLog(Input) << "Initializing named mode: "<<mId;
 	QTranslatableSettings cfg(Qtopia::qtopiaDir()+"etc/im/pkim/named_"+mId+".conf", QSettings::IniFormat);
 	if ( cfg.status()==QSettings::NoError ) {
 	    cfg.beginGroup("Buttons");
@@ -812,8 +819,18 @@ void InputMatcher::init()
 	    QString d = cfg.value("Dict").toString();
 	    if ( !d.isEmpty() )
 		dict = d;
-	    else
-		dict = chosenLanguages()[0];
+	    else {
+                // no dictionary found for named mode - default to system setting
+                
+                if(chosenLanguages().contains(current_System_Language))
+                {
+                    dict = current_System_Language;
+                } else {
+                    // no dictionary specified, and no dictionary found for 
+                    // current system language, so default to first language
+                    dict = chosenLanguages()[0];// InputLanguages marker
+                }
+            }
 	    QString m = cfg.value("Mode").toString();
 	    if ( m.isEmpty() ) {
 		mReplaces = abc_index; // "abc"
@@ -852,11 +869,16 @@ void InputMatcher::init()
 	    mId = QString(); // make invalid.
 	}
     } else {
+        // not named mode
 	if (mId.left(5) == "dict-") {
 	    dict = mId.mid(5);
 	} else {
-	    dict = chosenLanguages()[0];
-	}
+            if(chosenLanguages().contains(current_System_Language)) {
+                dict = current_System_Language;
+            } else {
+                dict = chosenLanguages()[0];// InputLanguages marker
+            };
+        }
 
 	mLookup = validNames[mIndex].lookup;
 
@@ -968,16 +990,32 @@ void InputMatcherSet::populate()
 	index++;
     }
 
+    QSettings cfg("Trolltech","locale");
+    cfg.beginGroup("Language");
+    QString current_System_Language = cfg.value("Language").toString();
+
     // load up dictionaries.
     QStringList cl = InputMatcher::chosenLanguages();
     QStringList::Iterator it = cl.begin();
-    ++it; // skip the first.
+
     while(it != cl.end()) {
+        // skip the current system language
+        if(*it == current_System_Language){
+            ++it;
+            continue;
+        }
+        
 	mModes.append(new InputMatcher("dict-"+(*it)));
+        // check if this mode matches the system language, and if so set it as default
+        if(*it == current_System_Language)
+            current = mModes.last();
 	++it;
     }
 
-    current = mModes.first();
+    if(!current){
+        qWarning() << "Didn't find dictionary for system language. Defaulting to first found.";
+        current = mModes.first();
+    }
 }
 
 InputMatcherSet::~InputMatcherSet()
@@ -993,15 +1031,26 @@ void InputMatcherSet::checkDictionaries()
     // load up dictionaries.
     QStringList cl = InputMatcher::chosenLanguages();
     QStringList::Iterator it;
+
+    // Get the current system language so we can avoid creating a redundant mode
+    QSettings cfg("Trolltech","locale");
+    cfg.beginGroup("Language");
+    QString current_System_Language = cfg.value("Language").toString();
+    
     // first remove ones from mMode that are not chosen.
-	// 
     QListIterator<InputMatcher*> mit(mModes);
     while ( mit.hasNext()) {
 	if (mit.peekNext()->id().left(5) == "dict-") {
+            
 	    it = cl.begin();
-	    ++it; // skip the first.
 	    bool keep = FALSE;
+
 	    while(it != cl.end()) {
+                // skip the current system language
+                if(*it == current_System_Language){
+                    ++it;
+                    continue;
+                }
 		if (mit.peekNext()->id() == "dict-"+(*it)) {
 		    // remove from list so not added later.
 		    cl.erase(it);
@@ -1010,6 +1059,7 @@ void InputMatcherSet::checkDictionaries()
 		}
 		++it;
 	    }
+            
 	    if (keep) {
 		mit.next();
 	    } else {
@@ -1031,10 +1081,11 @@ void InputMatcherSet::checkDictionaries()
 
     // then put the ones chosen back in. Only ones not already in
     // list are in cl, others removed above.
+    // Also, don't add a mode that matches the current system language,
+    // because that's already covered by plain "dict" mode
     it = cl.begin();
-    ++it; // skip the first.
     while(it != cl.end()) {
-	mModes.append(new InputMatcher("dict-"+(*it)));
+        if(*it != current_System_Language) mModes.append(new InputMatcher("dict-"+(*it)));
 	++it;
     }
     if (!current) {

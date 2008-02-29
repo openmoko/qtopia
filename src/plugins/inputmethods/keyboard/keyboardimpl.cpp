@@ -141,27 +141,23 @@ QList<QIMActionDescription*> KeyboardInputMethod::menuDescription()
     QList<QIMActionDescription*> descriptionList;
     QIMActionDescription* keyboardActionDescription = new QIMActionDescription;
     // First item of more than one is the menu item, and will never be called
-    keyboardActionDescription->setId(-1);
+    keyboardActionDescription->setId(Keyboard::RootItem);
     keyboardActionDescription->setLabel(tr("Keyboard"));
     keyboardActionDescription->setIconFileName(QString(":icon/keyboard"));
     descriptionList.append(keyboardActionDescription);
 
-    keyboardActionDescription = new QIMActionDescription(1,tr("Swap Keyboard Postion"),QString(":icon/rotate"));
-    descriptionList.append(keyboardActionDescription);
-
     if(input->frame()->isVisible()){
         keyboardActionDescription = new QIMActionDescription;        
-        keyboardActionDescription->setId(3);
+        keyboardActionDescription->setId(Keyboard::HideKeyboard);
         keyboardActionDescription->setLabel(("Hide Keyboard"));
         keyboardActionDescription->setIconFileName(QString(":icon/stop"));
         descriptionList.append(keyboardActionDescription);
     } else {
-        keyboardActionDescription = new QIMActionDescription(2, tr("Show Keyboard"), QString(":icon/keyboard"));
+        keyboardActionDescription = new QIMActionDescription(Keyboard::ShowKeyboard, tr("Show Keyboard"), QString(":icon/keyboard"));
         descriptionList.append(keyboardActionDescription);
     };
 
     return descriptionList;
-
 };
 
 

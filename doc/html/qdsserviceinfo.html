@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QDSServiceInfo Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QDSServiceInfo Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDSServiceInfo Class Reference</h1>
 <p>The QDSServiceInfo class encapsulates the description of a QDS service <a href="#details">More...</a></p>
-<pre>    #include &lt;QDSServiceInfo&gt;</pre><ul>
+<pre>#include &lt;QDSServiceInfo&gt;</pre><ul>
 <li><a href="qdsserviceinfo-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -55,7 +54,7 @@
 </ul>
 <p>Each QDS service must have a unique combination of QDS service name and Qtopia service. The QDS service name must only contain alphanumeric characters.</p>
 <p>The description for a QDS service is obtained from the service file <tt>&lt;Qtopia Runtime Prefix&gt;/etc/qds/&lt;qtopia_service&gt;</tt>. Each QDS service in a Qtopia service should be included in the one service file, and should follow the form below:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaServices
     Context=Contacts
     [setContactImage]
@@ -73,7 +72,7 @@
     Description[]=Beam VCard
     Icon=beam</pre>
 <p>A QDS service can support multiple data types for both the request and response data. The types can be listed individually in the service file, and wildcards can be used. This is demonstrated in the service file below:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaServices
     Context=Contacts
     [setContactImage]
@@ -91,7 +90,7 @@
     Description[]=Beam VCard
     Icon=beam</pre>
 <p>The QDS service should also be included in the actions section of the Qtopia service description, for the QDS services list above the <tt>&lt;Qtopia Runtime Prefix&gt;/services/Contacts.service</tt> file would look like:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaServices
     Context=Contacts
     [Service]
@@ -143,6 +142,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

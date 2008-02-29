@@ -37,26 +37,22 @@ public:
     QUniqueId(const QUniqueId &o);
     explicit QUniqueId(const QString &s);
     explicit QUniqueId(const QByteArray &);
-    explicit QUniqueId(uint);
 
     uint index() const;
     QUuid context() const;
-    QUuid device() const;
+
+    uint mappedContext() const;
 
     QUniqueId operator=(const QUniqueId &o);
 
-    bool operator==(const QUniqueId &o) const
-    { return mId == o.mId && mContext == o.mContext; }
-    bool operator!=(const QUniqueId &o) const
-    { return mId != o.mId || mContext != o.mContext; }
+    bool operator==(const QUniqueId &o) const { return mId == o.mId; }
+    bool operator!=(const QUniqueId &o) const { return mId != o.mId; }
 
     // these are not really useful, and could be harmful.
-    bool operator<(QUniqueId o) const
-        { return mContext == o.mContext ? mId < o.mId : mContext < o.mContext; }
-    bool operator>(QUniqueId o) const
-        { return mContext == o.mContext ? mId > o.mId : mContext > o.mContext; }
-    bool operator<=(QUniqueId o) const { return *this == o || *this < o; }
-    bool operator>=(QUniqueId o) const { return *this == o || *this > o; }
+    bool operator<(QUniqueId o) const { return mId < o.mId; }
+    bool operator>(QUniqueId o) const { return mId > o.mId; }
+    bool operator<=(QUniqueId o) const { return mId <= o.mId; }
+    bool operator>=(QUniqueId o) const { return mId >= o.mId; }
 
     bool isNull() const { return mId == 0; }
 
@@ -65,23 +61,30 @@ public:
     QString toString() const;
     QByteArray toByteArray() const;
 
+    uint toUInt() const;
+    static QUniqueId fromUInt(uint);
+
     template <typename Stream> void serialize(Stream &stream) const;
     template <typename Stream> void deserialize(Stream &stream);
 
-protected:
-    // automatically reversable via constructors, which can detect format.
     QString toLocalContextString() const;
     QByteArray toLocalContextByteArray() const;
+
+    static QUniqueId constructApplicationLocalUniqueId();
+
+protected:
+    // automatically reversable via constructors, which can detect format.
 #ifndef QT_NO_DATASTREAM
     QDataStream &fromLocalContextDataStream( QDataStream & );
     QDataStream &toLocalContextDataStream( QDataStream & ) const;
 #endif
 
 private:
-    uint mContext; // covers both device and context.
+    void setContext(uint context);
+    void setIndex(uint index);
+    void setIdentity(uint context, uint index);
     uint mId;
 
-    static QUuid deviceId();
     static QUuid legacyIdContext();
     static QUuid temporaryIDContext();
 
@@ -90,34 +93,10 @@ private:
 
 inline uint qHash(const QUniqueId &uid) { return uid.mId; }
 
-class QTOPIA_EXPORT QLocalUniqueId : public QUniqueId
-{
-public:
-    QLocalUniqueId() : QUniqueId() {}
-    QLocalUniqueId(const QUniqueId &o) : QUniqueId(o) {}
-    QLocalUniqueId(const QLocalUniqueId &o) : QUniqueId(o) {}
-    QLocalUniqueId(const QString &s) : QUniqueId(s) {}
-    QLocalUniqueId(const QByteArray &b) : QUniqueId(b) {}
-
-    QString toString() const { return toLocalContextString(); }
-    QByteArray toByteArray() const { return toLocalContextByteArray(); }
-
-#ifndef QT_NO_DATASTREAM
-    QDataStream &fromLocalContextDataStream( QDataStream &s )
-        { return QUniqueId::fromLocalContextDataStream(s); }
-    QDataStream &toLocalContextDataStream( QDataStream &s ) const
-        { return QUniqueId::toLocalContextDataStream(s); }
-    friend QTOPIA_EXPORT QDataStream &operator>>( QDataStream &, QUniqueId & );
-    friend QTOPIA_EXPORT QDataStream &operator<<( QDataStream &, const QUniqueId & );
-#endif
-};
-
-
 class QTOPIA_EXPORT QUniqueIdGenerator
 {
 public:
     QUniqueIdGenerator(const QUuid &context);
-    QUniqueIdGenerator(const QUuid &device, const QUuid &context);
     QUniqueIdGenerator(const QUniqueIdGenerator &other);
 
     ~QUniqueIdGenerator();
@@ -129,6 +108,7 @@ public:
 
     static QUniqueId temporaryID(uint);
 
+    static uint mappedContext(const QUuid &context);
 private:
     uint mContext; // a combination of device mapped and scope mapped context.
     uint mLastId;

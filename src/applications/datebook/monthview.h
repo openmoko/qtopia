@@ -48,7 +48,7 @@ class MonthView : public QCalendarWidget
     Q_OBJECT
 
 public:
-    MonthView(QWidget *parent = 0);
+    MonthView(QWidget *parent = 0, const QCategoryFilter& c = QCategoryFilter());
     ~MonthView();
 
 public slots:

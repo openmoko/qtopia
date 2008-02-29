@@ -25,7 +25,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QtDebug>
-
+#include <qtopialog.h>
 
 /**
   Base constructor
@@ -73,16 +73,14 @@ PackageInformationReader::PackageInformationReader(const QString& fName)
     // open file for reading
     QFile file(fileName);
 
-    int pos = fileName.indexOf( QString( "/" ) + AbstractPackageController::INFORMATION_FILE );
-    if ( pos > 0 )  // contains a path to a control file, at least 1 char before the "/"
-    {
-        int dirNamePos = fileName.lastIndexOf( "/", pos - fileName.length() - 1 );
-        // default the package name to the directory above the control file
-        pkg.name = fileName.mid( dirNamePos + 1, pos - dirNamePos - 1 );
-    }
     if (!file.exists()) {
+        //assumption that control file has md5 in it's full filename, use as default name
+        int pos = fileName.lastIndexOf( "/" );
+        pkg.name = fileName.mid( pos + 1, 32 ); //32 chars is length of md5 digest
         pkg.status = (InstallControl::InstallStatus)( InstallControl::PartlyInstalled | InstallControl::Error );
         pkg.description = fileName + " does not exist";
+        isError = true;
+        qLog( Package ) << pkg.description;
         return;
     }
 
@@ -95,8 +93,11 @@ PackageInformationReader::PackageInformationReader(const QString& fName)
 
         readLine( line );
     }
-    if ( !pkg.isComplete() )
+    if ( !pkg.isComplete( true ) )
+    {
         pkg.status = (InstallControl::InstallStatus)( InstallControl::PartlyInstalled | InstallControl::Error );
+        isError = true;
+    }
 }
 
 void PackageInformationReader::reset()
@@ -111,6 +112,7 @@ void PackageInformationReader::reset()
     pkg.trust = QString::null;
     pkg.files.clear();
     pkg.url = QString();
+    pkg.qtopiaVersion = QString::null;
     error = QString::null;
     isError = false;
     hasContent = false;
@@ -219,6 +221,11 @@ void PackageInformationReader::readLine( const QString &line )
     {
         pkg.url = lineStr.mid( colon ).trimmed();
         if ( !pkg.url.isEmpty() ) hasContent = true;
+    }
+    else if ( lineStr.startsWith( QLatin1String( "QtopiaVersion:" ), Qt::CaseInsensitive ))
+    {
+        pkg.qtopiaVersion = lineStr.mid( colon ).trimmed();
+        if ( !pkg.qtopiaVersion.isEmpty() ) hasContent = true;
     }
     else
     {

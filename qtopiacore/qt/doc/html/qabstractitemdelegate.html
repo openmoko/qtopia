@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/itemviews/qabstractitemdelegate.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qabstractitemdelegate.cpp -->
 <head>
   <title>Qt 4.2: QAbstractItemDelegate Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -66,7 +66,7 @@
 <p>To render an item in a custom way, you must implement <a href="qabstractitemdelegate.html#paint">paint</a>() and <a href="qabstractitemdelegate.html#sizeHint">sizeHint</a>(). The <a href="qitemdelegate.html">QItemDelegate</a> class provides default implementations for these functions; if you do not need custom rendering, subclass that class instead.</p>
 <p>To provide custom editing, there are two approaches that can be used. The first approach is to create an editor widget and display it directly on top of the item. To do this you must reimplement <a href="qabstractitemdelegate.html#createEditor">createEditor</a>() to provide an editor widget, <a href="qabstractitemdelegate.html#setEditorData">setEditorData</a>() to populate the editor with the data from the model, and <a href="qabstractitemdelegate.html#setModelData">setModelData</a>() so that the delegate can update the model with data from the editor.</p>
 <p>The second approach is to handle user events directly by reimplementing <a href="qabstractitemdelegate.html#editorEvent">editorEvent</a>().</p>
-<p>See also <a href="model-view-programming.html">Model/View Programming</a>, <a href="qitemdelegate.html">QItemDelegate</a>, and Pixelator Example.</p>
+<p>See also <a href="model-view-programming.html">Model/View Programming</a>, <a href="qitemdelegate.html">QItemDelegate</a>, and <a href="itemviews-pixelator.html">Pixelator Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="EndEditHint-enum"></a>enum QAbstractItemDelegate::EndEditHint</h3>
@@ -104,6 +104,7 @@
 <h3 class="fn"><a name="createEditor"></a><a href="qwidget.html">QWidget</a> * QAbstractItemDelegate::createEditor ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the editor to be used for editing the data item with the given <i>index</i>. Note that the index contains information about the model being used. The editor's parent widget is specified by <i>parent</i>, and the item options by <i>option</i>.</p>
 <p>The base implementation returns 0. If you want custom editing you will need to reimplement this function.</p>
+<p>The returned editor widget should have <a href="qt.html#FocusPolicy-enum">Qt::StrongFocus</a>; otherwise, <a href="qmouseevent.html">QMouseEvent</a>s received by the widget will propagate to the view. The view's background will shine through unless the editor paints its own background (e.g., with <a href="qwidget.html#autoFillBackground-prop">setAutoFillBackground()</a>).</p>
 <p>See also <a href="qabstractitemdelegate.html#setModelData">setModelData</a>() and <a href="qabstractitemdelegate.html#setEditorData">setEditorData</a>().</p>
 <h3 class="fn"><a name="editorEvent"></a>bool QAbstractItemDelegate::editorEvent ( <a href="qevent.html">QEvent</a> * <i>event</i>, <a href="qabstractitemmodel.html">QAbstractItemModel</a> * <i>model</i>, const <a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a> &amp; <i>option</i>, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Whenever an event occurs, this function is called with the <i>event</i> <i>model</i> <i>option</i> and the <i>index</i> that corresponds to the item being edited.</p>
@@ -129,6 +130,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -85,6 +85,7 @@ void LazyContentStack::back()
     } else {
         raiseView(m_viewStack.top(), false);
     }
+    notBusy();
 }
 
 bool LazyContentStack::isDone() const
@@ -348,6 +349,20 @@ LauncherView *PhoneBrowserStack::createAppView(const QString &category)
     tv.view = new ApplicationLauncherView(categoryId, stack);
     tv.view->setObjectName(category);
 
+    if ( category == "Applications" )
+    {
+        QCategoryManager manager("Applications");
+        manager.addCategory( "Packages", "Packages", "qpe/AppsIcon", false, true );
+        QContent *content = new QContent();
+        content->setType("Folder/Packages");
+        content->setName( tr("Installed Apps"));
+        content->setRole(QContent::Application);
+        content->setIcon( "qpe/AppsIcon" );
+
+        tv.view->addItem( content, true );
+        delete content;
+    }
+
     QFont f(font());
     f.setWeight(QFont::Bold);
     tv.view->setFont(f);
@@ -466,7 +481,7 @@ void PhoneMainMenu::makeLauncherMenu(QSettings &cfg)
     const int menuc = cfg.value("Columns",3).toInt();
     menuKeyMap = cfg.value("Map","123456789").toString();
 
-    qLog(Performance) << "UI :  " << "Creating PhoneMainMenu: "
+    qLog(Performance) << "UI :  " << "Creating PhoneMainMenu : "
                       << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
     qLog(UI) << "PhoneMainMenu:";
@@ -552,7 +567,7 @@ void PhoneMainMenu::makeLauncherMenu(QSettings &cfg)
     // just to get help for the main menu
     (void)QSoftMenuBar::menuFor(this);
 
-    qLog(Performance) << "UI :  " << "PhoneMainMenu created: "
+    qLog(Performance) << "UI :  " << "PhoneMainMenu created : "
                       << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
     cfg.endGroup();
@@ -563,20 +578,24 @@ QContent *PhoneMainMenu::readLauncherMenuItem(const QString &entry)
     QContent *applnk = 0;
 
     if (entry.right(8)==".desktop") {
-        // This is a bit of a hack, but will work since Qtopia
-        // relies on unique binary names, as long as the desktop file name is
-        // the same as the binary name.  Next check in we fix the .conf files.
-        QString exec = entry;
-        exec.chop( 8 );
-        if ( exec.contains( "/" ))
-            exec.remove( 0, exec.lastIndexOf( "/" ) + 1 );
-        QContentId id = QContent::execToContent( exec );
-        if ( id != QContent::InvalidId )
-        {
-            applnk = new QContent( id );
-            if ( applnk->type() == "Separator" ) { // No tr
-                delete applnk;
-                applnk = 0;
+        // There used to be a quick way to locate a .desktop file
+        // Now we have to create a QContentSet and iterate over the items
+
+        // The path to the apps folder (which only exists in the database)
+        QString apps = Qtopia::qtopiaDir()+"apps/";
+        // We need the full path to the entry to compare against the items we get from QContentSet
+        QString entryPath = apps+entry;
+        // This is the path we're going to search
+        QString folder = apps+QFileInfo(entry).dir().dirName();
+        QContentSet set( QContentFilter(QContentFilter::Directory, folder) );
+        // The documentation says that items() is expensive. It mentions
+        // getting a pointer from a model but didn't contain a link to the
+        // appropriate documentation.
+        foreach ( const QContent &content, set.items() ) {
+            if ( content.linkFile() == entryPath ) {
+                // Yay. We found it!
+                applnk = new QContent( content );
+                break;
             }
         }
     } else if (entry == "Documents") { // No tr

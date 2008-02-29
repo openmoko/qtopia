@@ -78,10 +78,9 @@ public:
     virtual QUuid id() const = 0;
 
     virtual bool exists(const QUniqueId &) const = 0;
-    virtual bool exists(const QUniqueId &id, const QPimSource &source)
+    virtual bool exists(const QUniqueId &id, const QPimSource &source) const
     {
-        Q_UNUSED(source);
-        return exists(id);
+        return !source.isNull() && (this->source(id) == source) && exists(id);
     }
     virtual QPimSource source(const QUniqueId &) const = 0;
 
@@ -123,8 +122,8 @@ public:
     virtual QUniqueId addAppointment(const QAppointment &, const QPimSource &) = 0;
 
     virtual bool removeOccurrence(const QUniqueId &original, const QDate &) = 0;
-    virtual QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &) = 0;
-    virtual QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &) = 0;
+    virtual QUniqueId replaceOccurrence(const QUniqueId &original, const QOccurrence &, const QDate& = QDate()) = 0;
+    virtual QUniqueId replaceRemaining(const QUniqueId &original, const QAppointment &, const QDate& = QDate()) = 0;
 
     virtual QList<QAppointment> exportAppointments(const QPimSource &, bool &ok) const { ok = false; return QList<QAppointment>(); }
     virtual bool importAppointments(const QPimSource &, const QList<QAppointment> &) { return false; }

@@ -37,6 +37,7 @@ public:
 
     virtual QStringList keys() const;
     virtual bool installContent( const QString &filePath, QContent *content );
+    virtual bool updateContent( QContent *content );
 
 private:
     QString name( const QString &filePath, Id3Tag &tag ) const;

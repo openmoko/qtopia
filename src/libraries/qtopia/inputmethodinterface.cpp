@@ -51,13 +51,21 @@
 
     The \a id attribute will be passed back to the input method via
     \c menuActionActivated(), in order to differentiate different actions,
-    so the id field must be unique for each action in an input-method.  Also
-    note that 0 is returned if the server is unable to determine which action
-    was selected, so this should not be used as an id value.
+    so the id field must be unique for each action in an input-method. 
+
+    \bold {Note:} 0 is reserved for an unkown or unrecognised menu actions,
+    and negative id values are reserved for system menus.  Using these values
+    is not recommended.
 
     As a simple data storage class the data fields are public (like a struct).
-    However, in most cases IMActionDescriptions should simply be created and
-    passed to the server, with little or no manipulation.
+    
+    IMActionDescriptions should be created on the heap.
+    The server expects lists of pointers to QIMActionDescriptions, and will 
+    delete them when it is finished with them.  If constructing the 
+    QIMActionDescriptions is expensive for some reason, the copy constructor 
+    is very fast, and can be used safely.
+
+    \sa QtopiaInputMethod
 
   \ingroup userinput
 */

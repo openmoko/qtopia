@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -192,11 +202,6 @@ void QWidgetPrivate::create_sys(WId window, bool initializeWindow, bool /*destro
             topextra->frameStrut.setCoords(0, 0, 0, 0);
         }
 #endif
-        // declare the widget's object name as window role
-
-        qt_fbdpy->addProperty(id,QT_QWS_PROPERTY_WINDOWNAME);
-        qt_fbdpy->setProperty(id,QT_QWS_PROPERTY_WINDOWNAME,0,q->objectName().toLatin1());
-
         if (!topextra->caption.isEmpty())
             setWindowTitle_helper(topextra->caption);
 
@@ -631,6 +636,28 @@ static Qt::WindowStates effectiveState(Qt::WindowStates state)
      return Qt::WindowNoState;
  }
 
+void QWidgetPrivate::setMaxWindowState_helper()
+{
+    // in_set_window_state is usually set in setWindowState(), but this
+    // function is used in other functions as well
+    // (e.g QApplicationPrivate::setMaxWindowRect())
+    const uint old_state = data.in_set_window_state;
+    data.in_set_window_state = 1;
+
+#ifndef QT_NO_QWS_MANAGER
+    if (extra && extra->topextra && extra->topextra->qwsManager)
+        extra->topextra->qwsManager->maximize();
+    else
+#endif
+    {
+        Q_Q(QWidget);
+        const QApplicationPrivate *ap = QApplicationPrivate::instance();
+        const QRect maxWindowRect = ap->maxWindowRect(getScreen());
+        q->setGeometry(maxWindowRect);
+    }
+    data.in_set_window_state = old_state;
+}
+
 void QWidget::setWindowState(Qt::WindowStates newstate)
 {
     Q_D(QWidget);
@@ -670,16 +697,7 @@ void QWidget::setWindowState(Qt::WindowStates newstate)
             needShow = true;
         } else if (newEffectiveState == Qt::WindowMaximized) {
             createWinId();
-#ifndef QT_NO_QWS_MANAGER
-            if (d->extra && d->extra->topextra && d->extra->topextra->qwsManager)
-                d->extra->topextra->qwsManager->maximize();
-            else
-#endif
-            {
-                QApplicationPrivate *ap = QApplicationPrivate::instance();
-                const QRect maxWindowRect = ap->maxWindowRect(d->getScreen());
-                setGeometry(maxWindowRect);
-            }
+            d->setMaxWindowState_helper();
         } else { //normal
             QRect r = d->topData()->normalGeometry;
             if (r.width() >= 0) {

@@ -144,6 +144,11 @@ bool DrmSession::isMuted() const
     return d->mediaSession->isMuted();
 }
 
+QtopiaMedia::State DrmSession::playerState() const
+{
+    return d->mediaSession->playerState();
+}
+
 QString DrmSession::errorString()
 {
     return d->mediaSession->errorString();

@@ -34,7 +34,7 @@
 // Qtopia includes
 #include <Qtopia>
 #include <QMimeType>
-#include <QLocalUniqueId>
+#include <QUniqueId>
 #include <qtopiaglobal.h>
 
 // ============================================================================
@@ -78,7 +78,7 @@ public:
     bool isAvailable() const;
     bool isActive() const;
 
-    QLocalUniqueId id() const;
+    QUniqueId id() const;
     const QDSServiceInfo& serviceInfo() const;
     QDSData responseData() const;
     QString errorMessage() const;
@@ -92,9 +92,9 @@ public:
               const QByteArray& auxiliary = QByteArray() );
 
 signals:
-    void response( const QLocalUniqueId& actionId );
-    void response( const QLocalUniqueId& actionId, const QDSData& responseData );
-    void error( const QLocalUniqueId& actionId, const QString& message );
+    void response( const QUniqueId& actionId );
+    void response( const QUniqueId& actionId, const QDSData& responseData );
+    void error( const QUniqueId& actionId, const QString& message );
 
 private:
     QDSActionPrivate* d;

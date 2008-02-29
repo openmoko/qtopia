@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qt4.2-intro.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qt4.2-intro.qdoc -->
 <head>
   <title>Qt 4.2: What's New in Qt 4.2</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -14,7 +14,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">What's New in Qt 4.2<br /><small></small></h1>
 <p>Qt 4.2 provides many improvements and enhancements over the previous releases in the Qt 4 series. This documents covers the most important features in this release, separated by category.</p>
-<p>Since we will continue to improve and fine-tune Qt as a result of feedback and suggestions from customers and the open source community, we have not included a detailed list of changes between Qt 4.1 and this release. A comprehensive list of changes between Qt 4.1 and Qt 4.2 will be included in the Qt 4.2 final release.</p>
+<p>A comprehensive list of changes between Qt 4.1 and Qt 4.2 is included in the <tt>changes-4.2.3</tt> file provided with Qt, and is also <a href="http://www.trolltech.com/developer/notes/changes/changes-4.2.3">available online</a>.</p>
 <p>A list of other Qt 4 features can be found on the <b><a href="qt4-intro.html">What's New in Qt 4</a></b> page.</p>
 <p><b>Highlights</b></p>
 <ul><li><a href="#graphics-view">Graphics View</a></li>
@@ -34,7 +34,7 @@
 <p align="center"><img src="images/elasticnodes-example.png" /></p><p>An <b>improved API</b> aims to make common uses easier while making advanced uses more accessible to developers.</p>
 <p align="center"><img src="images/graphicsview-map.png" /></p><p>Graphics View's <b>enhanced presentation system</b>, takes advantage of Qt 4's paint system to render items using anti-aliasing, and taking advantage of OpenGL to improve rendering performance. Support for printing is built into the framework, making it possible to produce high quality documents from interactive applications.</p>
 <p align="center"><img src="images/graphicsview-text.png" /></p><p>A selection of <b>predefined item types</b> is provided that contains, amongst others, a text item that supports inline editing.</p>
-<p>In addition, various graphics view examples have been written to demonstrate key features of the framework, including ports of Canvas module examples from Qt 3.</p>
+<p>In addition, various <a href="examples.html#graphics-view-examples">graphics view examples</a> have been written to demonstrate key features of the framework, including ports of Canvas module examples from Qt 3.</p>
 <a name="desktop-integration"></a>
 <h2>Desktop Integration</h2>
 <p>This release introduces a set of features that are designed to make it easier to write applications that are integrated into users' desktop environments.</p>
@@ -65,7 +65,7 @@
 <p><b>System tray support</b> on all desktop platforms is provided by the new <a href="qsystemtrayicon.html">QSystemTrayIcon</a> class, which exposes a comprehensive set of features via an intuitive Qt-style API.</p>
 <a name="text-completion-framework"></a>
 <h2>Text Completion Framework</h2>
-<p align="center"><img src="images/completer-example.png" /></p><p>The new <a href="qcompleter.html">QCompleter</a> class provides a <b>framework for handling text completion in input widgets</b>. Completion facilities can be set up for use in <a href="qlineedit.html">QLineEdit</a>, <a href="qcombobox.html">QComboBox</a> and custom widgets. An example is included which shows how text completion can be used with a selection of different models and data sets.</p>
+<p align="center"><img src="images/completer-example.png" /></p><p>The new <a href="qcompleter.html">QCompleter</a> class provides a <b>framework for handling text completion in input widgets</b>. Completion facilities can be set up for use in <a href="qlineedit.html">QLineEdit</a>, <a href="qcombobox.html">QComboBox</a> and custom widgets. An <a href="tools-completer.html">example is included</a> which shows how text completion can be used with a selection of different models and data sets.</p>
 <a name="widget-style-sheets"></a>
 <h2>Widget Style Sheets</h2>
 <p><b>Widgets can be styled using style sheets</b> that follow a syntax similar to that used by Cascading Style Sheets (CSS) for HTML. Many of the more common customizations to widget styles can be made using style sheets, making it largely unnecessary for developers to create entire custom widget styles with <a href="qstyle.html">QStyle</a> subclasses.</p>
@@ -91,7 +91,7 @@
   </table>
   <p>A <a href="qfontcombobox.html">specialized font combobox</a> is now available for use in text editing and related applications.</p>
 <p align="center"><img src="images/qcalendarwidget-maximum.png" /></p><p>Facilities for <b>displaying monthly calendars and date selection</b> are provided by <a href="qcalendarwidget.html">QCalendarWidget</a>, a class adapted from the <a href="http://www.trolltech.com/products/qt/addon/solutions/catalog/4/Widgets/qtcalendarwidget/">Calendar Widget</a> Qt Solution.</p>
-<p>The <b><a href="application.html">main window classes</a> have been updated to be more responsive to user activity</b>. In particular, when a user moves a floating dock window over a dock area by the user, any other dock windows in that area will automatically make room to allow it to be dropped there. These enhancements can be seen in the Dock Widgets example.</p>
+<p>The <b><a href="application.html">main window classes</a> have been updated to be more responsive to user activity</b>. In particular, when a user moves a floating dock window over a dock area by the user, any other dock windows in that area will automatically make room to allow it to be dropped there. These enhancements can be seen in the <a href="mainwindows-dockwidgets.html">Dock Widgets</a> example.</p>
 <p><b>Access to OpenGL framebuffer objects</b> is provided by the <a href="qglframebufferobject.html">QGLFramebufferObject</a> class; this enables textures to be painted with a series of calls to <a href="qpainter.html">QPainter</a> functions in the usual way for <a href="qpaintdevice.html">QPaintDevice</a> subclasses.</p>
 <p><b>Improved support for platform-native message boxes</b> is provided by QMessageBoxEx. This class uses <a href="qdialogbuttonbox.html">QDialogButtonBox</a> to positioned buttons using the appropriate conventions for the user's platform and desktop environment.</p>
 <a name="extended-infrastructure"></a>
@@ -120,6 +120,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

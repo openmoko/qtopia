@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/emb-porting.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/emb-porting.qdoc -->
 <head>
   <title>Qt 4.2: Porting Qtopia Core to a New Architecture</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -28,11 +28,11 @@
 <h2>Atomic Operations</h2>
 <p>Using Qt/Embedded, Linux was always supported as long as you had a compiler for the architecture. Starting with Qt 4.0 and <a href="qtopiacore.html">Qtopia Core</a>, Qt uses an optimization called <a href="shared.html">implicit sharing</a> for many of its value classes; implicitly shared classes can safely be copied across threads. This technology is implemented using atomic operations.i.e., <a href="qtopiacore.html">Qtopia Core</a> requires that platform-specific atomic operations are implemented to support Linux.</p>
 <p>When porting <a href="qtopiacore.html">Qtopia Core</a> to a new architecture, it is important to ensure that the platform-specific atomic operations are implemented in a corresponding header file, and that this file is located in Qt's <tt>src/corelib/arch</tt> directory.</p>
-<p>See the atomic operations documentation for more details.</p>
+<p>See the <a href="atomic-operations.html">atomic operations</a> documentation for more details.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 CREATE TABLE contactphonenumbers (
     phone_number TEXT NOT NULL,
-    recid BLOB,
+    recid INTEGER,
     phone_type INT,
     FOREIGN KEY(recid) REFERENCES contacts(recid)
 );

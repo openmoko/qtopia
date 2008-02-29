@@ -8,3 +8,4 @@ CREATE TABLE categories (
 INSERT INTO categories (categoryid, categorytext, flags) VALUES('Business', 'Business', 1);
 INSERT INTO categories (categoryid, categorytext, flags) VALUES('Personal', 'Personal', 1);
 INSERT INTO categories (categoryid, categorytext, categoryscope, flags) VALUES('SystemRingtones', 'SystemRingtones', 'System', 1);
+INSERT INTO categories (categoryid, categorytext, categoryscope, flags) VALUES('SystemWallpapers', 'SystemWallpapers', 'System', 1);

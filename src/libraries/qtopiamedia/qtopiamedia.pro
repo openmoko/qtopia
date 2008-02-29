@@ -71,6 +71,5 @@ qt_inc($$TARGET)
 
 headers.files = $$HEADERS
 headers.path = /include/qtopia/qtopiamedia
-headers.hint = headers
-
+headers.hint = headers sdk
 INSTALLS += headers

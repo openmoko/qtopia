@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Build System User Guide</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Build System User Guide</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -54,13 +53,13 @@
 <a name="terminology"></a>
 <h2>Terminology</h2>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Term</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>Qt</td><td><ul>
+<tr valign="top" bgcolor="#a2c511"><th>Term</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Qt</td><td><ul>
 <li>The name of Trolltech's GUI toolkit for desktop systems.</li>
 <li>This is also referred to as Qt (host) and <tt>qtopiacore</tt> (host).</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>Qtopia Core</td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td>Qtopia Core</td><td><ul>
 <li>The name given to Qt when it is run on embedded Linux systems.</li>
 <li>Features additional functionality not present in the desktop version.</li>
 <li>It does not run under an existing windowing system.</li>
@@ -68,29 +67,29 @@
 <li>This is also referred to as Qt (target) and <tt>qtopiacore</tt> (target).</li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td>source tree</td><td><ul>
+<tr valign="top" bgcolor="#f0f0f0"><td>source tree</td><td><ul>
 <li>Where source code is located. This can be the same as the build tree.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>build tree</td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td>build tree</td><td><ul>
 <li>Where build files are located. This can be the same as the source tree.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td>project root</td><td><ul>
+<tr valign="top" bgcolor="#f0f0f0"><td>project root</td><td><ul>
 <li>The Qtopia source tree is split into a number of areas called project roots.</li>
 <li>Generally, files are found relative to a project root.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>project</td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td>project</td><td><ul>
 <li>A project is a directory that contains a .pro file.</li>
 <li>Typically represents an application, library or plug-in to be built.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td>internal project</td><td><ul>
+<tr valign="top" bgcolor="#f0f0f0"><td>internal project</td><td><ul>
 <li>This is a project inside the Qtopia tree.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>external project</td><td><ul>
+<tr valign="top" bgcolor="#e0e0e0"><td>external project</td><td><ul>
 <li>This is a project outside the Qtopia tree.</li>
 </ul>
 </td></tr>
@@ -122,15 +121,15 @@
 <h3>What is the Build System?</h3>
 <p>For definition purposes, the build system comprises the following files:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>File</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>configure</tt></td><td>The initial entry point into the build system used to set up the build tree.</td></tr>
-<tr valign="top" class="even"><td><tt>bin/qtopiamake</tt></td><td>Called by <tt>configure</tt> and doubles as the the initial entry point for external projects.</td></tr>
-<tr valign="top" class="odd"><td><tt>bin/*.pm</tt></td><td>Support modules for the perl scripts that comprise the build system.</td></tr>
-<tr valign="top" class="even"><td><tt>Makefile</tt></td><td>Second entry point into the build system. Makefiles are created by <tt>qtopiamake</tt>.</td></tr>
-<tr valign="top" class="odd"><td><tt>Makefile.target</tt></td><td>File created by <tt>qmake</tt> for each project. It should not be called directly.</td></tr>
-<tr valign="top" class="even"><td><tt>*.pro</tt></td><td>File read by <tt>qmake</tt> when it makes <tt>Makefile.target</tt>. There is one of these files for each project.</td></tr>
-<tr valign="top" class="odd"><td><tt>*.prf</tt></td><td>Features files that can be loaded explicitly but are typically loaded implicitly.</td></tr>
-<tr valign="top" class="even"><td><tt>*.pri</tt></td><td>These are miscellaneous build system files included from <tt>.pro</tt> or <tt>.prf</tt> files.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>File</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>configure</tt></td><td>The initial entry point into the build system used to set up the build tree.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>bin/qtopiamake</tt></td><td>Called by <tt>configure</tt> and doubles as the the initial entry point for external projects.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>bin/*.pm</tt></td><td>Support modules for the perl scripts that comprise the build system.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>Makefile</tt></td><td>Second entry point into the build system. Makefiles are created by <tt>qtopiamake</tt>.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>Makefile.target</tt></td><td>File created by <tt>qmake</tt> for each project. It should not be called directly.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>*.pro</tt></td><td>File read by <tt>qmake</tt> when it makes <tt>Makefile.target</tt>. There is one of these files for each project.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>*.prf</tt></td><td>Features files that can be loaded explicitly but are typically loaded implicitly.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>*.pri</tt></td><td>These are miscellaneous build system files included from <tt>.pro</tt> or <tt>.prf</tt> files.</td></tr>
 </table></p>
 <a name="platform-support"></a>
 <h3>Platform Support</h3>
@@ -138,7 +137,7 @@
 <a name="depot-hopping"></a>
 <h3>Depot Hopping</h3>
 <p>When editing source files and shadow building (that is, build tree != source tree) you may be interested in depot hopping. Simply set <tt>QPEDIR</tt> to the location of your build tree and the Makefiles that <tt>qtopiamake</tt> puts in the source tree will call through to those in the build tree. For example:</p>
-<pre>    cd /path/to/build
+<pre>&nbsp;   cd /path/to/build
     export QPEDIR=$PWD
     cd /path/to/source/examples/application
     $QPEDIR/bin/qtopiamake # sets up shadow build to $QPEDIR/examples/application
@@ -150,7 +149,7 @@
 <p>The Qtopia build system has dependency information embedded into the <tt>.pro</tt> files. This makes it possible to build everything in the most efficient way as well as providing flexibility. For example, a library can be renamed with a single change in a single file whereas without the dependency system, many files would need to be changed. The dependency information also provides the ability to graph interdependencies between projects as well as dependencies on external libraries.</p>
 <p><b>Note:</b> Do not put <tt>LIBS+=</tt> or <tt>INCLUDEPATH+=</tt> lines in your <tt>.pro</tt> files, use <tt>depends()</tt> instead. This applies even if you need to depend on something that isn't built (ie. part of the system). Simply create a <tt>stub</tt> project with <tt>dep()</tt> commands. This keeps dependencies clearly defined.</p>
 <p>If your application can handle a missing dependency you should do something like this:</p>
-<pre>    contains(PROJECTS,mydep):CONFIG+=enable_mydep
+<pre>&nbsp;   contains(PROJECTS,mydep):CONFIG+=enable_mydep
     enable_mydep:depends(mydep)
     else:DEFINES+=QTOPIA_NO_MYDEP</pre>
 <p>Use the presence or absence of <tt>enable_mydep</tt> in the <tt>.pro</tt> file. For example, disable whole files that use the dependency. Use the presence or absence of <tt>QTOPIA_NO_MYDEP</tt> to handle code that interfaces with the dependency.</p>
@@ -165,7 +164,7 @@
 <li>singleexec (non-quicklaunch)</li>
 </ol>
 <p>To facilitate switching between build modes, Qtopia provides two macros which are used as follows:</p>
-<pre>    #include &quot;myheader.h&quot;
+<pre>&nbsp;   #include &quot;myheader.h&quot;
     #include &lt;QtopiaApplication&gt;
 
     QTOPIA_ADD_APPLICATION(QTOPIA_TARGET, MyMainClass)
@@ -175,7 +174,7 @@
 <p>Building for either <tt>quicklaunch</tt> or <tt>singleexec</tt> (quicklaunch) <b>requires</b> these macros but the build system cannot easily determine if you have used them and the penalty for a wrong guess could be disastrous. Therefore you must use the <tt>qtopia_main</tt> <tt>CONFIG</tt> value if you use these macros or the build system will assume your application is not quicklaunch-compatible. If your application does not handle <tt>quicklaunch</tt> or is <tt>singleexec</tt> you can use the <tt>no_quicklaunch</tt> or <tt>no_singleexec</tt> <tt>CONFIG</tt> values.</p>
 <p>For example, games do not need the speed benefits of <tt>quicklauncher</tt> (and there is a size penalty for using quicklauncher) but they do work with <tt>singleexec</tt>. So use <tt>CONFIG+=qtopia_main no_quicklaunch</tt> to indicate this.</p>
 <p>Some applications, such as those using a custom application class, cannot use the macros. Tis prevents the use of <tt>quicklauncher</tt> but you can still work with <tt>singleexec</tt> if you make some changes to your code. You need to use the <tt>singleexec_main</tt> <tt>CONFIG</tt> value and have a <tt>main.cpp</tt> similar to the following:</p>
-<pre>    #include &quot;myheader.h&quot;
+<pre>&nbsp;   #include &quot;myheader.h&quot;
     #include &lt;QtopiaApplication&gt;
 
     #ifdef SINGLE_EXEC
@@ -195,7 +194,7 @@
 <a name="libraries"></a>
 <h3>Libraries</h3>
 <p>Library projects <tt>.pro</tt> files require extra code to make them usable by other projects, for example:</p>
-<pre>    qtopia_project(lib)
+<pre>&nbsp;   qtopia_project(lib)
     TARGET=mylib
 
     PREFIX=MYLIB
@@ -233,11 +232,11 @@
 <a name="packages"></a>
 <h3>Packages</h3>
 <p>Qtopia projects are automatically setup to be built into packages, and by default these are single packages. Non-qtopia projects must add <tt>packages</tt> to their <tt>CONFIG</tt> to be built into packages. The package contents are the result of running <tt>make install</tt>. To configure the default package you should use the <tt>pkg</tt> structure, for example:</p>
-<pre>    pkg.name=myapp
+<pre>&nbsp;   pkg.name=myapp
     pkg.desc=My Great App
     pkg.version=1.0</pre>
 <p>You can create other structures and assign them to the <tt>PACKAGES</tt> variable to create more than one package though this is not well tested. The structure of a packaging structure is as follows:</p>
-<pre>    # struct package {
+<pre>&nbsp;   # struct package {
     #     name       # eg. $name.ipk
     #     desc       # one line summary
     #     domain     # SXE security domains
@@ -249,7 +248,7 @@
     #     targets    # targets to run (ie. install stuff)
     # }</pre>
 <p>The use of <tt>pkg</tt> structure is suppressed by adding the <tt>no_pkg CONFIG</tt> value. This is useful for multi-project packages, for exmaple, several network-related projects are put into one package. To improve maintainability, you should indicate which project is responsible for packaging if you do this, for example:</p>
-<pre>    # Packaged by settings/network
+<pre>&nbsp;   # Packaged by settings/network
     CONFIG+=no_pkg</pre>
 <a name="internationalization"></a>
 <h3>Internationalization</h3>
@@ -258,12 +257,12 @@
 <h3>Non-code Translatables</h3>
 <p><a href="buildsystem-reference.html#nct">Non-code Translatables</a> are processed with <tt>bin/nct_lupdate</tt> which extracts data from the following formats:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Format</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>zone.tab</tt></td><td>A special case used to extract city names from the time zone database</td></tr>
-<tr valign="top" class="even"><td><tt>QSettings</tt></td><td>Format for Qtopia configuration files that deal with translated values.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Format</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>zone.tab</tt></td><td>A special case used to extract city names from the time zone database</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><a href="qsettings.html">QSettings</a></td><td>Format for Qtopia configuration files that deal with translated values.</td></tr>
 </table></p>
 <p>The following is an example of a translatable settings file:</p>
-<pre>    [Translation]
+<pre>&nbsp;   [Translation]
     File=QtopiaApplications
     Context=Calendar
     Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
@@ -276,11 +275,11 @@
     MimeType=text/x-vcalendar</pre>
 <p>In the above <tt>datebook.desktop</tt> example,the important parts are the <tt>[Translation]</tt> section and the <tt>Var[]=Value</tt> lines.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Code Line</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>File=QtopiaApplications</tt></td><td>Instructs the build system to store the translations in a file called <tt>QtopiaApplications.ts</tt>. The files in Qtopia are generally stored in global <tt>.ts</tt> files but third-party applications need to use their own files.</td></tr>
-<tr valign="top" class="even"><td><tt>Context=Calendar</tt></td><td>Specifies the context to use for the translations. When <tt>QObject::tr()</tt> is called an implicit context is used, however, <tt>QApplication::translate()</tt> allows the context to be set. This must be somewhat unique so that translators do not have to deal with unrelated strings when translating content.</td></tr>
-<tr valign="top" class="odd"><td><tt>Comment[Desktop Entry/Name]=Use soft hyphen</tt> <tt>(char U00AD) to indicate hyphenation</tt></td><td>Places a comment in the <tt>.ts</tt> file for translators. In this case, the value <tt>Name</tt> in the <tt>[Desktop Entry]</tt> section is given a comment.</td></tr>
-<tr valign="top" class="even"><td><tt>Name[]=Cal\xad\x65n\xad\x64\x61r</tt></td><td>When Qtopia reads this value, it will try to translate it.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Code Line</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>File=QtopiaApplications</tt></td><td>Instructs the build system to store the translations in a file called <tt>QtopiaApplications.ts</tt>. The files in Qtopia are generally stored in global <tt>.ts</tt> files but third-party applications need to use their own files.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>Context=Calendar</tt></td><td>Specifies the context to use for the translations. When <a href="qobject.html#tr">QObject::tr</a>() is called an implicit context is used, however, <a href="qcoreapplication.html#translate">QApplication::translate</a>() allows the context to be set. This must be somewhat unique so that translators do not have to deal with unrelated strings when translating content.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>Comment[Desktop Entry/Name]=Use soft hyphen</tt> <tt>(char U00AD) to indicate hyphenation</tt></td><td>Places a comment in the <tt>.ts</tt> file for translators. In this case, the value <tt>Name</tt> in the <tt>[Desktop Entry]</tt> section is given a comment.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>Name[]=Cal\xad\x65n\xad\x64\x61r</tt></td><td>When Qtopia reads this value, it will try to translate it.</td></tr>
 </table></p>
 <a name="tasks"></a>
 <h2>Tasks</h2>
@@ -301,7 +300,7 @@
 <a name="setting-up-a-global-condition"></a>
 <h3>Setting up a Global Condition</h3>
 <p>Place the following code in the <tt>optvar</tt> section of <tt>configure</tt>:</p>
-<pre>    set_optvar( &quot;myopt&quot;, +{
+<pre>&nbsp;   set_optvar( &quot;myopt&quot;, +{
         &quot;set&quot; =&gt; [ &quot;%&quot;, &quot;Enable myopt.&quot; ],
         &quot;unset&quot; =&gt; [ &quot;no-%&quot;, &quot;Disable myopt.&quot; ],
         &quot;default&quot; =&gt; 1,
@@ -309,11 +308,11 @@
         &quot;autodep&quot; =&gt; $qtopia_autoref,
     });</pre>
 <p>Place the following code in the <tt>config_pri</tt> section of <tt>configure</tt>:</p>
-<pre>    if ( opt(&quot;myopt&quot;) ) {
+<pre>&nbsp;   if ( opt(&quot;myopt&quot;) ) {
         print CONFIG_PRI &quot;CONFIG+=enable_myopt\n&quot;;
     }</pre>
 <p>Place the following code in <tt>src/build/qtopia.prf</tt>:</p>
-<pre>    # positive define (preferred)
+<pre>&nbsp;   # positive define (preferred)
     enable_myopt:DEFINES+=QTOPIA_MYOPT
     # negative define (to match the QT_NO_ style)
     !enable_myopt:DEFINES+=QTOPIA_NO_MYOPT</pre>
@@ -323,62 +322,62 @@
 <p>The file <tt>projects.pri</tt> includes other files to setup the <tt>PROJECTS</tt> and <tt>THEMES</tt> variables which control what is built.</p>
 <p>The following files are included from <tt>src</tt> in the source tree:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>File</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>general.pri</td><td>Projects and themes that are in all Qtopia source packages.</td></tr>
-<tr valign="top" class="even"><td>commercial.pri</td><td>Projects and themes that are only in commercial Qtopia source packages.</td></tr>
-<tr valign="top" class="odd"><td>custom.pri</td><td>Overrides/additions for Qtopia.</td></tr>
-<tr valign="top" class="even"><td>desktop.pri</td><td>Projects that are in Qtopia Desktop.</td></tr>
-<tr valign="top" class="odd"><td>custom_qd.pri</td><td>Overrides/additions for Qtopia Desktop.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>File</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>general.pri</td><td>Projects and themes that are in all Qtopia source packages.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>commercial.pri</td><td>Projects and themes that are only in commercial Qtopia source packages.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>custom.pri</td><td>Overrides/additions for Qtopia.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>desktop.pri</td><td>Projects that are in Qtopia Desktop.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>custom_qd.pri</td><td>Overrides/additions for Qtopia Desktop.</td></tr>
 </table></p>
 <p>The following files are included from <tt>src</tt> in the build tree:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>File</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>local.pri</td><td>Overrides/additions specific to a build.</td></tr>
-<tr valign="top" class="even"><td>local_qd.pri</td><td>Overrides/additions for Qtopia Desktop specific to a build.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>File</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>local.pri</td><td>Overrides/additions specific to a build.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>local_qd.pri</td><td>Overrides/additions for Qtopia Desktop specific to a build.</td></tr>
 </table></p>
 <p>It is not recommended to modify <tt>general.pri</tt> and <tt>commercial.pri</tt>, instead you should use <tt>custom.pri</tt> and <tt>local.pri</tt>. The intent is for <i>organization</i> changes (that is, changes that will be part of a redistributed source package) to go into <tt>custom.pri</tt> and changes for individual developers to go into <tt>local.pri</tt>.</p>
 <p>When adding projects, it is recommended to use <tt>*=</tt> to avoid the possibility of duplicate entries as duplicate entries can cause problems when you try to build. For example:</p>
-<pre>    PROJECTS+=myproj
+<pre>&nbsp;   PROJECTS+=myproj
     PROJECTS*=myproj # no duplicate
     PROJECTS+=myproj # duplicate</pre>
 <p>A project can be removed using <tt>-=</tt> as follows:</p>
-<pre>    PROJECTS-=myproj</pre>
+<pre>&nbsp;   PROJECTS-=myproj</pre>
 <p><b>Note:</b> <tt>qmake</tt> does not consider it an error to remove a non-existent value so check for spelling errors if a removed project is still building.</p>
 <p><tt>CONFIG</tt> values that are set based on edition and configuration can be used when adding projects, for example, a PDA-specific application could be added with:</p>
-<pre>    pda:PROJECTS*=myproj</pre>
+<pre>&nbsp;   pda:PROJECTS*=myproj</pre>
 <p>In the situation where You might want to enable a project only if another project is enabled, you can check for the presence of a project with the <tt>qmake</tt> <tt>contains</tt> function as follows:</p>
-<pre>    contains(PROJECTS,applications/mygreatapp):PROJECTS*=plugins/mygreatapp/time</pre>
+<pre>&nbsp;   contains(PROJECTS,applications/mygreatapp):PROJECTS*=plugins/mygreatapp/time</pre>
 <a name="common-makefile-targets"></a>
 <h2>Common Makefile Targets</h2>
 <p>The following targets should work everywhere and will descend into subdirectories unless otherwise noted:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Target</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>all</tt></td><td>Build the target.</td></tr>
-<tr valign="top" class="even"><td><tt>first</tt></td><td>Same as <tt>all</tt>. Provided for compatibility with Qt (which uses <tt>all</tt> to mean both debug and release versions).</td></tr>
-<tr valign="top" class="odd"><td><tt>install</tt></td><td>Run the install rules.</td></tr>
-<tr valign="top" class="even"><td><tt>install_target</tt></td><td>Install the target only (eg. the application binary).</td></tr>
-<tr valign="top" class="odd"><td><tt>cleaninstall</tt></td><td>Remove the <tt>image</tt> (and <tt>dimage</tt>) directories before installing. (Only useful when used from the top of the tree).</td></tr>
-<tr valign="top" class="even"><td><tt>lupdate</tt></td><td>Update <tt>.ts</tt> files.</td></tr>
-<tr valign="top" class="odd"><td><tt>syncqtopia</tt></td><td><ul>
+<tr valign="top" bgcolor="#a2c511"><th>Target</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>all</tt></td><td>Build the target.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>first</tt></td><td>Same as <tt>all</tt>. Provided for compatibility with Qt (which uses <tt>all</tt> to mean both debug and release versions).</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>install</tt></td><td>Run the install rules.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>install_target</tt></td><td>Install the target only (eg. the application binary).</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>cleaninstall</tt></td><td>Remove the <tt>image</tt> (and <tt>dimage</tt>) directories before installing. (Only useful when used from the top of the tree).</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>lupdate</tt></td><td>Update <tt>.ts</tt> files.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>syncqtopia</tt></td><td><ul>
 <li>Install Headers. See <a href="#setting-up-headers">Setting Up Headers</a> for details.</li>
 <li>Only libraries will be processed.</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>packages</tt></td><td>Make installable packages. See <a href="#packages">Packages</a> for details.</td></tr>
-<tr valign="top" class="odd"><td><tt>sdk</tt></td><td>Run the SDK rules.</td></tr>
-<tr valign="top" class="even"><td><tt>devsdk</tt></td><td>Run the <a href="buildsystem-reference.html#devsdk">DevSDK</a> rules.</td></tr>
-<tr valign="top" class="odd"><td><tt>regenerate</tt></td><td>Rebuild the Makefile for this project. Do not descend into subdirectories.</td></tr>
-<tr valign="top" class="even"><td><tt>qmake</tt></td><td>Same as <tt>regenerate</tt> but descends into subdirectories.</td></tr>
-<tr valign="top" class="odd"><td><tt>qmake-debug</tt></td><td>Same as <tt>regenerate</tt> but turns on <tt>qmake</tt> debugging.</td></tr>
-<tr valign="top" class="even"><td><tt>clean</tt></td><td>Remove intermediate files (not everything).</td></tr>
-<tr valign="top" class="odd"><td><tt>disclean</tt></td><td>Remove the target and <tt>Makefile.target</tt>.</td></tr>
-<tr valign="top" class="even"><td><tt>remove_target</tt></td><td>Remove the target so that <tt>make</tt> will cause it to be re-linked.</td></tr>
-<tr valign="top" class="odd"><td><tt>relink</tt></td><td>Runs <tt>make remove_target</tt> and <tt>make</tt> so that all targets are re-linked.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>packages</tt></td><td>Make installable packages. See <a href="#packages">Packages</a> for details.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>sdk</tt></td><td>Run the SDK rules.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>devsdk</tt></td><td>Run the <a href="buildsystem-reference.html#devsdk">DevSDK</a> rules.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>regenerate</tt></td><td>Rebuild the Makefile for this project. Do not descend into subdirectories.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>qmake</tt></td><td>Same as <tt>regenerate</tt> but descends into subdirectories.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>qmake-debug</tt></td><td>Same as <tt>regenerate</tt> but turns on <tt>qmake</tt> debugging.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>clean</tt></td><td>Remove intermediate files (not everything).</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>disclean</tt></td><td>Remove the target and <tt>Makefile.target</tt>.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>remove_target</tt></td><td>Remove the target so that <tt>make</tt> will cause it to be re-linked.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>relink</tt></td><td>Runs <tt>make remove_target</tt> and <tt>make</tt> so that all targets are re-linked.</td></tr>
 </table></p>
 <a name="devconfigprofiles"></a><a name="device-configuration-profiles"></a>
 <h2>Device Configuration Profiles</h2>
 <p>Device Configuration Profiles simplify the task of configuring Qtopia for a device. A single directory contains all of the configuration information required to build for the device. The profiles are located in the <tt>devices</tt> directory in the source tree and are activated by running:</p>
-<pre>    configure -device foo</pre>
+<pre>&nbsp;   configure -device foo</pre>
 <p>For a tutorial on the process of implementing a plug-in for a new device see : <a href="tut-deviceexample.html">Tutorial: Implementing a Device Plug-in</a></p>
 <p>The following sections describe how to customize the profiles:</p>
 <a name="features"></a>
@@ -389,7 +388,7 @@
 <p>Each device configuration profile can have a file named <tt>configure</tt> that specifies all the arguments required to configure for the new device. This simplifies the process as generally many configuration arguments are required.</p>
 <p>When <tt>configure ... -device foo ...</tt> is run, <tt>configure</tt> checks for <tt>$QTOPIA_DEPOT_PATH/devices/device/configure</tt> and if it is found, <tt>configure</tt> re-launches itself with <tt>-device device</tt> replaced by the contents of the file.</p>
 <p>The following is a sample configure file:</p>
-<pre>    -edition phone -xplatform mydev -arch arm -no-qvfb
+<pre>&nbsp;   -edition phone -xplatform mydev -arch arm -no-qvfb
     -release -displaysize 240x320 -quicklaunch
     -defaultbuttons phone
     -extra-qtopiacore-config -plugin-kbd-mydev
@@ -402,14 +401,14 @@
 </ol>
 <p>For example, the sample file above specifies <tt>-release</tt>. Here is what would happen <tt>-debug</tt> is passed before and after <tt>-device foo</tt>:</p>
 <ul>
-<li>Before:<pre>    {configure -debug -device foo}</pre>
+<li>Before:<pre>&nbsp;   {configure -debug -device foo}</pre>
 <p>becomes:</p>
-<pre>    {configure -debug -release}</pre>
+<pre>&nbsp;   {configure -debug -release}</pre>
 <p><tt>-release</tt> overrides <tt>-debug</tt> so a release build is performed.</p>
 </li>
-<li>After:<pre>    {configure -device foo -debug}</pre>
+<li>After:<pre>&nbsp;   {configure -device foo -debug}</pre>
 <p>becomes:</p>
-<pre>    {configure -release -debug}</pre>
+<pre>&nbsp;   {configure -release -debug}</pre>
 <p><tt>-debug</tt> overrides <tt>-release</tt> so a debug build is performed.</p>
 </li>
 </ul>
@@ -420,7 +419,7 @@
 <h3>mkspecs</h3>
 <p>A typical behavior of the <tt>configure</tt> file is to set <tt>-xplatform</tt> so it is useful to have a platform specification for the device. Profiles can contain a <tt>mkspecs</tt> directory that is used to determine <tt>-platform</tt> and <tt>-xplatform</tt> speciification files. This allows a device to be built without having to modify the Qt depot (although it is possible to move a specification file to Qt without having to modify the configure line).</p>
 <p>For example, the <tt>mydev</tt> specification files are in its configuration directory as follows:</p>
-<pre>    devices/mydev/mkspecs/qws/linux-mydev-g++/qmake.conf
+<pre>&nbsp;   devices/mydev/mkspecs/qws/linux-mydev-g++/qmake.conf
     devices/mydev/mkspecs/qws/linux-mydev-g++/qplatformdefs.h</pre>
 <p>There are <tt>mkspecs</tt> that ship with Qtopia Core located in <tt>qtopiacore/qt/mkspecs/qws</tt>. You should copy one that is similar to your device, for example, <tt>linux-arm-g++</tt>, and modify it to suit your device. Be sure to check the compiler name and the compiler flags (especially optimization flags). You may also want the <tt>mkspec</tt> to specify a <tt>define</tt> to be used to enable device-specific code in Qtopia Core and Qtopia.</p>
 <a name="custom-h-custom-cpp"></a>
@@ -432,19 +431,19 @@
 <a name="config-pri"></a>
 <h3>config.pri</h3>
 <p>Configuration tweaks can be done here. This is read just after the configure-generated config.pri, before each .pro file is read. A modified <tt>config.pri</tt> file is used to customize configuration. This file is read after the the <tt>config.pri</tt> file generated by <tt>configure</tt> and before each <tt>.pro</tt> file. Adding &lt;content&gt; to a <tt>config.pri</tt> file is equivalent to running the following:</p>
-<pre>    configure -config &lt;content&gt;</pre>
+<pre>&nbsp;   configure -config &lt;content&gt;</pre>
 <a name="projects-pri"></a>
 <h3>projects.pri</h3>
 <p>The <tt>projects.pri</tt> file is used to enable and disable projects for a device. It is processed after <tt>general.pri</tt> and <tt>commercial.pri</tt> but before <tt>custom.pri</tt> and <tt>local.pri</tt> so that the user can still override the projects.</p>
 <a name="src"></a>
 <h3>src</h3>
 <p>If the src directory exists, it is added as a project root that is:</p>
-<pre>        configure -build $QTOPIA_DEPOT_PATH/devices/foo/src}</pre>
+<pre>&nbsp;       configure -build $QTOPIA_DEPOT_PATH/devices/foo/src}</pre>
 <p>It is recommended to mimic the Qtopia source tree layout for ease of reference.</p>
 <a name="qconfig-h"></a>
 <h3>qconfig.h</h3>
 <p>This file overrides the use of <tt>qconfig-qpe.h</tt>. It can define all new items or can include and override settings by using:</p>
-<pre>        #include &quot;qconfig-qpe.h&quot;</pre>
+<pre>&nbsp;       #include &quot;qconfig-qpe.h&quot;</pre>
 <p><b>Note:</b> Beware of dependencies when including and overriding.</p>
 <a name="storage-conf"></a>
 <h3>Storage.conf</h3>
@@ -460,6 +459,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

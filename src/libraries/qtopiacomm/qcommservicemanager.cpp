@@ -25,14 +25,13 @@
 /*!
     \class QCommServiceManager
     \brief The QCommServiceManager class provides a method to discover the active communications services and interfaces.
-    \ingroup communication
 
     The QCommServiceManager class provides a method to discover the
     communications services and interfaces that are active within the system.
 
     Each service has a unique name, such as \c{GSM}, \c{VoIP}, etc.  Within
     each service is a list of interfaces for functionality areas, which have
-    names such as \c{QNetworkRegistration}, \c{QSMSSender}, etc.
+    names such as QNetworkRegistration, QSMSSender, etc.
 
     Interface names correspond to class names elsewhere in the Qtopia
     Communications and Telephony API's.  To use an interface, the caller

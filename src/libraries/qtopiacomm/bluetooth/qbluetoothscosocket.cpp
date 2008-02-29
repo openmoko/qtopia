@@ -23,6 +23,7 @@
 #include <qtopia/comm/qbluetoothaddress.h>
 #include <qtopia/comm/qbluetoothnamespace.h>
 #include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include <qtopiacomm/private/qbluetoothabstractsocket_p.h>
 
 #include <bluetooth/bluetooth.h>
 #include <sys/socket.h>
@@ -31,13 +32,21 @@
 #include <bluetooth/sco.h>
 #include <unistd.h>
 
-class QBluetoothScoSocketPrivate
+class QBluetoothScoSocketPrivate : public QBluetoothAbstractSocketPrivate
 {
 public:
+    QBluetoothScoSocketPrivate();
+
     QBluetoothAddress m_local;
     QBluetoothAddress m_remote;
     int m_mtu;
 };
+
+QBluetoothScoSocketPrivate::QBluetoothScoSocketPrivate()
+    : QBluetoothAbstractSocketPrivate(true)
+{
+    m_mtu = 0;
+}
 
 /*!
     \class QBluetoothScoSocket
@@ -60,10 +69,8 @@ public:
     \a parent.
 */
 QBluetoothScoSocket::QBluetoothScoSocket(QObject *parent)
-    : QBluetoothAbstractSocket(parent)
+    : QBluetoothAbstractSocket(new QBluetoothScoSocketPrivate, parent)
 {
-    m_data = new QBluetoothScoSocketPrivate();
-    m_data->m_mtu = 0;
 }
 
 /*!
@@ -71,8 +78,6 @@ QBluetoothScoSocket::QBluetoothScoSocket(QObject *parent)
 */
 QBluetoothScoSocket::~QBluetoothScoSocket()
 {
-    if (m_data)
-        delete m_data;
 }
 
 /*!
@@ -81,7 +86,7 @@ QBluetoothScoSocket::~QBluetoothScoSocket()
     This function should generally return immediately, and the socket
     will enter into the \c ConnectingState.
 
-    The function returns true if the connection couldbe started,
+    The function returns true if the connection could be started,
     and false otherwise.
 
     Note that the connection could still fail, the state of the socket
@@ -93,9 +98,7 @@ bool QBluetoothScoSocket::connect(const QBluetoothAddress &local,
     if (state() != QBluetoothAbstractSocket::UnconnectedState)
         return false;
 
-    m_data->m_local = QBluetoothAddress::invalid;
-    m_data->m_remote = QBluetoothAddress::invalid;
-    m_data->m_mtu = 0;
+    resetSocketParameters();
 
     int sk = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_SCO);
     if (sk < 0) {
@@ -134,6 +137,7 @@ bool QBluetoothScoSocket::connect(const QBluetoothAddress &local,
 */
 QBluetoothAddress QBluetoothScoSocket::remoteAddress() const
 {
+    SOCKET_DATA(QBluetoothScoSocket);
     return m_data->m_remote;
 }
 
@@ -144,6 +148,7 @@ QBluetoothAddress QBluetoothScoSocket::remoteAddress() const
 */
 QBluetoothAddress QBluetoothScoSocket::localAddress() const
 {
+    SOCKET_DATA(QBluetoothScoSocket);
     return m_data->m_local;
 }
 
@@ -153,11 +158,14 @@ QBluetoothAddress QBluetoothScoSocket::localAddress() const
 */
 int QBluetoothScoSocket::mtu() const
 {
+    SOCKET_DATA(QBluetoothScoSocket);
     return m_data->m_mtu;
 }
 
 bool QBluetoothScoSocket::readSocketParameters(int sockfd)
 {
+    SOCKET_DATA(QBluetoothScoSocket);
+
     struct sockaddr_sco addr;
     socklen_t len = sizeof(addr);
 
@@ -189,11 +197,16 @@ bool QBluetoothScoSocket::readSocketParameters(int sockfd)
         m_data->m_mtu = opts.mtu;
     }
 
+    setReadMtu(m_data->m_mtu);
+    setWriteMtu(m_data->m_mtu);
+
     return true;
 }
 
 void QBluetoothScoSocket::resetSocketParameters()
 {
+    SOCKET_DATA(QBluetoothScoSocket);
+
     m_data->m_local = QBluetoothAddress::invalid;
     m_data->m_remote = QBluetoothAddress::invalid;
     m_data->m_mtu = 0;

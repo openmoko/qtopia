@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/dialogs/qmessagebox.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/dialogs/qmessagebox.cpp -->
 <head>
   <title>Qt 4.2: Obsolete Members for QMessageBox</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -72,7 +72,7 @@
 </ul>
 <p>Use <a href="qmessagebox.html#StandardButton-enum">QMessageBox::NoButton</a> for the later parameters to have fewer than three buttons in your message box. If you don't specify any buttons at all, <a href="qmessagebox.html">QMessageBox</a> will provide an Ok button.</p>
 <p>One of the buttons can be OR-ed with the <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Default</a> flag to make it the default button (clicked when Enter is pressed).</p>
-<p>One of the buttons can be OR-ed with the <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a> flag to make it the cancel or close button (clicked when Escape is pressed).</p>
+<p>One of the buttons can be OR-ed with the <a href="qmessagebox.html#StandardButton-enum">QMessageBox::Escape</a> flag to make it the cancel or close button (clicked when <b>Esc</b> is pressed).</p>
 <pre>         QMessageBox mb(&quot;Application Name&quot;,
                         &quot;Hardware failure.\n\nDisk error detected\nDo you want to stop?&quot;,
                         QMessageBox::Question,
@@ -137,9 +137,8 @@
 <h3 class="fn"><a name="information-4"></a>int QMessageBox::information ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, const <a href="qstring.html">QString</a> &amp; <i>button0Text</i>, const <a href="qstring.html">QString</a> &amp; <i>button1Text</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>button2Text</i> = QString(), int <i>defaultButtonNumber</i> = 0, int <i>escapeButtonNumber</i> = -1 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Displays an information message box with the given <i>title</i> and <i>text</i>, as well as one, two or three buttons. Returns the index of the button that was clicked (0, 1 or 2).</p>
-<p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional. <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the Escape button; pressing Escape is the same as clicking this button. It defaults to -1; supply 0, 1 or 2 to make pressing Escape equivalent to clicking the relevant button.</p>
+<p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional. <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the escape button; pressing <b>Esc</b> is the same as clicking this button. It defaults to -1; supply 0, 1 or 2 to make pressing <b>Esc</b> equivalent to clicking the relevant button.</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
-<p>Note: If you do not specify an Escape button and no Escape button could be automatically detected, the dialog will not close with the Esc key. It is suggested that you specify an Escape button to prevent this from happening.</p>
 <p>See also <a href="qmessagebox.html#question">question</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
 <h3 class="fn"><a name="question-2"></a>int QMessageBox::question ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>button0</i>, int <i>button1</i> = 0, int <i>button2</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -166,7 +165,6 @@
 <p>Displays a question message box with the given <i>title</i> and <i>text</i>, as well as one, two or three buttons. Returns the index of the button that was clicked (0, 1 or 2).</p>
 <p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional. <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the Escape button; pressing Escape is the same as clicking this button. It defaults to -1; supply 0, 1 or 2 to make pressing Escape equivalent to clicking the relevant button.</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
-<p>Note: If you do not specify an Escape button and no Escape button could be automatically detected, the dialog will not close with the Esc key. It is suggested that you specify an Escape button to prevent this from happening.</p>
 <p>See also <a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#warning">warning</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
 <h3 class="fn"><a name="setButtonText"></a>void QMessageBox::setButtonText ( int <i>button</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
 <p>Sets the text of the message box button <i>button</i> to <i>text</i>. Setting the text of a button that is not in the message box is silently ignored.</p>
@@ -201,12 +199,11 @@
 <p>Displays a warning message box with the given <i>title</i> and <i>text</i>, as well as one, two, or three buttons. Returns the number of the button that was clicked (0, 1, or 2).</p>
 <p><i>button0Text</i> is the text of the first button, and is optional. If <i>button0Text</i> is not supplied, &quot;OK&quot; (translated) will be used. <i>button1Text</i> is the text of the second button, and is optional, and <i>button2Text</i> is the text of the third button, and is optional. <i>defaultButtonNumber</i> (0, 1 or 2) is the index of the default button; pressing Return or Enter is the same as clicking the default button. It defaults to 0 (the first button). <i>escapeButtonNumber</i> is the index of the Escape button; pressing Escape is the same as clicking this button. It defaults to -1; supply 0, 1, or 2 to make pressing Escape equivalent to clicking the relevant button.</p>
 <p>If <i>parent</i> is 0, the message box becomes an application-global modal dialog box. If <i>parent</i> is a widget, the message box becomes modal relative to <i>parent</i>.</p>
-<p>Note: If you do not specify an Escape button and no Escape button could be automatically detected, the dialog will not close with the Esc key. It is suggested that you specify an Escape button to prevent this from happening.</p>
 <p>See also <a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#question">question</a>(), and <a href="qmessagebox.html#critical">critical</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

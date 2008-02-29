@@ -63,6 +63,8 @@ public:
 
     static bool installContent( const QString &filePath, QContent *content );
 
+    static bool updateContent( QContent *content );
+
     static QDrmContentPlugin *plugin( const QString &filePath );
 
     static QIcon createIcon( const QIcon &baseIcon, int smallSize, int bigSize, bool validRights = true );

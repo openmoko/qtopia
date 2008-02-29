@@ -27,7 +27,7 @@
 /*!
     \class QAbstractIpcInterface
     \brief The QAbstractIpcInterface class provides facilities for implementing the client and server sides of IPC communications paths.
-    \ingroup communication
+    \ingroup ipc
 
     The QAbstractIpcInterface class provides facilities for implementing the
     client and server sides of IPC communications paths.  Subclasses that

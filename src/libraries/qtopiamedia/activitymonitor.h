@@ -27,8 +27,7 @@
 #include <QtCore>
 #include <qtopiaglobal.h>
 
-class QTOPIAMEDIA_EXPORT ActivityMonitor : public QObject,
-    public Observer
+class QTOPIAMEDIA_EXPORT ActivityMonitor : public QObject
 {
     Q_OBJECT
 public:
@@ -38,12 +37,12 @@ public:
 
     bool isActive() { return m_active; }
 
-    // Observer
-    void update( Subject* );
-
 signals:
     void active();
     void inactive();
+
+public slots:
+    void update();
 
 protected:
     void timerEvent( QTimerEvent* );

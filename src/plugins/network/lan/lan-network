@@ -243,13 +243,13 @@ install()
                                 #for completeness addedd
                                 echo "WIRELESS_WPA_PSK=''" >> $TMP_FILE;
                                 ;;
-                            WPA_PSK)
+                            WPA-PSK)
                                 echo "WIRELESS_AUTH_MODE='psk'" >> $TMP_FILE
                                 shift;
                                 if [ "$1" = "none" ]; then
                                     echo "WIRELESS_WPA_PSK=''";
                                 fi
-                                echo "WIRELESS_WPA_PSK='$1'" >> $TMP_FILE;
+                                echo "WIRELESS_WPA_PSK=$1" >> $TMP_FILE;
                                 
                                 #for completeness addedd
                                 echo "WIRELESS_DEFAULT_KEY='0'">> $TMP_FILE;
@@ -259,7 +259,7 @@ install()
                                 echo "WIRELESS_KEY_2=''">> $TMP_FILE;
                                 echo "WIRELESS_KEY_3=''">> $TMP_FILE;
                                 ;;
-                            WPA_EAP)
+                            WPA-EAP)
                                 shift;
                                 shift;  # PEAP,TLS,TTLS
                                 shift;  # identity/client cert

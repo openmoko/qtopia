@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright ( C ) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -20,10 +20,11 @@
 ****************************************************************************/
 #include "remotedevicesdialog.h"
 
-#include <qtopia/comm/qbluetoothaddress.h>
-#include <qtopia/comm/qbluetoothlocaldevice.h>
-#include <qtopia/comm/qbluetoothremotedevice.h>
-#include <qtopia/comm/qbluetoothnamespace.h>
+#include <qbluetoothremotedevicedialog.h>
+#include <qbluetoothaddress.h>
+#include <qbluetoothlocaldevice.h>
+#include <qbluetoothremotedevice.h>
+#include <qbluetoothnamespace.h>
 #include <qdocumentselector.h>
 #include <qtopialog.h>
 
@@ -39,48 +40,55 @@
 #include <QVBoxLayout>
 
 
-RemoteDevicesWindow::RemoteDevicesWindow( QWidget *parent, Qt::WFlags fl )
-    : QDialog( parent, fl ),
-      m_deviceSelector( new QBluetoothDeviceSelector( this ) )
+class MyDeviceDialog : public QBluetoothRemoteDeviceDialog
 {
-    setFocusPolicy( Qt::NoFocus );
+    Q_OBJECT
+public:
+    MyDeviceDialog(QWidget *parent);
 
-    // don't close the device selector when a device is activated
-    disconnect( m_deviceSelector, SIGNAL(deviceActivated(const QBluetoothAddress &)),
-                m_deviceSelector, SLOT(accept()) );
+public slots:
+    virtual void accept();
+};
 
-    // create actions
-    m_fileSelector = new QDialog( this );
-    m_fileSelector->setObjectName( "fileSelectorDialog" );
-    m_fileSelector->setModal( true );
-    m_fileSelector->setWindowTitle( tr( "Select File to Send..." ) );
+MyDeviceDialog::MyDeviceDialog(QWidget *parent)
+    : QBluetoothRemoteDeviceDialog(parent)
+{
+}
 
-    QVBoxLayout *qvbl = new QVBoxLayout( m_fileSelector );
-    m_docSelector = new QDocumentSelector( m_fileSelector );
-    m_docSelector->setObjectName( "fileselector" );
-    qvbl->addWidget( m_docSelector );
+void MyDeviceDialog::accept()
+{
+    // The default accept() implementation closes the dialog.
+    // Don't do that for this dialog, because it's not behaving as a
+    // "selector" dialog in Bluetooth Settings - it's more like a
+    // device "viewer".
+}
 
-    connect( m_docSelector, SIGNAL( documentSelected( const QContent& ) ),
-             SLOT( sendFileRequest( const QContent& ) ) );
+
+
+RemoteDevicesWindow::RemoteDevicesWindow(QWidget *parent, Qt::WFlags fl)
+    : QDialog(parent, fl),
+      m_deviceDialog(new MyDeviceDialog(this))
+{
+    setFocusPolicy(Qt::NoFocus);
 
 #ifdef QTOPIA_KEYPAD_NAVIGATION
     QAction *newAction;
 
 #ifdef QTOPIA_PHONE
-    newAction = new QAction( QIcon( ":icon/business" ),
-            tr( "Send Business Card..." ), this );
-    connect( newAction, SIGNAL(triggered()), SLOT(sendVCard()) );
-    m_deviceSelector->addDeviceAction( newAction );
+    newAction = new QAction(QIcon(":icon/business"),
+            tr("Send Business Card..."), this);
+    connect(newAction, SIGNAL(triggered()), SLOT(sendVCard()));
+    m_deviceDialog->addAction(newAction);
 #endif
 
-    newAction = new QAction( QIcon( ":icon/txt" ), tr( "Send File..." ),
-            this );
-    connect( newAction, SIGNAL(triggered()), SLOT(sendFile()) );
-    m_deviceSelector->addDeviceAction( newAction );
+    newAction = new QAction(QIcon(":icon/txt"), tr("Send File..."),
+            this);
+    connect(newAction, SIGNAL(triggered()), SLOT(sendFile()));
+    m_deviceDialog->addAction(newAction);
 #endif
 
-    setWindowTitle( QObject::tr( "Remote Devices" ) );
-    setObjectName( "remote-devices" );
+    setWindowTitle(QObject::tr("Remote Devices"));
+    setObjectName("remote-devices");
 }
 
 RemoteDevicesWindow::~RemoteDevicesWindow()
@@ -90,55 +98,49 @@ RemoteDevicesWindow::~RemoteDevicesWindow()
 
 void RemoteDevicesWindow::start()
 {
-/*
-    QtopiaApplication::showDialog( m_deviceSelector );
-    m_deviceSelector->raise();
-    m_deviceSelector->activateWindow();
-    */
-    m_deviceSelector->showMaximized();
-    QtopiaApplication::execDialog(m_deviceSelector);
+    m_deviceDialog->showMaximized();
+#ifdef QTOPIA_DESKTOP
+    m_deviceDialog->exec();
+#else
+    QtopiaApplication::execDialog(m_deviceDialog);
+#endif
 }
 
 void RemoteDevicesWindow::sendFile()
 {
-    qLog(Bluetooth) << "RemoteDevicesWindow::sendFile()";
+    qLog(Bluetooth) << "RemoteDevicesWindow::sendFile() entry";
 
-    if ( !m_deviceSelector->selectedDevice().valid() ) {
+    QBluetoothAddress device = m_deviceDialog->selectedDevice();
+    if (!device.isValid()) {
         qLog(Bluetooth) << "Can't send file, no selected device";
         return;
     }
 
+    // display a dialog that allows the user to select a document
+    QDocumentSelectorDialog dialog;
+    dialog.setFilter(QContentFilter(QContent::Document));
 #ifdef QTOPIA_DESKTOP
-    fileSelectorDialog->exec();
+    if (dialog.exec() == QDialog::Accepted) {
 #else
-    QtopiaApplication::execDialog( m_fileSelector );
+    if (QtopiaApplication::execDialog(&dialog) == QDialog::Accepted) {
 #endif
-}
-
-void RemoteDevicesWindow::sendFileRequest( const QContent& dl )
-{
-    qLog(Bluetooth) << "RemoteDevicesWindow::sendFileRequest()";
-
-    QBluetoothAddress device = m_deviceSelector->selectedDevice();
-    if ( !device.valid() ) {
-        qLog(Bluetooth) << "Can't send file, no selected device";
-        return;
+        QContent content = dialog.selectedDocument();
+        qLog(Bluetooth) << "Sending file:" << content;
+        QtopiaServiceRequest req("BluetoothPush", "pushFile(QBluetoothAddress,QContentId)");
+        req << device << content.id();
+        req.send();
     }
-
-    m_fileSelector->accept();
-
-    QtopiaServiceRequest req("BluetoothPush", "pushFile(QBluetoothAddress,QContentId)");
-    req << device << dl.id();
-    req.send();
 }
 
 void RemoteDevicesWindow::sendVCard()
 {
-    QBluetoothAddress device = m_deviceSelector->selectedDevice();
-    if ( !device.valid() )
+    QBluetoothAddress device = m_deviceDialog->selectedDevice();
+    if (!device.isValid())
         return;
 
-    QtopiaServiceRequest req("BluetoothPush", "pushBusinessCard(QBluetoothAddress)");
+    QtopiaServiceRequest req("BluetoothPush", "pushPersonalBusinessCard(QBluetoothAddress)");
     req << device;
     req.send();
 }
+
+#include "remotedevicesdialog.moc"

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/emb-pointer.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/emb-pointer.qdoc -->
 <head>
   <title>Qt 4.2: Qtopia Core Pointer Handling</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -26,6 +26,7 @@
 <p>In the default Qt configuration, only the &quot;pc&quot; mouse driver is enabled. The various drivers can be enabled and disabled using the <tt>configure</tt> script. For example:</p>
 <pre> configure -qt-mouse-tslib</pre>
 <p>Custom mouse drivers can be implemented by subclassing the <a href="qwsmousehandler.html">QWSMouseHandler</a> class and creating a mouse driver plugin (derived from the <a href="qmousedriverplugin.html">QMouseDriverPlugin</a> class). <a href="qtopiacore.html">Qtopia Core</a>'s implementation of the <a href="qmousedriverfactory.html">QMouseDriverFactory</a> class will automatically detect the plugin, loading the driver into the server application at runtime.</p>
+<p>If you are creating a driver for a device that needs calibration or noise reduction, such as a touchscreen, derive from the <a href="qwscalibratedmousehandler.html">QWSCalibratedMouseHandler</a> subclass instead to take advantage of its calibration functionality.</p>
 <a name="specifying-a-driver"></a>
 <h2>Specifying a Driver</h2>
 <p>Provided that the &quot;pc&quot; mouse driver is enabled, <a href="qtopiacore.html">Qtopia Core</a> will try to auto-detect the mouse device if it is one of the supported types on <tt>/dev/psaux</tt> or one of the <tt>/dev/ttyS</tt>? serial lines. If multiple mice are detected, all may be used simultaneously.</p>
@@ -51,6 +52,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

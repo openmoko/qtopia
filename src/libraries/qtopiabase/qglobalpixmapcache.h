@@ -27,7 +27,12 @@
 
 #include <qtopiaglobal.h>
 
-#define QGLOBAL_PIXMAP_CACHE_LIMIT 1048576     // 1 Mb
+#include "custom.h"
+
+#ifndef QGLOBAL_PIXMAP_CACHE_LIMIT
+    //You can override this in your device profile custom.h
+    #define QGLOBAL_PIXMAP_CACHE_LIMIT 1048576     // 1 Mb
+#endif
 
 class QTOPIABASE_EXPORT QGlobalPixmapCache
 {

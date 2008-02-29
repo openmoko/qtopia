@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Porting Between Qtopia Versions</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Porting Between Qtopia Versions</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -16,9 +15,16 @@
 <li><a href="#porting-to-qtopia-4-2-0">Porting to Qtopia 4.2.0</a></li>
 <ul><li><a href="#telephony-api">Telephony API</a></li>
 <li><a href="#network-api">Network API</a></li>
+<li><a href="#application-lifecycle">Application Lifecycle</a></li>
+<li><a href="#ipc">IPC</a></li>
+<li><a href="#content">Content</a></li>
+<li><a href="#drm-api">DRM API</a></li>
 </ul>
 <li><a href="#porting-to-qtopia-4-2-1">Porting to Qtopia 4.2.1</a></li>
 <li><a href="#porting-to-qtopia-4-2-2">Porting to Qtopia 4.2.2</a></li>
+<ul><li><a href="#api">API</a></li>
+<li><a href="#qpk-packages">Qpk packages</a></li>
+</ul>
 </ul>
 <a name="overview"></a>
 <h2>Overview</h2>
@@ -31,15 +37,15 @@
 </ul>
 <p><i>However</i>, there are exceptions to these rules, because compatibility between releases is a compromise between improving the API to make future development effort less, and minimizing porting effort. The incompatibilities scheduled for Qtopia are:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Version</th><th>Compatiblity</th></tr></thead>
-<tr valign="top" class="odd"><td>4.1.0 to 4.1.6</td><td>Significant incompatibilities in many API components.</td></tr>
-<tr valign="top" class="even"><td>4.1.7 to 4.1.99</td><td>No incompatibilities introduced.</td></tr>
-<tr valign="top" class="odd"><td>4.2.0</td><td>Significant incompatibilities in a small number of API components.</td></tr>
-<tr valign="top" class="even"><td>4.2.1</td><td>Minor incompatibilities in a small number of API components.</td></tr>
-<tr valign="top" class="odd"><td>4.2.2</td><td>Minor incompatibilities in a small number of API components.</td></tr>
-<tr valign="top" class="even"><td>4.2.3</td><td>No incompatibilities.</td></tr>
-<tr valign="top" class="odd"><td>4.3.0</td><td>No source incompatibilities.</td></tr>
-<tr valign="top" class="even"><td>Subsequent</td><td>Standard compatibility rules apply.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Version</th><th>Compatiblity</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>4.1.0 to 4.1.6</td><td>Significant incompatibilities in many API components.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>4.1.7 to 4.1.99</td><td>No incompatibilities introduced.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>4.2.0</td><td>Significant incompatibilities in a small number of API components.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>4.2.1</td><td>Minor incompatibilities in a small number of API components.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>4.2.2</td><td>Minor incompatibilities in a small number of API components.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>4.2.3</td><td>No incompatibilities.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>4.3.0</td><td>No source incompatibilities.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Subsequent</td><td>Standard compatibility rules apply.</td></tr>
 </table></p>
 <p>Of course, while compatibility is not available between some versions, considerable steps, such as the information below, are taken to minimize the porting effort.</p>
 <a name="porting-from-qtopia-2"></a>
@@ -60,30 +66,30 @@
 <h3>Telephony API</h3>
 <p>Qtopia 4.1's Telephony API used a central <tt>QPhoneLine</tt> object, from which all telephony features were accessed. This class has been replaced with several classes for each area of telephony functionality. In particular, previous code that used <tt>QPhoneLine::query()</tt> and <tt>QPhoneLine::modify()</tt> must be modified to use methods in the classes below:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Interface</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>QAdviceOfCharge</td><td>Advice of charge information during a call.</td></tr>
-<tr valign="top" class="even"><td>QBandSelection</td><td>Selection of GSM bands - 850 MHz, 900 MHz, 1800 MHz, 1900 MHz, dual, and tri-band.</td></tr>
-<tr valign="top" class="odd"><td>QCallBarring</td><td>Settings related to call barring.</td></tr>
-<tr valign="top" class="even"><td>QCallForwarding</td><td>Settings related to call forwarding.</td></tr>
-<tr valign="top" class="odd"><td>QCallSettings</td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
-<tr valign="top" class="even"><td>QCellBroadcast</td><td>Access to cell broadcast messages.</td></tr>
-<tr valign="top" class="odd"><td>QGprsNetworkRegistration</td><td>Notification of GPRS registration state.</td></tr>
-<tr valign="top" class="even"><td>QNetworkRegistration</td><td>Notification of general network registration state, plus operator selection.</td></tr>
-<tr valign="top" class="odd"><td>QPhoneBook</td><td>Access to phone books that are stored on a SIM.</td></tr>
-<tr valign="top" class="even"><td>QPhoneCallManager</td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
-<tr valign="top" class="odd"><td>QPhoneRfFunctionality</td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
-<tr valign="top" class="even"><td>QPinManager</td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
-<tr valign="top" class="odd"><td>QPreferredNetworkOperators</td><td>Access to the preferred network operator list in a SIM.</td></tr>
-<tr valign="top" class="even"><td>QPresence</td><td>VoIP presence information.</td></tr>
-<tr valign="top" class="odd"><td>QServiceChecker</td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
-<tr valign="top" class="even"><td>QServiceNumbers</td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
-<tr valign="top" class="odd"><td>QSimFiles</td><td>Raw access to files on the SIM.</td></tr>
-<tr valign="top" class="even"><td>QSimInfo</td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
-<tr valign="top" class="odd"><td>QSimToolkit</td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
-<tr valign="top" class="even"><td>QSMSReader</td><td>Access to the incoming SMS message queue.</td></tr>
-<tr valign="top" class="odd"><td>QSMSSender</td><td>Access to the outgoing SMS message queue.</td></tr>
-<tr valign="top" class="even"><td>QSupplementaryServices</td><td>SS and USSD support for GSM networks.</td></tr>
-<tr valign="top" class="odd"><td>QTelephonyConfiguration</td><td>Service configuration interface and miscellaneous settings.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Interface</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QAdviceOfCharge</td><td>Advice of charge information during a call.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QBandSelection</td><td>Selection of GSM bands - 850 MHz, 900 MHz, 1800 MHz, 1900 MHz, dual, and tri-band.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QCallBarring</td><td>Settings related to call barring.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QCallForwarding</td><td>Settings related to call forwarding.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QCallSettings</td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QCellBroadcast</td><td>Access to cell broadcast messages.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QGprsNetworkRegistration</td><td>Notification of GPRS registration state.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QNetworkRegistration</td><td>Notification of general network registration state, plus operator selection.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QPhoneBook</td><td>Access to phone books that are stored on a SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QPhoneCallManager</td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QPhoneRfFunctionality</td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QPinManager</td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QPreferredNetworkOperators</td><td>Access to the preferred network operator list in a SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QPresence</td><td>VoIP presence information.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QServiceChecker</td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QServiceNumbers</td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QSimFiles</td><td>Raw access to files on the SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QSimInfo</td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QSimToolkit</td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QSMSReader</td><td>Access to the incoming SMS message queue.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QSMSSender</td><td>Access to the outgoing SMS message queue.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QSupplementaryServices</td><td>SS and USSD support for GSM networks.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QTelephonyConfiguration</td><td>Service configuration interface and miscellaneous settings.</td></tr>
 </table></p>
 <p>Modem vendor plugins and multiplexer implementations from Qtopia 4.1 must also be updated. See the following pages for more information:</p>
 <ul>
@@ -96,21 +102,130 @@
 <p>The Network APIs have been extended by moving device specific information from <a href="qnetworkstate.html">QNetworkState</a> to the new class <a href="qnetworkdevice.html">QNetworkDevice</a>. In addition <a href="qnetworkinterface.html">QNetworkInterface</a> (introduced by Qt 4.2) replaces <a href="qhostaddress.html">QHostAddress</a> throughout the Network API's.</p>
 <p>The table below lists the function conversions for porting to Qtopia 4.2.0.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Qtopia 4.1.x</th><th>Qtopia 4.2.0</th></tr></thead>
-<tr valign="top" class="odd"><td>QNetworkState::addess()</td><td><a href="qnetworkdevice.html#address">QNetworkDevice::address</a>()</td></tr>
-<tr valign="top" class="even"><td>QNetworkState::interfaces()</td><td><a href="qnetworkstate.html#availableNetworkDevices">QNetworkState::availableNetworkDevices</a>()</td></tr>
-<tr valign="top" class="odd"><td>QtopiaNetwork::networkOnline()</td><td><a href="qtopianetwork.html#online">QtopiaNetwork::online</a>(), <a href="qnetworkstate.html#connected">QNetworkState::connected</a>(), <a href="qnetworkstate.html#disconnected">QNetworkState::disconnected</a>()</td></tr>
-<tr valign="top" class="even"><td>QtopiaNetwork::shutdownNetwork()</td><td><a href="qtopianetwork.html#shutdown">QtopiaNetwork::shutdown</a>()</td></tr>
-<tr valign="top" class="odd"><td>QtopiaNetwork::toType()</td><td><a href="qnetworkstate.html#deviceType">QNetworkState::deviceType</a>()</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Qtopia 4.1.x</th><th>Qtopia 4.2.0</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QNetworkState::addess()</td><td><a href="qnetworkdevice.html#address">QNetworkDevice::address</a>()</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QNetworkState::interfaces()</td><td><a href="qnetworkstate.html#availableNetworkDevices">QNetworkState::availableNetworkDevices</a>()</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QtopiaNetwork::networkOnline()</td><td><a href="qtopianetwork.html#online">QtopiaNetwork::online</a>(), <a href="qnetworkstate.html#connected">QNetworkState::connected</a>(), <a href="qnetworkstate.html#disconnected">QNetworkState::disconnected</a>()</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>QtopiaNetwork::shutdownNetwork()</td><td><a href="qtopianetwork.html#shutdown">QtopiaNetwork::shutdown</a>()</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>QtopiaNetwork::toType()</td><td><a href="qnetworkstate.html#deviceType">QNetworkState::deviceType</a>()</td></tr>
 </table></p>
+<a name="application-lifecycle"></a>
+<h3>Application Lifecycle</h3>
+<p>Qtopia applications may start in response to QCop messages or service requests. In Qtopia 4.1 and earlier, applications would start, handle these messages and then terminate unless they called QtopiaApplication::setKeepRunning(). The QtopiaApplication::setKeepRunning() API has been removed in Qtopia 4.2.0 and replaced with a more flexible &quot;task&quot; oriented mechanism.</p>
+<p>The documentation for <a href="qtopiaapplication.html">QtopiaApplication</a> covers this new model in depth. The two most common uses of QtopiaApplication::setKeepRunning() and the appropriate replacement are:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" bgcolor="#a2c511"><th>Use</th><th>Replacement</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Application is displaying UI, and the setKeepRunning() call was used to ensure that the application does not exit until the user has finished interacting with it.</td><td>No replacement is necessary. Qtopia applications now continue to run automatically as long as any UI is being displayed.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Application uses setKeepRunning() to continue running to perform background processing without displaying any UI to the user.</td><td>Calls to setKeepRunning() may be replaced with <a href="qtopiaapplication.html#registerRunningTask">QtopiaApplication::registerRunningTask</a>(). The application will exit once a corresponding <a href="qtopiaapplication.html#unregisterRunningTask">QtopiaApplication::unregisterRunningTask</a>() call is made.</td></tr>
+</table></p>
+<a name="ipc"></a>
+<h3>IPC</h3>
+<p>Several of the QCop-related IPC classes were renamed between Qtopia 4.1.x and Qtopia 4.2.0:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" bgcolor="#a2c511"><th>Qtopia 4.1.x</th><th>Qtopia 4.2.0</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QCopObject</tt></td><td><a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QCopEnvelope</tt></td><td><a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QCopService</tt></td><td><a href="qtopiaservice.html">QtopiaService</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QCopServiceRequest</tt></td><td><a href="qtopiaservicerequest.html">QtopiaServiceRequest</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QCopServiceDescription</tt></td><td><a href="qtopiaservicedescription.html">QtopiaServiceDescription</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QCopServiceSelector</tt></td><td>QtopiaServiceSelector</td></tr>
+</table></p>
+<p>The functionality remains essentially the same. See the documentation for the individual classes for more information.</p>
+<p>In addition, it is recommended that code that used <a href="qcopchannel.html">QCopChannel</a> should be updated to use <a href="qtopiachannel.html">QtopiaChannel</a> instead. <a href="qcopchannel.html">QCopChannel</a> still exists as part of Qtopia Core, but future versions of Qtopia may implement <a href="qtopiachannel.html">QtopiaChannel</a> differently.</p>
+<a name="content"></a>
+<h3>Content</h3>
+<p><a href="qcontentfilter.html">QContentFilter</a> changed from a typedef of <a href="qmultihash.html">QMultiHash</a>&lt; QContentSet::FilterType, <a href="qstring.html">QString</a> &gt; to a new class with a different API and is no longer a member of <a href="qcontentset.html">QContentSet</a>. Basic filters in Qtopia 4.2 are still formed of a FilterType/<a href="qstring.html">QString</a> pair but are combined using the logical operators And (&amp;) and Or (|) and can be negated using the negation (~) operator. The FilterType enum is also now a member of <a href="qcontentfilter.html">QContentFilter</a> and not <a href="qcontentset.html">QContentSet</a>, and the addCriteria() members of <a href="qcontentset.html">QContentSet</a> take an additional argument; a <a href="qcontentfilter.html#Operand-enum">QContentFilter::Operand</a> which specifices how the new criteria should be combined with any existing criteria.</p>
+<p>The API of <a href="qdocumentselector.html">QDocumentSelector</a> has changed which has resulted in some methods being removed or replaced, the functional equivalents are listed in the table below:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" bgcolor="#a2c511"><th>Qtopia 4.1.x</th><th>Qtopia 4.2.0</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QDocumentSelector(QString,QWidget*)</tt></td><td><a href="qdocumentselector.html#QDocumentSelector">QDocumentSelector::QDocumentSelector(QWidget*)</a>; <a href="qdocumentselector.html#setFilter">setFilter(QContentFilter)</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QDocumentSelector(QString,QCategoryFilter,QWidget*)</tt></td><td><a href="qdocumentselector.html#QDocumentSelector">QDocumentSelector::QDocumentSelector(QWidget*)</a>; <a href="qdocumentselector.html#setFilter">setFilter(QContentFilter)</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QDocumentSelector(QContentSet,QWidget*)</tt></td><td><a href="qdocumentselector.html#QDocumentSelector">QDocumentSelector::QDocumentSelector(QWidget*)</a>; <a href="qdocumentselector.html#setFilter">setFilter(QContentFilter)</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QDocumentSelector(QContentSet::QContentFilter,QWidget*)</tt></td><td><a href="qdocumentselector.html#QDocumentSelector">QDocumentSelector::QDocumentSelector(QWidget*)</a>; <a href="qdocumentselector.html#setFilter">setFilter(QContentFilter)</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>setCategoryFilter(QCategoryFilter)</tt></td><td><a href="qdocumentselector.html#setDefaultCategories">setDefaultCategories(QStringList)</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>categoryFilter()</tt></td><td><a href="qdocumentselector.html#defaultCategories">defaultCategories()</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>setNewEnabled(true)</tt></td><td><a href="qdocumentselector.html#enableOptions">enableOptions(QDocumentSelector::NewDocument)</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>setNewEnabled(false)</tt></td><td><a href="qdocumentselector.html#disableOptions">disableOptions(QDocumentSelector::NewDocument)</a></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>selectedDocument(false)</tt></td><td><a href="qdocumentselector.html#currentDocument">currentDocument()</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>setDocuments(QContentSet)</tt></td><td><a href="qdocumentselector.html#setFilter">setFilter(QContentFilter)</a></td></tr>
+</table></p>
+<p>The <a href="qcontent.html#QContentId-typedef">QContentId</a> typedef has changed from a quint64 to a <a href="qpair.html">QPair</a>&lt; <a href="qcontent.html#QtopiaDatabaseId-typedef">QtopiaDatabaseId</a>, quint64 &gt;.</p>
+<p>The <tt>model()</tt> member of <a href="qcontentset.html">QContentSet</a> has been removed, a model for a <a href="qcontentset.html">QContentSet</a> can now by constructing a new <a href="qcontentsetmodel.html">QContentSetModel</a> and passing a pointer to the content set as an argument.</p>
+<p><a href="qcontent.html#UsageMode-typedef">QContent::UsageMode</a> has been renamed <a href="qcontent.html#Role-enum">QContent::Role</a>, <a href="qcontent.html#UsageMode-typedef">QContent::UsageMode</a> has been retained as a typedef of <a href="qcontent.html#Role-enum">QContent::Role</a> for compatability but is deprecated and should not be used in new code. Likewise <a href="qcontent.html#usageMode">QContent::usageMode</a>() has been replaced by <a href="qcontent.html#role">QContent::role</a>().</p>
+<a name="drm-api"></a>
+<h3>DRM API</h3>
+<p>The DRM API in Qtopia 4.2 has been reworked and extended to support multiple DRM agents supporting different implementations.</p>
+<p><a href="qdrmcontent.html">QDrmContent</a> has been simplified and no longer inherits from <a href="qcontent.html">QContent</a> and can only be assigned a <a href="qcontent.html">QContent</a> with a successful call to <a href="qdrmcontent.html#requestLicense">requestLicense(QContent)</a>. The license permission must be set separately using <a href="qdrmcontent.html#setPermission">setPermission()</a> prior to requesting the license and a license handover can be requested by setting the <a href="qdrmcontent.html#LicenseOption-enum">QDrmContent::Handover</a> activation option with <a href="qdrmcontent.html#setLicenseOptions">setLicenseOptions()</a>. The assigned <a href="qcontent.html">QContent</a> can be accessed using <a href="qdrmcontent.html#content">QDrmContent::content</a>().</p>
+<p>Some of <a href="qdrmcontent.html">QDrmContent</a>'s members have also been renamed or relocated to <a href="qdrmrights.html">QDrmRights</a> or <a href="qcontent.html">QContent</a>, the table below lists the conversions for porting to Qtopia 4.2:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" bgcolor="#a2c511"><th>Qtopia 4.1.x</th><th>Qtopia 4.2.0</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QDrmContent::PermissionType</tt></td><td><a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QDrmContent::permissionType()</tt></td><td><a href="qdrmcontent.html#permission">QDrmContent::permission</a>()</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QDrmContent::setPermissionType(QDrmContent::PermissionType)</tt></td><td><a href="qdrmcontent.html#setPermission">QDrmContent::setPermission(QDrmRights::Permission)</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QDrmContent::rightsValid(QContent,QDrmContent::PermissionType)</tt></td><td><a href="qcontent.html#permissions">QContent::permissions</a>()</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>QDrmContent::activationOptions(QContent)</tt></td><td><a href="qdrmcontent.html#canActivate">QDrmContent::canActivate(QContent)</a></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>QDrmContent::activate(QContent,QDrmContent::ActivationOptions)</tt></td><td><a href="qdrmcontent.html#activate">QDrmContent::activate(QContent,QWidget*)</a></td></tr>
+</table></p>
+<p>The DRM agent integration layer from Qtopia 4.1 has been fully replaced. In Qtopia 4.1 this consisted of a single class QDrmContentAgent which specifically targeted OMA DRM v1 and only supported a single agent. Qtopia 4.2 introduces a more generic plugin based system which replaces QDrmContentAgent, the details of which are available in the <a href="syscust-drm.html">DRM Agent Integration</a> guide.</p>
 <a name="porting-to-qtopia-4-2-1"></a>
 <h2>Porting to Qtopia 4.2.1</h2>
+<p>The QObexPushService::aboutToDelete signal has been removed. Please use the <a href="qobject.html#destroyed">QObject::destroyed</a>() signal instead.</p>
 <a name="porting-to-qtopia-4-2-2"></a>
 <h2>Porting to Qtopia 4.2.2</h2>
+<a name="api"></a>
+<h3>API</h3>
+<ul>
+<li>The QBluetoothDeviceSelector class has been renamed to <a href="qbluetoothremotedevicedialog.html">QBluetoothRemoteDeviceDialog</a> and the setForcePairing(), displayedDevice(), and startDeviceDiscovery() functions as well as the signals have been removed. To change the behavior when a device is activated, override done().</li>
+<li>The QBluetoothDeviceSelectorFilter class has renamed to <a href="qbluetoothremotedevicedialogfilter.html">QBluetoothRemoteDeviceDialogFilter</a>.</li>
+<li>The QSDAP::cancelSearch method's implementation has been modified. You now must wait until the searchCancelled() signal is sent before being able to start a new SDP Query.</li>
+<li>The QSDAPSearchResult::errorOccurred() method has been renamed to isValid()</li>
+<li>The QBluetoothAbstractSocket::lastError() has been renamed to <a href="qbluetoothabstractsocket.html#error">QBluetoothAbstractSocket::error</a>()</li>
+<li>The QBluetoothAbstractServer::lastError() has been renamed to <a href="qbluetoothabstractserver.html#error">QBluetoothAbstractServer::error</a>()</li>
+<li>The <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a> class no longer subclasses QAbstractIpcInterfaceGropu</li>
+<li>The <a href="qbluetoothabstractservice.html#start">QBluetoothAbstractService::start</a>() no longer has a channel argument</li>
+<li>The QBluetoothAbstractService::translatableDisplayName() has been renamed to displayName()</li>
+<li>The QBluetoothAbstractService::sdpRegister() and QBluetoothAbstractService::sdpUnregister() have been removed. Use <a href="qbluetoothabstractservice.html#registerRecord">QBluetoothAbstractService::registerRecord</a>() and <a href="qbluetoothabstractservice.html#unregisterRecord">QBluetoothAbstractService::unregisterRecord</a>() instead.</li>
+<li>The <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a> requires the service display name for construction</li>
+<li>The use of the signals <a href="qbluetoothabstractservice.html#started">QBluetoothAbstractService::started</a>() and <a href="qbluetoothabstractservice.html#stopped">QBluetoothAbstractService::stopped</a>() have changed and QBluetoothAbstractService::error() has been removed</li>
+<li>The QBluetoothLocalDevice::lastError() has been renamed to <a href="qbluetoothlocaldevice.html#error">QBluetoothLocalDevice::error</a>()</li>
+<li>The QBluetoothLocalDevice::NoSuchAdapter enum has been renamed to <a href="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::NoSuchAdaptor</a></li>
+<li>The <a href="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</a> class has been refactored.</li>
+<li>The QBluetoothAddress::valid() method has been renamed to isValid()</li>
+<li>The QSDPUUID class has been renamed to <a href="qbluetoothsdpuuid.html">QBluetoothSdpUuid</a></li>
+<li>The QSDPUUID::toUUID128() method has been renamed to toUuid128</li>
+<li>The QSDPService class has been renamed to <a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a></li>
+<li>The QSDPSequence class has been renamed to <a href="qbluetoothsdpsequence.html">QBluetoothSdpSequence</a></li>
+<li>The QSDPAlternative class has been renamed to <a href="qbluetoothsdpalternative.html">QBluetoothSdpAlternative</a></li>
+<li>The QSDP class has been removed</li>
+<li>The QBluetoothObexServer::authenticated has been renamed to isAuthenticated</li>
+<li>The QBluetoothObexServer::encrypted has been renamed to isEncrypted</li>
+<li>The QBluetoothAbstractSocket::TimedoutError has been renamed to <a href="qbluetoothabstractsocket.html#SocketError-enum">QBluetoothAbstractSocket::TimeoutError</a></li>
+<li>The QBluetoothObexSocket::authenticated has been renamed to isAuthenticated</li>
+<li>the QBluetoothObexSocket::encrypted has been renamed to isEncrypted</li>
+<li>The QBluetoothPasskeyAgent::lastError has been renamed to error</li>
+<li>The QSDAP searchLocalServices, browseLocalServices methods have been removed</li>
+<li>The QSDAPSearchResult class has been renamed to <a href="qbluetoothsdpqueryresult.html">QBluetoothSdpQueryResult</a></li>
+<li>The QSDAP class has been renamed to <a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a></li>
+<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes no longer delete the provided <a href="qobexsocket.html">QObexSocket</a> object. The socket object should be deleted by the programmer when it is no longer required.</li>
+<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' setAutoDelete() and autoDelete() functions have been removed. To replicate the auto-delete functionality, connect <a href="qobexpushclient.html#done">QObexPushClient::done</a>() or <a href="qobexpushservice.html#done">QObexPushService::done</a>() to <a href="qobject.html#deleteLater">QObject::deleteLater</a>().</li>
+<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' state() and error() functions now return enumeration values from their own classes rather than from the QObex namespace</li>
+<li>The QObex namespace has been removed</li>
+<li>The <a href="qobexpushclient.html#abort">QObexPushClient::abort</a>() now only aborts the current command instead of performing a hard abort and closing itself.</li>
+<li>The QLocalUniqueId class has been removed</li>
+<li>The <a href="quniqueid.html">QUniqueId</a> class no longer uses a device id as part of its composition</li>
+<li>The <a href="quniqueid.html">QUniqueId</a> class now only uses 32bits</li>
+<li>The QUniqueId::toLocalString() method has been moved from protected to public</li>
+<li>The <a href="quniqueid.html#toByteArray">QUniqueId::toByteArray</a>() method has been moved from protected to public</li>
+<li>The <a href="quniqueid.html#toUInt">QUniqueId::toUInt</a>() and <a href="quniqueid.html#fromUInt">QUniqueId::fromUInt</a>() methods have been added</li>
+</ul>
+<a name="qpk-packages"></a>
+<h3>Qpk packages</h3>
+<p>Qpk packages built with 4.2.2 will have a Qtopia version field included in the package's control file, which contains metainformation concerning the package. Package Manager requires packages to have this field filled in otherwise, it will not install the package; as a result packages built prior to 4.2.2 won't install with Qtopia 4.2.2.</p>
+<p>If a package built prior to 4.2.2 needs to be installed, there is a workaround which is to untar the qpk, edit the control file to include the line, &quot;QtopiaVersion: 4.2.2&quot;, retar the qpk and then remake the packages.list or qpd file on the server. This is not a recommended step, if for no other reason than the binary incompatibilities introduced in 4.2.2.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

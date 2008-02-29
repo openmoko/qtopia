@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/model-view-programming.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/model-view-programming.qdoc -->
 <head>
   <title>Qt 4.2: Model Subclassing Reference</title>
   <link rel="prev" href="model-view-proxy-models.html" />
@@ -132,9 +132,11 @@
 <tr valign="top" class="odd"><td><a href="qabstractitemmodel.html#dropMimeData">dropMimeData()</a></td><td>Performs the actual decoding of the data transferred by drag and drop operations, determines where in the model it will be set, and inserts new rows and columns where necessary. How this function is implemented in subclasses depends on the requirements of the data exposed by each model.</td></tr>
 </table></p>
 <p>If the implementation of the <a href="qabstractitemmodel.html#dropMimeData">dropMimeData()</a> function changes the dimensions of a model by inserting or removing rows or columns, or if items of data are modified, care must be taken to ensure that all relevant signals are emitted. It can be useful to simply call reimplementations of other functions in the subclass, such as <a href="qabstractitemmodel.html#setData">setData()</a>, <a href="qabstractitemmodel.html#insertRows">insertRows()</a>, and <a href="qabstractitemmodel.html#insertColumns">insertColumns()</a>, to ensure that the model behaves consistently.</p>
+<p>It is important that the functions that remove data from the model ( <a href="qabstractitemmodel.html">QAbstractItemModel</a>'s <a href="qabstractitemmodel.html#removeRows">removeRows()</a>, <a href="qabstractitemmodel.html#removeRow">removeRow()</a>, <a href="qabstractitemmodel.html#removeColumns">removeColumns()</a>, and <a href="qabstractitemmodel.html#removeColumn">removeColumn()</a>) are reimplemented for drags that move data to work properly.</p>
 <a name="convenience-views"></a>
 <h3>Convenience Views</h3>
-<p>The convenience views (<a href="qlistwidget.html">QListWidget</a>, <a href="qtablewidget.html">QTableWidget</a>, and <a href="qtreewidget.html">QTreeWidget</a>) override the default drag and drop functionality to provide less flexible, but more natural behavior that is appropriate for many applications. For example, since it is more common to drop data into cells in a <a href="qtablewidget.html">QTableWidget</a>, replacing the existing contents with the data being transferred, the underlying model will set the data of the target items rather than insert new rows and columns into the model.</p>
+<p>The convenience views (<a href="qlistwidget.html">QListWidget</a>, <a href="qtablewidget.html">QTableWidget</a>, and <a href="qtreewidget.html">QTreeWidget</a>) override the default drag and drop functionality to provide less flexible, but more natural behavior that is appropriate for many applications. For example, since it is more common to drop data into cells in a <a href="qtablewidget.html">QTableWidget</a>, replacing the existing contents with the data being transferred, the underlying model will set the data of the target items rather than insert new rows and columns into the model. For more information on drag and drop in convenience views, you can see <a href="model-view-dnd.html">Using Drag and Drop with Item Views</a>.</p>
+<p>See also <a href="http://www.phptr.com/content/images/0131872494/samplechapter/blanchette_ch10.pdf">&quot;Item View Classes&quot; Chapter of C++ GUI Programming with Qt 4</a>.</p>
 <p>
 [Previous: <a href="model-view-proxy-models.html">Proxy Models</a>]
 [<a href="model-view-programming.html">Contents</a>]
@@ -143,6 +145,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

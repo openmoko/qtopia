@@ -176,7 +176,7 @@ bool QPimContext::editable() const { return false; }
 */
 
 /*!
-  \fn bool QPimContext::exists(const QUniqueId &id, const QPimSource &source)
+  \fn bool QPimContext::exists(const QUniqueId &id, const QPimSource &source) const
 
   Returns true if the contact identified by \a id exists in the PIM data \a source
   and the \a source is controlled by this context.  Otherwise returns false.
@@ -344,19 +344,22 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 */
 
 /*!
-  \fn QUniqueId QAppointmentContext::replaceOccurrence(const QUniqueId &id, const QOccurrence &occurrence)
+  \fn QUniqueId QAppointmentContext::replaceOccurrence(const QUniqueId &id, const QOccurrence &occurrence, const QDate& date)
 
-  Replaces an occurrence of the appointment identified by \a id with \a occurrence.
+  Replaces an occurrence that occurs on \a date of the appointment identified
+  by \a id with \a occurrence.  If \a date is null, the date of the supplied
+  \a occurrence will be used.
   Returns true if the appointment was successfully updated, otherwise returns false.
 */
 
 /*!
-  \fn QUniqueId QAppointmentContext::replaceRemaining(const QUniqueId &id, const QAppointment &appointment)
+  \fn QUniqueId QAppointmentContext::replaceRemaining(const QUniqueId &id, const QAppointment &appointment, const QDate& date)
 
-  Modifies the appointment identified by \a id to not repeat after the first
-  occurrence of \a appointment and adds \a appointment do the PIM data source
-  that stores the appointment identified by \a id.  Returns the unique id for
-  the new appointment if successful, otherwise returns a null id.
+  Modifies the appointment identified by \a id to not repeat after \a date and
+  adds \a appointment to the PIM data source that stores the appointment
+  identified by \a id.  If \a date is null, the date of the first occurrence
+  of \a appointment will be used.
+  Returns the unique id for the new appointment if successful, otherwise returns a null id.
 */
 
 /*!

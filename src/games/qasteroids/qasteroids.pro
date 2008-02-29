@@ -17,5 +17,5 @@ pics.hint=pics
 sounds.files=$$QTOPIA_DEPOT_PATH/sounds/qasteroids/*
 sounds.path=/sounds/qasteroids
 INSTALLS+=help desktop pics sounds
-pkg.domain=window,games,helix
+pkg.domain=window,games,mediasession
 

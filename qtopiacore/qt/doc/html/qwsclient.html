@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/embedded/qwindowsystem_qws.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/embedded/qwindowsystem_qws.cpp -->
 <head>
   <title>Qt 4.2: QWSClient Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -39,9 +39,10 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QWSClient class encapsulates a client process in Qtopia Core.</p>
-<p>When running a <a href="qtopiacore.html">Qtopia Core</a> application, it either runs as a server or as a client connected to an existing server. The server is responsible for managing top-level window regions. A list of the current windows can be retrieved using the <a href="qwsserver.html#clientWindows">QWSServer::clientWindows</a>() function, and each window can tell which client that owns it through its <a href="qwswindow.html#client">QWSWindow::client</a>() function.</p>
+<p>When you run a <a href="qtopiacore.html">Qtopia Core</a> application, it either runs as a server or connects to an existing server. The server and client processes have different responsibilities: The client process performs all application specific operations. The server process is responsible for managing the clients as well as taking care of the pointer handling, character input, and screen output. In addition, the server provides functionality to handle input methods.</p>
+<p>As applications add and remove windows, the server process maintains information about each window. In <a href="qtopiacore.html">Qtopia Core</a>, top-level windows are encapsulated as <a href="qwswindow.html">QWSWindow</a> objects. A list of the current windows can be retrieved using the <a href="qwsserver.html#clientWindows">QWSServer::clientWindows</a>() function, and each window can tell which client that owns it through its <a href="qwswindow.html#client">QWSWindow::client</a>() function.</p>
 <p>A QWSClient object has an unique ID that can be retrieved using its <a href="qwsclient.html#clientId">clientId</a>() function. QWSClient also provides the <a href="qwsclient.html#identity">identity</a>() function which typically returns the name of this client's running application.</p>
-<p>See also <a href="qwsserver.html">QWSServer</a>, <a href="qcopchannel.html">QCopChannel</a>, and <a href="qtopiacore-running.html">Running Qtopia Core Applications</a>.</p>
+<p>See also <a href="qwsserver.html">QWSServer</a>, <a href="qwswindow.html">QWSWindow</a>, and <a href="qtopiacore-architecture.html">Qtopia Core Architecture</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="clientId"></a>int QWSClient::clientId () const</h3>
@@ -52,6 +53,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

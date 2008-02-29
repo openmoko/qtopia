@@ -30,6 +30,10 @@
 
 #include <qtopiaapplication.h>
 
+#ifndef NO_NICE
+#include <unistd.h>
+#endif
+
 class MediaServiceRequestHandler : public RequestHandler
 {
 public:
@@ -129,6 +133,19 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
         context, SLOT(setMediaContent(QMediaContent*)) );
     context->addObject( m_playerwidget );
     context->addObject( m_mediabrowser );
+
+    // Initialize volume
+    QSettings config( "Trolltech", "MediaPlayer" );
+    int volume = config.value( "Volume", 50 ).toInt();
+
+    m_playercontrol->setVolume( volume );
+
+#ifndef NO_NICE
+    static const int NICE_DELTA = -15;
+
+    // Increase process priority to improve gui responsiveness
+    nice( NICE_DELTA );
+#endif
 }
 
 void MediaPlayer::setPlaylist( Playlist* playlist )
@@ -227,6 +244,10 @@ void MediaPlayer::closeEvent( QCloseEvent* e )
 
     if( m_closeonback ) {
         QtopiaApplication::instance()->unregisterRunningTask( this );
+
+        // Save volume settings
+        QSettings config( "Trolltech", "MediaPlayer" );
+        config.setValue( "Volume", m_playercontrol->volume() );
     } else {
         QtopiaApplication::instance()->registerRunningTask( "Media Player", this );
     }

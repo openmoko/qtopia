@@ -299,8 +299,19 @@ defineReplace(reverse) {
     return(ret)
 }
 
+# Specify the license conditions of a project
 defineTest(license) {
-    idep(QTOPIA_LICENSE*=$$1,QTOPIA_LICENSE)
+    val=$$1
+    contains(QMAKE_BEHAVIORS,func_in_join):!contains(QMAKE_BEHAVIORS,var_split):val=$$split(val," ")
+    for(l,val) {
+        QTOPIA_LICENSE*="$$self:$$l"
+        export(QTOPIA_LICENSE)
+        idep(QTOPIA_DEP_LICENSE*="__SELF__:$$l")
+        idep(CONFIG*=license,CONFIG)
+
+        # Special case for LGPL projects that depend on Qt
+        equals(l,LGPL):qt:idep(QTOPIA_DEP_LICENSE*="__SELF__:LGPL_QT")
+    }
 }
 
 defineReplace(esc) {
@@ -368,6 +379,7 @@ defineTest(resolveRelativeFiles) {
     out=
     for(i,in) {
         found=0
+        # First check for files in the build directory
         files=$$files($$OUT_PWD/$$i)
         for(f,files) {
             exists($$f) {
@@ -376,7 +388,17 @@ defineTest(resolveRelativeFiles) {
             }
         }
         equals(found,1):next()
+        # Then check for files in the source directory
         files=$$files($$SRCDIR/$$i)
+        for(f,files) {
+            exists($$f) {
+                found=1
+                out+=$$f
+            }
+        }
+        equals(found,1):next()
+        # Finally check for files specified with absolute paths
+        files=$$files($$i)
         for(f,files) {
             exists($$f) {
                 found=1

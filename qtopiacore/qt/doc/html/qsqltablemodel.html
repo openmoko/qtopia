@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/sql/models/qsqltablemodel.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/sql/models/qsqltablemodel.cpp -->
 <head>
   <title>Qt 4.2: QSqlTableModel Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -125,9 +125,9 @@
      QString name = model.record(4).value(&quot;name&quot;).toString();</pre>
 <p>The code snippet above extracts the <tt>salary</tt> field from record 4 in the result set of the query <tt>SELECT * from employee</tt>.</p>
 <p>It is possible to set filters using <a href="qsqltablemodel.html#setFilter">setFilter</a>(), or modify the sort order using <a href="qsqltablemodel.html#setSort">setSort</a>(). At the end, you must call <a href="qsqltablemodel.html#select">select</a>() to populate the model with data.</p>
-<p>The sql/tablemodel example illustrates how to use QSqlTableModel as the data source for a <a href="qtableview.html">QTableView</a>.</p>
+<p>The <a href="sql-tablemodel.html">sql/tablemodel</a> example illustrates how to use QSqlTableModel as the data source for a <a href="qtableview.html">QTableView</a>.</p>
 <p>QSqlTableModel provides no direct support for foreign keys. Use the <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a> and <a href="qsqlrelationaldelegate.html">QSqlRelationalDelegate</a> if you want to resolve foreign keys.</p>
-<p>See also <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a>, <a href="qsqlquery.html">QSqlQuery</a>, <a href="model-view-programming.html">Model/View Programming</a>, Table Model Example, and Cached Table Example.</p>
+<p>See also <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a>, <a href="qsqlquery.html">QSqlQuery</a>, <a href="model-view-programming.html">Model/View Programming</a>, <a href="sql-tablemodel.html">Table Model Example</a>, and <a href="sql-cachedtable.html">Cached Table Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="EditStrategy-enum"></a>enum QSqlTableModel::EditStrategy</h3>
@@ -288,6 +288,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -62,8 +62,8 @@ for my $lang ( @translations ) {
             system($cmd);
         }
     } else {
-        print "No .ts files found to suit language \"$lang\". Please run make lupdate in $srcdir.\n";
-        exit 1;
+        die "ERROR: Missing $trtarget-$lang.ts.\n".
+            "Please run make lupdate in $srcdir.\n";
     }
 }
 

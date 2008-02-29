@@ -21,6 +21,12 @@
 #ifndef __QTOPIA_HTTP_H__
 #define __QTOPIA_HTTP_H__
 
+/*
+   INTERNAL CLASS
+
+   This class will be removed in a future version of Qtopia, being replaced
+   by functionality from future version of Qt.  The API's will likely not be compatible.
+*/
 #include <qtopiaglobal.h>
 
 #include <QList>

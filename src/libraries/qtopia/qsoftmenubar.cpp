@@ -100,6 +100,9 @@
   \value BackSpace
   \value Next
   \value Previous
+  \value EndEdit
+  \value RevertEdit
+  \value Deselect
 */
 
 /*!
@@ -308,6 +311,7 @@ private:
     QList<QWidget*> widgetsWithMenu(QMenu *menu, QSoftMenuBar::FocusState state);
     QString findHelp(const QWidget* w);
     bool triggerMenuItem( QMenu *menu, int keyNum );
+    QPoint positionForMenu(const QMenu *menu);
 
 private slots:
     void widgetDestroyed();
@@ -648,6 +652,13 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
         }
         return false;
     }
+    
+    if (e->type() == QEvent::Resize) {
+        QMenu *menu = qobject_cast<QMenu*>(o);
+        if (menu && menu->isVisible()) {    //menu needs to be moved when resized (since it is bottom-anchored)
+            menu->move(positionForMenu(menu));
+        }
+    }
 
     if (!o || !e || e->type() != QEvent::KeyPress )
         return false;
@@ -852,8 +863,9 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
 #endif
         inputMethodAction = menu->addAction(QIcon(desc.iconFileName()),desc.label());
         inputMethodAction->setData(desc.id());
+        connect(inputMethodAction, SIGNAL(triggered()), this, SLOT(inputMethod()));
 
-        if(descriptionList.size() > 1);
+        if(descriptionList.size() > 1)
         {
             QMenu* IMMenu = new QMenu();
             inputMethodAction->setMenu(IMMenu);
@@ -891,19 +903,9 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
     }
 
     if (menu->actions().count()) {
-        QDesktopWidget *desktop = QApplication::desktop();
-        QRect r = desktop->availableGeometry(desktop->primaryScreen());
-        QPoint pos;
-        if ( QApplication::layoutDirection() == Qt::LeftToRight )
-            pos = QPoint(r.left(), r.bottom() - menu->sizeHint().height() + 1);
-        else {
-            int x = r.right() - menu->sizeHint().width()+1;
-            if ( x < 0 ) x=1;
-            pos = QPoint(x, r.bottom() - menu->sizeHint().height() + 1);
-        }
-        menu->popup(pos);
+        menu->popup(positionForMenu(menu));
         foreach (QAction *a, menu->actions()) {
-            if (a->isEnabled() && a->isVisible()) {
+            if (a->isEnabled() && a->isVisible() && !a->isSeparator()) {
                 if ( a->menu() == 0 )
                     menu->setActiveAction(a);
                 break;
@@ -974,6 +976,23 @@ bool MenuManager::helpExists(QWidget *w)
     if (!d.helpexists)
         qLog(UI) << ">>> NO help exists for" << d.helpFile;
     return d.helpexists;
+}
+
+QPoint MenuManager::positionForMenu(const QMenu *menu)
+{
+    if (!menu)
+        return QPoint(0,0);
+    QDesktopWidget *desktop = QApplication::desktop();
+    QRect r = desktop->availableGeometry(desktop->primaryScreen());
+    QPoint pos;
+    if ( QApplication::layoutDirection() == Qt::LeftToRight )
+        pos = QPoint(r.left(), r.bottom() - menu->sizeHint().height() + 1);
+    else {
+        int x = r.right() - menu->sizeHint().width()+1;
+        if ( x < 0 ) x=1;
+        pos = QPoint(x, r.bottom() - menu->sizeHint().height() + 1);
+    }
+    return pos;
 }
 
 #include "qsoftmenubar.moc"

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qlayoutitem.cpp -->
 <head>
   <title>Qt 4.2: QLayoutItem Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -96,7 +97,8 @@
 <h3 class="fn"><a name="minimumSize"></a><a href="qsize.html">QSize</a> QLayoutItem::minimumSize () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Implemented in subclasses to return the minimum size of this item.</p>
 <h3 class="fn"><a name="setAlignment"></a>void QLayoutItem::setAlignment ( <a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a> <i>alignment</i> )</h3>
-<p>Sets the alignment of this item to <i>alignment</i>. Not all subclasses support alignment.</p>
+<p>Sets the alignment of this item to <i>alignment</i>.</p>
+<p><b>Note:</b> Item alignment is only supported by <a href="qlayoutitem.html">QLayoutItem</a> subclasses where it would have a visual effect. Except for <a href="qspaceritem.html">QSpacerItem</a>, which provides blank space for layouts, all public Qt classes that inherit <a href="qlayoutitem.html">QLayoutItem</a> support item alignment.</p>
 <p>See also <a href="qlayoutitem.html#alignment">alignment</a>().</p>
 <h3 class="fn"><a name="setGeometry"></a>void QLayoutItem::setGeometry ( const <a href="qrect.html">QRect</a> &amp; <i>r</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Implemented in subclasses to set this item's geometry to <i>r</i>.</p>
@@ -111,6 +113,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

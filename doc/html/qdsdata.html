@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QDSData Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QDSData Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDSData Class Reference</h1>
 <p>The QDSData class encapsulates data which is shared with QDS services. <a href="#details">More...</a></p>
-<pre>    #include &lt;QDSData&gt;</pre><ul>
+<pre>#include &lt;QDSData&gt;</pre><ul>
 <li><a href="qdsdata-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="public-functions"></a>
@@ -20,7 +19,7 @@
 <ul>
 <li><div class="fn"/><b><a href="qdsdata.html#QDSData">QDSData</a></b> ()</li>
 <li><div class="fn"/><b><a href="qdsdata.html#QDSData-2">QDSData</a></b> ( const QDSData &amp; <i>other</i> )</li>
-<li><div class="fn"/><b><a href="qdsdata.html#QDSData-3">QDSData</a></b> ( const QLocalUniqueId &amp; <i>key</i> )</li>
+<li><div class="fn"/><b><a href="qdsdata.html#QDSData-3">QDSData</a></b> ( const QUniqueId &amp; <i>key</i> )</li>
 <li><div class="fn"/><b><a href="qdsdata.html#QDSData-4">QDSData</a></b> ( const QByteArray &amp; <i>data</i>, const QMimeType &amp; <i>type</i> )</li>
 <li><div class="fn"/><b><a href="qdsdata.html#QDSData-5">QDSData</a></b> ( const QString &amp; <i>data</i>, const QMimeType &amp; <i>type</i> )</li>
 <li><div class="fn"/><b><a href="qdsdata.html#QDSData-6">QDSData</a></b> ( QFile &amp; <i>data</i>, const QMimeType &amp; <i>type</i> )</li>
@@ -34,7 +33,7 @@
 <li><div class="fn"/>bool <b><a href="qdsdata.html#modify-5">modify</a></b> ( const QString &amp; <i>data</i>, const QMimeType &amp; <i>type</i> )</li>
 <li><div class="fn"/>bool <b><a href="qdsdata.html#modify-6">modify</a></b> ( QFile &amp; <i>data</i>, const QMimeType &amp; <i>type</i> )</li>
 <li><div class="fn"/>bool <b><a href="qdsdata.html#remove">remove</a></b> ()</li>
-<li><div class="fn"/>QLocalUniqueId <b><a href="qdsdata.html#store">store</a></b> ()</li>
+<li><div class="fn"/>QUniqueId <b><a href="qdsdata.html#store">store</a></b> ()</li>
 <li><div class="fn"/>QIODevice * <b><a href="qdsdata.html#toIODevice">toIODevice</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qdsdata.html#toString">toString</a></b> () const</li>
 <li><div class="fn"/>QMimeType <b><a href="qdsdata.html#type">type</a></b> () const</li>
@@ -55,7 +54,7 @@
 <p>The default constructor creates an empty object.</p>
 <h3 class="fn"><a name="QDSData-2"></a>QDSData::QDSData ( const QDSData &amp; <i>other</i> )</h3>
 <p>Copy constructor creates a deep copy of <i>other</i>.</p>
-<h3 class="fn"><a name="QDSData-3"></a>QDSData::QDSData ( const <a href="qlocaluniqueid.html">QLocalUniqueId</a> &amp; <i>key</i> )</h3>
+<h3 class="fn"><a name="QDSData-3"></a>QDSData::QDSData ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>key</i> )</h3>
 <p>Constructs a data object from the <i>key</i> created by <a href="qdsdata.html#store">QDSData::store</a>().</p>
 <h3 class="fn"><a name="QDSData-4"></a>QDSData::QDSData ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
 <p>Constructs a new data object with <i>data</i> of <i>type</i>.</p>
@@ -88,7 +87,7 @@
 <p>Replaces the data with <i>data</i> of <i>type</i>.</p>
 <h3 class="fn"><a name="remove"></a>bool QDSData::remove ()</h3>
 <p>Removes the data from the persistent data store, when the reference count is zero, indicating that no-one requires the data, the data is deleted permanently from the data store.</p>
-<h3 class="fn"><a name="store"></a><a href="qlocaluniqueid.html">QLocalUniqueId</a> QDSData::store ()</h3>
+<h3 class="fn"><a name="store"></a><a href="quniqueid.html">QUniqueId</a> QDSData::store ()</h3>
 <p>Adds the data to the persistent data store, and returns a key for accessing the data in the future.</p>
 <p>If the data was correctly stored, the returned key will not be null.</p>
 <p>The persistent data is reference counted so all applications who wish to access the data from the data store should call this method.</p>
@@ -109,6 +108,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

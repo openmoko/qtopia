@@ -22,45 +22,38 @@
 #ifndef __QBLUETOOTHABSTRACTSERVICE_H__
 #define __QBLUETOOTHABSTRACTSERVICE_H__
 
-#include <qabstractipcinterfacegroup.h>
 #include <qbluetoothnamespace.h>
 
 class QBluetoothAddress;
-class QBluetoothAbstractService_Private;
+class QBluetoothSdpRecord;
+class QBluetoothAbstractServicePrivate;
 
-class QTOPIACOMM_EXPORT QBluetoothAbstractService
-            : public QAbstractIpcInterfaceGroup
+class QTOPIACOMM_EXPORT QBluetoothAbstractService : public QObject
 {
-    friend class QBluetoothAbstractService_Private;
     Q_OBJECT
 
 public:
-    explicit QBluetoothAbstractService(const QString &name, QObject *parent = 0);
+    explicit QBluetoothAbstractService(const QString &name, const QString &displayName, QObject *parent = 0);
     virtual ~QBluetoothAbstractService();
 
-    virtual void initialize();
-
-    virtual void start(int channel) = 0;
+    virtual void start() = 0;
     virtual void stop() = 0;
     virtual void setSecurityOptions(QBluetooth::SecurityOptions options) = 0;
 
-    virtual QString translatableDisplayName() const = 0;
-
+    QString name() const;
+    QString displayName() const;
 
 protected:
-    bool sdpRegister(const QBluetoothAddress &local,
-                     QBluetooth::SDPProfile profile,
-                     int channel);
-    bool sdpUnregister();
-    QString sdpError();
+    quint32 registerRecord(const QBluetoothSdpRecord &record);
+    quint32 registerRecord(const QString &filename);
+    bool unregisterRecord(quint32 handle);
 
 private:
-    QBluetoothAbstractService_Private *m_private;
+    QBluetoothAbstractServicePrivate *m_data;
 
 signals:
-    void started(QBluetooth::ServiceError error, const QString &errorDesc);
-    void stopped(QBluetooth::ServiceError error, const QString &errorDesc);
-    void error(QBluetooth::ServiceError error, const QString &errorDesc);
+    void started(bool error, const QString &description);
+    void stopped();
 };
 
 #endif

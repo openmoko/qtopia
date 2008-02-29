@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -935,7 +945,7 @@ void qt_getArabicProperties(const unsigned short *chars, int len, QArabicPropert
             break;
         case ArabicSpace:
             properties[i].justification = QGlyphLayout::Arabic_Space;
-
+            break;
         case Kashida:
             properties[i].justification = QGlyphLayout::Arabic_Kashida;
             break;
@@ -3032,18 +3042,20 @@ static bool indic_shape_syllable(QOpenType *openType, QShaperItem *item, bool in
 
 #ifdef INDIC_DEBUG
         for (i = fixed; i < len; ++i)
-            IDEBUG("position[%d] = %d, form=%d", i, position[i], form(uc[i]));
+            IDEBUG("position[%d] = %d, form=%d uc=%x", i, position[i], form(uc[i]), uc[i]);
 #endif
         // we continuosly position the matras and vowel marks and increase the fixed
         // until we reached the end.
         const IndicOrdering *finalOrder = indic_order[script-QUnicodeTables::Devanagari];
 
         IDEBUG("    reordering pass:");
-        //IDEBUG("        base=%d fixed=%d", base, fixed);
+        IDEBUG("        base=%d fixed=%d", base, fixed);
         int toMove = 0;
         while (finalOrder[toMove].form && fixed < len-1) {
-            //IDEBUG("        fixed = %d, moving form %d with pos %d", fixed, finalOrder[toMove].form, finalOrder[toMove].position);
+            IDEBUG("        fixed = %d, toMove=%d, moving form %d with pos %d", fixed, toMove, finalOrder[toMove].form, finalOrder[toMove].position);
             for (i = fixed; i < len; i++) {
+                IDEBUG() << "           i=" << i << "uc=" << hex << uc[i] << "form=" << form(uc[i])
+                         << "position=" << position[i];
                 if (form(uc[i]) == finalOrder[toMove].form &&
                      position[i] == finalOrder[toMove].position) {
                     // need to move this glyph
@@ -3055,7 +3067,7 @@ static bool indic_shape_syllable(QOpenType *openType, QShaperItem *item, bool in
                         unsigned char pos = position[i];
                         for (int j = i+1; j > to+1; j--) {
                             uc[j] = uc[j-2];
-                            position[j] = uc[j-2];
+                            position[j] = position[j-2];
                         }
                         uc[to] = ch;
                         uc[to+1] = ch2;

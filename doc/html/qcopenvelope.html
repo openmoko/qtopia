@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QCopEnvelope Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QCopEnvelope Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QCopEnvelope Class Reference</h1>
 <p>The QCopEnvelope class encapsulates and sends QCop messages over QCopChannels. <a href="#details">More...</a></p>
-<pre>    #include &lt;QCopEnvelope&gt;</pre><p>Inherits <a href="qdatastream.html">QDataStream</a>.</p>
+<pre>#include &lt;QCopEnvelope&gt;</pre><p>Inherits <a href="qdatastream.html">QDataStream</a>.</p>
 <ul>
 <li><a href="qcopenvelope-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -31,10 +30,10 @@
 <p>The QCopEnvelope class encapsulates and sends QCop messages over QCopChannels.</p>
 <p>QCop messages allow applications to communicate with each other by sending messages using <tt>QCopEnvelope</tt> and receiving messages by connecting to a <tt>QCopChannel</tt>.</p>
 <p>To send a message, use the following protocol:</p>
-<pre>    QCopEnvelope e(channelname, messagename);
+<pre>&nbsp;   QCopEnvelope e(channelname, messagename);
     e &lt;&lt; parameter1 &lt;&lt; parameter2 &lt;&lt; ...;</pre>
 <p>For messages without parameters, simply use:</p>
-<pre>    QCopEnvelope e(channelname, messagename);</pre>
+<pre>&nbsp;   QCopEnvelope e(channelname, messagename);</pre>
 <p>where:</p>
 <ul>
 <li><tt>channelname</tt> is the channel name within Qtopia, commencing with &quot;QPE/&quot;.</li>
@@ -44,12 +43,12 @@
 <p>To receive a message either:</p>
 <ul>
 <li>use the predefined QPE/Application/<i>appname</i> channel in the application. For further information refer to: <a href="qtopiaapplication.html#appMessage">QtopiaApplication::appMessage</a>().</li>
-<li>create another channel and connect it to a slot using:<pre>     myChannel = new QCopChannel( &quot;QPE/FooBar&quot;, this );
+<li>create another channel and connect it to a slot using:<pre>&nbsp;    myChannel = new QCopChannel( &quot;QPE/FooBar&quot;, this );
      connect( myChannel, SIGNAL(received(const QString&amp;,const QByteArray&amp;)),
               this, SLOT(fooBarMessage(const QString&amp;,const QByteArray&amp;)) );</pre>
 </li>
 </ul>
-<p>See also: Qtopia IPC and <a href="services.html">Services</a>.</p>
+<p>See also: <a href="qtopiaipc.html">Qtopia IPC</a> and <a href="services.html">Services</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QCopEnvelope"></a>QCopEnvelope::QCopEnvelope ( const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>message</i> )</h3>
@@ -60,6 +59,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -30,10 +30,12 @@
 #include "remotedevicesdialog.h"
 #include "localserviceswindow.h"
 
-#include <qtopia/comm/qbluetoothlocaldevice.h>
-#include <qtopia/comm/qbluetoothlocaldevicemanager.h>
+#include <qbluetoothlocaldevice.h>
+#include <qbluetoothlocaldevicemanager.h>
+#include <qcommdevicecontroller.h>
+#include <qtopiacomm/private/remotedevicepropertiesdialog_p.h>
+#include <qtopianamespace.h>
 #include <qtopialog.h>
-#include <qtopia/comm/qcommdevicecontroller.h>
 
 #include <QApplication>
 #include <QtopiaApplication>
@@ -115,7 +117,11 @@ void DeviceWindow::start()
     m_ui->deviceOffButton->setChecked(!m_prev);
 
     this->setModal( true );
+#ifdef QTOPIA_DESKTOP
+    this->exec();
+#else
     QtopiaApplication::execDialog( this );
+#endif
 }
 
 class VisibilityWindow : public QDialog
@@ -162,14 +168,14 @@ void VisibilityWindow::finished(int result)
         if (cur) {
             if (!m_device->setDiscoverable()) {
                 qLog(Bluetooth) << "Error making device discoverable:"
-                    << m_device->lastError();
+                    << m_device->error();
                 QMessageBox::warning(this, tr("Device Error"),
                     QString(tr("<P>Unable to turn on device visibility")));
             }
         } else {
             if (!m_device->setConnectable()) {
                 qLog(Bluetooth) << "Error turning off device:"
-                    << m_device->lastError();
+                    << m_device->error();
                 QMessageBox::warning(this, tr("Device Error"),
                     QString(tr("<P>Unable to turn off device visibility")));
             }
@@ -184,7 +190,11 @@ void VisibilityWindow::start()
     m_ui->visibilityOffButton->setChecked(!m_prev);
 
     this->setModal( true );
+#ifdef QTOPIA_DESKTOP
+    this->exec();
+#else
     QtopiaApplication::execDialog( this );
+#endif
 }
 
 class DeviceInfoWindow : public QDialog
@@ -198,7 +208,6 @@ public:
 public slots:
     void finished(int result);
     void start();
-    void removeNameFocus();
 
 private:
     Ui::DeviceInfo *m_ui;
@@ -235,7 +244,7 @@ void DeviceInfoWindow::finished(int result)
 {
     if (result == QDialog::Accepted) {
         QString cur = m_ui->nameEdit->text();
-        if (cur != m_prev) {
+        if (cur != m_prev && !cur.trimmed().isEmpty()) {
             m_device->setName(cur);
         }
     }
@@ -244,22 +253,22 @@ void DeviceInfoWindow::finished(int result)
 void DeviceInfoWindow::start()
 {
     m_prev = m_device->name();
-    m_ui->nameEdit->setText(m_prev);
 
-    // it's quite annoying for the user if the "name" field automatically
-    // gets edit focus when the dialog is shown (since then you have to
-    // click to get out of it, even if you just want to view the details
-    // and not change anything), so remove the name focus on start-up
-    QTimer::singleShot(0, this, SLOT(removeNameFocus()));
+    QVariant nameFont = Qtopia::findDisplayFont(m_prev);
+    if (nameFont.isNull()) {
+        // cannot display this name with any of the installed fonts
+        m_ui->nameEdit->setText("");
+    } else {
+        m_ui->nameEdit->setText(m_prev);
+        m_ui->nameEdit->setFont(nameFont.value<QFont>());
+    }
 
     this->setModal( true );
+#ifdef QTOPIA_DESKTOP
+    this->exec();
+#else
     QtopiaApplication::execDialog( this );
-}
-
-void DeviceInfoWindow::removeNameFocus()
-{
-    m_ui->nameEdit->home(false);
-    m_ui->nameEdit->setEditFocus(false);
+#endif
 }
 
 

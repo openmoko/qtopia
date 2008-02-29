@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qstatusbar.cpp -->
 <head>
   <title>Qt 4.2: QStatusBar Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -43,7 +44,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -94,14 +95,29 @@
 <p>QStatusBar lets you display all three types of indicators.</p>
 <p>Typically, a request for the status bar functionality occurs in relation to a <a href="qmainwindow.html">QMainWindow</a> object. <a href="qmainwindow.html">QMainWindow</a> provides a main application window, with a menu bar, tool bars, dock widgets <i>and</i> a status bar around a large central widget. The status bar can be retrieved using the <a href="qmainwindow.html#statusBar">QMainWindow::statusBar</a>() function, and replaced using the <a href="qmainwindow.html#setStatusBar">QMainWindow::setStatusBar</a>() function.</p>
 <p>Use the <a href="qstatusbar.html#showMessage">showMessage</a>() slot to display a <i>temporary</i> message:</p>
-<pre></pre>
+<pre> void MainWindow::createStatusBar()
+ {
+     statusBar()-&gt;showMessage(tr(&quot;Ready&quot;));
+ }</pre>
 <p>To remove a temporary message, use the <a href="qstatusbar.html#clearMessage">clearMessage</a>() slot, or set a time limit when calling <a href="qstatusbar.html#showMessage">showMessage</a>(). For example:</p>
-<pre></pre>
+<pre> void MainWindow::print()
+ {
+     QTextDocument *document = textEdit-&gt;document();
+     QPrinter printer;
+
+     QPrintDialog *dlg = new QPrintDialog(&amp;printer, this);
+     if (dlg-&gt;exec() != QDialog::Accepted)
+         return;
+
+     document-&gt;print(&amp;printer);
+
+     statusBar()-&gt;showMessage(tr(&quot;Ready&quot;), 2000);
+ }</pre>
 <p>Use the <a href="qstatusbar.html#currentMessage">currentMessage</a>() function to retrieve the temporary message currently shown. The QStatusBar class also provide the <a href="qstatusbar.html#messageChanged">messageChanged</a>() signal which is emitted whenever the temporary status message changes.</p>
 <p><i>Normal</i> and <i>Permanent</i> messages are displayed by creating a small widget (<a href="qlabel.html">QLabel</a>, <a href="qprogressbar.html">QProgressBar</a> or even <a href="qtoolbutton.html">QToolButton</a>) and then adding it to the status bar using the <a href="qstatusbar.html#addWidget">addWidget</a>() or the <a href="qstatusbar.html#addPermanentWidget">addPermanentWidget</a>() function. Use the <a href="qstatusbar.html#removeWidget">removeWidget</a>() function to remove such messages from the status bar.</p>
 <pre> statusBar()-&gt;addWidget(new MyReadWriteIndication);</pre>
 <p>By default QStatusBar provides a <a href="qsizegrip.html">QSizeGrip</a> in the lower-right corner. You can disable it using the <a href="qstatusbar.html#sizeGripEnabled-prop">setSizeGripEnabled</a>() function. Use the <a href="qstatusbar.html#sizeGripEnabled-prop">isSizeGripEnabled</a>() function to determine the current status of the size grip.</p>
-<p align="center"><img src="images/plastique-statusbar.png" alt="A status bar shown in the Plastique widget style" /></p><p>See also <a href="qmainwindow.html">QMainWindow</a>, <a href="qstatustipevent.html">QStatusTipEvent</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Status Bar</a>, and Application Example.</p>
+<p align="center"><img src="images/plastique-statusbar.png" alt="A status bar shown in the Plastique widget style" /></p><p>See also <a href="qmainwindow.html">QMainWindow</a>, <a href="qstatustipevent.html">QStatusTipEvent</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Status Bar</a>, and <a href="mainwindows-application.html">Application Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="sizeGripEnabled-prop"></a>sizeGripEnabled : bool</h3>
@@ -187,6 +203,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

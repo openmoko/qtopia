@@ -54,6 +54,7 @@
   Returns a map of custom field key and value for the record.
 */
 
+
 /*!
   \fn QString QPimRecord::notes() const
   Returns the notes for the record.
@@ -108,8 +109,14 @@ QPimRecord::~QPimRecord()
 }
 
 /*!
-  Returns true if the record has the same Uid as \a other;
-  otherwise returns false.
+  Returns true if the record and the \a other record have all the same:
+  \list
+  \o UID
+  \o categories
+  \o custom fields
+  \o notes
+  \endlist
+  and otherwise returns false.
 
   \sa operator!=()
 */
@@ -127,8 +134,14 @@ bool QPimRecord::operator==( const QPimRecord &other ) const
 }
 
 /*!
-  Returns true if the record does not have the same Uid as \a
-  other; otherwise returns false.
+  Returns false if the record and the \a other record have all the same:
+  \list
+  \o UID
+  \o categories
+  \o custom fields
+  \o notes
+  \endlist
+  and otherwise returns true.
 
   \sa operator==()
 */

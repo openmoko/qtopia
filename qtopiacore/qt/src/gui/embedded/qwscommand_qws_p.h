@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -128,7 +138,14 @@ struct QWSIdentifyCommand : public QWSCommand
             qWarning( "Identify command - name length %d - too big!", simpleData.idLen );
             simpleData.idLen = MAX_COMMAND_SIZE;
         }
-        id = QString(reinterpret_cast<const QChar*>(d), simpleData.idLen);
+        if ( simpleData.idLen * int(sizeof(QChar)) > len )
+        {
+            qWarning( "Identify command - name length %d - buffer size %d - buffer overrun!", simpleData.idLen, len );
+        }
+        else
+        {
+            id = QString(reinterpret_cast<const QChar*>(d), simpleData.idLen);
+        }
     }
 
     void setId(const QString& i, int lock)
@@ -172,9 +189,18 @@ struct QWSRegionNameCommand : public QWSCommand
             qWarning( "region name command - caption length too big!" );
             simpleData.captionLen = MAX_COMMAND_SIZE;
         }
-        name = QString(reinterpret_cast<const QChar*>(d), simpleData.nameLen/2);
-        d += simpleData.nameLen;
-        caption = QString(reinterpret_cast<const QChar*>(d), simpleData.captionLen/2);
+        if ( simpleData.nameLen + simpleData.captionLen > len )
+        {
+            qWarning( "region name command - name length %d - caption length %d - buffer size %d - buffer overrun!",
+                      simpleData.nameLen, simpleData.captionLen, len );
+
+        }
+        else
+        {
+            name = QString(reinterpret_cast<const QChar*>(d), simpleData.nameLen/2);
+            d += simpleData.nameLen;
+            caption = QString(reinterpret_cast<const QChar*>(d), simpleData.captionLen/2);
+        }
     }
 
     void setName(const QString& n, const QString &c)
@@ -208,16 +234,24 @@ struct QWSRegionCommand : public QWSCommand
     void setData(const char *d, int len, bool allocateMem = true) {
         QWSCommand::setData(d, len, allocateMem);
 
-        char *ptr = rawDataPtr;
+        if( simpleData.nrectangles * int(sizeof(QRect)) + simpleData.surfacekeylength * int(sizeof(QChar)) + simpleData.surfacedatalength * int(sizeof(char)) > len )
+        {
+            qWarning( "region command - rectangle count %d - surface key length %d - region data size %d - buffer size %d - buffer overrun!",
+                      simpleData.nrectangles, simpleData.surfacekeylength, simpleData.surfacedatalength, len );
+        }
+        else
+        {
+            char *ptr = rawDataPtr;
 
-        region.setRects(reinterpret_cast<QRect*>(ptr), simpleData.nrectangles);
-        ptr += simpleData.nrectangles * sizeof(QRect);
+            region.setRects(reinterpret_cast<QRect*>(ptr), simpleData.nrectangles);
+            ptr += simpleData.nrectangles * sizeof(QRect);
 
-        surfaceKey = QString(reinterpret_cast<QChar*>(ptr),
+            surfaceKey = QString(reinterpret_cast<QChar*>(ptr),
                              simpleData.surfacekeylength);
-        ptr += simpleData.surfacekeylength * sizeof(QChar);
+            ptr += simpleData.surfacekeylength * sizeof(QChar);
 
-        surfaceData = QByteArray(ptr, simpleData.surfacedatalength);
+            surfaceData = QByteArray(ptr, simpleData.surfacedatalength);
+        }
     }
 
     void setData(int id, const QString &key, const QByteArray &data,
@@ -367,6 +401,14 @@ struct QWSRepaintRegionCommand : public QWSCommand
 
     void setData(const char *d, int len, bool allocateMem = true) {
         QWSCommand::setData(d, len, allocateMem);
+
+        if( simpleData.nrectangles * int(sizeof(QRect)) > len )
+        {
+            qWarning( "repaint region command - region rectangle count %d - buffer size %d - buffer overrun",
+                      simpleData.nrectangles, len );
+
+            simpleData.nrectangles = len / sizeof(QRect);
+        }
         rectangles = reinterpret_cast<QRect *>(rawDataPtr);
     }
 
@@ -537,7 +579,14 @@ struct QWSQCopRegisterChannelCommand : public QWSCommand
             qWarning( "Command channel name too large!" );
             simpleData.chLen = MAX_COMMAND_SIZE;
         }
-        channel = QString(reinterpret_cast<const QChar*>(d), simpleData.chLen);
+        if( simpleData.chLen * int(sizeof(QChar)) > len )
+        {
+            qWarning( "register qcop channel command - channel name length %d - buffer size %d - buffer overrun!", simpleData.chLen, len );
+        }
+        else
+        {
+            channel = QString(reinterpret_cast<const QChar*>(d), simpleData.chLen);
+        }
     }
 
     void setChannel(const QString& n)
@@ -561,16 +610,28 @@ struct QWSQCopSendCommand : public QWSCommand
 
     void setData(const char *d, int len, bool allocateMem) {
         QWSCommand::setData(d, len, allocateMem);
-        const QChar *cd = reinterpret_cast<const QChar*>(d);
-        channel = QString(cd,simpleData.clen); cd += simpleData.clen;
-        message = QString(cd,simpleData.mlen);
-        d += simpleData.clen*sizeof(QChar) + simpleData.mlen*sizeof(QChar);
-        data = QByteArray(d, simpleData.dlen);
+
+        if( simpleData.clen * int(sizeof(QChar)) + simpleData.mlen * int(sizeof(QChar)) + simpleData.dlen * int(sizeof(char)) > len )
+        {
+            qWarning( "qcop send command - channel name length %d - message name length %d - data size %d - buffer size %d - buffer overrun!",
+                      simpleData.clen, simpleData.mlen, simpleData.dlen, len );
+        }
+        else
+        {
+            const QChar *cd = reinterpret_cast<const QChar*>(d);
+            channel = QString(cd,simpleData.clen); cd += simpleData.clen;
+            message = QString(cd,simpleData.mlen);
+            d += simpleData.clen*sizeof(QChar) + simpleData.mlen*sizeof(QChar);
+            data = QByteArray(d, simpleData.dlen);
+        }
     }
 
     void setMessage(const QString &c, const QString &m,
                      const QByteArray &data)
     {
+        this->channel = c;
+        this->message = m;
+        this->data = data;
         simpleData.clen = c.length();
         simpleData.mlen = m.length();
         simpleData.dlen = data.size();
@@ -584,8 +645,8 @@ struct QWSQCopSendCommand : public QWSCommand
         memcpy(d, m.unicode(), simpleData.mlen*sizeof(QChar));
         d += simpleData.mlen*sizeof(QChar);
         memcpy(d, data.data(), simpleData.dlen);
-        setData(tmp, l, true);
-        delete[] tmp;
+        QWSCommand::setData(tmp, l, false);
+        deleteRaw = true;
     }
 
     struct SimpleData {
@@ -673,8 +734,17 @@ struct QWSEmbedCommand : public QWSCommand
     void setData(const char *d, int len, bool allocateMem = true)
     {
         QWSCommand::setData(d, len, allocateMem);
-        region.setRects(reinterpret_cast<QRect*>(rawDataPtr),
-                        simpleData.rects);
+
+        if( simpleData.rects * int(sizeof(QRect)) > len )
+        {
+            qWarning( "embed command - region rectangle count %d - buffer size %d - buffer overrun!",
+                      simpleData.rects, len );
+        }
+        else
+        {
+            region.setRects(reinterpret_cast<QRect*>(rawDataPtr),
+                            simpleData.rects);
+        }
     }
 
     void setData(WId embedder, WId embedded, QWSEmbedEvent::Type type,

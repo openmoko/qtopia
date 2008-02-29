@@ -170,6 +170,8 @@ void TaskDialog::init()
     sv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     sv->setFocusPolicy(Qt::NoFocus);
     sv->setFrameStyle(QFrame::NoFrame);
+    sv->viewport()->installEventFilter(this);
+
     QWidget* taskDetail = new QWidget(sv);
 
     Ui::NewTaskDetail::setupUi(taskDetail);
@@ -221,6 +223,13 @@ void TaskDialog::init()
 #ifdef QTOPIA_DESKTOP
     setMaximumSize( sizeHint()*2 );
 #endif
+}
+
+bool TaskDialog::eventFilter( QObject *receiver, QEvent *event )
+{
+    if( sv && sv->widget() && receiver == sv->viewport() && event->type() == QEvent::Resize )
+        sv->widget()->setFixedWidth( sv->viewport()->width() );
+    return false;
 }
 
 void TaskDialog::startDateChecked()
@@ -312,8 +321,8 @@ const QTask &TaskDialog::todoEntry() const
 {
     todo.setDescription( inputDescription->text() );
     todo.setPriority( (QTask::Priority) (comboPriority->currentIndex() + 1) );
-    // percent completed and status are kept up to date, don't need to read
-    // here.
+    todo.setStatus(comboStatus->currentIndex());
+    todo.setPercentCompleted(spinComplete->value());
 
     if (dueCheck->isChecked())
         todo.setDueDate( dueEdit->date() );

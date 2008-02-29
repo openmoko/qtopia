@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/layout.qdoc -->
 <head>
   <title>Qt 4.2: Layout Classes</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -86,7 +87,7 @@
 <p>The third <a href="qpushbutton.html">QPushButton</a> spans 2 columns. This is possible by specifying 2 as the fourth argument to <a href="qgridlayout.html#addWidget">QGridLayout::addWidget</a>().</p>
 <p>When you use a layout, you don't need to pass a parent when constructing the child widgets. The layout will automatically reparent the widgets (using <a href="qwidget.html#setParent">QWidget::setParent</a>()) so that they are children of the widget on which the layout is installed.</p>
 <p><b>Important:</b> Widgets in a layout are children of the widget on which the layout is installed, <i>not</i> of the layout itself. Widgets can only have other widgets as parent, not layouts.</p>
-<p>You can nest layouts using <tt>addLayout()</tt> on a layout; the inner layout then becomes a child of the layout it is inserted into. The Basic Layouts example uses this feature to create a complex dialog.</p>
+<p>You can nest layouts using <tt>addLayout()</tt> on a layout; the inner layout then becomes a child of the layout it is inserted into. The <a href="layouts-basiclayouts.html">Basic Layouts</a> example uses this feature to create a complex dialog.</p>
 <a name="adding-widgets-to-a-layout"></a>
 <h2>Adding Widgets to a Layout</h2>
 <p>When you add widgets to a layout, the layout process works as follows:</p>
@@ -124,7 +125,7 @@
 <p>The widget will get an event of type <a href="qevent.html#Type-enum">QEvent::LayoutHint</a> when the layout needs to be recalculated. Reimplement <a href="qwidget.html#event">QWidget::event</a>() to handle <a href="qevent.html#Type-enum">QEvent::LayoutHint</a> events.</p>
 <a name="writing-custom-layout-managers"></a>
 <h2>Writing Custom Layout Managers</h2>
-<p>An alternative to manual layout is to write your own layout manager by subclassing <a href="qlayout.html">QLayout</a>. The Border Layout and Flow Layout examples show how to do this.</p>
+<p>An alternative to manual layout is to write your own layout manager by subclassing <a href="qlayout.html">QLayout</a>. The <a href="layouts-borderlayout.html">Border Layout</a> and <a href="layouts-flowlayout.html">Flow Layout</a> examples show how to do this.</p>
 <p>Here we present an example in detail. The class CardLayout is inspired by the Java layout manager of the same name. It lays out the items (widgets or nested layouts) on top of each other, each item offset by <a href="qlayout.html#spacing-prop">QLayout::spacing</a>().</p>
 <p>To write your own layout class, you must define the following:</p>
 <ul>
@@ -250,6 +251,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

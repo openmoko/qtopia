@@ -283,11 +283,13 @@ void WindowManagementPrivate::windowEvent(QWSWindow *w,
                     ++iter)
                 known = ((*iter)->testAttribute(Qt::WA_WState_Created)) && (((*iter)->winId() == (unsigned)w->winId()));
             break;
+        default:
+            break;
     }
 
     switch( e ) {
         case QWSServer::Raise:
-            if (!w->isVisible())
+            if (!w->isVisible() || w->requestedRegion().isEmpty())
                 break;
             // else FALL THROUGH
         case QWSServer::Show:
@@ -303,7 +305,7 @@ void WindowManagementPrivate::windowEvent(QWSWindow *w,
                             !known && widgets.end() != iter;
                             ++iter)
                         if((*iter)->isVisible() &&
-                                req.intersects((*iter)->rect())) {
+                                req.intersects((*iter)->geometry())) {
                             QTimer::singleShot(0, *iter, SLOT(raise()));
                         }
                 }
@@ -332,17 +334,33 @@ void WindowManagementPrivate::windowEvent(QWSWindow *w,
 void WindowManagementPrivate::doWindowActive(const QString &caption,
                                              const QRect &rect, QWSWindow *win)
 {
-    wmValueSpace.setAttribute("Title", caption);
-    wmValueSpace.setAttribute("Rect", rect);
+    static QString currCaption;
+    static QRect currRect;
+    static int currWinId = 0;
 
-    emit windowActive(caption, rect, win);
-    if(rect.top() <= qt_screen->deviceHeight()/3 &&
-       rect.bottom() > qt_screen->deviceHeight()/2 &&
-       rect.width() >= qt_screen->deviceWidth()-4) {
-        wmValueSpace.setAttribute("Caption", caption);
-        emit windowCaption(caption);
+    if (currCaption != caption || currRect != rect || currWinId != win->winId()) {
+        emit windowActive(caption, rect, win);
+        currWinId = win->winId();
     }
 
+    if (currCaption != caption || currRect != rect) {
+        if(rect.top() <= qt_screen->deviceHeight()/3 &&
+                rect.bottom() > qt_screen->deviceHeight()/2 &&
+                rect.width() >= qt_screen->deviceWidth()-4) {
+            wmValueSpace.setAttribute("Caption", caption);
+            emit windowCaption(caption);
+        }
+    }
+
+    if (currRect != rect) {
+        wmValueSpace.setAttribute("Rect", rect);
+        currRect = rect;
+    }
+
+    if (currCaption != caption) {
+        wmValueSpace.setAttribute("Title", caption);
+        currCaption = caption;
+    }
 }
 
 void WindowManagementPrivate::destroyed(QObject *obj)

@@ -141,6 +141,11 @@ bool HelixSession::isMuted() const
     return d->ismute;
 }
 
+QtopiaMedia::State HelixSession::playerState() const
+{
+    return d->player->playerState();
+}
+
 QString HelixSession::errorString()
 {
     return d->player->errorString();

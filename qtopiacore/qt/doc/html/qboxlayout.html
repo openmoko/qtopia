@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/kernel/qboxlayout.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qboxlayout.cpp -->
 <head>
   <title>Qt 4.2: QBoxLayout Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -117,11 +117,11 @@
 <p>Adds <i>layout</i> to the end of the box, with serial stretch factor <i>stretch</i>.</p>
 <p>See also <a href="qboxlayout.html#insertLayout">insertLayout</a>(), <a href="qlayout.html#addItem">addItem</a>(), and <a href="qboxlayout.html#addWidget">addWidget</a>().</p>
 <h3 class="fn"><a name="addSpacing"></a>void QBoxLayout::addSpacing ( int <i>size</i> )</h3>
-<p>Adds a non-stretchable space with size <i>size</i> to the end of this box layout. <a href="qboxlayout.html">QBoxLayout</a> provides default margin and spacing. This function adds additional space.</p>
-<p>See also <a href="qboxlayout.html#insertSpacing">insertSpacing</a>() and <a href="qlayout.html#addItem">addItem</a>().</p>
+<p>Adds a non-stretchable space (a <a href="qspaceritem.html">QSpacerItem</a>) with size <i>size</i> to the end of this box layout. <a href="qboxlayout.html">QBoxLayout</a> provides default margin and spacing. This function adds additional space.</p>
+<p>See also <a href="qboxlayout.html#insertSpacing">insertSpacing</a>(), <a href="qlayout.html#addItem">addItem</a>(), and <a href="qspaceritem.html">QSpacerItem</a>.</p>
 <h3 class="fn"><a name="addStretch"></a>void QBoxLayout::addStretch ( int <i>stretch</i> = 0 )</h3>
-<p>Adds a stretchable space with zero minimum size and stretch factor <i>stretch</i> to the end of this box layout.</p>
-<p>See also <a href="qboxlayout.html#insertStretch">insertStretch</a>() and <a href="qlayout.html#addItem">addItem</a>().</p>
+<p>Adds a stretchable space (a <a href="qspaceritem.html">QSpacerItem</a>) with zero minimum size and stretch factor <i>stretch</i> to the end of this box layout.</p>
+<p>See also <a href="qboxlayout.html#insertStretch">insertStretch</a>(), <a href="qlayout.html#addItem">addItem</a>(), and <a href="qspaceritem.html">QSpacerItem</a>.</p>
 <h3 class="fn"><a name="addStrut"></a>void QBoxLayout::addStrut ( int <i>size</i> )</h3>
 <p>Limits the perpendicular dimension of the box (e.g. height if the box is <a href="qboxlayout.html#Direction-enum">LeftToRight</a>) to a minimum of <i>size</i>. Other constraints may increase the limit.</p>
 <p>See also <a href="qlayout.html#addItem">addItem</a>().</p>
@@ -136,19 +136,18 @@
 <p>See also <a href="qboxlayout.html#setDirection">setDirection</a>(), <a href="qboxlayout.html#Direction-enum">QBoxLayout::Direction</a>, <a href="qboxlayout.html#addWidget">addWidget</a>(), and <a href="qboxlayout.html#addSpacing">addSpacing</a>().</p>
 <h3 class="fn"><a name="insertItem"></a>void QBoxLayout::insertItem ( int <i>index</i>, <a href="qlayoutitem.html">QLayoutItem</a> * <i>item</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Inserts <i>item</i> into this box layout at position <i>index</i>. If <i>index</i> is negative, the item is added at the end.</p>
-<p><b>Warning:</b> Do not call QLayout::insertChildLayout() if <i>item</i> is a <a href="qlayout.html">QLayout</a>.</p>
 <p>See also <a href="qlayout.html#addItem">addItem</a>(), <a href="qboxlayout.html#insertWidget">insertWidget</a>(), <a href="qboxlayout.html#insertLayout">insertLayout</a>(), <a href="qboxlayout.html#insertStretch">insertStretch</a>(), and <a href="qboxlayout.html#insertSpacing">insertSpacing</a>().</p>
 <h3 class="fn"><a name="insertLayout"></a>void QBoxLayout::insertLayout ( int <i>index</i>, <a href="qlayout.html">QLayout</a> * <i>layout</i>, int <i>stretch</i> = 0 )</h3>
 <p>Inserts <i>layout</i> at position <i>index</i>, with stretch factor <i>stretch</i>. If <i>index</i> is negative, the layout is added at the end.</p>
 <p><i>layout</i> becomes a child of the box layout.</p>
 <p>See also <a href="qboxlayout.html#addLayout">addLayout</a>() and <a href="qboxlayout.html#insertItem">insertItem</a>().</p>
 <h3 class="fn"><a name="insertSpacing"></a>void QBoxLayout::insertSpacing ( int <i>index</i>, int <i>size</i> )</h3>
-<p>Inserts a non-stretchable space at position <i>index</i>, with size <i>size</i>. If <i>index</i> is negative the space is added at the end.</p>
+<p>Inserts a non-stretchable space (a <a href="qspaceritem.html">QSpacerItem</a>) at position <i>index</i>, with size <i>size</i>. If <i>index</i> is negative the space is added at the end.</p>
 <p>The box layout has default margin and spacing. This function adds additional space.</p>
-<p>See also <a href="qboxlayout.html#addSpacing">addSpacing</a>() and <a href="qboxlayout.html#insertItem">insertItem</a>().</p>
+<p>See also <a href="qboxlayout.html#addSpacing">addSpacing</a>(), <a href="qboxlayout.html#insertItem">insertItem</a>(), and <a href="qspaceritem.html">QSpacerItem</a>.</p>
 <h3 class="fn"><a name="insertStretch"></a>void QBoxLayout::insertStretch ( int <i>index</i>, int <i>stretch</i> = 0 )</h3>
-<p>Inserts a stretchable space at position <i>index</i>, with zero minimum size and stretch factor <i>stretch</i>. If <i>index</i> is negative the space is added at the end.</p>
-<p>See also <a href="qboxlayout.html#addStretch">addStretch</a>() and <a href="qboxlayout.html#insertItem">insertItem</a>().</p>
+<p>Inserts a stretchable space (a <a href="qspaceritem.html">QSpacerItem</a>) at position <i>index</i>, with zero minimum size and stretch factor <i>stretch</i>. If <i>index</i> is negative the space is added at the end.</p>
+<p>See also <a href="qboxlayout.html#addStretch">addStretch</a>(), <a href="qboxlayout.html#insertItem">insertItem</a>(), and <a href="qspaceritem.html">QSpacerItem</a>.</p>
 <h3 class="fn"><a name="insertWidget"></a>void QBoxLayout::insertWidget ( int <i>index</i>, <a href="qwidget.html">QWidget</a> * <i>widget</i>, int <i>stretch</i> = 0, <a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a> <i>alignment</i> = 0 )</h3>
 <p>Inserts <i>widget</i> at position <i>index</i>, with stretch factor <i>stretch</i> and alignment <i>alignment</i>. If <i>index</i> is negative, the widget is added at the end.</p>
 <p>The stretch factor applies only in the <a href="qboxlayout.html#direction">direction</a> of the <a href="qboxlayout.html">QBoxLayout</a>, and is relative to the other boxes and widgets in this <a href="qboxlayout.html">QBoxLayout</a>. Widgets and boxes with higher stretch factors grow more.</p>
@@ -187,6 +186,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

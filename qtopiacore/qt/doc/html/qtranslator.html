@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/kernel/qtranslator.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/kernel/qtranslator.cpp -->
 <head>
   <title>Qt 4.2: QTranslator Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -46,8 +46,21 @@
 <h2>Detailed Description</h2>
 <p>The QTranslator class provides internationalization support for text output.</p>
 <p>An object of this class contains a set of translations from a source language to a target language. QTranslator provides functions to look up translations in a translation file. Translation files are created using <a href="linguist-manual.html#qt-linguist">Qt Linguist</a>.</p>
-<p>The most common use of QTranslator is to: load a translation file, install it using <a href="qcoreapplication.html#installTranslator">QApplication::installTranslator</a>(), and use it via <a href="qobject.html#tr">QObject::tr</a>(). Here's the <tt>main()</tt> function from the Hello tr() example:</p>
-<pre></pre>
+<p>The most common use of QTranslator is to: load a translation file, install it using <a href="qcoreapplication.html#installTranslator">QApplication::installTranslator</a>(), and use it via <a href="qobject.html#tr">QObject::tr</a>(). Here's the <tt>main()</tt> function from the <a href="linguist-hellotr.html">Hello tr()</a> example:</p>
+<pre> int main(int argc, char *argv[])
+ {
+     QApplication app(argc, argv);
+
+     QTranslator translator;
+     translator.load(&quot;hellotr_la&quot;);
+     app.installTranslator(&amp;translator);
+
+     QPushButton hello(QPushButton::tr(&quot;Hello world!&quot;));
+     hello.resize(100, 30);
+
+     hello.show();
+     return app.exec();
+ }</pre>
 <p>Note that the translator must be created <i>before</i> the application's widgets.</p>
 <p>Most applications will never need to do anything else with this class. The other functions provided by this class are useful for applications that work on translator files.</p>
 <p>It is possible to lookup a translation using <a href="qtranslator.html#translate">translate</a>() (as <a href="qobject.html#tr">tr</a>() and <a href="qcoreapplication.html#translate">QApplication::translate</a>() do). The <a href="qtranslator.html#translate">translate</a>() function takes up to three parameters:</p>
@@ -58,7 +71,7 @@
 </ul>
 <p>For example, the &quot;Cancel&quot; in a dialog might have &quot;Anuluj&quot; when the program runs in Polish (in this case the source text would be &quot;Cancel&quot;). The context would (normally) be the dialog's class name; there would normally be no comment, and the translated text would be &quot;Anuluj&quot;.</p>
 <p>But it's not always so simple. The Spanish version of a printer dialog with settings for two-sided printing and binding would probably require both &quot;Activado&quot; and &quot;Activada&quot; as translations for &quot;Enabled&quot;. In this case the source text would be &quot;Enabled&quot; in both cases, and the context would be the dialog's class name, but the two items would have disambiguating comments such as &quot;two-sided printing&quot; for one and &quot;binding&quot; for the other. The comment enables the translator to choose the appropriate gender for the Spanish version, and enables Qt to distinguish between translations.</p>
-<p>See also <a href="qcoreapplication.html#installTranslator">QApplication::installTranslator</a>(), <a href="qcoreapplication.html#removeTranslator">QApplication::removeTranslator</a>(), <a href="qobject.html#tr">QObject::tr</a>(), <a href="qcoreapplication.html#translate">QApplication::translate</a>(), I18N Example, Hello tr() Example, Arrow Pad Example, and Troll Print Example.</p>
+<p>See also <a href="qcoreapplication.html#installTranslator">QApplication::installTranslator</a>(), <a href="qcoreapplication.html#removeTranslator">QApplication::removeTranslator</a>(), <a href="qobject.html#tr">QObject::tr</a>(), <a href="qcoreapplication.html#translate">QApplication::translate</a>(), <a href="tools-i18n.html">I18N Example</a>, <a href="linguist-hellotr.html">Hello tr</a>() Example, <a href="linguist-arrowpad.html">Arrow Pad Example</a>, and <a href="linguist-trollprint.html">Troll Print Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QTranslator"></a>QTranslator::QTranslator ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -107,6 +120,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

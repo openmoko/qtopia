@@ -165,6 +165,17 @@ bool PhoneFieldManager::isFull() const
     return full;
 }
 
+bool PhoneFieldManager::isEmpty() const
+{
+    QListIterator<PhoneField*> it(phoneFields);
+    while(it.hasNext()) {
+        PhoneField *f = it.next();
+        if( !f->isEmpty() )
+            return false;
+    }
+    return true;
+}
+
 void PhoneFieldManager::add( const QString &number, const PhoneFieldType &type )
 {
     if(number.isEmpty() || isFull())
@@ -510,7 +521,7 @@ static void adjustPronWidgets(QLabel* label, QLineEdit* le)
 //-----------------------------------------------------------------------
 
 //
-//FIXME : This is crap iterative widget creation that has survived from the rewrite.
+//FIXME : This is suboptimal iterative widget creation that has survived from the rewrite.
 //now that address parsing has gone, make this into AbNameDetails dialog
 //
 
@@ -968,14 +979,28 @@ void AbstractName::textChanged()
 
 //----------------------------------------------------------------------
 
-AbEditor::AbEditor(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl),
 #ifdef QTOPIA_PHONE
-    simName(0),
+void AbEditor::keyPressEvent(QKeyEvent *e)
+{
+    int k = e->key();
+    switch( k )
+    {
+        case Qt::Key_Back:
+            //accept();
+            //break;
+        default:
+            QDialog::keyPressEvent( e );
+            break;
+    }
+}
 #endif
+
+AbFullEditor::AbFullEditor(QWidget *parent, Qt::WFlags fl)
+    : AbEditor(parent, fl),
     abName(0)
 {
     setObjectName("edit");
+    setModal(true);
 
     setWindowState(windowState() | Qt::WindowMaximized);
 
@@ -984,25 +1009,31 @@ AbEditor::AbEditor(QWidget *parent, Qt::WFlags fl)
     phoneMan = 0;
     specCompanyLA = 0;
     lastUpdateInternal = false;
-    mainUIInit = false;
-#ifdef QTOPIA_PHONE
-    simUIInit = false;
-#endif
-    quitExplicitly = false;
-    tabOtherInit = false;
+    wBusinessTab = 0;
+    wPersonalTab = 0;
+    wOtherTab = 0;
+    companyLE = 0;
+    jobTitleLE = 0;
+    homePhoneLE = 0;
+    homeMobileLE = 0;
+    homeFaxLE = 0;
+    busPhoneLE = 0;
+    busMobileLE = 0;
+    busFaxLE = 0;
+    busPagerLE = 0;
     init();
 }
 
-AbEditor::~AbEditor()
+AbFullEditor::~AbFullEditor()
 {
 }
 
-void AbEditor::init()
+void AbFullEditor::init()
 {
     //
     // NOTE : If you change these, you also need to change
-    // AbEditor::phoneFieldsToDetailsFilter() and
-    // AbEditor::detailsToPhoneFieldsFilter()
+    // AbFullEditor::phoneFieldsToDetailsFilter() and
+    // AbFullEditor::detailsToPhoneFieldsFilter()
     //
 
     mHPType = PhoneFieldType("homephone", tr("Home Phone"));
@@ -1025,98 +1056,20 @@ void AbEditor::init()
     mainVBox->setSpacing(0);
     mainVBox->setMargin(0);
 
-#ifdef QTOPIA_PHONE
-    editingSim = false;
-#endif
+    initMainUI();
 }
 
-#ifdef QTOPIA_PHONE
-void AbEditor::initSimUI()
+
+void AbFullEditor::initMainUI()
 {
-    if(mainUIInit)
-        tabs->hide();
-
-    editingSim = true;
-
-    if(simUIInit)
-        return;
-
-    simUIInit = true;
-
-    simEditor = new QWidget(0);
-    mainVBox->addWidget(simEditor);
-
-    QGridLayout *gridLayout = new QGridLayout(simEditor);
-
-    gridLayout->addItem(new QSpacerItem(4, 0), 0, 1);
-    gridLayout->setSpacing(0);
-    gridLayout->setMargin(2);
-
-    int rowCount = 0;
-
-    //
-    //  Name
-    //
-
-    QLabel *label = new QLabel(tr("Name"));
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(label, rowCount, 0);
-
-    simName = new QLineEdit(0);
-    gridLayout->addWidget(simName, rowCount, 2);
-
-    rowCount++;
-
-    //
-    //  Phone number
-    //
-
-    label = new QLabel(tr("Number"));
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(label, rowCount, 0);
-
-    simNumber = new QLineEdit(0);
-    QtopiaApplication::setInputMethodHint(simNumber,QtopiaApplication::PhoneNumber);
-    gridLayout->addWidget(simNumber, rowCount, 2);
-
-    rowCount++;
-    gridLayout->addItem(new QSpacerItem(4, 0), rowCount, 1);
-}
-#endif
-
-void AbEditor::initMainUI()
-{
-#if QTOPIA_PHONE
-    if(simUIInit)
-        simEditor->hide();
-
-    editingSim = false;
-#endif
-
-    if(mainUIInit)
-        return;
-
-    mainUIInit = true;
-
     setupTabs();
-
-    //
-    // create a map of QLineEdit pointers for iterating through
-    // used in AbEditor::isEmpty()
-    //
-
-    buildLineEditList();
-
-    spouseLE->setWhatsThis(tr("e.g. Husband or Wife."));
-    professionLE->setWhatsThis(tr("Occupation or job description."));
-
 }
 
-void AbEditor::tabClicked( QWidget * )
+void AbFullEditor::tabClicked( QWidget * )
 {
 }
 
-void AbEditor::editEmails()
+void AbFullEditor::editEmails()
 {
     QString strDefaultEmail;
     QStringList emails;
@@ -1142,51 +1095,71 @@ void AbEditor::editEmails()
     delete ed;
 }
 
-void AbEditor::tabChanged(int tab)
+void AbFullEditor::prepareTab(int tab)
 {
     switch (tab) {
     case 1:
-        // This delays the cost of layout until we actually want to see the tab
-        businessTab->setWidget(wBusinessTab);
-        businessTab->viewport()->setAutoFillBackground(false); // transparent window color
-        wBusinessTab->setAutoFillBackground(false); // transparent window color
+        setupTabWork();
         break;
     case 2:
-        // This delays the cost of layout until we actually want to see the tab
-        personalTab->setWidget(wPersonalTab);
-        personalTab->viewport()->setAutoFillBackground(false); // transparent window color
-        wPersonalTab->setAutoFillBackground(false); // transparent window color
+        setupTabHome();
         break;
     case 3:
-        // Wait until we want to use the "Other" tab before initializing.
         setupTabOther();
     default:
         break;
     }
 }
 
-void AbEditor::setupTabs()
+class  QDelayedScrollArea : public QScrollArea 
+{
+    Q_OBJECT
+public:
+    QDelayedScrollArea(int index, QWidget *parent = 0) : QScrollArea(parent), i(index) {}
+    ~QDelayedScrollArea() {}
+
+signals:
+    void aboutToShow(int);
+
+protected:
+    void showEvent(QShowEvent *event)
+    {
+        emit aboutToShow(i);
+        QScrollArea::showEvent(event);
+    }
+private:
+    int i;
+};
+
+#include "abeditor.moc"
+
+void AbFullEditor::setupTabs()
 {
     //
     //  Set up the tabs.
     //
 
     tabs = new QTabWidget(this);
-    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+
     mainVBox->addWidget(tabs);
 
-    contactTab = new QScrollArea(0);
+    contactTab = new QDelayedScrollArea(0);
     contactTab->setFocusPolicy(Qt::NoFocus);
     contactTab->setFrameStyle(QFrame::NoFrame);
-    businessTab = new QScrollArea(0);
+    businessTab = new QDelayedScrollArea(1);
     businessTab->setFocusPolicy(Qt::NoFocus);
     businessTab->setFrameStyle(QFrame::NoFrame);
-    personalTab = new QScrollArea(0);
+    personalTab = new QDelayedScrollArea(2);
     personalTab->setFocusPolicy(Qt::NoFocus);
     personalTab->setFrameStyle(QFrame::NoFrame);
-    otherTab = new QScrollArea(0);
+    otherTab = new QDelayedScrollArea(3);
     otherTab->setFocusPolicy(Qt::NoFocus);
     otherTab->setFrameStyle(QFrame::NoFrame);
+
+    
+    connect(businessTab, SIGNAL(aboutToShow(int)), this, SLOT(prepareTab(int)));
+    connect(personalTab, SIGNAL(aboutToShow(int)), this, SLOT(prepareTab(int)));
+    connect(otherTab, SIGNAL(aboutToShow(int)), this, SLOT(prepareTab(int)));
 
     tabs->addTab(contactTab, QIcon( ":icon/contactdetails" ), "");
     tabs->addTab(businessTab, QIcon( ":icon/business" ), "");
@@ -1204,26 +1177,27 @@ void AbEditor::setupTabs()
     //  Create widgets in the scrollable area of the tabs.
     //
 
+    // need to set this even if not on that tab.
+    cmbCat = new QCategorySelector( "Address Book", QCategorySelector::Filter  | QCategorySelector::DialogView );
+    connect(cmbCat, SIGNAL(categoriesSelected(const QList<QString>&)),
+        this, SLOT(categorySelectChanged(const QList<QString>&)));
+
+    // set up first tab.
+    setupTabCommon();
+}
+
+void AbFullEditor::setupTabCommon()
+{
+    //
+    //  Contact Tab
+    //
+    int rowCount = 0;
+
     QWidget *wContactTab = new QWidget;
     contactTab->setWidget(wContactTab);
     contactTab->setWidgetResizable(true);
     contactTab->viewport()->setAutoFillBackground(false); // transparent window color
     wContactTab->setAutoFillBackground(false); // transparent window color
-    wBusinessTab = new QWidget;
-    businessTab->setWidgetResizable(true);
-    wPersonalTab = new QWidget;
-    personalTab->setWidgetResizable(true);
-
-    //
-    //  Fill in the tabs.
-    //
-
-    QLabel *label;
-    int rowCount = 0;
-
-    //
-    //  Contact Tab
-    //
 
     QGridLayout *gridLayout = new QGridLayout(wContactTab);
 
@@ -1235,7 +1209,7 @@ void AbEditor::setupTabs()
     //  Abstract Name
     //
 
-    label = new QLabel(tr("Name"));
+    QLabel *label = new QLabel(tr("Name"));
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     gridLayout->addWidget(label, rowCount, 0);
 
@@ -1267,6 +1241,8 @@ void AbEditor::setupTabs()
 
 #ifdef QTOPIA_PHONE
     emailLE = new QLineEdit(wContactTab);
+    lineEdits[QContactModel::Emails] = emailLE ;
+
     QtopiaApplication::setInputMethodHint(emailLE,QtopiaApplication::Named,"email");
     gridLayout->addWidget(emailLE, rowCount, 2);
 
@@ -1282,6 +1258,8 @@ void AbEditor::setupTabs()
     gridLayout->addLayout(emailBoxLayout, rowCount, 2);
 
     emailLE = new QLineEdit(wContactTab);
+    lineEdits[QContactModel::Emails] = emailLE ;
+
     emailBoxLayout->addWidget(emailLE);
 
     QPushButton *ecm = new QPushButton("...", wContactTab);
@@ -1353,26 +1331,37 @@ void AbEditor::setupTabs()
     QSpacerItem* verticalSpacer = new QSpacerItem(1, 1,
         QSizePolicy::Minimum, QSizePolicy::Expanding);
     gridLayout->addItem(verticalSpacer, rowCount + phoneTypes.count(), 2);
+}
 
+void AbFullEditor::setupTabWork()
+{
+    if (wBusinessTab)
+        return;
     //
     //  Business Tab
     //
 
-    gridLayout = new QGridLayout(wBusinessTab);
+    wBusinessTab = new QWidget;
+    businessTab->setWidgetResizable(true);
+    businessTab->viewport()->setAutoFillBackground(false); // transparent window color
+    wBusinessTab->setAutoFillBackground(false); // transparent window color
+
+    QGridLayout *gridLayout = new QGridLayout(wBusinessTab);
 
     gridLayout->addItem(new QSpacerItem(4, 0), 0, 1);
     gridLayout->setSpacing(0);
     gridLayout->setMargin(2);
 
-    rowCount = 0;
+    int rowCount = 0;
 
     //
     //  Company
     //
 
-    label = new QLabel( tr("Company"));
+    QLabel *label = new QLabel( tr("Company"));
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     companyLE = new QLineEdit();
+    lineEdits[QContactModel::Company] = companyLE ;
     QtopiaApplication::setInputMethodHint(companyLE, QtopiaApplication::Text);
     connect( companyLE, SIGNAL(textChanged(const QString&)),
         this, SLOT(specFieldsFilter(const QString&)) );
@@ -1401,6 +1390,7 @@ void AbEditor::setupTabs()
     label = new QLabel(tr("Title"));
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     jobTitleLE = new QLineEdit();
+    lineEdits[QContactModel::JobTitle] = jobTitleLE;
     connect( jobTitleLE, SIGNAL(textChanged(const QString&)), this, SLOT(specFieldsFilter(const QString&)) );
 
     gridLayout->addWidget( label, rowCount, 0 );
@@ -1414,6 +1404,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Phone"));
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busPhoneLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessPhone] = busPhoneLE;
     QtopiaApplication::setInputMethodHint(busPhoneLE,QtopiaApplication::PhoneNumber);
     connect( busPhoneLE, SIGNAL(textChanged(const QString&)), this,
             SLOT(detailsToPhoneFieldsFilter(const QString&)) );
@@ -1429,6 +1420,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Mobile"));
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busMobileLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessMobile] = busMobileLE;
     QtopiaApplication::setInputMethodHint(busMobileLE,QtopiaApplication::PhoneNumber);
     connect( busMobileLE, SIGNAL(textChanged(const QString&)), this,
             SLOT(detailsToPhoneFieldsFilter(const QString&)) );
@@ -1444,6 +1436,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Fax") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busFaxLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessFax] = busFaxLE;
     QtopiaApplication::setInputMethodHint(busFaxLE,QtopiaApplication::PhoneNumber);
     connect( busFaxLE, SIGNAL(textChanged(const QString&)), this,
             SLOT(detailsToPhoneFieldsFilter(const QString&)) );
@@ -1459,6 +1452,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Pager") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busPagerLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessPager] = busPagerLE;
     QtopiaApplication::setInputMethodHint(busPagerLE,QtopiaApplication::PhoneNumber);
     connect( busPagerLE, SIGNAL(textChanged(const QString&)), this,
             SLOT(detailsToPhoneFieldsFilter(const QString&)) );
@@ -1485,6 +1479,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("City") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busCityLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessCity] = busCityLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( busCityLE, rowCount, 2 );
@@ -1493,6 +1488,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("State") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busStateLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessState] = busStateLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( busStateLE, rowCount, 2 );
@@ -1501,6 +1497,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Zip") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busZipLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessZip] = busZipLE;
     QtopiaApplication::setInputMethodHint( busZipLE, QtopiaApplication::Number );
 
     gridLayout->addWidget( label, rowCount, 0 );
@@ -1510,6 +1507,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Country") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busCountryLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessCountry] = busCountryLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( busCountryLE, rowCount, 2 );
@@ -1522,6 +1520,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("URL") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     busWebPageLE = new QLineEdit();
+    lineEdits[QContactModel::BusinessWebPage] = busWebPageLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( busWebPageLE, rowCount, 2 );
@@ -1534,10 +1533,11 @@ void AbEditor::setupTabs()
 #ifdef QTOPIA_PHONE
     label = new QLabel( tr("Dept'ment") );
 #else
-    label = new QLabel( tr("Deptartment") );
+    label = new QLabel( tr("Department") );
 #endif
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     deptLE = new QLineEdit();
+    lineEdits[QContactModel::Department] = deptLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( deptLE, rowCount, 2 );
@@ -1550,6 +1550,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Office") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     officeLE = new QLineEdit();
+    lineEdits[QContactModel::Office] = officeLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( officeLE, rowCount, 2 );
@@ -1562,6 +1563,8 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Profession") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     professionLE = new QLineEdit();
+    professionLE->setWhatsThis(tr("Occupation or job description."));
+    lineEdits[QContactModel::Profession] = professionLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( professionLE, rowCount, 2 );
@@ -1574,6 +1577,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Manager") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     managerLE = new QLineEdit();
+    lineEdits[QContactModel::Manager] = managerLE;
     QtopiaApplication::setInputMethodHint(managerLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
@@ -1587,35 +1591,50 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Assistant") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     assistantLE = new QLineEdit();
+    lineEdits[QContactModel::Assistant] = assistantLE;
     QtopiaApplication::setInputMethodHint(assistantLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( assistantLE, rowCount, 2 );
     ++rowCount;
 
-    verticalSpacer = new QSpacerItem( 4, 1, QSizePolicy::QSizePolicy::Fixed,
+    QSpacerItem *verticalSpacer = new QSpacerItem( 4, 1, QSizePolicy::QSizePolicy::Fixed,
                                                    QSizePolicy::Expanding );
     gridLayout->addItem( verticalSpacer, rowCount, 1 );
 
+    businessTab->setWidget(wBusinessTab);
+
+    setEntryWork();
+}
+
+void AbFullEditor::setupTabHome()
+{
+    if (wPersonalTab)
+        return;
     //
     //  Home Tab
     //
 
-    gridLayout = new QGridLayout( wPersonalTab );
+    wPersonalTab = new QWidget;
+    personalTab->setWidgetResizable(true);
+    personalTab->viewport()->setAutoFillBackground(false); // transparent window color
+    wPersonalTab->setAutoFillBackground(false); // transparent window color
+    QGridLayout *gridLayout = new QGridLayout( wPersonalTab );
 
     gridLayout->addItem(new QSpacerItem(4, 0), 0, 1);
     gridLayout->setSpacing(0);
     gridLayout->setMargin(2);
 
-    rowCount = 0;
+    int rowCount = 0;
 
     //
     //    Home phone
     //
 
-    label = new QLabel(tr("Phone"));
+    QLabel *label = new QLabel(tr("Phone"));
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     homePhoneLE = new QLineEdit();
+    lineEdits[QContactModel::HomePhone] = homePhoneLE;
     QtopiaApplication::setInputMethodHint(homePhoneLE,QtopiaApplication::PhoneNumber);
     connect( homePhoneLE, SIGNAL(textChanged(const QString&)), this,
             SLOT(detailsToPhoneFieldsFilter(const QString&)) );
@@ -1632,6 +1651,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Mobile") );
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     homeMobileLE = new QLineEdit();
+    lineEdits[QContactModel::HomeMobile] = homeMobileLE;
     QtopiaApplication::setInputMethodHint(homeMobileLE,QtopiaApplication::PhoneNumber);
     connect( homeMobileLE, SIGNAL(textChanged(const QString&)), this,
             SLOT(detailsToPhoneFieldsFilter(const QString&)) );
@@ -1648,6 +1668,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Fax") );
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     homeFaxLE = new QLineEdit();
+    lineEdits[QContactModel::HomeFax] = homeFaxLE;
     QtopiaApplication::setInputMethodHint(homeFaxLE,QtopiaApplication::PhoneNumber);
     connect( homeFaxLE, SIGNAL(textChanged(const QString&)), this,
             SLOT(detailsToPhoneFieldsFilter(const QString&)) );
@@ -1676,6 +1697,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("City") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     homeCityLE = new QLineEdit();
+    lineEdits[QContactModel::HomeCity] = homeCityLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( homeCityLE, rowCount, 2 );
@@ -1685,6 +1707,7 @@ void AbEditor::setupTabs()
     label = new QLabel(tr("State"));
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     homeStateLE = new QLineEdit();
+    lineEdits[QContactModel::HomeState] = homeStateLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( homeStateLE, rowCount, 2 );
@@ -1694,6 +1717,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Zip") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     homeZipLE = new QLineEdit();
+    lineEdits[QContactModel::HomeZip] = homeZipLE;
     QtopiaApplication::setInputMethodHint( homeZipLE, QtopiaApplication::Number );
 
     gridLayout->addWidget( label, rowCount, 0 );
@@ -1704,6 +1728,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Country") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     homeCountryLE = new QLineEdit();
+    lineEdits[QContactModel::HomeCountry] = homeCountryLE;
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( homeCountryLE, rowCount, 2 );
@@ -1717,6 +1742,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("URL") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     homeWebPageLE = new QLineEdit();
+    lineEdits[QContactModel::HomeWebPage] = homeWebPageLE;
     QtopiaApplication::setInputMethodHint(homeWebPageLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
@@ -1731,6 +1757,8 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Spouse") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     spouseLE = new QLineEdit();
+    spouseLE->setWhatsThis(tr("e.g. Husband or Wife."));
+    lineEdits[QContactModel::Spouse] = spouseLE;
     QtopiaApplication::setInputMethodHint(spouseLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
@@ -1745,6 +1773,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Children") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     childrenLE = new QLineEdit();
+    lineEdits[QContactModel::Children] = childrenLE;
     QtopiaApplication::setInputMethodHint(childrenLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
@@ -1812,27 +1841,25 @@ void AbEditor::setupTabs()
 
     ++rowCount;
 
-    verticalSpacer = new QSpacerItem( 1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding );
+    QSpacerItem *verticalSpacer = new QSpacerItem( 1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding );
     gridLayout->addItem( verticalSpacer, rowCount, 1 );
 
+    personalTab->setWidget(wPersonalTab);
 
-    cmbCat = new QCategorySelector( "Address Book", QCategorySelector::Filter );
-    connect(cmbCat, SIGNAL(categoriesSelected(const QList<QString>&)),
-        this, SLOT(categorySelectChanged(const QList<QString>&)));
-
-    // The "Other" tab is not setup until the user attempts to view it.
+    setEntryHome();
 }
 
 //
 //  Other Tab
 //
-void AbEditor::setupTabOther()
+void AbFullEditor::setupTabOther()
 {
-    if (tabOtherInit)
+    if (wOtherTab)
         return;
 
     wOtherTab = new QWidget;
     otherTab->setWidgetResizable(true);
+    otherTab->viewport()->installEventFilter(this);
 
     QGridLayout *gridLayout = new QGridLayout( wOtherTab );
 
@@ -1871,7 +1898,6 @@ void AbEditor::setupTabOther()
     label = new QLabel( tr("Ringtone") );
     editTonePB = new RingToneButton(0);
     editTonePB->setAllowNone(true);
-
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( editTonePB, rowCount, 3 );
 
@@ -1884,6 +1910,7 @@ void AbEditor::setupTabOther()
 
     label = new QLabel( tr("Notes") );
     txtNote = new QTextEdit();
+    label->setBuddy( txtNote );
     QFontMetrics fmTxtNote( txtNote->font() );
     txtNote->setFixedHeight( fmTxtNote.height() * 3 );
 
@@ -1913,9 +1940,7 @@ void AbEditor::setupTabOther()
 
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     gridLayout->addWidget( label, rowCount, 0 );
-    ++rowCount;
-    gridLayout->addWidget( cmbCat, rowCount, 0, 1, 4 );
-
+    gridLayout->addWidget( cmbCat, rowCount, 3 );
     ++rowCount;
 
     QSpacerItem* verticalSpacer = new QSpacerItem( 1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding );
@@ -1923,21 +1948,28 @@ void AbEditor::setupTabOther()
 
     otherTab->setWidget(wOtherTab);
 
-    tabOtherInit = true;
     setEntryOther();
 }
 
-void AbEditor::editPhoto()
+bool AbFullEditor::eventFilter( QObject *receiver, QEvent *event )
+{
+    if( otherTab && otherTab->widget() && receiver == otherTab->viewport() && event->type() == QEvent::Resize )
+        otherTab->widget()->setFixedWidth( otherTab->viewport()->width() );
+    return false;
+}
+
+void AbFullEditor::editPhoto()
 {
     ImageSourceDialog *iface = new ImageSourceDialog( mContactImage, this );
     if( QtopiaApplication::execDialog( iface ) == QDialog::Accepted ) {
+        mImageModified = true;
         mContactImage = iface->pixmap();
         photoPB->setIcon( QIcon(mContactImage) );
     }
     delete iface;
 }
 
-void AbEditor::catCheckBoxChanged( bool  b )
+void AbFullEditor::catCheckBoxChanged( bool  b )
 {
     QString bcatid = QLatin1String("Business"); // no tr
     QList<QString> curCats = cmbCat->selectedCategories();
@@ -1965,7 +1997,7 @@ void AbEditor::catCheckBoxChanged( bool  b )
     showSpecWidgets( b );
 }
 
-void AbEditor::showSpecWidgets( bool s )
+void AbFullEditor::showSpecWidgets( bool s )
 {
     if( s )
     {
@@ -1985,7 +2017,7 @@ void AbEditor::showSpecWidgets( bool s )
     }
 }
 
-void AbEditor::categorySelectChanged(const QList<QString>& cats)
+void AbFullEditor::categorySelectChanged(const QList<QString>& cats)
 {
     if(cats.indexOf("Business") > -1)
         categoryCB->setChecked( true );
@@ -1993,58 +2025,8 @@ void AbEditor::categorySelectChanged(const QList<QString>& cats)
         categoryCB->setChecked( false );
 }
 
-void AbEditor::buildLineEditList()
-{
-    lineEdits[QContactModel::Emails] = emailLE ;
 
-    lineEdits[QContactModel::Company] = companyLE ;
-    lineEdits[QContactModel::CompanyPronunciation] = companyProLE;
-    lineEdits[QContactModel::JobTitle] = jobTitleLE;
-    lineEdits[QContactModel::BusinessPhone] = busPhoneLE;
-    lineEdits[QContactModel::BusinessFax] = busFaxLE;
-    lineEdits[QContactModel::BusinessMobile] = busMobileLE;
-    lineEdits[QContactModel::BusinessPager] = busPagerLE;
-    lineEdits[QContactModel::BusinessWebPage] = busWebPageLE;
-    lineEdits[QContactModel::Department] = deptLE;
-    lineEdits[QContactModel::Office] = officeLE;
-    lineEdits[QContactModel::Profession] = professionLE;
-    lineEdits[QContactModel::Manager] = managerLE;
-    lineEdits[QContactModel::Assistant] = assistantLE;
-
-    lineEdits[QContactModel::Spouse] = spouseLE;
-    lineEdits[QContactModel::Children] = childrenLE;
-    lineEdits[QContactModel::HomePhone] = homePhoneLE;
-    lineEdits[QContactModel::HomeFax] = homeFaxLE;
-    lineEdits[QContactModel::HomeMobile] = homeMobileLE;
-    lineEdits[QContactModel::HomeWebPage] = homeWebPageLE;
-
-    lineEdits[QContactModel::HomeCity] = homeCityLE;
-    lineEdits[QContactModel::HomeState] = homeStateLE;
-    lineEdits[QContactModel::HomeZip] = homeZipLE;
-    lineEdits[QContactModel::HomeCountry] = homeCountryLE;
-    lineEdits[QContactModel::BusinessCity] = busCityLE;
-    lineEdits[QContactModel::BusinessState] = busStateLE;
-    lineEdits[QContactModel::BusinessZip] = busZipLE;
-    lineEdits[QContactModel::BusinessCountry] = busCountryLE;
-}
-
-#ifdef QTOPIA_PHONE
-void AbEditor::keyPressEvent(QKeyEvent *e)
-{
-    int k = e->key();
-    switch( k )
-    {
-        case Qt::Key_Back:
-            //accept();
-            //break;
-        default:
-            QDialog::keyPressEvent( e );
-            break;
-    }
-}
-#endif
-
-void AbEditor::specFieldsFilter( const QString &newValue )
+void AbFullEditor::specFieldsFilter( const QString &newValue )
 {
     QLineEdit *s = (QLineEdit *)sender();
     QLineEdit *r = 0;
@@ -2069,25 +2051,29 @@ void AbEditor::specFieldsFilter( const QString &newValue )
 
 // when phone fields changed, this slot gets called and sets the corresponding
 // phone widgets in other tabs
-void AbEditor::phoneFieldsToDetailsFilter( const QString &newNumber,
+void AbFullEditor::phoneFieldsToDetailsFilter( const QString &newNumber,
                                                     const PhoneFieldType &newType )
 {
     QLineEdit *detail = 0;
-    if( newType == mHPType ) //phone
-        detail = homePhoneLE;
-    else if( newType == mHMType )//mobile
-        detail = homeMobileLE;
-    else if( newType == mHFType )//fax
-        detail = homeFaxLE;
+    if (wPersonalTab) {
+        if( newType == mHPType ) //phone
+            detail = homePhoneLE;
+        else if( newType == mHMType )//mobile
+            detail = homeMobileLE;
+        else if( newType == mHFType )//fax
+            detail = homeFaxLE;
+    }
 
-    else if( newType == mBPType )//phone
-        detail = busPhoneLE;
-    else if( newType == mBMType )//mobile
-        detail = busMobileLE;
-    else if( newType == mBFType )//fax
-        detail = busFaxLE;
-    else if( newType == mBPAType )//pager
-        detail = busPagerLE;
+    if (!detail && wBusinessTab) {
+        if( newType == mBPType )//phone
+            detail = busPhoneLE;
+        else if( newType == mBMType )//mobile
+            detail = busMobileLE;
+        else if( newType == mBFType )//fax
+            detail = busFaxLE;
+        else if( newType == mBPAType )//pager
+            detail = busPagerLE;
+    }
 
     if( detail )
     {
@@ -2102,7 +2088,7 @@ void AbEditor::phoneFieldsToDetailsFilter( const QString &newNumber,
 }
 
 // when details of phone fields changed, this updates the phone field manager
-void AbEditor::detailsToPhoneFieldsFilter( const QString &newNumber )
+void AbFullEditor::detailsToPhoneFieldsFilter( const QString &newNumber )
 {
     QLineEdit *detail = (QLineEdit *)sender();
     PhoneFieldType type;
@@ -2128,58 +2114,111 @@ void AbEditor::detailsToPhoneFieldsFilter( const QString &newNumber )
     lastUpdateInternal = false;
 }
 
-void AbEditor::setEntry( const QContact &entry, bool newEntry
-#ifdef QTOPIA_PHONE
-    , bool simEntry
-#endif
-    )
+void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
 {
-    quitExplicitly = false;
     ent = entry;
+    mNewEntry = newEntry;
 
-#ifdef QTOPIA_PHONE
-    if(simEntry)
-    {
-        initSimUI();
-        if( newEntry )
-            setWindowTitle(tr("New SIM Contact"));
-        else
-            setWindowTitle(tr("Edit SIM Contact"));
+    QMap<QContactModel::Field, QString> abNameMap;
 
-        simName->setText(entry.firstName());
-        simNumber->setText(entry.homePhone());
-    }
+    phoneMan->clear();
+
+    if( newEntry )
+        setWindowTitle(tr("New Contact"));
     else
+        setWindowTitle(tr("Edit Contact"));
+
+    mImageModified = false;
+
+    cmbCat->selectCategories(ent.categories());
+    QString business = QLatin1String("Business");
+    bool busCat = ent.categories().contains(business);
+
+    /*
+       force an update to category select, even if the checkbox is already
+       checked the right way (wouldn't emit toggled() signal)
+       saves wasting an extra Categories load when we don't need it
+     */
+
+    if(busCat == categoryCB->isChecked())
+        catCheckBoxChanged(busCat);
+    categoryCB->setChecked(busCat);
+
+
+    abName->setModified(false);
+    abNameMap.insert(QContactModel::Nickname, ent.nickname());
+    abNameMap.insert(QContactModel::NameTitle, ent.nameTitle());
+    abNameMap.insert(QContactModel::FirstName, ent.firstName());
+    abNameMap.insert(QContactModel::MiddleName, ent.middleName());
+    abNameMap.insert(QContactModel::LastName, ent.lastName());
+    abNameMap.insert(QContactModel::FirstNamePronunciation,
+            ent.firstNamePronunciation());
+    abNameMap.insert(QContactModel::LastNamePronunciation,
+            ent.lastNamePronunciation());
+    abNameMap.insert(QContactModel::Suffix, ent.suffix() );
+    abName->setFields(abNameMap);
+
+    QString strDefEmail = ent.defaultEmail();
+    QStringList strAllEmail = ent.emailList();
+    QString strFinal;
+    parseEmailTo(strDefEmail, strAllEmail, strFinal);
+    emailLE->setText(strFinal);
+
+    //
+    //  Make sure we see the "default"
+    //
+
+    emailLE->home( false );
+
+    //
+    // VoIP ID
+    //
+#ifdef QTOPIA_VOIP
+    QString strVoipId = ent.customField("VOIP_ID");
+    voipIdLE->setText(strVoipId);
+
+    // make sure we see the default
+    voipIdLE->home( false );
+
+    if (newEntry)
+        ent.setCustomField("VOIP_STATUS", "OFFLINE");
 #endif
+
+    // set phoneMan numbers
+    phoneMan->add( ent.homePhone(), mHPType);
+    phoneMan->add( ent.homeMobile(), mHMType );
+    phoneMan->add( ent.homeFax(), mHFType );
+    phoneMan->add( ent.businessPhone(), mBPType );
+    phoneMan->add( ent.businessMobile(), mBMType );
+    phoneMan->add( ent.businessFax(), mBFType );
+    phoneMan->add( ent.businessPager(), mBPAType );
+
+    // Spec fields on the common tab
+    specCompanyLE->setText(ent.company());
+    specJobTitleLE->setText(ent.jobTitle());
+
+    if (wOtherTab)
+        setEntryOther();
+    if (wBusinessTab)
+        setEntryWork();
+    if (wPersonalTab)
+        setEntryHome();
+
+    setNameFocus();
+}
+
+void AbFullEditor::setEntryHome()
+{
+    QDate bday = ent.birthday();
+    if (bday.isNull()) {
+        bdayCheck->setChecked(false);
+    } else {
+        bdayCheck->setChecked(true);
+        bdayEdit->setDate( bday );
+    }
+
+    switch( ent.gender() )
     {
-        QMap<QContactModel::Field, QString> abNameMap;
-
-        initMainUI();
-        phoneMan->clear();
-
-        if( newEntry )
-            setWindowTitle(tr("New Contact"));
-        else
-            setWindowTitle(tr("Edit Contact"));
-
-        mImageModified = false;
-
-        cmbCat->selectCategories(ent.categories());
-        QString business = QLatin1String("Business");
-        bool busCat = ent.categories().contains(business);
-
-        /*
-            force an update to category select, even if the checkbox is already
-            checked the right way (wouldn't emit toggled() signal)
-            saves wasting an extra Categories load when we don't need it
-        */
-
-        if(busCat == categoryCB->isChecked())
-            catCheckBoxChanged(busCat);
-        categoryCB->setChecked(busCat);
-
-        switch( ent.gender() )
-        {
         case QContact::UnspecifiedGender:
             genderCombo->setCurrentIndex(0);
             break;
@@ -2189,135 +2228,70 @@ void AbEditor::setEntry( const QContact &entry, bool newEntry
         case QContact::Female:
             genderCombo->setCurrentIndex(2);
             break;
-        }
-
-        abName->setModified(false);
-        abNameMap.insert(QContactModel::Nickname, ent.nickname());
-        abNameMap.insert(QContactModel::NameTitle, ent.nameTitle());
-        abNameMap.insert(QContactModel::FirstName, ent.firstName());
-        abNameMap.insert(QContactModel::MiddleName, ent.middleName());
-        abNameMap.insert(QContactModel::LastName, ent.lastName());
-        abNameMap.insert(QContactModel::FirstNamePronunciation,
-                                                    ent.firstNamePronunciation());
-        abNameMap.insert(QContactModel::LastNamePronunciation,
-                                                    ent.lastNamePronunciation());
-        abNameMap.insert(QContactModel::Suffix, ent.suffix() );
-        abName->setFields(abNameMap);
-
-        QString strDefEmail = ent.defaultEmail();
-        QStringList strAllEmail = ent.emailList();
-        QString strFinal;
-        parseEmailTo(strDefEmail, strAllEmail, strFinal);
-        emailLE->setText(strFinal);
-
-        //
-        //  Make sure we see the "default"
-        //
-
-        emailLE->home( false );
-
-        //
-        // VoIP ID
-        //
-#ifdef QTOPIA_VOIP
-        QString strVoipId = ent.customField("VOIP_ID");
-        voipIdLE->setText(strVoipId);
-
-        // make sure we see the default
-        voipIdLE->home( false );
-
-        if (newEntry)
-            ent.setCustomField("VOIP_STATUS", "OFFLINE");
-#endif
-
-        QDate bday = ent.birthday();
-        if (bday.isNull()) {
-            bdayCheck->setChecked(false);
-        } else {
-            bdayCheck->setChecked(true);
-            bdayEdit->setDate( bday );
-        }
-
-        //
-        //  Home
-        //
-
-        spouseLE->setText( ent.spouse() );
-
-        QDate aday = ent.anniversary();
-        if (aday.isNull()) {
-            anniversaryCheck->setChecked(false);
-        } else {
-            anniversaryCheck->setChecked(true);
-            anniversaryEdit->setDate( aday );
-        }
-
-        childrenLE->setText( ent.children() );
-
-        homeStreetME->setPlainText( ent.homeStreet() );
-        homeCityLE->setText( ent.homeCity() );
-        homeStateLE->setText(  ent.homeState() );
-        homeZipLE->setText( ent.homeZip() );
-        homeCountryLE->setText( ent.homeCountry() );
-
-        QString homePhone = ent.homePhone();
-        QString homeFax = ent.homeFax();
-        QString homeMobile = ent.homeMobile();
-
-        homePhoneLE->setText( homePhone );
-        homeFaxLE->setText( homeFax );
-        homeMobileLE->setText( homeMobile );
-
-        phoneMan->add( homePhone, mHPType );
-        phoneMan->add( homeMobile, mHMType );
-        phoneMan->add( homeFax, mHFType );
-        homeWebPageLE->setText( ent.homeWebpage() );
-
-        //
-        //  Business
-        //
-
-        busStreetME->setPlainText( ent.businessStreet() );
-        busCityLE->setText( ent.businessCity() );
-        busStateLE->setText( ent.businessState() );
-        busZipLE->setText( ent.businessZip() );
-        busCountryLE->setText( ent.businessCountry() );
-        specCompanyLE->setText( ent.company() );
-        companyProLE->setText( ent.companyPronunciation() );
-        busWebPageLE->setText( ent.businessWebpage() );
-        specJobTitleLE->setText( ent.jobTitle() );
-        deptLE->setText( ent.department() );
-        officeLE->setText( ent.office() );
-
-        QString busPhone = ent.businessPhone();
-        QString busFax = ent.businessFax();
-        QString busMobile = ent.businessMobile();
-        QString busPager = ent.businessPager();
-
-        busPhoneLE->setText( busPhone );
-        busFaxLE->setText( busFax );
-        busMobileLE->setText( busMobile );
-        busPagerLE->setText( busPager );
-
-        phoneMan->add( busPhone, mBPType );
-        phoneMan->add( busMobile, mBMType );
-        phoneMan->add( busFax, mBFType );
-        phoneMan->add( busPager, mBPAType );
-
-        professionLE->setText( ent.profession() );
-        assistantLE->setText( ent.assistant() );
-        managerLE->setText( ent.manager() );
-
-        if (tabOtherInit)
-            setEntryOther();
-
-        tabs->setCurrentIndex(0);
     }
-    lastUpdateInternal = false;
-    mNewEntry = newEntry;
+
+    //
+    //  Home
+    //
+
+    spouseLE->setText( ent.spouse() );
+
+    QDate aday = ent.anniversary();
+    if (aday.isNull()) {
+        anniversaryCheck->setChecked(false);
+    } else {
+        anniversaryCheck->setChecked(true);
+        anniversaryEdit->setDate( aday );
+    }
+
+    childrenLE->setText( ent.children() );
+
+    homeStreetME->setPlainText( ent.homeStreet() );
+    homeCityLE->setText( ent.homeCity() );
+    homeStateLE->setText(  ent.homeState() );
+    homeZipLE->setText( ent.homeZip() );
+    homeCountryLE->setText( ent.homeCountry() );
+
+    // mirrored one 'common' screen, may have changed
+    // so take from there rather than entry
+    homePhoneLE->setText( phoneMan->numberFromType( mHPType ) );
+    homeFaxLE->setText( phoneMan->numberFromType( mHFType ) );
+    homeMobileLE->setText( phoneMan->numberFromType( mHMType ) );
+
+    homeWebPageLE->setText( ent.homeWebpage() );
 }
 
-void AbEditor::setEntryOther()
+void AbFullEditor::setEntryWork()
+{
+    //
+    //  Business
+    //
+
+    busStreetME->setPlainText( ent.businessStreet() );
+    busCityLE->setText( ent.businessCity() );
+    busStateLE->setText( ent.businessState() );
+    busZipLE->setText( ent.businessZip() );
+    busCountryLE->setText( ent.businessCountry() );
+    companyProLE->setText( ent.companyPronunciation() );
+    busWebPageLE->setText( ent.businessWebpage() );
+    deptLE->setText( ent.department() );
+    officeLE->setText( ent.office() );
+
+    // mirrored one 'common' screen, may have changed
+    // so take from there rather than entry
+    busPhoneLE->setText( phoneMan->numberFromType( mBPType ) );
+    busFaxLE->setText( phoneMan->numberFromType( mBFType ) );
+    busMobileLE->setText( phoneMan->numberFromType( mBMType ) );
+    busPagerLE->setText( phoneMan->numberFromType( mBPAType ) );
+    companyLE->setText( specCompanyLE->text() );
+    jobTitleLE->setText( specJobTitleLE->text() );
+
+    professionLE->setText( ent.profession() );
+    assistantLE->setText( ent.assistant() );
+    managerLE->setText( ent.manager() );
+}
+
+void AbFullEditor::setEntryOther()
 {
     QString photoFile = ent.portraitFile();
     if( !photoFile.isEmpty() )
@@ -2331,7 +2305,7 @@ void AbEditor::setEntryOther()
             mContactImage = myPixmap;
             photoPB->setIcon( QIcon(myPixmap) );
         } else {
-            qWarning("AbEditor::setEntry - Unable to get image for contact");
+            qWarning("AbFullEditor::setEntry - Unable to get image for contact");
         }
     }
     else
@@ -2351,21 +2325,16 @@ void AbEditor::setEntryOther()
 #endif
 }
 
-void AbEditor::closeEvent(QCloseEvent *e)
+void AbFullEditor::closeEvent(QCloseEvent *e)
 {
     QDialog::closeEvent(e);
-    quitExplicitly = false;
 }
 
-void AbEditor::accept()
+void AbFullEditor::accept()
 {
-    quitExplicitly = true;
-    if(isEmpty())
+    if(mNewEntry && isEmpty())
     {
-       if(mNewEntry)
-            reject();
-        else
-            QDialog::accept();
+        reject();
     }
     else
     {
@@ -2380,79 +2349,59 @@ void AbEditor::accept()
                 reject();
                 return;
             } else {
-#ifdef QTOPIA_PHONE
-                if (simName)
-                    simName->setFocus();
-                else
-#endif
-                    abName->setFocus();
+                abName->setFocus();
                 return;
             }
         }
 
         ent = tmp; // now we can copy the fields over
 
-#ifdef QTOPIA_PHONE
-        if(!editingSim)
-#endif
-        {
-            QString links;
-            QDL::saveLinks( links, QDL::clients( this ) );
-            ent.setCustomField( QDL::CLIENT_DATA_KEY, links );
+        QString links;
+        QDL::saveLinks( links, QDL::clients( this ) );
+        ent.setCustomField( QDL::CLIENT_DATA_KEY, links );
 
-            if (tabOtherInit) {
-                QString pFileName = ent.portraitFile();
-                QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
-                mImageModified = !mContactImage.isNull() || !pFileName.isEmpty();
+        if (wOtherTab) {
+            if (mImageModified)
                 ent.changePortrait( mContactImage );
-            }
         }
 
         QDialog::accept();
     }
 }
 
-bool AbEditor::imageModified() const
+bool AbFullEditor::imageModified() const
 {
     return mImageModified;
 }
 
-void AbEditor::reject()
+void AbFullEditor::reject()
 {
-    quitExplicitly = true;
     QDialog::reject();
 }
 
-bool AbEditor::isEmpty()
+bool AbFullEditor::isEmpty() const
 {
-#ifdef QTOPIA_PHONE
-    if(editingSim)
-    {
-        if(!simName->text().trimmed().isEmpty())
-            return false;
+    if( !(abName->isEmpty()) )
+        return false;
 
-        if(!simNumber->text().trimmed().isEmpty())
+    // analyze all the line edits and make sure there is _something_ there
+    // that warrants saving...
+    QString text;
+    QMap<QContactModel::Field, QLineEdit *>::ConstIterator it;
+    for ( it = lineEdits.begin() ; it != lineEdits.end() ; ++it )
+    {
+        text = it.value()->text();
+        if ( !text.trimmed().isEmpty() )
             return false;
     }
-    else
-    {
-#endif
-        if( !(abName->isEmpty()) )
-            return false;
-        if( homeStreetME->toPlainText().trimmed().length() ||
-            busStreetME->toPlainText().trimmed().length() )
-            return false;
 
-        // analyze all the line edits and make sure there is _something_ there
-        // that warrants saving...
-        QString text;
-        QMap<QContactModel::Field, QLineEdit *>::Iterator it;
-        for ( it = lineEdits.begin() ; it != lineEdits.end() ; ++it )
-        {
-            text = it.value()->text();
-            if ( !text.trimmed().isEmpty() )
-                return false;
-        }
+    if (!phoneMan->isEmpty())
+        return false;
+
+    if ( wPersonalTab ) {
+        if( homeStreetME->toPlainText().trimmed().length() ||
+                busStreetME->toPlainText().trimmed().length() )
+            return false;
 
         if( anniversaryCheck->isChecked() )
             return false;
@@ -2460,105 +2409,116 @@ bool AbEditor::isEmpty()
             return false;
         if( !genderCombo->currentText().isEmpty() )
             return false;
+    } else {
+        // otherwise, check existing contact
+        if ( !ent.homeStreet().isEmpty() )
+            return false;
+        if ( !ent.anniversary().isNull() )
+            return false;
+        if ( !ent.birthday().isNull() )
+            return false;
+        if ( ent.gender() != QContact::UnspecifiedGender )
+            return false;
+    }
 #ifdef QTOPIA_CELL
-        if( tabOtherInit) {
-            if (editTonePB->tone().isValid() )
-                return false;
-        } else if (!ent.customField("tone").isEmpty()) {
+    if( wOtherTab) {
+        if (editTonePB->tone().isValid() )
             return false;
-        }
-#endif
-#ifdef QTOPIA_VOIP
-        text = voipIdLE->text();
-        if ( !text.trimmed().isEmpty() )
-            return false;
-#endif
-        if (tabOtherInit) {
-            // User may have modified
-            text = txtNote->toHtml();
-            if ( !text.trimmed().isEmpty() )
-                return false;
-            if( !mContactImage.isNull() )
-                return false;
-        } else {
-            // otherwise, check existing contact
-            if (!ent.notes().isEmpty())
-                return false;
-            if (!ent.portraitFile().isEmpty())
-                return false;
-        }
-#ifdef QTOPIA_PHONE
+    } else if (!ent.customField("tone").isEmpty()) {
+        return false;
     }
 #endif
+#ifdef QTOPIA_VOIP
+    text = voipIdLE->text();
+    if ( !text.trimmed().isEmpty() )
+        return false;
+#endif
+    if (wOtherTab) {
+        // User may have modified
+        text = txtNote->toPlainText();
+        if ( !text.trimmed().isEmpty() )
+            return false;
+        if( !mContactImage.isNull() )
+            return false;
+    } else {
+        // otherwise, check existing contact
+        if (!ent.notes().isEmpty())
+            return false;
+        if (!ent.portraitFile().isEmpty())
+            return false;
+    }
 
     return true;
 }
 
-void AbEditor::contactFromFields(QContact &e)
+void AbFullEditor::contactFromFields(QContact &e)
 {
-#ifdef QTOPIA_PHONE
-    if(editingSim)
-    {
-        e.setFirstName(simName->text());
-        e.setHomePhone(simNumber->text());
-    }
-    else
-#endif
-    {
-        QMap<QContactModel::Field, QString> fields;
-        int gender = genderCombo->currentIndex();
-        switch( gender ) {
-        case 0: e.setGender( QContact::UnspecifiedGender ); break;
-        case 1: e.setGender( QContact::Male ); break;
-        case 2: e.setGender( QContact::Female ); break;
-        }
+    QMap<QContactModel::Field, QString> fields;
 
-        e.setCustomField( "BUSINESS_CONTACT",
+    e.setCustomField( "BUSINESS_CONTACT",
             categoryCB->isChecked() ? QString("1") : QString() );
 
-        //
-        //  Contact Tab
-        //
 
-        if(abName->modified())
-            abName->parse();
-        fields = abName->fields();
-        e.setNameTitle( fields[ QContactModel::NameTitle ] );
-        e.setSuffix( fields[ QContactModel::Suffix ]  );
-        e.setFirstName( fields[ QContactModel::FirstName ] );
-        e.setMiddleName( fields[ QContactModel::MiddleName ] );
-        e.setLastName( fields[ QContactModel::LastName ] );
-        e.setFirstNamePronunciation( fields[ QContactModel::FirstNamePronunciation ] );
-        e.setLastNamePronunciation( fields[ QContactModel::LastNamePronunciation ] );
+    //
+    //  Contact Tab
+    //
+
+    if(abName->modified())
+        abName->parse();
+    fields = abName->fields();
+    e.setNameTitle( fields[ QContactModel::NameTitle ] );
+    e.setSuffix( fields[ QContactModel::Suffix ]  );
+    e.setFirstName( fields[ QContactModel::FirstName ] );
+    e.setMiddleName( fields[ QContactModel::MiddleName ] );
+    e.setLastName( fields[ QContactModel::LastName ] );
+    e.setFirstNamePronunciation( fields[ QContactModel::FirstNamePronunciation ] );
+    e.setLastNamePronunciation( fields[ QContactModel::LastNamePronunciation ] );
+
+    QString strDefaultEmail;
+    QStringList emails;
+    parseEmailFrom( emailLE->text(), strDefaultEmail,
+            emails );
+    e.setDefaultEmail( strDefaultEmail );
+    e.setEmailList( emails  );
+
+    //
+    // VoIP ID
+    //
+#ifdef QTOPIA_VOIP
+    QString oldVoIP = e.customField("VOIP_ID");
+    QString newVoIP = voipIdLE->text();
+    if (newVoIP.isEmpty() && !oldVoIP.isEmpty())
+        e.removeCustomField("VOIP_ID");
+    if (!newVoIP.isEmpty())
+        e.setCustomField( "VOIP_ID", newVoIP);
+#endif
+
+    e.setHomePhone( phoneMan->numberFromType( mHPType ) );
+    e.setHomeMobile( phoneMan->numberFromType( mHMType ) );
+    e.setHomeFax( phoneMan->numberFromType( mHFType ) );
+
+    e.setBusinessPhone( phoneMan->numberFromType( mBPType ) );
+    e.setBusinessMobile( phoneMan->numberFromType( mBMType ) );
+    e.setBusinessFax( phoneMan->numberFromType( mBFType ) );
+    e.setBusinessPager( phoneMan->numberFromType( mBPAType ) );
+
+    //
+    // Home Tab
+    //
+
+    if (wPersonalTab) {
+        int gender = genderCombo->currentIndex();
+        switch( gender ) {
+            case 0: e.setGender( QContact::UnspecifiedGender ); break;
+            case 1: e.setGender( QContact::Male ); break;
+            case 2: e.setGender( QContact::Female ); break;
+        }
         if (bdayCheck->isChecked())
             e.setBirthday( bdayEdit->date() );
         else
             e.setBirthday( QDate() );
 
         e.setNickname( fields[ QContactModel::Nickname ] );
-
-        QString strDefaultEmail;
-        QStringList emails;
-        parseEmailFrom( emailLE->text(), strDefaultEmail,
-                emails );
-        e.setDefaultEmail( strDefaultEmail );
-        e.setEmailList( emails  );
-
-        //
-        // VoIP ID
-        //
-#ifdef QTOPIA_VOIP
-        QString oldVoIP = e.customField("VOIP_ID");
-        QString newVoIP = voipIdLE->text();
-        if (newVoIP.isEmpty() && !oldVoIP.isEmpty())
-            e.removeCustomField("VOIP_ID");
-        if (!newVoIP.isEmpty())
-            e.setCustomField( "VOIP_ID", newVoIP);
-#endif
-
-        //
-        // Home Tab
-        //
 
         if (anniversaryCheck->isChecked())
             e.setAnniversary( anniversaryEdit->date() );
@@ -2570,17 +2530,16 @@ void AbEditor::contactFromFields(QContact &e)
         e.setHomeState( homeStateLE->text() );
         e.setHomeZip( homeZipLE->text() );
         e.setHomeCountry( homeCountryLE->text() );
-        e.setHomePhone( phoneMan->numberFromType( mHPType ) );
-        e.setHomeMobile( phoneMan->numberFromType( mHMType ) );
-        e.setHomeFax( phoneMan->numberFromType( mHFType ) );
         e.setHomeWebpage( homeWebPageLE->text() );
         e.setSpouse( spouseLE->text() );
         e.setChildren( childrenLE->text() );
+    }
 
-        //
-        //  Business Tab
-        //
+    //
+    //  Business Tab
+    //
 
+    if (wBusinessTab) {
         e.setCompany( companyLE->text() );
         e.setCompanyPronunciation( companyProLE->text() );
         e.setBusinessStreet( busStreetME->toPlainText() );
@@ -2592,42 +2551,38 @@ void AbEditor::contactFromFields(QContact &e)
         e.setJobTitle( jobTitleLE->text() );
         e.setDepartment( deptLE->text() );
         e.setOffice( officeLE->text() );
-        e.setBusinessPhone( phoneMan->numberFromType( mBPType ) );
-        e.setBusinessMobile( phoneMan->numberFromType( mBMType ) );
-        e.setBusinessFax( phoneMan->numberFromType( mBFType ) );
-        e.setBusinessPager( phoneMan->numberFromType( mBPAType ) );
         e.setProfession( professionLE->text() );
         e.setAssistant( assistantLE->text() );
         e.setManager( managerLE->text() );
-
-        //
-        //  Notes tab
-        //
-
-        if (tabOtherInit) {
-            if (txtNote->toPlainText().simplified().isEmpty())
-                e.setNotes(QString());
-            else
-                e.setNotes( txtNote->toHtml() );
-#ifdef QTOPIA_CELL
-            if ( !editTonePB->tone().isValid() )
-                e.removeCustomField("tone"); // No tr()
-            else
-                e.setCustomField("tone", editTonePB->tone().linkFile() ); // No tr()
-#endif
-        }
-        e.setCategories(cmbCat->selectedCategories());
     }
+
+    //
+    //  Notes tab
+    //
+
+    if (wOtherTab) {
+        if (txtNote->toPlainText().simplified().isEmpty())
+            e.setNotes(QString());
+        else
+            e.setNotes( txtNote->toHtml() );
+#ifdef QTOPIA_CELL
+        if ( !editTonePB->tone().isValid() )
+            e.removeCustomField("tone"); // No tr()
+        else
+            e.setCustomField("tone", editTonePB->tone().linkFile() ); // No tr()
+#endif
+    }
+    e.setCategories(cmbCat->selectedCategories());
 }
 
-void AbEditor::showEvent( QShowEvent *e )
+void AbFullEditor::showEvent( QShowEvent *e )
 {
     QDialog::showEvent( e );
     if( mNewEntry )
         abName->setFocus();
 }
 
-void AbEditor::setNameFocus()
+void AbFullEditor::setNameFocus()
 {
     tabs->setCurrentIndex( tabs->indexOf(contactTab) );
     abName->setFocus();
@@ -2674,7 +2629,7 @@ void parseEmailTo( const QString &strDefaultEmail,
     int defaultPos = emails.indexOf( strDefaultEmail );
 
     if ( defaultPos == -1 ) {
-        qWarning("AbEditor::parseEmailTo default email is not found in the email list; bug!");
+        qWarning("AbFullEditor::parseEmailTo default email is not found in the email list; bug!");
         strBack = strDefaultEmail;
         strBack += emails.join(", ");
         return;
@@ -2692,3 +2647,126 @@ void parseEmailTo( const QString &strDefaultEmail,
     strBack = emails.join(", ");
 }
 
+#ifdef QTOPIA_PHONE
+
+AbSimEditor::AbSimEditor(QWidget *parent, Qt::WFlags fl)
+    : AbEditor(parent, fl)
+{
+    setObjectName("edit");
+    setModal(true);
+
+    setWindowState(windowState() | Qt::WindowMaximized);
+
+    mNewEntry = false;
+}
+
+AbSimEditor::~AbSimEditor()
+{
+}
+
+void AbSimEditor::initSimUI()
+{
+    QVBoxLayout *mainVBox = new QVBoxLayout(this);
+    mainVBox->setSpacing(0);
+    mainVBox->setMargin(0);
+
+    simEditor = new QWidget(0);
+    mainVBox->addWidget(simEditor);
+
+    QGridLayout *gridLayout = new QGridLayout(simEditor);
+
+    gridLayout->addItem(new QSpacerItem(4, 0), 0, 1);
+    gridLayout->setSpacing(0);
+    gridLayout->setMargin(2);
+
+    int rowCount = 0;
+
+    //
+    //  Name
+    //
+
+    QLabel *label = new QLabel(tr("Name"));
+    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    gridLayout->addWidget(label, rowCount, 0);
+
+    simName = new QLineEdit(0);
+    gridLayout->addWidget(simName, rowCount, 2);
+
+    rowCount++;
+
+    //
+    //  Phone number
+    //
+
+    label = new QLabel(tr("Number"));
+    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    gridLayout->addWidget(label, rowCount, 0);
+
+    simNumber = new QLineEdit(0);
+    QtopiaApplication::setInputMethodHint(simNumber,QtopiaApplication::PhoneNumber);
+    gridLayout->addWidget(simNumber, rowCount, 2);
+
+    rowCount++;
+    gridLayout->addItem(new QSpacerItem(4, 0), rowCount, 1);
+}
+
+void AbSimEditor::setEntry( const QContact &entry, bool newEntry)
+{
+    ent = entry;
+    initSimUI();
+    if( newEntry )
+        setWindowTitle(tr("New SIM Contact"));
+    else
+        setWindowTitle(tr("Edit SIM Contact"));
+
+    simName->setText(entry.firstName());
+    simNumber->setText(entry.homePhone());
+
+    mNewEntry = newEntry;
+}
+
+bool AbSimEditor::isEmpty() const
+{
+    if(!simName->text().trimmed().isEmpty())
+        return false;
+
+    if(!simNumber->text().trimmed().isEmpty())
+        return false;
+    return true;
+}
+
+void AbSimEditor::accept()
+{
+    if(mNewEntry && isEmpty()) {
+        reject();
+    }
+    else
+    {
+        QContact tmp(ent); //preserve uid.
+        tmp.setFirstName(simName->text());
+        tmp.setHomePhone(simNumber->text());
+
+        if (tmp.label().isEmpty()) {
+            if (QMessageBox::warning(this, tr("Contacts"),
+                    tr("<qt>Name is required. Cancel editing?</qt>"),
+                    QMessageBox::Yes,
+                    QMessageBox::No) == QMessageBox::Yes) {
+                reject();
+                return;
+            } else {
+                simName->setFocus();
+                return;
+            }
+        }
+
+        ent = tmp; // now we can copy the fields over
+
+        QDialog::accept();
+    }
+}
+
+void AbSimEditor::reject()
+{
+    QDialog::reject();
+}
+#endif

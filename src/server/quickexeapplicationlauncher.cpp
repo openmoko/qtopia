@@ -243,7 +243,9 @@ QuickExeApplicationLauncher::QuickExeApplicationLauncher()
              this,
              SLOT( quickLauncherChannel( const QString&, const QByteArray& ) ) );
 
-    respawnQuicklauncher(false);
+    // No point starting in less than 10secs - the server will take at least
+    // that long to startup.
+    QTimer::singleShot( 10000, this, SLOT( startNewQuicklauncher() ) );
 }
 
 /*!
@@ -281,6 +283,10 @@ void QuickExeApplicationLauncher::launch(const QString &app)
 
     QString qlch("QPE/QuickLauncher-");
     qlch += QString::number( process->pid() );
+
+    // Restore process priority
+    if ( ::getuid() == 0 )
+        ::setpriority( PRIO_PROCESS, process->pid(), 0 );
 
     QtopiaIpcEnvelope env( qlch, "execute(QStringList)" );
     QStringList args;
@@ -350,10 +356,11 @@ void QuickExeApplicationLauncher::startNewQuicklauncher()
 }
 
 /*! \internal */
-void QuickExeApplicationLauncher::qlProcessExited( int pid )
+void QuickExeApplicationLauncher::qlProcessExited( int )
 {
-    QProcess* process = d->removeProcess( pid );
-    if ( process != 0 ) {
+    if ( sender() != 0 ) {
+        QProcess* process
+            = d->removeProcess( qobject_cast<QProcess*>( sender() )->pid() );
         process->disconnect();
         process->deleteLater();
 
@@ -379,7 +386,7 @@ void QuickExeApplicationLauncher::qlProcessError( QProcess::ProcessError )
 /*! \internal */
 void QuickExeApplicationLauncher::respawnQuicklauncher( bool fast )
 {
-    QTimer::singleShot( fast ? 500 : 5000,
+    QTimer::singleShot( fast ? 1000 : 5000,
                         this,
                         SLOT( startNewQuicklauncher() ) );
 }

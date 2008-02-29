@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/dialogs/qfiledialog.cpp -->
 <head>
   <title>Qt 4.2: QFileDialog Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -91,7 +92,7 @@
 <li><div class="fn"/>5 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -153,8 +154,8 @@
      fileNames = fileDialog-&gt;selectedFiles();</pre>
 <p>In the above example, a modal file dialog is created and shown. If the user clicked OK, the file they selected is put in <tt>fileName</tt>.</p>
 <p>The dialog's working directory can be set with <a href="qfiledialog.html#setDirectory">setDirectory</a>(). Each file in the current directory can be selected using the <a href="qfiledialog.html#selectFile">selectFile</a>() function.</p>
-<p>The Standard Dialogs example shows how to use QFileDialog as well as other built-in Qt dialogs.</p>
-<p>See also <a href="qdir.html">QDir</a>, <a href="qfileinfo.html">QFileInfo</a>, <a href="qfile.html">QFile</a>, <a href="qprintdialog.html">QPrintDialog</a>, <a href="qcolordialog.html">QColorDialog</a>, <a href="qfontdialog.html">QFontDialog</a>, Standard Dialogs Example, and Application Example.</p>
+<p>The <a href="dialogs-standarddialogs.html">Standard Dialogs</a> example shows how to use QFileDialog as well as other built-in Qt dialogs.</p>
+<p>See also <a href="qdir.html">QDir</a>, <a href="qfileinfo.html">QFileInfo</a>, <a href="qfile.html">QFile</a>, <a href="qprintdialog.html">QPrintDialog</a>, <a href="qcolordialog.html">QColorDialog</a>, <a href="qfontdialog.html">QFontDialog</a>, <a href="dialogs-standarddialogs.html">Standard Dialogs Example</a>, and <a href="mainwindows-application.html">Application Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="AcceptMode-enum"></a>enum QFileDialog::AcceptMode</h3>
@@ -370,10 +371,8 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <h3 class="fn"><a name="setFilter"></a>void QFileDialog::setFilter ( const <a href="qstring.html">QString</a> &amp; <i>filter</i> )</h3>
 <p>Sets the filter used in the file dialog to the given <i>filter</i>.</p>
-<p>If <i>filter</i> contains a pair of parentheses containing one or more of <b>anything*something</b>, separated by spaces or by semicolons then only the text contained in the parentheses is used as the filter. This means that these calls are all equivalent:</p>
-<pre> dialog.setFilter(&quot;All C++ files (*.cpp *.cc *.C *.cxx *.c++)&quot;);
- dialog.setFilter(&quot;*.cpp *.cc *.C *.cxx *.c++&quot;);
- dialog.setFilter(&quot;All C++ files (*.cpp;*.cc;*.C;*.cxx;*.c++)&quot;);
+<p>If <i>filter</i> contains a pair of parentheses containing one or more of <b>anything*something</b>, separated by semicolons, then only the text contained in the parentheses is used as the filter. This means that these calls are all equivalent:</p>
+<pre> dialog.setFilter(&quot;All C++ files (*.cpp;*.cc;*.C;*.cxx;*.c++)&quot;);
  dialog.setFilter(&quot;*.cpp;*.cc;*.C;*.cxx;*.c++&quot;);</pre>
 <p>See also <a href="qfiledialog.html#setFilters">setFilters</a>().</p>
 <h3 class="fn"><a name="setFilters"></a>void QFileDialog::setFilters ( const <a href="qstringlist.html">QStringList</a> &amp; <i>filters</i> )</h3>
@@ -437,6 +436,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

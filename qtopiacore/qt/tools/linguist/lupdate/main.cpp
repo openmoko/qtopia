@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the Qt Linguist of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -63,14 +73,17 @@ static void updateTsFiles( const MetaTranslator& fetchedTor,
 						   bool noObsolete, bool verbose )
 {
     QStringList::ConstIterator t = tsFileNames.begin();
+    QDir dir;
     while ( t != tsFileNames.end() ) {
+        QString fn = dir.relativeFilePath(*t);
         MetaTranslator tor;
         MetaTranslator out;
         tor.load( *t );
         if ( !codecForTr.isEmpty() )
             tor.setCodec( codecForTr.toLatin1() );
         if ( verbose )
-            fprintf( stderr, "Updating '%s'...\n", (*t).toLatin1().data() );
+            fprintf( stderr, "Updating '%s'...\n", fn.toLatin1().constData() );
+ 
         merge( &tor, &fetchedTor, &out, verbose, noObsolete );
         if ( noObsolete )
             out.stripObsoleteMessages();
@@ -81,10 +94,10 @@ static void updateTsFiles( const MetaTranslator& fetchedTor,
 	        char buf[100];
 	        strerror_s(buf, sizeof(buf), errno);
 	        fprintf( stderr, "lupdate error: Cannot save '%s': %s\n",
-                     (*t).toLatin1().constData(), buf );
+                     fn.toLatin1().constData(), buf );
 #else
             fprintf( stderr, "lupdate error: Cannot save '%s': %s\n",
-                     (*t).toLatin1().constData(), strerror(errno) );
+                     fn.toLatin1().constData(), strerror(errno) );
 #endif
 	    }
         ++t;
@@ -114,12 +127,13 @@ int main( int argc, char **argv )
     QString defaultContext = "@default";
     MetaTranslator fetchedTor;
     QByteArray codecForTr;
-	QByteArray codecForSource;
+    QByteArray codecForSource;
     QStringList tsFileNames;
+    QStringList proFiles;
+    QStringList sourceFiles;
 
     bool verbose = true; // verbose is on by default starting with Qt 4.2
     bool noObsolete = false;
-    bool metSomething = false;
     int numFiles = 0;
     bool standardSyntax = true;
     bool metTsFlag = false;
@@ -166,8 +180,6 @@ int main( int argc, char **argv )
 
         numFiles++;
         
-        QStringList sourceFiles;
-
         QString fullText;
 
         if ( standardSyntax && !metTsFlag ) {
@@ -194,7 +206,7 @@ int main( int argc, char **argv )
             if ( QString(argv[i]).endsWith(".ts", Qt::CaseInsensitive) ) {
                 QFileInfo fi( argv[i] );
                 if ( !fi.exists() || fi.isWritable() ) {
-                    tsFileNames.append( argv[i] );
+                    tsFileNames.append( QFileInfo(argv[i]).absoluteFilePath() );
                 } else {
                     fprintf( stderr,
                              "lupdate warning: For some reason, I cannot"
@@ -207,28 +219,7 @@ int main( int argc, char **argv )
                          argv[i] );
             }
         } else if (QString(argv[i]).endsWith(".pro", Qt::CaseInsensitive)) {
-            QDir::setCurrent( QFileInfo(argv[i]).path() );
-            QMap<QByteArray, QStringList> variables;
-
-            if(!evaluateProFile(QFileInfo(argv[i]).fileName(), verbose, &variables))
-                return 2;
-
-            sourceFiles = variables.value("SOURCES");
-            metSomething |= !sourceFiles.isEmpty();
-
-            QStringList tmp = variables.value("CODECFORTR");
-            if (!tmp.isEmpty()) {
-                metSomething = true;
-                codecForTr = tmp.first().toAscii();
-            }
-            tmp = variables.value("CODECFORSRC");
-            if (!tmp.isEmpty()) {
-                metSomething = true;
-                codecForSource = tmp.first().toAscii();
-            }
-
-            tsFileNames = variables.value("TRANSLATIONS");
-            metSomething |= !tsFileNames.isEmpty();
+            proFiles << QLatin1String(argv[i]);
         } else {
             QFileInfo fi(argv[i]);
             if (fi.isDir()) {
@@ -263,6 +254,37 @@ int main( int argc, char **argv )
                 sourceFiles << fi.canonicalFilePath().replace('\\','/');
             }            
         }
+    }   //for
+
+    
+    if ( proFiles.count() > 0 ) {
+        proFiles = getListOfProfiles(proFiles, verbose);
+    }
+    bool firstPass = true;
+    for (int pi = 0; firstPass || pi < proFiles.count(); ++pi) {
+        QStringList tsFiles = tsFileNames;
+        if (proFiles.count() > 0) {
+            QString pf = proFiles.at(pi);
+            QDir::setCurrent( QFileInfo(pf).path() );
+            QMap<QByteArray, QStringList> variables;
+
+            if(!evaluateProFile(QFileInfo(pf).fileName(), verbose, &variables))
+                return 2;
+
+            sourceFiles = variables.value("SOURCES");
+
+            QStringList tmp = variables.value("CODECFORTR");
+            if (!tmp.isEmpty()) {
+                codecForTr = tmp.first().toAscii();
+            }
+            tmp = variables.value("CODECFORSRC");
+            if (!tmp.isEmpty()) {
+                codecForSource = tmp.first().toAscii();
+            }
+
+            tsFiles += variables.value("TRANSLATIONS");
+        }
+
         for (QStringList::iterator it = sourceFiles.begin(); it != sourceFiles.end(); ++it) {
 #ifdef LINGUIST_DEBUG
             qDebug() << "  " << (*it);
@@ -278,11 +300,14 @@ int main( int argc, char **argv )
                 fetchtr_cpp( (*it).toAscii(), &fetchedTor, defaultContext.toAscii(), true, codecForSource );
             }
         }
-    }   //for
 
-    removeDuplicates(&tsFileNames, false);
-    if ( tsFileNames.count() > 0) {
-        updateTsFiles( fetchedTor, tsFileNames, codecForTr, noObsolete, verbose );
+        removeDuplicates(&tsFiles, false);
+        
+        QDir::setCurrent( oldDir );
+        if ( tsFiles.count() > 0) {
+            updateTsFiles( fetchedTor, tsFiles, codecForTr, noObsolete, verbose );
+        }
+        firstPass = false;
     }
     QDir::setCurrent( oldDir );
 

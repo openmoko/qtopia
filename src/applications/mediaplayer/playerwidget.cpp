@@ -1416,7 +1416,7 @@ void PlayerWidget::playingChanged( const QModelIndex& index )
 
 void PlayerWidget::pingMonitor()
 {
-    m_monitor->update( 0 );
+    m_monitor->update();
 }
 
 void PlayerWidget::showProgress()
@@ -1430,11 +1430,11 @@ void PlayerWidget::cycleView()
     {
     case Progress:
         setView( Volume );
-        m_monitor->update( 0 );
+        m_monitor->update();
         break;
     case Seek:
         setView( Volume );
-        m_monitor->update( 0 );
+        m_monitor->update();
         break;
     case Volume:
         setView( Progress );
@@ -1484,7 +1484,7 @@ void PlayerWidget::keyPressEvent( QKeyEvent* e )
         QCoreApplication::sendEvent( m_volumeview->keyEventHandler(), &event );
 
         m_pingtimer->start();
-        m_monitor->update( 0 );
+        m_monitor->update();
         }
         break;
     case Qt::Key_Down:
@@ -1496,7 +1496,7 @@ void PlayerWidget::keyPressEvent( QKeyEvent* e )
         QCoreApplication::sendEvent( m_volumeview->keyEventHandler(), &event );
 
         m_pingtimer->start();
-        m_monitor->update( 0 );
+        m_monitor->update();
         }
         break;
     case Qt::Key_Left:
@@ -1525,7 +1525,7 @@ void PlayerWidget::keyPressEvent( QKeyEvent* e )
             QCoreApplication::sendEvent( m_seekview->keyEventHandler(), &event );
 
             m_pingtimer->start();
-            m_monitor->update( 0 );
+            m_monitor->update();
         }
         break;
     case KEY_RIGHT_HOLD:
@@ -1536,7 +1536,7 @@ void PlayerWidget::keyPressEvent( QKeyEvent* e )
             QCoreApplication::sendEvent( m_seekview->keyEventHandler(), &event );
 
             m_pingtimer->start();
-            m_monitor->update( 0 );
+            m_monitor->update();
         }
         break;
     default:
@@ -1594,8 +1594,12 @@ void PlayerWidget::keyReleaseEvent( QKeyEvent* e )
 
 void PlayerWidget::showEvent( QShowEvent* )
 {
+    if( m_videowidget ) {
+        QtopiaApplication::setPowerConstraint( QtopiaApplication::Disable );
+    }
+
 #ifndef NO_VISUALIZATION
-    if( !m_videowidget ) {
+    else {
         m_visualization->setActive( true );
     }
 #endif
@@ -1603,6 +1607,10 @@ void PlayerWidget::showEvent( QShowEvent* )
 
 void PlayerWidget::hideEvent( QHideEvent* )
 {
+    if( m_videowidget ) {
+        QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
+    }
+
 #ifndef NO_VISUALIZATION
     m_visualization->setActive( false );
 #endif
@@ -1652,6 +1660,8 @@ void PlayerWidget::setVideo( QWidget* widget )
     m_helixlogoaudio->hide();
     m_helixlogovideo->show();
 #endif
+
+    QtopiaApplication::setPowerConstraint( QtopiaApplication::Disable );
 }
 
 void PlayerWidget::removeVideo()
@@ -1667,6 +1677,8 @@ void PlayerWidget::removeVideo()
     m_helixlogoaudio->show();
     m_helixlogovideo->hide();
 #endif
+
+    QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
 }
 
 void PlayerWidget::setCurrentTrack( const QModelIndex& index )

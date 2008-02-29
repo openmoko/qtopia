@@ -31,7 +31,7 @@
 #include <qtopianetwork.h>
 #include <qvaluespace.h>
 
-#include <qbluetoothdeviceselector.h>
+#include <qbluetoothremotedevicedialog.h>
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothrfcommserialport.h>
 #include <qbluetoothremotedevice.h>
@@ -65,7 +65,8 @@ BluetoothImpl::~BluetoothImpl()
     configIface = 0;
     qLog(Network) << "Deleting BluetoothImpl instance";
 
-    delete session;
+    if ( session )
+        delete session;
 }
 
 QtopiaNetworkInterface::Status BluetoothImpl::status()
@@ -182,15 +183,9 @@ bool BluetoothImpl::start( const QVariant /*options*/ )
     //Find device that offers dial-up networking
     QSet<QBluetooth::SDPProfile> profiles;
     profiles.insert( QBluetooth::DialupNetworkingProfile );
+    QBluetoothAddress addr = QBluetoothRemoteDeviceDialog::getRemoteDevice(0, profiles);
 
-    QBluetoothDeviceSelector selector;
-    QBluetoothAddress addr;
-    selector.setValidationProfiles( profiles );
-    selector.setForcePairing( true );   // force pairing for DUN connection
-    if ( QtopiaApplication::execDialog( &selector ) == QDialog::Accepted )
-        addr = selector.selectedDevice();
-
-    if ( addr.valid() ) {
+    if ( addr.isValid() ) {
         qLog(Network) << "Connecting to" << addr.toString();
         dialupDev->connectToDUNService( addr );
 
@@ -206,6 +201,7 @@ bool BluetoothImpl::start( const QVariant /*options*/ )
         delete session;
         session = 0;
     }
+
     return result;
 }
 

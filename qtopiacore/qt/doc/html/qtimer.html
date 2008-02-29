@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/kernel/qtimer.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/kernel/qtimer.cpp -->
 <head>
   <title>Qt 4.2: QTimer Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -78,8 +78,10 @@
 <h2>Detailed Description</h2>
 <p>The QTimer class provides repetitive and single-shot timers.</p>
 <p>The QTimer class provides a high-level programming interface for timers. To use it, create a QTimer, connect its <a href="qtimer.html#timeout">timeout</a>() signal to the appropriate slots, and call <a href="qtimer.html#start">start</a>(). From then on it will emit the <a href="qtimer.html#timeout">timeout</a>() signal at constant intervals.</p>
-<p>Example for a one second (1000 millisecond) timer (from the Analog Clock example):</p>
-<pre></pre>
+<p>Example for a one second (1000 millisecond) timer (from the <a href="widgets-analogclock.html">Analog Clock</a> example):</p>
+<pre>     QTimer *timer = new QTimer(this);
+     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+     timer-&gt;start(1000);</pre>
 <p>From then on, the <tt>update()</tt> slot is called every second.</p>
 <p>You can set a timer to time out only once by calling setSingleShot(true). You can also use the static <a href="qtimer.html#singleShot">QTimer::singleShot</a>() function to call a slot after a specified interval:</p>
 <pre>     QTimer::singleShot(200, this, SLOT(updateCaption()));</pre>
@@ -93,7 +95,7 @@
 <p>An alternative to using QTimer is to call <a href="qobject.html#startTimer">QObject::startTimer</a>() for your object and reimplement the <a href="qobject.html#timerEvent">QObject::timerEvent</a>() event handler in your class (which must inherit <a href="qobject.html">QObject</a>). The disadvantage is that <a href="qobject.html#timerEvent">timerEvent</a>() does not support such high-level features as single-shot timers or signals.</p>
 <p>Another alternative to using QTimer is to use <a href="qbasictimer.html">QBasicTimer</a>. It is typically less cumbersome than using <a href="qobject.html#startTimer">QObject::startTimer</a>() directly. See <a href="timers.html">Timers</a> for an overview of all three approaches.</p>
 <p>Some operating systems limit the number of timers that may be used; Qt tries to work around these limitations.</p>
-<p>See also <a href="qbasictimer.html">QBasicTimer</a>, <a href="qtimerevent.html">QTimerEvent</a>, <a href="qobject.html#timerEvent">QObject::timerEvent</a>(), <a href="timers.html">Timers</a>, Analog Clock Example, and Wiggly Example.</p>
+<p>See also <a href="qbasictimer.html">QBasicTimer</a>, <a href="qtimerevent.html">QTimerEvent</a>, <a href="qobject.html#timerEvent">QObject::timerEvent</a>(), <a href="timers.html">Timers</a>, <a href="widgets-analogclock.html">Analog Clock Example</a>, and <a href="widgets-wiggly.html">Wiggly Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="interval-prop"></a>interval : int</h3>
@@ -168,6 +170,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

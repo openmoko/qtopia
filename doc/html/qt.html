@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qnamespace.qdoc -->
 <head>
   <title>Qt 4.2: Qt Namespace Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -38,7 +39,7 @@
 <li><div class="fn"/>enum <b><a href="qt.html#Dock-enum">Dock</a></b> { DockUnmanaged, DockTornOff, DockTop, DockBottom, ..., DockMinimized }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#DockWidgetArea-enum">DockWidgetArea</a></b> { LeftDockWidgetArea, RightDockWidgetArea, TopDockWidgetArea, BottomDockWidgetArea, AllDockWidgetAreas, NoDockWidgetArea }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#DockWidgetArea-enum">DockWidgetAreas</a></b></li>
-<li><div class="fn"/>enum <b><a href="qt.html#DropAction-enum">DropAction</a></b> { CopyAction, MoveAction, LinkAction, ActionMask, TargetMoveAction, IgnoreAction }</li>
+<li><div class="fn"/>enum <b><a href="qt.html#DropAction-enum">DropAction</a></b> { CopyAction, MoveAction, LinkAction, ActionMask, IgnoreAction }</li>
 <li><div class="fn"/>flags <b><a href="qt.html#DropAction-enum">DropActions</a></b></li>
 <li><div class="fn"/>enum <b><a href="qt.html#FillRule-enum">FillRule</a></b> { OddEvenFill, WindingFill }</li>
 <li><div class="fn"/>enum <b><a href="qt.html#FocusPolicy-enum">FocusPolicy</a></b> { TabFocus, ClickFocus, StrongFocus, WheelFocus, NoFocus }</li>
@@ -335,7 +336,6 @@
 <tr><td valign="top"><tt>Qt::MoveAction</tt></td><td align="center" valign="top"><tt>0x2</tt></td><td valign="top">Move the data from the source to the target.</td></tr>
 <tr><td valign="top"><tt>Qt::LinkAction</tt></td><td align="center" valign="top"><tt>0x4</tt></td><td valign="top">Create a link from the source to the target.</td></tr>
 <tr><td valign="top"><tt>Qt::ActionMask</tt></td><td align="center" valign="top"><tt>0xff</tt></td><td valign="top">&nbsp;</td></tr>
-<tr><td valign="top"><tt>Qt::TargetMoveAction</tt></td><td align="center" valign="top"><tt>0x8002</tt></td><td valign="top">&nbsp;</td></tr>
 <tr><td valign="top"><tt>Qt::IgnoreAction</tt></td><td align="center" valign="top"><tt>0x0</tt></td><td valign="top">Ignore the action (do nothing with the data).</td></tr>
 </table></p>
 <p>The DropActions type is a typedef for <a href="qflags.html">QFlags</a>&lt;DropAction&gt;. It stores an OR combination of DropAction values.</p>
@@ -474,13 +474,13 @@
 </table></p>
 <p>The ImageConversionFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;ImageConversionFlag&gt;. It stores an OR combination of ImageConversionFlag values.</p>
 <h3 class="fn"><a name="InputMethodQuery-enum"></a>enum Qt::InputMethodQuery</h3>
-<p><table border="1" cellpadding="2" cellspacing="1" width="40%">
-<tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
-<tr><td valign="top"><tt>Qt::ImMicroFocus</tt></td><td align="center" valign="top"><tt>0</tt></td></tr>
-<tr><td valign="top"><tt>Qt::ImFont</tt></td><td align="center" valign="top"><tt>1</tt></td></tr>
-<tr><td valign="top"><tt>Qt::ImCursorPosition</tt></td><td align="center" valign="top"><tt>2</tt></td></tr>
-<tr><td valign="top"><tt>Qt::ImSurroundingText</tt></td><td align="center" valign="top"><tt>3</tt></td></tr>
-<tr><td valign="top"><tt>Qt::ImCurrentSelection</tt></td><td align="center" valign="top"><tt>4</tt></td></tr>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>Qt::ImMicroFocus</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The rectangle covering the area of the input cursor in widget coordinates.</td></tr>
+<tr><td valign="top"><tt>Qt::ImFont</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The currently used font for text input.</td></tr>
+<tr><td valign="top"><tt>Qt::ImCursorPosition</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The logical position of the cursor within the text surrounding the input area (see ImSurroundingText).</td></tr>
+<tr><td valign="top"><tt>Qt::ImSurroundingText</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The plain text around the input area, for example the current paragraph.</td></tr>
+<tr><td valign="top"><tt>Qt::ImCurrentSelection</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The currently selected text.</td></tr>
 </table></p>
 <h3 class="fn"><a name="ItemDataRole-enum"></a>enum Qt::ItemDataRole</h3>
 <p>Each item in the model has a set of data elements associated with it, each with its own role. The roles are used by the view to indicate to the model which type of data it needs.</p>
@@ -867,7 +867,7 @@
 <p>See also <a href="qkeyevent.html#key">QKeyEvent::key</a>().</p>
 <h3 class="flags"><a name="KeyboardModifier-enum"></a>enum Qt::KeyboardModifier<br />flags Qt::KeyboardModifiers</h3>
 <p>This enum describes the modifier keys.</p>
-<p><b>Note:</b> On Mac OS X, the <tt>ControlModifier</tt> value corresponds to the Command keys on the Macintosh keyboard, and the <tt>MetaModifier</tt> value corresponds to the Control keys.</p>
+<p><b>Note:</b> On Mac OS X, the <tt>ControlModifier</tt> value corresponds to the Command keys on the Macintosh keyboard, and the <tt>MetaModifier</tt> value corresponds to the Control keys. The <tt>KeypadModifier</tt> value will also be set when an arrow key is pressed as the arrow keys are considered part of the keypad.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>Qt::NoModifier</tt></td><td align="center" valign="top"><tt>0x00000000</tt></td><td valign="top">No modifier key is pressed.</td></tr>
@@ -1145,8 +1145,8 @@
 <tr><td valign="top"><tt>Qt::WA_StaticContents</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">Indicates that the widget contents are north-west aligned and static. On resize, such a widget will receive paint events only for the newly visible part of itself. This is set/cleared by the widget's author.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_PaintOnScreen</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">Indicates that the widget wants to draw directly onto the screen. Widgets with this attribute set do not participate in composition management, i.e. they cannot be semi-transparent or shine through semi-transparent overlapping widgets. This is only supported on X11. The flag is set or cleared by the widget's author. This flag is required for rendering outside of Qt's paint system; e.g. if you need to use native X11 painting primitives.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_PaintUnclipped</tt></td><td align="center" valign="top"><tt>52</tt></td><td valign="top">Makes all painters operating on this widget unclipped. Children of this widget or other widgets in front of it do not clip the area the painter can paint on. This flag is only supported on X11 for widgets for which the WA_PaintOnScreen flag is set. The preferred way to do this in a cross platform way is to create a transparent widget that lies in front of the other widgets.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_PaintOutsidePaintEvent</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top">Makes it possible to use <a href="qpainter.html">QPainter</a> to paint on the widget outside <a href="qwidget.html#paintEvent">paintEvent()</a>. This is not supported on Windows or Mac OS X. We recommend that you use this attribute only when porting Qt 3 code to Qt 4.</td></tr>
-<tr><td valign="top"><tt>Qt::WA_Hover</tt></td><td align="center" valign="top"><tt>74</tt></td><td valign="top">Forces Qt to generate paint events when the mouse enters or leaves the widget. This feature is typically used when implementing custom styles; see the Styles example for details.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_PaintOutsidePaintEvent</tt></td><td align="center" valign="top"><tt>13</tt></td><td valign="top">Makes it possible to use <a href="qpainter.html">QPainter</a> to paint on the widget outside <a href="qwidget.html#paintEvent">paintEvent()</a>. This is not supported on Windows, Mac OS X or Qtopia Core. We recommend that you use this attribute only when porting Qt 3 code to Qt 4.</td></tr>
+<tr><td valign="top"><tt>Qt::WA_Hover</tt></td><td align="center" valign="top"><tt>74</tt></td><td valign="top">Forces Qt to generate paint events when the mouse enters or leaves the widget. This feature is typically used when implementing custom styles; see the <a href="widgets-styles.html">Styles</a> example for details.</td></tr>
 <tr><td valign="top"><tt>Qt::WA_WindowModified</tt></td><td align="center" valign="top"><tt>41</tt></td><td valign="top">Indicates that the window is marked as modified. On some platforms this will mean nothing, on others (including Mac OS X and Windows) the window will take a modified appearance. This is set/cleared by <a href="qwidget.html#windowModified-prop">QWidget::setWindowModified</a>().</td></tr>
 <tr><td valign="top"><tt>Qt::WA_Resized</tt></td><td align="center" valign="top"><tt>42</tt></td><td valign="top">Indicates that the widget has an explicit size. This is set/cleared by <a href="qwidget.html#size-prop">QWidget::resize</a>() and by <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>().</td></tr>
 <tr><td valign="top"><tt>Qt::WA_Moved</tt></td><td align="center" valign="top"><tt>43</tt></td><td valign="top">Indicates that the widget has an explicit position. This is set/cleared by <a href="qwidget.html#pos-prop">QWidget::move</a>() and by <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>().</td></tr>
@@ -1207,7 +1207,7 @@
 <tr><td valign="top"><tt>Qt::Tool</tt></td><td align="center" valign="top"><tt>0x0000000a | Window</tt></td><td valign="top">Indicates that the widget is a tool window. A tool window is often a small window with a smaller than usual title bar and decoration, typically used for collections of tool buttons. It there is a parent, the tool window will always be kept on top of it. If there isn't a parent, you may consider using Qt::WindowStaysOnTopHint as well. If the window system supports it, a tool window can be decorated with a somewhat lighter frame. It can also be combined with Qt::FramelessWindowHint.</td></tr>
 <tr><td valign="top"><tt>Qt::ToolTip</tt></td><td align="center" valign="top"><tt>0x0000000c | Window</tt></td><td valign="top">Indicates that the widget is a tooltip. This is used internally to implement <a href="qwidget.html#toolTip-prop">tooltips</a>.</td></tr>
 <tr><td valign="top"><tt>Qt::SplashScreen</tt></td><td align="center" valign="top"><tt>0x0000000e | Window</tt></td><td valign="top">Indicates that the window is a splash screen. This is the default type for <a href="qsplashscreen.html">QSplashScreen</a>.</td></tr>
-<tr><td valign="top"><tt>Qt::Desktop</tt></td><td align="center" valign="top"><tt>0x00000010 | Window</tt></td><td valign="top">Indicates that this widget is the desktop. This is the type for QDesktopWidget.</td></tr>
+<tr><td valign="top"><tt>Qt::Desktop</tt></td><td align="center" valign="top"><tt>0x00000010 | Window</tt></td><td valign="top">Indicates that this widget is the desktop. This is the type for <a href="qdesktopwidget.html">QDesktopWidget</a>.</td></tr>
 <tr><td valign="top"><tt>Qt::SubWindow</tt></td><td align="center" valign="top"><tt>0x00000012</tt></td><td valign="top">Indicates that this widget is a child widget, irrespective of whether the widget has a parent or not.</td></tr>
 </table></p>
 <p>There are also a number of flags which you can use to customize the appearance of top-level windows. These have no effect on other windows:</p>
@@ -1271,7 +1271,7 @@
 <tr><td valign="top"><tt>Qt::WMacNoSheet</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">No longer needed.</td></tr>
 </table></p>
 <p>The WindowFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;WindowType&gt;. It stores an OR combination of WindowType values.</p>
-<p>See also <a href="qwidget.html#windowFlags-prop">QWidget::windowFlags</a> and Window Flags Example.</p>
+<p>See also <a href="qwidget.html#windowFlags-prop">QWidget::windowFlags</a> and <a href="widgets-windowflags.html">Window Flags Example</a>.</p>
 <hr />
 <h2>Function Documentation</h2>
 <h3 class="fn"><a name="convertFromPlainText"></a><a href="qstring.html">QString</a> Qt::convertFromPlainText ( const <a href="qstring.html">QString</a> &amp; <i>plain</i>, <a href="qt.html#WhiteSpaceMode-enum">WhiteSpaceMode</a> <i>mode</i> = WhiteSpacePre )</h3>
@@ -1400,6 +1400,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

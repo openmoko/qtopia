@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -312,7 +322,6 @@ void QLabel::setText(const QString &text)
     if (d->isRichText()) {
         d->doc->setHtml(text);
         setMouseTracking(true);
-        d->ensureTextControl();
     } else {
         d->doc->setPlainText(text);
         setMouseTracking(false);
@@ -322,6 +331,7 @@ void QLabel::setText(const QString &text)
 #endif
     }
 
+    d->textInteractionFlagsChanged();
     d->updateLabel();
 }
 
@@ -662,6 +672,22 @@ void QLabel::setOpenExternalLinks(bool open)
         d->control->setOpenExternalLinks(open);
 }
 
+void QLabelPrivate::textInteractionFlagsChanged()
+{    
+    if (!doc)
+        return;
+
+    bool richText = isRichText();
+    if ((richText && textInteractionFlags != Qt::NoTextInteraction)
+        || (!richText && (textInteractionFlags & (Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard)))) {
+        ensureTextControl();
+        control->setTextInteractionFlags(textInteractionFlags);
+    } else {
+        delete control;
+        control = 0;
+    }
+}
+
 /*!
     \property QLabel::textInteractionFlags
     \since 4.2
@@ -677,15 +703,19 @@ void QLabel::setOpenExternalLinks(bool open)
 void QLabel::setTextInteractionFlags(Qt::TextInteractionFlags flags)
 {
     Q_D(QLabel);
+
+    if (d->textInteractionFlags == flags)
+        return;
     d->textInteractionFlags = flags;
+
     if (flags & Qt::LinksAccessibleByKeyboard)
         setFocusPolicy(Qt::StrongFocus);
     else if (flags & Qt::TextSelectableByKeyboard)
         setFocusPolicy(Qt::ClickFocus);
     else
         setFocusPolicy(Qt::NoFocus);
-    if (d->control)
-        d->control->setTextInteractionFlags(flags);
+
+    d->textInteractionFlagsChanged();
 }
 
 Qt::TextInteractionFlags QLabel::textInteractionFlags() const

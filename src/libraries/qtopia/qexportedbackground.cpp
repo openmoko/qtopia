@@ -43,8 +43,16 @@ public:
     bool exportedBackgroundAvailable;
 };
 
-static ExportedBackground exportedBg[MaxScreens];
-static int tintAmount = 2;
+struct ExportedBackgroundLocalInfo {
+    ExportedBackgroundLocalInfo()
+        : tintAmount(2) {}
+
+    int tintAmount;
+    ExportedBackground exportedBg[MaxScreens];
+    QSet<QExportedBackground *> localInstance;
+};
+
+Q_GLOBAL_STATIC(ExportedBackgroundLocalInfo, localInfo);
 
 class QExportedBackgroundPrivate
 {
@@ -75,6 +83,7 @@ QExportedBackground::QExportedBackground(int scr, QObject *parent)
                 this, SLOT(sysMessage(const QString&,const QByteArray&)) );
         getPixmaps();
     }
+    localInfo()->localInstance.insert(this);
 }
 
 QExportedBackground::QExportedBackground(QObject *parent)
@@ -89,6 +98,7 @@ QExportedBackground::QExportedBackground(QObject *parent)
                 this, SLOT(sysMessage(const QString&,const QByteArray&)) );
         getPixmaps();
     }
+    localInfo()->localInstance.insert(this);
 }
 
 QExportedBackground::~QExportedBackground()
@@ -96,6 +106,7 @@ QExportedBackground::~QExportedBackground()
     if ( d )
         delete d;
     d = 0;
+    localInfo()->localInstance.remove(this);
 }
 
 QPixmap QExportedBackground::wallpaper() const
@@ -146,7 +157,7 @@ void QExportedBackground::initExportedBackground(int width, int height, int scre
     if (screen < 0 || screen >= MaxScreens)
         return;
 
-    ExportedBackground &expBg = exportedBg[screen];
+    ExportedBackground &expBg = localInfo()->exportedBg[screen];
     if (expBg.bgState)
         return;
     expBg.exportedBackgroundAvailable = false;
@@ -185,16 +196,19 @@ void QExportedBackground::clearExportedBackground(int screen)
     if (screen < 0 || screen >= MaxScreens)
         return;
 
-    ExportedBackground &expBg = exportedBg[screen];
+    ExportedBackground &expBg = localInfo()->exportedBg[screen];
     if(!expBg.exportedBackgroundAvailable)
         return;
 
     *((uchar*)expBg.bgState->qwsBits()) = 0; // Not set
+
+    foreach(QExportedBackground *bg, localInfo()->localInstance)
+        bg->getPixmaps();
 }
 
 void QExportedBackground::setExportedBackgroundTint(int tint)
 {
-    tintAmount = tint;
+    localInfo()->tintAmount = tint;
 }
 
 void QExportedBackground::setExportedBackground(const QPixmap &image, int screen)
@@ -202,7 +216,7 @@ void QExportedBackground::setExportedBackground(const QPixmap &image, int screen
     if (screen < 0 || screen >= MaxScreens)
         return;
 
-    ExportedBackground &expBg = exportedBg[screen];
+    ExportedBackground &expBg = localInfo()->exportedBg[screen];
     if(!expBg.exportedBackgroundAvailable)
         return;
 
@@ -212,9 +226,13 @@ void QExportedBackground::setExportedBackground(const QPixmap &image, int screen
     }
 
     colorize(*expBg.bgPm, image,
-             QApplication::palette().color(QPalette::Window), tintAmount);
+             QApplication::palette().color(QPalette::Window), 
+             localInfo()->tintAmount);
     *((uchar*)expBg.bgState->qwsBits()) = 1; // Set
     QtopiaIpcEnvelope e("QPE/System", "backgroundChanged()");
+   
+    foreach(QExportedBackground *bg, localInfo()->localInstance)
+        bg->getPixmaps();
 }
 
 void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,

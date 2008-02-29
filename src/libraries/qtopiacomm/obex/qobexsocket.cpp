@@ -23,34 +23,72 @@
 
 #include <openobex/obex.h>
 
-QObexSocket::QObexSocket()
+/*!
+    \class QObexSocket
+    \brief The QObexSocket class is an abstract base class for OBEX sockets.
+
+    This class provides a common base class for OBEX sockets. Subclasses
+    such as QBluetoothObexSocket and QIrObexSocket provide implementations
+    specific to their own types of transport.
+
+    \sa QObexPushClient, QObexPushService
+
+    \ingroup qtopiaobex
+ */
+
+/*!
+    Constructs a QObexSocket with parent object \a parent.
+ */
+QObexSocket::QObexSocket(QObject *parent)
+    : QObject(parent)
 {
     m_handle = 0;
 }
 
+/*!
+    Destroys a QObexSocket.
+ */
 QObexSocket::~QObexSocket()
 {
     OBEX_Cleanup(static_cast<obex_t *>(m_handle));
     m_handle = NULL;
 }
 
+/*!
+    Connects the underlying transport connection. Returns true if the socket
+    was connected successfully.
+ */
 bool QObexSocket::connect()
 {
     return false;
 }
 
-bool QObexSocket::close()
+/*!
+    Closes the socket and disconnects the transport connection. Returns true
+    if the socket was able to be closed.
+ */
+void QObexSocket::close()
 {
-    int ret = OBEX_TransportDisconnect(static_cast<obex_t *>(m_handle));
+    OBEX_TransportDisconnect(static_cast<obex_t *>(m_handle));
     m_handle = NULL;
-
-    if (ret == -1)
-        return false;
-
-    return true;
 }
 
+/*!
+    Returns whether the transport for this socket is connected.
+ */
 bool QObexSocket::isConnected() const
 {
     return m_handle != NULL;
 }
+
+/*!
+    \fn void QObexSocket::setHandle(void *handle)
+
+    Sets the underlying implementation handle to \a handle.
+ */
+
+/*!
+    \fn void *QObexSocket::handle()
+
+    Returns the underlying implementation handle.
+ */

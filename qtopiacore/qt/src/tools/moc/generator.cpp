@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the tools applications of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -281,13 +291,13 @@ void Generator::generateCode()
     fprintf(out, "\nvoid *%s::qt_metacast(const char *_clname)\n{\n", cdef->qualified.constData());
     fprintf(out, "    if (!_clname) return 0;\n");
     fprintf(out, "    if (!strcmp(_clname, qt_meta_stringdata_%s))\n"
-                  "\treturn static_cast<void*>(const_cast<%s*>(this));\n",
+                  "\treturn static_cast<void*>(const_cast< %s*>(this));\n",
             qualifiedClassNameIdentifier.constData(), cdef->classname.constData());
     for (int i = 1; i < cdef->superclassList.size(); ++i) { // for all superclasses but the first one
         if (cdef->superclassList.at(i).second == FunctionDef::Private)
             continue;
         const char *cname = cdef->superclassList.at(i).first;
-        fprintf(out, "    if (!strcmp(_clname, \"%s\"))\n\treturn static_cast<%s*>(const_cast<%s*>(this));\n",
+        fprintf(out, "    if (!strcmp(_clname, \"%s\"))\n\treturn static_cast< %s*>(const_cast< %s*>(this));\n",
                 cname, cname, cdef->classname.constData());
     }
     for (int i = 0; i < cdef->interfaceList.size(); ++i) {
@@ -295,8 +305,8 @@ void Generator::generateCode()
         for (int j = 0; j < iface.size(); ++j) {
             fprintf(out, "    if (!strcmp(_clname, %s))\n\treturn ", iface.at(j).interfaceId.constData());
             for (int k = j; k >= 0; --k)
-                fprintf(out, "static_cast<%s*>(", iface.at(k).className.constData());
-            fprintf(out, "const_cast<%s*>(this)%s;\n",
+                fprintf(out, "static_cast< %s*>(", iface.at(k).className.constData());
+            fprintf(out, "const_cast< %s*>(this)%s;\n",
                     cdef->classname.constData(), QByteArray(j+1, ')').constData());
         }
     }
@@ -794,7 +804,7 @@ void Generator::generateSignal(FunctionDef *def,int index)
     const char *constQualifier = "";
 
     if (def->isConst) {
-        thisPtr = "const_cast<";
+        thisPtr = "const_cast< ";
         thisPtr += cdef->qualified;
         thisPtr += " *>(this)";
         constQualifier = "const";

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qsignalspy.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qsignalspy.qdoc -->
 <head>
   <title>Qt 4.2: QSignalSpy Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -50,10 +50,10 @@
 <span class="comment"> // do something that triggers the signal</span>
  box-&gt;animateClick();
 
- COMPARE(spy.count(), 1); <span class="comment">// make sure the signal was emitted exactly one time</span>
+ QCOMPARE(spy.count(), 1); <span class="comment">// make sure the signal was emitted exactly one time</span>
  QList&lt;QVariant&gt; arguments = spy.takeFirst(); <span class="comment">// take the first signal</span>
 
- VERIFY(arguments.at(0).toBool() == true); <span class="comment">// verify the first argument</span></pre>
+ QVERIFY(arguments.at(0).toBool() == true); <span class="comment">// verify the first argument</span></pre>
 <p><tt>spy.takeFirst()</tt> returns the arguments for the first emitted signal, as a list of <a href="qvariant.html">QVariant</a> objects. The <tt>clicked()</tt> signal has a single bool argument, which is stored as the first entry in the list of arguments.</p>
 <p>The example below catches a signal from a custom object:</p>
 <pre> QSignalSpy spy(myCustomObject, SIGNAL(mySignal(int, QString, double)));
@@ -61,9 +61,9 @@
  myCustomObject-&gt;doSomething(); <span class="comment">// trigger emission of the signal</span>
 
  QList&lt;QVariant&gt; arguments = spy.takeFirst();
- VERIFY(arguments.at(0).type() == QVariant::Int);
- VERIFY(arguments.at(1).type() == QVariant::QString);
- VERIFY(arguments.at(2).type() == QVariant::double);</pre>
+ QVERIFY(arguments.at(0).type() == QVariant::Int);
+ QVERIFY(arguments.at(1).type() == QVariant::QString);
+ QVERIFY(arguments.at(2).type() == QVariant::double);</pre>
 <p><b>Note:</b> Non-standard data types need to be registered, using the <a href="qmetatype.html#qRegisterMetaType">qRegisterMetaType</a>() function, before you can create a QSignalSpy. For example:</p>
 <pre> qRegisterMetaType&lt;QModelIndex&gt;(&quot;QModelIndex&quot;);
  QSignalSpy spy(&amp;model, SIGNAL(whatever(QModelIndex)));</pre>
@@ -84,6 +84,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -23,8 +23,9 @@
 #define __QBLUETOOHRFCOMMSERIALPORT__H
 
 #include <QObject>
-#include <QString>
-#include <QStringList>
+#include <QList>
+
+class QString;
 
 #include "qbluetoothaddress.h"
 #include "qbluetoothrfcommsocket.h"
@@ -34,18 +35,53 @@ class QBluetoothRfcommSerialPortPrivate;
 class QTOPIACOMM_EXPORT QBluetoothRfcommSerialPort : public QObject
 {
     Q_OBJECT
+    friend class QBluetoothRfcommSerialPortPrivate;
+
 public:
+    enum Flag { KeepAlive = 0x01 };
+    Q_DECLARE_FLAGS(Flags, Flag)
+
+    enum Error {
+        NoError,
+        SocketNotConnected,
+        ConnectionFailed,
+        ConnectionCancelled,
+        CreationError
+    };
+
     explicit QBluetoothRfcommSerialPort(QObject* parent = 0);
+    explicit QBluetoothRfcommSerialPort(QBluetoothRfcommSocket *socket,
+                                        QBluetoothRfcommSerialPort::Flags flags = 0,
+                                        QObject *parent = 0);
     ~QBluetoothRfcommSerialPort();
 
-    QString createTty( QBluetoothRfcommSocket* socket );
-    QString createTty( const QBluetoothAddress& local, const QBluetoothAddress &remote, int channel);
-    void releaseTty();
-    QString boundDevice() const;
-    int id() const;
+    bool connect(const QBluetoothAddress &local,
+                 const QBluetoothAddress &remote,
+                 int channel);
+    bool disconnect();
 
-    static QStringList listBindings();
-    static bool releaseTty(int id);
+    QString device() const;
+    int id() const;
+    QBluetoothRfcommSerialPort::Flags flags() const;
+
+    QBluetoothRfcommSerialPort::Error error() const;
+    QString errorString() const;
+
+    QBluetoothAddress remoteAddress() const;
+    int remoteChannel() const;
+    QBluetoothAddress localAddress() const;
+
+    static QList<int> listDevices();
+    static QList<int> listDevices(const QBluetoothLocalDevice &device);
+    static bool releaseDevice(int id);
+
+signals:
+    void connected(const QString &boundDevice);
+    void error(QBluetoothRfcommSerialPort::Error err);
+    void disconnected();
+
+protected:
+    void setError(QBluetoothRfcommSerialPort::Error err);
 
 private:
     QBluetoothRfcommSerialPortPrivate* d;

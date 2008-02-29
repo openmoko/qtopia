@@ -1213,8 +1213,6 @@
         <keyword ref="qapplication.html#topLevelWidgets">topLevelWidgets</keyword>
         <keyword ref="qapplication.html#type">type</keyword>
         <keyword ref="qapplication.html#widgetAt">widgetAt</keyword>
-        <keyword ref="qapplication.html#winFocus">winFocus</keyword>
-        <keyword ref="qapplication.html#winMouseButtonUp">winMouseButtonUp</keyword>
         <keyword ref="qapplication.html#x11EventFilter">x11EventFilter</keyword>
         <keyword ref="qapplication.html#x11ProcessEvent">x11ProcessEvent</keyword>
         <keyword ref="qapplication.html#qApp">qApp</keyword>
@@ -1250,6 +1248,152 @@
         <keyword ref="qassistantclient.html#setArguments">setArguments</keyword>
         <keyword ref="qassistantclient.html#showPage">showPage</keyword>
         <section ref="qassistantclient-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxaggregated.html" title="QAxAggregated Class Reference">
+        <keyword ref="qaxaggregated.html">QAxAggregated</keyword>
+        <keyword ref="qaxaggregated.html#controllingUnknown">controllingUnknown</keyword>
+        <keyword ref="qaxaggregated.html#object">object</keyword>
+        <keyword ref="qaxaggregated.html#queryInterface">queryInterface</keyword>
+        <keyword ref="qaxaggregated.html#widget">widget</keyword>
+        <section ref="qaxaggregated-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxbase.html" title="QAxBase Class Reference">
+        <keyword ref="qaxbase.html">QAxBase</keyword>
+        <keyword ref="qaxbase.html#PropertyBag-typedef">PropertyBag</keyword>
+        <keyword ref="qaxbase.html#control-prop">control</keyword>
+        <keyword ref="qaxbase.html#control-prop">setControl</keyword>
+        <keyword ref="qaxbase.html#asVariant">asVariant</keyword>
+        <keyword ref="qaxbase.html#clear">clear</keyword>
+        <keyword ref="qaxbase.html#disableClassInfo">disableClassInfo</keyword>
+        <keyword ref="qaxbase.html#disableEventSink">disableEventSink</keyword>
+        <keyword ref="qaxbase.html#disableMetaObject">disableMetaObject</keyword>
+        <keyword ref="qaxbase.html#dynamicCall">dynamicCall</keyword>
+        <keyword ref="qaxbase.html#exception">exception</keyword>
+        <keyword ref="qaxbase.html#generateDocumentation">generateDocumentation</keyword>
+        <keyword ref="qaxbase.html#initialize">initialize</keyword>
+        <keyword ref="qaxbase.html#initializeActive">initializeActive</keyword>
+        <keyword ref="qaxbase.html#initializeFromFile">initializeFromFile</keyword>
+        <keyword ref="qaxbase.html#initializeLicensed">initializeLicensed</keyword>
+        <keyword ref="qaxbase.html#initializeRemote">initializeRemote</keyword>
+        <keyword ref="qaxbase.html#isNull">isNull</keyword>
+        <keyword ref="qaxbase.html#propertyBag">propertyBag</keyword>
+        <keyword ref="qaxbase.html#propertyChanged">propertyChanged</keyword>
+        <keyword ref="qaxbase.html#propertyWritable">propertyWritable</keyword>
+        <keyword ref="qaxbase.html#queryInterface">queryInterface</keyword>
+        <keyword ref="qaxbase.html#querySubObject">querySubObject</keyword>
+        <keyword ref="qaxbase.html#setPropertyBag">setPropertyBag</keyword>
+        <keyword ref="qaxbase.html#setPropertyWritable">setPropertyWritable</keyword>
+        <keyword ref="qaxbase.html#signal">signal</keyword>
+        <keyword ref="qaxbase.html#verbs">verbs</keyword>
+        <section ref="qaxbase-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxbindable.html" title="QAxBindable Class Reference">
+        <keyword ref="qaxbindable.html">QAxBindable</keyword>
+        <keyword ref="qaxbindable.html#clientSite">clientSite</keyword>
+        <keyword ref="qaxbindable.html#createAggregate">createAggregate</keyword>
+        <keyword ref="qaxbindable.html#propertyChanged">propertyChanged</keyword>
+        <keyword ref="qaxbindable.html#readData">readData</keyword>
+        <keyword ref="qaxbindable.html#reportError">reportError</keyword>
+        <keyword ref="qaxbindable.html#requestPropertyChange">requestPropertyChange</keyword>
+        <keyword ref="qaxbindable.html#writeData">writeData</keyword>
+        <section ref="qaxbindable-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxfactory.html" title="QAxFactory Class Reference">
+        <keyword ref="qaxfactory.html">QAxFactory</keyword>
+        <keyword ref="qaxfactory.html#ServerType-enum">ServerType</keyword>
+        <keyword ref="qaxfactory.html#ServerType-enum">QAxFactory::SingleInstance</keyword>
+        <keyword ref="qaxfactory.html#ServerType-enum">QAxFactory::MultipleInstances</keyword>
+        <keyword ref="qaxfactory.html#appID">appID</keyword>
+        <keyword ref="qaxfactory.html#classID">classID</keyword>
+        <keyword ref="qaxfactory.html#createObject">createObject</keyword>
+        <keyword ref="qaxfactory.html#createObjectWrapper">createObjectWrapper</keyword>
+        <keyword ref="qaxfactory.html#eventsID">eventsID</keyword>
+        <keyword ref="qaxfactory.html#exposeToSuperClass">exposeToSuperClass</keyword>
+        <keyword ref="qaxfactory.html#featureList">featureList</keyword>
+        <keyword ref="qaxfactory.html#hasStockEvents">hasStockEvents</keyword>
+        <keyword ref="qaxfactory.html#interfaceID">interfaceID</keyword>
+        <keyword ref="qaxfactory.html#isServer">isServer</keyword>
+        <keyword ref="qaxfactory.html#isService">isService</keyword>
+        <keyword ref="qaxfactory.html#metaObject">metaObject</keyword>
+        <keyword ref="qaxfactory.html#registerActiveObject">registerActiveObject</keyword>
+        <keyword ref="qaxfactory.html#registerClass">registerClass</keyword>
+        <keyword ref="qaxfactory.html#serverDirPath">serverDirPath</keyword>
+        <keyword ref="qaxfactory.html#serverFilePath">serverFilePath</keyword>
+        <keyword ref="qaxfactory.html#startServer">startServer</keyword>
+        <keyword ref="qaxfactory.html#stayTopLevel">stayTopLevel</keyword>
+        <keyword ref="qaxfactory.html#stopServer">stopServer</keyword>
+        <keyword ref="qaxfactory.html#typeLibID">typeLibID</keyword>
+        <keyword ref="qaxfactory.html#unregisterClass">unregisterClass</keyword>
+        <keyword ref="qaxfactory.html#validateLicenseKey">validateLicenseKey</keyword>
+        <keyword ref="qaxfactory.html#QAXCLASS">QAXCLASS</keyword>
+        <keyword ref="qaxfactory.html#QAXFACTORY_BEGIN">QAXFACTORY_BEGIN</keyword>
+        <keyword ref="qaxfactory.html#QAXFACTORY_DEFAULT">QAXFACTORY_DEFAULT</keyword>
+        <keyword ref="qaxfactory.html#QAXFACTORY_END">QAXFACTORY_END</keyword>
+        <keyword ref="qaxfactory.html#QAXFACTORY_EXPORT">QAXFACTORY_EXPORT</keyword>
+        <keyword ref="qaxfactory.html#QAXTYPE">QAXTYPE</keyword>
+        <section ref="qaxfactory-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxobject.html" title="QAxObject Class Reference">
+        <keyword ref="qaxobject.html">QAxObject</keyword>
+        <keyword ref="qaxobject.html#doVerb">doVerb</keyword>
+        <section ref="qaxobject-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxscript.html" title="QAxScript Class Reference">
+        <keyword ref="qaxscript.html">QAxScript</keyword>
+        <keyword ref="qaxscript.html#FunctionFlags-enum">FunctionFlags</keyword>
+        <keyword ref="qaxscript.html#FunctionFlags-enum">QAxScript::FunctionSignatures</keyword>
+        <keyword ref="qaxscript.html#FunctionFlags-enum">QAxScript::FunctionNames</keyword>
+        <keyword ref="qaxscript.html#call">call</keyword>
+        <keyword ref="qaxscript.html#entered">entered</keyword>
+        <keyword ref="qaxscript.html#error">error</keyword>
+        <keyword ref="qaxscript.html#finished">finished</keyword>
+        <keyword ref="qaxscript.html#functions">functions</keyword>
+        <keyword ref="qaxscript.html#load">load</keyword>
+        <keyword ref="qaxscript.html#scriptCode">scriptCode</keyword>
+        <keyword ref="qaxscript.html#scriptEngine">scriptEngine</keyword>
+        <keyword ref="qaxscript.html#scriptName">scriptName</keyword>
+        <keyword ref="qaxscript.html#stateChanged">stateChanged</keyword>
+        <section ref="qaxscript-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxscriptengine.html" title="QAxScriptEngine Class Reference">
+        <keyword ref="qaxscriptengine.html">QAxScriptEngine</keyword>
+        <keyword ref="qaxscriptengine.html#State-enum">State</keyword>
+        <keyword ref="qaxscriptengine.html#State-enum">QAxScriptEngine::Initialized</keyword>
+        <keyword ref="qaxscriptengine.html#State-enum">QAxScriptEngine::Connected</keyword>
+        <keyword ref="qaxscriptengine.html#State-enum">QAxScriptEngine::Disconnected</keyword>
+        <keyword ref="qaxscriptengine.html#State-enum">QAxScriptEngine::Closed</keyword>
+        <keyword ref="qaxscriptengine.html#State-enum">QAxScriptEngine::Started</keyword>
+        <keyword ref="qaxscriptengine.html#State-enum">QAxScriptEngine::Uninitialized</keyword>
+        <keyword ref="qaxscriptengine.html#addItem">addItem</keyword>
+        <keyword ref="qaxscriptengine.html#hasIntrospection">hasIntrospection</keyword>
+        <keyword ref="qaxscriptengine.html#isValid">isValid</keyword>
+        <keyword ref="qaxscriptengine.html#queryInterface">queryInterface</keyword>
+        <keyword ref="qaxscriptengine.html#scriptLanguage">scriptLanguage</keyword>
+        <keyword ref="qaxscriptengine.html#setState">setState</keyword>
+        <keyword ref="qaxscriptengine.html#state">state</keyword>
+        <section ref="qaxscriptengine-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxscriptmanager.html" title="QAxScriptManager Class Reference">
+        <keyword ref="qaxscriptmanager.html">QAxScriptManager</keyword>
+        <keyword ref="qaxscriptmanager.html#addObject">addObject</keyword>
+        <keyword ref="qaxscriptmanager.html#call">call</keyword>
+        <keyword ref="qaxscriptmanager.html#error">error</keyword>
+        <keyword ref="qaxscriptmanager.html#functions">functions</keyword>
+        <keyword ref="qaxscriptmanager.html#load">load</keyword>
+        <keyword ref="qaxscriptmanager.html#registerEngine">registerEngine</keyword>
+        <keyword ref="qaxscriptmanager.html#script">script</keyword>
+        <keyword ref="qaxscriptmanager.html#scriptFileFilter">scriptFileFilter</keyword>
+        <keyword ref="qaxscriptmanager.html#scriptNames">scriptNames</keyword>
+        <section ref="qaxscriptmanager-members.html" title="List of all members"/>
+    </section>
+    <section ref="qaxwidget.html" title="QAxWidget Class Reference">
+        <keyword ref="qaxwidget.html">QAxWidget</keyword>
+        <keyword ref="qaxwidget.html#createAggregate">createAggregate</keyword>
+        <keyword ref="qaxwidget.html#createHostWindow">createHostWindow</keyword>
+        <keyword ref="qaxwidget.html#doVerb">doVerb</keyword>
+        <keyword ref="qaxwidget.html#initialize">initialize</keyword>
+        <keyword ref="qaxwidget.html#translateKeyEvent">translateKeyEvent</keyword>
+        <section ref="qaxwidget-members.html" title="List of all members"/>
     </section>
     <section ref="qbasictimer.html" title="QBasicTimer Class Reference">
         <keyword ref="qbasictimer.html">QBasicTimer</keyword>
@@ -2387,7 +2531,7 @@
         <keyword ref="qdbusabstractadaptor.html">QDBusAbstractAdaptor</keyword>
         <keyword ref="qdbusabstractadaptor.html#autoRelaySignals">autoRelaySignals</keyword>
         <keyword ref="qdbusabstractadaptor.html#setAutoRelaySignals">setAutoRelaySignals</keyword>
-        <keyword ref="qdbusabstractadaptor.html#Q_ASYNC">Q_ASYNC</keyword>
+        <keyword ref="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</keyword>
         <section ref="qdbusabstractadaptor-members.html" title="List of all members"/>
     </section>
     <section ref="qdbusabstractinterface.html" title="QDBusAbstractInterface Class Reference">
@@ -2899,6 +3043,19 @@
         <keyword ref="qdesktopservices.html#setUrlHandler">setUrlHandler</keyword>
         <keyword ref="qdesktopservices.html#unsetUrlHandler">unsetUrlHandler</keyword>
         <section ref="qdesktopservices-members.html" title="List of all members"/>
+    </section>
+    <section ref="qdesktopwidget.html" title="QDesktopWidget Class Reference">
+        <keyword ref="qdesktopwidget.html">QDesktopWidget</keyword>
+        <keyword ref="qdesktopwidget.html#availableGeometry">availableGeometry</keyword>
+        <keyword ref="qdesktopwidget.html#isVirtualDesktop">isVirtualDesktop</keyword>
+        <keyword ref="qdesktopwidget.html#numScreens">numScreens</keyword>
+        <keyword ref="qdesktopwidget.html#primaryScreen">primaryScreen</keyword>
+        <keyword ref="qdesktopwidget.html#resized">resized</keyword>
+        <keyword ref="qdesktopwidget.html#screen">screen</keyword>
+        <keyword ref="qdesktopwidget.html#screenGeometry">screenGeometry</keyword>
+        <keyword ref="qdesktopwidget.html#screenNumber">screenNumber</keyword>
+        <keyword ref="qdesktopwidget.html#workAreaResized">workAreaResized</keyword>
+        <section ref="qdesktopwidget-members.html" title="List of all members"/>
     </section>
     <section ref="qdial.html" title="QDial Class Reference">
         <keyword ref="qdial.html">QDial</keyword>
@@ -4340,27 +4497,11 @@
     </section>
     <section ref="qfsfileengine.html" title="QFSFileEngine Class Reference">
         <keyword ref="qfsfileengine.html">QFSFileEngine</keyword>
-        <keyword ref="qfsfileengine.html#caseSensitive">caseSensitive</keyword>
-        <keyword ref="qfsfileengine.html#copy">copy</keyword>
         <keyword ref="qfsfileengine.html#currentPath">currentPath</keyword>
         <keyword ref="qfsfileengine.html#drives">drives</keyword>
-        <keyword ref="qfsfileengine.html#entryList">entryList</keyword>
-        <keyword ref="qfsfileengine.html#fileName">fileName</keyword>
-        <keyword ref="qfsfileengine.html#fileTime">fileTime</keyword>
         <keyword ref="qfsfileengine.html#homePath">homePath</keyword>
-        <keyword ref="qfsfileengine.html#isRelativePath">isRelativePath</keyword>
-        <keyword ref="qfsfileengine.html#link">link</keyword>
-        <keyword ref="qfsfileengine.html#mkdir">mkdir</keyword>
-        <keyword ref="qfsfileengine.html#owner">owner</keyword>
-        <keyword ref="qfsfileengine.html#ownerId">ownerId</keyword>
-        <keyword ref="qfsfileengine.html#remove">remove</keyword>
-        <keyword ref="qfsfileengine.html#rename">rename</keyword>
-        <keyword ref="qfsfileengine.html#rmdir">rmdir</keyword>
         <keyword ref="qfsfileengine.html#rootPath">rootPath</keyword>
         <keyword ref="qfsfileengine.html#setCurrentPath">setCurrentPath</keyword>
-        <keyword ref="qfsfileengine.html#setPermissions">setPermissions</keyword>
-        <keyword ref="qfsfileengine.html#setSize">setSize</keyword>
-        <keyword ref="qfsfileengine.html#size">size</keyword>
         <keyword ref="qfsfileengine.html#tempPath">tempPath</keyword>
         <section ref="qfsfileengine-members.html" title="List of all members"/>
     </section>
@@ -4971,14 +5112,34 @@
         <keyword ref="qgraphicsscenecontextmenuevent.html#reason">reason</keyword>
         <keyword ref="qgraphicsscenecontextmenuevent.html#scenePos">scenePos</keyword>
         <keyword ref="qgraphicsscenecontextmenuevent.html#screenPos">screenPos</keyword>
-        <keyword ref="qgraphicsscenecontextmenuevent.html#setReason">setReason</keyword>
         <section ref="qgraphicsscenecontextmenuevent-members.html" title="List of all members"/>
+    </section>
+    <section ref="qgraphicsscenedragdropevent.html" title="QGraphicsSceneDragDropEvent Class Reference">
+        <keyword ref="qgraphicsscenedragdropevent.html">QGraphicsSceneDragDropEvent</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#acceptProposedAction">acceptProposedAction</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#buttons">buttons</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#dropAction">dropAction</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#mimeData">mimeData</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#modifiers">modifiers</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#pos">pos</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#possibleActions">possibleActions</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#proposedAction">proposedAction</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#scenePos">scenePos</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#screenPos">screenPos</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#setDropAction">setDropAction</keyword>
+        <keyword ref="qgraphicsscenedragdropevent.html#source">source</keyword>
+        <section ref="qgraphicsscenedragdropevent-members.html" title="List of all members"/>
     </section>
     <section ref="qgraphicssceneevent.html" title="QGraphicsSceneEvent Class Reference">
         <keyword ref="qgraphicssceneevent.html">QGraphicsSceneEvent</keyword>
-        <keyword ref="qgraphicssceneevent.html#setWidget">setWidget</keyword>
         <keyword ref="qgraphicssceneevent.html#widget">widget</keyword>
         <section ref="qgraphicssceneevent-members.html" title="List of all members"/>
+    </section>
+    <section ref="qgraphicsscenehelpevent.html" title="QGraphicsSceneHelpEvent Class Reference">
+        <keyword ref="qgraphicsscenehelpevent.html">QGraphicsSceneHelpEvent</keyword>
+        <keyword ref="qgraphicsscenehelpevent.html#scenePos">scenePos</keyword>
+        <keyword ref="qgraphicsscenehelpevent.html#screenPos">screenPos</keyword>
+        <section ref="qgraphicsscenehelpevent-members.html" title="List of all members"/>
     </section>
     <section ref="qgraphicsscenehoverevent.html" title="QGraphicsSceneHoverEvent Class Reference">
         <keyword ref="qgraphicsscenehoverevent.html">QGraphicsSceneHoverEvent</keyword>
@@ -5011,12 +5172,6 @@
         <keyword ref="qgraphicsscenewheelevent.html#pos">pos</keyword>
         <keyword ref="qgraphicsscenewheelevent.html#scenePos">scenePos</keyword>
         <keyword ref="qgraphicsscenewheelevent.html#screenPos">screenPos</keyword>
-        <keyword ref="qgraphicsscenewheelevent.html#setButtons">setButtons</keyword>
-        <keyword ref="qgraphicsscenewheelevent.html#setDelta">setDelta</keyword>
-        <keyword ref="qgraphicsscenewheelevent.html#setModifiers">setModifiers</keyword>
-        <keyword ref="qgraphicsscenewheelevent.html#setPos">setPos</keyword>
-        <keyword ref="qgraphicsscenewheelevent.html#setScenePos">setScenePos</keyword>
-        <keyword ref="qgraphicsscenewheelevent.html#setScreenPos">setScreenPos</keyword>
         <section ref="qgraphicsscenewheelevent-members.html" title="List of all members"/>
     </section>
     <section ref="qgraphicssimpletextitem.html" title="QGraphicsSimpleTextItem Class Reference">
@@ -7316,6 +7471,36 @@
         <keyword ref="qlocale.html#operator-eq-eq">operator==</keyword>
         <section ref="qlocale-members.html" title="List of all members"/>
     </section>
+    <section ref="qmacpasteboardmime.html" title="QMacPasteboardMime Class Reference">
+        <keyword ref="qmacpasteboardmime.html">QMacPasteboardMime</keyword>
+        <keyword ref="qmacpasteboardmime.html#all">all</keyword>
+        <keyword ref="qmacpasteboardmime.html#canConvert">canConvert</keyword>
+        <keyword ref="qmacpasteboardmime.html#convertFromMime">convertFromMime</keyword>
+        <keyword ref="qmacpasteboardmime.html#convertToMime">convertToMime</keyword>
+        <keyword ref="qmacpasteboardmime.html#convertor">convertor</keyword>
+        <keyword ref="qmacpasteboardmime.html#convertorName">convertorName</keyword>
+        <keyword ref="qmacpasteboardmime.html#flavorFor">flavorFor</keyword>
+        <keyword ref="qmacpasteboardmime.html#flavorToMime">flavorToMime</keyword>
+        <keyword ref="qmacpasteboardmime.html#mimeFor">mimeFor</keyword>
+        <section ref="qmacpasteboardmime-members.html" title="List of all members"/>
+    </section>
+    <section ref="qmacstyle.html" title="QMacStyle Class Reference">
+        <keyword ref="qmacstyle.html">QMacStyle</keyword>
+        <keyword ref="qmacstyle.html#FocusRectPolicy-enum">FocusRectPolicy</keyword>
+        <keyword ref="qmacstyle.html#FocusRectPolicy-enum">QMacStyle::FocusEnabled</keyword>
+        <keyword ref="qmacstyle.html#FocusRectPolicy-enum">QMacStyle::FocusDefault</keyword>
+        <keyword ref="qmacstyle.html#FocusRectPolicy-enum">QMacStyle::FocusDisabled</keyword>
+        <keyword ref="qmacstyle.html#WidgetSizePolicy-enum">WidgetSizePolicy</keyword>
+        <keyword ref="qmacstyle.html#WidgetSizePolicy-enum">QMacStyle::SizeMini</keyword>
+        <keyword ref="qmacstyle.html#WidgetSizePolicy-enum">QMacStyle::SizeDefault</keyword>
+        <keyword ref="qmacstyle.html#WidgetSizePolicy-enum">QMacStyle::SizeSmall</keyword>
+        <keyword ref="qmacstyle.html#WidgetSizePolicy-enum">QMacStyle::SizeLarge</keyword>
+        <keyword ref="qmacstyle.html#focusRectPolicy">focusRectPolicy</keyword>
+        <keyword ref="qmacstyle.html#setFocusRectPolicy">setFocusRectPolicy</keyword>
+        <keyword ref="qmacstyle.html#setWidgetSizePolicy">setWidgetSizePolicy</keyword>
+        <keyword ref="qmacstyle.html#widgetSizePolicy">widgetSizePolicy</keyword>
+        <section ref="qmacstyle-members.html" title="List of all members"/>
+    </section>
     <section ref="qmainwindow.html" title="QMainWindow Class Reference">
         <keyword ref="qmainwindow.html">QMainWindow</keyword>
         <keyword ref="qmainwindow.html#animated-prop">animated</keyword>
@@ -7513,7 +7698,6 @@
         <keyword ref="qmenu.html#insertSeparator">insertSeparator</keyword>
         <keyword ref="qmenu.html#isEmpty">isEmpty</keyword>
         <keyword ref="qmenu.html#isTearOffMenuVisible">isTearOffMenuVisible</keyword>
-        <keyword ref="qmenu.html#macMenu">macMenu</keyword>
         <keyword ref="qmenu.html#menuAction">menuAction</keyword>
         <keyword ref="qmenu.html#popup">popup</keyword>
         <keyword ref="qmenu.html#setActiveAction">setActiveAction</keyword>
@@ -7577,7 +7761,6 @@
         <keyword ref="qmenubar.html#hovered">hovered</keyword>
         <keyword ref="qmenubar.html#insertMenu">insertMenu</keyword>
         <keyword ref="qmenubar.html#insertSeparator">insertSeparator</keyword>
-        <keyword ref="qmenubar.html#macMenu">macMenu</keyword>
         <keyword ref="qmenubar.html#setActiveAction">setActiveAction</keyword>
         <keyword ref="qmenubar.html#triggered">triggered</keyword>
         <keyword ref="qmenubar-qt3.html#Separator-enum">Separator</keyword>
@@ -8318,7 +8501,6 @@
         <keyword ref="qpaintdevice.html#PaintDeviceMetric-enum">QPaintDevice::PdmDpiY</keyword>
         <keyword ref="qpaintdevice.html#PaintDeviceMetric-enum">QPaintDevice::PdmNumColors</keyword>
         <keyword ref="qpaintdevice.html#depth">depth</keyword>
-        <keyword ref="qpaintdevice.html#getDC">getDC</keyword>
         <keyword ref="qpaintdevice.html#height">height</keyword>
         <keyword ref="qpaintdevice.html#heightMM">heightMM</keyword>
         <keyword ref="qpaintdevice.html#logicalDpiX">logicalDpiX</keyword>
@@ -8329,7 +8511,6 @@
         <keyword ref="qpaintdevice.html#paintingActive">paintingActive</keyword>
         <keyword ref="qpaintdevice.html#physicalDpiX">physicalDpiX</keyword>
         <keyword ref="qpaintdevice.html#physicalDpiY">physicalDpiY</keyword>
-        <keyword ref="qpaintdevice.html#releaseDC">releaseDC</keyword>
         <keyword ref="qpaintdevice.html#width">width</keyword>
         <keyword ref="qpaintdevice.html#widthMM">widthMM</keyword>
         <keyword ref="qpaintdevice-qt3.html#x11AppCells">x11AppCells</keyword>
@@ -8843,6 +9024,8 @@
     <section ref="qpixmap.html" title="QPixmap Class Reference">
         <keyword ref="qpixmap.html">QPixmap</keyword>
         <keyword ref="qpixmap.html#HBitmapFormat-enum">HBitmapFormat</keyword>
+        <keyword ref="qpixmap.html#HBitmapFormat-enum">QPixmap::PremultipliedAlpha</keyword>
+        <keyword ref="qpixmap.html#HBitmapFormat-enum">QPixmap::NoAlpha</keyword>
         <keyword ref="qpixmap.html#alphaChannel">alphaChannel</keyword>
         <keyword ref="qpixmap.html#copy">copy</keyword>
         <keyword ref="qpixmap.html#createHeuristicMask">createHeuristicMask</keyword>
@@ -8865,7 +9048,6 @@
         <keyword ref="qpixmap.html#load">load</keyword>
         <keyword ref="qpixmap.html#loadFromData">loadFromData</keyword>
         <keyword ref="qpixmap.html#mask">mask</keyword>
-        <keyword ref="qpixmap.html#paintEngine">paintEngine</keyword>
         <keyword ref="qpixmap.html#rect">rect</keyword>
         <keyword ref="qpixmap.html#save">save</keyword>
         <keyword ref="qpixmap.html#scaled">scaled</keyword>
@@ -11708,6 +11890,7 @@
         <keyword ref="qstyleoptiongroupbox.html#StyleOptionType-enum">QStyleOptionGroupBox::Type</keyword>
         <keyword ref="qstyleoptiongroupbox.html#StyleOptionVersion-enum">StyleOptionVersion</keyword>
         <keyword ref="qstyleoptiongroupbox.html#StyleOptionVersion-enum">QStyleOptionGroupBox::Version</keyword>
+        <keyword ref="qstyleoptiongroupbox.html#features-var">features</keyword>
         <keyword ref="qstyleoptiongroupbox.html#lineWidth-var">lineWidth</keyword>
         <keyword ref="qstyleoptiongroupbox.html#midLineWidth-var">midLineWidth</keyword>
         <keyword ref="qstyleoptiongroupbox.html#text-var">text</keyword>
@@ -12355,7 +12538,6 @@
         <keyword ref="qt.html#DropAction-enum">Qt::MoveAction</keyword>
         <keyword ref="qt.html#DropAction-enum">Qt::IgnoreAction</keyword>
         <keyword ref="qt.html#DropAction-enum">Qt::LinkAction</keyword>
-        <keyword ref="qt.html#DropAction-enum">Qt::TargetMoveAction</keyword>
         <keyword ref="qt.html#FillRule-enum">FillRule</keyword>
         <keyword ref="qt.html#FillRule-enum">Qt::OddEvenFill</keyword>
         <keyword ref="qt.html#FillRule-enum">Qt::WindingFill</keyword>
@@ -16014,6 +16196,17 @@
         <keyword ref="qwidgetitem.html#widget">widget</keyword>
         <section ref="qwidgetitem-members.html" title="List of all members"/>
     </section>
+    <section ref="qwindowsmime.html" title="QWindowsMime Class Reference">
+        <keyword ref="qwindowsmime.html">QWindowsMime</keyword>
+        <keyword ref="qwindowsmime.html#canConvertFromMime">canConvertFromMime</keyword>
+        <keyword ref="qwindowsmime.html#canConvertToMime">canConvertToMime</keyword>
+        <keyword ref="qwindowsmime.html#convertFromMime">convertFromMime</keyword>
+        <keyword ref="qwindowsmime.html#convertToMime">convertToMime</keyword>
+        <keyword ref="qwindowsmime.html#formatsForMime">formatsForMime</keyword>
+        <keyword ref="qwindowsmime.html#mimeForFormat">mimeForFormat</keyword>
+        <keyword ref="qwindowsmime.html#registerMimeType">registerMimeType</keyword>
+        <section ref="qwindowsmime-members.html" title="List of all members"/>
+    </section>
     <section ref="qwindowsstyle.html" title="QWindowsStyle Class Reference">
         <keyword ref="qwindowsstyle.html">QWindowsStyle</keyword>
         <section ref="qwindowsstyle-members.html" title="List of all members"/>
@@ -16545,6 +16738,8 @@
         <keyword ref="qtglobal.html#qRound">qRound</keyword>
         <keyword ref="qtglobal.html#qVersion">qVersion</keyword>
         <keyword ref="qtglobal.html#qWarning">qWarning</keyword>
+        <keyword ref="qtglobal.html#qrand">qrand</keyword>
+        <keyword ref="qtglobal.html#qsrand">qsrand</keyword>
         <keyword ref="qtglobal.html#qt_set_sequence_auto_mnemonic">qt_set_sequence_auto_mnemonic</keyword>
         <keyword ref="qtglobal.html#QT_POINTER_SIZE">QT_POINTER_SIZE</keyword>
         <keyword ref="qtglobal.html#QT_TRANSLATE_NOOP">QT_TRANSLATE_NOOP</keyword>
@@ -16622,6 +16817,9 @@
         <keyword ref="qtplugin.html#Q_EXPORT_PLUGIN2">Q_EXPORT_PLUGIN2</keyword>
         <keyword ref="qtplugin.html#Q_IMPORT_PLUGIN">Q_IMPORT_PLUGIN</keyword>
     </section>
+    <section ref="qaxserver-demo-simple.html" title="A standard ActiveX and the &quot;simple&quot; ActiveQt widget">
+        <keyword ref="qaxserver-demo-simple.html">A standard ActiveX and the &quot;simple&quot; ActiveQt widget</keyword>
+    </section>
     <section ref="aboutqt.html" title="About Qt">
         <keyword ref="aboutqt.html">About Qt</keyword>
     </section>
@@ -16634,8 +16832,14 @@
     <section ref="accessibility.html" title="Accessibility Classes">
         <keyword ref="accessibility.html">Accessibility Classes</keyword>
     </section>
+    <section ref="activeqt.html" title="ActiveQt Framework">
+        <keyword ref="activeqt.html">ActiveQt Framework</keyword>
+    </section>
     <section ref="qtopiacore-accel.html" title="Adding an Accelerated Graphics Driver in Qtopia Core">
         <keyword ref="qtopiacore-accel.html">Adding an Accelerated Graphics Driver in Qtopia Core</keyword>
+    </section>
+    <section ref="richtext-advanced-processing.html" title="Advanced Rich Text Processing">
+        <keyword ref="richtext-advanced-processing.html">Advanced Rich Text Processing</keyword>
     </section>
     <section ref="advanced.html" title="Advanced Widgets">
         <keyword ref="advanced.html">Advanced Widgets</keyword>
@@ -16799,6 +17003,12 @@
     <section ref="bughowto.html" title="How to Report a Bug">
         <keyword ref="bughowto.html">How to Report a Bug</keyword>
     </section>
+    <section ref="activeqt-idc.html" title="IDC - The Interface Description Compiler (ActiveQt)">
+        <keyword ref="activeqt-idc.html">IDC - The Interface Description Compiler (ActiveQt)</keyword>
+    </section>
+    <section ref="atomic-operations.html" title="Implementing Atomic Operations">
+        <keyword ref="atomic-operations.html">Implementing Atomic Operations</keyword>
+    </section>
     <section ref="shared.html" title="Implicitly Shared Classes">
         <keyword ref="shared.html">Implicitly Shared Classes</keyword>
     </section>
@@ -16835,8 +17045,8 @@
     <section ref="focus.html" title="Keyboard Focus">
         <keyword ref="focus.html">Keyboard Focus</keyword>
     </section>
-    <section ref="known-issues.html" title="Known Issues in %VERSION%">
-        <keyword ref="known-issues.html">Known Issues in %VERSION%</keyword>
+    <section ref="known-issues.html" title="Known Issues in 4.2.3">
+        <keyword ref="known-issues.html">Known Issues in 4.2.3</keyword>
     </section>
     <section ref="layout.html" title="Layout Classes">
         <keyword ref="layout.html">Layout Classes</keyword>
@@ -16864,6 +17074,9 @@
     </section>
     <section ref="functions.html" title="Member Function Index">
         <keyword ref="functions.html">Member Function Index</keyword>
+    </section>
+    <section ref="qaxserver-demo-menus.html" title="Menubar Merging">
+        <keyword ref="qaxserver-demo-menus.html">Menubar Merging</keyword>
     </section>
     <section ref="metaobjects.html" title="Meta-Object System">
         <keyword ref="metaobjects.html">Meta-Object System</keyword>
@@ -16900,6 +17113,9 @@
     </section>
     <section ref="objecttrees.html" title="Object Trees and Object Ownership">
         <keyword ref="objecttrees.html">Object Trees and Object Ownership</keyword>
+    </section>
+    <section ref="qaxserver-demo-opengl.html" title="OpenGL in an HTML page">
+        <keyword ref="qaxserver-demo-opengl.html">OpenGL in an HTML page</keyword>
     </section>
     <section ref="organizers.html" title="Organizers">
         <keyword ref="organizers.html">Organizers</keyword>
@@ -16949,6 +17165,9 @@
     <section ref="qpl.html" title="Q Public License (QPL)">
         <keyword ref="qpl.html">Q Public License (QPL)</keyword>
     </section>
+    <section ref="qaxcontainer.html" title="QAxContainer Module">
+        <keyword ref="qaxcontainer.html">QAxContainer Module</keyword>
+    </section>
     <section ref="qaxserver.html" title="QAxServer Module">
         <keyword ref="qaxserver.html">QAxServer Module</keyword>
     </section>
@@ -16982,6 +17201,9 @@
     <section ref="editions.html" title="Qt Editions">
         <keyword ref="editions.html">Qt Editions</keyword>
     </section>
+    <section ref="examples.html" title="Qt Examples">
+        <keyword ref="examples.html">Qt Examples</keyword>
+    </section>
     <section ref="linguist-manual.html" title="Qt Linguist Manual">
         <keyword ref="linguist-manual.html">Qt Linguist Manual</keyword>
     </section>
@@ -16997,8 +17219,14 @@
     <section ref="stylesheet.html" title="Qt Style Sheets">
         <keyword ref="stylesheet.html">Qt Style Sheets</keyword>
     </section>
+    <section ref="tutorial.html" title="Qt Tutorial">
+        <keyword ref="tutorial.html">Qt Tutorial</keyword>
+    </section>
     <section ref="gallery.html" title="Qt Widget Gallery">
         <keyword ref="gallery.html">Qt Widget Gallery</keyword>
+    </section>
+    <section ref="qaxserver-demo-hierarchy.html" title="Qt Widget Hierarchy">
+        <keyword ref="qaxserver-demo-hierarchy.html">Qt Widget Hierarchy</keyword>
     </section>
     <section ref="classes.html" title="Qt's Classes">
         <keyword ref="classes.html">Qt's Classes</keyword>
@@ -17141,8 +17369,14 @@
     <section ref="dialogs.html" title="Standard Dialog Classes">
         <keyword ref="dialogs.html">Standard Dialog Classes</keyword>
     </section>
+    <section ref="qaxserver-demo-wrapper.html" title="Standard Qt widgets in an HTML page">
+        <keyword ref="qaxserver-demo-wrapper.html">Standard Qt widgets in an HTML page</keyword>
+    </section>
     <section ref="richtext-html-subset.html" title="Supported HTML Subset">
         <keyword ref="richtext-html-subset.html">Supported HTML Subset</keyword>
+    </section>
+    <section ref="activeqt-testcon.html" title="testcon - An ActiveX Test Container (ActiveQt)">
+        <keyword ref="activeqt-testcon.html">testcon - An ActiveX Test Container (ActiveQt)</keyword>
     </section>
     <section ref="qtopiacore-testingframebuffer.html" title="Testing the Linux Framebuffer">
         <keyword ref="qtopiacore-testingframebuffer.html">Testing the Linux Framebuffer</keyword>
@@ -17158,6 +17392,12 @@
     </section>
     <section ref="coordsys.html" title="The Coordinate System">
         <keyword ref="coordsys.html">The Coordinate System</keyword>
+    </section>
+    <section ref="activeqt-dumpcpp.html" title="The dumpcpp Tool (ActiveQt)">
+        <keyword ref="activeqt-dumpcpp.html">The dumpcpp Tool (ActiveQt)</keyword>
+    </section>
+    <section ref="activeqt-dumpdoc.html" title="The dumpdoc Tool (ActiveQt)">
+        <keyword ref="activeqt-dumpdoc.html">The dumpdoc Tool (ActiveQt)</keyword>
     </section>
     <section ref="graphicsview.html" title="The Graphics View Framework">
         <keyword ref="graphicsview.html">The Graphics View Framework</keyword>
@@ -17228,6 +17468,9 @@
     <section ref="codec-tscii.html" title="TSCII Text Codec">
         <keyword ref="codec-tscii.html">TSCII Text Codec</keyword>
     </section>
+    <section ref="qaxserver-demo-multiple.html" title="Two Simple Qt Widgets">
+        <keyword ref="qaxserver-demo-multiple.html">Two Simple Qt Widgets</keyword>
+    </section>
     <section ref="unicode.html" title="Unicode">
         <keyword ref="unicode.html">Unicode</keyword>
     </section>
@@ -17281,17 +17524,68 @@
     </section>
 </section>
 <section ref="examples.html" title="Tutorial &amp; Examples">
+    <section ref="opengl-2dpainting.html" title="2D Painting Example">
+        <keyword ref="opengl-2dpainting.html">2D Painting Example</keyword>
+    </section>
     <section ref="demos-chip.html" title="40000 Chips">
         <keyword ref="demos-chip.html">40000 Chips</keyword>
+    </section>
+    <section ref="qtopiacore-svgalib.html" title="Accelerated Screen Driver Example">
+        <keyword ref="qtopiacore-svgalib.html">Accelerated Screen Driver Example</keyword>
     </section>
     <section ref="demos-affine.html" title="Affine Transformations">
         <keyword ref="demos-affine.html">Affine Transformations</keyword>
     </section>
+    <section ref="widgets-analogclock.html" title="Analog Clock Example">
+        <keyword ref="widgets-analogclock.html">Analog Clock Example</keyword>
+    </section>
+    <section ref="mainwindows-application.html" title="Application Example">
+        <keyword ref="mainwindows-application.html">Application Example</keyword>
+    </section>
+    <section ref="linguist-arrowpad.html" title="Arrow Pad Example">
+        <keyword ref="linguist-arrowpad.html">Arrow Pad Example</keyword>
+    </section>
     <section ref="demos-arthurplugin.html" title="Arthur Plugin">
         <keyword ref="demos-arthurplugin.html">Arthur Plugin</keyword>
     </section>
+    <section ref="painting-basicdrawing.html" title="Basic Drawing Example">
+        <keyword ref="painting-basicdrawing.html">Basic Drawing Example</keyword>
+    </section>
+    <section ref="layouts-basiclayouts.html" title="Basic Layouts Example">
+        <keyword ref="layouts-basiclayouts.html">Basic Layouts Example</keyword>
+    </section>
+    <section ref="itemviews-basicsortfiltermodel.html" title="Basic Sort/Filter Model Example">
+        <keyword ref="itemviews-basicsortfiltermodel.html">Basic Sort/Filter Model Example</keyword>
+    </section>
+    <section ref="network-blockingfortuneclient.html" title="Blocking Fortune Client Example">
+        <keyword ref="network-blockingfortuneclient.html">Blocking Fortune Client Example</keyword>
+    </section>
     <section ref="demos-books.html" title="Books">
         <keyword ref="demos-books.html">Books</keyword>
+    </section>
+    <section ref="layouts-borderlayout.html" title="Border Layout Example">
+        <keyword ref="layouts-borderlayout.html">Border Layout Example</keyword>
+    </section>
+    <section ref="network-broadcastreceiver.html" title="Broadcast Receiver Example">
+        <keyword ref="network-broadcastreceiver.html">Broadcast Receiver Example</keyword>
+    </section>
+    <section ref="network-broadcastsender.html" title="Broadcast Sender Example">
+        <keyword ref="network-broadcastsender.html">Broadcast Sender Example</keyword>
+    </section>
+    <section ref="sql-cachedtable.html" title="Cached Table Example">
+        <keyword ref="sql-cachedtable.html">Cached Table Example</keyword>
+    </section>
+    <section ref="designer-calculatorbuilder.html" title="Calculator Builder Example">
+        <keyword ref="designer-calculatorbuilder.html">Calculator Builder Example</keyword>
+    </section>
+    <section ref="widgets-calculator.html" title="Calculator Example">
+        <keyword ref="widgets-calculator.html">Calculator Example</keyword>
+    </section>
+    <section ref="designer-calculatorform.html" title="Calculator Form Example">
+        <keyword ref="designer-calculatorform.html">Calculator Form Example</keyword>
+    </section>
+    <section ref="richtext-calendar.html" title="Calendar Example">
+        <keyword ref="richtext-calendar.html">Calendar Example</keyword>
     </section>
     <section ref="qtestlib-tutorial1.html" title="Chapter 1: Writing a Unit Test">
         <keyword ref="qtestlib-tutorial1.html">Chapter 1: Writing a Unit Test</keyword>
@@ -17305,23 +17599,329 @@
     <section ref="qtestlib-tutorial4.html" title="Chapter 4: Replaying GUI Events">
         <keyword ref="qtestlib-tutorial4.html">Chapter 4: Replaying GUI Events</keyword>
     </section>
+    <section ref="widgets-charactermap.html" title="Character Map Example">
+        <keyword ref="widgets-charactermap.html">Character Map Example</keyword>
+    </section>
+    <section ref="itemviews-chart.html" title="Chart Example">
+        <keyword ref="itemviews-chart.html">Chart Example</keyword>
+    </section>
+    <section ref="network-chat.html" title="Chat Example">
+        <keyword ref="network-chat.html">Chat Example</keyword>
+    </section>
+    <section ref="tools-codecs.html" title="Codecs Example">
+        <keyword ref="tools-codecs.html">Codecs Example</keyword>
+    </section>
+    <section ref="graphicsview-collidingmice.html" title="Colliding Mice Example">
+        <keyword ref="graphicsview-collidingmice.html">Colliding Mice Example</keyword>
+    </section>
     <section ref="painting-separations.html" title="Color Separations Example">
         <keyword ref="painting-separations.html">Color Separations Example</keyword>
+    </section>
+    <section ref="activeqt-comapp.html" title="COM App Example (ActiveQt)">
+        <keyword ref="activeqt-comapp.html">COM App Example (ActiveQt)</keyword>
+    </section>
+    <section ref="tools-completer.html" title="Completer Example">
+        <keyword ref="tools-completer.html">Completer Example</keyword>
     </section>
     <section ref="demos-composition.html" title="Composition Modes">
         <keyword ref="demos-composition.html">Composition Modes</keyword>
     </section>
+    <section ref="painting-concentriccircles.html" title="Concentric Circles Example">
+        <keyword ref="painting-concentriccircles.html">Concentric Circles Example</keyword>
+    </section>
+    <section ref="dialogs-configdialog.html" title="Config Dialog Example">
+        <keyword ref="dialogs-configdialog.html">Config Dialog Example</keyword>
+    </section>
+    <section ref="designer-containerextension.html" title="Container Extension Example">
+        <keyword ref="designer-containerextension.html">Container Extension Example</keyword>
+    </section>
+    <section ref="tools-customcompleter.html" title="Custom Completer Example">
+        <keyword ref="tools-customcompleter.html">Custom Completer Example</keyword>
+    </section>
+    <section ref="itemviews-customsortfiltermodel.html" title="Custom Sort/Filter Model Example">
+        <keyword ref="itemviews-customsortfiltermodel.html">Custom Sort/Filter Model Example</keyword>
+    </section>
+    <section ref="designer-customwidgetplugin.html" title="Custom Widget Plugin Example">
+        <keyword ref="designer-customwidgetplugin.html">Custom Widget Plugin Example</keyword>
+    </section>
+    <section ref="widgets-digitalclock.html" title="Digital Clock Example">
+        <keyword ref="widgets-digitalclock.html">Digital Clock Example</keyword>
+    </section>
+    <section ref="itemviews-dirview.html" title="Dir View Example">
+        <keyword ref="itemviews-dirview.html">Dir View Example</keyword>
+    </section>
+    <section ref="mainwindows-dockwidgets.html" title="Dock Widgets Example">
+        <keyword ref="mainwindows-dockwidgets.html">Dock Widgets Example</keyword>
+    </section>
+    <section ref="xml-dombookmarks.html" title="DOM Bookmarks Example">
+        <keyword ref="xml-dombookmarks.html">DOM Bookmarks Example</keyword>
+    </section>
+    <section ref="activeqt-dotnet.html" title="Dot Net Example (ActiveQt)">
+        <keyword ref="activeqt-dotnet.html">Dot Net Example (ActiveQt)</keyword>
+    </section>
+    <section ref="draganddrop-puzzle.html" title="Drag and Drop Puzzle Example">
+        <keyword ref="draganddrop-puzzle.html">Drag and Drop Puzzle Example</keyword>
+    </section>
+    <section ref="graphicsview-dragdroprobot.html" title="Drag and Drop Robot Example">
+        <keyword ref="graphicsview-dragdroprobot.html">Drag and Drop Robot Example</keyword>
+    </section>
+    <section ref="draganddrop-draggableicons.html" title="Draggable Icons Example">
+        <keyword ref="draganddrop-draggableicons.html">Draggable Icons Example</keyword>
+    </section>
+    <section ref="draganddrop-draggabletext.html" title="Draggable Text Example">
+        <keyword ref="draganddrop-draggabletext.html">Draggable Text Example</keyword>
+    </section>
+    <section ref="draganddrop-dropsite.html" title="Drop Site Example">
+        <keyword ref="draganddrop-dropsite.html">Drop Site Example</keyword>
+    </section>
+    <section ref="layouts-dynamiclayouts.html" title="Dynamic Layouts Example">
+        <keyword ref="layouts-dynamiclayouts.html">Dynamic Layouts Example</keyword>
+    </section>
+    <section ref="graphicsview-elasticnodes.html" title="Elastic Nodes Example">
+        <keyword ref="graphicsview-elasticnodes.html">Elastic Nodes Example</keyword>
+    </section>
+    <section ref="dialogs-extension.html" title="Extension Example">
+        <keyword ref="dialogs-extension.html">Extension Example</keyword>
+    </section>
+    <section ref="dialogs-findfiles.html" title="Find Files Example">
+        <keyword ref="dialogs-findfiles.html">Find Files Example</keyword>
+    </section>
+    <section ref="layouts-flowlayout.html" title="Flow Layout Example">
+        <keyword ref="layouts-flowlayout.html">Flow Layout Example</keyword>
+    </section>
+    <section ref="painting-fontsampler.html" title="Font Sampler Example">
+        <keyword ref="painting-fontsampler.html">Font Sampler Example</keyword>
+    </section>
+    <section ref="network-fortuneclient.html" title="Fortune Client Example">
+        <keyword ref="network-fortuneclient.html">Fortune Client Example</keyword>
+    </section>
+    <section ref="network-fortuneserver.html" title="Fortune Server Example">
+        <keyword ref="network-fortuneserver.html">Fortune Server Example</keyword>
+    </section>
+    <section ref="opengl-framebufferobject2.html" title="Framebuffer Object 2 Example">
+        <keyword ref="opengl-framebufferobject2.html">Framebuffer Object 2 Example</keyword>
+    </section>
+    <section ref="opengl-framebufferobject.html" title="Framebuffer Object Example">
+        <keyword ref="opengl-framebufferobject.html">Framebuffer Object Example</keyword>
+    </section>
+    <section ref="draganddrop-fridgemagnets.html" title="Fridge Magnets Example">
+        <keyword ref="draganddrop-fridgemagnets.html">Fridge Magnets Example</keyword>
+    </section>
+    <section ref="network-ftp.html" title="FTP Example">
+        <keyword ref="network-ftp.html">FTP Example</keyword>
+    </section>
+    <section ref="opengl-grabber.html" title="Grabber Example">
+        <keyword ref="opengl-grabber.html">Grabber Example</keyword>
+    </section>
     <section ref="demos-gradients.html" title="Gradients">
         <keyword ref="demos-gradients.html">Gradients</keyword>
+    </section>
+    <section ref="widgets-groupbox.html" title="Group Box Example">
+        <keyword ref="widgets-groupbox.html">Group Box Example</keyword>
+    </section>
+    <section ref="opengl-hellogl.html" title="Hello GL Example">
+        <keyword ref="opengl-hellogl.html">Hello GL Example</keyword>
+    </section>
+    <section ref="linguist-hellotr.html" title="Hello tr() Example">
+        <keyword ref="linguist-hellotr.html">Hello tr() Example</keyword>
+    </section>
+    <section ref="activeqt-hierarchy.html" title="Hierarchy Example (ActiveQt)">
+        <keyword ref="activeqt-hierarchy.html">Hierarchy Example (ActiveQt)</keyword>
+    </section>
+    <section ref="network-http.html" title="HTTP Example">
+        <keyword ref="network-http.html">HTTP Example</keyword>
+    </section>
+    <section ref="tools-i18n.html" title="I18N Example">
+        <keyword ref="tools-i18n.html">I18N Example</keyword>
+    </section>
+    <section ref="widgets-icons.html" title="Icons Example">
+        <keyword ref="widgets-icons.html">Icons Example</keyword>
+    </section>
+    <section ref="painting-imagecomposition.html" title="Image Composition Example">
+        <keyword ref="painting-imagecomposition.html">Image Composition Example</keyword>
+    </section>
+    <section ref="widgets-imageviewer.html" title="Image Viewer Example">
+        <keyword ref="widgets-imageviewer.html">Image Viewer Example</keyword>
     </section>
     <section ref="demos-interview.html" title="Interview">
         <keyword ref="demos-interview.html">Interview</keyword>
     </section>
+    <section ref="itemviews-puzzle.html" title="Item Views Puzzle Example">
+        <keyword ref="itemviews-puzzle.html">Item Views Puzzle Example</keyword>
+    </section>
+    <section ref="widgets-lineedits.html" title="Line Edits Example">
+        <keyword ref="widgets-lineedits.html">Line Edits Example</keyword>
+    </section>
+    <section ref="network-loopback.html" title="Loopback Example">
+        <keyword ref="network-loopback.html">Loopback Example</keyword>
+    </section>
     <section ref="demos-mainwindow.html" title="Main Window">
         <keyword ref="demos-mainwindow.html">Main Window</keyword>
     </section>
+    <section ref="threads-mandelbrot.html" title="Mandelbrot Example">
+        <keyword ref="threads-mandelbrot.html">Mandelbrot Example</keyword>
+    </section>
+    <section ref="mainwindows-mdi.html" title="MDI Example">
+        <keyword ref="mainwindows-mdi.html">MDI Example</keyword>
+    </section>
+    <section ref="mainwindows-menus.html" title="Menus Example">
+        <keyword ref="mainwindows-menus.html">Menus Example</keyword>
+    </section>
+    <section ref="activeqt-menus.html" title="Menus Example (ActiveQt)">
+        <keyword ref="activeqt-menus.html">Menus Example (ActiveQt)</keyword>
+    </section>
+    <section ref="qtopiacore-mousecalibration.html" title="Mouse Calibration Example">
+        <keyword ref="qtopiacore-mousecalibration.html">Mouse Calibration Example</keyword>
+    </section>
+    <section ref="widgets-movie.html" title="Movie Example">
+        <keyword ref="widgets-movie.html">Movie Example</keyword>
+    </section>
+    <section ref="activeqt-multiple.html" title="Multiple Example (ActiveQt)">
+        <keyword ref="activeqt-multiple.html">Multiple Example (ActiveQt)</keyword>
+    </section>
+    <section ref="activeqt-opengl.html" title="OpenGL Example (ActiveQt)">
+        <keyword ref="activeqt-opengl.html">OpenGL Example (ActiveQt)</keyword>
+    </section>
+    <section ref="richtext-orderform.html" title="Order Form Example">
+        <keyword ref="richtext-orderform.html">Order Form Example</keyword>
+    </section>
+    <section ref="opengl-overpainting.html" title="Overpainting Example">
+        <keyword ref="opengl-overpainting.html">Overpainting Example</keyword>
+    </section>
+    <section ref="painting-painterpaths.html" title="Painter Paths Example">
+        <keyword ref="painting-painterpaths.html">Painter Paths Example</keyword>
+    </section>
     <section ref="demos-pathstroke.html" title="Path Stroking">
         <keyword ref="demos-pathstroke.html">Path Stroking</keyword>
+    </section>
+    <section ref="opengl-pbuffers2.html" title="Pixel Buffers 2 Example">
+        <keyword ref="opengl-pbuffers2.html">Pixel Buffers 2 Example</keyword>
+    </section>
+    <section ref="opengl-pbuffers.html" title="Pixel Buffers Example">
+        <keyword ref="opengl-pbuffers.html">Pixel Buffers Example</keyword>
+    </section>
+    <section ref="itemviews-pixelator.html" title="Pixelator Example">
+        <keyword ref="itemviews-pixelator.html">Pixelator Example</keyword>
+    </section>
+    <section ref="tools-plugandpaintplugins-basictools.html" title="Plug &amp; Paint Basic Tools Example">
+        <keyword ref="tools-plugandpaintplugins-basictools.html">Plug &amp; Paint Basic Tools Example</keyword>
+    </section>
+    <section ref="tools-plugandpaint.html" title="Plug &amp; Paint Example">
+        <keyword ref="tools-plugandpaint.html">Plug &amp; Paint Example</keyword>
+    </section>
+    <section ref="tools-plugandpaintplugins-extrafilters.html" title="Plug &amp; Paint Extra Filters Example">
+        <keyword ref="tools-plugandpaintplugins-extrafilters.html">Plug &amp; Paint Extra Filters Example</keyword>
+    </section>
+    <section ref="graphicsview-portedasteroids.html" title="Ported Asteroids Example">
+        <keyword ref="graphicsview-portedasteroids.html">Ported Asteroids Example</keyword>
+    </section>
+    <section ref="graphicsview-portedcanvas.html" title="Ported Canvas Example">
+        <keyword ref="graphicsview-portedcanvas.html">Ported Canvas Example</keyword>
+    </section>
+    <section ref="tools-qtdemo.html" title="Qt Demo Example">
+        <keyword ref="tools-qtdemo.html">Qt Demo Example</keyword>
+    </section>
+    <section ref="tutorial-t1.html" title="Qt Tutorial 1 - Hello World!">
+        <keyword ref="tutorial-t1.html">Qt Tutorial 1 - Hello World!</keyword>
+    </section>
+    <section ref="tutorial-t10.html" title="Qt Tutorial 10 - Smooth as Silk">
+        <keyword ref="tutorial-t10.html">Qt Tutorial 10 - Smooth as Silk</keyword>
+    </section>
+    <section ref="tutorial-t11.html" title="Qt Tutorial 11 - Giving It a Shot">
+        <keyword ref="tutorial-t11.html">Qt Tutorial 11 - Giving It a Shot</keyword>
+    </section>
+    <section ref="tutorial-t12.html" title="Qt Tutorial 12 - Hanging in the Air the Way Bricks Don't">
+        <keyword ref="tutorial-t12.html">Qt Tutorial 12 - Hanging in the Air the Way Bricks Don't</keyword>
+    </section>
+    <section ref="tutorial-t13.html" title="Qt Tutorial 13 - Game Over">
+        <keyword ref="tutorial-t13.html">Qt Tutorial 13 - Game Over</keyword>
+    </section>
+    <section ref="tutorial-t14.html" title="Qt Tutorial 14 - Facing the Wall">
+        <keyword ref="tutorial-t14.html">Qt Tutorial 14 - Facing the Wall</keyword>
+    </section>
+    <section ref="tutorial-t2.html" title="Qt Tutorial 2 - Calling it Quits">
+        <keyword ref="tutorial-t2.html">Qt Tutorial 2 - Calling it Quits</keyword>
+    </section>
+    <section ref="tutorial-t3.html" title="Qt Tutorial 3 - Family Values">
+        <keyword ref="tutorial-t3.html">Qt Tutorial 3 - Family Values</keyword>
+    </section>
+    <section ref="tutorial-t4.html" title="Qt Tutorial 4 - Let There Be Widgets">
+        <keyword ref="tutorial-t4.html">Qt Tutorial 4 - Let There Be Widgets</keyword>
+    </section>
+    <section ref="tutorial-t5.html" title="Qt Tutorial 5 - Building Blocks">
+        <keyword ref="tutorial-t5.html">Qt Tutorial 5 - Building Blocks</keyword>
+    </section>
+    <section ref="tutorial-t6.html" title="Qt Tutorial 6 - Building Blocks Galore!">
+        <keyword ref="tutorial-t6.html">Qt Tutorial 6 - Building Blocks Galore!</keyword>
+    </section>
+    <section ref="tutorial-t7.html" title="Qt Tutorial 7 - One Thing Leads to Another">
+        <keyword ref="tutorial-t7.html">Qt Tutorial 7 - One Thing Leads to Another</keyword>
+    </section>
+    <section ref="tutorial-t8.html" title="Qt Tutorial 8 - Preparing for Battle">
+        <keyword ref="tutorial-t8.html">Qt Tutorial 8 - Preparing for Battle</keyword>
+    </section>
+    <section ref="tutorial-t9.html" title="Qt Tutorial 9 - With Cannon You Can">
+        <keyword ref="tutorial-t9.html">Qt Tutorial 9 - With Cannon You Can</keyword>
+    </section>
+    <section ref="sql-querymodel.html" title="Query Model Example">
+        <keyword ref="sql-querymodel.html">Query Model Example</keyword>
+    </section>
+    <section ref="activeqt-qutlook.html" title="Qutlook Example (ActiveQt)">
+        <keyword ref="activeqt-qutlook.html">Qutlook Example (ActiveQt)</keyword>
+    </section>
+    <section ref="mainwindows-recentfiles.html" title="Recent Files Example">
+        <keyword ref="mainwindows-recentfiles.html">Recent Files Example</keyword>
+    </section>
+    <section ref="tools-regexp.html" title="Regular Expressions Example">
+        <keyword ref="tools-regexp.html">Regular Expressions Example</keyword>
+    </section>
+    <section ref="sql-relationaltablemodel.html" title="Relational Table Model Example">
+        <keyword ref="sql-relationaltablemodel.html">Relational Table Model Example</keyword>
+    </section>
+    <section ref="opengl-samplebuffers.html" title="Sample Buffers Example">
+        <keyword ref="opengl-samplebuffers.html">Sample Buffers Example</keyword>
+    </section>
+    <section ref="xml-saxbookmarks.html" title="SAX Bookmarks Example">
+        <keyword ref="xml-saxbookmarks.html">SAX Bookmarks Example</keyword>
+    </section>
+    <section ref="desktop-screenshot.html" title="Screenshot Example">
+        <keyword ref="desktop-screenshot.html">Screenshot Example</keyword>
+    </section>
+    <section ref="widgets-scribble.html" title="Scribble Example">
+        <keyword ref="widgets-scribble.html">Scribble Example</keyword>
+    </section>
+    <section ref="mainwindows-sdi.html" title="SDI Example">
+        <keyword ref="mainwindows-sdi.html">SDI Example</keyword>
+    </section>
+    <section ref="threads-semaphores.html" title="Semaphores Example">
+        <keyword ref="threads-semaphores.html">Semaphores Example</keyword>
+    </section>
+    <section ref="tools-settingseditor.html" title="Settings Editor Example">
+        <keyword ref="tools-settingseditor.html">Settings Editor Example</keyword>
+    </section>
+    <section ref="widgets-shapedclock.html" title="Shaped Clock Example">
+        <keyword ref="widgets-shapedclock.html">Shaped Clock Example</keyword>
+    </section>
+    <section ref="itemviews-simpledommodel.html" title="Simple DOM Model Example">
+        <keyword ref="itemviews-simpledommodel.html">Simple DOM Model Example</keyword>
+    </section>
+    <section ref="activeqt-simple.html" title="Simple Example (ActiveQt)">
+        <keyword ref="activeqt-simple.html">Simple Example (ActiveQt)</keyword>
+    </section>
+    <section ref="assistant-simpletextviewer.html" title="Simple Text Viewer Example">
+        <keyword ref="assistant-simpletextviewer.html">Simple Text Viewer Example</keyword>
+    </section>
+    <section ref="itemviews-simpletreemodel.html" title="Simple Tree Model Example">
+        <keyword ref="itemviews-simpletreemodel.html">Simple Tree Model Example</keyword>
+    </section>
+    <section ref="widgets-sliders.html" title="Sliders Example">
+        <keyword ref="widgets-sliders.html">Sliders Example</keyword>
+    </section>
+    <section ref="itemviews-spinboxdelegate.html" title="Spin Box Delegate Example">
+        <keyword ref="itemviews-spinboxdelegate.html">Spin Box Delegate Example</keyword>
+    </section>
+    <section ref="widgets-spinboxes.html" title="Spin Boxes Example">
+        <keyword ref="widgets-spinboxes.html">Spin Boxes Example</keyword>
     </section>
     <section ref="demos-spreadsheet.html" title="Spreadsheet">
         <keyword ref="demos-spreadsheet.html">Spreadsheet</keyword>
@@ -17329,11 +17929,80 @@
     <section ref="demos-sqlbrowser.html" title="SQL Browser">
         <keyword ref="demos-sqlbrowser.html">SQL Browser</keyword>
     </section>
+    <section ref="dialogs-standarddialogs.html" title="Standard Dialogs Example">
+        <keyword ref="dialogs-standarddialogs.html">Standard Dialogs Example</keyword>
+    </section>
+    <section ref="widgets-stylesheet.html" title="Style Sheet Example">
+        <keyword ref="widgets-stylesheet.html">Style Sheet Example</keyword>
+    </section>
+    <section ref="widgets-styles.html" title="Styles Example">
+        <keyword ref="widgets-styles.html">Styles Example</keyword>
+    </section>
+    <section ref="painting-svgviewer.html" title="SVG Viewer Example">
+        <keyword ref="painting-svgviewer.html">SVG Viewer Example</keyword>
+    </section>
+    <section ref="richtext-syntaxhighlighter.html" title="Syntax Highlighter Example">
+        <keyword ref="richtext-syntaxhighlighter.html">Syntax Highlighter Example</keyword>
+    </section>
+    <section ref="desktop-systray.html" title="System Tray Icon Example">
+        <keyword ref="desktop-systray.html">System Tray Icon Example</keyword>
+    </section>
+    <section ref="dialogs-tabdialog.html" title="Tab Dialog Example">
+        <keyword ref="dialogs-tabdialog.html">Tab Dialog Example</keyword>
+    </section>
+    <section ref="sql-tablemodel.html" title="Table Model Example">
+        <keyword ref="sql-tablemodel.html">Table Model Example</keyword>
+    </section>
+    <section ref="designer-taskmenuextension.html" title="Task Menu Extension Example">
+        <keyword ref="designer-taskmenuextension.html">Task Menu Extension Example</keyword>
+    </section>
+    <section ref="widgets-tetrix.html" title="Tetrix Example">
+        <keyword ref="widgets-tetrix.html">Tetrix Example</keyword>
+    </section>
     <section ref="demos-textedit.html" title="Text Edit">
         <keyword ref="demos-textedit.html">Text Edit</keyword>
     </section>
+    <section ref="opengl-textures.html" title="Textures Example">
+        <keyword ref="opengl-textures.html">Textures Example</keyword>
+    </section>
+    <section ref="network-threadedfortuneserver.html" title="Threaded Fortune Server Example">
+        <keyword ref="network-threadedfortuneserver.html">Threaded Fortune Server Example</keyword>
+    </section>
+    <section ref="widgets-tooltips.html" title="Tooltips Example">
+        <keyword ref="widgets-tooltips.html">Tooltips Example</keyword>
+    </section>
+    <section ref="network-torrent.html" title="Torrent Example">
+        <keyword ref="network-torrent.html">Torrent Example</keyword>
+    </section>
+    <section ref="painting-transformations.html" title="Transformations Example">
+        <keyword ref="painting-transformations.html">Transformations Example</keyword>
+    </section>
+    <section ref="linguist-trollprint.html" title="Troll Print Example">
+        <keyword ref="linguist-trollprint.html">Troll Print Example</keyword>
+    </section>
     <section ref="demos-deform.html" title="Vector Deformation">
         <keyword ref="demos-deform.html">Vector Deformation</keyword>
+    </section>
+    <section ref="threads-waitconditions.html" title="Wait Conditions Example">
+        <keyword ref="threads-waitconditions.html">Wait Conditions Example</keyword>
+    </section>
+    <section ref="activeqt-webbrowser.html" title="Web Browser Example (ActiveQt)">
+        <keyword ref="activeqt-webbrowser.html">Web Browser Example (ActiveQt)</keyword>
+    </section>
+    <section ref="widgets-wiggly.html" title="Wiggly Example">
+        <keyword ref="widgets-wiggly.html">Wiggly Example</keyword>
+    </section>
+    <section ref="widgets-windowflags.html" title="Window Flags Example">
+        <keyword ref="widgets-windowflags.html">Window Flags Example</keyword>
+    </section>
+    <section ref="designer-worldtimeclockbuilder.html" title="World Time Clock Builder Example">
+        <keyword ref="designer-worldtimeclockbuilder.html">World Time Clock Builder Example</keyword>
+    </section>
+    <section ref="designer-worldtimeclockplugin.html" title="World Time Clock Plugin Example">
+        <keyword ref="designer-worldtimeclockplugin.html">World Time Clock Plugin Example</keyword>
+    </section>
+    <section ref="activeqt-wrapper.html" title="Wrapper Example (ActiveQt)">
+        <keyword ref="activeqt-wrapper.html">Wrapper Example (ActiveQt)</keyword>
     </section>
 </section>
 </DCF>

@@ -61,27 +61,25 @@ QAppointmentSqlIO::QAppointmentSqlIO(QObject *parent)
             "repeatfrequency, repeatenddate, "
             "repeatweekflags) VALUES (:i, :context, :d, :l, :s, :e, :a, :stz, "
             ":at, :ad, :rr, :rf, :re, :rw)"),
-            appointmentByRowValid(false),
+            lastAppointmentStatus(Empty),
+            lastRow(-1),
             rType(QAppointmentModel::AnyDuration),
             mainTable("appointments"),
             catTable("appointmentcategories"),
             customTable("appointmentcustom"),
-            exceptionTable("appointmentexceptions")
+            exceptionTable("appointmentexceptions"),
+            appointmentQuery("SELECT recid, description, location, start, end, allday, "
+            "starttimezone, alarm, alarmdelay, repeatrule, "
+            "repeatfrequency, repeatenddate, repeatweekflags "
+            "FROM appointments WHERE recid = :i"),
+            exceptionsQuery("SELECT edate, alternateid FROM appointmentexceptions WHERE recid=:id"),
+            parentQuery("SELECT recid FROM appointmentexceptions WHERE alternateid=:id")
 {
-    QStringList tables;
-    tables << "sqlsources";
-    tables << "changelog";
-    tables << "categories";
-    tables << mainTable;
-    tables << catTable;
-    tables << customTable;
-    tables << exceptionTable;
-    QtopiaSql::ensureSchema(tables, QtopiaSql::systemDatabase());
-    QStringList sort;
-    sort << "start";
-    sort << "end";
-    sort << "repeatenddate";
-    QPimSqlIO::setOrderBy(sort);
+     QStringList sort;
+     sort << "start";
+     sort << "end";
+     sort << "repeatenddate";
+     QPimSqlIO::setOrderBy(sort);
 }
 
 
@@ -121,7 +119,7 @@ bool QAppointmentSqlIO::updateAppointment(const QAppointment& appointment)
     if (QPimSqlIO::updateRecord(appointment)) {
         addAlarm(appointment);
 
-        notifyUpdated(appointment);
+        notifyUpdated(appointment.uid());
         invalidateCache();
         emit recordsUpdated();
         return true;
@@ -135,10 +133,10 @@ void QAppointmentSqlIO::refresh()
     emit recordsUpdated();
 }
 
-void QAppointmentSqlIO::checkAdded(const QAppointment &) { refresh(); }
+void QAppointmentSqlIO::checkAdded(const QUniqueId &) { refresh(); }
 void QAppointmentSqlIO::checkRemoved(const QUniqueId &) { refresh(); }
 void QAppointmentSqlIO::checkRemoved(const QList<QUniqueId> &) { refresh(); }
-void QAppointmentSqlIO::checkUpdated(const QAppointment &) { refresh(); }
+void QAppointmentSqlIO::checkUpdated(const QUniqueId &) { refresh(); }
 
 QUniqueId QAppointmentSqlIO::addAppointment(const QAppointment& appointment, const QPimSource &source, bool createuid)
 {
@@ -151,26 +149,26 @@ QUniqueId QAppointmentSqlIO::addAppointment(const QAppointment& appointment, con
         if (added.isValid() && added.hasAlarm())
             addAlarm(added);
 
-	notifyAdded(added);
+	notifyAdded(i);
         invalidateCache();
         emit recordsUpdated();
     }
     return i;
 }
 
-bool QAppointmentSqlIO::updateExtraTables(const QByteArray &, const QPimRecord &)
+bool QAppointmentSqlIO::updateExtraTables(uint, const QPimRecord &)
 {
     return true; // not actually adding exceptions directly at the moment.
 }
 
-bool QAppointmentSqlIO::insertExtraTables(const QByteArray &, const QPimRecord &)
+bool QAppointmentSqlIO::insertExtraTables(uint, const QPimRecord &)
 {
     return true; // not actually adding exceptions directly at the moment.
 }
 
-bool QAppointmentSqlIO::removeExtraTables(const QByteArray &uid)
+bool QAppointmentSqlIO::removeExtraTables(uint uid)
 {
-    QSqlQuery q;
+    QSqlQuery q(database());
     if (!q.prepare("DELETE FROM " + exceptionTable + " WHERE recid=:ida OR alternateid=:idb")) {
         qWarning("Failed to prepare query %s: %s",
                 q.lastQuery().toLocal8Bit().constData(), q.lastError().text().toLocal8Bit().constData());
@@ -188,21 +186,19 @@ bool QAppointmentSqlIO::removeExtraTables(const QByteArray &uid)
 bool QAppointmentSqlIO::removeOccurrence(const QUniqueId &original,
         const QDate &date)
 {
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)original;
-
     // TODO should so some checking to make sure request is reasonable.
 
-    QSqlDatabase::database().transaction();
+    database().transaction();
 
-    QSqlQuery q;
+    QSqlQuery q(database());
     if( !q.prepare("INSERT INTO " + exceptionTable + " (recid, edate) VALUES (:i, :ed)") )
         return false;
 
-    q.bindValue(":i", lid.toByteArray());
+    q.bindValue(":i", original.toUInt());
     q.bindValue(":ed", date);
-    if( !q.exec() || !QSqlDatabase::database().commit() )
+    if( !q.exec() || !database().commit() )
     {
-        QSqlDatabase::database().rollback();
+        database().rollback();
         return false;
     }
 
@@ -212,50 +208,50 @@ bool QAppointmentSqlIO::removeOccurrence(const QUniqueId &original,
 }
 
 QUniqueId QAppointmentSqlIO::replaceOccurrence(const QUniqueId &original,
-        const QOccurrence &occurrence)
+        const QOccurrence &occurrence, const QDate& occurrenceDate)
 {
     // TODO should do some checking to make sure request is reasonable.
 
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)original;
-
-    QDate date = occurrence.date();
+    QDate date = occurrenceDate;
+    if (date.isNull())
+        date = occurrence.date();
     QAppointment a = occurrence.appointment();
     a.setRepeatRule(QAppointment::NoRepeat);
     int c = context(original);
 
-    QLocalUniqueId u = addRecord(a, c, true);
+    QUniqueId u = addRecord(a, c, true);
     if (!u.isNull()) {
         QAppointment added = appointment(u);
         if (added.isValid() && added.hasAlarm())
             addAlarm(added);
 
-        notifyAdded(added);
+        notifyAdded(u);
         invalidateCache();
         emit recordsUpdated();
     }
 
     //  Begin transaction after add, because SQLite does not support nested transactions
-    QSqlDatabase::database().transaction();
+    database().transaction();
 
-    QSqlQuery q;
+    QSqlQuery q(database());
     q.prepare("INSERT INTO " + exceptionTable + " (recid, edate, alternateid)"
             " VALUES (:i, :ed, :aid)");
-    q.bindValue(":i", lid.toByteArray());
+    q.bindValue(":i", u.toUInt());
     q.bindValue(":ed", date);
-    q.bindValue(":aid", u.toByteArray());
+    q.bindValue(":aid", u.toUInt());
 
     QtopiaSql::logQuery(q);
     if( !q.exec() )
     {
         qWarning() << "Failed to add exception: " << q.lastError().text();
-        QSqlDatabase::database().rollback();
+        database().rollback();
         return QUniqueId();
     }
 
-    if( !QSqlDatabase::database().commit() )
+    if( !database().commit() )
     {
-        qWarning() << "Failed to commit changes: " << QSqlDatabase::database().lastError().text();
-        QSqlDatabase::database().rollback();
+        qWarning() << "Failed to commit changes: " << database().lastError().text();
+        database().rollback();
         return QUniqueId();
     }
 
@@ -265,14 +261,15 @@ QUniqueId QAppointmentSqlIO::replaceOccurrence(const QUniqueId &original,
 }
 
 QUniqueId QAppointmentSqlIO::replaceRemaining(const QUniqueId &original,
-        const QAppointment &remaining)
+        const QAppointment &remaining, const QDate& endDate)
 {
-    // TODO check sanity of using remaining as a alternate end to original.
-    // also make sure that exceptions transferred to the replacement are sane for possible change in repeat days
+    // TODO make sure that exceptions transferred to the replacement are sane for possible change in repeat days
 
     QAppointment ao = appointment(original);
-
-    ao.setRepeatUntil(remaining.start().date().addDays(-1));
+    QDate date = endDate;
+    if (date.isNull())
+        date = remaining.start().date();
+    ao.setRepeatUntil(date.addDays(-1));
     updateAppointment(ao);
     int c = context(original);
     QUniqueId u = addRecord(remaining, c, true);
@@ -281,40 +278,34 @@ QUniqueId QAppointmentSqlIO::replaceRemaining(const QUniqueId &original,
         if (added.isValid() && added.hasAlarm())
             addAlarm(added);
 
-        notifyAdded(added);
+        notifyAdded(u);
         invalidateCache();
         emit recordsUpdated();
     }
 
     //  Begin transaction after add, because SQLite does not support nested transactions
-    QSqlDatabase::database().transaction();
+    database().transaction();
 
     //  Transfer any exceptions after the switchover date to the replacement appointment
-    QSqlQuery q;
+    QSqlQuery q(database());
     q.prepare("UPDATE " + exceptionTable + " SET recid=:newid WHERE recid=:oldid AND edate >= :d");
 
-    const QLocalUniqueId &newlid = (const QLocalUniqueId &)u;
-    QByteArray newuid = newlid.toByteArray();
-    q.bindValue(":newid", newuid);
-
-    const QLocalUniqueId &oldlid = (const QLocalUniqueId &)original;
-    QByteArray olduid = oldlid.toByteArray();
-    q.bindValue(":oldid", olduid);
-
+    q.bindValue(":newid", u.toUInt());
+    q.bindValue(":oldid", original.toUInt());
     q.bindValue(":d", remaining.start().date());
 
     QtopiaSql::logQuery(q);
     if (!q.exec())
     {
         qWarning() << "Failed to transfer exceptions: " << q.lastError().text();
-        QSqlDatabase::database().rollback();
+        database().rollback();
         return QUniqueId();
     }
 
-    if( !QSqlDatabase::database().commit() )
+    if( !database().commit() )
     {
-        qWarning() << "Failed to commit changes: " << QSqlDatabase::database().lastError().text();
-        QSqlDatabase::database().rollback();
+        qWarning() << "Failed to commit changes: " << database().lastError().text();
+        database().rollback();
         return QUniqueId();
     }
 
@@ -335,7 +326,7 @@ void QAppointmentSqlIO::setCategoryFilter(const QCategoryFilter &f)
     if (f != categoryFilter()) {
         QPimSqlIO::setCategoryFilter(f);
         invalidateCache();
-        emit recordsUpdated();
+        emit filtersUpdated();
     }
 }
 
@@ -352,7 +343,7 @@ void QAppointmentSqlIO::setRangeFilter(const QDateTime &earliest, const QDateTim
     rEnd = latest;
     setFilters(currentFilters());
     invalidateCache();
-    emit recordsUpdated();
+    emit filtersUpdated();
 }
 
 QStringList QAppointmentSqlIO::currentFilters() const
@@ -385,7 +376,7 @@ void QAppointmentSqlIO::setDurationType(QAppointmentModel::DurationType type)
     rType = type;
     setFilters(currentFilters());
     invalidateCache();
-    emit recordsUpdated();
+    emit filtersUpdated();
 }
 
 void QAppointmentSqlIO::setContextFilter(const QSet<int> &list)
@@ -393,7 +384,7 @@ void QAppointmentSqlIO::setContextFilter(const QSet<int> &list)
     if (list != contextFilter()) {
         QPimSqlIO::setContextFilter(list, ExcludeContexts);
         invalidateCache();
-        emit recordsUpdated();
+        emit filtersUpdated();
     }
 }
 
@@ -404,91 +395,92 @@ QSet<int> QAppointmentSqlIO::contextFilter() const
 
 QAppointment QAppointmentSqlIO::appointment(const QUniqueId &u) const
 {
-    if (appointmentByRowValid && u == lastAppointment.uid())
+    return appointment(u, false);
+}
+
+QAppointment QAppointmentSqlIO::appointment(const QUniqueId &u, bool minimal) const
+{
+    if (u == lastAppointment.uid()
+            && ((minimal && lastAppointmentStatus != Empty)
+                ||
+                (lastAppointmentStatus == Full))
+               )
+    {
         return lastAppointment;
+    }
 
-
-    QSqlQuery q;
-    q.prepare("SELECT recid, description, location, start, end, allday, "
-            "starttimezone, alarm, alarmdelay, repeatrule, "
-            "repeatfrequency, repeatenddate, repeatweekflags "
-            "FROM " + mainTable + " WHERE recid = :i");
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)u;
-    QByteArray uid = lid.toByteArray();
-    q.bindValue(":i", uid);
+    uint uid = u.toUInt();
 
     QAppointment t;
-    retrieveRecord(uid, t);
-    q.setForwardOnly(true);
+    if (!minimal)
+        retrieveRecord(uid, t);
 
-    QtopiaSql::logQuery(q);
-    if (!q.exec()) {
-        appointmentByRowValid = false;
-        qWarning("failed to select appointment: %s", (const char *)q.lastError().text().toLocal8Bit());
+    appointmentQuery.prepare();
+
+    appointmentQuery.bindValue(":i", uid);
+
+    if (!appointmentQuery.exec()) {
+        lastAppointmentStatus = Empty;
+        qWarning("failed to select appointment: %s", (const char *)appointmentQuery.lastError().text().toLocal8Bit());
         return t;
     }
 
-    if ( q.next() ) {
-        // categories for this appointment;
-        QSqlQuery q2;
-        q2.prepare("SELECT edate, alternateid FROM " + exceptionTable + " WHERE recid=:id");
-        q2.bindValue(":id", uid);
-        QtopiaSql::logQuery(q2);
-        if (!q2.exec())
+    if ( appointmentQuery.next() ) {
+
+        t.setUid(QUniqueId::fromUInt(appointmentQuery.value(0).toUInt()));
+        t.setDescription(appointmentQuery.value(1).toString());
+        t.setLocation(appointmentQuery.value(2).toString());
+        t.setStart(appointmentQuery.value(3).toDateTime());
+        t.setEnd(appointmentQuery.value(4).toDateTime());
+        t.setAllDay(appointmentQuery.value(5).toBool());
+        t.setTimeZone(QTimeZone(appointmentQuery.value(6).toString().toLocal8Bit().constData()));
+
+        QAppointment::AlarmFlags af = (QAppointment::AlarmFlags)appointmentQuery.value(7).toInt();
+        if (af != QAppointment::NoAlarm)
+            t.setAlarm(appointmentQuery.value(8).toInt(), af);
+
+        t.setRepeatRule((QAppointment::RepeatRule)appointmentQuery.value(9).toInt());
+        t.setFrequency(appointmentQuery.value(10).toInt());
+        t.setRepeatUntil(appointmentQuery.value(11).toDate());
+        t.setWeekFlags((QAppointment::WeekFlags)appointmentQuery.value(12).toInt());
+
+        appointmentQuery.reset();
+
+        exceptionsQuery.prepare();
+        exceptionsQuery.bindValue(":id", uid);
+        if (!exceptionsQuery.exec())
             qWarning("select appointment exceptions failed: %s",
-                    (const char *)q2.lastError().text().toLocal8Bit());
+                    (const char *)exceptionsQuery.lastError().text().toLocal8Bit());
         QList<QAppointment::Exception> elist;
-        while(q2.next()) {
+        while(exceptionsQuery.next()) {
             QAppointment::Exception ae;
-            ae.date = q2.value(0).toDate();
-            if (!q2.value(1).isNull())
-                ae.alternative = QUniqueId(q2.value(1).toByteArray());
+            ae.date = exceptionsQuery.value(0).toDate();
+            if (!exceptionsQuery.value(1).isNull())
+                ae.alternative = QUniqueId::fromUInt(exceptionsQuery.value(1).toUInt());
             elist.append(ae);
         }
         t.setExceptions(elist);
 
-        q2.prepare("SELECT recid FROM " + exceptionTable + " WHERE alternateid=:id");
-        q2.bindValue(":id", uid);
-        QtopiaSql::logQuery(q2);
-        if (!q2.exec())
+        exceptionsQuery.reset();
+
+        parentQuery.prepare();
+        parentQuery.bindValue(":id", uid);
+        if (!parentQuery.exec())
             qWarning("check for exception parent failed: %s",
-                        (const char *)q2.lastError().text().toLocal8Bit());
-        if(q2.next())
-            t.setExceptionParent(QUniqueId(q2.value(0).toByteArray()));
+                        (const char *)parentQuery.lastError().text().toLocal8Bit());
+        if(parentQuery.next())
+            t.setExceptionParent(QUniqueId::fromUInt(parentQuery.value(0).toUInt()));
+        parentQuery.reset();
 
-        t.setUid(QUniqueId(q.value(0).toByteArray()));
-        t.setDescription(q.value(1).toString());
-        t.setLocation(q.value(2).toString());
-        t.setStart(q.value(3).toDateTime());
-        t.setEnd(q.value(4).toDateTime());
-        t.setAllDay(q.value(5).toBool());
-        t.setTimeZone(QTimeZone(q.value(6).toString().toLocal8Bit().constData()));
-
-        QAppointment::AlarmFlags af = (QAppointment::AlarmFlags)q.value(7).toInt();
-        if (af != QAppointment::NoAlarm)
-            t.setAlarm(q.value(8).toInt(), af);
-
-        t.setRepeatRule((QAppointment::RepeatRule)q.value(9).toInt());
-        t.setFrequency(q.value(10).toInt());
-        t.setRepeatUntil(q.value(11).toDate());
-        t.setWeekFlags((QAppointment::WeekFlags)q.value(12).toInt());
         lastAppointment = t;
-        appointmentByRowValid = true;
-
-        // custom fields for this appointment
-        q2.prepare("SELECT fieldname, fieldvalue from " + customTable + " where recid=:id");
-        q2.bindValue(":id", uid);
-        QtopiaSql::logQuery(q2);
-        if (!q2.exec()) {
-            qWarning("select fieldname, fieldvalue failed: %s",
-                     (const char *)q2.lastError().text().toLocal8Bit());
-        }
-        QMap<QString, QString> tMap;
-        while (q2.next())
-            t.setCustomField(q2.value(0).toString(), q2.value(1).toString());
-
+        if (minimal)
+            lastAppointmentStatus = Minimal;
+        else
+            lastAppointmentStatus = Full;
+        lastRow = -1; // will be corrected in appointmentField if need be.
     } else {
-        appointmentByRowValid = false;
+        appointmentQuery.reset();
+        lastAppointmentStatus = Empty;
         qWarning("Did not find selected appointment: %s", u.toString().toLocal8Bit().constData());
     }
     return t;
@@ -499,6 +491,47 @@ QAppointment QAppointmentSqlIO::appointment(int row) const
     return appointment(recordId(row));
 }
 
+QVariant QAppointmentSqlIO::appointmentField(int row, QAppointmentModel::Field k) const
+{
+    switch (k) {
+        case QAppointmentModel::Invalid:
+            break;
+        case QAppointmentModel::Description:
+        case QAppointmentModel::Location:
+        case QAppointmentModel::Start:
+        case QAppointmentModel::End:
+        case QAppointmentModel::AllDay:
+        case QAppointmentModel::TimeZone:
+        case QAppointmentModel::Alarm:
+        case QAppointmentModel::RepeatRule:
+        case QAppointmentModel::RepeatFrequency:
+        case QAppointmentModel::RepeatEndDate:
+        case QAppointmentModel::RepeatWeekFlags:
+        case QAppointmentModel::Identifier:
+            {
+                if (lastAppointmentStatus != Empty && lastRow == row)
+                    return QAppointmentModel::appointmentField(lastAppointment, k);
+
+                QVariant v =  QAppointmentModel::appointmentField(appointment(recordId(row), true), k);
+                if (v.isValid())
+                    lastRow = row;
+                return v;
+            }
+        case QAppointmentModel::Categories:
+        case QAppointmentModel::Notes:
+            {
+                if (lastAppointmentStatus == Full && lastRow == row)
+                    return QAppointmentModel::appointmentField(lastAppointment, k);
+
+                QVariant v = QAppointmentModel::appointmentField(appointment(recordId(row), false), k);
+                if (v.isValid())
+                    lastRow = row;
+                return v;
+            }
+    }
+    return QVariant();
+}
+
 // needs to be comparable?
 QVariant QAppointmentSqlIO::key(int row) const
 {
@@ -507,11 +540,10 @@ QVariant QAppointmentSqlIO::key(int row) const
 
 QVariant QAppointmentSqlIO::key(const QUniqueId &id) const
 {
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)id;
-    QSqlQuery q;
+    QSqlQuery q(database());
     if (!q.prepare("SELECT start FROM appointments WHERE recid = :id"))
         qWarning("select record key failed: %s", (const char *)q.lastError().text().toLocal8Bit());
-    q.bindValue(":id", lid.toByteArray());
+    q.bindValue(":id", id.toUInt());
 
     if (q.exec() && q.next())
         return q.value(0);
@@ -559,7 +591,7 @@ QStringList QAppointmentSqlIO::sortColumns() const
 void QAppointmentSqlIO::invalidateCache()
 {
     QPimSqlIO::invalidateCache();
-    appointmentByRowValid = false;
+    lastAppointmentStatus = Empty;
 }
 
 /***************
@@ -671,12 +703,12 @@ bool QAppointmentDefaultContext::removeOccurrence(const QUniqueId &original, con
     return mAccess->removeOccurrence(original, date);
 }
 
-QUniqueId QAppointmentDefaultContext::replaceOccurrence(const QUniqueId &original, const QOccurrence &occurrence)
+QUniqueId QAppointmentDefaultContext::replaceOccurrence(const QUniqueId &original, const QOccurrence &occurrence, const QDate& date)
 {
-    return mAccess->replaceOccurrence(original, occurrence);
+    return mAccess->replaceOccurrence(original, occurrence, date);
 }
 
-QUniqueId QAppointmentDefaultContext::replaceRemaining(const QUniqueId &original, const QAppointment &r)
+QUniqueId QAppointmentDefaultContext::replaceRemaining(const QUniqueId &original, const QAppointment &r, const QDate& date)
 {
-    return mAccess->replaceRemaining(original, r);
+    return mAccess->replaceRemaining(original, r, date);
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/embedded/qscreen_qws.cpp -->
 <head>
   <title>Qt 4.2: QScreen Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -89,7 +90,7 @@
 <p>The QScreen class is a base class for screen drivers in Qtopia Core.</p>
 <p>Note that this class is only available in <a href="qtopiacore.html">Qtopia Core</a>.</p>
 <p><a href="qtopiacore.html">Qtopia Core</a> provides ready-made drivers for several screen protocols, see the <a href="qtopiacore-displaymanagement.html">display management</a> documentation for details. Custom screen drivers can be implemented by subclassing the QScreen class and creating a screen driver plugin (derived from <a href="qscreendriverplugin.html">QScreenDriverPlugin</a>). <a href="qtopiacore.html">Qtopia Core</a>'s implementation of the <a href="qscreendriverfactory.html">QScreenDriverFactory</a> class will automatically detect the plugin, and load the driver into the server application at runtime using Qt's <a href="plugins-howto.html">plugin system</a>.</p>
-<p>When rendering, <a href="qtopiacore.html">Qtopia Core</a>'s default behavior is for each client to render its widgets as well as its decorations into memory, while the server copies the memory content to the device's framebuffer using the screen driver. See the <a href="qtopiacore-architecture.html">Qtopia Core Architecture</a> overview for details.</p>
+<p>When rendering, <a href="qtopiacore.html">Qtopia Core</a>'s default behavior is for each client to render its widgets as well as its decorations into memory, while the server copies the memory content to the device's framebuffer using the screen driver. See the <a href="qtopiacore-architecture.html">Qtopia Core Architecture</a> overview for details (note that it is possible for the clients to manipulate and control the underlying hardware directly as well).</p>
 <p>Starting with <a href="qtopiacore.html">Qtopia Core</a> 4.2, it is also possible to add an accelerated graphics driver to take advantage of available hardware resources. See the <a href="qtopiacore-accel.html">Adding an Accelerated Graphics Driver in Qtopia Core</a> documentation for details.</p>
 <ul><li><a href="#framebuffer-management">Framebuffer Management</a></li>
 <li><a href="#palette-management">Palette Management</a></li>
@@ -108,7 +109,7 @@
 <p>To determine if the screen driver supports a given color depth, use the <a href="qscreen.html#supportsDepth">supportsDepth</a>() function that returns true of the specified depth is supported.</p>
 <a name="drawing-on-screen"></a>
 <h3>Drawing on Screen</h3>
-<p>When a screen update is required, the <a href="qtopiacore.html">Qtopia Core</a> server runs through all the top-level windows that intersect with the region that is about to be updated, and ensures that the associated clients have updated their memory buffer. Then the server calls the <a href="qscreen.html#exposeRegion">exposeRegion</a>() function that composes the window surfaces and copies the content of memory to screen by calling the <a href="qscreen.html#blit">blit</a>() and <a href="qscreen.html#solidFill">solidFill</a>() functions. See the <a href="qtopiacore-architecture.html">Qtopia Core Architecture</a> overview for details.</p>
+<p>When a screen update is required, the <a href="qtopiacore.html">Qtopia Core</a> server runs through all the top-level windows that intersect with the region that is about to be updated, and ensures that the associated clients have updated their memory buffer. Then the server calls the <a href="qscreen.html#exposeRegion">exposeRegion</a>() function that composes the window surfaces and copies the content of memory to screen by calling the <a href="qscreen.html#blit">blit</a>() and <a href="qscreen.html#solidFill">solidFill</a>() functions.</p>
 <p>The <a href="qscreen.html#blit">blit</a>() function copies a given region in a given image to a specified point using device coordinates, while the <a href="qscreen.html#solidFill">solidFill</a>() function fills the given region of the screen with the specified color. Note that normally there is no need to call either of these functions explicitly.</p>
 <p>In addition, QScreen provides the <a href="qscreen.html#blank">blank</a>() function that can be reimplemented to prevent any contents from being displayed on the screen, and the <a href="qscreen.html#setDirty">setDirty</a>() function that can be reimplemented to indicate that a given rectangle of the screen has been altered. Note that the default implementations of these functions do nothing.</p>
 <p>Reimplement the the <a href="qscreen.html#mapFromDevice">mapFromDevice</a>() and <a href="qscreen.html#mapToDevice">mapToDevice</a>() functions to map objects from the framebuffer coordinate system to the coordinate space used by the application, and vice versa. Be aware that the default implementations simply return the given objects as they are.</p>
@@ -348,6 +349,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

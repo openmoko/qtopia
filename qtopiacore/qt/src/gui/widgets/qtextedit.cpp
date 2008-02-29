@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -212,16 +222,11 @@ void QTextEditPrivate::pageUpDown(QTextCursor::MoveOperation op, QTextCursor::Mo
 }
 
 #ifndef QT_NO_SCROLLBAR
-void QTextEditPrivate::_q_adjustScrollbars()
+static QSize documentSize(QTextControl *control)
 {
-    if (ignoreAutomaticScrollbarAdjustment)
-        return;
-    ignoreAutomaticScrollbarAdjustment = true; // avoid recursion, #106108
-
     QTextDocument *doc = control->document();
     QAbstractTextDocumentLayout *layout = doc->documentLayout();
 
-    const QSize viewportSize = viewport->size();
     QSize docSize;
 
     if (QTextDocumentLayout *tlayout = qobject_cast<QTextDocumentLayout *>(layout)) {
@@ -234,22 +239,54 @@ void QTextEditPrivate::_q_adjustScrollbars()
         docSize = layout->documentSize().toSize();
     }
 
-    hbar->setRange(0, docSize.width() - viewportSize.width());
-    hbar->setPageStep(viewportSize.width());
+    return docSize;
+}
 
-    vbar->setRange(0, docSize.height() - viewportSize.height());
-    vbar->setPageStep(viewportSize.height());
+void QTextEditPrivate::_q_adjustScrollbars()
+{
+    if (ignoreAutomaticScrollbarAdjustment)
+        return;
+    ignoreAutomaticScrollbarAdjustment = true; // avoid recursion, #106108
 
-    // if we are in left-to-right mode widening the document due to
-    // lazy layouting does not require a repaint. If in right-to-left
-    // the scrollbar has the value zero and it visually has the maximum
-    // value (it is visually at the right), then widening the document
-    // keeps it at value zero but visually adjusts it to the new maximum
-    // on the right, hence we need an update.
-    if (q_func()->isRightToLeft())
-        viewport->update();
+    QSize viewportSize = viewport->size();
+    QSize docSize = documentSize(control);
 
-    _q_showOrHideScrollBars();
+    // due to the recursion guard we have to repeat this step a few times,
+    // as adding/removing a scroll bar will cause the document or viewport
+    // size to change
+    // ideally we should loop until the viewport size and doc size stabilize,
+    // but in corner cases they might fluctuate, so we need to limit the
+    // number of iterations
+    for (int i = 0; i < 4; ++i) {
+        hbar->setRange(0, docSize.width() - viewportSize.width());
+        hbar->setPageStep(viewportSize.width());
+
+        vbar->setRange(0, docSize.height() - viewportSize.height());
+        vbar->setPageStep(viewportSize.height());
+
+        // if we are in left-to-right mode widening the document due to
+        // lazy layouting does not require a repaint. If in right-to-left
+        // the scroll bar has the value zero and it visually has the maximum
+        // value (it is visually at the right), then widening the document
+        // keeps it at value zero but visually adjusts it to the new maximum
+        // on the right, hence we need an update.
+        if (q_func()->isRightToLeft())
+            viewport->update();
+
+        _q_showOrHideScrollBars();
+
+        const QSize oldViewportSize = viewportSize;
+        const QSize oldDocSize = docSize;
+
+        // make sure the document is layouted if the viewport width changes
+        viewportSize = viewport->size();
+        if (viewportSize.width() != oldViewportSize.width())
+            relayoutDocument();
+
+        docSize = documentSize(control);
+        if (viewportSize == oldViewportSize && docSize == oldDocSize)
+            break;
+    }
     ignoreAutomaticScrollbarAdjustment = false;
 }
 #endif
@@ -455,7 +492,8 @@ void QTextEditPrivate::ensureViewportLayouted()
     will select the character to the right, and \e{Shift+Ctrl+Right
     Arrow} will select the word to the right, etc.
 
-    \sa QTextDocument, QTextCursor, {Application Example}, {Syntax Highlighter Example}
+    \sa QTextDocument, QTextCursor, {Application Example},
+	{Syntax Highlighter Example}, {Rich Text Processing}
 */
 
 /*!
@@ -1343,6 +1381,10 @@ void QTextEditPrivate::_q_currentCharFormatChanged(const QTextCharFormat &fmt)
 void QTextEdit::mousePressEvent(QMouseEvent *e)
 {
     Q_D(QTextEdit);
+#ifdef QT_KEYPAD_NAVIGATION
+    if (QApplication::keypadNavigationEnabled() && !hasEditFocus())
+        setEditFocus(true);
+#endif
     d->sendControlEvent(e);
 }
 
@@ -1965,7 +2007,7 @@ void QTextEdit::scrollToAnchor(const QString &name)
 /*!
     \fn QTextEdit::zoomIn(int range)
 
-    Zooms in on the text by by making the base font size \a range
+    Zooms in on the text by making the base font size \a range
     points larger and recalculating all font sizes to be the new size.
     This does not change the size of any images.
 

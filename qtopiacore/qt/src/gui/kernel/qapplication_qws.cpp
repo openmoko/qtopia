@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -190,11 +200,8 @@ static void setMaxWindowRect(const QRect &rect)
         }
     }
 
-    const QSize devSize(screen->deviceWidth(), screen->deviceHeight());
-    QRect r = screen->mapFromDevice(rect, devSize);
-
     QApplicationPrivate *ap = QApplicationPrivate::instance();
-    ap->setMaxWindowRect(screen, r);
+    ap->setMaxWindowRect(screen, rect);
 }
 
 void QApplicationPrivate::setMaxWindowRect(const QScreen *screen,
@@ -210,10 +217,8 @@ void QApplicationPrivate::setMaxWindowRect(const QScreen *screen,
     for (int i = 0; i < l.size(); ++i) {
         QWidget *w = l.at(i);
         QScreen *s = w->d_func()->getScreen();
-        if (w->isVisible() && w->isMaximized() && s == screen) {
-            w->showNormal(); //#### flicker
-            w->showMaximized();
-        }
+        if (w->isMaximized() && s == screen)
+            w->d_func()->setMaxWindowState_helper();
     }
 }
 
@@ -558,7 +563,7 @@ void QWSDisplay::Data::reinit( const QString& newAppName )
             QTransportAuth::Trusted,
             csocket->socketDescriptor());
     QAuthDevice *ad = a->authBuf( d, csocket );
-    ad->setClient( reinterpret_cast<void*>(csocket) );
+    ad->setClient( csocket );
 
     cmd.write(ad);
 #else
@@ -642,7 +647,7 @@ void QWSDisplay::Data::init()
                 QTransportAuth::Trusted,
                 csocket->socketDescriptor());
         QAuthDevice *ad = a->authBuf( d, csocket );
-        ad->setClient( reinterpret_cast<void*>(csocket) );
+        ad->setClient( csocket );
         cmd.write(ad);
 #else
         cmd.write(csocket);
@@ -703,6 +708,7 @@ void QWSDisplay::Data::init()
         memset(sharedRam,0,sharedRamSize);
 
         QWSIdentifyCommand cmd;
+        cmd.setId(appName, -1);
         qt_server_enqueue(&cmd);
     }
 
@@ -2824,11 +2830,10 @@ void QApplication::qwsSetCustomColors(QRgb *colorTable, int start, int numColors
 
 #ifndef QT_NO_QWS_MANAGER
 /*!
-    \warning
-
     Return the QWSDecoration used for decorating windows.
 
-    This method is non-portable. It is only available in Qtopia Core.
+    \warning This method is non-portable. It is only available in
+    Qtopia Core.
 
     \sa QDecoration
 */

@@ -28,7 +28,7 @@
 #include "qdlsourceselector_p.h"
 
 // Qtopia includes
-#include <QLocalUniqueId>
+#include <QUniqueId>
 #include <QDSAction>
 #include <QDSData>
 #include <QMimeType>
@@ -61,7 +61,7 @@ public:
     int nextLinkId();
 
     QString mHint;
-    QMap<int, QLocalUniqueId> mLinkKeys;
+    QMap<int, QUniqueId> mLinkKeys;
 };
 
 int QDLClientPrivate::nextLinkId()

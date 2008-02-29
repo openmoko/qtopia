@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/codecs/qtextcodec.cpp -->
 <head>
   <title>Qt 4.2: QTextCodec Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -108,7 +109,7 @@
 <pre> QString string = &quot;...&quot;;
  QTextCodec *codec = QTextCodec::codecForName(&quot;KOI8-R&quot;);
  QByteArray encodedString = codec-&gt;fromUnicode(string);</pre>
-<p>To read or write files in various encodings, use <a href="qtextstream.html">QTextStream</a> and its <a href="qtextstream.html#setCodec">setCodec()</a> function. See the Codecs example for an application of QTextCodec to file I/O.</p>
+<p>To read or write files in various encodings, use <a href="qtextstream.html">QTextStream</a> and its <a href="qtextstream.html#setCodec">setCodec()</a> function. See the <a href="tools-codecs.html">Codecs</a> example for an application of QTextCodec to file I/O.</p>
 <p>Some care must be taken when trying to convert the data in chunks, for example, when receiving it over a network. In such cases it is possible that a multi-byte character will be split over two chunks. At best this might result in the loss of a character and at worst cause the entire conversion to fail.</p>
 <p>The approach to use in these situations is to create a <a href="qtextdecoder.html">QTextDecoder</a> object for the codec and use this <a href="qtextdecoder.html">QTextDecoder</a> for the whole decoding process, as shown below:</p>
 <pre> QTextCodec *codec = QTextCodec::codecForName(&quot;Shift-JIS&quot;);
@@ -134,7 +135,7 @@
 <tr valign="top" class="odd"><td><a href="qtextcodec.html#convertFromUnicode">convertFromUnicode</a>()</td><td>Converts a Unicode string to an 8-bit character string.</td></tr>
 </table></p>
 <p>You may find it more convenient to make your codec class available as a plugin; see <a href="plugins-howto.html">How to Create Qt Plugins</a> for details.</p>
-<p>See also <a href="qtextstream.html">QTextStream</a>, <a href="qtextdecoder.html">QTextDecoder</a>, <a href="qtextencoder.html">QTextEncoder</a>, and Codecs Example.</p>
+<p>See also <a href="qtextstream.html">QTextStream</a>, <a href="qtextdecoder.html">QTextDecoder</a>, <a href="qtextencoder.html">QTextEncoder</a>, and <a href="tools-codecs.html">Codecs Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="ConversionFlag-enum"></a>enum QTextCodec::ConversionFlag<br />flags QTextCodec::ConversionFlags</h3>
@@ -263,6 +264,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

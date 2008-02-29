@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>BuiltinApplicationLauncher Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>BuiltinApplicationLauncher Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">BuiltinApplicationLauncher Class Reference</h1>
 <p>The BuiltinApplicationLauncher class supports launching simple applications that run inside the Qtopia Server process. <a href="#details">More...</a></p>
-<pre>    #include &lt;BuiltinApplicationLauncher&gt;</pre><p>Inherits <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> and <a href="applicationipcrouter-routedestination.html">ApplicationIpcRouter::RouteDestination</a>.</p>
+<pre>#include &lt;BuiltinApplicationLauncher&gt;</pre><p>Inherits <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> and <a href="applicationipcrouter-routedestination.html">ApplicationIpcRouter::RouteDestination</a>.</p>
 <ul>
 <li><a href="builtinapplicationlauncher-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -62,7 +61,7 @@
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="BuiltinFunc-typedef"></a>typedef BuiltinApplicationLauncher::BuiltinFunc</h3>
 <p>The BuiltinFunc provides a type definition that the static function used to create a builtin application must conform to. The exact specification is:</p>
-<pre>    typdef QWidget *(*BuiltinFunc)()</pre>
+<pre>&nbsp;   typdef QWidget *(*BuiltinFunc)()</pre>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="BuiltinApplicationLauncher"></a>BuiltinApplicationLauncher::BuiltinApplicationLauncher ()</h3>
@@ -73,9 +72,9 @@
 <h2>Macro Documentation</h2>
 <h3 class="fn"><a name="QTOPIA_SIMPLE_BUILTIN"></a>QTOPIA_SIMPLE_BUILTIN (  <i>ApplicationName</i>,  <i>createFunc</i> )</h3>
 <p>Add a new builtin application to the server. <i>ApplicationName</i> must be the name of the application and <i>createFunc</i> a static function, of type <a href="builtinapplicationlauncher.html#BuiltinFunc-typedef">BuiltinApplicationLauncher::BuiltinFunc</a>, that creates the applications. For example, the following code adds a simple builtin named &quot;TestBuiltin&quot; to the server.</p>
-<pre>    class TestBuiltinWindow : public QWidget
+<pre>&nbsp;   class TestBuiltinWindow : public QWidget
     {
-       <span class="comment">// ...</span>
+       // ...
     };
     static QWidget *testBuiltinFunc()
     {
@@ -86,6 +85,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

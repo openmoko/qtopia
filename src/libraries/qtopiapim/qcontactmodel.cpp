@@ -42,6 +42,9 @@
 
 #include "qrecordiomerge_p.h"
 
+#include "qtopiaipcenvelope.h"
+#include "qtopiachannel.h"
+
 QMap<QContactModel::Field, QString> QContactModel::k2i;
 QMap<QString, QContactModel::Field> QContactModel::i2k;
 QMap<QContactModel::Field, QString>  QContactModel::k2t;
@@ -155,23 +158,6 @@ QString QContactModel::fieldLabel(Field k)
     return k2t[k];
 }
 
-/*!
-  Returns a icon representing the contact model field \a k.
-
-  Returns a null icon if no icon is available.
-
-  \sa fieldLabel(), fieldIdentifier(), identifierField()
-*/
-QIcon QContactModel::fieldIcon(Field k)
-{
-    QString ident = fieldIdentifier(k);
-
-    if (ident.isEmpty() || !QFile::exists(":image/addressbook/" + ident))
-        return QIcon();
-
-    return QIcon(":image/addressbook/" + ident);
-}
-
 
 /*!
   Returns a non-translated string describing the contact model field \a k.
@@ -263,17 +249,51 @@ public:
             delete searchModel;
     }
 
-    QBiasedRecordIOMerge *mio;
-    QContactIO *defaultmodel;
-    QContactContext *defaultContext;
-
-    QList<QContactIO *>models;
-    QList<QContactContext *> contexts;
-
     mutable QContactModel *searchModel;
     mutable QString filterText;
     mutable int filterFlags;
+
+    static QUniqueId mPersonalId;
+    static bool mPersonalIdRead;
+
+    QContactIO *defaultmodel;
+    QPimSource phoneSource;
+    QPimSource simSource;
+    uint simContext;
+    static QIcon getCachedIcon(const QString& path);
+    static QHash<QString, QIcon> cachedIcons;
 };
+
+QUniqueId QContactModelData::mPersonalId;
+bool QContactModelData::mPersonalIdRead;
+QHash<QString, QIcon> QContactModelData::cachedIcons;
+
+QIcon QContactModelData::getCachedIcon(const QString& path)
+{
+    if (cachedIcons.contains(path))
+        return cachedIcons.value(path);
+
+    cachedIcons.insert(path, QIcon(path));
+    return cachedIcons.value(path);
+}
+
+/*!
+  Returns a icon representing the contact model field \a k.
+
+  Returns a null icon if no icon is available.
+
+  \sa fieldLabel(), fieldIdentifier(), identifierField()
+*/
+QIcon QContactModel::fieldIcon(Field k)
+{
+    QString ident = fieldIdentifier(k);
+
+    if (ident.isEmpty() || !QFile::exists(":image/addressbook/" + ident))
+        return QIcon();
+
+    return QContactModelData::getCachedIcon(":image/addressbook/" + ident);
+}
+
 
 /*!
   \class QContactModel
@@ -386,46 +406,36 @@ public:
   Constructs a QContactModel with parent \a parent.
 */
 QContactModel::QContactModel(QObject *parent)
-    : QAbstractItemModel(parent)
+    : QPimModel(parent)
 {
+    d = new QContactModelData;
     QtopiaSql::openDatabase();
-    d = new QContactModelData();
-    d->mio = new QBiasedRecordIOMerge(this);
 
-    d->defaultmodel = new ContactSqlIO(this);
+    ContactSqlIO *access = new ContactSqlIO(this);
+    QContactDefaultContext *context = new QContactDefaultContext(this, access);
 
-    QContactDefaultContext *dcon = new QContactDefaultContext(this, d->defaultmodel);
-
-    d->defaultContext = dcon;
-
-    d->models.append(d->defaultmodel);
-    d->contexts.append(dcon);
-    d->mio->setPrimaryModel(d->defaultmodel);
+    addAccess(access);
+    addContext(context);
+    d->phoneSource = context->defaultSource();
+    d->defaultmodel = access;
 
 #ifdef QTOPIA_CELL
-    QContactSimContext *scon = new QContactSimContext(this, d->defaultmodel);
-    d->contexts.append(scon);
+    QContactSimContext *scon = new QContactSimContext(this, access);
+    d->simSource = scon->defaultSource();
+    d->simContext = QUniqueIdGenerator::mappedContext(d->simSource.context);
+    addContext(scon);
 #endif
-    connect(d->mio, SIGNAL(reset()), this, SLOT(voidCache()));
+
+    QtopiaChannel *channel = new QtopiaChannel( "QPE/PIM",  this );
+
+    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
+            this, SLOT(pimMessage(const QString&,const QByteArray&)) );
 }
 
 /*!
   Destructs the QContactModel.
 */
 QContactModel::~QContactModel() {}
-
-void QContactModel::voidCache()
-{
-    reset();
-}
-
-/*!
-  Return the number of contacts visible in the in the current filter mode.
-*/
-int QContactModel::count() const
-{
-    return d->mio->count();
-}
 
 /*!
   \overload
@@ -562,17 +572,6 @@ QVariant QContactModel::data(const QModelIndex &index, int role) const
 /*!
   \overload
 
-    Returns the number of rows under the given \a parent.
-*/
-int QContactModel::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    return count();
-}
-
-/*!
-  \overload
-
     Returns the number of columns for the given \a parent.
 */
 int QContactModel::columnCount(const QModelIndex &parent) const
@@ -586,12 +585,24 @@ int QContactModel::columnCount(const QModelIndex &parent) const
   Sets the \a role data for the item at \a index to \a value. Returns true if successful,
   otherwise returns false.
 */
-bool QContactModel::setData(const QModelIndex &index, const QVariant &value, int role) const
+bool QContactModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (role != Qt::EditRole)
         return false;
     if (!index.isValid())
         return false;
+
+    QContact c = contact(index);
+    if (!setContactField(c, (Field)index.column(), value))
+        return false;
+    return updateContact(c);
+
+#if 0
+    /* disabled due to 'notifyUpdated' require whole record.
+       While writing whole record is less efficient than partial - at 
+       this stage it was the easiest way of fixing the bug where setData
+       did not result in cross-model data change from being propogated properly
+   */
 
     int i = index.row();
     const QContactIO *model = qobject_cast<const QContactIO*>(d->mio->model(i));
@@ -599,6 +610,7 @@ bool QContactModel::setData(const QModelIndex &index, const QVariant &value, int
     if (model)
         return ((QContactIO *)model)->setContactField(r, (Field)index.column(), value);
     return false;
+#endif
 }
 
 /*!
@@ -606,7 +618,7 @@ bool QContactModel::setData(const QModelIndex &index, const QVariant &value, int
   For every Qt::ItemDataRole in \a roles, sets the role data for the item at \a index to the
   associated value in \a roles. Returns true if successful, otherwise returns false.
 */
-bool QContactModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &roles) const
+bool QContactModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &roles)
 {
     if (roles.count() != 1 || !roles.contains(Qt::EditRole))
         return false;
@@ -673,39 +685,6 @@ Qt::ItemFlags QContactModel::flags(const QModelIndex &index) const
 }
 
 /*!
-  \overload
-    Returns the parent of the model item with the given \a index.
-*/
-QModelIndex QContactModel::parent(const QModelIndex &index) const
-{
-    Q_UNUSED(index);
-    return QModelIndex();
-}
-
-/*!
-  \overload
-  Returns true if \a parent has any children; otherwise returns false.
-  Use rowCount() on the parent to find out the number of children.
-
-  \sa parent(), index()
-*/
-bool QContactModel::hasChildren(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    return false;
-}
-
-/*!
-  Ensures the data in Contacts is in a state suitable for syncing.
-*/
-bool QContactModel::flush() { return true; }
-
-/*!
-  Forces a refresh of the Contact data.
-*/
-bool QContactModel::refresh() { reset(); return true; }
-
-/*!
   Returns the contact for the row specified by \a index.
   The column of \a index is ignored.
 */
@@ -715,24 +694,12 @@ QContact QContactModel::contact(const QModelIndex &index) const
 }
 
 /*!
-  Returns the id for contact at the \a row specified.
-*/
-QUniqueId QContactModel::id(int row) const
-{
-    const QContactIO *model = qobject_cast<const QContactIO *>(d->mio->model(row));
-    int r = d->mio->row(row);
-    if (model)
-        return model->id(r);
-    return QUniqueId();
-}
-
-/*!
   Return the contact for the \a row specified.
 */
 QContact QContactModel::contact(int row) const
 {
-    const QContactIO *model = qobject_cast<const QContactIO*>(d->mio->model(row));
-    int r = d->mio->row(row);
+    const QContactIO *model = qobject_cast<const QContactIO*>(access(row));
+    int r = accessRow(row);
     if (model)
         return model->contact(r);
     return QContact();
@@ -744,10 +711,9 @@ QContact QContactModel::contact(int row) const
 */
 QContact QContactModel::contact(const QUniqueId & id) const
 {
-    foreach(const QContactIO *model, d->models) {
-        if (model->exists(id))
-            return model->contact(id);
-    }
+    const QContactIO *model = qobject_cast<const QContactIO *>(access(id));
+    if (model)
+        return model->contact(id);
     return QContact();
 }
 
@@ -778,7 +744,7 @@ QVariant QContactModel::contactField(const QContact &contact, QContactModel::Fie
         case QContactModel::Label:
             return contact.label();
         case QContactModel::JobTitle:
-            return contact.label();
+            return contact.jobTitle();
         case QContactModel::Department:
             return contact.department();
         case QContactModel::Company:
@@ -1193,17 +1159,19 @@ bool QContactModel::setContactField(QContact &contact, QContactModel::Field f,  
   Updates the contact \a contact so long as a there is a contact in the
   QContactModel with the same uid as \a contact.
 
-  Returns true if the contact was successfully updated.  Otherwise return false.
+  Returns true if the contact was successfully updated.  Otherwise returns false.
 */
 bool QContactModel::updateContact(const QContact& contact)
 {
-    foreach(QContactContext *context, d->contexts) {
-        if (context->exists(contact.uid())) {
-            bool result = context->updateContact(contact);
-            if (result && contact.uid() == personalID())
+    QContactContext *c= qobject_cast<QContactContext *>(context(contact.uid()));
+    if (c) {
+        bool result = c->updateContact(contact);
+        if (result) {
+            if (contact.uid() == personalID())
                 updateBusinessCard(contact);
-            return result;
+            refresh();
         }
+        return result;
     }
     return false;
 }
@@ -1212,7 +1180,7 @@ bool QContactModel::updateContact(const QContact& contact)
   Removes the contact \a contact so long as there is a contact in the QContactModel with
   the same uid as \a contact.
 
-  Returns true if the contact was successfully removed.  Otherwise return false.
+  Returns true if the contact was successfully removed.  Otherwise returns false.
 */
 bool QContactModel::removeContact(const QContact& contact)
 {
@@ -1220,19 +1188,21 @@ bool QContactModel::removeContact(const QContact& contact)
 }
 
 /*!
-  Removes the contact that has the uid \a id from the QContactModel;
+  Removes the contact that has the uid \a id from the QContactModel.
 
-  Returns true if the contact was successfully removed.  Otherwise return false.
+  Returns true if the contact was successfully removed.  Otherwise returns false.
 */
 bool QContactModel::removeContact(const QUniqueId& id)
 {
-    foreach(QContactContext *context, d->contexts) {
-        if (context->exists(id)) {
-            bool result = context->removeContact(id);
-            if (result && id == personalID())
+    QContactContext *c = qobject_cast<QContactContext *>(context(id));
+    if (c) {
+        bool result = c->removeContact(id);
+        if (result) {
+            if (id == personalID())
                 clearPersonalDetails();
-            return result;
+            refresh();
         }
+        return result;
     }
     return false;
 }
@@ -1241,17 +1211,16 @@ bool QContactModel::removeContact(const QUniqueId& id)
   Adds the contact \a contact to the QContactModel under the storage source \a source.
   If source is empty will add the contact to the default storage source.
 
-  Returns true if the contact was successfully added.  Otherwise return false.
+  Returns valid id if the contact was successfully added.  Otherwise returns an invalid id.
 */
 QUniqueId QContactModel::addContact(const QContact& contact, const QPimSource &source)
 {
-    if (source.isNull()) {
-        return d->defaultContext->addContact(contact, source);
-    } else {
-        foreach(QContactContext *context, d->contexts) {
-            if (context->sources().contains(source))
-                return context->addContact(contact, source);
-        }
+    QContactContext *c = qobject_cast<QContactContext *>(context(source));
+
+    QUniqueId id;
+    if (c && !(id = c->addContact(contact, source)).isNull()) {
+        refresh();
+        return id;
     }
     return QUniqueId();
 }
@@ -1278,6 +1247,124 @@ bool QContactModel::removeList(const QList<QUniqueId> &ids)
 }
 
 /*!
+  \overload
+
+  Adds the PIM record encoded in \a bytes to the QContactModel under the storage source \a source.
+  The format of the record in \a bytes is given by \a format.  An empty \a format string will
+  cause the record to be read using the data stream operators for the PIM data type of the model.
+  If \a source is empty will add the record to the default storage source.
+
+  Returns valid id if the record was successfully added.  Otherwise returns an invalid id.
+
+  Can only add PIM data that is represented by the model.  This means that only contact data
+  can be added using a QContactModel.  Valid formats are "vCard" or an empty string.
+
+*/
+QUniqueId QContactModel::addRecord(const QByteArray &bytes, const QPimSource &source, const QString &format)
+{
+    if (format == "vCard") {
+        QList<QContact> list = QContact::readVCard(bytes);
+        if (list.count() == 1)
+            return addContact(list[0], source);
+    } else {
+        QContact c;
+        QDataStream ds(bytes);
+        ds >> c;
+        return addContact(c, source);
+    }
+    return QUniqueId();
+}
+
+/*!
+  \overload
+
+  Updates the record enoded in \a bytes so long as there is a record in the QContactModel with
+  the same uid as the record.  The format of the record in \a bytes is given by \a format.
+  An empty \a format string will cause the record to be read using the data stream operators
+  for the PIM data type of the model. If \a id is not null will set the record uid to \a id
+  before attempting to update the record.
+
+  Returns true if the record was successfully updated.  Otherwise returns false.
+*/
+bool QContactModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, const QString &format)
+{
+    QContact c;
+    if (format == "vCard") {
+        QList<QContact> list = QContact::readVCard(bytes);
+        if (list.count() == 1) {
+            c = list[0];
+        }
+    } else {
+        QDataStream ds(bytes);
+        ds >> c;
+    }
+    if (!id.isNull())
+        c.setUid(id);
+    return updateContact(c);
+}
+
+/*!
+  \fn bool QContactModel::removeRecord(const QUniqueId &id)
+  \overload
+
+  Removes the record that has the uid \a id from the QContactModel.
+
+  Returns true if the record was successfully removed.  Otherwise returns false.
+*/
+
+/*!
+  \overload
+
+    Returns the record with the identifier \a id encoded in the format specified by \a format.
+    An empty \a format string will cause the record to be written using the data stream
+    operators for the PIM data type of the model.
+*/
+QByteArray QContactModel::record(const QUniqueId &id, const QString &format) const
+{
+    QContact c = contact(id);
+    if (c.uid().isNull())
+        return QByteArray();
+
+    QByteArray bytes;
+    QDataStream ds(&bytes, QIODevice::WriteOnly);
+    if (format == "vCard") {
+        c.writeVCard(&ds);
+        return bytes;
+    } else {
+        ds << c;
+        return bytes;
+    }
+    return QByteArray();
+}
+
+void QContactModel::pimMessage(const QString& message, const QByteArray& data)
+{
+    if (message == QLatin1String("updatePersonalId(QUniqueId)")) {
+        QUniqueId id;
+        QDataStream ds(data);
+
+        QUniqueId newId;
+        QUniqueId oldId = d->mPersonalIdRead ? d->mPersonalId : QUniqueId();
+
+        ds >> newId;
+
+        d->mPersonalId = newId;
+        d->mPersonalIdRead = true;
+
+        // Notify views that we changed
+        QModelIndex pd = index(newId);
+        if (pd.isValid())
+            emit dataChanged(pd, pd);
+
+        if (oldId != newId) {
+            pd = index(oldId);
+            if (pd.isValid())
+                emit dataChanged(pd, pd);
+        }
+    }
+}
+
+/*!
   Returns the uid for the contact representing the personal details of the device owner.
 
   If no contact is specified as the personal details of the device owner, will return a
@@ -1285,11 +1372,19 @@ bool QContactModel::removeList(const QList<QUniqueId> &ids)
 */
 QUniqueId QContactModel::personalID() const
 {
-    QSettings c("Trolltech","Pim");
-    c.beginGroup("Contacts");
-    if (!c.value("personalid").isValid())
-        return QUniqueId();
-    return QUniqueId(c.value("personalid").toString());
+    // Cache this, since it is used by QContactDelegate
+    // We broadcast when we change it.
+    if (!d->mPersonalIdRead) {
+        d->mPersonalIdRead = true;
+        QSettings c("Trolltech","Pim");
+        c.beginGroup("Contacts");
+        if (c.contains("personalid"))
+            d->mPersonalId = QUniqueId(c.value("personalid").toString());
+        else
+            d->mPersonalId = QUniqueId();
+    }
+
+    return d->mPersonalId;
 }
 
 /*!
@@ -1314,29 +1409,13 @@ bool QContactModel::hasPersonalDetails() const
 }
 
 /*!
-  Returns true if a contact with the uid \a id is stored in the contact model.  Otherwise
-  return false.
-
-  The contact with uid \a id does not need to be in the current filter mode.
-
-  \sa contains()
-*/
-bool QContactModel::exists(const QUniqueId &id) const
-{
-    foreach(const QContactIO *model, d->models) {
-        if (model->exists(id))
-            return true;
-    }
-    return false;
-}
-
-/*!
   Returns true if the contact for the row specified by \a i represents the personal details
-  of the device owner.  Otherwise return false.
+  of the device owner.  Otherwise returns false.
 */
 bool QContactModel::isPersonalDetails(const QModelIndex &i) const
 {
-    if (hasPersonalDetails() && personalID() == id(i))
+    QUniqueId personalId = personalID();
+    if (personalId == id(i) && exists(personalId))
         return true;
     return false;
 }
@@ -1365,16 +1444,26 @@ void QContactModel::setPersonalDetails(const QUniqueId & i)
         c.setValue("personalid", i.toString());
     }
 
+    d->mPersonalId = i;
+    d->mPersonalIdRead = true;
+
+    // The IPC will send the appropriate signals, if required.
+    {
+        QtopiaIpcEnvelope e("QPE/PIM", "updatePersonalId(QUniqueId)");
+        e << i;
+    }
+
     updateBusinessCard(contact(i));
 }
 
 /*!
   Returns true if the contact with uid \a i represents the personal details
-  of the device owner.  Otherwise return false.
+  of the device owner.  Otherwise returns false.
 */
 bool QContactModel::isPersonalDetails(const QUniqueId & i) const
 {
-    if (hasPersonalDetails() && personalID() == i)
+    QUniqueId personalId = personalID();
+    if (personalId == i && exists(personalId))
         return true;
     return false;
 }
@@ -1421,9 +1510,10 @@ QContact QContactModel::matchPhoneNumber(const QString &text)
 {
     int bestMatch = 0;
     QUniqueId bestId;
-    foreach(const QContactIO *model, d->models) {
+    foreach(const QRecordIO *model, accessModels()) {
+        const QContactIO *contactModel = qobject_cast<const QContactIO *>(model);
         int match;
-        QUniqueId id = model->matchPhoneNumber(text, match);
+        QUniqueId id = contactModel->matchPhoneNumber(text, match);
         if (match > bestMatch) {
             bestMatch = match;
             bestId = id;
@@ -1464,9 +1554,10 @@ void QContactModel::setFilter(const QString &text, int flags)
 
     d->filterText = text;
     d->filterFlags = flags;
-    foreach(QContactIO *model, d->models)
-        model->setFilter(text, flags);
-    d->mio->rebuildCache();
+    foreach(QRecordIO *model, accessModels()) {
+        QContactIO *contactModel = qobject_cast<QContactIO *>(model);
+        contactModel->setFilter(text, flags);
+    }
 }
 
 /*!
@@ -1500,8 +1591,10 @@ void QContactModel::clearFilter()
     if (d->filterText.isEmpty() && d->filterFlags == 0)
         return;
 
-    foreach(QContactIO *model, d->models)
-        model->clearFilter();
+    foreach(QRecordIO *model, accessModels()) {
+        QContactIO *contactModel = qobject_cast<QContactIO *>(model);
+        contactModel->clearFilter();
+    }
 
     d->filterText.clear();
     d->filterFlags = 0;
@@ -1524,9 +1617,9 @@ bool QContactModel::isSIMCardContact(const QModelIndex &index) const
 bool QContactModel::isSIMCardContact(const QUniqueId & id) const
 {
 #ifdef QTOPIA_CELL
-    // sim source changes on loading.
-    bool b = sourceExists(simSource(), id);
-    return b;
+    simSource();
+    // mContext part of id
+    return id.mappedContext() == d->simContext;
 #else
     Q_UNUSED(id);
     return false;
@@ -1543,9 +1636,10 @@ void QContactModel::setSortField(Field s)
     if (s == sortField())
         return;
 
-    foreach(QContactIO *model, d->models)
-        model->setSortKey(s);
-    d->mio->rebuildCache();
+    foreach(QRecordIO *model, accessModels()) {
+        QContactIO *contactModel = qobject_cast<QContactIO *>(model);
+        contactModel->setSortKey(s);
+    }
 }
 
 /*!
@@ -1558,194 +1652,19 @@ QContactModel::Field QContactModel::sortField() const
 }
 
 /*!
-  Set the model to only contain contacts accepted by the QCategoryFilter \a f.
-*/
-void QContactModel::setCategoryFilter(const QCategoryFilter &f)
-{
-    if (f == categoryFilter())
-        return;
-
-    foreach(QContactIO *model, d->models)
-        model->setCategoryFilter(f);
-    d->mio->rebuildCache();
-}
-
-/*!
-  Returns the QCategoryFilter that contacts are tested against for the current filter mode.
-*/
-QCategoryFilter QContactModel::categoryFilter() const
-{
-    // assumed others are the same.
-    return d->defaultmodel->categoryFilter();
-}
-
-/*!
-  \overload
-  Returns the index of the item in the model specified by the given \a row, \a column
-  and \a parent index.
-*/
-QModelIndex QContactModel::index(int row, int column, const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    if (row < 0 || row >= count() || column < 0 || column >= columnCount())
-        return QModelIndex();
-    return createIndex(row,column);
-}
-
-/*!
-  If the model contains a contact with uid \a id, returns the index of the contact.
-  Otherwise returns a null QModelIndex
-
-  \sa contains(), exists()
-*/
-QModelIndex QContactModel::index(const QUniqueId & id) const
-{
-    int i = d->mio->index(id);
-    if (i == -1)
-        return QModelIndex();
-    return createIndex(i, 0);
-}
-
-/*!
-  Return the id for the contact at the row specified by \a index.
-  If index is null or out of the range of the model, will return a null id.
-*/
-QUniqueId QContactModel::id(const QModelIndex &index) const
-{
-    int i = index.row();
-    return id(i);
-}
-
-/*!
-  Returns true if the current filter mode of the model contains \a index.
-  Otherwise returns false.
-*/
-bool QContactModel::contains(const QModelIndex &index) const
-{
-    return (index.row() >= 0 && index.row() < count());
-}
-
-/*!
-  Returns true if the current filter mode of the model contains the contact with the uid \a id.
-  Otherwise returns false.
-*/
-bool QContactModel::contains(const QUniqueId & id) const
-{
-    return index(id).isValid();
-}
-
-/*!
-  Returns the list of sources of contact data that are currently shown by the
-  contact model.
-*/
-QSet<QPimSource> QContactModel::visibleSources() const
-{
-    QSet<QPimSource> set;
-    foreach(QContactContext *c, d->contexts)
-        set.unite(c->visibleSources());
-    return set;
-}
-
-/*!
-   Returns the contexts of contact data that can be shown by the contact model.
-*/
-const QList<QContactContext*> &QContactModel::contexts() const
-{
-    return d->contexts;
-}
-
-/*!
-  Returns the context that contains the contact with identifier \a id.
-  If the contact does not exists returns 0.
-*/
-QContactContext *QContactModel::context(const QUniqueId &id) const
-{
-    foreach(QContactContext *context, d->contexts) {
-        if (context->exists(id))
-            return context;
-    }
-    return 0;
-}
-
-/*!
-  Returns the source identifier that contains the contact with identifier \a id.
-  If the contact does not exist returns a null source.
-*/
-QPimSource QContactModel::source(const QUniqueId &id) const
-{
-    foreach(QContactContext *context, d->contexts) {
-        if (context->exists(id))
-            return context->source(id);
-    }
-    return QPimSource();
-}
-
-/*!
-  Sets the QContactModel to show only contacts contained in the storage sources specified
-  by \a list.
-
-  Also refreshes the model.
-*/
-void QContactModel::setVisibleSources(const QSet<QPimSource> &list)
-{
-    foreach (QContactContext *c, d->contexts) {
-        QSet<QPimSource> cset = c->sources();
-        cset.intersect(list);
-        c->setVisibleSources(cset);
-    }
-    refresh();
-}
-
-/*!
-  Returns true if the contact uid \a id is stored in the storage source \a source.
-  Otherwise returns false.
-*/
-bool QContactModel::sourceExists(const QPimSource &source, const QUniqueId &id) const
-{
-    foreach (QContactContext *c, d->contexts) {
-        if (c->sources().contains(source))
-            return c->exists(id, source);
-    }
-    return false;
-}
-
-/*!
-  Returns the set of identifiers for storage sources that can be shown.
-*/
-QSet<QPimSource> QContactModel::availableSources() const
-{
-    QSet<QPimSource> set;
-    foreach(QContactContext *c, d->contexts)
-        set.unite(c->sources());
-    return set;
-}
-
-/*!
   Returns the identifier for storage sources relating to the SIM Card.
 */
 QPimSource QContactModel::simSource() const
 {
-#ifdef QTOPIA_MODEM
-    foreach(QContactContext *c, d->contexts) {
-        QContactSimContext *sim = qobject_cast<QContactSimContext *>(c);
-        if (sim)
-            return sim->defaultSource();
-    }
-#endif
-    return QPimSource();
+    return d->simSource;
 }
 
 /*!
   Returns the identifier for storage sources relating to the Phone memory.
-*/
+ */
 QPimSource QContactModel::phoneSource() const
 {
-    foreach(QContactContext *c, d->contexts) {
-        QContactDefaultContext *con = qobject_cast<QContactDefaultContext *>(c);
-        if (con)
-            return con->defaultSource();
-    }
-    return QPimSource();
+    return d->phoneSource;
 }
 
 /*!
@@ -1761,18 +1680,12 @@ QPimSource QContactModel::phoneSource() const
 bool QContactModel::mirrorToSource(const QPimSource &dest, const QUniqueId &id)
 {
     QContact c;
-    QContactContext *sourceContext = context(id);
+    QContactContext *sourceContext = qobject_cast<QContactContext *>(context(id));
     QPimSource source = QContactModel::source(id);
-    QContactContext *destContext = 0;
+    QContactContext *destContext = qobject_cast<QContactContext *>(context(dest));
 
     if (source == dest)
         return false;
-    foreach(QContactContext *c, d->contexts) {
-        if (c->sources().contains(dest)) {
-            destContext = c;
-            break;
-        }
-    }
 
     if (sourceContext && destContext) {
         bool result;
@@ -1795,15 +1708,9 @@ bool QContactModel::mirrorAll(const QPimSource &source, const QPimSource &dest)
 {
     if (source == dest || source.isNull() || dest.isNull())
         return false;
-    QContactContext *sourceContext = 0;
-    QContactContext *destContext = 0;
+    QContactContext *sourceContext = qobject_cast<QContactContext *>(context(source));
+    QContactContext *destContext = qobject_cast<QContactContext *>(context(dest));
 
-    foreach(QContactContext *c, d->contexts) {
-        if (c->sources().contains(source))
-            sourceContext = c;
-        if (c->sources().contains(dest))
-            destContext = c;
-    }
     if (sourceContext && destContext) {
         bool result;
         QList<QContact> c = sourceContext->exportContacts(source, result);
@@ -1844,31 +1751,36 @@ bool QContactModel::writeVCard( const QString &filename )
     Returns a list of indexes for the items where the data
     matches the specified \a value.  The list that is returned may be empty.
 
-    The search starts from the \a start index.
+    The search starts from the \a start index, and continues until the number of
+    matching data items equals \a hits, the search reaches the last row
 
-    The arguments \a role, \a hits and \a flags are currently ignored.
+    The arguments \a role and \a flags are currently ignored.
 */
 QModelIndexList QContactModel::match(const QModelIndex &start, int role, const QVariant &value,
             int hits, Qt::MatchFlags flags) const
 {
-    Q_UNUSED(hits);
+    /* role and flags ignored. */
     Q_UNUSED(role);
     Q_UNUSED(flags);
-    /* role, flags and count ignored. */
+
+    QModelIndexList l;
+    if ( 0 == hits )
+        return l;
+
     if (d->searchModel == 0) {
         d->searchModel = new QContactModel(0);
     }
     d->searchModel->setCategoryFilter(categoryFilter());
     d->searchModel->setFilter(value.toString());
 
-    QModelIndexList l;
     for (int i = 0; i < d->searchModel->count(); i++) {
         QModelIndex idx = d->searchModel->index(i, 0, QModelIndex());
         if (idx.isValid()) {
             QModelIndex foundidx = index(d->searchModel->id(idx));
             if (foundidx.row() >= start.row()) {
                 l.append(foundidx);
-                break;
+                if ( hits != -1 && l.count() >= hits )
+                    break;
             }
         }
     }

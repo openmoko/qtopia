@@ -122,7 +122,7 @@ public:
     CallContactDelegate( QObject * parent = 0 );
     virtual ~CallContactDelegate();
 
-    QFont secondaryFont(const QStyleOptionViewItem& o) const;
+    QFont secondaryFont(const QStyleOptionViewItem& o, const QModelIndex& idx) const;
 };
 
 class CallContactView : public QListView

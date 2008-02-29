@@ -24,44 +24,39 @@
 #include "qgooglecontext_p.h"
 #endif
 #include <QSettings>
-#include <QPainter>
 #include <QMap>
 #include <QList>
 #include <QSet>
-#include <QPixmap>
 #include <QFile>
-#include <QTextDocument>
 #include <QTimer>
-#include <QAbstractTextDocumentLayout>
 #include <QApplication>
-#include <QStyle>
 
 #include <QDebug>
 
 #include "qrecordiomerge_p.h"
 
-/*!
-   \class QAppointmentModel
-   \brief QAppointmentModel represents the appointments in the database.
-
-   This class allows you to view, update and delete appointments.
-*/
-
 class QAppointmentModelData
 {
 public:
-    QAppointmentModelData() : mio(0), defaultmodel(0), durationType(QAppointmentModel::AnyDuration) {}
-    QBiasedRecordIOMerge *mio;
-
-    QAppointmentIO *defaultmodel;
-    QAppointmentContext *defaultContext;
-    QList<QAppointmentContext *> contexts;
-    QList<QAppointmentIO*> models;
+    QAppointmentModelData() : durationType(QAppointmentModel::AnyDuration) {}
 
     QDateTime rStart;
     QDateTime rEnd;
     QAppointmentModel::DurationType durationType;
+
+    static QIcon getCachedIcon(const QString& str);
+    static QHash<QString, QIcon> cachedIcons;
 };
+
+QHash<QString, QIcon> QAppointmentModelData::cachedIcons;
+
+QIcon QAppointmentModelData::getCachedIcon(const QString &str)
+{
+    if (cachedIcons.contains(str))
+        return cachedIcons.value(str);
+    cachedIcons.insert(str, QIcon(str));
+    return cachedIcons.value(str);
+}
 
 QMap<QAppointmentModel::Field, QString> QAppointmentModel::k2i;
 QMap<QString, QAppointmentModel::Field> QAppointmentModel::i2k;
@@ -138,7 +133,7 @@ QIcon QAppointmentModel::fieldIcon(Field field)
     if (ident.isEmpty())
         return QIcon();
 
-    return QIcon(":image/datebook/" + ident);
+    return QAppointmentModelData::getCachedIcon(":image/datebook/" + ident);
 }
 
 /*!
@@ -191,39 +186,21 @@ QAppointmentModel::Field QAppointmentModel::identifierField(const QString &ident
   Constructs a QAppointmentModel with parent \a parent.
 */
 QAppointmentModel::QAppointmentModel(QObject *parent)
-    : QAbstractItemModel(parent)
+    : QPimModel(parent)
 {
+
     QtopiaSql::openDatabase();
     d = new QAppointmentModelData();
-    d->mio = new QBiasedRecordIOMerge(this);
 
-    d->defaultmodel = new QAppointmentSqlIO(this);
+    QAppointmentSqlIO *access = new QAppointmentSqlIO(this);
+    QAppointmentContext *context = new QAppointmentDefaultContext(this, access);
 
-    QAppointmentDefaultContext *dcon = new QAppointmentDefaultContext(this, d->defaultmodel);
-
-    d->defaultContext = dcon;
-
-    d->models.append(d->defaultmodel);
-    d->contexts.append(dcon);
+    addAccess(access);
+    addContext(context);
 
 #ifdef GOOGLE_CALENDAR_CONTEXT
-    QGoogleCalendarContext *gcon = new QGoogleCalendarContext(this, d->defaultmodel);
-    d->contexts.append(gcon);
+    addContext(new QGoogleCalendarContext(this, access));
 #endif
-
-    d->mio->setPrimaryModel(d->defaultmodel);
-
-    // XXX BiasedRecordIOMerge doesn't emit reset until after a timer event
-    // is dispatched, which leaves us inconsistent for a short while after
-    // a change.  This mostly affects QOccurrenceModel, which has a higher
-    // level cache.  There's no API for querying whether a IOMerge or a
-    // QAppointmentModel is pending a cache rebuild, unfortunately.
-    // Thus we monitor the models directly.
-    foreach(const QAppointmentIO *model, d->models) {
-        connect(model, SIGNAL(recordsUpdated()), this, SLOT(voidCache()));
-    }
-    // This might not be necessary any more
-    connect(d->mio, SIGNAL(reset()), this, SLOT(voidCache()));
 }
 
 /*!
@@ -232,11 +209,6 @@ QAppointmentModel::QAppointmentModel(QObject *parent)
 QAppointmentModel::~QAppointmentModel()
 {
     delete d;
-}
-
-void QAppointmentModel::voidCache()
-{
-    reset();
 }
 
 /*!
@@ -308,8 +280,11 @@ QStringList QAppointmentModel::mimeTypes() const
 */
 QVariant QAppointmentModel::data(const QModelIndex &index, int role) const
 {
-    //generic = QPixmap(":image/datebook/generic-appointment");
-    QAppointment c(appointment(index));
+    const QAppointmentIO *model = qobject_cast<const QAppointmentIO *>(access(index.row()));
+    int r = accessRow(index.row());
+    if (!model)
+        return QVariant();
+
     switch(index.column()) {
         case Description:
             if (index.row() < rowCount()){
@@ -318,12 +293,12 @@ QVariant QAppointmentModel::data(const QModelIndex &index, int role) const
                     default:
                         break;
                     case Qt::DisplayRole:
-                        return QVariant(c.description());
+                        return model->appointmentField(r, Description);
                     case Qt::EditRole:
-                        return QVariant(c.uid().toByteArray());
+                        return model->appointmentField(r, Identifier).toByteArray();
                     case LabelRole:
                         {
-                            QString l = c.description();
+                            QString l = model->appointmentField(r, Description).toString();
                             return "<b>" + l + "</b>";
                         }
                         break;
@@ -332,27 +307,10 @@ QVariant QAppointmentModel::data(const QModelIndex &index, int role) const
             break;
         default:
             if (index.column() > 0 && index.column() < columnCount())
-                return appointmentField(c, (Field)index.column());
+                return model->appointmentField(r, (QAppointmentModel::Field)index.column());
             break;
     }
     return QVariant();
-}
-
-/*!
-  \fn int QAppointmentModel::count() const
-
-  Returns the number of appointments visible in the current filter mode.
-*/
-
-/*!
-  \overload
-
-  Returns the number of rows under the given \a parent.
-*/
-int QAppointmentModel::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent)
-    return d->mio->count();
 }
 
 /*!
@@ -371,12 +329,24 @@ int QAppointmentModel::columnCount(const QModelIndex &parent) const
   Sets the \a role data for the item at \a index to \a value. Returns true if successful,
   otherwise returns false.
 */
-bool QAppointmentModel::setData(const QModelIndex &index, const QVariant &value, int role) const
+bool QAppointmentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (role != Qt::EditRole)
         return false;
     if (!index.isValid())
         return false;
+
+    QAppointment a = appointment(index);
+    if (!setAppointmentField(a, (Field)index.column(), value))
+        return false;
+    return updateAppointment(a);
+
+#if 0
+    /* disabled due to 'notifyUpdated' require whole record.
+       While writing whole record is less efficient than partial - at 
+       this stage it was the easiest way of fixing the bug where setData
+       did not result in cross-model data change from being propogated properly
+   */
 
     int i = index.row();
     const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(d->mio->model(i));
@@ -384,6 +354,7 @@ bool QAppointmentModel::setData(const QModelIndex &index, const QVariant &value,
     if (model)
         return ((QAppointmentIO *)model)->setAppointmentField(r, (Field)index.column(), value);
     return false;
+#endif
 }
 
 /*!
@@ -391,7 +362,7 @@ bool QAppointmentModel::setData(const QModelIndex &index, const QVariant &value,
   For every Qt::ItemDataRole in \a roles, sets the role data for the item at \a index to the
   associated value in \a roles. Returns true if successful, otherwise returns false.
 */
-bool QAppointmentModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &roles) const
+bool QAppointmentModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &roles)
 {
     if (roles.count() != 1 || !roles.contains(Qt::EditRole))
         return false;
@@ -441,41 +412,6 @@ QVariant QAppointmentModel::headerData(int section, Qt::Orientation orientation,
 }
 
 /*!
-  \overload
-    Returns the parent of the model item with the given \a index.
-*/
-QModelIndex QAppointmentModel::parent(const QModelIndex &index) const
-{
-    // TODO depend on view style.
-    Q_UNUSED(index);
-    return QModelIndex();
-}
-
-/*!
-  \overload
-  Returns true if \a parent has any children; otherwise returns false.
-  Use rowCount() on the parent to find out the number of children.
-
-  \sa parent(), index()
-*/
-bool QAppointmentModel::hasChildren(const QModelIndex &parent) const
-{
-    // TODO maybe?  after all, the concept of children does exist.
-    Q_UNUSED(parent)
-    return false;
-}
-
-/*!
-  Ensures the data in Appointments is in a state suitable for syncing.
-*/
-bool QAppointmentModel::flush() { return true; }
-
-/*!
-  Forces a refresh of the Appointment data.
-*/
-bool QAppointmentModel::refresh() { reset(); return true; }
-
-/*!
   Returns the appointment for the row specified by \a index.
   The column of \a index is ignored.
 */
@@ -489,8 +425,8 @@ QAppointment QAppointmentModel::appointment(const QModelIndex &index) const
 */
 QAppointment QAppointmentModel::appointment(int row) const
 {
-    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(d->mio->model(row));
-    int r = d->mio->row(row);
+    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(access(row));
+    int r = accessRow(row);
     if (model)
         return model->appointment(r);
     return QAppointment();
@@ -502,10 +438,9 @@ QAppointment QAppointmentModel::appointment(int row) const
 */
 QAppointment QAppointmentModel::appointment(const QUniqueId & id) const
 {
-    foreach(const QAppointmentIO *model, d->models) {
-        if (model->exists(id))
-            return model->appointment(id);
-    }
+    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(access(id));
+    if (model)
+        return model->appointment(id);
     return QAppointment();
 }
 
@@ -653,10 +588,10 @@ bool QAppointmentModel::setAppointmentField(QAppointment &appointment, QAppointm
 */
 bool QAppointmentModel::updateAppointment(const QAppointment& appointment)
 {
-    foreach(QAppointmentContext *context, d->contexts) {
-        if (context->exists(appointment.uid())) {
-            return context->updateAppointment(appointment);
-        }
+    QAppointmentContext *c= qobject_cast<QAppointmentContext *>(context(appointment.uid()));
+    if (c && c->updateAppointment(appointment)) {
+        refresh();
+        return true;
     }
     return false;
 }
@@ -679,10 +614,10 @@ bool QAppointmentModel::removeAppointment(const QAppointment& appointment)
 */
 bool QAppointmentModel::removeAppointment(const QUniqueId& id)
 {
-    foreach(QAppointmentContext *context, d->contexts) {
-        if (context->exists(id)) {
-            return context->removeAppointment(id);
-        }
+    QAppointmentContext *c= qobject_cast<QAppointmentContext *>(context(id));
+    if (c && c->removeAppointment(id)) {
+        refresh();
+        return true;
     }
     return false;
 }
@@ -695,13 +630,12 @@ bool QAppointmentModel::removeAppointment(const QUniqueId& id)
 */
 QUniqueId QAppointmentModel::addAppointment(const QAppointment& appointment, const QPimSource &source)
 {
-    if (source.isNull()) {
-        return d->defaultContext->addAppointment(appointment, source);
-    } else {
-        foreach(QAppointmentContext *context, d->contexts) {
-            if (context->sources().contains(source))
-                return context->addAppointment(appointment, source);
-        }
+    QAppointmentContext *c = qobject_cast<QAppointmentContext *>(context(source));
+
+    QUniqueId id;
+    if (c && !(id = c->addAppointment(appointment, source)).isNull()) {
+        refresh();
+        return id;
     }
     return QUniqueId();
 }
@@ -740,40 +674,49 @@ bool QAppointmentModel::removeOccurrence(const QAppointment& appointment, const 
 
 bool QAppointmentModel::removeOccurrence(const QUniqueId &id, const QDate &date)
 {
-    foreach(QAppointmentContext *context, d->contexts) {
-        if (context->exists(id))
-            return context->removeOccurrence(id, date);
+    QAppointmentContext *c = qobject_cast<QAppointmentContext *>(context(id));
+    if (c && c->removeOccurrence(id, date)) {
+        refresh();
+        return true;
     }
     return false;
 }
 
 /*!
-  Replaces an occurrence of the appointment \a appointment with an \a occurrence that begins on the same date.
+  Replaces an occurrence of the appointment \a appointment on the date \a date with \a occurrence.
+  If \a date is null, the start date of the supplied \a occurrence will be used to create the
+  exception.
 
   Returns the uid of the replacement appointment.
 */
 
-QUniqueId QAppointmentModel::replaceOccurrence(const QAppointment& appointment, const QOccurrence& occurrence)
+QUniqueId QAppointmentModel::replaceOccurrence(const QAppointment& appointment, const QOccurrence& occurrence, const QDate& date)
 {
-    foreach(QAppointmentContext *context, d->contexts) {
-        if (context->exists(appointment.uid()))
-            return context->replaceOccurrence(appointment.uid(), occurrence);
+    QAppointmentContext *c = qobject_cast<QAppointmentContext *>(context(appointment.uid()));
+    QUniqueId id;
+    if (c && !(id = c->replaceOccurrence(appointment.uid(), occurrence, date)).isNull()) {
+        refresh();
+        return id;
     }
     return QUniqueId();
 }
 
 /*!
   Remove all occurrences of the appointment \a appointment with occurrences of the appointment \a replacement that
-  occur on or after the start date of the \a replacement.
+  occur on or after the date \a date.  If \a date is null, the start date of the \a replacement will be used as
+  the transition date.  The original \a appointment will have its repeatUntil date set to the day before the
+  transition date.
 
   Returns the uid of the replacement appointment.
 */
 
-QUniqueId QAppointmentModel::replaceRemaining(const QAppointment& appointment, const QAppointment& replacement)
+QUniqueId QAppointmentModel::replaceRemaining(const QAppointment& appointment, const QAppointment& replacement, const QDate& date)
 {
-    foreach(QAppointmentContext *context, d->contexts) {
-        if (context->exists(appointment.uid()))
-            return context->replaceRemaining(appointment.uid(), replacement);
+    QAppointmentContext *c = qobject_cast<QAppointmentContext *>(context(appointment.uid()));
+    QUniqueId id;
+    if (c && !(id = c->replaceRemaining(appointment.uid(), replacement, date)).isNull()) {
+        refresh();
+        return id;
     }
     return QUniqueId();
 }
@@ -800,18 +743,94 @@ bool QAppointmentModel::removeList(const QList<QUniqueId> &ids)
 }
 
 /*!
-  Returns true if a appointment with the uid \a id is stored in the appointment model.  Otherwise
-  return false.
+  \overload
 
-  The appointment with uid id does not need to be in the current filter mode.
+  Adds the PIM record encoded in \a bytes to the QAppointmentModel under the storage source \a source.
+  The format of the record in \a bytes is given by \a format.  An empty \a format string will
+  cause the record to be read using the data stream operators for the PIM data type of the model.
+  If \a source is empty will add the record to the default storage source.
+
+  Returns valid id if the record was successfully added.  Otherwise returns an invalid id.
+
+  Can only add PIM data that is represented by the model.  This means that only appointment data
+  can be added using a QAppointmentModel.  Valid formats are "vCalendar" or an empty string.
+
 */
-bool QAppointmentModel::exists(const QUniqueId &id) const
+QUniqueId QAppointmentModel::addRecord(const QByteArray &bytes, const QPimSource &source, const QString &format)
 {
-    foreach(const QAppointmentIO *model, d->models) {
-        if (model->exists(id))
-            return true;
+    if (format == "vCalendar") {
+        QList<QAppointment> list = QAppointment::readVCalendar(bytes);
+        if (list.count() == 1)
+            return addAppointment(list[0], source);
+    } else {
+        QAppointment a;
+        QDataStream ds(bytes);
+        ds >> a;
+        return addAppointment(a, source);
     }
-    return false;
+    return QUniqueId();
+}
+
+/*!
+  \overload
+
+  Updates the record enoded in \a bytes so long as there is a record in the QAppointmentModel with
+  the same uid as the record.  The format of the record in \a bytes is given by \a format.
+  An empty \a format string will cause the record to be read using the data stream operators
+  for the PIM data type of the model. If \a id is not null will set the record uid to \a id
+  before attempting to update the record.
+
+  Returns true if the record was successfully updated.  Otherwise returns false.
+*/
+bool QAppointmentModel::updateRecord(const QUniqueId &id, const QByteArray &bytes, const QString &format)
+{
+    QAppointment a;
+    if (format == "vCalendar") {
+        QList<QAppointment> list = QAppointment::readVCalendar(bytes);
+        if (list.count() == 1) {
+            a = list[0];
+        }
+    } else {
+        QDataStream ds(bytes);
+        ds >> a;
+    }
+    if (!id.isNull())
+        a.setUid(id);
+    return updateAppointment(a);
+}
+
+/*!
+  \fn bool QAppointmentModel::removeRecord(const QUniqueId &id)
+  \overload
+
+  Removes the record that has the uid \a id from the QAppointmentModel.
+
+  Returns true if the record was successfully removed.  Otherwise returns false.
+*/
+
+/*!
+  \overload
+
+    Returns the record with the identifier \a id encoded in the format specified by \a format.
+    An empty \a format string will cause the record to be written using the data stream
+    operators for the PIM data type of the model.
+*/
+QByteArray QAppointmentModel::record(const QUniqueId &id, const QString &format) const
+{
+    QAppointment a = appointment(id);
+    if (a.uid().isNull())
+        return QByteArray();
+
+    QByteArray bytes;
+    QDataStream ds(&bytes, QIODevice::WriteOnly);
+    if (format == "vCalendar") {
+        a.writeVCalendar(&ds);
+        return bytes;
+    } else {
+        ds << a;
+        return bytes;
+    }
+    return QByteArray();
 }
 
 /*!
@@ -823,9 +842,10 @@ void QAppointmentModel::setDurationType(DurationType type)
         return;
     d->durationType = type;
 
-    foreach(QAppointmentIO *model, d->models)
-        model->setDurationType(type);
-    d->mio->rebuildCache();
+    foreach(QRecordIO *model, accessModels()) {
+        QAppointmentIO *appointmentModel = qobject_cast<QAppointmentIO *>(model);
+        appointmentModel->setDurationType(type);
+    }
 }
 
 /*!
@@ -851,9 +871,10 @@ void QAppointmentModel::setRange(const QDateTime &rangeStart, const QDateTime &r
     d->rStart = rangeStart;
     d->rEnd = rangeEnd;
 
-    foreach(QAppointmentIO *model, d->models)
-        model->setRangeFilter(rangeStart, rangeEnd);
-    d->mio->rebuildCache();
+    foreach(QRecordIO *model, accessModels()) {
+        QAppointmentIO *appointmentModel = qobject_cast<QAppointmentIO *>(model);
+        appointmentModel->setRangeFilter(rangeStart, rangeEnd);
+    }
 }
 
 /*!
@@ -876,183 +897,12 @@ QDateTime QAppointmentModel::rangeEnd() const
     return d->rEnd;
 }
 
-/*!
-  Set the model to only contain appointments accepted by the QCategoryFilter \a f.
-*/
-void QAppointmentModel::setCategoryFilter(const QCategoryFilter &f)
-{
-    if (f == categoryFilter())
-        return;
-
-    foreach(QAppointmentIO *model, d->models)
-        model->setCategoryFilter(f);
-    d->mio->rebuildCache();
-}
-
-/*!
-  Returns the QCategoryFilter that appointments are tested against for the current filter mode.
-*/
-QCategoryFilter QAppointmentModel::categoryFilter() const
-{
-    // assumed others are the same.
-    return d->defaultmodel->categoryFilter();
-}
-
-/*!
-  \overload
-  Returns the index of the item in the model specified by the given \a row, \a column
-  and \a parent index.
-*/
-QModelIndex QAppointmentModel::index(int row, int column, const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    if (row < 0 || row >= rowCount() || column < 0 || column >= columnCount())
-        return QModelIndex();
-    return createIndex(row,column);
-}
-
-/*!
-  If the model contains a appointment with uid \a id returns the index of the appointment.
-  Otherwise returns a null QModelIndex
-
-  \sa exists()
-*/
-QModelIndex QAppointmentModel::index(const QUniqueId & id) const
-{
-    int i = d->mio->index(id);
-    if (i == -1)
-        return QModelIndex();
-    return createIndex(i, 0);
-}
-
-/*!
-  Return the id for the appointment at the row specified by \a index.
-  if index is null or out of the range of the model will return a null id.
-*/
-QUniqueId QAppointmentModel::id(const QModelIndex &index) const
-{
-    int i = index.row();
-    const QAppointmentIO *model = qobject_cast<const QAppointmentIO *>(d->mio->model(i));
-    int r = d->mio->row(i);
-    if (model)
-        return model->id(r);
-    return QUniqueId();
-}
-
-/*!
-  Returns the list of sources of appointment data that are currently shown by the
-  appointment model.
-*/
-QSet<QPimSource> QAppointmentModel::visibleSources() const
-{
-    QSet<QPimSource> set;
-    foreach(QPimContext *c, d->contexts)
-        set.unite(c->visibleSources());
-    return set;
-}
-
-/*!
-   Returns the contexts of appointment data that can be shown by the appointment model.
-*/
-const QList<QAppointmentContext*> &QAppointmentModel::contexts() const
-{
-    return d->contexts;
-}
-
-/*!
-  Returns the context that contains the appointment with identifier \a id.
-  If the contact does not exists returns 0.
-*/
-QAppointmentContext *QAppointmentModel::context(const QUniqueId &id) const
-{
-    foreach(QAppointmentContext *context, d->contexts) {
-        if (context->exists(id))
-            return context;
-    }
-    return 0;
-}
-
-/*!
-  Returns the source identifier that contains the appointment with identifier \a id.
-  If the appointment does not exist returns a null source.
-*/
-QPimSource QAppointmentModel::source(const QUniqueId &id) const
-{
-    foreach(QPimContext *context, d->contexts) {
-        if (context->exists(id))
-            return context->source(id);
-    }
-    return QPimSource();
-}
-
-/*!
-  Sets the QAppointmentModel to show only appointments contained in the storage sources specified
-  by \a list.
-
-  Also refreshes the model.
-*/
-void QAppointmentModel::setVisibleSources(const QSet<QPimSource> &list)
-{
-    foreach (QPimContext *c, d->contexts) {
-        QSet<QPimSource> cset = c->sources();
-        cset.intersect(list);
-        c->setVisibleSources(cset);
-    }
-    refresh();
-}
-
-/*!
-  Returns true if the appointment uid \a id is stored in the storage source \a source.
-  Otherwise returns false.
-*/
-bool QAppointmentModel::sourceExists(const QPimSource &source, const QUniqueId &id) const
-{
-    foreach (QPimContext *c, d->contexts) {
-        if (c->sources().contains(source))
-            return c->exists(id, source);
-    }
-    return false;
-}
-
-/*!
-  Returns the set of identifiers for storage sources that can be shown.
-*/
-QSet<QPimSource> QAppointmentModel::availableSources() const
-{
-    QSet<QPimSource> set;
-    foreach(QPimContext *c, d->contexts)
-        set.unite(c->sources());
-    return set;
-}
-
-/*!
-  Returns true if the appointment for \a index can be updated or removed.
-  Otherwise returns false.
-*/
-bool QAppointmentModel::editable(const QModelIndex &index) const
-{
-    return editable(id(index));
-}
-
-/*!
-  Returns true if the appointment for \a id can be updated or removed.
-  Otherwise returns false.
-*/
-bool QAppointmentModel::editable(const QUniqueId &id) const
-{
-    foreach (QPimContext *c, d->contexts) {
-        if (c->exists(id))
-            return c->editable();
-    }
-    return false;
-}
-
 // QOccurrenceModel start
 
 class QOccurrenceModelData
 {
 public:
-    QOccurrenceModelData() : requestedCount(-1), rebuildCacheTimer(0) {}
+    QOccurrenceModelData() : requestedCount(-1) {}
 
     QAppointmentModel *appointmentModel;
 
@@ -1061,9 +911,16 @@ public:
     QDateTime end;
     int requestedCount;
 
-    QTimer *rebuildCacheTimer;
+    struct OccurrenceItem
+    {
+        QDateTime startInTZ;
+        QDateTime endInTZ;
+        QDate date;
+        QUniqueId id;
+        int row;
+    };
 
-    QVector< QPair<QDate, QUniqueId> > cache;
+    QVector< OccurrenceItem > cache;
 };
 
 /*!
@@ -1078,7 +935,9 @@ public:
 
   It differs from the QAppointmentModel in that it will show each occurrence of appointments as a
   separate item in the model.  Since some appointments have infinite occurrences a date
-  range must be specified to limit the total set of occurrences included in the model.
+  range must be specified to limit the total set of occurrences included in the model.  Another important difference
+  is that the values for the QAppointmentModel::Start and QAppointmentModel::End columns are converted
+  to the current time zone of the device.
 */
 
 /*!
@@ -1107,6 +966,7 @@ public:
 /*!
   Constructs a QOccurrenceModel that contains appointments that occur in the
   range of \a start to \a end.  The model will have the parent \a parent.
+  Both \a start and \a end should be in the local time zone.
 */
 QOccurrenceModel::QOccurrenceModel(const QDateTime &start, const QDateTime &end, QObject *parent)
     : QAbstractItemModel(parent)
@@ -1117,8 +977,8 @@ QOccurrenceModel::QOccurrenceModel(const QDateTime &start, const QDateTime &end,
 
 /*!
   Constructs a QOccurrenceModel that contains appointments that
-  occur in the range of \a start for a total of \a count
-  occurrences.  The model will have the parent \a parent.
+  occur at or after \a start (in the local time zone) for a total
+  of \a count occurrences.  The model will have the parent \a parent.
 */
 QOccurrenceModel::QOccurrenceModel(const QDateTime &start, int count, QObject *parent)
     : QAbstractItemModel(parent)
@@ -1130,13 +990,9 @@ QOccurrenceModel::QOccurrenceModel(const QDateTime &start, int count, QObject *p
 void QOccurrenceModel::init(QAppointmentModel *appointmentModel)
 {
     od = new QOccurrenceModelData();
-    od->rebuildCacheTimer = new QTimer(this);
-    od->rebuildCacheTimer->setSingleShot(true);
-    od->rebuildCacheTimer->setInterval(0);
-    connect(od->rebuildCacheTimer, SIGNAL(timeout()), this, SLOT(rebuildCache()));
 
     od->appointmentModel = appointmentModel;
-    connect(od->appointmentModel, SIGNAL(modelReset()), this, SLOT(voidCache()));
+    connect(od->appointmentModel, SIGNAL(modelReset()), this, SLOT(rebuildCache()));
 }
 
 /*!
@@ -1202,6 +1058,11 @@ QStringList QOccurrenceModel::mimeTypes() const
     return QStringList();
 }
 
+QVariant QOccurrenceModel::appointmentData(int row, int column) const
+{
+    return od->appointmentModel->data(od->appointmentModel->index(row, column), Qt::DisplayRole);
+}
+
 /*!
   \overload
 
@@ -1209,63 +1070,63 @@ QStringList QOccurrenceModel::mimeTypes() const
 */
 QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
 {
-    // should have different roles?
-    //generic = QPixmap(":image/datebook/generic-appointment");
-    QOccurrence o = occurrence(index);
+    if (!index.isValid() || index.row() >= rowCount())
+        return QVariant();
+
+    QOccurrenceModelData::OccurrenceItem item = od->cache.at(index.row());
+
     switch(index.column()) {
         case QAppointmentModel::Description:
-            if (index.row() < rowCount()){
-                // later, take better advantage of roles.
-                switch(role) {
-                    default:
-                        break;
-                    case Qt::DisplayRole:
-                        return QVariant(o.description());
-                    case Qt::EditRole:
-                        return QVariant(o.uid().toByteArray());
-                    case QAppointmentModel::LabelRole:
-                        {
-                            QString l = o.description();
-                            return "<b>" + l + "</b>";
-                        }
-                    case Qt::BackgroundColorRole:
+            switch(role) {
+                default:
+                    break;
+                case Qt::DisplayRole:
+                    return appointmentData(item.row, QAppointmentModel::Description);
+                case Qt::EditRole:
+                    return item.id.toByteArray();
+                case QAppointmentModel::LabelRole:
+                    {
+                        QString l = appointmentData(item.row, QAppointmentModel::Description).toString();
+                        return "<b>" + l + "</b>";
+                    }
+                case Qt::BackgroundColorRole:
+                    if( appointmentData(item.row, QAppointmentModel::RepeatRule)
+                            != QAppointment::NoRepeat )
+                        return QVariant( QColor( 0, 50, 255 ) );
+                    else
+                        return QVariant( QColor( 255, 50, 0 ) );
+                case Qt::DecorationRole:
+                    {
+                        QOccurrence o = occurrence(index);
+                        QList<QVariant> icons;
                         if( o.appointment().hasRepeat() )
-                            return QVariant( QColor( 0, 50, 255 ) );
-                        else
-                            return QVariant( QColor( 255, 50, 0 ) );
-                    case Qt::DecorationRole:
-                        {
-                            QList<QVariant> icons;
-                            if( o.appointment().hasRepeat() )
-                                icons.append( QVariant( QIcon( ":icon/repeat" ) ) );
-                            if( o.appointment().isException() )
-                                icons.append( QVariant( QIcon( ":icon/repeatException" ) ) );
-                            if( o.appointment().timeZone() != QTimeZone() && o.appointment().timeZone() != QTimeZone::current() )
-                                icons.append( QVariant( QIcon( ":icon/globe" ) ) );
-                            switch( o.alarm() ) {
-                                case QAppointment::Audible:
-                                    icons.append( QVariant( QIcon( ":icon/audible" ) ) );
-                                    break;
-                                case QAppointment::Visible:
-                                    icons.append( QVariant( QIcon( ":icon/silent" ) ) );
-                                    break;
-                                default:
-                                    break;
-                            }
-                            return icons;
+                            icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/repeat" ) ) );
+                        if( o.appointment().isException() )
+                            icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/repeatException" ) ) );
+                        if( o.appointment().timeZone() != QTimeZone() && o.appointment().timeZone() != QTimeZone::current() )
+                            icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/globe" ) ) );
+                        switch( o.alarm() ) {
+                            case QAppointment::Audible:
+                                icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/audible" ) ) );
+                                break;
+                            case QAppointment::Visible:
+                                icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/silent" ) ) );
+                                break;
+                            default:
+                                break;
                         }
-                }
+                        return icons;
+                    }
             }
             break;
         case QAppointmentModel::Start:
-            return o.start();
+            return od->cache.at(index.row()).startInTZ;
         case QAppointmentModel::End:
-            return o.end();
+            return od->cache.at(index.row()).endInTZ;
         default:
-            return QAppointmentModel::appointmentField(o.appointment(), (QAppointmentModel::Field)index.column());
             break;
     }
-    return QVariant();
+    return od->appointmentModel->data(od->appointmentModel->index(item.row, index.column()), role);
 }
 
 /*!
@@ -1273,7 +1134,7 @@ QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
   Returns false since QOccurrenceModel does not allow editing.  \a index, \a value and \a role
   are ignored.
 */
-bool QOccurrenceModel::setData(const QModelIndex &index, const QVariant &value, int role) const
+bool QOccurrenceModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     Q_UNUSED(index)
     Q_UNUSED(value)
@@ -1286,7 +1147,7 @@ bool QOccurrenceModel::setData(const QModelIndex &index, const QVariant &value, 
   Returns false since QOccurrenceModel does not allow editing.  \a index and \a values
   are ignored
 */
-bool QOccurrenceModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &values) const
+bool QOccurrenceModel::setItemData(const QModelIndex &index, const QMap<int,QVariant> &values)
 {
     Q_UNUSED(index)
     Q_UNUSED(values)
@@ -1331,7 +1192,7 @@ bool QOccurrenceModel::contains(const QModelIndex &index) const
 bool QOccurrenceModel::contains(const QUniqueId &id) const
 {
     for (int i = 0; i < od->cache.size(); ++i) {
-        if (od->cache.at(i).second == id)
+        if (od->cache.at(i).id == id)
             return true;
     }
     return false;
@@ -1347,7 +1208,7 @@ bool QOccurrenceModel::contains(const QUniqueId &id) const
 QModelIndex QOccurrenceModel::index(const QUniqueId &id) const
 {
     for (int i = 0; i < od->cache.size(); ++i) {
-        if (od->cache.at(i).second == id)
+        if (od->cache.at(i).id == id)
             return createIndex(i, 0);
     }
     return QModelIndex();
@@ -1360,7 +1221,7 @@ QModelIndex QOccurrenceModel::index(const QUniqueId &id) const
 */
 QUniqueId QOccurrenceModel::id(const QModelIndex &index) const
 {
-    return od->cache.at(index.row()).second;
+    return od->cache.at(index.row()).id;
 }
 
 /*!
@@ -1371,10 +1232,10 @@ QModelIndex QOccurrenceModel::index(const QOccurrence &o) const
 {
     if (od->cache.count() < 1)
         return QModelIndex();
-    QPair<QDate, QUniqueId> value(o.date(), o.uid());
-    int index = od->cache.indexOf(value);
-    if (index > -1)
-        return createIndex(index, 0);
+    for (int i = 0; i < od->cache.size(); ++i) {
+        if (od->cache.at(i).id == o.uid() && od->cache.at(i).date == o.date())
+            return createIndex(i, 0);
+    }
     return QModelIndex();
 }
 
@@ -1392,8 +1253,8 @@ QOccurrence QOccurrenceModel::occurrence(const QModelIndex &index) const
 */
 QOccurrence QOccurrenceModel::occurrence(int row) const
 {
-    QPair<QDate, QUniqueId> value = od->cache[row];
-    return QOccurrence(value.first, od->appointmentModel->appointment(value.second));
+    QOccurrenceModelData::OccurrenceItem value = od->cache[row];
+    return QOccurrence(value.date, od->appointmentModel->appointment(value.id));
 }
 
 /*!
@@ -1403,10 +1264,9 @@ QOccurrence QOccurrenceModel::occurrence(int row) const
 */
 QOccurrence QOccurrenceModel::occurrence(const QUniqueId &id, const QDate &date) const
 {
-    QPair<QDate, QUniqueId> value(date, id);
-    int index = od->cache.indexOf(value);
-    if (index > -1)
-        return QOccurrence(date, appointment(id));
+    QOccurrence o(date, appointment(id));
+    if (index(o).isValid())
+        return o;
     return QOccurrence();
 }
 
@@ -1462,8 +1322,8 @@ QAppointmentModel::DurationType QOccurrenceModel::durationType() const
 // get the appointment and edit that.
 
 /*!
-  Sets the model to only contain the first \a count occurrences that occur after the
-  \a start of the specified range
+  Sets the model to only contain the first \a count occurrences that occur at or after the
+  \a start (in the local time zone) of the specified range.
 */
 void QOccurrenceModel::setRange(const QDateTime &start, int count)
 {
@@ -1473,27 +1333,26 @@ void QOccurrenceModel::setRange(const QDateTime &start, int count)
     od->start = start;
     od->end = QDateTime();
     od->requestedCount = count;
-    voidCache();
 }
 
 /*!
-  Sets the model to only contain occurrences that occur between the \a start and
-  \a end of the specified range.
+  Sets the model to only contain occurrences that start before the \a end of the range,
+  and end at or after the \a start of the range.  Both \a start and \a end should be
+  in the local time zone.
 */
 void QOccurrenceModel::setRange(const QDateTime &start, const QDateTime &end)
 {
     if (!start.isValid() || !end.isValid() || start >= end)
         return;
-    od->appointmentModel->setRange(start, end);
+    od->appointmentModel->setRange(start.addDays(-1), end.addDays(1)); // account for TZ
     od->start = start;
     od->end = end;
     od->requestedCount = -1;
-    voidCache();
 }
 
 /*!
-  Returns the start of the range specified that occurrences must end after to be
-  included in the model
+  Returns the start of the range specified that occurrences must end at or after to be
+  included in the model, in the local time zone.
 */
 QDateTime QOccurrenceModel::rangeStart() const
 {
@@ -1502,7 +1361,7 @@ QDateTime QOccurrenceModel::rangeStart() const
 
 /*!
   Returns the end of the range specified that occurrences must start before to be included
-  in the model.
+  in the model, in the local time zone.
 
   If the range was specified by a start and a count, this will return a null QDateTime.
 */
@@ -1582,11 +1441,6 @@ bool QOccurrenceModel::editable(const QUniqueId &id) const
     return od->appointmentModel->editable(id);
 }
 
-void QOccurrenceModel::voidCache()
-{
-    od->rebuildCacheTimer->start();
-}
-
 /*!
   Returns true if the occurrence model has not yet updated the list of occurrence
   due to a change in stored appointments.
@@ -1595,7 +1449,7 @@ void QOccurrenceModel::voidCache()
 */
 bool QOccurrenceModel::fetching() const
 {
-    return od->rebuildCacheTimer->isActive();
+    return false;
 }
 
 /*!
@@ -1617,8 +1471,7 @@ bool QOccurrenceModel::fetching() const
 */
 void QOccurrenceModel::completeFetch()
 {
-    if (fetching())
-        rebuildCache();
+    od->appointmentModel->refresh();
 }
 
 /*!
@@ -1630,12 +1483,11 @@ void QOccurrenceModel::completeFetch()
 */
 void QOccurrenceModel::rebuildCache()
 {
-    od->rebuildCacheTimer->stop();
     /*
        for each appointment, build a list of occurrences.
    */
     if( (!od->end.isNull() || od->requestedCount > 0) && !od->start.isNull()) {
-        QMultiMap< QDateTime, QPair<QDate, QUniqueId> > result;
+        QMultiMap< QDateTime, QOccurrenceModelData::OccurrenceItem > result;
 
         int c = od->appointmentModel->rowCount(); // count can be expensive for some types of requests.
         for (int i = 0; i < c; i++) {
@@ -1650,8 +1502,15 @@ void QOccurrenceModel::rebuildCache()
                 QDateTime start = o.startInCurrentTZ();
                 QDateTime end = o.endInCurrentTZ().addSecs(-1);
 
-                if ((od->end.isNull() || start <= od->end) && end >= od->start)
-                    result.insert(start, QPair<QDate, QUniqueId>(o.date(), o.appointment().uid()));
+                if ((od->end.isNull() || start < od->end) && end >= od->start) {
+                    QOccurrenceModelData::OccurrenceItem item;
+                    item.startInTZ = start;
+                    item.endInTZ = end.addSecs(1);
+                    item.date = o.date();
+                    item.id = o.uid();
+                    item.row = i;
+                    result.insert(start, item);
+                }
                 // escape for forever events going past end range.
                 else if (!od->end.isNull() && start > od->end)
                     break;
@@ -1681,140 +1540,3 @@ void QOccurrenceModel::refresh()
     reset();
 }
 
-/*!
-  Constructs a QAppointmentModelDelegate with parent \a parent.
-*/
-QAppointmentDelegate::QAppointmentDelegate( QObject * parent )
-    : QAbstractItemDelegate(parent)
-{
-    iconSize = QApplication::style()->pixelMetric(QStyle::PM_ListViewIconSize);
-}
-
-/*!
-  Destroys a QAppointmentModelDelegate.
-*/
-QAppointmentDelegate::~QAppointmentDelegate() {}
-
-/*!
-  \internal
-  Provides an alternate font based of the \a start font.  Reduces the size of the returned font
-  by at least step point sizes.  Will attempt a total of six point sizes beyond the request
-  point size until a valid font size that differs from the starting font size is found.
-*/
-QFont QAppointmentDelegate::differentFont(const QFont& start, int step) const
-{
-    int osize = QFontMetrics(start).lineSpacing();
-    QFont f = start;
-    for (int t=1; t<6; t++) {
-        int newSize = f.pointSize() + step;
-        if ( newSize > 0 )
-            f.setPointSize(f.pointSize()+step);
-        else
-            return start; // we cannot find a font -> return old one
-        step += step < 0 ? -1 : +1;
-        QFontMetrics fm(f);
-        if ( fm.lineSpacing() != osize )
-            break;
-    }
-    return f;
-}
-
-/*!
-  Returns the font to use for painting the main label text of the item.
-  Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
-  ignored.  These attributes can be set by the text returned for
-  QAbstractItemModel::data() where role is QAppointmentModel::LabelRole.
-
-  By default returns the font of the style option \a o.
-*/
-QFont QAppointmentDelegate::mainFont(const QStyleOptionViewItem &o) const
-{
-    return o.font;
-}
-
-/*!
-  Returns the font to use for painting the sub label text of the item.
-  Due to the nature of rich text painting in Qt 4.0 attributes such as bold and italic will be
-  ignored.  These attributes can be set by the text returned for
-  QAbstractItemModel::data() where role is QAppointmentModel::SubLabelRole.
-
-  By default returns a font at least two point sizes smaller of the font of the
-  style option \a o.
-*/
-QFont QAppointmentDelegate::secondaryFont(const QStyleOptionViewItem &o) const
-{
-    return differentFont(o.font, -2);
-}
-
-/*!
-  \overload
-
-  Paints the element at \a index using \a painter with style options \a option.
-*/
-void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem & option,
-        const QModelIndex & index) const
-{
-    //  Prepare brush + pen and draw in background rectangle
-
-    QRect border;
-    QPen pen(Qt::black);
-    if (option.state & QStyle::State_Selected) {
-        painter->setBrush(option.palette.highlight());
-        border = option.rect.adjusted(1, 1, -1, -1);
-        pen.setWidth(2);
-    } else {
-        painter->setBrush(qvariant_cast<QColor>(index.model()->data(index, Qt::BackgroundColorRole)).light(170));
-        border = option.rect.adjusted(0, 0, -1, -1);
-    }
-
-    painter->setPen(pen);
-    painter->drawRect(border);
-
-    //  Draw in the relevant event icons
-
-    QRect contentRect = option.rect.adjusted(2, 2, -2, -2);
-    int iconRow = 0;
-    int drawnIconSize = qMin(qMin(contentRect.height(), contentRect.width()), iconSize);
-    QList<QVariant> icons = index.model()->data( index, Qt::DecorationRole ).toList();
-    for (QList<QVariant>::Iterator it = icons.begin(); it != icons.end(); ++it) {
-        QIcon icon = qvariant_cast<QIcon>(*it);
-        icon.paint(painter, contentRect.right() - drawnIconSize, contentRect.top() + iconRow, drawnIconSize, drawnIconSize);
-        if(contentRect.height() > iconRow + drawnIconSize + 2)
-            iconRow += drawnIconSize + 2;
-        else
-            contentRect.setRight(contentRect.right() - (drawnIconSize + 2));
-    }
-    if (iconRow > 0)
-        contentRect.setRight(contentRect.right() - (drawnIconSize + 2));
-
-    //  Prepare pen and draw in text
-
-    if (option.state & QStyle::State_Selected)
-        painter->setPen(option.palette.color(QPalette::HighlightedText));
-    else
-        painter->setPen(option.palette.color(QPalette::Text));
-
-    static QTextOption o(Qt::AlignLeft);
-    o.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-    painter->drawText(contentRect, index.model()->data(index, Qt::DisplayRole).toString());
-}
-
-/*!
-   \overload
-
-   Returns the size hint for objects drawn with the delegate with style options \a option for item at \a index.
-*/
-QSize QAppointmentDelegate::sizeHint(const QStyleOptionViewItem & option,
-        const QModelIndex &index) const
-{
-    Q_UNUSED(index);
-
-    QFontMetrics fm(mainFont(option));
-
-#ifndef QTOPIA_PHONE
-    QFontMetrics sfm(secondaryFont(option));
-    return QSize(fm.width("M") * 10, fm.height() + sfm.height() + 4);
-#else
-    return QSize(fm.width("M") * 10, fm.height() + 4);  //  Make Qtopia phone more compact
-#endif
-}

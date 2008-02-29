@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qtoolbar.cpp -->
 <head>
   <title>Qt 4.2: QToolBar Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -66,7 +67,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -108,7 +109,7 @@
 <p>Toolbar buttons are added by adding <i>actions</i>, using <a href="qtoolbar.html#addAction">addAction</a>() or <a href="qwidget.html#insertAction">insertAction</a>(). Groups of buttons can be separated using <a href="qtoolbar.html#addSeparator">addSeparator</a>() or <a href="qtoolbar.html#insertSeparator">insertSeparator</a>(). If a toolbar button is not appropriate, a widget can be inserted instead using <a href="qtoolbar.html#addWidget">addWidget</a>() or <a href="qtoolbar.html#insertWidget">insertWidget</a>(); examples of suitable widgets are <a href="qspinbox.html">QSpinBox</a>, <a href="qdoublespinbox.html">QDoubleSpinBox</a>, and <a href="qcombobox.html">QComboBox</a>. When a toolbar button is pressed it emits the <a href="qtoolbar.html#actionTriggered">actionTriggered</a>() signal.</p>
 <p>A toolbar can be fixed in place in a particular area (e.g. at the top of the window), or it can be movable (<a href="qtoolbar.html#movable-prop">isMovable</a>()) between toolbar areas; see <a href="qtoolbar.html#allowedAreas-prop">allowedAreas</a>() and <a href="qtoolbar.html#isAreaAllowed">isAreaAllowed</a>().</p>
 <p>When a toolbar is resized in such a way that it is too small to show all the items it contains, an extension button will appear as the last item in the toolbar. Pressing the extension button will pop up a menu containing the items that does not currently fit in the toolbar. Note that only action based items will be shown in the menu. If only non-action based items are to appear in the extension menu (e.g. a <a href="qspinbox.html">QSpinBox</a>), the extension button will appear as usual, but it will be disabled to indicate that some items in the toolbar are currently not visible.</p>
-<p>See also <a href="qtoolbutton.html">QToolButton</a>, <a href="qmenu.html">QMenu</a>, <a href="qaction.html">QAction</a>, and Application Example.</p>
+<p>See also <a href="qtoolbutton.html">QToolButton</a>, <a href="qmenu.html">QMenu</a>, <a href="qaction.html">QAction</a>, and <a href="mainwindows-application.html">Application Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="allowedAreas-prop"></a>allowedAreas : <a href="qt.html#ToolBarArea-enum">Qt::ToolBarAreas</a></h3>
@@ -123,7 +124,7 @@
 <p>See also <a href="qtoolbar.html#movable-prop">movable</a>.</p>
 <h3 class="fn"><a name="iconSize-prop"></a>iconSize : <a href="qsize.html">QSize</a></h3>
 <p>This property holds size of icons in the toolbar.</p>
-<p>The default is Qt::AutomaticIconSize.</p>
+<p>The default size is determined by the application's style and is derived from the <a href="qstyle.html#PixelMetric-enum">QStyle::PM_ToolBarIconSize</a> pixel metric.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>QSize iconSize () const</b></li>
@@ -142,7 +143,7 @@
 <h3 class="fn"><a name="orientation-prop"></a>orientation : <a href="qt.html#Orientation-enum">Qt::Orientation</a></h3>
 <p>This property holds orientation of the toolbar.</p>
 <p>The default is <a href="qt.html#Orientation-enum">Qt::Horizontal</a>.</p>
-<p>The orientation is updated automatically when the toolbar is managed by <a href="qmainwindow.html">QMainWindow</a>.</p>
+<p>This function should not be used when the toolbar is managed by <a href="qmainwindow.html">QMainWindow</a>. You can use <a href="qmainwindow.html#addToolBar">QMainWindow::addToolBar</a>() or <a href="qmainwindow.html#insertToolBar">QMainWindow::insertToolBar</a>() if you wish to move a toolbar (that is already added to a main window) to another <a href="qt.html#ToolBarArea-enum">Qt::ToolBarArea</a>.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>Qt::Orientation orientation () const</b></li>
@@ -241,6 +242,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

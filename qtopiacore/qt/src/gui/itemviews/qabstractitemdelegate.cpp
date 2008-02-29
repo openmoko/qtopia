@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -168,6 +178,12 @@ QAbstractItemDelegate::~QAbstractItemDelegate()
 
     The base implementation returns 0. If you want custom editing you
     will need to reimplement this function.
+
+    The returned editor widget should have Qt::StrongFocus;
+    otherwise, \l{QMouseEvent}s received by the widget will propagate
+    to the view. The view's background will shine through unless the
+    editor paints its own background (e.g., with
+    \l{QWidget::}{setAutoFillBackground()}). 
 
     \sa setModelData() setEditorData()
 */

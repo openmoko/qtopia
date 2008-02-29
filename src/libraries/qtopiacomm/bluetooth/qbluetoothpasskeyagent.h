@@ -44,6 +44,9 @@ public:
     virtual void requestPasskey(QBluetoothPasskeyRequest &req) = 0;
     virtual void cancelRequest(const QString &localDevice,
                                const QBluetoothAddress &remoteAddr);
+    virtual bool confirmPasskey(const QString &localDevice,
+                                const QBluetoothAddress &remoteAddr,
+                                const QString &passkey);
     virtual void release();
 
     enum Error {
@@ -53,7 +56,7 @@ public:
         UnknownAddress,
         UnknownError };
 
-    QBluetoothPasskeyAgent::Error lastError() const;
+    QBluetoothPasskeyAgent::Error error() const;
 
     bool registerDefault();
     bool unregisterDefault();

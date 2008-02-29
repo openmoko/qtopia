@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -172,6 +182,19 @@ bool QListModel::setData(const QModelIndex &index, const QVariant &value, int ro
         return false;
     items.at(index.row())->setData(role, value);
     return true;
+}
+
+QMap<int, QVariant> QListModel::itemData(const QModelIndex &index) const
+{
+    QMap<int, QVariant> roles;
+    if (!index.isValid() || index.row() >= items.count())
+        return roles;
+    QListWidgetItem *itm = items.at(index.row());
+    for (int i = 0; i < itm->values.count(); ++i) {
+        roles.insert(itm->values.at(i).role,
+                     itm->values.at(i).value);
+    }
+    return roles;
 }
 
 bool QListModel::insertRows(int row, int count, const QModelIndex &parent)
@@ -623,7 +646,7 @@ void QListWidgetItem::setData(int role, const QVariant &value)
 
 /*!
    This function returns the item's data for a given \a role (see
-   {Qt::ItemDataRole}). Reimplement this function if you need
+   Qt::ItemDataRole). Reimplement this function if you need
    extra roles or special behavior for certain roles.
 */
 QVariant QListWidgetItem::data(int role) const
@@ -1107,6 +1130,9 @@ void QListWidgetPrivate::_q_dataChanged(const QModelIndex &topLeft,
     \fn void QListWidget::addItem(QListWidgetItem *item)
 
     Inserts the \a item at the the end of the list widget.
+
+    \warning A QListWidgetItem can only be added to one
+    QListWidget. Behavior is undefined if you do.
 
     \sa insertItem()
 */

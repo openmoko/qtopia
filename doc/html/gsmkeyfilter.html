@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>GsmKeyFilter Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>GsmKeyFilter Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">GsmKeyFilter Class Reference</h1>
 <p>The GsmKeyFilter class filters key sequences looking for GSM control actions. <a href="#details">More...</a></p>
-<pre>    #include &lt;GsmKeyFilter&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;GsmKeyFilter&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="gsmkeyfilter-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -68,19 +67,29 @@
 <p>The GsmKeyFilter class filters key sequences looking for GSM control actions.</p>
 <p>The GsmKeyFilter class filters key sequences looking for GSM control actions. The following standard control actions are recognized by this class:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>0 SEND</tt></td><td>Set the busy state for a waiting call, or release the held calls.</td></tr>
-<tr valign="top" class="even"><td><tt>1 SEND</tt></td><td>Release the active calls.</td></tr>
-<tr valign="top" class="odd"><td><tt>1n SEND</tt></td><td>Release only call <tt>n</tt>.</td></tr>
-<tr valign="top" class="even"><td><tt>2 SEND</tt></td><td>Swap the active and held calls.</td></tr>
-<tr valign="top" class="odd"><td><tt>2n SEND</tt></td><td>Activate only call <tt>n</tt>, putting all others on hold.</td></tr>
-<tr valign="top" class="even"><td><tt>3 SEND</tt></td><td>Join the active and held calls into a multi-party conversation.</td></tr>
-<tr valign="top" class="odd"><td><tt>4 SEND</tt></td><td>Join the active and held calls into a multi-party conversation and then detach the local user (i.e. transfer).</td></tr>
-<tr valign="top" class="even"><td><tt>4*n SEND</tt></td><td>Deflect the waiting call to the number <tt>n</tt>.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>0 SEND</tt></td><td>Set the busy state for a waiting call, or release the held calls.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>1 SEND</tt></td><td>Release the active calls.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>1n SEND</tt></td><td>Release only call <tt>n</tt>.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>2 SEND</tt></td><td>Swap the active and held calls.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>2n SEND</tt></td><td>Activate only call <tt>n</tt>, putting all others on hold.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>3 SEND</tt></td><td>Join the active and held calls into a multi-party conversation.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>4 SEND</tt></td><td>Join the active and held calls into a multi-party conversation and then detach the local user (i.e. transfer).</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>4*n SEND</tt></td><td>Deflect the waiting call to the number <tt>n</tt>.</td></tr>
 </table></p>
 <p>Additional actions can be added with <a href="gsmkeyfilter.html#addAction">addAction</a>().</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="Flag-enum"></a>enum GsmKeyFilter::Flag<br />flags GsmKeyFilter::Flags</h3>
+<p>Flags that modify the filtering of keys for GSM control actions.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>GsmKeyFilter::Send</tt></td><td align="center" valign="top"><tt>( 1&lt;&lt;0 )</tt></td><td valign="top">The GSM <tt>SEND</tt> function has been selected. Usually this is the call button on the keypad.</td></tr>
+<tr><td valign="top"><tt>GsmKeyFilter::Immediate</tt></td><td align="center" valign="top"><tt>( 1&lt;&lt;1 )</tt></td><td valign="top">The action should be taken immediately when the last character is matched. This is for sequences such as <tt>*#06#</tt> which must activate when the final <tt>#</tt> is pressed.</td></tr>
+<tr><td valign="top"><tt>GsmKeyFilter::OnCall</tt></td><td align="center" valign="top"><tt>( 1&lt;&lt;2 )</tt></td><td valign="top">The digits were entered when there was an active or held call.</td></tr>
+<tr><td valign="top"><tt>GsmKeyFilter::Incoming</tt></td><td align="center" valign="top"><tt>( 1&lt;&lt;3 )</tt></td><td valign="top">The digits were entered when there was an incoming call that has not yet been accepted.</td></tr>
+<tr><td valign="top"><tt>GsmKeyFilter::BeforeDial</tt></td><td align="center" valign="top"><tt>( 1&lt;&lt;4 )</tt></td><td valign="top">The digits were encountered just before the dial attempt was made. The digits may have originated from a dialer or from a contact. This provides a last chance to intercept a string of digits before regular dialing occurs.</td></tr>
+<tr><td valign="top"><tt>GsmKeyFilter::TestOnly</tt></td><td align="center" valign="top"><tt>( 1&lt;&lt;5 )</tt></td><td valign="top">Test to see if the filter would suceed, but do not apply.</td></tr>
+</table></p>
 <p>The Flags type is a typedef for <a href="qflags.html">QFlags</a>&lt;Flag&gt;. It stores an OR combination of Flag values.</p>
 <h3 class="fn"><a name="ServiceAction-enum"></a>enum GsmKeyFilter::ServiceAction</h3>
 <p>Action types for supplementary services.</p>
@@ -115,8 +124,9 @@
 <h3 class="fn"><a name="addService"></a>void GsmKeyFilter::addService ( const <a href="qstring.html">QString</a> &amp; <i>code</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Flags</a> <i>flags</i> = GsmKeyFilter::Send )</h3>
 <p>Add action filters for the supplementary service associated with <i>code</i> and call <i>slot</i> on <i>target</i> when the action is encountered.</p>
 <p>The prototype for <i>slot</i> should be <tt>action(GsmKeyFilter::ServiceAction, QStringList)</tt> where <tt>action</tt> is the name of the slot. The first parameter will be the type of action to be taken, and the second parameter will be the list of <tt>*</tt>-separated parameters that were supplied to the action, starting with the service code.</p>
+<p>The <i>flags</i> modifies when the action will be accepted or ignored. For example, setting <tt>Send</tt> will require that the <tt>SEND</tt> key be pressed to terminate the sequence; setting <tt>Incoming</tt> will require that there be an incoming call. All specified flags must be present.</p>
 <h3 class="fn"><a name="deflect"></a>void GsmKeyFilter::deflect ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Signal that is emitted when the <tt>4*NUM SEND</tt> key sequence is encountered when there was an incoming call, which indicates that the incoming call should be deflected to <tt>NUM</tt>.</p>
+<p>Signal that is emitted when the <tt>4*NUM SEND</tt> key sequence is encountered when there was an incoming call, which indicates that the incoming call should be deflected to <tt>NUM</tt>. The <tt>NUM</tt> value is supplied in the <i>number</i> parameter to the signal.</p>
 <h3 class="fn"><a name="filter"></a>bool GsmKeyFilter::filter ( const <a href="qstring.html">QString</a> &amp; <i>digits</i>, <a href="gsmkeyfilter.html#Flag-enum">Flags</a> <i>flags</i> )</h3>
 <p>Filter the supplied string of <i>digits</i> to determine if it corresponds to a GSM control action. The <i>flags</i> indicate the context within which <i>digits</i> should be interpreted.</p>
 <p>Returns false if the digit sequence is not recognized by the filter. The filter will be called again when there are more digits (or less if a backspace was encountered).</p>
@@ -139,6 +149,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

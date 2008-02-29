@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -248,6 +258,7 @@ static QBrushData *nullBrushInstance()
         x->ref = 1; x->style = Qt::BrushStyle(0); x->color = Qt::black;
         if (!q_atomic_test_and_set_ptr(&defaultBrush.pointer, 0, x))
             delete x;
+        x->hasTransform = false;
     }
     return defaultBrush.pointer;
 }
@@ -296,6 +307,7 @@ void QBrush::init(const QColor &color, Qt::BrushStyle style)
     d->ref = 1;
     d->style = style;
     d->color = color;
+    d->hasTransform = false;
 }
 
 /*!
@@ -509,6 +521,7 @@ void QBrush::detach(Qt::BrushStyle newStyle)
     x->style = newStyle;
     x->color = d->color;
     x->transform = d->transform;
+    x->hasTransform = d->hasTransform;
     x = qAtomicSetPtr(&d, x);
     if (!x->ref.deref())
         cleanUp(x);
@@ -772,6 +785,7 @@ void QBrush::setMatrix(const QMatrix &matrix)
 {
     detach(d->style);
     d->transform = matrix;
+    d->hasTransform = !matrix.isIdentity();
 }
 
 

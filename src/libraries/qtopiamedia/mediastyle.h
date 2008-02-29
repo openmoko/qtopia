@@ -22,14 +22,21 @@
 #ifndef MEDIASTYLE_H
 #define MEDIASTYLE_H
 
+#include <qtopiabase/qtopiaglobal.h>
+
 #include <QtGui>
 
-class MediaStyle : public QWindowsStyle
+class QTOPIAMEDIA_EXPORT MediaStyle : public QWindowsStyle
 {
 public:
     void drawControl( ControlElement ce, const QStyleOption *opt, QPainter *p, const QWidget *widget ) const;
 
     int pixelMetric( PixelMetric pm, const QStyleOption *opt, const QWidget *widget ) const;
+
+private:
+    mutable QPixmap m_groovebuffer;
+    mutable QPixmap m_barbuffer;
+    mutable QPixmap m_silhouettebuffer;
 };
 
 #endif // MEDIASTYLE_H

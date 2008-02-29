@@ -41,6 +41,7 @@
 #include <string.h>
 
 #include <QDebug>
+#include <QMetaObject>
 
 /*!
     \class QBluetoothReply
@@ -87,6 +88,8 @@
     Convenience method, same as value()
 */
 
+#define REMOTE_DEVICE_DISCOVERED 1
+
 class QBluetoothLocalDevice_Private : public QObject
 {
     Q_OBJECT
@@ -110,8 +113,11 @@ public:
     bool m_valid;
     QBluetoothLocalDevice *m_parent;
     QBluetoothLocalDevice::Error m_error;
-    bool m_discovering;
+    QString m_errorString;
     QList<QBluetoothRemoteDevice> m_discovered;
+
+    void requestSignal(int signal);
+    void releaseSignal(int signal);
 
 public slots:
     void modeChanged(const QString &mode);
@@ -123,6 +129,7 @@ public slots:
 
     void discoveryStarted();
     void remoteDeviceFound(const QString &addr, uint cls, short rssi);
+    void remoteDeviceDisappeared(const QString &addr);
     void discoveryCompleted();
 
     void remoteAliasChanged(const QString &addr, const QString &alias);
@@ -131,6 +138,12 @@ public slots:
     void createBondingReply(const QBluetoothAddress &addr, const QDBusMessage &msg);
     void bondingCreated(const QString &addr);
     void bondingRemoved(const QString &addr);
+
+    void remoteNameUpdated(const QString &addr, const QString &name);
+    void remoteNameFailed(const QString &addr);
+    void remoteClassUpdated(const QString &addr, uint cls);
+    void disconnectRemoteDeviceRequested(const QString &addr);
+
 };
 
 class PairingCancelledProxy : public QObject
@@ -160,6 +173,48 @@ void PairingCancelledProxy::createBondingReply(const QDBusMessage &msg)
 {
     m_parent->createBondingReply(m_addr, msg);
     delete this;
+}
+
+void QBluetoothLocalDevice_Private::requestSignal(int signal)
+{
+    if (!m_iface->isValid()) {
+        return;
+    }
+
+    QDBusConnection dbc = QDBusConnection::systemBus();
+    QString service = m_iface->service();
+    QString path = m_iface->path();
+    QString interface = m_iface->interface();
+
+    switch(signal) {
+        case REMOTE_DEVICE_DISCOVERED:
+            dbc.connect(service, path, interface, "RemoteDeviceFound",
+                this, SLOT(remoteDeviceFound(const QString &, uint, short)));
+            break;
+        default:
+            break;
+    }
+}
+
+void QBluetoothLocalDevice_Private::releaseSignal(int signal)
+{
+    if (!m_iface->isValid()) {
+        return;
+    }
+
+    QDBusConnection dbc = QDBusConnection::systemBus();
+    QString service = m_iface->service();
+    QString path = m_iface->path();
+    QString interface = m_iface->interface();
+
+    switch(signal) {
+        case REMOTE_DEVICE_DISCOVERED:
+            dbc.disconnect(service, path, interface, "RemoteDeviceFound",
+                           this, SLOT(remoteDeviceFound(const QString &, uint, short)));
+            break;
+        default:
+            break;
+    }
 }
 
 void QBluetoothLocalDevice_Private::init(const QString &str)
@@ -196,18 +251,20 @@ void QBluetoothLocalDevice_Private::init(const QString &str)
         return;
     }
 
-    m_addr = QBluetoothAddress(reply.value());
-
-    m_valid = true;
-
     QString service = m_iface->service();
     QString path = m_iface->path();
     QString interface = m_iface->interface();
+
+    m_addr = QBluetoothAddress(reply.value());
+
+    m_valid = true;
 
     dbc.connect(service, path, interface, "NameChanged",
                 m_parent, SIGNAL(nameChanged(const QString &)));
     dbc.connect(service, path, interface, "ModeChanged",
                 this, SLOT(modeChanged(const QString &)));
+    dbc.connect(service, path, interface, "DiscoverableTimeoutChanged",
+                m_parent, SIGNAL(discoverableTimeoutChanged(uint)));
 
     dbc.connect(service, path, interface, "RemoteDeviceConnected",
                 this, SLOT(remoteDeviceConnected(const QString &)));
@@ -218,8 +275,8 @@ void QBluetoothLocalDevice_Private::init(const QString &str)
                 this, SLOT(discoveryStarted()));
     dbc.connect(service, path, interface, "DiscoveryCompleted",
                 this, SLOT(discoveryCompleted()));
-    dbc.connect(service, path, interface, "RemoteDeviceFound",
-                this, SLOT(remoteDeviceFound(const QString &, uint, short)));
+    dbc.connect(service, path, interface, "RemoteDeviceDisappeared",
+                this, SLOT(remoteDeviceDisappeared(const QString &)));
 
     dbc.connect(service, path, interface, "RemoteAliasChanged",
                 this,
@@ -231,14 +288,23 @@ void QBluetoothLocalDevice_Private::init(const QString &str)
                 this, SLOT(bondingCreated(const QString &)));
     dbc.connect(service, path, interface, "BondingRemoved",
                 this, SLOT(bondingRemoved(const QString &)));
+
+    dbc.connect(service, path, interface, "RemoteNameUpdated",
+                this, SLOT(remoteNameUpdated(const QString &, const QString &)));
+    dbc.connect(service, path, interface, "RemoteNameFailed",
+                this, SLOT(remoteNameFailed(const QString &)));
+    dbc.connect(service, path, interface, "RemoteClassUpdated",
+                this, SLOT(remoteClassUpdated(const QString &, uint)));
+
+    dbc.connect(service, path, interface, "RemoteDeviceDisconnectRequested",
+                this, SLOT(disconnectRemoteDeviceRequested(const QString &)));
 }
 
 QBluetoothLocalDevice_Private::QBluetoothLocalDevice_Private(
         QBluetoothLocalDevice *parent,
         const QBluetoothAddress &addr) : QObject(parent),
         m_iface(0), m_valid(false), m_parent(parent),
-        m_error(QBluetoothLocalDevice::NoError),
-        m_discovering(false)
+        m_error(QBluetoothLocalDevice::NoError)
 {
     init(addr.toString());
 }
@@ -247,8 +313,7 @@ QBluetoothLocalDevice_Private::QBluetoothLocalDevice_Private(
         QBluetoothLocalDevice *parent,
         const QString &devName) : QObject(parent),
         m_iface(0), m_valid(false), m_parent(parent),
-        m_error(QBluetoothLocalDevice::NoError),
-        m_discovering(false)
+        m_error(QBluetoothLocalDevice::NoError)
 {
     init(devName);
 }
@@ -270,7 +335,7 @@ static bluez_error_mapping bluez_errors[] = {
     { "org.bluez.Error.InvalidArguments", QBluetoothLocalDevice::InvalidArguments },
     { "org.bluez.Error.NotAuthorized", QBluetoothLocalDevice::NotAuthorized },
     { "org.bluez.Error.OutOfMemory", QBluetoothLocalDevice::OutOfMemory },
-    { "org.bluez.Error.NoSuchAdapter", QBluetoothLocalDevice::NoSuchAdapter },
+    { "org.bluez.Error.NoSuchAdapter", QBluetoothLocalDevice::NoSuchAdaptor },
     { "org.bluez.Error.UnknownAddress", QBluetoothLocalDevice::UnknownAddress },
     { "org.bluez.Error.NotAvailable", QBluetoothLocalDevice::UnknownError },
     { "org.bluez.Error.NotConnected", QBluetoothLocalDevice::NotConnected },
@@ -299,6 +364,8 @@ QBluetoothLocalDevice::Error QBluetoothLocalDevice_Private::handleError(const QD
         }
         i++;
     }
+
+    m_errorString = error.message();
 
     return m_error;
 }
@@ -344,7 +411,7 @@ void QBluetoothLocalDevice_Private::cancelScanReply(const QDBusMessage &msg)
 void QBluetoothLocalDevice_Private::remoteDeviceConnected(const QString &dev)
 {
     QBluetoothAddress addr(dev);
-    if (addr.valid()) {
+    if (addr.isValid()) {
         emit m_parent->remoteDeviceConnected(addr);
     }
 }
@@ -352,16 +419,13 @@ void QBluetoothLocalDevice_Private::remoteDeviceConnected(const QString &dev)
 void QBluetoothLocalDevice_Private::remoteDeviceDisconnected(const QString &dev)
 {
     QBluetoothAddress addr(dev);
-    if (addr.valid()) {
+    if (addr.isValid()) {
         emit m_parent->remoteDeviceDisconnected(addr);
     }
 }
 
 void QBluetoothLocalDevice_Private::discoveryStarted()
 {
-    if (!m_discovering)
-        return;
-
     m_discovered.clear();
     emit m_parent->discoveryStarted();
 }
@@ -377,14 +441,29 @@ void QBluetoothLocalDevice_Private::remoteAliasRemoved(const QString &addr)
     emit m_parent->remoteAliasRemoved(QBluetoothAddress(addr));
 }
 
+void QBluetoothLocalDevice_Private::remoteDeviceDisappeared(const QString &addr)
+{
+    emit m_parent->remoteDeviceDisappeared(QBluetoothAddress(addr));
+}
+
+void QBluetoothLocalDevice_Private::disconnectRemoteDeviceRequested(const QString &addr)
+{
+    emit m_parent->remoteDeviceDisconnectRequested(QBluetoothAddress(addr));
+}
+
+void QBluetoothLocalDevice_Private::remoteClassUpdated(const QString &addr, uint cls)
+{
+    quint8 major = (cls >> 8) & 0x1F;
+    quint8 minor = (cls >> 2) & 0x3F;
+    quint8 service = (cls >> 16) & 0xFF;
+
+    emit m_parent->remoteClassUpdated(QBluetoothAddress(addr), major_to_device_major(major),
+                                      minor, QBluetooth::ServiceClasses(service));
+}
+
 void QBluetoothLocalDevice_Private::remoteDeviceFound(const QString &addr,
         uint cls, short rssi)
 {
-    qLog(Bluetooth) << "RemoteDeviceFound: " << addr << cls << rssi;
-
-    if (!m_discovering)
-        return;
-
     quint8 major = (cls >> 8) & 0x1F;
     quint8 minor = (cls >> 2) & 0x3F;
     quint8 service = (cls >> 16) & 0xFF;
@@ -399,9 +478,13 @@ void QBluetoothLocalDevice_Private::remoteDeviceFound(const QString &addr,
     QBluetoothAddress a(addr);
 
     for (int i = 0; i < m_discovered.size(); i++) {
-        if (m_discovered[i].address() == a)
+        if (m_discovered[i].address() == a) {
+            qLog(Bluetooth) << "RemoteDeviceFound: " << addr << cls << rssi << "[filtered]";
             return;
+        }
     }
+
+    qLog(Bluetooth) << "RemoteDeviceFound: " << addr << cls << rssi;
 
     QString version;
     QString revision;
@@ -450,12 +533,10 @@ void QBluetoothLocalDevice_Private::remoteDeviceFound(const QString &addr,
 
 void QBluetoothLocalDevice_Private::discoveryCompleted()
 {
-    if (!m_discovering)
-        return;
-
-    m_discovering = false;
     emit m_parent->discoveryCompleted();
     emit m_parent->remoteDevicesFound(m_discovered);
+
+    m_discovered.clear();
 }
 
 void QBluetoothLocalDevice_Private::createBondingReply(const QBluetoothAddress &addr,
@@ -480,6 +561,16 @@ void QBluetoothLocalDevice_Private::bondingRemoved(const QString &addr)
     emit m_parent->pairingRemoved(QBluetoothAddress(addr));
 }
 
+void QBluetoothLocalDevice_Private::remoteNameUpdated(const QString &addr, const QString &name)
+{
+    emit m_parent->remoteNameUpdated(QBluetoothAddress(addr), name);
+}
+
+void QBluetoothLocalDevice_Private::remoteNameFailed(const QString &addr)
+{
+    emit m_parent->remoteNameFailed(QBluetoothAddress(addr));
+}
+
 /*!
     \class QBluetoothLocalDevice
     \brief The QBluetoothLocalDevice class represents a local bluetooth device.
@@ -496,7 +587,7 @@ void QBluetoothLocalDevice_Private::bondingRemoved(const QString &addr)
 
 /*!
     \enum QBluetoothLocalDevice::State
-    \brief State of the local adapter
+    \brief State of the local adaptor
 
     \value Off The device is turned off.
     \value Discoverable The device can be connected to and can be discovered by other remote devicess.
@@ -507,12 +598,11 @@ void QBluetoothLocalDevice_Private::bondingRemoved(const QString &addr)
     \o Page scan - Controls whether other devices can connect to the local device.
     \o Inquiry scan - Controls whether the device can be discovered by remote devices.
     \endlist
-                   QString
     While each scan type can be activated or disabled independently,
     only three combinations really make sense:
 
     \list
-    \o Page Scan Off, Inquiry Scan Off - Device is in Off state
+    \o Page Scan Off, Inquiry Scan Off - Device is in \bold Off state
     \o Page Scan On, Inquiry Scan On - Device is in \bold Discoverable state
     \o Page Scan On, Inquiry Scan Off - Device is \bold Connectable state
     \endlist
@@ -531,7 +621,7 @@ void QBluetoothLocalDevice_Private::bondingRemoved(const QString &addr)
     \value InvalidArguments Invalid arguments have been provided for the operation
     \value NotAuthorized The client has no permission to perform the action
     \value OutOfMemory Out of memory condition occurred
-    \value NoSuchAdapter Trying to use a device which does not exist
+    \value NoSuchAdaptor Trying to use a device which does not exist
     \value UnknownAddress No such host has been found
     \value ConnectionAttemptFailed Connection attempt has failed
     \value NotConnected No connection exists
@@ -595,6 +685,29 @@ QBluetoothLocalDevice::~QBluetoothLocalDevice()
 }
 
 /*!
+    \internal
+*/
+void QBluetoothLocalDevice::connectNotify(const char *signal)
+{
+    QByteArray sig(signal);
+
+    if ((sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceFound(const QBluetoothRemoteDevice &)))) ||
+        (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDevicesFound(const QList<QBluetoothRemoteDevice> &))))) {
+        m_data->requestSignal(REMOTE_DEVICE_DISCOVERED);
+    }
+}
+
+void QBluetoothLocalDevice::disconnectNotify(const char *signal)
+{
+    QByteArray sig(signal);
+
+    if ((sig == QMetaObject::normalizedSignature(SIGNAL(remoteDeviceFound(const QBluetoothRemoteDevice &)))) ||
+        (sig == QMetaObject::normalizedSignature(SIGNAL(remoteDevicesFound(const QList<QBluetoothRemoteDevice> &))))) {
+        m_data->releaseSignal(REMOTE_DEVICE_DISCOVERED);
+    }
+}
+
+/*!
     Returns whether the instance is valid.
 */
 bool QBluetoothLocalDevice::isValid() const
@@ -605,9 +718,17 @@ bool QBluetoothLocalDevice::isValid() const
 /*!
     Returns the last error that has occurred.
 */
-QBluetoothLocalDevice::Error QBluetoothLocalDevice::lastError() const
+QBluetoothLocalDevice::Error QBluetoothLocalDevice::error() const
 {
     return m_data->m_error;
+}
+
+/*!
+    Returns the human readable form of the last error that has occurred.
+*/
+QString QBluetoothLocalDevice::errorString() const
+{
+    return m_data->m_errorString;
 }
 
 /*!
@@ -619,7 +740,7 @@ QBluetoothAddress QBluetoothLocalDevice::address() const
 }
 
 /*!
-    Returns the system device name of this device.
+    Returns the system device name of this device.  This is of the form \bold hciX.
 */
 QString QBluetoothLocalDevice::deviceName() const
 {
@@ -748,26 +869,16 @@ bool QBluetoothLocalDevice::setName(const QString &n)
 }
 
 /*!
-    \fn void QBluetoothLocalDevice::nameChanged(const QString &name)
-
-    This signal is emitted whenever a device name has been changed.  The
-    \a name variable contains the new name.  Note that this signal can
-    be triggered by external events (such as another program changing the
-    device name)
-
- */
-
-/*!
     Sets the device into \bold Discoverable state.  The \a timeout value
     is used to specify how long the device will remain discoverable.
     If the timeout value of 0 is specified, the device will remain
     discoverable indefinitely.
 
     Returns true if the request could be queued, and false otherwise.
-    The stateChanged signal will be sent once the device has changed
-    state.  An error signal will be sent if the state change failed.
+    The stateChanged() signal will be sent once the device has changed
+    state.  An error() signal will be sent if the state change failed.
 
-    \sa discoverableTimeout(), discoverable()
+    \sa discoverableTimeout(), discoverable(), stateChanged()
 */
 bool QBluetoothLocalDevice::setDiscoverable(uint timeout)
 {
@@ -839,10 +950,10 @@ QBluetoothReply<bool> QBluetoothLocalDevice::discoverable() const
     can connect to the local device, but not discover its existence.
 
     Returns true if the request could be queued, and false otherwise.
-    The stateChanged signal will be sent once the device has changed
-    state.  An error signal will be sent if the state change failed.
+    The stateChanged() signal will be sent once the device has changed
+    state.  An error() signal will be sent if the state change failed.
 
-    \sa connectable()
+    \sa connectable(), stateChanged()
  */
 bool QBluetoothLocalDevice::setConnectable()
 {
@@ -881,8 +992,8 @@ QBluetoothReply<bool> QBluetoothLocalDevice::connectable() const
     Turns off the device.
 
     Returns true if the request could be queued, and false otherwise.
-    The stateChanged signal will be sent once the device has changed
-    state.  An error signal will be sent if the state change failed.
+    The stateChanged() signal will be sent once the device has changed
+    state.  An error() signal will be sent if the state change failed.
 
     \sa connectable()
  */
@@ -908,14 +1019,6 @@ QBluetoothReply<bool> QBluetoothLocalDevice::isUp()
 {
     return connectable();
 }
-
-/*!
-    \fn void QBluetoothLocalDevice::stateChanged(QBluetoothLocalDevice::State state)
-
-    This signal is emitted whenever a device has entered a new state.  The
-    \a state variable contains the new state.  Note that this signal can be
-    triggered externally.
- */
 
 /*!
     Returns a list of all remote devices which are currently connected
@@ -966,39 +1069,23 @@ QBluetoothReply<bool> QBluetoothLocalDevice::isConnected(const QBluetoothAddress
 }
 
 /*!
-    \fn void QBluetoothLocalDevice::remoteDeviceConnected(const QBluetoothAddress &addr)
-
-    This signal is emitted whenever a remote device has connected to the local
-    device.  The \a addr parameter holds the address of the remote device. Note
-    that this signal can be triggered externally.
- */
-
-/*!
-    \fn void QBluetoothLocalDevice::remoteDeviceDisconnected(const QBluetoothAddress &addr)
-
-    This signal is emitted whenever a remote device has disconnected from the local
-    device.  The \a addr parameter holds the address of the remote device.  Note
-    that this signal can be triggered externally.
- */
-
-/*!
     Requests the local device to scan for all discoverable devices in the vicinity.
     Returns true if the device is not already discovering and the process was started
     successfully.  Returns false on error, setting error accordingly.
 
-    Once discovery process is in process, the \c discoveryStarted signal is emitted.
-    When the discovery process completes, the \c discoveryCompleted signal is emitted.
+    Once discovery process is in process, the discoveryStarted() signal is emitted.
+    When the discovery process completes, the discoveryCompleted() signal is emitted.
 
     The clients can subscribe to the discovery information in one of two ways.
     If the client wants to receive information about a device as it is received,
-    they should subscribe to \c remoteDeviceFound signal.  Note that the clients
+    they should subscribe to the remoteDeviceFound() signal.  Note that the clients
     should be prepared to receive multiple signals with information about
     the same device, and deal with them accordingly.
 
     If the clients wish to receive the information wholesale, they should subscribe
-    to the \c remoteDevicesFound signal.
+    to the remoteDevicesFound() signal.
 
-    \sa remoteDevicesFound(), cancelDiscovery()
+    \sa remoteDevicesFound(), remoteDeviceFound(), cancelDiscovery()
 */
 bool QBluetoothLocalDevice::discoverRemoteDevices()
 {
@@ -1012,16 +1099,20 @@ bool QBluetoothLocalDevice::discoverRemoteDevices()
         return false;
     }
 
-    m_data->m_discovering = true;
     return true;
 }
 
 /*!
     Attempts to cancel the discovery of remote devices.  In case of error,
-    an error signal will be emitted.  In the case of success, a discoveryCancelled
-    signal will be emitted.
+    an error signal will be emitted.  In the case of success, a discoveryCancelled()
+    signal will be emitted.  Note that only the QBluetoothLocalDevice instance
+    that initiated the discovery can cancel it, and only that instance will receive
+    the discoveryCancelled() signal.  All other instances will receive the
+    discoveryCompleted signal.
 
     Returns true if the request could be queued, false otherwise.
+
+    \sa discoveryCancelled()
 */
 bool QBluetoothLocalDevice::cancelDiscovery()
 {
@@ -1036,51 +1127,8 @@ bool QBluetoothLocalDevice::cancelDiscovery()
 }
 
 /*!
-    \fn void QBluetoothLocalDevice::discoveryStarted()
-
-    This signal is emitted whenever a discovery scan has been initiated.
-
-    \sa discoverRemoteDevices(), discoveryCompleted()
- */
-
-/*!
-    \fn void QBluetoothLocalDevice::remoteDeviceFound(const QBluetoothRemoteDevice &device)
-
-    This signal is emitted whenever a device is discovered.  The \a device parameter
-    contains the remote device discovered.
-
-    \sa remoteDevicesFound()
-*/
-
-/*!
-    \fn void QBluetoothLocalDevice::remoteDevicesFound(const QList<QBluetoothRemoteDevice> &list)
-
-    This signal is emitted whenever a discovery procedure has finished.  It returns
-    all devices discovered by the procedure. The \a list contains the list of all
-    remote devices found.
-
-    \sa remoteDeviceFound()
-*/
-
-/*!
-    \fn void QBluetoothLocalDevice::discoveryCancelled()
-
-    This signal is emitted whenever a discovery scan has been cancelled.
-
-    \sa cancelDiscovery()
- */
-
-/*!
-    \fn void QBluetoothLocalDevice::discoveryCompleted()
-
-    This signal is emitted whenever a discovery scan has been completed.
-
-    \sa discoverRemoteDevices(), discoveryStarted()
- */
-
-/*!
     Returns the date the remote device with address \a addr was last seen by
-    the local device adapter.  In the case the device has never been seen,
+    the local device adaptor.  In the case the device has never been seen,
     returns an invalid QDateTime.  If an error occurs, this method returns
     an invalid QDateTime and sets the error() accordingly.
 
@@ -1105,7 +1153,7 @@ QBluetoothReply<QDateTime> QBluetoothLocalDevice::lastSeen(const QBluetoothAddre
 
 /*!
     Returns the date the remote device with address \a addr was last used by
-    the local device adapter.  In the case the device has never been used,
+    the local device adaptor.  In the case the device has never been used,
     returns an invalid QDateTime. If an error occurs, this method returns
     an invalid QDateTime and sets the error() accordingly.
 
@@ -1130,9 +1178,9 @@ QBluetoothReply<QDateTime> QBluetoothLocalDevice::lastUsed(const QBluetoothAddre
 
 /*!
     Updates the information about the remote device, based on the local device
-    cache.  Some information is generally not provided by the local adapter
-    until a low-level connection is made to the remote device.  Thus for devices
-    which are found by \c discoverRemoteDevices() will not contain the full
+    cache.  Some information is generally not provided by the local adaptor
+    until a low-level connection is made to the remote device.  Thus devices
+    which are found by discoverRemoteDevices() will not contain the full
     information about the device. The remote device is given
     by \a device.
 
@@ -1223,7 +1271,8 @@ bool QBluetoothLocalDevice::requestPairing(const QBluetoothAddress &addr)
     Requests the local device to remove its pairing to a remote device with
     address \a addr.  Returns true if the removal request could be
     queued successfully, false otherwise.  The signal pairingRemoved()
-    will be sent if the pairing could be removed successfully.
+    will be sent if the pairing could be removed successfully.  An error() signal
+    will be emitted if the pairing could not be removed.
 
     \sa pairingRemoved()
  */
@@ -1251,8 +1300,10 @@ bool QBluetoothLocalDevice::removePairing(const QBluetoothAddress &addr)
     the peer might not trust the local device.
 
     The function will return a list of paired device addresses.  If an error
-    occurred during a request, the return value will be an error, and \c error
+    occurred during a request, the return value will be an error, and error()
     will be set accordingly.
+
+    \sa isPaired()
 */
 QBluetoothReply<QList<QBluetoothAddress> > QBluetoothLocalDevice::pairedDevices() const
 {
@@ -1278,8 +1329,10 @@ QBluetoothReply<QList<QBluetoothAddress> > QBluetoothLocalDevice::pairedDevices(
 /*!
     Returns true if the local device is paired to a remote device, and false
     otherwise. In the case of an error, the return value is invalid and the
-    \c error is set accordingly. The address of the remote device is
+    error() is set accordingly. The address of the remote device is
     given by \a addr.
+
+    \sa pairedDevices()
 */
 QBluetoothReply<bool> QBluetoothLocalDevice::isPaired(const QBluetoothAddress &addr) const
 {
@@ -1299,11 +1352,13 @@ QBluetoothReply<bool> QBluetoothLocalDevice::isPaired(const QBluetoothAddress &a
 /*!
     Attempts to cancel the pairing process.  In case of error,
     an error signal will be emitted.  In the case of success, a
-    pairingFailed signal will be emitted and \c error set to
+    pairingFailed() signal will be emitted and error() set to
     QBluetoothLocalDevice::AuthenticationCancelled.  The address of
     the remote device is given by \a addr.
 
     Returns true if the request could be queued, false otherwise.
+
+    \sa pairingFailed(), error()
  */
 bool QBluetoothLocalDevice::cancelPairing(const QBluetoothAddress &addr)
 {
@@ -1317,29 +1372,6 @@ bool QBluetoothLocalDevice::cancelPairing(const QBluetoothAddress &addr)
     return m_data->m_iface->callWithCallback("CancelBondingProcess", args,
             m_data, SLOT(asyncReply(const QDBusMessage &)));
 }
-
-/*!
-    \fn void QBluetoothLocalDevice::pairingCreated(const QBluetoothAddress &addr)
-
-    This signal is emitted whenever a pairing request has completed
-    successfully. The \a addr parameter holds the address just paired to.
-    Note that this signal could be triggered by external events.
-*/
-
-/*!
-    \fn void QBluetoothLocalDevice::pairingFailed(const QBluetoothAddress &addr)
-
-    This signal is emitted whenever a pairing request has failed.  The \a addr
-    parameter holds the address of the remote device.
- */
-
-/*!
-    \fn void QBluetoothLocalDevice::pairingRemoved(const QBluetoothAddress &addr)
-
-    This signal is emitted whenever a pairing has been removed. The \a addr
-    parameter holds the address of the remote device.  Note that this signal
-    could be triggered by external events.
- */
 
 /*!
     Returns the alias for a remote device.  If the alias is set, it should
@@ -1369,6 +1401,8 @@ QBluetoothReply<QString> QBluetoothLocalDevice::remoteAlias(const QBluetoothAddr
 /*!
     Sets the alias for a remote device given by \a addr to alias \a alias.
     Returns true if the alias could be set, and false otherwise.
+
+    \sa remoteAlias(), removeRemoteAlias()
 */
 bool QBluetoothLocalDevice::setRemoteAlias(const QBluetoothAddress &addr,
                                            const QString &alias)
@@ -1391,6 +1425,8 @@ bool QBluetoothLocalDevice::setRemoteAlias(const QBluetoothAddress &addr,
 /*!
     Removes the alias for a remote device given by \a addr.
     Returns true if the alias could be removed, and false otherwise.
+
+    \sa setRemoteAlias(), remoteAlias()
  */
 bool QBluetoothLocalDevice::removeRemoteAlias(const QBluetoothAddress &addr)
 {
@@ -1410,6 +1446,272 @@ bool QBluetoothLocalDevice::removeRemoteAlias(const QBluetoothAddress &addr)
 }
 
 /*!
+    Enables or Disables the Periodic Discovery Mode according to \a enabled.
+    When in Periodic Discovery Mode the device will periodically run a device inquiry
+    and report the results.  Returns true if the mode change operation succeded,
+    and false otherwise.
+
+    \sa isPeriodicDiscoveryEnabled()
+*/
+bool QBluetoothLocalDevice::setPeriodicDiscoveryEnabled(bool enabled)
+{
+    if (!m_data->m_iface || !m_data->m_iface->isValid()) {
+        return false;
+    }
+
+    QString meth = enabled ? "StartPeriodicDiscovery" : "StopPeriodicDiscovery";
+    QDBusReply<void> reply = m_data->m_iface->call(meth);
+
+    if (!reply.isValid()) {
+        m_data->handleError(reply.error());
+        return false;
+    }
+
+    return true;
+}
+
+/*!
+    Returns true if the device is currently in Periodic Discovery Mode.
+
+    \sa setPeriodicDiscoveryEnabled()
+*/
+QBluetoothReply<bool> QBluetoothLocalDevice::isPeriodicDiscoveryEnabled() const
+{
+    if (!m_data->m_iface || !m_data->m_iface->isValid()) {
+        return false;
+    }
+
+    QDBusReply<bool> reply = m_data->m_iface->call("IsPeriodicDiscovery");
+    if (!reply.isValid()) {
+        m_data->handleError(reply.error());
+        return false;
+    }
+
+    return reply.value();
+}
+
+/*!
+    Returns the pin code length used when the device was paired to \a addr.  If the device
+    is not paired, an invalid QBluetoothReply is returned.
+*/
+QBluetoothReply<uchar> QBluetoothLocalDevice::pinCodeLength(const QBluetoothAddress &addr) const
+{
+    if (!m_data->m_iface || !m_data->m_iface->isValid()) {
+        return QBluetoothReply<uchar>();
+    }
+
+    QDBusReply<uchar> reply = m_data->m_iface->call("GetPinCodeLength", addr.toString());
+
+    if (!reply.isValid()) {
+        m_data->handleError(reply.error());
+        return QBluetoothReply<uchar>();
+    }
+
+    return reply.value();
+}
+
+/*!
+    Requests the Bluetooth device to disconnect the underlying low level connection to the
+    remote bluetooth device at address \a addr.  This call will most likely require system
+    administrator privileges.  The actual disconnection will happen several seconds later.
+    First the remoteDeviceDisconnectRequested signal will be sent.  This method returns
+    true if the disconnectRemoteDevice request succeded, and false otherwise.
+
+    \sa remoteDeviceDisconnectRequested()
+*/
+bool QBluetoothLocalDevice::disconnectRemoteDevice(const QBluetoothAddress &addr)
+{
+    if (!m_data->m_iface || !m_data->m_iface->isValid()) {
+        return false;
+    }
+
+    QDBusReply<void> reply = m_data->m_iface->call("DisconnectRemoteDevice", addr.toString());
+
+    if (!reply.isValid()) {
+        m_data->handleError(reply.error());
+        return false;
+    }
+
+    return true;
+}
+
+/*!
+    Lists the addresses of all known devices, ones that have paired, seen or used.
+*/
+QBluetoothReply<QList<QBluetoothAddress> >
+        QBluetoothLocalDevice::knownDevices() const
+{
+    if (!m_data->m_iface || !m_data->m_iface->isValid()) {
+        return QBluetoothReply<QList<QBluetoothAddress> >();
+    }
+
+    QDBusReply<QStringList> reply = m_data->m_iface->call("ListRemoteDevices");
+    if (!reply.isValid()) {
+        m_data->handleError(reply.error());
+        return QBluetoothReply<QList<QBluetoothAddress> >();
+    }
+
+    QList<QBluetoothAddress> ret;
+
+    foreach (QString addr, reply.value()) {
+        ret.push_back(QBluetoothAddress(addr));
+    }
+
+    return ret;
+}
+
+/*!
+    Lists the addresses of all known devices, ones that have paired, seen or used after
+    the given \a date.
+ */
+QBluetoothReply<QList<QBluetoothAddress> >
+        QBluetoothLocalDevice::knownDevices(const QDateTime &date) const
+{
+    if (!m_data->m_iface || !m_data->m_iface->isValid()) {
+        return QBluetoothReply<QList<QBluetoothAddress> >();
+    }
+
+    // Time format is YYYY-MM-DD HH:MM:SS GMT
+    QString strDate = date.toUTC().toString("yyyy-MM-dd hh:mm:ss");
+
+    QDBusReply<QStringList> reply = m_data->m_iface->call("ListRecentRemoteDevices", strDate);
+    if (!reply.isValid()) {
+        m_data->handleError(reply.error());
+        return QBluetoothReply<QList<QBluetoothAddress> >();
+    }
+
+    QList<QBluetoothAddress> ret;
+
+    foreach (QString addr, reply.value()) {
+        ret.push_back(QBluetoothAddress(addr));
+    }
+
+    return ret;
+}
+
+/*!
+    \fn void QBluetoothLocalDevice::nameChanged(const QString &name)
+
+    This signal is emitted whenever a device name has been changed.  The
+    \a name variable contains the new name.  Note that this signal can
+    be triggered by external events (such as another program changing the
+    device name).
+
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::stateChanged(QBluetoothLocalDevice::State state)
+
+    This signal is emitted whenever a device has entered a new state.  The
+    \a state variable contains the new state.  Note that this signal can be
+    triggered externally.
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::error(QBluetoothLocalDevice::Error error, const QString &msg)
+
+    This signal is emitted whenever an error has occurred.  The \a error variable
+    contains the error that has occurred.  The \a msg variable contains the
+    error message.
+
+    \sa error()
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteDeviceConnected(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a remote device has connected to the local
+    device.  The \a addr parameter holds the address of the remote device. Note
+    that this signal can be triggered externally.
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteDeviceDisconnected(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a remote device has disconnected from the local
+    device.  The \a addr parameter holds the address of the remote device.  Note
+    that this signal can be triggered externally.
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::discoveryStarted()
+
+    This signal is emitted whenever a discovery scan has been initiated.  Note that
+    this signal can be triggered by other instances of QBluetoothLocalDevice.
+
+    \sa discoverRemoteDevices(), discoveryCompleted()
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteDeviceFound(const QBluetoothRemoteDevice &device)
+
+    This signal is emitted whenever a device is discovered.  The \a device parameter
+    contains the remote device discovered.  Note that this signal can be triggered by
+    other instances of QBluetoothLocalDevice.
+
+    \sa remoteDevicesFound()
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteDeviceDisappeared(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a periodic discovery cycle has completed, and a previously
+    detected device is no longer in range or invisible.  The \a addr parameter holds the
+    address of the remote device.
+
+    \sa setPeriodicDiscoveryEnabled()
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteDevicesFound(const QList<QBluetoothRemoteDevice> &list)
+
+    This signal is emitted whenever a discovery procedure has finished.  It returns
+    all devices discovered by the procedure. The \a list contains the list of all
+    remote devices found.
+
+    \sa remoteDeviceFound()
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::discoveryCancelled()
+
+    This signal is emitted whenever a discovery scan has been cancelled.
+
+    \sa cancelDiscovery()
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::discoveryCompleted()
+
+    This signal is emitted whenever a discovery scan has been completed.
+
+    \sa discoverRemoteDevices(), discoveryStarted()
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::pairingCreated(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a pairing request has completed
+    successfully. The \a addr parameter holds the address just paired to.
+    Note that this signal could be triggered by external events.
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::pairingFailed(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a pairing request has failed.  The \a addr
+    parameter holds the address of the remote device.
+ */
+
+/*!
+    \fn void QBluetoothLocalDevice::pairingRemoved(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a pairing has been removed. The \a addr
+    parameter holds the address of the remote device.  Note that this signal
+    could be triggered by external events.
+ */
+
+/*!
     \fn void QBluetoothLocalDevice::remoteAliasChanged(const QBluetoothAddress &addr, const QString &alias)
 
     This signal is emitted whenever a remote device's alias has been changed.
@@ -1426,13 +1728,55 @@ bool QBluetoothLocalDevice::removeRemoteAlias(const QBluetoothAddress &addr)
  */
 
 /*!
-    \fn void QBluetoothLocalDevice::error(QBluetoothLocalDevice::Error error, const QString &msg)
+    \fn void QBluetoothLocalDevice::remoteNameUpdated(const QBluetoothAddress &addr, const QString &name)
 
-    This signal is emitted whenever an error has occurred.  The \a error variable
-    contains the error that has occurred.  The \a msg variable contains the
-    error message.
+    This signal is emitted whenever the remote device's name has been changed.  This
+    can occur when a never seen device has been discovered and the name was obtained
+    (in this case its bluetooth address should be used for display purposes until
+    this signal is emitted), or if the device name has changed since last communication.
+    The \a addr parameter holds the address of the Bluetooth device.  The \a name
+    contains the new name.
 
-    \sa lastError()
- */
+    \sa remoteNameFailed()
+*/
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteNameFailed(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a request for a remote device's name has failed.  The
+    \a addr parameter holds the address of the device.
+
+    \sa remoteNameUpdated()
+*/
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteClassUpdated(const QBluetoothAddress &addr,  QBluetooth::DeviceMajor major, quint8 minor, QBluetooth::ServiceClasses serviceClasses)
+
+    This signal is emitted whenever a remote device's class has changed.  The \a addr
+    parameter holds the address of the device, the \a major, \a minor and \a serviceClasses
+    parameters hold the Device Major, Device Minor and Device Service Classes information,
+    respectively.
+*/
+
+/*!
+    \fn void QBluetoothLocalDevice::discoverableTimeoutChanged(uint timeout)
+
+    This signal is emitted whenever a discoverable timeout for a device has been changed.
+    The \a timeout parameter holds the new timeout.
+
+    \sa discoverableTimeout(), setDiscoverable()
+*/
+
+/*!
+    \fn void QBluetoothLocalDevice::remoteDeviceDisconnectRequested(const QBluetoothAddress &addr)
+
+    This signal is emitted whenever a disconnectRemoteDevice request has been issued to
+    the Bluetooth system.  Services can act upon this signal in order to shut down the
+    connection gracefully to the particular device before the underlying low-level
+    connection is terminated.  The actual disconnection will happen several seconds later.
+    The \a addr parameter holds the address of the device being disconnected.
+
+    \sa disconnectRemoteDevice()
+*/
 
 #include "qbluetoothlocaldevice.moc"

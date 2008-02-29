@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/tools/designer/src/uitools/quiloader.cpp -->
 <head>
   <title>Qt 4.2: QUiLoader Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -85,7 +86,7 @@
  }</pre>
 <p>You can make a custom widget available to the loader using the <a href="quiloader.html#addPluginPath">addPluginPath</a>() function, and you can remove all the available widgets by calling the <a href="quiloader.html#clearPluginPaths">clearPluginPaths</a>() function.</p>
 <p>The <a href="quiloader.html#createAction">createAction</a>(), <a href="quiloader.html#createActionGroup">createActionGroup</a>(), <a href="quiloader.html#createLayout">createLayout</a>() and <a href="quiloader.html#createWidget">createWidget</a>() functions are used internally by the QUiLoader class whenever it has to create an action, action group, layout or widget respectively. For that reason, you can subclass the QUiLoader class and reimplement these functions to intervene the process of constructing an user interface. For example, you might want to create a list of the actions created when loading a form or creating a custom widget.</p>
-<p>For a complete example using the QUiLoader class, see the Calculator Builder example.</p>
+<p>For a complete example using the QUiLoader class, see the <a href="designer-calculatorbuilder.html">Calculator Builder</a> example.</p>
 <p>See also <a href="qtuitools.html">QtUiTools</a> and <a href="qformbuilder.html">QFormBuilder</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -116,7 +117,7 @@
 <p>See also <a href="quiloader.html#createWidget">createWidget</a>() and <a href="quiloader.html#load">load</a>().</p>
 <h3 class="fn"><a name="createWidget"></a><a href="qwidget.html">QWidget</a> * QUiLoader::createWidget ( const <a href="qstring.html">QString</a> &amp; <i>className</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const <a href="qstring.html">QString</a> &amp; <i>name</i> = QString() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Creates a new widget with the given <i>parent</i> and <i>name</i> using the class specified by <i>className</i>. You can use this function to create any of the widgets returned by the <a href="quiloader.html#availableWidgets">availableWidgets</a>() function.</p>
-<p>The function is also used internally by the <a href="quiloader.html">QUiLoader</a> class whenever it has to create a widget. For that reason, you can subclass the <a href="quiloader.html">QUiLoader</a> class and reimplement this function to intervene the process of constructing an user interface or widget.</p>
+<p>The function is also used internally by the <a href="quiloader.html">QUiLoader</a> class whenever it has to create a widget. For that reason, you can subclass the <a href="quiloader.html">QUiLoader</a> class and reimplement this function to intervene in the process of constructing a user interface or widget.</p>
 <p>See also <a href="quiloader.html#availableWidgets">availableWidgets</a>() and <a href="quiloader.html#load">load</a>().</p>
 <h3 class="fn"><a name="load"></a><a href="qwidget.html">QWidget</a> * QUiLoader::load ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, <a href="qwidget.html">QWidget</a> * <i>parentWidget</i> = 0 )</h3>
 <p>Loads a form from the given <i>device</i> and creates a new widget with the given <i>parentWidget</i> to hold its contents.</p>
@@ -134,6 +135,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

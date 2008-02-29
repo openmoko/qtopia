@@ -25,7 +25,7 @@
 #include <qstring.h>
 #include <quuid.h>
 
-#include <qtopiamedia/observer.h>
+#include "observer.h"
 
 #include "mediasession.h"
 
@@ -61,6 +61,8 @@ public:
 
     void setMuted(bool mute);
     bool isMuted() const;
+
+    QtopiaMedia::State playerState() const;
 
     QString errorString();
 

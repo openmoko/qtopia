@@ -90,7 +90,7 @@ void VersionInfo::init()
     vBoxLayout1->addSpacing( 10 );
 
     QLabel *qtopiaCopyright = new QLabel(this);
-    qtopiaCopyright->setText(tr( "Copyright \251 %1", "%1 = 'year'" ).arg(2006));
+    qtopiaCopyright->setText(tr( "Copyright \251 %1", "%1 = 'year'" ).arg(2007));
     vBoxLayout1->addWidget(qtopiaCopyright);
     QLabel* qtopiaCopyright1 = new QLabel( this );
     qtopiaCopyright1->setText( "Trolltech ASA" );

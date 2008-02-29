@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>  Multitasking </title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>  Multitasking </title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -31,9 +30,25 @@ The user is able to:
 <p />
 When applications are switched <em>from</em>, whether by the user directly switching to another application, or by a window spontaneously obscuring them (for example, incoming call), they receive a windowing event. Applications are written to respond accordingly. Most applications do nothing, as they are just sitting there doing nothing, waiting for user input anyway. Some applications will pause their activity - for example an action game will pause and the user will need to manually unpause when they return and are ready to resume the action; a video playback might pause but resume automatically when returned to; an audio playback might not pause at all, except when a call comes in.
 <p />
+<h3><a name="Support_Without_Home_Key"></a> Support Without Home Key </h3>
+<p />
+Devices which do not have any dedicated "multitasking" or "Home" key can provide access to multitasking by binding some other key. To be useful, this key must not be otherwise used. One possible binding is press-and-hold of the Menu key to bring up the Running applications list:
+<p />
+defaultbuttons.conf:
+<pre>
+[Button<i>N</i>]
+Name[]=Left Soft Key
+Key=Context1
+HeldActionService=TaskManager
+HeldActionMessage=showRunningTasks()
+HeldActionMappable=0
+PressActionMappable=0
+</pre>
+<p />
+<p />
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div>

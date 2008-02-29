@@ -69,6 +69,8 @@ public:
 
     void show();
 
+    bool eventFilter(QObject*, QEvent*);
+
 #ifdef QTOPIA_DESKTOP
     void updateCategories();
     QCategorySelector *categorySelect();

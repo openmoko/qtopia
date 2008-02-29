@@ -329,11 +329,7 @@ sub opt_apply_defaults
             }
             if ( !defined($auto) || $auto ) {
                 $optref->{"value"} = $def;
-                my $sa = _resolve_to_scalar($optref->{"showauto"});
-                my $vis = _resolve_to_scalar($optref->{"visible"});
-                if ( (!defined($vis) || $vis) && $sa ) {
-                    $optref->{"auto"} = 1;
-                }
+                $optref->{"auto"} = 1;
             }
         }
     }
@@ -423,7 +419,9 @@ sub opt_print_autodetect()
             next;
         }
         $line =~ s/%/$optname/;
-        if ( $optref->{"auto"} ) {
+        my $sa = _resolve_to_scalar($optref->{"showauto"});
+        my $vis = _resolve_to_scalar($optref->{"visible"});
+        if ( (!defined($optref->{"visible"}) || $vis) && (!defined($optref->{"showauto"}) || $sa) && $optref->{"auto"} ) {
             if ( !$haveauto ) {
                 $haveauto = 1;
                 print "The following default/detected values have been used:\n";

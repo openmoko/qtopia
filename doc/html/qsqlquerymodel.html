@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/sql/models/qsqlquerymodel.cpp -->
 <head>
   <title>Qt 4.2: QSqlQueryModel Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -84,9 +85,9 @@
 <p>The code snippet above extracts the <tt>salary</tt> field from record 4 in the result set of the query <tt>SELECT * from employee</tt>. Assuming that <tt>salary</tt> is column 2, we can rewrite the last line as follows:</p>
 <pre>     int salary = model.data(model.index(4, 2)).toInt();</pre>
 <p>The model is read-only by default. To make it read-write, you must subclass it and reimplement <a href="qabstractitemmodel.html#setData">setData</a>() and <a href="qabstractitemmodel.html#flags">flags</a>(). Another option is to use <a href="qsqltablemodel.html">QSqlTableModel</a>, which provides a read-write model based on a single database table.</p>
-<p>The sql/querymodel example illustrates how to use QSqlQueryModel to display the result of a query. It also shows how to subclass QSqlQueryModel to customize the contents of the data before showing it to the user, and how to create a read-write model based on QSqlQueryModel.</p>
+<p>The <a href="sql-querymodel.html">sql/querymodel</a> example illustrates how to use QSqlQueryModel to display the result of a query. It also shows how to subclass QSqlQueryModel to customize the contents of the data before showing it to the user, and how to create a read-write model based on QSqlQueryModel.</p>
 <p>If the database doesn't return the amount of selected rows in a query, the model will fetch rows incrementally. See <a href="qsqlquerymodel.html#fetchMore">fetchMore</a>() for more information.</p>
-<p>See also <a href="qsqltablemodel.html">QSqlTableModel</a>, <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a>, <a href="qsqlquery.html">QSqlQuery</a>, <a href="model-view-programming.html">Model/View Programming</a>, and Query Model Example.</p>
+<p>See also <a href="qsqltablemodel.html">QSqlTableModel</a>, <a href="qsqlrelationaltablemodel.html">QSqlRelationalTableModel</a>, <a href="qsqlquery.html">QSqlQuery</a>, <a href="model-view-programming.html">Model/View Programming</a>, and <a href="sql-querymodel.html">Query Model Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QSqlQueryModel"></a>QSqlQueryModel::QSqlQueryModel ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -195,6 +196,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -23,7 +23,7 @@
 #define QDS_DATA_P_H
 
 // Qtopia includes
-#include <QLocalUniqueId>
+#include <QUniqueId>
 
 // Qt includes
 #include <QFile>
@@ -94,10 +94,10 @@ class QDSDataPrivate
 {
 public:
     QDSDataPrivate();
-    explicit QDSDataPrivate( const QLocalUniqueId& dataId );
+    explicit QDSDataPrivate( const QUniqueId& dataId );
     QDSDataPrivate( const QByteArray& data, const QMimeType& type );
     QDSDataPrivate( QFile& data, const QMimeType& type );
-    QDSDataPrivate( const QLocalUniqueId& dataId,
+    QDSDataPrivate( const QUniqueId& dataId,
                     const QByteArray& data,
                     const QMimeType& type );
     ~QDSDataPrivate();
@@ -105,7 +105,7 @@ public:
     void shiftToStore();
 
     bool            mUsingLocalStore;
-    QLocalUniqueId  mId;
+    QUniqueId  mId;
     QByteArray*     mLocalStore;
     QMimeType*      mType;
 
@@ -122,47 +122,47 @@ public:
 class QDSDataStore
 {
 public:
-    static bool add( const QLocalUniqueId& id,
+    static bool add( const QUniqueId& id,
                      const QByteArray& data,
                      const QMimeType& type );
 
-    static bool add( const QLocalUniqueId& id,
+    static bool add( const QUniqueId& id,
                      QFile& data,
                      const QMimeType& type );
 
-    static bool add( const QLocalUniqueId& id );
+    static bool add( const QUniqueId& id );
 
-    static bool set( const QLocalUniqueId& id,
+    static bool set( const QUniqueId& id,
                      const QByteArray& data );
 
-    static bool set( const QLocalUniqueId& id,
+    static bool set( const QUniqueId& id,
                      QFile& data );
 
-    static bool set( const QLocalUniqueId& id,
+    static bool set( const QUniqueId& id,
                      const QByteArray& data,
                      const QMimeType& type );
 
-    static bool set( const QLocalUniqueId& id,
+    static bool set( const QUniqueId& id,
                      QFile& data,
                      const QMimeType& type );
 
-    static bool remove( const QLocalUniqueId& id );
-    static bool exists( const QLocalUniqueId& id );
+    static bool remove( const QUniqueId& id );
+    static bool exists( const QUniqueId& id );
 
-    static bool transmit( const QLocalUniqueId& id );
-    static bool received( const QLocalUniqueId& id );
+    static bool transmit( const QUniqueId& id );
+    static bool received( const QUniqueId& id );
 
-    static QMimeType type( const QLocalUniqueId& id );
-    static QByteArray data( const QLocalUniqueId& id );
+    static QMimeType type( const QUniqueId& id );
+    static QByteArray data( const QUniqueId& id );
 
-    static QString infoFileName( const QLocalUniqueId& id );
-    static QString dataFileName( const QLocalUniqueId& id );
+    static QString infoFileName( const QUniqueId& id );
+    static QString dataFileName( const QUniqueId& id );
 
-    static int referenceCount( const QLocalUniqueId& id );
-    static bool removeReference( const QLocalUniqueId& id );
+    static int referenceCount( const QUniqueId& id );
+    static bool removeReference( const QUniqueId& id );
 
-    static int transmitCount( const QLocalUniqueId& id );
-    static bool removeTransmit( const QLocalUniqueId& id );
+    static int transmitCount( const QUniqueId& id );
+    static bool removeTransmit( const QUniqueId& id );
 };
 
 

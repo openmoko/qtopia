@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/stylesheet.qdoc -->
 <head>
   <title>Qt 4.2: Qt Style Sheets</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -46,12 +47,12 @@
 <p>For this kind of customization, style sheets are much more powerful than <a href="qpalette.html">QPalette</a>. For example, it might be tempting to set the <a href="qpalette.html#ColorRole-enum">QPalette::Button</a> role to red for a <a href="qpushbutton.html">QPushButton</a> to obtain a red push button. However, this wasn't guaranteed to work for all styles, because style authors are restricted by the different platforms' guidelines and (on Windows XP and Mac OS X) by the native theme engine.</p>
 <p>Style sheets let you perform all kinds of customizations that are difficult or impossible to perform using <a href="qpalette.html">QPalette</a> alone. If you want yellow backgrounds for mandatory fields, red text for potentially destructive push buttons, or fancy check boxes, style sheets are the answer.</p>
 <p>Style sheets are applied on top of the current <a href="qstyle.html">widget style</a>, meaning that your applications will still look native, but any style sheet constraints will be taken into consideration. Unlike palette fiddling, style sheets offer guarantees: If you set the background color of a <a href="qpushbutton.html">QPushButton</a> to be red, you can be assured that the button will have a red background in all styles, on all platforms. <a href="designer-manual.html#qt-designer">Qt Designer</a> provides style sheet integration, making it easy to view the effects of a style sheet in different <a href="qstyle.html">widget styles</a>.</p>
-<p>In addition, style sheets can be used to provide a distinctive look and feel for your application, without having to subclass <a href="qstyle.html">QStyle</a>. For example, you can specify arbitrary images for radio buttons and check boxes to make them stand out. Using this technique, you can also achieve minor customizations that would normally require subclassing several style classes, such as specifying a <a href="qstyle.html#styleHint">style hint</a>. The Style Sheet example depicted below defines two distinctive style sheets that you can try out and modify at will.</p>
+<p>In addition, style sheets can be used to provide a distinctive look and feel for your application, without having to subclass <a href="qstyle.html">QStyle</a>. For example, you can specify arbitrary images for radio buttons and check boxes to make them stand out. Using this technique, you can also achieve minor customizations that would normally require subclassing several style classes, such as specifying a <a href="qstyle.html#styleHint">style hint</a>. The <a href="widgets-stylesheet.html">Style Sheet</a> example depicted below defines two distinctive style sheets that you can try out and modify at will.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><img src="images/stylesheet-coffee-xp.png" /></td><td><img src="images/stylesheet-pagefold.png" /></td></tr>
 </table></p>
 <p>When a style sheet is active, the <a href="qstyle.html">QStyle</a> returned by <a href="qwidget.html#style">QWidget::style</a>() is a wrapper &quot;style sheet&quot; style, <i>not</i> the platform-specific style. The wrapper style ensures that any active style sheet is respected and otherwise forwards the drawing operations to the underlying, platform-specific style (e.g., <a href="qwindowsxpstyle.html">QWindowsXPStyle</a> on Windows XP).</p>
-<p><b>Warning:</b> Qt style sheets are currently not supported for QMacStyle (the default style on Mac OS X). We plan to address this in Qt 4.3.</p>
+<p><b>Warning:</b> Qt style sheets are currently not supported for <a href="qmacstyle.html">QMacStyle</a> (the default style on Mac OS X). We plan to address this in Qt 4.3.</p>
 <a name="the-style-sheet-syntax"></a>
 <h2>The Style Sheet Syntax</h2>
 <p>Qt Style Sheet terminology and syntactic rules are almost identical to those of HTML CSS. If you already know CSS, you can probably skim quickly through this section.</p>
@@ -169,7 +170,7 @@
 <tr valign="top" class="odd"><td><a href="qcheckbox.html">QCheckBox</a></td><td>Supports the <a href="#box-model">box model</a>. The check indicator can be styled using the <a href="#indicator-sub">::indicator</a> sub-control. The <a href="#spacing-attr">spacing</a> attribute specifies the spacing between the check indicator and the text.</td></tr>
 <tr valign="top" class="even"><td><a href="qcombobox.html">QComboBox</a></td><td>The frame around the combobox can be styled using the <a href="#box-model">box model</a>. The drop-down button can be styled using the <a href="#drop-down-sub">::drop-down</a> sub-control. The arrow mark inside the drop-down button can be styled using the <a href="#down-arrow-sub">::down-arrow</a> sub-control.</td></tr>
 <tr valign="top" class="odd"><td><a href="qdialogbuttonbox.html">QDialogButtonBox</a></td><td>The layout of buttons can be altered using the <a href="#button-layout-attr">button-layout</a> attribute.</td></tr>
-<tr valign="top" class="even"><td><a href="qframe.html">QFrame</a></td><td>Supports the <a href="#box-model">box model</a>. Does not support the <a href="#hover-ps">:hover</a> pseudo-state.</td></tr>
+<tr valign="top" class="even"><td><a href="qframe.html">QFrame</a></td><td>Supports the <a href="#box-model">box model</a>. Does not support the <a href="#hover-ps">:hover</a> pseudo-state. For <a href="qframe.html">QFrame</a> and its subclasses, you must set the QFrame::frameStyle property to <a href="qframe.html#Shape-enum">QFrame::StyledPanel</a>; otherwise, the background and border attributes will not be respected.</td></tr>
 <tr valign="top" class="odd"><td><a href="qgroupbox.html">QGroupBox</a></td><td>Supports the <a href="#box-model">box model</a>. The title can be styled using the <a href="#title-sub">::title</a> sub-control. The indicator of checkable group boxes can be styled using the <a href="#indicator-sub">::indicator</a> sub-control.</td></tr>
 <tr valign="top" class="even"><td><a href="qlabel.html">QLabel</a></td><td>Supports the <a href="#box-model">box model</a>. Does not support the <a href="#hover-ps">:hover</a> pseudo-state.</td></tr>
 <tr valign="top" class="odd"><td><a href="qlineedit.html">QLineEdit</a></td><td>Support the <a href="#box-model">box model</a>.</td></tr>
@@ -676,11 +677,11 @@
  QLineEdit[readOnly=&quot;true&quot;] { color: gray }
  QDialog QLineEdit { color: brown }</pre>
 <p>Quiz: What happens if we have a read-only <a href="qlineedit.html">QLineEdit</a> in a <a href="qdialog.html">QDialog</a>? [Hint: The <a href="#conflict-resolution">Conflict Resolution</a> section above explains what happens in cases like this.]</p>
-<p>See also Style Sheet Example, <a href="richtext-html-subset.html">Supported HTML Subset</a>, and <a href="qstyle.html">QStyle</a>.</p>
+<p>See also <a href="widgets-stylesheet.html">Style Sheet Example</a>, <a href="richtext-html-subset.html">Supported HTML Subset</a>, and <a href="qstyle.html">QStyle</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

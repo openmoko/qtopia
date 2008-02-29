@@ -30,6 +30,7 @@
 #include <QDate>
 #include <QTimer>
 #include <QPainter>
+#include <QStyle>
 
 // Qtopia includes
 #include <QSoftMenuBar>

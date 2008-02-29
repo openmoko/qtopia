@@ -135,11 +135,7 @@ QIrObexServer::~QIrObexServer()
 }
 
 /*!
-    This function starts attempts to open a server socket and register itself with
-    the OBEX protocol handler.
-
-    Returns a valid QObexHandle if the registration was completed successfully,
-    and an invalid one otherwise.
+    \reimp
 */
 void *QIrObexServer::registerServer()
 {
@@ -175,8 +171,7 @@ QIr::DeviceClasses QIrObexServer::deviceClasses() const
 }
 
 /*!
-    Returns the next pending connection if there are pending connections, otherwise returns
-    NULL value.  It is responsibility of the caller to make sure the socket is deleted.
+    \reimp
 */
 QObexSocket *QIrObexServer::nextPendingConnection()
 {
@@ -187,7 +182,7 @@ QObexSocket *QIrObexServer::nextPendingConnection()
         return NULL;
 
     qLog(Infrared) << "Creating new QIrObexSocket";
-    QIrObexSocket *socket = new QIrObexSocket();
+    QIrObexSocket *socket = new QIrObexSocket(this);
     socket->setHandle(handle);
 
     return socket;

@@ -114,6 +114,7 @@ protected slots:
     void mailArrived(const Email &);
     void allMailArrived(int);
     void queryItemSelected();
+    void resetNewMailCount();
     bool moveMailToFolder(Email *mail, EmailFolderList *source, EmailFolderList *target);
     void emptyFolder();
 
@@ -140,6 +141,7 @@ protected slots:
     void imapServerFolders();
     void failedList(QStringList &);
 
+    void displayNewMessage( Email *mail );
     void mailRemoved(const QUuid &, const QString &);
     void mailUpdated(Email *, const QString &);
     void mailFromDisk(Email *, const QString &);
@@ -180,6 +182,7 @@ protected slots:
     void showFolderList();
     void showMessageList();
     void displayRecentMessage();
+    void updateListViews();
     void readReplyRequested(Email*);
 
     void settings();
@@ -187,10 +190,10 @@ protected slots:
     void deleteAccount(MailAccount *);
 
     void selectAccountTimeout();
-
     MailListView *messageView();
 
 private slots:
+    void initActions();
     void smsVCard( const QDSActionRequest& request );
     void emailVCard( const QDSActionRequest& request );
     void collectSysMessages();
@@ -284,6 +287,7 @@ private:
     QAction *settingsAction;
     QAction *emptyTrashAction;
     QAction *deleteMailAction;
+    bool enableMessageActions;
 
     QMenuBar *mb;
     QMenu *configure;
@@ -318,6 +322,7 @@ private:
     int showMsgRetryCount;
     MailAccount::AccountType showMessageType;
     QUuid showMsgId;
+    bool waitingForNewMessage;
     bool autoGetMail;
 
     QUuid repliedFromUuid;

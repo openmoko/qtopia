@@ -20,15 +20,16 @@
 ****************************************************************************/
 
 #include <qbluetoothaddress.h>
+#include <qhash.h>
 
 #include <string.h>
 #include <stdio.h>
 
 /*!
     \class QBluetoothAddress
-    \brief The QBluetoothAddress class represents a bluetooth address (bdaddr).
+    \brief The QBluetoothAddress class represents a bluetooth address.
 
-The QBluetoothAddress class refers to a single BluetoothAddress object.
+The QBluetoothAddress class refers to a single Bluetooth address.
 Each Bluetooth device can have one and only one address.  There are certain
 special addresses defined.  Namely \bold{any}, \bold{local}, \bold{all}.
 
@@ -37,7 +38,7 @@ special addresses defined.  Namely \bold{any}, \bold{local}, \bold{all}.
  */
 
 /*!
-    Construct a new invalid bluetooth address object.
+    Constructs a new invalid bluetooth address.
  */
 QBluetoothAddress::QBluetoothAddress()
 {
@@ -46,7 +47,7 @@ QBluetoothAddress::QBluetoothAddress()
 }
 
 /*!
-    Construct a copy of a bluetooth address object from \a other object.
+    Constructs a copy of a bluetooth address from \a other.
 */
 QBluetoothAddress::QBluetoothAddress(const QBluetoothAddress &other)
 {
@@ -55,10 +56,10 @@ QBluetoothAddress::QBluetoothAddress(const QBluetoothAddress &other)
 }
 
 /*!
-    Construct a bluetooth address object based on string representation given by \a addr.
+    Constructs a bluetooth address based on string representation given by \a addr.
     The string should be in the format of XX:XX:XX:XX:XX:XX where XX represents
-    a hexadecimal number.  If the string is in an invalid format, and invalid bdaddr
-    is constructed.
+    a hexadecimal number.  If the string is in an invalid format, an invalid
+    bluetooth address is constructed.
 */
 QBluetoothAddress::QBluetoothAddress(const QString &addr)
 {
@@ -79,14 +80,14 @@ QBluetoothAddress::QBluetoothAddress(const QString &addr)
 }
 
 /*!
-    Destroys a Bluetooth address object.
+    Destroys a Bluetooth address.
 */
 QBluetoothAddress::~QBluetoothAddress()
 {
 }
 
 /*!
-    Assigns the contents of the Bluetooth address object \a other to the current object.
+    Assigns the contents of the Bluetooth address \a other to the current address.
 */
 QBluetoothAddress &QBluetoothAddress::operator=(const QBluetoothAddress &other)
 {
@@ -108,18 +109,22 @@ bool QBluetoothAddress::operator==(const QBluetoothAddress &other) const
 }
 
 /*!
-    Converts the Bluetooth address object into a QString.  The format will be of the form
-    XX:XX:XX:XX:XX:XX where XX is a hexadecimal number.
+    Converts the Bluetooth address into a QString.  The format will be of the form
+    XX:XX:XX:XX:XX:XX where XX is a hexadecimal number.  If the address is invalid, a
+    null string is returned.
 */
 QString QBluetoothAddress::toString() const
 {
+    if (!m_valid)
+        return QString();
+
     return m_bdaddr;
 }
 
 /*!
     Returns whether the address is valid.
 */
-bool QBluetoothAddress::valid() const
+bool QBluetoothAddress::isValid() const
 {
     return m_valid;
 }
@@ -173,6 +178,11 @@ template <typename Stream> void QBluetoothAddress::deserialize(Stream &stream)
 {
     stream >> m_bdaddr;
     stream >> m_valid;
+}
+
+uint qHash(const QBluetoothAddress &addr)
+{
+    return qHash(addr.m_bdaddr);
 }
 
 Q_IMPLEMENT_USER_METATYPE(QBluetoothAddress)

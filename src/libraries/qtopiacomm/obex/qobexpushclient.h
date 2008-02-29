@@ -22,31 +22,49 @@
 #ifndef __QOBEXPUSHCLIENT_H__
 #define __QOBEXPUSHCLIENT_H__
 
-#include <qobexnamespace.h>
-
 #include <QObject>
 #include <QString>
 
 #include <qtopiaglobal.h>
 
-class QObexPushClient_Private;
+class QObexPushClientPrivate;
 class QByteArray;
 class QIODevice;
 class QObexSocket;
 
 class QTOPIACOMM_EXPORT QObexPushClient : public QObject
 {
+    friend class QObexPushClientPrivate;
     Q_OBJECT
+
 public:
+
+    enum State {
+        Ready,
+        Connecting,
+        Disconnecting,
+        Streaming,
+        Closed = 100
+    };
+
+    enum Error {
+        NoError,
+        LinkError,
+        TransportConnectionError,
+        RequestFailed,
+        Aborted,
+        UnknownError = 100
+    };
 
     explicit QObexPushClient(QObexSocket *socket, QObject *parent = 0);
     virtual ~QObexPushClient();
 
-    void setAutoDelete(bool enable);
-    bool autoDelete() const;
+    State state() const;
+    Error error() const;
 
-    QObex::State state() const;
-    QObex::Error error() const;
+    int currentId() const;
+    bool hasPendingCommands() const;
+    void clearPendingCommands();
 
     int connect();
     int disconnect();
@@ -60,22 +78,18 @@ public:
     void exchangeBusinessCard(QIODevice *mine, QIODevice *theirs,
                               int *putId = 0, int *getId = 0);
 
-    int close();
-
-
 public slots:
     void abort();
 
 signals:
     void done(bool error);
     void progress(qint64, qint64);
-    void stateChanged(QObex::State);
+    void stateChanged(QObexPushClient::State state);
     void commandFinished(int id, bool error);
     void commandStarted(int id);
 
 private:
-    friend class QObexPushClient_Private;
-    QObexPushClient_Private *m_data;
+    QObexPushClientPrivate *m_data;
     Q_DISABLE_COPY(QObexPushClient)
 };
 

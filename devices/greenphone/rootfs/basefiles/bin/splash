@@ -1,0 +1,53 @@
+#!/bin/sh
+
+progress=0
+y=
+now=0
+
+while :; do
+    opt="$1"
+    case $opt in
+    -p)
+        shift
+        progress="$1"
+        if [ "$progress" = "+" ]; then
+            progress=$(( $(cat /tmp/progress) + 1 ))
+        elif [ "$progress" = "-" ]; then
+            progress=$(cat /tmp/progress)
+        fi
+        echo "$progress" >/tmp/progress
+        ;;
+    -y)
+        shift
+        y="$1"
+        ;;
+    -now)
+        now=1
+        ;;
+    --)
+        shift
+        break
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
+done
+
+if [ -z "$y" ]; then
+    if [ "$#" = 1 ]; then
+        y=170
+    elif [ "$#" = 2 ]; then
+        y=155
+    elif [ "$#" = 3 ]; then
+        y=135
+    fi
+fi
+
+/bin/addtext p $progress $y "$@" < /usr/share/bootprogress/blank.gif > /dev/fb &
+
+if [ "$now" = 1 ]; then
+    wait
+fi
+

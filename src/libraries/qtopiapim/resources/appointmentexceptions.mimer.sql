@@ -1,5 +1,5 @@
 CREATE TABLE appointmentexceptions (
-        recid BINARY(8) NOT NULL,
+        recid INTEGER NOT NULL,
         edate DATE NOT NULL,
         alternateid INT, 
 	UNIQUE(recid, edate), 

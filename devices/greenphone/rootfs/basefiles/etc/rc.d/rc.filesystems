@@ -1,5 +1,7 @@
 #!/bin/sh
 
+splash "Mounting virtual" "filesystems"
+
 mount /proc
 
 mount /dev
@@ -10,6 +12,8 @@ mount /var
 tar -xzf /var.tgz -C /var
 
 # check all filesystems for errors
+splash -p + "Checking filesystems"
+
 NEED_REBOOT=0
 mount -o remount,ro /
 
@@ -20,9 +24,13 @@ for part in tffsb tffsc tffsd; do
     fi
 done
 
-[ $NEED_REBOOT -eq 1 ] && reboot
+if [ $NEED_REBOOT -eq 1 ]; then
+    splash -now "Filesystem errors" "detected, rebooting"
+    reboot
+fi
 
 # mount local filesystems
+splash -p + "Mounting filesystems"
 mount /dev/tffsa2
 mount /dev/tffsb
 mount /dev/tffsc

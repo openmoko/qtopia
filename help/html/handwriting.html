@@ -1,3 +1,4 @@
+<!--#if expr="$PDASTYLE || $TOUCH"-->
 <html>
 <head><title>Handwriting Help</title></head>
 <body>
@@ -6,10 +7,18 @@
 <!--#else-->
    <h3>Handwriting Help</h3>
 <!--#endif-->
-<!--#if expr="$TOUCH"-->
-<p>Handwriting is only an input method option for touch screen phones.</p>
-<!--#endif-->
 <p>The Qtopia handwriting feature can be personalized through the device settings that provide a comprehensive guide to drawing letters, numbers and other characters.</p>
-<p>For more details about the handwriting input method, please select a topic from <a href="handwriting-index.html">More Handwriting Help</a>.</p>
+<p>For more details about the handwriting input method, please select a topic from:</p>
+<ul>
+<li><a href="handwriting.html">Handwriting Help</a></li>
+<li><a href="handwriting-fsim.html">Full Screen Handwriting</a></li>
+<li><a href="handwriting-metrics.html">General Metrics</a></li>
+<!--#if expr="$PDASTYLE"-->
+<li><a href="handwriting-recognition.html">Recognition</a></li>
+<!--#endif-->
+<li><a href="hwsettings.html">Settings</a></li>
+<li><a href="handwriting-strokes.html">Strokes</a></li>
+</ul>
 </body>
 </html>
+<!--#endif-->

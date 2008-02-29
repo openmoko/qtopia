@@ -24,25 +24,54 @@
 
 #include "installcontrol.h"
 
-class SandboxInstallJob
+#include <qtopiasxe.h>
+
+class SandboxInstallJob : public QObject
 {
+    Q_OBJECT
     public:
-        SandboxInstallJob( const InstallControl::PackageInfo *, const QString &, ErrorReporter *reporter = 0 );
+        SandboxInstallJob( const InstallControl::PackageInfo *, const QString &, ErrorReporter *errorReporter = 0 );
+        virtual ~SandboxInstallJob() {};
         QString destinationPath() const { return destination; }
         bool isAborted() const { return abort; }
-        void registerPackageFiles( const QString &f = QString() );
+        bool registerPackageFiles( const QString &f = QString() );
         void removeDestination() const;
-        void installContent();
-        void setupSandbox();
+        bool installContent();
+        bool setupSandbox();
         void runSandbox( const QString & );
         bool createLink( const QString &target, const QString &link );
+
+#ifndef QT_NO_SXE
+    signals:
+        void newBinary(SxeProgramInfo &pi);
+#endif
+
     private:
         void mediaSandboxRoot();
+        void clearMiscFiles() const;
         const InstallControl::PackageInfo *package;
         QString destination;
         QString media;
         QStringList desktopPaths;
         bool abort;
+        ErrorReporter *reporter;
 };
+
+class SandboxUninstallJob
+{
+    public:
+        SandboxUninstallJob( const InstallControl::PackageInfo *, const QString &media, ErrorReporter *reporter = 0 );
+        void unregisterPackageFiles() const;
+        void dismantleSandbox() const;
+        void rollBackSandboxRule( const QString &binPath ) const;
+
+    private:
+        QStringList getPackageBinaryPaths( const QString &path = QString() ) const;
+        void removePackage() const;
+
+        const InstallControl::PackageInfo *package;
+        QString packagePath;
+};
+
 
 #endif

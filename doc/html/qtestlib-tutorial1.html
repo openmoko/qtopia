@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qtestlib.qdoc -->
 <head>
   <title>Qt 4.2: Chapter 1: Writing a Unit Test</title>
   <link rel="contents" href="qtestlib-tutorial.html" />
@@ -17,11 +18,22 @@
 [Next: <a href="qtestlib-tutorial2.html">Chapter 2</a>]
 </p>
 <h1 align="center">Chapter 1: Writing a Unit Test<br /><small></small></h1>
+<p>Files:</p>
+<ul>
+<li><a href="qtestlib-tutorial1-testqstring-cpp.html">qtestlib/tutorial1/testqstring.cpp</a></li>
+</ul>
 <p>In this first chapter we will see how to write a simple unit test for a class, and how to execute it.</p>
 <a name="writing-a-test"></a>
 <h2>Writing a Test</h2>
 <p>Let's assume you want to test the behavior of our <a href="qstring.html">QString</a> class. First, you need a class that contains your test functions. This class has to inherit from <a href="qobject.html">QObject</a>:</p>
-<pre></pre>
+<pre> #include &lt;QtTest/QtTest&gt;
+
+ class TestQString: public QObject
+ {
+     Q_OBJECT
+ private slots:
+     void toUpper();
+ };</pre>
 <p>Note that you need to include the <a href="qtest.html">QTest</a> header, and that the test functions have to be declared as private slots so the test framework finds and executes it.</p>
 <p>Then you need to implement the test function itself. The implementation could look like this:</p>
 <pre> void TestQString::toUpper()
@@ -31,10 +43,15 @@
  }</pre>
 <p>The <a href="qtest.html#QVERIFY">QVERIFY</a>() macro evaluates the expression passed as its argument. If the expression evaluates to true, the execution of the test function continues. Otherwise, a message describing the failure is appended to the test log, and the test function stops executing.</p>
 <p>But if you want a more verbose output to the test log, you should use the <a href="qtest.html#QCOMPARE">QCOMPARE</a>() macro instead:</p>
-<pre></pre>
+<pre> void TestQString::toUpper()
+ {
+     QString str = &quot;Hello&quot;;
+     QCOMPARE(str.toUpper(), QString(&quot;HELLO&quot;));
+ }</pre>
 <p>If the strings are not equal, the contents of both strings is appended to the test log, making it immediately visible why the comparison failed.</p>
 <p>Finally, to make our test case a stand-alone executable, the following two lines are needed:</p>
-<pre></pre>
+<pre> QTEST_MAIN(TestQString)
+ #include &quot;testqstring.moc&quot;</pre>
 <p>The <a href="qtest.html#QTEST_MAIN">QTEST_MAIN</a>() macro expands to a simple <tt>main()</tt> method that runs all the test functions. Note that if both the declaration and the implementation of our test class are in a <tt>.cpp</tt> file, we also need to include the generated moc file to make Qt's introspection work.</p>
 <a name="executing-a-test"></a>
 <h2>Executing a Test</h2>
@@ -60,6 +77,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

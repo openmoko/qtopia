@@ -22,13 +22,13 @@
 #define __LOCALSERVICESWINDOW_H__
 
 #include <qbluetoothnamespace.h>
-#include <qsdap.h>
+#include <qbluetoothsdpquery.h>
 
 #include <QDialog>
 #include <QHash>
 
 class QBluetoothLocalDevice;
-class QSDAPSearchResult;
+class QBluetoothSdpQueryResult;
 class BluetoothServicesController;
 class QListWidgetItem;
 class QAction;
@@ -50,18 +50,10 @@ public:
     void addRegisteredServices();
 
 public slots:
-    void serviceStarted(const QString &name,
-                        QBluetooth::ServiceError error,
-                        const QString &errorDesc);
-    void serviceStopped(const QString &name,
-                        QBluetooth::ServiceError error,
-                        const QString &errorDesc);
-    void serviceError(const QString &name,
-                      QBluetooth::ServiceError error,
-                      const QString &errorDesc);
+    void serviceStarted(const QString &name, bool error, const QString &desc);
+    void serviceStopped(const QString &name);
 
 private slots:
-    //void results(const QSDAPSearchResult &result);
     void editServiceSettings();
     void itemActivated(QListWidgetItem *item);
     void finished();
@@ -78,8 +70,6 @@ private:
     QAction *m_settingsAction;
 
     QBluetoothLocalDevice *m_device;
-    QSDAP m_sdap;
-    bool m_inprogress;
     QBluetoothServiceController *m_servicesController;
     QHash<QString, int> m_displayedProviders;
 };

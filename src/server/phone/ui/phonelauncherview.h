@@ -102,15 +102,14 @@ private:
     // Potential value of margin - used for selectedItem.
     static const int MARGIN_DEFAULT = 6;
 
-#ifdef QTOPIA_TEST
-    // This is just temporary until this is configurable
-    // If this is a test configuration we want launcher grid navigation to be fast
-    static const int DEFAULT_MOVE_TIME_DURATION = 0;
-#else
+#ifndef MOVE_TIME_DURATION 
     // Number of milliseconds that selectedItem takes to move across to a neighbouring
     // GridItem - used for selectedItem.
-    static const int DEFAULT_MOVE_TIME_DURATION = 400;
+    // Override this by building with compiler option -DMOVE_TIME_DURATION=0
+
+    #define MOVE_TIME_DURATION 400
 #endif
+    static const int DEFAULT_MOVE_TIME_DURATION = MOVE_TIME_DURATION;
 
     // Potential file used for the background image of selectedItem.
     static const QString SELECTED_BACKGROUND_FILE_MOUSE_PREFERRED;

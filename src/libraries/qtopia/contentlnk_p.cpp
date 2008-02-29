@@ -451,8 +451,6 @@ bool ContentLinkPrivate::isValid(bool force) const
         ContentLinkPrivate *that=const_cast<ContentLinkPrivate *>(this);
         that->valid = Valid;
         //QTOPIA_DOCAPI_TODO check if we're in the app path, if so, no pathing info on cPath needed.
-        if(linkFile().isEmpty())
-            qLog(DocAPI) << "isValid called on empty file!!";
         qLog(DocAPI) << "isValid linkfile" << linkFile() << valid;
     }
     else
@@ -460,9 +458,8 @@ bool ContentLinkPrivate::isValid(bool force) const
         QFileInfo f( cPath );
         ContentLinkPrivate *that=const_cast<ContentLinkPrivate *>(this);
         that->valid = f.exists() ? Valid : Invalid;
-        if(cPath.isEmpty())
-            qLog(DocAPI) << "isValid called on empty file!!";
-        qLog(DocAPI) << "isValid file" << cPath << valid;
+        if(!cPath.isEmpty())
+            qLog(DocAPI) << "isValid file" << cPath << valid;
     }
     return valid == Valid;
 }
@@ -733,6 +730,18 @@ const QStringList &ContentLinkPrivate::mimeTypeIcons() const
     }
 
     return cMimeTypeIcons;
+}
+
+const QStringList &ContentLinkPrivate::categories() const
+{
+    if (!(cExtraLoaded & Categories)) {
+        ContentLinkPrivate *that = const_cast<ContentLinkPrivate*>(this);
+
+        that->cCategories = persistenceEngine()->categoriesById(cId);
+        that->cExtraLoaded |= Categories;
+    }
+
+    return cCategories;
 }
 
 QDebug &operator<<(QDebug &debug, const ContentLinkPrivate *contentLink)

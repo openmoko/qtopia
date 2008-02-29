@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtSql module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -100,14 +110,14 @@ QSqlQueryPrivate::~QSqlQueryPrivate()
     \o seek()
     \endlist
 
-    These functions allow the programmer to move forward, backward or
-    arbitrarily through the records returned by the query. If you only
-    need to move forward through the results, e.g. using next() or
-    using seek() with a positive offset, you can use setForwardOnly()
-    and save a significant amount of memory overhead. Once an active
-    query is positioned on a valid record, data can be retrieved using
-    value(). All data is transferred from the SQL backend using
-    QVariants.
+    These functions allow the programmer to move forward, backward
+    or arbitrarily through the records returned by the query. If you
+    only need to move forward through the results (e.g., by using
+    next()), you can use setForwardOnly(), which will save a
+    significant amount of memory overhead and improve performance on
+    some databases. Once an active query is positioned on a valid
+    record, data can be retrieved using value(). All data is
+    transferred from the SQL backend using QVariants.
 
     For example:
 
@@ -191,6 +201,10 @@ QSqlQueryPrivate::~QSqlQueryPrivate()
     \printuntil boundValue(
 
     Note that unbound parameters will retain their values.
+
+    Stored procedures that uses the return statement to return values,
+    or return multiple result sets, are not fully supported. For specific 
+    details see \l{SQL Database Drivers}.
 
     \sa QSqlDatabase, QSqlQueryModel, QSqlTableModel, QVariant
 */
@@ -753,10 +767,16 @@ bool QSqlQuery::isForwardOnly() const
 }
 
 /*!
-    Sets forward only mode to \a forward. If \a forward is true, only
-    next() and seek() with positive values, are allowed for
-    navigating the results. Forward only mode needs far less memory
-    since results do not need to be cached.
+    Sets forward only mode to \a forward. If \a forward is true,
+    only next() and seek() with positive values, are allowed for
+    navigating the results.
+
+    Forward only mode can be (depending on the driver) more memory
+    efficient since results do not need to be cached. It will also
+    improve performance on some databases. For this to be true, you
+    must call \c setForwardMode() before the query is prepared or
+    executed. Note that the constructor that takes a query and a
+    database may execute the query.
 
     Forward only mode is off by default.
 

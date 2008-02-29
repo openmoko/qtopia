@@ -25,8 +25,17 @@
 #include <qtopiaapplication.h>
 #include <QList>
 #ifdef QTOPIA_TEST
-# include <qtest/qtopiasystemtestslave.h>
-class TestKeyFilter;
+# include <qtest/qtopiaservertestslave.h>
+class TestEventFilter;
+class QtopiaTestServerSocket : public QTcpServer
+{
+public:
+    QtopiaTestServerSocket();
+    virtual ~QtopiaTestServerSocket();
+
+private:
+    virtual void incomingConnection( int socket );
+};
 #endif
 class QWSEvent;
 
@@ -93,10 +102,33 @@ private:
     QList<QWSEventFilter *> m_filters;
     static QtopiaServerApplication *m_instance;
 #ifdef QTOPIA_TEST
+    friend class QtopiaTestServerSocket;
+    friend class TestEventFilter;
+    QtopiaTestServerSocket *m_serverSocket;
     QtopiaServerTestSlave m_serverSlave;
-    TestKeyFilter *m_testKeyFilter;
+    TestEventFilter *m_testFilter;
 #endif
 };
+
+#ifdef QTOPIA_TEST
+class TestEventFilter : public QtopiaServerApplication::QWSEventFilter
+{
+public:
+    TestEventFilter(QtopiaServerApplication *parent) {
+        parent->installQWSEventFilter(this);
+        m_parent = parent;
+    }
+    ~TestEventFilter() {
+        m_parent->removeQWSEventFilter(this);
+    }
+    bool qwsEventFilter(QWSEvent *e) {
+        m_parent->m_serverSlave.qwsEventFilter(e);
+        return false;
+    }
+private:
+    QtopiaServerApplication *m_parent;
+};
+#endif
 
 template<class T>
 inline const char *qtopiaTask_InterfaceName()

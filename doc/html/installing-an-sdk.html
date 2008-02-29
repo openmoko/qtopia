@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Installing a Qtopia SDK</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Installing a Qtopia SDK</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -45,27 +44,27 @@
 <a name="using-a-cd-dvd"></a>
 <h4>Using a CD/DVD</h4>
 <p>To install the SDK from a CD/DVD:</p>
-<pre>    put the CD/DVD in the drive.
+<pre>&nbsp;   put the CD/DVD in the drive.
     The CD should automount into /media/cdrom (or something similar)
     Don't forget to install VmPlayer.</pre>
 <a name="using-a-loopback-device"></a>
 <h4>Using a loopback device</h4>
 <p>To use the iso image as a loopback device, please do the following:</p>
-<pre>    su (login as root, enter password if needed)
+<pre>&nbsp;   su (login as root, enter password if needed)
     mkdir &lt;mountpoint&gt; (create a directory where the ISO needs to be mounted)
     mount -o loop &lt;filename&gt; &lt;mountpoint&gt;
     exit (logout as root, i.e. logged in as normal user again)</pre>
 <a name="installing-the-sdk-continued"></a>
 <h3>Installing the SDK (continued)</h3>
-<pre>    cd &lt;mountpoint&gt; (You MUST cd into the mounted directory)
+<pre>&nbsp;   cd &lt;mountpoint&gt; (You MUST cd into the mounted directory)
     ./install.sh (run the install script)</pre>
 <p>Answer the questions asked in the installer program and make sure VmPlayer is installed.</p>
 <a name="running-the-sdk"></a>
 <h3>Running the SDK</h3>
 <p>To run the SDK:</p>
-<pre>    cd /home/&lt;username&gt;/QtopiaGreenphoneSDK (or wherever the SDK is installed)
+<pre>&nbsp;   cd /home/&lt;username&gt;/QtopiaGreenphoneSDK (or wherever the SDK is installed)
     vmplayer greenphone.vmx</pre>
-<p>Once the VmPlayer is running a fully functional Linux environment is available inside the VmPlayer that contains all the Qtopia SDK tools, pre-build Qtopia binaries, documentation, etc to be used. To run Qtopia, click on &quot;runqpe&quot;.</p>
+<p>Once the VMPlayer is running a fully functional Linux environment is available inside the VMPlayer that contains all the Qtopia SDK tools, pre-build Qtopia binaries, documentation, etc to be used. To run Qtopia, click on <tt>runqtopia</tt>.</p>
 <p>With just the SDK it is not possible to rebuild Qtopia (it comes in a pre-build form) so the starting point of an SDK is basically the point where a Source Package user would be after having configured and build Qtopia both for the desktop and for the device. Apart from the fact that you cannot rebuild Qtopia itself using an SDK there are no differences with respect to running Qtopia, or to building and running your own applications.</p>
 <p>The Qtopia binaries are located (from within the VmPlayer environment) in <tt>/opt/Qtopia/SDK/&lt;version&gt;/x86</tt> and <tt>/opt/Qtopia/SDK/&lt;version&gt;/&lt;device&gt;</tt>. The &lt;device&gt; directory contains all the files (and <i>only</i> the files) that should be installed onto the device. Note that we have passed -prefix to specify the location that Qtopia will run from /opt/Qtopia.</p>
 <p>For further information about running Qtopia refer to <a href="running-qtopia.html">Running Qtopia</a>.</p>
@@ -73,6 +72,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

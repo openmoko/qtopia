@@ -1,5 +1,5 @@
 CREATE TABLE contacts (
-	recid BLOB NOT NULL,
+	recid INTEGER NOT NULL,
 	title TEXT COLLATE NOCASE,
 	firstname TEXT COLLATE NOCASE,
 	middlename TEXT COLLATE NOCASE,

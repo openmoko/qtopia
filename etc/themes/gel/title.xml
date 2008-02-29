@@ -5,8 +5,8 @@
 	    expr:@/Accessories/Battery/VisualCharge
 	</level>
         <exclusive>
-          <level name="signal" rect="-44,2,20x19" src="signal" count="5" onclick="color=Highlight" interactive="yes" min="0" max="100" active="expr:@/Telephony/Status/SignalLevel/modem">
-		expr:@/Telephony/Status/SignalLevel/modem
+          <level name="signal" rect="-44,2,20x19" src="signal" count="5" onclick="color=Highlight" interactive="yes" min="0" max="100" active="expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength">
+                expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength
 	    </level>
             <widget name="inputmethod" rect="-44,2,20x19" transient="yes" active="expr:@/UI/IMVisible"/>
         </exclusive>

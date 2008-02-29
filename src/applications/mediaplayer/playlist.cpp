@@ -62,6 +62,9 @@ void BasicPlaylist::remove( const QModelIndex& index )
 
 void BasicPlaylist::clear()
 {
+    if( rowCount() <= 0 )
+	return;
+
     beginRemoveRows( QModelIndex(), 0, rowCount() - 1 );
 
     m_urls.clear();

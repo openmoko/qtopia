@@ -21,7 +21,6 @@
 
 #define QPE_USE_MALLOC_FOR_NEW
 #define QPE_NEED_CALIBRATION
-#define QPE_OWNAPM
 #define QPE_NOCIBAUD
 #define QPE_STARTMENU
 #include <asm/sharp_apm.h>
@@ -71,59 +70,6 @@
 // a bit awkward, as this value is defined in emailclient.cpp aswell...
 #define LED_MAIL 0
 #define SHARP_LED_MAIL 9
-
-#define CUSTOM_LEDS( led, status ) \
-{ \
-    if ( led == LED_MAIL ) \
-        led = SHARP_LED_MAIL; \
-    static int fd = open( "/dev/sharp_led", O_RDWR|O_NONBLOCK ); \
-    sharp_led_status leds; \
-    memset(&leds, 0, sizeof(leds)); \
-    leds.which = led; \
-    leds.status = status; \
-    ioctl( fd, SHARP_LED_SETSTATUS, (char*)&leds ); \
-}
-
-#define QPE_HAVE_MEMALERTER
-//#define QPE_LAZY_APPLICATION_SHUTDOWN
-
-#define QPE_MEMALERTER_IMPL \
-static void sig_handler(int sig) \
-{ \
-    switch (sig) { \
-    case SIGHUP: \
-        ServerApplication::memstate = ServerApplication::MemVeryLow; \
-        break; \
-    case SIGUSR1: \
-        ServerApplication::memstate = ServerApplication::MemNormal; \
-        break; \
-    case SIGUSR2: \
-        ServerApplication::memstate = ServerApplication::MemLow; \
-        break; \
-    } \
-} \
-static void initMemalerter() \
-{ \
-    struct sigaction sa; \
-    memset(&sa, '\0', sizeof sa); \
-    sa.sa_handler = sig_handler; \
-    sa.sa_flags = SA_RESTART; \
-    if (sigaction(SIGHUP, &sa, NULL) < 0) { \
-        return; \
-    } \
-    if (sigaction(SIGUSR1, &sa, NULL) < 0) { \
-        return; \
-    } \
-    if (sigaction(SIGUSR2, &sa, NULL) < 0) { \
-        return; \
-    } \
-    FILE *fo = fopen("/proc/sys/vm/freepg_signal_proc", "w"); \
-     \
-    if (!fo) \
-        return; \
-    fprintf(fo, "qpe\n"); \
-    fclose(fo); \
-}
 
 #define QPE_INITIAL_NUMLOCK_STATE \
 { \

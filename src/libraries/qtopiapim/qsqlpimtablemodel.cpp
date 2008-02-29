@@ -30,6 +30,7 @@
 #include <QVector>
 #include <QtopiaSql>
 
+#include "qpimsqlio_p.h"
 
 /* there may be an argument to make this more dynamic */
 const int QSqlPimTableModel::rowStep(25);
@@ -50,8 +51,7 @@ QSqlPimTableModel::~QSqlPimTableModel()
 
 QList<QVariant> QSqlPimTableModel::orderKey(const QUniqueId &id) const
 {
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)id;
-    QSqlQuery keyQuery;
+    QSqlQuery keyQuery(QPimSqlIO::database());
     if (!keyQuery.prepare("SELECT " + sortColumn()
                 + ", t1.recid FROM "
                 + tableText + " AS t1 WHERE t1.recid = :id")) {
@@ -59,13 +59,15 @@ QList<QVariant> QSqlPimTableModel::orderKey(const QUniqueId &id) const
                 keyQuery.lastError().text().toLocal8Bit().constData());
         qLog(Sql) << keyQuery.lastQuery();
     }
-    keyQuery.bindValue(":id", lid.toByteArray());
+    keyQuery.bindValue(":id", id.toUInt());
 
     QList<QVariant> list;
     QtopiaSql::logQuery(keyQuery);
-    if (keyQuery.exec() && keyQuery.next()) {
-        for (int i = 0; i < mOrderBy.count() + 1; i++)
-            list << keyQuery.value(i);
+    if (keyQuery.exec()) {
+        if (keyQuery.next()) {
+            for (int i = 0; i < mOrderBy.count() + 1; i++)
+                list << keyQuery.value(i);
+        }
     } else {
         qWarning("QSqlPimTableModel::orderKey() - Could not execute query: %s",
                 keyQuery.lastError().text().toLocal8Bit().constData());
@@ -189,7 +191,7 @@ int QSqlPimTableModel::count() const
 
     qLog(Sql) << " QSqlPimTable::count() - not cached";
     // may not be sqlite compatible...
-    QSqlQuery countQuery;
+    QSqlQuery countQuery(QPimSqlIO::database());
     countQuery.setForwardOnly(true);
     countQuery.prepare(selectText("count(distinct t1.recid)"));
 
@@ -319,7 +321,7 @@ QUniqueId QSqlPimTableModel::recordId(int row) const
 
     qLog(Sql) << "QSqlPimTableModel::recordId() - row block" << rowBlockStart;
     QString joinText;
-    QSqlQuery idByRowQuery;
+    QSqlQuery idByRowQuery(QPimSqlIO::database());
     /* if adding a limit... needs to be row-rowBlockStart *rowStep  */
     QString sortColumnString = sortColumn();
     if (!idByRowQuery.prepare( selectText("distinct t1.recid", keyJumpFilter) +
@@ -360,7 +362,7 @@ QUniqueId QSqlPimTableModel::recordId(int row) const
         /* cache any block keys we come across */
         if (!(jumpedRow % rowStep) && !cachedKeys.contains(jumpedRow/rowStep)) {
             qLog(Sql) << "QSqlPimTableModel::recordId() - cache set point" << jumpedRow;
-            cachedKeys.insert(jumpedRow/rowStep, new QUniqueId(idByRowQuery.value(0).toByteArray()));
+            cachedKeys.insert(jumpedRow/rowStep, new QUniqueId(QUniqueId::fromUInt(idByRowQuery.value(0).toUInt())));
         }
 
         if (jumpedRow >= rowEnd)
@@ -368,7 +370,7 @@ QUniqueId QSqlPimTableModel::recordId(int row) const
 
         if (jumpedRow > rowEnd-2*rowStep) {
             qLog(Sql) << "QSqlPimTableModel::recordId() - cache" << jumpedRow;
-           cachedIndexes.insert(jumpedRow, new QUniqueId(idByRowQuery.value(0).toByteArray()));
+           cachedIndexes.insert(jumpedRow, new QUniqueId(QUniqueId::fromUInt(idByRowQuery.value(0).toUInt())));
         }
         ++jumpedRow;
     }
@@ -400,19 +402,18 @@ int QSqlPimTableModel::row(const QUniqueId & tid) const
 
     QList<QVariant> keys = orderKey(tid);
     int r = predictedRow(keys)-1;
-    if (recordId(r) == tid)
+    if (r > -1 && recordId(r) == tid)
         return r;
     return -1;
 }
 
 bool QSqlPimTableModel::contains(const QUniqueId &id) const
 {
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)id;
     QStringList filter;
     filter << "t1.recid = :id";
-    QSqlQuery q;
+    QSqlQuery q(QPimSqlIO::database());
     q.prepare(selectText(filter));
-    q.bindValue(":id", lid.toByteArray());
+    q.bindValue(":id", id.toUInt());
     QtopiaSql::logQuery(q);
     q.exec();
     return q.next();
@@ -424,6 +425,11 @@ int QSqlPimTableModel::predictedRow(const QList<QVariant> &keys) const
     QString k;
     QString filter;
     int i = 0;
+
+    // We have a dependence on the recid being the last value in keys, by using i below.
+    if (keys.count() == 0)
+        return -1;
+
     foreach(k, sc) {
         if (i >= keys.count())
             break;
@@ -437,7 +443,7 @@ int QSqlPimTableModel::predictedRow(const QList<QVariant> &keys) const
             filter += "(t1." + k + " IS NULL and ";
         i++;
     }
-    filter += "(t1.recid > ? or t1.recid = ?)";
+    filter += "(t1.recid < ? or t1.recid = ?)";
     i = 0;
     foreach(k, sc) {
         if (i >= keys.count())
@@ -450,7 +456,7 @@ int QSqlPimTableModel::predictedRow(const QList<QVariant> &keys) const
     filters << filter;
     QString querytext = selectText("count(distinct t1.recid)", filters);
 
-    QSqlQuery rowByIdQuery;
+    QSqlQuery rowByIdQuery(QPimSqlIO::database());
     if (!rowByIdQuery.prepare(querytext)) {
         qWarning("QSqlPimTableModel::row() - Could not prepare Query: %s", rowByIdQuery.lastError().text().toLocal8Bit().constData());
         qLog(Sql) << rowByIdQuery.lastQuery();

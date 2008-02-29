@@ -49,4 +49,4 @@ INSTALLS+=desktop help pics service
 
 pkg.desc=Network configuration utility
 pkg.multi=plugins/network/dialup plugins/network/lan
-pkg.domain=window,net,netconfig
+pkg.domain=window,net,netconfig,netadmin

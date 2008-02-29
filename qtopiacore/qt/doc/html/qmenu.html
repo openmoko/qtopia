@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/widgets/qmenu.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qmenu.cpp -->
 <head>
   <title>Qt 4.2: QMenu Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -59,7 +59,6 @@
 <li><div class="fn"/>bool <b><a href="qmenu.html#isEmpty">isEmpty</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qmenu.html#tearOffEnabled-prop">isTearOffEnabled</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qmenu.html#isTearOffMenuVisible">isTearOffMenuVisible</a></b> () const</li>
-<li><div class="fn"/>MenuRef <b><a href="qmenu.html#macMenu">macMenu</a></b> ( MenuRef <i>merge</i> = 0 )</li>
 <li><div class="fn"/>QAction * <b><a href="qmenu.html#menuAction">menuAction</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qmenu.html#popup">popup</a></b> ( const QPoint &amp; <i>p</i>, QAction * <i>atAction</i> = 0 )</li>
 <li><div class="fn"/>bool <b><a href="qmenu.html#separatorsCollapsible-prop">separatorsCollapsible</a></b> () const</li>
@@ -74,7 +73,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -123,9 +122,9 @@
 <p>When inserting action items you usually specify a receiver and a slot. The receiver will be notifed whenever the item is <a href="qaction.html#triggered">triggered()</a>. In addition, QMenu provides two signals, <a href="qmenu-qt3.html#activated">activated</a>() and <a href="qmenu-qt3.html#highlighted">highlighted</a>(), which signal the <a href="qaction.html">QAction</a> that was triggered from the menu.</p>
 <p>You clear a menu with <a href="qmenu.html#clear">clear</a>() and remove individual action items with <a href="qwidget.html#removeAction">removeAction</a>().</p>
 <p>A QMenu can also provide a tear-off menu. A tear-off menu is a top-level window that contains a copy of the menu. This makes it possible for the user to &quot;tear off&quot; frequently used menus and position them in a convenient place on the screen. If you want this functionality for a particular menu, insert a tear-off handle with <a href="qmenu.html#tearOffEnabled-prop">setTearOffEnabled</a>(). When using tear-off menus, bear in mind that the concept isn't typically used on Microsoft Windows so some users may not be familiar with it. Consider using a <a href="qtoolbar.html">QToolBar</a> instead.</p>
-<p>See the Menus example for an example of how to use <a href="qmenubar.html">QMenuBar</a> and QMenu in your application.</p>
+<p>See the <a href="mainwindows-menus.html">Menus</a> example for an example of how to use <a href="qmenubar.html">QMenuBar</a> and QMenu in your application.</p>
 <p>Important inherited functions: <a href="qmenu.html#addAction">addAction</a>(), <a href="qwidget.html#removeAction">removeAction</a>(), <a href="qmenu.html#clear">clear</a>(), <a href="qmenu.html#addSeparator">addSeparator</a>(), and <a href="qmenu.html#addMenu">addMenu</a>().</p>
-<p>See also <a href="qmenubar.html">QMenuBar</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Menu, Drop-Down and Pop-Up</a>, Application Example, Menus Example, and Recent Files Example.</p>
+<p>See also <a href="qmenubar.html">QMenuBar</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Menu, Drop-Down and Pop-Up</a>, <a href="mainwindows-application.html">Application Example</a>, <a href="mainwindows-menus.html">Menus Example</a>, and <a href="mainwindows-recentfiles.html">Recent Files Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="icon-prop"></a>icon : <a href="qicon.html">QIcon</a></h3>
@@ -280,7 +279,6 @@
 <h3 class="fn"><a name="isTearOffMenuVisible"></a>bool QMenu::isTearOffMenuVisible () const</h3>
 <p>When a menu is torn off a second menu is shown to display the menu contents in a new window. When the menu is in this mode and the menu is visible returns true; otherwise false.</p>
 <p>See also <a href="qmenu.html#hideTearOffMenu">hideTearOffMenu</a>() and <a href="qmenu.html#tearOffEnabled-prop">isTearOffEnabled</a>().</p>
-<h3 class="fn"><a name="macMenu"></a>MenuRef QMenu::macMenu ( MenuRef <i>merge</i> = 0 )</h3>
 <h3 class="fn"><a name="menuAction"></a><a href="qaction.html">QAction</a> * QMenu::menuAction () const</h3>
 <p>Returns the action associated with this menu.</p>
 <h3 class="fn"><a name="popup"></a>void QMenu::popup ( const <a href="qpoint.html">QPoint</a> &amp; <i>p</i>, <a href="qaction.html">QAction</a> * <i>atAction</i> = 0 )</h3>
@@ -441,6 +439,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

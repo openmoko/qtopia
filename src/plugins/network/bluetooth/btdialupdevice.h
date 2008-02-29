@@ -27,10 +27,11 @@
 
 #include <QBluetoothAddress>
 #include <QBluetoothLocalDevice>
-#include <QSDAP>
+#include <QBluetoothSdpQuery>
+#include <QBluetoothRfcommSerialPort>
 
 class QBluetoothLocalDeviceManager;
-class QBluetoothRfcommSerialPort;
+class QBluetoothRfcommSocket;
 
 class BluetoothDialupDevice : public QObject
 {
@@ -54,7 +55,9 @@ private slots:
     void devAdded( const QString& devName );
     void devRemoved( const QString& devName );
     void deviceStateChanged( QBluetoothLocalDevice::State state );
-    void searchComplete( const QSDAPSearchResult& result );
+    void searchComplete( const QBluetoothSdpQueryResult& result );
+    void serialPortConnected( const QString& dev );
+    void serialPortError(QBluetoothRfcommSerialPort::Error error);
 
 private:
     void reconnectDevice();
@@ -65,8 +68,9 @@ private:
     QBluetoothLocalDevice* btDevice;
     QBluetoothAddress remoteAddress;
     QBluetoothRfcommSerialPort* serialPort;
+    QBluetoothRfcommSocket *socket;
     QString btDeviceName;
-    QSDAP m_sdap;
+    QBluetoothSdpQuery m_sdap;
 };
 
 #endif //BLUETOOTH_DIALUP_DEVICE_H

@@ -26,8 +26,6 @@
 #include <qsettings.h>
 #include <qtimestring.h>
 #include <qsoftmenubar.h>
-
-
 #include <qlcdnumber.h>
 #include <qlabel.h>
 #include <qtimer.h>
@@ -69,32 +67,22 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
     stopwatchLcd->setSegmentStyle( QLCDNumber::Flat );
     stopwatchLcd->setSizePolicy( QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred) );
 
-    connect( stopStart, SIGNAL(pressed()), SLOT(stopStartStopWatch()) );
-    connect( reset, SIGNAL(pressed()), SLOT(resetStopWatch()) );
+    connect( stopStart, SIGNAL(clicked()), SLOT(stopStartStopWatch()) );
+    connect( reset, SIGNAL(clicked()), SLOT(resetStopWatch()) );
 
-#ifdef QTOPIA_PHONE
     if (!Qtopia::mousePreferred()) {
         int iconSz = style()->pixelMetric(QStyle::PM_SmallIconSize);
         stopStart->setIconSize(QSize(iconSz, iconSz));
         stopStart->setIcon( QIcon( ":icon/select" ) );
         stopStart->setText( " " + stopStart->text() );
-        //stopStart->setShortcut(QKeySequence(Qt::Key_Select));
+        stopStart->setShortcut(QKeySequence(Qt::Key_Select));
         reset->setText("# " + reset->text());
         reset->setShortcut(QKeySequence(Qt::Key_NumberSign));
-
-        // The buttons DO need keyboard focus, otherwise it is not possible to operate them
-        // on a non-touchscreen phone.
-        //stopStart->setFocusPolicy(Qt::NoFocus);
-        //reset->setFocusPolicy(Qt::NoFocus);
-
-        // Took this next line out because it doesn't apply when the Reset button has the focus.
-        // There's no longer any need for it anyway, because we have re-introduced focus.
-        //QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
-
-        // Make sure the stop/start button is the one that has focus at first.
-        stopStart->setFocus(Qt::OtherFocusReason);
     }
-#endif
+
+    // Don't need to focus on buttons, shortcuts will do
+    stopStart->setFocusPolicy(Qt::NoFocus);
+    reset->setFocusPolicy(Qt::NoFocus);
 
     t = new QTimer( this );
     connect( t, SIGNAL(timeout()), SLOT(updateClock()) );
@@ -114,26 +102,18 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
     nextLapBtn->setArrowType(Qt::UpArrow);
     connect( nextLapBtn, SIGNAL(clicked()), this, SLOT(nextLap()) );
     nextLapBtn->setShortcut( QKeySequence(Qt::Key_Up) );
+    nextLapBtn->setFocusPolicy(Qt::NoFocus);
     lvb->addWidget( nextLapBtn );
+    nextLapBtn->setEnabled( false );
 
     prevLapBtn = new QToolButton( lapFrame );
     prevLapBtn->setArrowType(Qt::DownArrow);
     connect( prevLapBtn, SIGNAL(clicked()), this, SLOT(prevLap()) );
     prevLapBtn->setShortcut( QKeySequence(Qt::Key_Down) );
     prevLapBtn->setMinimumWidth( 15 );
+    prevLapBtn->setFocusPolicy(Qt::NoFocus);
     lvb->addWidget( prevLapBtn );
-
     prevLapBtn->setEnabled( false );
-    nextLapBtn->setEnabled( false );
-
-#ifdef QTOPIA_PHONE
-    if (!Qtopia::mousePreferred()) {
-        // The buttons DO need keyboard focus, otherwise it is not possible to operate them
-        // on a non-touchscreen phone.
-        //nextLapBtn->setFocusPolicy ( Qt::NoFocus );
-        //prevLapBtn->setFocusPolicy ( Qt::NoFocus );
-    }
-#endif
 
     reset->setEnabled( false );
 
@@ -188,15 +168,13 @@ void StopWatch::stopStartStopWatch()
         swatch_splitms[swatch_currLap] = swatch_totalms;
         stopStart->setText( tr("Start") );
         reset->setText( tr("Reset") );
-#ifdef QTOPIA_PHONE
+
         if (!Qtopia::mousePreferred()) {
             stopStart->setIcon( QIcon( ":icon/select" ) );
             stopStart->setText( " " + stopStart->text() );
-            //stopStart->setShortcut(Qt::Key_Select);
             reset->setText( "# " + reset->text() );
-            reset->setShortcut(Qt::Key_NumberSign);
         }
-#endif
+
         reset->setEnabled( true );
         t->stop();
         swatch_running = false;
@@ -206,15 +184,13 @@ void StopWatch::stopStartStopWatch()
         swatch_start.start();
         stopStart->setText( tr("Stop") );
         reset->setText( tr("Lap/Split") );
-#ifdef QTOPIA_PHONE
+
         if (!Qtopia::mousePreferred()) {
             stopStart->setIcon( QIcon( ":icon/select" ) );
             stopStart->setText( " " + stopStart->text() );
-//            stopStart->setShortcut(Qt::Key_Select);
             reset->setText( "# " + reset->text() );
-            reset->setShortcut(Qt::Key_NumberSign);
         }
-#endif
+
         reset->setEnabled( swatch_currLap < 98 );
         t->start( 1000 );
         swatch_running = true;
@@ -225,9 +201,7 @@ void StopWatch::stopStartStopWatch()
     updateLap();
     prevLapBtn->setEnabled( swatch_dispLap );
     nextLapBtn->setEnabled( swatch_dispLap < swatch_currLap );
-#ifndef QTOPIA_PHONE
-    stopStart->setShortcut( QKeySequence(Qt::Key_Return) );
-#endif
+
 }
 
 void StopWatch::resetStopWatch()
@@ -334,13 +308,5 @@ void StopWatch::showEvent(QShowEvent *e)
 {
     QWidget::showEvent(e);
     updateClock();
-    /*
-      // We don't need to do this, because we are giving the stop/start button the focus in the ctor.
-#ifdef QTOPIA_PHONE
-    if (!Qtopia::mousePreferred()) {
-           setFocus();
-    }
-#endif
-    */
 }
 

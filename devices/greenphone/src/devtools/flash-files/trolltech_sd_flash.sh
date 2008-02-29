@@ -59,7 +59,6 @@ else
     export QTOPIA_PATH=/opt/Qtopia.rom:/tmp/qpk_sd:/tmp/qpk_local
     export PATH=$QPEDIR/bin:/opt/Qtopia.rom/bin:$QTOPIA_TOOLS:$PATH
     export LD_LIBRARY_PATH=$QPEDIR/lib:/opt/Qtopia.rom/lib
-    export SXE_DISCOVERY_MODE=1
 fi
 
 [ ! -e $HOME ] && mkdir $HOME

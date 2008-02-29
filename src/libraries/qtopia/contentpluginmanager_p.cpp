@@ -86,6 +86,11 @@ bool DotDirectoryContentPlugin::installContent( const QString &filePath, QConten
     return true;
 }
 
+bool DotDirectoryContentPlugin::updateContent( QContent *content )
+{
+    return content->linkFileKnown() ? installContent( content->linkFile(), content ) : false;
+}
+
 DotDesktopContentPlugin::DotDesktopContentPlugin()
 {
 }
@@ -253,6 +258,11 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
     return true;
 }
 
+bool DotDesktopContentPlugin::updateContent( QContent *content )
+{
+    return content->linkFileKnown() ? installContent( content->linkFile(), content ) : false;
+}
+
 /*!
     \class ContentPluginManager
     \internal
@@ -291,7 +301,6 @@ ContentPluginManager::ContentPluginManager()
 
 ContentPluginManager::~ContentPluginManager()
 {
-    // qDeleteAll( plugins );
 }
 
 QList< QContentPlugin * > ContentPluginManager::findPlugins( const QString &filePath )

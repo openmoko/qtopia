@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -475,6 +485,7 @@ public:
     GLuint conical_inv_mat_offset_location;
     GLuint conical_angle_location;
     GLuint conical_tex_location;
+    GLdouble projection_matrix[4][4];
 };
 
 #ifndef Q_USE_QT_TESSELLATOR
@@ -1076,9 +1087,12 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
     d->opacity = 1;
     d->drawable.makeCurrent();
 
+    bool has_frag_program = (QGLExtensions::glExtensions & QGLExtensions::FragmentProgram)
+                            && (pdev->devType() != QInternal::Pixmap);
+
     QGLContext *ctx = const_cast<QGLContext *>(d->drawable.context());
-    if (QGLExtensions::glExtensions & QGLExtensions::FragmentProgram)
-        qt_resolve_frag_program_extensions(ctx);
+    if (has_frag_program)
+        has_frag_program = qt_resolve_frag_program_extensions(ctx);
 
 
     // disable GLSL usage for now, since it seems there are bugs in
@@ -1087,14 +1101,13 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
               QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_ES_Version_2_0))
         d->has_glsl = qt_resolve_GLSL_functions(ctx);
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
+#ifndef Q_WS_QWS
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glGetDoublev(GL_PROJECTION_MATRIX, &d->projection_matrix[0][0]);
+#endif
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-#ifndef Q_WS_QWS
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-#endif
     if (QGLExtensions::glExtensions & QGLExtensions::SampleBuffers)
         glDisable(GL_MULTISAMPLE);
 #ifndef Q_WS_QWS
@@ -1147,7 +1160,7 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
                 glDeleteProgram(d->radial_glsl_prog);
                 glDeleteShader(d->conical_glsl_shader);
                 glDeleteProgram(d->conical_glsl_prog);
-            } else if (QGLExtensions::glExtensions & QGLExtensions::FragmentProgram) {
+            } else if (has_frag_program) {
                 glDeleteProgramsARB(1, &d->radial_frag_program);
                 glDeleteProgramsARB(1, &d->conical_frag_program);
             }
@@ -1184,7 +1197,7 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
             d->conical_tex_location = glGetUniformLocation(prog, "palette");
             glUseProgram(0);
 
-        } else if (QGLExtensions::glExtensions & QGLExtensions::FragmentProgram) {
+        } else if (has_frag_program) {
             glGenProgramsARB(1, &d->radial_frag_program);
             glGenProgramsARB(1, &d->conical_frag_program);
 
@@ -1217,13 +1230,13 @@ bool QOpenGLPaintEngine::end()
 {
     Q_D(QOpenGLPaintEngine);
     QGL_D_FUNC_CONTEXT;
-#ifndef Q_WS_QWS
-    glPopAttrib();
-#endif
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
+#ifndef Q_WS_QWS
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixd(&d->projection_matrix[0][0]);
+    glPopAttrib();
+#endif
 
     if (d->has_glsl)
         glUseProgram(0); // GLSL program state is not part of GL_ALL_ATTRIB_BITS
@@ -1681,7 +1694,11 @@ void QOpenGLPaintEngine::updateMatrix(const QMatrix &mtx)
     // that span the entire widget...
     d->inverseScale = qMax(1 / qMax( qMax(qAbs(mtx.m11()), qAbs(mtx.m22())),
                                      qMax(qAbs(mtx.m12()), qAbs(mtx.m21())) ),
+#ifndef Q_WS_QWS
                            0.0001);
+#else
+                           0.0001f);
+#endif
 
     glMatrixMode(GL_MODELVIEW);
 #ifndef Q_WS_QWS
@@ -2253,7 +2270,7 @@ void QOpenGLPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm, const QR
         drawPixmap(r, tpx, sr);
         return;
     }
-    GLenum target = QGLExtensions::glExtensions & QGLExtensions::TextureRectangle
+    GLenum target = (QGLExtensions::glExtensions & QGLExtensions::TextureRectangle)
                     ? GL_TEXTURE_RECTANGLE_NV
                     : GL_TEXTURE_2D;
     if (r.size() != pm.size())
@@ -2313,7 +2330,7 @@ void QOpenGLPaintEngine::drawImage(const QRectF &r, const QImage &image, const Q
                                    Qt::ImageConversionFlags)
 {
     Q_D(QOpenGLPaintEngine);
-    GLenum target = QGLExtensions::glExtensions & QGLExtensions::TextureRectangle
+    GLenum target = (QGLExtensions::glExtensions & QGLExtensions::TextureRectangle)
                     ? GL_TEXTURE_RECTANGLE_NV
                     : GL_TEXTURE_2D;
     if (r.size() != image.size())
@@ -2764,8 +2781,8 @@ void QOpenGLPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textIte
         QGLGlyphCoord *g = qt_glyph_cache()->lookup(ti.fontEngine, glyphs[i]);
 
         // we don't cache glyphs with no width/height
-	if (!g)
-	    continue;
+        if (!g)
+            continue;
 
         qreal x1, x2, y1, y2;
         x1 = g->x;

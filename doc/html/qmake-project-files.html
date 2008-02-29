@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qmake-manual.qdoc -->
 <head>
   <title>Qt 4.2: qmake Project Files</title>
   <link rel="prev" href="qmake-using.html" />
@@ -102,8 +103,7 @@
 <tr valign="top" class="odd"><td>vclib</td><td>Creates a Visual Studio Project file to build a library.</td></tr>
 </table></p>
 <p>See the <a href="qmake-tutorial.html">qmake Tutorial</a> for advice on writing project files for projects that use the <tt>app</tt> and <tt>lib</tt> templates.</p>
-<p>When the <tt>subdirs</tt> template is used, <tt>qmake</tt> generates a Makefile to examine each specified subdirectory, process any project file it finds there, and run the platform's <tt>make</tt> tool on the newly-created Makefile.</p>
-<p>The only system variable that is recognised for this template is the <tt>SUBDIRS</tt> variable. This variable contains a list of all the subdirectories that contain project files to be processed. It is essential that the project file in each subdirectory has the same name as the subdirectory, so that <tt>qmake</tt> can find it. For example, if the subdirectory is called <tt>myapp</tt> then the project file in that directory should be called <tt>myapp.pro</tt>.</p>
+<p>When the <tt>subdirs</tt> template is used, <tt>qmake</tt> generates a Makefile to examine each specified subdirectory, process any project file it finds there, and run the platform's <tt>make</tt> tool on the newly-created Makefile. The <a href="qmake-variable-reference.html#subdirs">SUBDIRS</a> variable is used to contain a list of all the subdirectories to be processed.</p>
 <a name="generalconfiguration"></a><a name="general-configuration"></a>
 <h2>General Configuration</h2>
 <p>The <a href="qmake-variable-reference.html#config">CONFIG variable</a> specifies the options and features that the compiler should use and the libraries that should be linked against. Anything can be added to the <tt>CONFIG</tt> variable, but the options covered below are recognized by <tt>qmake</tt> internally.</p>
@@ -186,6 +186,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 ROOT_UID=0
 VMPLAYER_DIR=`which vmplayer`
+if [ ! -n "$VMPLAYER_DIR" ] ; then
+    VMPLAYER_DIR=`which vmware`
+fi
+
+SCRIPT="$0"
+DIR=${SCRIPT%"install.sh"}
+#echo $DIR
+if [ "$DIR" != "./" ]; then
+    cd $DIR
+fi
+
 cat license.txt
 more release.txt
 clear
@@ -38,7 +49,7 @@ if [ ! -e "$dir" ] ; then
         echo
         exit
     fi
-    mkdir -p $dir
+    mkdir -p "$dir"
 fi
 if [ ! -w "$dir" ] ; then
     echo
@@ -56,24 +67,88 @@ if [ "$option" != "y" ] ; then
     echo
     exit
 fi
+
 clear
 echo "Installing Qtopia Greenphone SDK....please wait"
 #mkdir -p $dir
-cp release.html $dir
-cp greenphone.vmx $dir
-cp license.txt $dir
+if [ -e "$dir/release.html" ]; then
+  rm -f "$dir/release.html"
+fi
+cp release.html "$dir"
+chmod 664 "$dir/release.html"
+
+if [ -e "$dir/greenphone.vmx" ]; then
+  rm -f "$dir/greenphone.vmx"
+fi
+cp greenphone.vmx "$dir"
+chmod 664 "$dir/greenphone.vmx"
+
+if [ -e "$dir/license.txt" ]; then
+  rm -f "$dir/license.txt"
+fi
+cp license.txt "$dir"
+chmod 664 "$dir/license.txt"
+
 export currentdir=$PWD
-cd $dir
-echo "Installing qtopia SDK...4.0 minutes remaining"
-tar -xzf $currentdir/qtopia.dat >/dev/null 2>&1
-echo "Installing qtopia src...2.5 minutes remaining"
-tar -xzf $currentdir/qtopiasrc.dat >/dev/null 2>&1
-echo "Installing toolchain....2.0 minutes remaining"
-tar -xzf $currentdir/toolchain.dat >/dev/null 2>&1
-echo "Installing home.........1.5 minutes remaining"
-tar -xzf $currentdir/home.dat >/dev/null 2>&1
-echo "Installing rootfs.......1.0 minutes remaining"
-tar -xzf $currentdir/rootfs.dat >/dev/null 2>&1
+cd "$dir"
+
+ERROR="0"
+
+function unpack()
+{
+if ! tar -xzf "$1" >"$dir"/.install.log 2>"$dir"/.install.log
+      then
+      ERROR="1"
+      echo "FAILED!"
+      rm -f "$1"
+  fi
+}
+
+if [ "$ERROR" -ne "1" ]; then
+  echo "Installing qtopia SDK...4.0 minutes remaining"
+  unpack "$currentdir/qtopia.dat"
+fi
+
+if [ "$ERROR" -ne "1" ]; then
+  echo "Installing qtopia src...2.5 minutes remaining"
+  unpack "$currentdir/qtopiasrc.dat"
+fi
+
+if [ "$ERROR" -ne "1" ]; then
+  echo "Installing toolchain....2.0 minutes remaining"
+  unpack "$currentdir/toolchain.dat"
+fi
+
+if [ "$ERROR" -ne "1" ]; then
+  if [ -e "$dir/home.vmdk" ]; then
+    echo -n "Do you want to update the home directory and settings? (y/n) : "
+    read option
+    if [ "$option" != "n" ] ; then
+        echo "Updating home.........1.5 minutes remaining"
+        unpack "$currentdir/home.dat"
+    fi
+  else
+     echo "Installing home.........1.5 minutes remaining"
+     unpack "$currentdir/home.dat"
+  fi
+fi
+
+if [ "$ERROR" -ne "1" ]; then
+  if [ -e "$dir/rootfs.vmdk" ]; then
+    echo -n "Do you want to update the root filesystem? (y/n) : "
+    read option
+    if [ "$option" != "n" ] ; then
+      echo "Updating rootfs.......1.0 minutes remaining"
+      unpack "$currentdir/rootfs.dat"
+    fi
+  else
+    echo "Installing rootfs.......1.0 minutes remaining"
+    unpack "$currentdir/rootfs.dat"
+  fi
+
+fi
+
+if [ "$ERROR" -ne "1" ]; then
 
 if [ -e "$dir/home.vmdk" ] ; then
   if [ -e "$dir/qtopiasrc.vmdk" ] ; then
@@ -83,7 +158,7 @@ if [ -e "$dir/home.vmdk" ] ; then
           if [ -e "$dir/greenphone.vmx" ] ; then
             echo 
             echo "Installation successful."
-            echo "to start cd $dir;vmplayer greenphone.vmx"
+            echo "to start cd \"$dir\";vmplayer greenphone.vmx"
             echo
             exit
           fi
@@ -92,6 +167,8 @@ if [ -e "$dir/home.vmdk" ] ; then
     fi
   fi
 fi
-echo
+
+fi
+
 echo "Installation FAILED!"
 echo

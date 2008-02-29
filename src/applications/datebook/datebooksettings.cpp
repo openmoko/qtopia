@@ -39,6 +39,7 @@ DateBookSettings::DateBookSettings( bool whichClock, QWidget *parent, Qt::WFlags
     widCompress->hide();
 #endif
     init();
+    setObjectName("settings");
     QObject::connect( qApp, SIGNAL( clockChanged(bool) ),
                       this, SLOT( slotChangeClock(bool) ) );
 

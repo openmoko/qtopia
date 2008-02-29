@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 . /opt/Qtopia/SDK/scripts/functions
 
@@ -44,12 +44,25 @@ gp_net()
   if ! ping -c 1 -i 2 $PHONEIP 1>/dev/null 2>&1 ; then
     echo "Networking failed. Please unplug and plug the Greenphone back in."
     return 1;
-  else
-    if [ "$VERBOSE" = "1" ]; then
-      echo "Success! Greenphone address is $PHONEIP"
-    fi
-    return 0;
   fi
+
+  if [ ! -f "$HOME/.ssh/id_dsa.pub" ]; then
+    # generate keypair of ssh
+    [ "$VERBOSE" = "1" ] && echo "Generating DSA keypair for ssh"
+    ssh-keygen -t dsa -N '' -f $HOME/.ssh/id_dsa 2>&1 >/dev/null
+  fi
+
+  # send public key to Greenphone
+  if netcat -n $PHONEIP 10022 < $HOME/.ssh/id_dsa.pub; then
+     [ "$VERBOSE" = "1" ] && echo "Sent DSA public key to Greenphone"
+  else
+     [ "$VERBOSE" = "1" ] && echo "Greenphone already has DSA public key."
+  fi
+
+  if [ "$VERBOSE" = "1" ]; then
+    echo "Success! Greenphone address is $PHONEIP"
+  fi
+  return 0;
 }
 
 #---------------------------------------------------------------
@@ -154,25 +167,20 @@ gp_package()
 {
   # Creating a package for installation
 
-  if [ "$ARCH" = "greenphone" ];then
-    gp_source
-    if [ "$VERBOSE" = "0" ] ; then
-      echo -n "Creating package         "
-      if make packages FORMAT=qpk >$OUTPUT; then
-        return 0;
-      else
-        return 1;
-      fi
+  gp_source
+  if [ "$VERBOSE" = "0" ] ; then
+    echo -n "Creating package         "
+    if make packages FORMAT=qpk >$OUTPUT; then
+      return 0;
     else
-      if make packages FORMAT=qpk; then
-        return 0;
-      else
-        return 1;
-      fi
+      return 1;
     fi
   else
-    echo "Package create only supported for greenphone builds!"
-    return 0;
+    if make packages FORMAT=qpk; then
+      return 0;
+    else
+      return 1;
+    fi
   fi
 }
 
@@ -181,58 +189,40 @@ gp_package()
 gp_install()
 {
   # Transfer the package to the greenphone and install it
-
-  if [ "$ARCH" = "x86" ] ;then
-    gp_source
-    if [ "$VERBOSE" = "0" ] ; then
-      echo -n "Installing package       "
-      if make install>$OUTPUT; then
-        return 0;
-      else
-        return 1;
-      fi
-    else
-      if make install; then
-        return 0;
-      else
-        return 1;
-      fi> $pkg_dir/packages.list
-    fi
-    return 0;
-  fi
   gp_source
-  if ! gp_net; then
-    return 1; 
+  if [ "$ARCH" = "greenphone" ] && ! gp_net ;then
+      return 1; 
   fi
+
   if [ "$QPKG" = "1" ] ;then
     # Installing prebuilt qpk file
     LIST=$QPKGNAME
+  elif [ "$ARCH" = "x86" ] ;then
+    LIST=`ls -1 pkg|grep -i 'i386.qpk'|awk '{printf $1" "}'`
   else
-    LIST=`ls -1 pkg|awk '{printf $1" "}'`
+    LIST=`ls -1 pkg|grep -i 'arm.qpk'|awk '{printf $1" "}'`
   fi
   sudo mkdir -p $QPKWEBSERVER
-  sudo cp -f pkg/*.qpk $QPKWEBSERVER
-  sudo mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP
-
   for PKG in $LIST; do
-    echo "Installing ${PKG}"
-#----------
-cat>gpbuild-install.sh<<EOF
-#!/bin/sh
-. /opt/Qtopia.rom/qpe.env
-qcop service send PackageManager 'installPackageConfirm(QString)' 'http://${HOSTIP}/${PKG}.qpd'
-sleep 3
-echo DONE
-EOF
-#---------
-    ftpput -u anonymous $PHONEIP / gpbuild-install.sh
-    rm -f gpbuild-install.sh
-    if expect -c 'set timeout 300;log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user_local/gpbuild-install.sh\r"; expect root@'; then
-      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user_local/gpbuild-install.sh\r"; expect root@'
-    else 
-      return 1;
-    fi
-  done;
+			sudo cp -f pkg/$PKG $QPKWEBSERVER
+			sudo chmod 644 $QPKWEBSERVER/$PKG
+	done;
+  sudo /opt/Qtopia/SDK/scripts/mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP
+
+  if [ "$ARCH" = "x86" ] ;then
+    PATH=/opt/Qtopia/SDK/$QPEVER/x86/image/bin:$PATH
+    for PKG in $LIST; do
+      echo "Install process for ${PKG} successfully initiated"
+      qcop service send PackageManager 'installPackageConfirm(QString)' http://$HOSTIP/$PKG.qpd
+    done;
+  else
+
+    for PKG in $LIST; do
+      echo "Install process for ${PKG} successfully initiated"
+
+      ssh root@$PHONEIP ". /opt/Qtopia.rom/qpe.env; qcop service send PackageManager 'installPackageConfirm(QString)' 'http://${HOSTIP}/${PKG}.qpd'; sleep 3; echo DONE;"
+    done;
+  fi
   return 0;
 }
 
@@ -251,38 +241,15 @@ gp_run()
       echo -n "Executing application    "
     fi
 if [ "$QDEBUG" = "-debug" ] ; then
-#----------
-cat>gpbuild-run.sh<<EOF
-#!/bin/sh
-. /opt/Qtopia.rom/qpe.env
-gdbserver 127.0.0.1:22222 /opt/Qtopia/bin/$TARGET 2>&1 | logger -t 'DEBUGGER' &
-echo "DONE"
-EOF
-#---------- 
+
+  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ]; then echo \$file; exit; fi; done); gdbserver hostpc:22222 \$binary 2>&1 | logger -t 'DEBUGGER' &"
+
 else
-#----------
-cat>gpbuild-run.sh<<EOF
-#!/bin/sh
-. /opt/Qtopia.rom/qpe.env
-$TARGET 2>&1 | logger -t 'DEBUGGER' &
-echo "DONE"
-EOF
-fi
-#---------- 
-    ftpput -u anonymous $PHONEIP / gpbuild-run.sh
-    rm -f gpbuild-run.sh
-    if expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user_local/gpbuild-run.sh\r"; expect root@'; then
-      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user_local/gpbuild-run.sh\r"; expect root@'
-      return 0;
-    else 
-      return 1;
-    fi
-  else
-    if [ "$VERBOSE" = "0" ] ;then
-      echo -n "Not executable package    "
-    fi
-    return 0
+  
+  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ]; then echo \$file; exit; fi; done); \$binary 2>&1 | logger -t 'DEBUGGER' &"
+ 
   fi
+fi
 }
 
 gp_rescan()
@@ -296,24 +263,9 @@ gp_rescan()
     if ! gp_net; then
       return 1; 
     fi
-#----------
-cat>gpbuild-rescan.sh<<EOF
-#!/bin/sh
-. /opt/Qtopia.rom/qpe.env
-qcop QPE/DocAPI 'scanPath(QString,int)' 'all' '1'
-sleep 3
-echo DONE
-EOF
-#---------- 
-    ftpput -u anonymous $PHONEIP / gpbuild-rescan.sh
-    rm -f gpbuild-rescan.sh
-    if expect -c 'set timeout 300;log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user_local/gpbuild-rescan.sh\r"; expect root@'; then
-      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user_local/gpbuild-rescan.sh\r"; expect root@'
-      return 0;
-    else 
-      return 1;
-    fi
-  fi
+
+ ssh root@$PHONEIP ". /opt/Qtopia.rom/qpe.env; qcop QPE/DocAPI 'scanPath(QString,int)' 'all' '1'; sleep 3; echo DONE;"
+fi 
 }
 
 #---------------------------------------------------------------
@@ -399,7 +351,7 @@ while [ -n "$1" ]; do
     ;;
   -console)
     if gp_net; then
-      telnet $PHONEIP
+      ssh root@$PHONEIP
     fi
     exit
     ;;

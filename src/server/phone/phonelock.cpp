@@ -39,7 +39,6 @@ public:
                             m_vso(0) {}
 
     BasicKeyLock::State m_state;
-    QString m_emergency;
     Qt::Key m_lastKey;
     int m_stateTimeout;
     int m_timerId;
@@ -88,8 +87,7 @@ void BasicKeyLock::timerEvent(QTimerEvent *)
     stopTimer();
     if(KeyLockIncorrect == state() ||
        KeyLockToComplete == state()) {
-        Q_ASSERT(d->m_emergency.isEmpty());
-        setState(KeyLocked, QString());
+        setState(KeyLocked);
     }
 }
 
@@ -115,22 +113,11 @@ Qt::Key BasicKeyLock::lockKey()
     return (Qt::Key)key;
 }
 
-bool BasicKeyLock::emergency() const
-{
-    return PartialEmergencyNumber == state() || EmergencyNumber == state();
-}
-
-QString BasicKeyLock::emergencyNumber() const
-{
-    return d->m_emergency;
-}
-
 void BasicKeyLock::lock()
 {
     if(locked()) return;
 
-    Q_ASSERT(d->m_emergency.isEmpty());
-    setState(KeyLocked, QString());
+    setState(KeyLocked);
     d->m_vso->setAttribute("KeyLock", true);
 }
 
@@ -138,7 +125,7 @@ void BasicKeyLock::unlock()
 {
     if(!locked()) return;
     d->m_lastKey = Qt::Key_unknown;
-    setState(Open, QString());
+    setState(Open);
     d->m_vso->setAttribute("KeyLock", false);
 }
 
@@ -158,68 +145,26 @@ void BasicKeyLock::processKeyEvent(QKeyEvent *e)
         if(KeyLockToComplete == state() && e->key() == Qt::Key_Asterisk) {
             unlock();
         } else {
-            // Check emergency dialing
-            if(EmergencyNumber == state() &&
-               (Qt::Key_Yes == e->key() || Qt::Key_Call == e->key())) {
-                emit dialEmergency(emergencyNumber());
-                setState(KeyLocked, QString());
-            } else if (Qt::Key_Back == e->key() && !d->m_emergency.isEmpty()) {
-                if (d->m_emergency.length() <= 1) {
-                    setState(KeyLocked, QString());
-                } else {
-                    setState(PartialEmergencyNumber,
-                            d->m_emergency.left(d->m_emergency.length()-1));
-                }
-            } else if (Qt::Key_Hangup == e->key()) {
-                setState(KeyLocked, QString());
-            } else {
-                QString newEmergency = d->m_emergency;
-                newEmergency.append(e->text());
-                enum { None, Match, Partial } type = None;
-            #ifdef QTOPIA_CELL
-                if(!newEmergency.isEmpty()) {
-                    QStringList emergency =
-                        CellModemManager::emergencyNumbers();
-                    for(int ii = 0; type == None &&
-                                    ii < emergency.count(); ++ii) {
-                        if(emergency.at(ii).length() < newEmergency.length()) {
-                        } else if(emergency.at(ii) == newEmergency) {
-                            type = Match;
-                        } else if(emergency.at(ii).startsWith(newEmergency)) {
-                            type = Partial;
-                        }
-                    }
-                }
-            #endif
-
-                if(None == type) {
-                    if(lockKey() == e->key())
-                        setState(KeyLockToComplete, QString());
-                    else
-                        setState(KeyLockIncorrect, QString());
-                } else if(Partial == type) {
-                    setState(PartialEmergencyNumber, newEmergency);
-                } else if(Match == type) {
-                    setState(EmergencyNumber, newEmergency);
-                }
-            }
+            if(lockKey() == e->key())
+                setState(KeyLockToComplete);
+            else
+                setState(KeyLockIncorrect);
         }
     }
     d->m_lastKey = (Qt::Key)e->key();
 }
 
-void BasicKeyLock::setState(State state, const QString &e)
+void BasicKeyLock::setState(State state)
 {
-    if(d->m_state != state || d->m_emergency != e) {
+    if(d->m_state != state) {
         d->m_state = state;
-        d->m_emergency = e;
         if(d->m_state == KeyLockIncorrect ||
            d->m_state == KeyLockToComplete) {
             startTimer();
         } else {
             stopTimer();
         }
-        emit stateChanged(d->m_state, d->m_emergency);
+        emit stateChanged(d->m_state);
     }
 }
 
@@ -236,8 +181,8 @@ int BasicKeyLock::stateTimeout()
 void BasicKeyLock::reset()
 {
     d->m_lastKey = Qt::Key_unknown;
-    d->m_emergency = QString();
 }
+
 
 #ifdef QTOPIA_CELL
 
@@ -249,6 +194,7 @@ public:
         : m_state(BasicSimPinLock::Open),
           m_cell(0) {}
     BasicSimPinLock::State m_state;
+
     CellModemManager *m_cell;
 
     QString m_number;
@@ -286,11 +232,6 @@ QString BasicSimPinLock::number() const
     return d->m_number;
 }
 
-bool BasicSimPinLock::emergency() const
-{
-    return PartialEmergencyNumber == state() || EmergencyNumber == state();
-}
-
 bool BasicSimPinLock::open() const
 {
     return Open == state();
@@ -298,9 +239,6 @@ bool BasicSimPinLock::open() const
 
 void BasicSimPinLock::cellStateChanged(CellModemManager::State cellState)
 {
-    if(d->m_state == PartialEmergencyNumber || d->m_state == EmergencyNumber)
-        return;
-
     State newState = stateFromCellState(cellState);
 
     if(newState != d->m_state) {
@@ -372,113 +310,70 @@ void BasicSimPinLock::processKeyEvent(QKeyEvent *e)
 
     Qt::Key key = (Qt::Key)e->key();
 
-    // Check for emergency number
-    if(state() == EmergencyNumber &&
-       (Qt::Key_Call == key || Qt::Key_Yes == key || lockKey() == key)) {
+    QString newNumber = d->m_number;
 
-        emit dialEmergency(number());
-        d->m_number = QString();
-        d->m_state = stateFromCellState(d->m_cell->state());
-        emit stateChanged(d->m_state, d->m_number);
+    // Key_NumberSign (#), is required for GCF compliance.
+    // GSM 02.30, section 4.6.1, Entry of PIN and PIN2.
+    if((key == lockKey() || key == Qt::Key_NumberSign) && 
+       !d->m_number.isEmpty()) {
 
-    } else {
+        // Submit number
+        Q_ASSERT(SimPinRequired == state() ||
+                 SimPukRequired == state() ||
+                 NewSimPinRequired == state());
+        Q_ASSERT(d->m_cell);
 
-        QString newNumber = d->m_number;
-        State newState = d->m_state;
-
-        // Key_NumberSign (#), is required for GCF compliance.
-        // GSM 02.30, section 4.6.1, Entry of PIN and PIN2.
-        if((key == lockKey() || key == Qt::Key_NumberSign) && !d->m_number.isEmpty()) {
-            // Submit number
-            Q_ASSERT(SimPinRequired == state() ||
-                     SimPukRequired == state() ||
-                     NewSimPinRequired == state());
-            Q_ASSERT(d->m_cell);
-
-            if(SimPinRequired == state()) {
-                Q_ASSERT(CellModemManager::WaitingSIMPin == d->m_cell->state());
-                QString pin = d->m_number;
-                d->m_number.clear();
-                d->m_cell->setSimPin(pin);
-                Q_ASSERT(VerifyingSimPin == state());
-                Q_ASSERT(CellModemManager::VerifyingSIMPin == d->m_cell->state());
-            } else if(SimPukRequired == state()) {
-                Q_ASSERT(CellModemManager::WaitingSIMPuk == d->m_cell->state());
-                d->m_puk = d->m_number;
-                d->m_number = QString();
-                d->m_state = NewSimPinRequired;
-                emit stateChanged(d->m_state, d->m_number);
-            } else if(NewSimPinRequired == state()) {
-                Q_ASSERT(CellModemManager::WaitingSIMPuk == d->m_cell->state());
-                Q_ASSERT(!d->m_puk.isEmpty());
-                QString pin = d->m_number;
-                QString puk = d->m_puk;
-                d->m_number.clear();
-                d->m_puk.clear();
-                d->m_cell->setSimPuk(puk, pin);
-                Q_ASSERT(VerifyingSimPuk == state());
-                Q_ASSERT(CellModemManager::VerifyingSIMPuk == d->m_cell->state());
-            }
-
-        } else if(key >= Qt::Key_0 && key <= Qt::Key_9 &&
-                  d->m_number.count() < 8) {
-            int number = key - Qt::Key_0;
-            newNumber.append(QString::number(number));
-        } else if(key == Qt::Key_No) {
-            newNumber.clear();
-        } else if(key == Qt::Key_Back || key == Qt::Key_Cancel) {
-            newNumber = newNumber.left(newNumber.length() - 1);
-        }
-
-        enum { None, Match, Partial } type = None;
-        if(!newNumber.isEmpty()) {
-            QStringList emergency = CellModemManager::emergencyNumbers();
-            for(int ii = 0; type == None && ii < emergency.count(); ++ii) {
-                if(emergency.at(ii).length() < newNumber.length()) {
-                } else if(emergency.at(ii) == newNumber) {
-                    type = Match;
-                } else if(emergency.at(ii).startsWith(newNumber)) {
-                    type = Partial;
-                }
-            }
-        }
-
-        if(None == type) {
-            // If this was an emergency number, we need to reset the state
-            if(PartialEmergencyNumber == state() ||
-               EmergencyNumber == state()) {
-                newState = stateFromCellState(d->m_cell->state());
-            }
-
-            if(SimPinRequired != newState && SimPukRequired != newState &&
-               NewSimPinRequired != newState) {
-                // We don't care unless this is a pin entry
-                newNumber.clear();
-            }
-        } else if(Partial == type) {
-            newState = PartialEmergencyNumber;
-        } else if(Match == type) {
-            newState = EmergencyNumber;
-        }
-
-        if(newNumber != d->m_number || newState != d->m_state) {
-            d->m_number = newNumber;
-            d->m_state = newState;
+        if(SimPinRequired == state()) {
+            Q_ASSERT(CellModemManager::WaitingSIMPin == d->m_cell->state());
+            QString pin = d->m_number;
+            d->m_number.clear();
+            d->m_cell->setSimPin(pin);
+            Q_ASSERT(VerifyingSimPin == state());
+            Q_ASSERT(CellModemManager::VerifyingSIMPin == d->m_cell->state());
+        } else if(SimPukRequired == state()) {
+            Q_ASSERT(CellModemManager::WaitingSIMPuk == d->m_cell->state());
+            d->m_puk = d->m_number;
+            d->m_number = QString();
+            d->m_state = NewSimPinRequired;
             emit stateChanged(d->m_state, d->m_number);
+
+        } else if(NewSimPinRequired == state()) {
+            Q_ASSERT(CellModemManager::WaitingSIMPuk == d->m_cell->state());
+            Q_ASSERT(!d->m_puk.isEmpty());
+            QString pin = d->m_number;
+            QString puk = d->m_puk;
+            d->m_number.clear();
+            d->m_puk.clear();
+            d->m_cell->setSimPuk(puk, pin);
+            Q_ASSERT(VerifyingSimPuk == state());
+            Q_ASSERT(CellModemManager::VerifyingSIMPuk == d->m_cell->state());
         }
+
+        return;
+
+    } else if(key >= Qt::Key_0 && key <= Qt::Key_9 &&
+              d->m_number.count() < 8) {
+        int number = key - Qt::Key_0;
+        newNumber.append(QString::number(number));
+    } else if(key == Qt::Key_No) {
+        newNumber.clear();
+    } else if(key == Qt::Key_Back || key == Qt::Key_Cancel) {
+        newNumber = newNumber.left(newNumber.length() - 1);
+    }
+
+    if(newNumber != d->m_number) {
+        d->m_number = newNumber;
+        emit stateChanged(d->m_state, d->m_number);
     }
 }
 
 void BasicSimPinLock::reset()
 {
     if(d->m_cell) {
-        if(!d->m_number.isEmpty()) {
-            if(PartialEmergencyNumber == state() || EmergencyNumber == state())
-                // Force an invalid state so cellStateChanged() will always
-                // change it
-                d->m_state = (State)(EmergencyNumber + 1);
+        if(!d->m_number.isEmpty() || Open != state()) {
             d->m_number.clear();
-            cellStateChanged(d->m_cell->state());
+            d->m_state = Open;
+            emit stateChanged(d->m_state, d->m_number);
         }
     } else {
         Q_ASSERT(d->m_number.isEmpty());
@@ -486,5 +381,113 @@ void BasicSimPinLock::reset()
     }
 }
 
+// declare BasicEmergencyLockPrivate
+class BasicEmergencyLockPrivate
+{
+public:
+    BasicEmergencyLockPrivate() 
+        : m_state(BasicEmergencyLock::NoEmergencyNumber) {}
+
+    BasicEmergencyLock::State m_state;
+    QString m_number;
+};
+
+BasicEmergencyLock::BasicEmergencyLock(QObject *parent)
+: QObject(parent), d(0)
+{
+    d = new BasicEmergencyLockPrivate;
+}
+
+BasicEmergencyLock::~BasicEmergencyLock()
+{
+    delete d;
+    d = 0;
+}
+
+BasicEmergencyLock::State BasicEmergencyLock::state() const
+{
+    return d->m_state;
+}
+
+QString BasicEmergencyLock::emergencyNumber() const
+{
+    return d->m_number;
+}
+
+bool BasicEmergencyLock::emergency() const
+{
+    return NoEmergencyNumber != state();
+}
+
+void BasicEmergencyLock::reset()
+{
+    if(d->m_state != NoEmergencyNumber ||
+       !d->m_number.isEmpty()) {
+        d->m_state = NoEmergencyNumber; 
+        d->m_number.clear();
+        emit stateChanged(d->m_state, d->m_number);
+    }
+}
+
+/*!
+  Returns true if this caused an emergency dial (ie. the key was completely 
+  consumed).
+ */
+bool BasicEmergencyLock::processKeyEvent(QKeyEvent *e)
+{
+    int key = e->key();
+
+    if(EmergencyNumber == state() && 
+       (Qt::Key_Call == key || Qt::Key_Yes == key || lockKey() == key)) {
+
+        emit dialEmergency(emergencyNumber());
+        reset();
+        return true;
+    } else if(key >= Qt::Key_0 && key <= Qt::Key_9) {
+        int number = key - Qt::Key_0;
+
+        QString newNumber = d->m_number;
+        newNumber.append(QString::number(number));
+
+        QStringList emergency = CellModemManager::emergencyNumbers();
+
+        for(int ii = 0; ii < emergency.count(); ++ii) {
+            if(emergency.at(ii).length() < newNumber.length()) {
+            } else if(emergency.at(ii) == newNumber) {
+                d->m_state = EmergencyNumber;
+                d->m_number = newNumber;
+                emit stateChanged(d->m_state, d->m_number);
+                return false;
+            } else if(emergency.at(ii).startsWith(newNumber)) {
+                d->m_state = PartialEmergencyNumber;
+                d->m_number = newNumber;
+                emit stateChanged(d->m_state, d->m_number);
+                return false;
+            }
+        }
+
+    }
+
+    reset();
+    return false;
+}
+
+Qt::Key BasicEmergencyLock::lockKey()
+{
+    static int key = 0;
+    if(!key) {
+        if(Qtopia::hasKey(Qt::Key_Context1)) {
+            key = Qt::Key_Context1;
+        } else if(Qtopia::hasKey(Qt::Key_Menu)) {
+            key = Qt::Key_Menu;
+        } else {
+            qWarning("BasicEmergencyLock: Cannot map lock key - using Select.");
+            key = Qt::Key_Select;
+        }
+    }
+
+    return (Qt::Key)key;
+}
 
 #endif // QTOPIA_CELL
+

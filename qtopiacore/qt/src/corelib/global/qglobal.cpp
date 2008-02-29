@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1026,7 +1036,7 @@ bool qSharedBuild()
 
     MS-DOS-based versions:
 
-    \value WV_32s   Windows 3.1 wth Win 32s
+    \value WV_32s   Windows 3.1 with Win 32s
     \value WV_95    Windows 95
     \value WV_98    Windows 98
     \value WV_Me    Windows Me
@@ -1527,18 +1537,7 @@ typedef signed long SInt32;
 #endif
     SInt32 gestalt_version;
     if (Gestalt(gestaltSystemVersion, &gestalt_version) == noErr) {
-        if (gestalt_version >= 0x1050 && gestalt_version < 0x1060)
-            return QSysInfo::MV_10_5;
-        else if (gestalt_version >= 0x1040 && gestalt_version < 0x1050)
-            return QSysInfo::MV_10_4;
-        else if (gestalt_version >= 0x1030 && gestalt_version < 0x1040)
-            return QSysInfo::MV_10_3;
-        else if (gestalt_version >= 0x1020 && gestalt_version < 0x1030)
-            return QSysInfo::MV_10_2;
-        else if (gestalt_version >= 0x1010 && gestalt_version < 0x1020)
-            return QSysInfo::MV_10_1;
-        else if (gestalt_version >= 0x1000 && gestalt_version < 0x1010)
-            return QSysInfo::MV_10_0;
+        return QSysInfo::MacVersion(((gestalt_version & 0x00F0) >> 4) + 2);
     }
     return QSysInfo::MV_Unknown;
 }
@@ -2079,6 +2078,17 @@ void qDebug(const char *msg, ...)
         }
     \endcode
 
+    If you include <QtDebug>, a more convenient syntax is
+    also available:
+
+    \code
+       qWarning() << "Brush:" << myQBrush << "Other value:"
+       << i;
+    \endcode
+
+    This syntax inserts a space between each item, and
+    appends a newline at the end.
+
     \warning The internal buffer is limited to 8192 bytes, including
     the '\0'-terminator.
 
@@ -2119,6 +2129,17 @@ void qWarning(const char *msg, ...)
                 qCritical("File '%s' does not exist!", qPrintable(fileName));
         }
     \endcode
+
+    If you include <QtDebug>, a more convenitent syntax is
+    also available:
+
+    \code
+       qCritical() << "Brush:" << myQBrush << "Other
+       value:" << i;
+    \endcode
+
+    A space is inserted between the items, and a newline is
+    appended at the end.
 
     \warning The internal buffer is limited to 8192 bytes, including
     the '\0'-terminator.
@@ -2241,6 +2262,7 @@ static QThreadStorage<uint *> randTLS; // Thread Local Storage for seed value
 #endif
 
 /*!
+    \relates <QtGlobal>
     \since 4.2
 
     Thread-safe version of the standard C++ \c srand() function.
@@ -2270,6 +2292,7 @@ void qsrand(uint seed)
 }
 
 /*!
+    \relates <QtGlobal>
     \since 4.2
 
     Thread-safe version of the standard C++ \c rand() function.

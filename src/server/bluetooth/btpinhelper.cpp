@@ -51,11 +51,6 @@ BTPinHelper::BTPinHelper(QObject *parent)
 {
     m_passDialog->setInputMode(QPasswordDialog::Plain);
     registerDefault();
-
-    // just for pairingCreated() callback, this will be moved later
-    QBluetoothLocalDevice *local = new QBluetoothLocalDevice(this);
-    connect(local, SIGNAL(pairingCreated(const QBluetoothAddress &)),
-            SLOT(pairingCreated(const QBluetoothAddress &)));
 }
 
 /*!
@@ -103,6 +98,7 @@ void BTPinHelper::requestPasskey(QBluetoothPasskeyRequest &req)
  */
 void BTPinHelper::cancelRequest(const QString & /*localDevice*/, const QBluetoothAddress & /*remoteAddr*/)
 {
+    qLog(Bluetooth) << "BTPinHelper::cancelRequest()";
     m_passDialog->reject();
 }
 
@@ -112,21 +108,6 @@ void BTPinHelper::cancelRequest(const QString & /*localDevice*/, const QBluetoot
 void BTPinHelper::release()
 {
 
-}
-
-// this doesn't really belong in the in helper, but for now just need
-// a service/task to add paired devices as favourites (otherwise if this is
-// done in BT settings, a paired device won't get added as a favourite if
-// BT settings is not running)
-/*!
-    \internal
- */
-void BTPinHelper::pairingCreated(const QBluetoothAddress &addr)
-{
-    qLog(Bluetooth) << "Adding newly paired device" << addr.toString()
-            << "as favourite";
-    QSettings settings("Trolltech", "bluetooth");
-    settings.setValue( "Favorites/" + addr.toString(), true );
 }
 
 QTOPIA_TASK(DefaultBluetoothPassKeyAgent, BTPinHelper);

@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qmake-manual.qdoc -->
 <head>
   <title>Qt 4.2: qmake Variable Reference</title>
   <link rel="prev" href="qmake-reference.html" />
@@ -19,6 +20,8 @@
 [Next: <a href="qmake-function-reference.html">qmake Function Reference</a>]
 </p>
 <h1 align="center">qmake Variable Reference<br /><small></small></h1>
+<p><tt>qmake</tt>'s fundamental behavior is influenced by variable declarations that define the build process of each project. Some of these declare resources, such as headers and source files, that are common to each platform; others are used to customize the behavior of compilers and linkers on specific platforms.</p>
+<p>Platform-specific variables follow the naming pattern of the variables which they extend or modify, but include the name of the relevant platform in their name. For example, <tt>QMAKE_LIBS</tt> can be used to specify a list of libraries that a project needs to link against, and <tt>QMAKE_LIBS_X11</tt> can be used to extend or override this list.</p>
 <p><table width="100%">
 <tr valign="top"><td width="34%">
 <ul><li><a href="#config">CONFIG</a></li>
@@ -142,6 +145,7 @@
 <li><a href="#qmake-moc-src">QMAKE_MOC_SRC</a></li>
 <li><a href="#qmake-qmake">QMAKE_QMAKE</a></li>
 <li><a href="#qmake-qt-dll">QMAKE_QT_DLL</a></li>
+<li><a href="#qmake-resource-flags">QMAKE_RESOURCE_FLAGS</a></li>
 <li><a href="#qmake-run-cc">QMAKE_RUN_CC</a></li>
 <li><a href="#qmake-run-cc-imp">QMAKE_RUN_CC_IMP</a></li>
 <li><a href="#qmake-run-cxx">QMAKE_RUN_CXX</a></li>
@@ -186,7 +190,7 @@
 <thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>release</td><td>The project is to be built in release mode. This is ignored if <tt>debug</tt> is also specified.</td></tr>
 <tr valign="top" class="even"><td>debug</td><td>The project is to be built in debug mode.</td></tr>
-<tr valign="top" class="odd"><td>debug_and_release</td><td>The project is built in <i>both</i> debug and release modes.</td></tr>
+<tr valign="top" class="odd"><td>debug_and_release</td><td>The project is built in <i>both</i> debug and release modes. This can have some unexpected side effects (see below for more information).</td></tr>
 <tr valign="top" class="even"><td>build_all</td><td>If <tt>debug_and_release</tt> is specified, the project is built in both debug and release modes by default.</td></tr>
 <tr valign="top" class="odd"><td>ordered</td><td>When using the <tt>subdirs</tt> template, this option specifies that the directories listed should be processed in the order in which they are given.</td></tr>
 <tr valign="top" class="even"><td>warn_on</td><td>The compiler should output as many warnings as possible. This is ignored if <tt>warn_off</tt> is specified.</td></tr>
@@ -195,6 +199,7 @@
 <p>Since the <tt>debug</tt> option overrides the <tt>release</tt> option when both are defined in the <tt>CONFIG</tt> variable, it is necessary to use the <tt>debug_and_release</tt> option if you want to allow both debug and release versions of a project to be built. In such a case, the Makefile that <tt>qmake</tt> generates includes a rule that builds both versions, and this can be invoked in the following way:</p>
 <pre> make all</pre>
 <p>Adding the <tt>build_all</tt> option to the <tt>CONFIG</tt> variable makes this rule the default when building the project, and installation targets will be created for both debug and release builds.</p>
+<p>Additionally, adding <tt>debug_and_release</tt> to the <tt>CONFIG</tt> variable will cause both <tt>debug</tt> and <tt>release</tt> to be defined in the contents of <tt>CONFIG</tt> when the project file is processed, causing <a href="qmake-advanced-usage.html#scopes">scopes</a> that test for each value to be processed for <i>both</i> debug and release modes. As a result, it may be useful to define mode-specific variables, such as <a href="#qmake-lflags-release">QMAKE_LFLAGS_RELEASE</a>, instead of general variables, such as <a href="#qmake-lflags">QMAKE_LFLAGS</a>, where possible.</p>
 <p>The following options define the application/library type:</p>
 <p><table width="95%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
@@ -327,6 +332,7 @@
 <p>For example:</p>
 <pre> unix:LIBS += -L/usr/local/lib -lmath
  win32:LIBS += c:/mylibs/math.lib</pre>
+<p><b>Note:</b> On Windows, specifying libraries with the <tt>-l</tt> option, as in the above example, will cause the library with the highest version number to be used; for example, <tt>libmath2.lib</tt> could potentially be used instead of <tt>libmathlib</tt>. To avoid this ambiguity, we recommend that you explicitly specify the library to be used by including the <tt>.lib</tt> file name suffix.</p>
 <p>By default, the list of libraries stored in <tt>LIBS</tt> is reduced to a list of unique names before it is used. To change this behavior, add the <tt>no_lflags_merge</tt> option to the <tt>CONFIG</tt> variable:</p>
 <pre> CONFIG += no_lflags_merge</pre>
 <a name="literal-hash"></a><a name="literal-hash"></a>
@@ -491,6 +497,7 @@
 <a name="qmake-extension-shlib"></a><a name="qmake-extension-shlib"></a>
 <h2>QMAKE_EXTENSION_SHLIB</h2>
 <p>This variable contains the extention for shared libraries. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
+<p>Note that platform-specific variables that change the extension will override the contents of this variable.</p>
 <a name="qmake-ext-moc"></a>
 <h2>QMAKE_EXT_MOC</h2>
 <p>This variable changes the extention used on included moc files.</p>
@@ -595,11 +602,11 @@
 <a name="qmake-lflags-windows"></a>
 <h2>QMAKE_LFLAGS_WINDOWS</h2>
 <p><i>This is used on Windows only.</i></p>
-<p>This variable contains link flags when building windows projects. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
+<p>This variable contains link flags when building Windows GUI projects (i.e. non-console applications). The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
 <a name="qmake-lflags-windows-dll"></a>
 <h2>QMAKE_LFLAGS_WINDOWS_DLL</h2>
 <p><i>This is used on Windows only.</i></p>
-<p>This variable contains link flags when building windows dll projects. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
+<p>This variable contains link flags when building Windows DLL projects. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
 <a name="qmake-libdir"></a>
 <h2>QMAKE_LIBDIR</h2>
 <p>This variable contains the location of all known library directories.The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
@@ -622,8 +629,8 @@
 <p>This variable contains all project libraries. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
 <a name="qmake-libs-console"></a>
 <h2>QMAKE_LIBS_CONSOLE</h2>
-<p><i>This is used on Windows only.</i></p>
-<p>This variable contains all project libraries that should be linked against when building a console application. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
+<p><i>This Windows-specific variable is no longer used.</i></p>
+<p>Prior to Qt 4.2, this variable was used to list the libraries that should be linked against when building a console application project on Windows. <a href="#qmake-libs-windows">QMAKE_LIBS_WINDOW</a> should now be used instead.</p>
 <a name="qmake-libs-opengl"></a>
 <h2>QMAKE_LIBS_OPENGL</h2>
 <p>This variable contains all OpenGL libraries. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
@@ -697,6 +704,10 @@
 <a name="qmake-qt-dll"></a>
 <h2>QMAKE_QT_DLL</h2>
 <p>This variable is not empty if Qt was built as a dll. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
+<a name="qmake-resource-flags"></a>
+<h2>QMAKE_RESOURCE_FLAGS</h2>
+<p>This variable is used to customize the list of options passed to the <a href="rcc.html#rcc">Resource Compiler</a> in each of the build rules where it is used. For example, the following line ensures that the <tt>-threshold</tt> and <tt>-compress</tt> options are used with particular values each time that <tt>rcc</tt> is invoked:</p>
+<pre> QMAKE_RESOURCE_FLAGS += -threshold 0 -compress 9</pre>
 <a name="qmake-run-cc"></a>
 <h2>QMAKE_RUN_CC</h2>
 <p>This variable specifies the individual rule needed to build an object. The value of this variable is typically handled by <tt>qmake</tt> or <a href="#qmakespec">qmake.conf</a> and rarely needs to be modified.</p>
@@ -772,6 +783,7 @@
 <p>For example:</p>
 <pre>     SUBDIRS = kernel \
                tools</pre>
+<p>It is essential that the project file in each subdirectory has the same name as the subdirectory itself, so that <tt>qmake</tt> can find it. For example, if the subdirectory is called <tt>myapp</tt> then the project file in that directory should be called <tt>myapp.pro</tt>.</p>
 <p>If you need to ensure that the subdirectories are built in the order in which they are specified, update the <a href="#config">CONFIG</a> variable to include the <tt>ordered</tt> option:</p>
 <pre>     CONFIG += ordered</pre>
 <a name="target"></a><a name="target"></a>
@@ -873,6 +885,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

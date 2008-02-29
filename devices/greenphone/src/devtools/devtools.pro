@@ -35,6 +35,9 @@ desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/netwo
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/sdcard-umount.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/usb-gadget-ether.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/usb-gadget-stop.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/get-ssh-key.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/sdio-storage.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/sdio-wifi.desktop
 desktop.path=/apps/Devtools
 desktop.hint=desktop
 
@@ -61,10 +64,10 @@ greenphone_flash.path=/../greenphone_flash
 greenphone_flash.CONFIG+=no_default_install
 
 greenphone_flash_post.depends=install_greenphone_flash
-greenphone_flash_post.commands=(mv -f "\$(INSTALL_ROOT)$${greenphone_flash.path}/trolltech_sdk_flash.sh" "\$(INSTALL_ROOT)$${greenphone_flash.path}/trolltech_flash.sh"); \
-                               (cd "\$(INSTALL_ROOT)$${greenphone_flash.path}" ; tar -xzf tools.tgz busyboxT gifanim ; mv -f busyboxT tar)
+greenphone_flash_post.commands=(mv -f $${LITERAL_QUOTE}\$(INSTALL_ROOT)$${greenphone_flash.path}/trolltech_sdk_flash.sh$${LITERAL_QUOTE} $${LITERAL_QUOTE}\$(INSTALL_ROOT)$${greenphone_flash.path}/trolltech_flash.sh$${LITERAL_QUOTE}); \
+                               (cd $${LITERAL_QUOTE}\$(INSTALL_ROOT)$${greenphone_flash.path}$${LITERAL_QUOTE} ; tar -xzf tools.tgz busyboxT gifanim ; mv -f busyboxT tar)
 greenphone_flash_post.CONFIG+=no_path
 
-INSTALLS+=desktop pics script startup motd conf help
+INSTALLS+=desktop pics script startup motd help
 #INSTALLS+=greenphone_flash greenphone_flash_post
 QMAKE_EXTRA_TARGETS+=testenv

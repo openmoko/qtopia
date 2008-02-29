@@ -7,7 +7,7 @@
  * The implementation was written so as to conform with Netscapes SSL.
  * 
  * This library is free for commercial and non-commercial use as long as
- * the following conditions are aheared to.  The following conditions
+ * the following conditions are adhered to.  The following conditions
  * apply to all code found in this distribution, be it the RC4, RSA,
  * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
  * included with this distribution is covered by the same copyright terms
@@ -162,9 +162,10 @@ extern "C" {
 
 #define SSL3_CK_FZA_DMS_NULL_SHA		0x0300001C
 #define SSL3_CK_FZA_DMS_FZA_SHA			0x0300001D
-#if 0 /* Because it clashes with KRB5, is never used any more, and is safe
-	 to remove according to David Hopwood <david.hopwood@zetnet.co.uk>
-	 of the ietf-tls list */
+#if 0
+/* Because it clashes with KRB5, is never used any more, and is safe
+   to remove according to David Hopwood <david.hopwood@zetnet.co.uk>
+   of the ietf-tls list */
 #define SSL3_CK_FZA_DMS_RC4_SHA			0x0300001E
 #endif
 

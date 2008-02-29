@@ -32,7 +32,6 @@
 /*!
     \class QHardwareManager
     \brief The QHardwareManager class finds available hardware accessories.
-    \ingroup qtopiaemb
 
     QHardwareManager is part of the accessory system which
     provides information about the available physical accessories.

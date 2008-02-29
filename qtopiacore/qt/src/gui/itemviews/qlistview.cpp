@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -435,6 +445,7 @@ void QListView::setViewMode(ViewMode mode)
     setDragEnabled(movable);
     setAcceptDrops(movable);
 #endif
+    d->clear();
     d->doDelayedItemsLayout();
 }
 
@@ -1452,8 +1463,6 @@ QModelIndexList QListView::selectedIndexes() const
 void QListView::doItemsLayout()
 {
     Q_D(QListView);
-    d->layoutChildren(); // make sure the viewport has the right size
-    d->prepareItemsLayout();
     if (d->model->columnCount(d->root) > 0) { // no columns means no contents
         if (layoutMode() == SinglePass)
             d->doItemsLayout(d->model->rowCount(d->root)); // layout everything
@@ -1766,8 +1775,13 @@ bool QListViewPrivate::doItemsLayout(int delta)
     int first = batchStartRow;
     int last = qMin(first + delta - 1, max);
 
-    if (max < 0)
+    if (max < 0 || last < first)
         return true; // nothing to do
+
+    if (first == 0) { // first time
+        layoutChildren(); // make sure the viewport has the right size
+        prepareItemsLayout(); // prepare internal structures
+    }
 
     if (movement == QListView::Static) {
         doStaticLayout(layoutBounds, first, last);
@@ -1777,7 +1791,7 @@ bool QListViewPrivate::doItemsLayout(int delta)
         doDynamicLayout(layoutBounds, first, last);
     }
 
-    if (batchStartRow >= max) { // stop items layout
+    if (batchStartRow > max) { // stop items layout
         flowPositions.resize(flowPositions.count());
         segmentPositions.resize(segmentPositions.count());
         segmentStartRows.resize(segmentStartRows.count());
@@ -2048,6 +2062,7 @@ void QListViewPrivate::intersectingStaticSet(const QRect &area) const
     }
     if (segmentPositions.isEmpty() || flowPositions.isEmpty())
         return;
+    int rowCount = model->rowCount(root);
     const int segLast = segmentPositions.count() - 1;
     Q_ASSERT(segLast > -1);
     int seg = qBinarySearch<int>(segmentPositions, segStartPosition, 0, segLast);
@@ -2056,7 +2071,7 @@ void QListViewPrivate::intersectingStaticSet(const QRect &area) const
         int last = (seg < segLast ? segmentStartRows.at(seg + 1) : batchStartRow) - 1;
         int row = qBinarySearch<int>(flowPositions, flowStartPosition, first, last);
         for (; row <= last && flowPositions.at(row) <= flowEndPosition; ++row) {
-            if (hiddenRows.contains(row))
+            if (row < 0 || row >= rowCount || hiddenRows.contains(row))
                 continue;
             QModelIndex index = model->index(row, column, root);
             if (index.isValid())

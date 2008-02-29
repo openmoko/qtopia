@@ -24,6 +24,7 @@
 #include <qbluetoothaddress.h>
 #include <qbluetoothlocaldevice.h>
 #include <qtopialog.h>
+#include <qtopianamespace.h>
 
 #include <QtopiaApplication>
 #include <QWaitWidget>
@@ -68,7 +69,8 @@ RemoteDevicePropertiesDialog::RemoteDevicePropertiesDialog(
       m_local( new QBluetoothLocalDevice(localAddr, this) ),
       m_waitWidget( new QWaitWidget(this) ),
       m_servicesDialog( 0 ),
-      m_servicesText( 0 )
+      m_servicesText( 0 ),
+      m_cancellingSearch( false )
 {
     if ( !m_local->isValid() ) {
         qLog(Bluetooth) << "Invalid local device, won't show any device info";
@@ -85,14 +87,16 @@ RemoteDevicePropertiesDialog::RemoteDevicePropertiesDialog(
 #endif
 
     // service searching
-    connect( &m_sdap, SIGNAL( searchComplete( const QSDAPSearchResult& ) ),
-             SLOT( foundServices( const QSDAPSearchResult & ) ) );
+    connect( &m_sdap, SIGNAL( searchComplete( const QBluetoothSdpQueryResult& ) ),
+             SLOT( foundServices( const QBluetoothSdpQueryResult & ) ) );
+    connect( &m_sdap, SIGNAL(searchCancelled()),
+             SLOT(serviceSearchCancelled()) );
 
     // wait widget
     m_waitWidget->setText( tr( "Finding services..." ) );
     m_waitWidget->setCancelEnabled( true );
     connect( m_waitWidget, SIGNAL( cancelled() ),
-             &m_sdap, SLOT( cancelSearch() ) );
+             SLOT( cancelSearch() ) );
 
     initMainInfo();
 
@@ -101,26 +105,6 @@ RemoteDevicePropertiesDialog::RemoteDevicePropertiesDialog(
 
 RemoteDevicePropertiesDialog::~RemoteDevicePropertiesDialog()
 {
-}
-
-void RemoteDevicePropertiesDialog::setRemoteDevice( const QBluetoothRemoteDevice &remote, const QPixmap &icon )
-{
-    m_remote = remote;
-
-    // in case remote device details have just changed
-    m_local->updateRemoteDevice( m_remote );
-
-    // find device alias
-    QBluetoothReply<QString> reply = m_local->remoteAlias( m_remote.address() );
-    if ( reply.isError() )
-        m_prevAlias = QString();
-    else
-        m_prevAlias = reply.value();
-
-    if ( m_servicesText )
-        m_servicesText->clear();
-
-    resetMainInfo( m_prevAlias.isEmpty() ? m_remote.name() : m_prevAlias, icon );
 }
 
 void RemoteDevicePropertiesDialog::initMainInfo()
@@ -171,8 +155,6 @@ void RemoteDevicePropertiesDialog::initMainInfo()
     // set attributes for the nickname line edit
     m_aliasLineEdit = m_devAttrs[0];
     m_aliasLineEdit->setReadOnly( false );
-    connect( m_aliasLineEdit, SIGNAL(editingFinished()),
-             SLOT(checkAliasEdit()) );
     f = m_aliasLineEdit->font();
     f.setBold( true );
     m_aliasLineEdit->setFont( f );
@@ -200,26 +182,59 @@ void RemoteDevicePropertiesDialog::initMainInfo()
     setLayout( baseLayout );
 }
 
-void RemoteDevicePropertiesDialog::resetMainInfo( const QString &displayName, const QPixmap &pixmap )
+
+void RemoteDevicePropertiesDialog::setRemoteDevice( const QBluetoothRemoteDevice &remote, const QPixmap &icon )
 {
-    // set title
-    m_title->setText( ( m_remote.name().isEmpty() ) ?
-            m_remote.address().toString() : m_remote.name() );
+    m_remote = remote;
+
+    // in case remote device details have just changed
+    m_local->updateRemoteDevice( m_remote );
+
+    if ( m_servicesText )
+        m_servicesText->clear();
+
+    // set m_prevAlias
+    QBluetoothReply<QString> reply = m_local->remoteAlias( m_remote.address() );
+    if ( reply.isError() )
+        m_prevAlias = QString();
+    else
+        m_prevAlias = reply.value();
+
+    // set displayed title
+    QString deviceName = m_remote.name();
+    QVariant titleFont = ( deviceName.isEmpty() ? QVariant() :
+            Qtopia::findDisplayFont( deviceName ) );
+    if ( titleFont.isValid() ) {
+        m_title->setText( deviceName );
+        m_title->setFont( titleFont.value<QFont>() );
+    } else {
+        // name can't be displayed - use the address string instead
+        m_title->setText( m_remote.address().toString() );
+        m_title->setFont(QFont());
+    }
+
     m_title->home( false );
+    m_title->setFocus(); // give initial focus to title
 
     // set icon
-    if ( pixmap.isNull() ) {
+    if ( icon.isNull() ) {
         m_icon->hide();
         m_headingLayout->setAlignment( m_title, Qt::AlignHCenter );
     } else {
         m_headingLayout->setAlignment( m_title, Qt::AlignLeft );
-        m_icon->setPixmap( pixmap );
+        m_icon->setPixmap( icon );
         m_icon->show();
     }
 
-    m_title->setFocus(); // give initial focus to title
+    QVariant aliasFont = ( m_prevAlias.isEmpty() ? QVariant() :
+            Qtopia::findDisplayFont( m_prevAlias ) );
+    if ( aliasFont.isValid() ) {
+        m_devAttrs[0]->setText( m_prevAlias );
+        m_devAttrs[0]->setFont( aliasFont.value<QFont>() );
+    } else {
+        m_devAttrs[0]->setText( "" );
+    }
 
-    m_devAttrs[0]->setText( displayName );
     m_devAttrs[1]->setText( m_remote.address().toString() );
     m_devAttrs[2]->setText( m_remote.deviceMajorAsString() );
     m_devAttrs[3]->setText( m_remote.deviceMinorAsString() );
@@ -237,24 +252,35 @@ void RemoteDevicePropertiesDialog::showServices()
     qLog( Bluetooth ) << "RemoteDevicePropertiesDialog::showServices";
 
     QBluetoothAddress addr = m_remote.address();
-    if ( !addr.valid() )
+    if ( !addr.isValid() )
         return;
 
+    m_waitWidget->show();
+
+    if (m_cancellingSearch) {
+        qLog(Bluetooth) << "RemoteDevicePropertiesDialog: still cancelling search, waiting...";
+        while (m_cancellingSearch)
+            qApp->processEvents();
+        qLog(Bluetooth) << "RemoteDevicePropertiesDialog: finished cancelling search";
+    }
+
     // search by L2CAP to avoid having to do a full slow "records" sdp search
-    if ( !m_sdap.searchServices( addr, *m_local, QSDPUUID::L2cap ) ) {
+    if ( !m_sdap.searchServices( addr, *m_local, QBluetoothSdpUuid::L2cap ) ) {
         QMessageBox::warning( this, tr( "Service Error" ), SERVICE_ERROR_MSG );
+        m_waitWidget->hide();
     } else {
         qLog(Bluetooth) << "Starting service search...";
-        m_waitWidget->show();
     }
 }
 
 
-void RemoteDevicePropertiesDialog::foundServices( const QSDAPSearchResult &result )
+void RemoteDevicePropertiesDialog::foundServices( const QBluetoothSdpQueryResult &result )
 {
     qLog( Bluetooth ) << "RemoteDevicePropertiesDialog::foundServices";
 
-    if ( result.errorOccurred() ) {
+    m_cancellingSearch = false;
+
+    if ( !result.isValid() ) {
         qLog( Bluetooth ) << "Error in finding services:" << result.error();
         m_waitWidget->hide();
         QMessageBox::warning( this, tr( "Service Error" ), SERVICE_ERROR_MSG );
@@ -285,7 +311,7 @@ void RemoteDevicePropertiesDialog::foundServices( const QSDAPSearchResult &resul
             m_servicesText->clear();
     }
 
-    const QList<QSDPService> services = result.services();
+    const QList<QBluetoothSdpRecord> services = result.services();
     for ( int i=0; i<services.count(); i++ ) {
         if ( !services[i].serviceName().isEmpty() ) // ignore unnamed services
             m_servicesText->append( services[i].serviceName() );
@@ -303,26 +329,40 @@ void RemoteDevicePropertiesDialog::foundServices( const QSDAPSearchResult &resul
     m_waitWidget->hide();
 }
 
-void RemoteDevicePropertiesDialog::checkAliasEdit()
+void RemoteDevicePropertiesDialog::cancelSearch()
 {
-    if ( m_aliasLineEdit ) {
-        if ( m_aliasLineEdit->text().trimmed().isEmpty() )
-            m_aliasLineEdit->setText( m_remote.name() );
+    qLog(Bluetooth) << "RemoteDevicePropertiesDialog::cancelSearch()";
+    if (m_cancellingSearch) {
+        // already waiting for a search to finish, so don't need to call
+        // m_sdap.cancelSearch()
+        qLog(Bluetooth) << "Already waiting for search to finish";
+        m_waitWidget->hide();
+    } else {
+        qLog(Bluetooth) << "Cancelling search...";
+        m_cancellingSearch = true;
+        m_sdap.cancelSearch();
     }
 }
 
+void RemoteDevicePropertiesDialog::serviceSearchCancelled()
+{
+    qLog(Bluetooth) << "RemoteDevicePropertiesDialog::serviceSearchCancelled()";
+    m_cancellingSearch = false;
+}
+
+
 void RemoteDevicePropertiesDialog::setDeviceAlias()
 {
-    qLog(Bluetooth) << "RemoteDevicePropertiesDialog::setDeviceAlias";
+    qLog(Bluetooth) << "RemoteDevicePropertiesDialog check if need alias update";
 
     QString aliasEntry = m_aliasLineEdit->text();
-    if ( aliasEntry.trimmed().isEmpty() || aliasEntry == m_remote.name() ) {
+    if ( aliasEntry.trimmed().isEmpty() ) {
         m_local->removeRemoteAlias( m_remote.address() );
         return;
     }
     if ( aliasEntry == m_prevAlias )
         return;
 
-    qLog(Bluetooth) << "Changing alias";
+    qLog(Bluetooth) << "RemoteDevicePropertiesDialog changing alias";
     m_local->setRemoteAlias( m_remote.address(), m_aliasLineEdit->text() );
 }

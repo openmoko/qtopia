@@ -167,6 +167,9 @@ private slots:
     void activate();
     void deactivate();
 
+    void suspend();
+    void resume();
+
 protected:
     // QWidget
     void keyPressEvent( QKeyEvent* e );

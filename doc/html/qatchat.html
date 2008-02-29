@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QAtChat Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QAtChat Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAtChat Class Reference</h1>
 <p>The QAtChat class provides a simple mechanism for sending AT commands to modems <a href="#details">More...</a></p>
-<pre>    #include &lt;QAtChat&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>#include &lt;QAtChat&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qatchat-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -24,6 +23,7 @@
 <li><div class="fn"/>void <b><a href="qatchat.html#chat-2">chat</a></b> ( const QString &amp; <i>command</i>, QObject * <i>target</i>, const char * <i>slot</i>, QAtResult::UserData * <i>data</i> = 0 )</li>
 <li><div class="fn"/>void <b><a href="qatchat.html#chatPDU">chatPDU</a></b> ( const QString &amp; <i>command</i>, const QByteArray &amp; <i>pdu</i>, QObject * <i>target</i>, const char * <i>slot</i>, QAtResult::UserData * <i>data</i> = 0 )</li>
 <li><div class="fn"/>int <b><a href="qatchat.html#deadTimeout">deadTimeout</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qatchat.html#registerErrorPrefix">registerErrorPrefix</a></b> ( const QString &amp; <i>type</i> )</li>
 <li><div class="fn"/>void <b><a href="qatchat.html#registerNotificationType">registerNotificationType</a></b> ( const QString &amp; <i>type</i>, QObject * <i>target</i>, const char * <i>slot</i>, bool <i>mayBeCommand</i> = false )</li>
 <li><div class="fn"/>void <b><a href="qatchat.html#requestNextLine">requestNextLine</a></b> ( QObject * <i>target</i>, const char * <i>slot</i> )</li>
 <li><div class="fn"/>void <b><a href="qatchat.html#resume">resume</a></b> ()</li>
@@ -91,6 +91,9 @@
 <p>See also <a href="qatchat.html#setDeadTimeout">setDeadTimeout</a>() and <a href="qatchat.html#dead">dead</a>().</p>
 <h3 class="fn"><a name="pduNotification"></a>void QAtChat::pduNotification ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when a PDU notification such as <tt>+CMT</tt>, <tt>+CDS</tt>, or <tt>+CBM</tt> arrives. The <i>type</i> parameter contains the type and PDU length (e.g. <tt>+CBM: 88</tt>), and the <i>pdu</i> parameter contains the binary data for the PDU.</p>
+<h3 class="fn"><a name="registerErrorPrefix"></a>void QAtChat::registerErrorPrefix ( const <a href="qstring.html">QString</a> &amp; <i>type</i> )</h3>
+<p>Register <i>type</i> as a prefix for error strings. Any line of data from the modem that starts with <i>type</i> will be recorded as a synonym for <tt>ERROR</tt>. This is to support modems that have non-standard error strings.</p>
+<p>This function was introduced in Qtopia 4.2.1</p>
 <h3 class="fn"><a name="registerNotificationType"></a>void QAtChat::registerNotificationType ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, bool <i>mayBeCommand</i> = false )</h3>
 <p>Register <i>type</i> as an unsolicited notification on this object. Whenever a line is received from the modem that starts with <i>type</i>, the indicated <i>slot</i> on <i>target</i> will be called. The slot has the signature <tt>notification(const QString&amp;)</tt>. The entire notification, including the <i>type</i> prefix, will be passed to the slot.</p>
 <p>If <i>mayBeCommand</i> is true, then the notification type may sometimes appear as a command result. When it does, the command's completion slot should be called, not the unsolicited notification slot. An example is <tt>+CREG:</tt>, which can appear in response to an <tt>AT+CREG</tt> command, or as an unsolicited notification.</p>
@@ -122,6 +125,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

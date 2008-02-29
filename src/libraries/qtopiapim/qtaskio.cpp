@@ -39,10 +39,10 @@
 #include <unistd.h>
 #endif
 
-void QTaskIO::checkAdded(const QTask &) { emit recordsUpdated(); }
+void QTaskIO::checkAdded(const QUniqueId &) { emit recordsUpdated(); }
 void QTaskIO::checkRemoved(const QUniqueId &) { emit recordsUpdated(); }
 void QTaskIO::checkRemoved(const QList<QUniqueId> &) { emit recordsUpdated(); }
-void QTaskIO::checkUpdated(const QTask &) { emit recordsUpdated(); }
+void QTaskIO::checkUpdated(const QUniqueId &) { emit recordsUpdated(); }
 
 QList<QTaskIO *> QTaskIO::activeTasks;
 
@@ -68,13 +68,13 @@ QTaskIO::~QTaskIO()
 void QTaskIO::pimMessage(const QString &message, const QByteArray &data)
 {
     QDataStream ds(data);
-    if (message == "addedTask(int,QUuid,QTask)") {
+    if (message == "addedTask(int,QUuid,QUniqueId)") {
         int pid;
         QUuid u;
         ds >> pid;
         ds >> u;
         if (pid != getpid() && u == contextId()) {
-            QTask task;
+            QUniqueId task;
             ds >> task;
             checkAdded(task);
         }
@@ -98,13 +98,13 @@ void QTaskIO::pimMessage(const QString &message, const QByteArray &data)
             ds >> ids;
             checkRemoved(ids);
         }
-    } else if (message == "updatedTask(int,QUuid,QTask)") {
+    } else if (message == "updatedTask(int,QUuid,QUniqueId)") {
         int pid;
         QUuid u;
         ds >> pid;
         ds >> u;
         if (pid != getpid() && u == contextId()) {
-            QTask task;
+            QUniqueId task;
             ds >> task;
             checkUpdated(task);
         }
@@ -236,21 +236,21 @@ void QTaskIO::ensureDataCurrent(bool force)
   \internal
 
   Sends a message on the QPE/Pim QtopiaChannel indicating that this process has added the
-  \a task to the data store.
+  task with identifier \a id to the data store.
 */
-void QTaskIO::notifyAdded(const QTask &task)
+void QTaskIO::notifyAdded(const QUniqueId &id)
 {
 #ifndef QT_NO_COP
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "addedTask(int,QUuid,QTask)");
+        QtopiaIpcEnvelope e("QPE/PIM", "addedTask(int,QUuid,QUniqueId)");
         e << getpid();
         e << contextId();
-        e << task;
+        e << id;
     }
 #endif
     foreach(QTaskIO *c, activeTasks) {
         if (c != this && c->contextId() == contextId())
-            c->checkAdded(task);
+            c->checkAdded(id);
     }
 }
 
@@ -258,21 +258,21 @@ void QTaskIO::notifyAdded(const QTask &task)
   \internal
 
   Sends a message on the QPE/Pim QtopiaChannel indicating that this process has updated the
-  \a task in the data store.
+  task with identifier \a id in the data store.
 */
-void QTaskIO::notifyUpdated(const QTask &task)
+void QTaskIO::notifyUpdated(const QUniqueId &id)
 {
 #ifndef QT_NO_COP
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "updatedTask(int,QUuid,QTask)");
+        QtopiaIpcEnvelope e("QPE/PIM", "updatedTask(int,QUuid,QUniqueId)");
         e << getpid();
         e << contextId();
-        e << task;
+        e << id;
     }
 #endif
     foreach(QTaskIO *c, activeTasks) {
         if (c != this && c->contextId() == contextId())
-            c->checkUpdated(task);
+            c->checkUpdated(id);
     }
 }
 

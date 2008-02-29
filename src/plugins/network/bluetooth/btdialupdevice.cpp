@@ -28,12 +28,13 @@
 
 #include <qbluetoothlocaldevicemanager.h>
 #include <qbluetoothrfcommserialport.h>
+#include <qbluetoothrfcommsocket.h>
 
 #include <QBluetoothRemoteDevice>
-#include <qsdpservice.h>
+#include <qbluetoothsdprecord.h>
 
 BluetoothDialupDevice::BluetoothDialupDevice( QObject* parent )
-    : QObject( parent ), btDevice( 0 ), serialPort( 0 )
+    : QObject( parent ), btDevice( 0 ), serialPort( 0 ), socket( 0 )
 {
     btManager = new QBluetoothLocalDeviceManager( this );
     connect( btManager, SIGNAL(deviceAdded(const QString&)),
@@ -44,8 +45,8 @@ BluetoothDialupDevice::BluetoothDialupDevice( QObject* parent )
 
     reconnectDevice();
 
-    connect( &m_sdap, SIGNAL(searchComplete(const QSDAPSearchResult&)),
-            this, SLOT(searchComplete(const QSDAPSearchResult&)) );
+    connect( &m_sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult&)),
+            this, SLOT(searchComplete(const QBluetoothSdpQueryResult&)) );
     remoteAddress = QBluetoothAddress::invalid;
 }
 
@@ -61,7 +62,7 @@ QString BluetoothDialupDevice::name() const
 QByteArray BluetoothDialupDevice::rfcommDevice() const
 {
     if ( serialPort )
-        return serialPort->boundDevice().toAscii();
+        return serialPort->device().toAscii();
     else
         return QByteArray();
 }
@@ -160,7 +161,6 @@ void BluetoothDialupDevice::connectToDUNService( const QBluetoothAddress& remote
 void BluetoothDialupDevice::releaseDUNConnection()
 {
     if ( serialPort ) {
-        serialPort->releaseTty();
         delete serialPort;
         serialPort = 0;
         remoteAddress = QBluetoothAddress::invalid;
@@ -170,40 +170,53 @@ void BluetoothDialupDevice::releaseDUNConnection()
 bool BluetoothDialupDevice::hasActiveConnection()
 {
     if ( serialPort
-            && !serialPort->boundDevice().isEmpty()
-            && remoteAddress.valid() )
+            && !serialPort->device().isEmpty()
+            && remoteAddress.isValid() )
         return true;
     return false;
 }
 
-void BluetoothDialupDevice::searchComplete( const QSDAPSearchResult& result )
+void BluetoothDialupDevice::searchComplete( const QBluetoothSdpQueryResult& result )
 {
     qLog(Network) << "Search for remote Bluetooth Dialup Networking Service complete";
-    foreach( QSDPService service, result.services() ) {
-        if ( QSDPService::isInstance( service, QBluetooth::DialupNetworkingProfile ) ) {
-            int channel = QSDPService::rfcommChannel( service );
+    foreach( QBluetoothSdpRecord service, result.services() ) {
+        if ( service.isInstance( QBluetooth::DialupNetworkingProfile ) ) {
+            int channel = QBluetoothSdpRecord::rfcommChannel( service );
             if ( serialPort )
                 delete serialPort;
 
             serialPort = new QBluetoothRfcommSerialPort( this );
-            QByteArray tty = serialPort->createTty( btDevice->address(), remoteAddress, channel ).toLatin1().constData();
-
-            if ( tty.isEmpty() ) {
-                qLog(Network) << "Cannot create serial device for DUN";
-                delete serialPort;
-                serialPort = 0;
-                remoteAddress = QBluetoothAddress::invalid;
-            }
-
-            //we have to submit this even though tty might be empty
-            //the receiver interprets an empty string as error
-
-            //sleep for 1s. creation of the rfcomm tty port takes a bit of time
-            QTimer::singleShot( 1000, this, SIGNAL(connectionEstablished()) );
+            QObject::connect(serialPort, SIGNAL(connected(const QString&)), this, SLOT(serialPortConnected(const QString&)));
+            QObject::connect(serialPort, SIGNAL(error(QBluetoothRfcommSerialPort::Error)),
+                             this, SLOT(serialPortError(QBluetoothRfcommSerialPort::Error)));
+            serialPort->connect(btDevice->address(), remoteAddress, channel);
             return;
         }
     }
-    //we couldn't find such a service
-    //the receiver of this signal will discover that the rfcomm device is invalid
-    QTimer::singleShot( 0, this, SIGNAL(connectionEstablished()) );
+    
+    //the service doesn't exist
+    //cancel connect process
+    serialPortError( QBluetoothRfcommSerialPort::ConnectionFailed );
+}
+
+void BluetoothDialupDevice::serialPortConnected( const QString& dev )
+{
+    qLog(Network) << "Serial device for DUN created: " << dev;
+    emit connectionEstablished();
+}
+
+void BluetoothDialupDevice::serialPortError(QBluetoothRfcommSerialPort::Error error)
+{
+    if ((error == QBluetoothRfcommSerialPort::ConnectionFailed) ||
+        (error == QBluetoothRfcommSerialPort::ConnectionCancelled) ||
+        (error == QBluetoothRfcommSerialPort::CreationError))
+    {
+        qLog(Network) << "Cannot create serial device for DUN";
+        if ( serialPort )
+            delete serialPort;
+        serialPort = 0;
+        remoteAddress = QBluetoothAddress::invalid;
+
+        emit connectionEstablished();
+    }
 }

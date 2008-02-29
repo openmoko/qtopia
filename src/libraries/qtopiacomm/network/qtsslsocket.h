@@ -21,6 +21,12 @@
 #ifndef QTSSLSOCKET_H
 #define QTSSLSOCKET_H
 
+/*
+   INTERNAL CLASS
+
+   This class will be removed in a future version of Qtopia, being replaced
+   by functionality from future version of Qt.  The API's will likely not be compatible.
+*/
 #include <QtNetwork/QTcpSocket>
 #include "qtopiaglobal.h"
 

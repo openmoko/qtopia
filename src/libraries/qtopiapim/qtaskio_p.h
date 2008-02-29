@@ -49,9 +49,6 @@ public:
     virtual void setSortKey(QTaskModel::Field k) = 0;
     virtual QTaskModel::Field sortKey() const = 0;
 
-    virtual void setCategoryFilter(const QCategoryFilter &) = 0;
-    virtual QCategoryFilter categoryFilter() const = 0;
-
     virtual bool completedFilter() const = 0;
     virtual void setCompletedFilter(bool) = 0;
 
@@ -94,14 +91,14 @@ public:
 public slots:
     // need implents.  Does not mean add, means has been added by extenral
     // and may need to check or update records.
-    virtual void checkAdded(const QTask &);
+    virtual void checkAdded(const QUniqueId &);
     virtual void checkRemoved(const QUniqueId &);
     virtual void checkRemoved(const QList<QUniqueId> &);
-    virtual void checkUpdated(const QTask &);
+    virtual void checkUpdated(const QUniqueId &);
 
 protected:
-    void notifyAdded(const QTask &);
-    void notifyUpdated(const QTask &);
+    void notifyAdded(const QUniqueId &);
+    void notifyUpdated(const QUniqueId &);
     void notifyRemoved(const QUniqueId &);
     void notifyRemoved(const QList<QUniqueId> &);
 

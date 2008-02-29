@@ -255,7 +255,6 @@ void QuickLauncher::doQuickLaunch( QStringList &argList )
     setproctitle(myargv[0]);
 #endif
 
-    connect(app, SIGNAL(lastWindowClosed()), app, SLOT(hideOrQuit()));
     validExitLoop = true;
     needsInit = true;
     eventLoop->exit();

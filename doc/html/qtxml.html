@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qtxml.qdoc -->
 <head>
   <title>Qt 4.2: QtXml Module</title>
   <link rel="prev" href="qtsvg.html" />
@@ -123,7 +124,7 @@
 <tr valign="top" class="even"><td><a href="qxmllocator.html">QXmlLocator</a></td><td>Used to obtain the actual parsing position of an event.</td></tr>
 <tr valign="top" class="odd"><td><a href="qxmlnamespacesupport.html">QXmlNamespaceSupport</a></td><td>Used to implement namespace support for a reader. Note that namespaces do not change the parsing behavior. They are only reported through the handler.</td></tr>
 </table></p>
-<p>The SAX Bookmarks example illustrates how to subclass <a href="qxmldefaulthandler.html">QXmlDefaultHandler</a> to read an XML bookmark file (XBEL) and how to generate XML by hand.</p>
+<p>The <a href="xml-saxbookmarks.html">SAX Bookmarks example</a> illustrates how to subclass <a href="qxmldefaulthandler.html">QXmlDefaultHandler</a> to read an XML bookmark file (XBEL) and how to generate XML by hand.</p>
 <a name="sax2-features"></a>
 <h4>SAX2 Features</h4>
 <p>The behavior of an XML reader depends on its support for certain optional features. For example, a reader may have the feature &quot;report attributes used for namespace declarations and prefixes along with the local name of a tag&quot;. Like every other feature this has a unique name represented by a URI: it is called <i>http://xml.org/sax/features/namespace-prefixes</i>.</p>
@@ -237,7 +238,7 @@
 </ul>
 <p>With <a href="qdomnodelist.html">QDomNodeList</a> and <a href="qdomnamednodemap.html">QDomNamedNodeMap</a> two collection classes are provided: <a href="qdomnodelist.html">QDomNodeList</a> is a list of nodes, and <a href="qdomnamednodemap.html">QDomNamedNodeMap</a> is used to handle unordered sets of nodes (often used for attributes).</p>
 <p>The <a href="qdomimplementation.html">QDomImplementation</a> class allows the user to query features of the DOM implementation.</p>
-<p>To get started please refer to the <a href="qdomdocument.html">QDomDocument</a> documentation. You might also want to take a look at the DOM Bookmarks example, which illustrates how to read and write an XML bookmark file (XBEL) using DOM.</p>
+<p>To get started please refer to the <a href="qdomdocument.html">QDomDocument</a> documentation. You might also want to take a look at the <a href="xml-dombookmarks.html">DOM Bookmarks example</a>, which illustrates how to read and write an XML bookmark file (XBEL) using DOM.</p>
 <a name="namespaces"></a><a name="an-introduction-to-namespaces"></a>
 <h3>An Introduction to Namespaces</h3>
 <p>Parts of the Qt XML module documentation assume that you are familiar with XML namespaces. Here we present a brief introduction; skip to <a href="#namespacesconventions">Qt XML documentation conventions</a> if you already know this material.</p>
@@ -301,7 +302,7 @@
 <li>The <i>namespace URI</i> (&quot;Uniform Resource Identifier&quot;) is a unique identifier for a namespace. It looks like a URL (e.g. <i>http://trolltech.com/fnord/</i> ) but does not require data to be accessible by the given protocol at the named address.</li>
 </ul>
 <p>Elements without a &quot;:&quot; (like <i>chapter</i> in the example) do not have a namespace prefix. In this case the local part and the qualified name are identical (i.e. <i>chapter</i>).</p>
-<p>See also DOM Bookmarks Example and SAX Bookmarks Example.</p>
+<p>See also <a href="xml-dombookmarks.html">DOM Bookmarks Example</a> and <a href="xml-saxbookmarks.html">SAX Bookmarks Example</a>.</p>
 <p>
 [Previous: <a href="qtsvg.html">QtSvg Module</a>]
 [<a href="modules.html">Qt's Modules</a>]
@@ -311,6 +312,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

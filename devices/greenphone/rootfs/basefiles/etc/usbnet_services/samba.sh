@@ -15,7 +15,7 @@ start)
     ;;
 stop)
     # Kill Samba
-    killall nmbd smbd
+    kill $( pidof nmbd smbd ) 2>/dev/null
     ;;
 esac
 

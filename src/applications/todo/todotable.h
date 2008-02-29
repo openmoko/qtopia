@@ -22,11 +22,13 @@
 #ifndef TODOTABLE_H
 #define TODOTABLE_H
 
-#include <QTableView>
+#include <QListView>
 #include <QList>
 #include "taskdelegate.h"
+#include "qtask.h"
+#include "qtaskmodel.h"
 
-class TodoTable : public QTableView
+class TodoTable : public QListView
 {
     Q_OBJECT
 
@@ -48,15 +50,12 @@ public:
 
     QTaskModel *taskModel() const { return qobject_cast<QTaskModel *>(model()); }
 
-    TaskTableDelegate *taskDelegate() const { return qobject_cast<TaskTableDelegate *>(itemDelegate()); }
-
 signals:
     void currentItemChanged(const QModelIndex &);
     void taskActivated(const QTask &);
 
 protected:
-    void resizeEvent(QResizeEvent * e);
-    virtual void keyPressEvent(QKeyEvent *);
+    void keyPressEvent(QKeyEvent *);
 
 protected slots:
     void currentChanged(const QModelIndex &, const QModelIndex &);
@@ -65,10 +64,9 @@ protected slots:
     void toggleTaskCompleted(const QModelIndex &i);
 
 private:
-    void updateColumnSizes();
     // since needs to treat as list, not spreadsheet.
     void setSelectionBehavior(QAbstractItemView::SelectionBehavior behavior)
-    { QTableView::setSelectionBehavior(behavior); }
+    { QListView::setSelectionBehavior(behavior); }
 
     QUniqueId lastSelectedTaskId;
 };

@@ -23,7 +23,6 @@
 #define QDRMCONTENTPLUGIN_H
 
 #include <qdrmcontent.h>
-#include <QLocalUniqueId>
 #include <QAbstractFileEngineHandler>
 
 class QDrmContentLicensePrivate;
@@ -86,6 +85,8 @@ public:
     virtual qint64 unencryptedSize( const QString &fileName ) = 0;
 
     virtual bool installContent( const QString &fileName, QContent *content ) = 0;
+
+    virtual bool updateContent( QContent *content );
 
     virtual QPixmap thumbnail( const QString &fileName, const QSize &size, Qt::AspectRatioMode mode = Qt::KeepAspectRatio );
 

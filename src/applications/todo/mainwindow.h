@@ -97,7 +97,8 @@ protected slots:
     void setShowCompleted( int );
     void currentEntryChanged( );
     void taskModelReset( );
-
+    void markTaskDone();
+    void markTaskNotDone();
     void showFindWidget( bool s );
     void startNewSearch(const QString &);
     void nextSearchItem();
@@ -147,6 +148,8 @@ private:
     QAction *deleteAction;
     QAction *findAction;
     QAction *beamAction;
+    QAction *markDoneAction;
+    QAction *markNotDoneAction;
     QToolBar *searchBar;
     QLineEdit *searchEdit;
     QPopupMenu *catMenu;

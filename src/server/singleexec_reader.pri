@@ -5,13 +5,19 @@
 
 
 # Don't process the lupdate rule for the Qt directory (it takes too long)
-CONFIG+=disable_qt_lupdate
+CONFIG+=disable_qt_lupdate singleexec_reader
 # This is the variable that server.pro is going to read
 SINGLEEXEC_READER_CMD=
 
 # We need to check all the project roots because device-specific code may exist
 # outside the Qtopia project root.
 for(pr,PROJECT_ROOTS) {
+    # These project roots do not contain projects suitable for embedding into a singleexec binary!
+    equals(pr,$$QTOPIA_DEPOT_PATH/src/qtopiadesktop):next()
+    equals(pr,$$QTOPIA_DEPOT_PATH/tests):next()
+    equals(pr,$$QTOPIA_DEPOT_PATH/src/plugins/designer):next()
+    equals(pr,$$QTOPIA_DEPOT_PATH/etc/themes):next()
+
     # Save some variables
     TMP2_PROCESSED_PRI=$$PROCESSED_PRI
     TMP2_CONFIG=$$CONFIG
@@ -45,13 +51,17 @@ for(pr,PROJECT_ROOTS) {
         # Clear some variables
         QTOPIA_DEPENDS=
         QTOPIA_DEPENDS_NO_WARN=
+        QTOPIA_LICENSE=
+        QTOPIA_DEP_LICENSE=
         PROCESSED_DEPS=
         LIBS=
         plugin_type=
+        LAST_CMDS=
 
         # Projects use this to identify themselves. It's normally set by config.prf but we have to do it
         # manually because config.prf has already been read.
         QTOPIA_ID=$$p
+        self=$$tail($$file)
 
         include($$file)
 
@@ -77,10 +87,18 @@ for(pr,PROJECT_ROOTS) {
             # This is needed for plugin_type
             qtopia:include($$QTOPIA_DEPOT_PATH/src/build/qtopia.prf)
 
-            DEP_PROJECTS*=$$QTOPIA_DEPENDS
+            for(dep,QTOPIA_DEPENDS) {
+                # Don't add any fake dependencies!
+                !contains(QTOPIA_DEPENDS_NO_WARN,$$dep):DEP_PROJECTS*=$$dep
+            }
 
             # Stop the depends file from being read again
             CONFIG-=depends
+
+            include($$QTOPIA_DEPOT_PATH/src/build/license.prf)
+
+            CONFIG-=runlast
+            include($$QTOPIA_DEPOT_PATH/src/build/runlast.prf)
         }
 
         # Check again because a project we depend on might have set this
@@ -115,6 +133,7 @@ for(pr,PROJECT_ROOTS) {
         # Load up the dependency libs
         LIBS=
         QTOPIA_DEPENDS=$$DEP_PROJECTS
+        QTOPIA_DEPENDS_NO_WARN=
         include($$QTOPIA_DEPOT_PATH/src/build/depends.prf)
         SINGLEEXEC_READER_CMD+="LIBS*=$$LIBS"
     }

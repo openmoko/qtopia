@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1861,8 +1871,10 @@ void QTreeView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int e
     d->expandParent.push(expanded);
     if (expanded) {
         int p = d->viewIndex(parent);
-        if (p != -1)
-            d->collapse(p, false);
+        if (p != -1) {
+            d->collapse(p, false); // d->itemViews will be updated...
+            d->updateScrollBars(); //...so we also need to update the scrollbar values
+        }
     }
 
     QAbstractItemView::rowsAboutToBeRemoved(parent, start, end);
@@ -2036,8 +2048,8 @@ void QTreeView::updateGeometries()
         QRect geometryRect(vg.left(), vg.top() - hint.height(), vg.width(), hint.height());
         d->header->setGeometry(geometryRect);
         d->header->setOffset(horizontalScrollBar()->value());
-        if (d->header->isHidden())
-            QMetaObject::invokeMethod(d->header, "updateGeometries");
+        // ### Qt 4.3 introduce hasAutoResizeSections()
+        QMetaObject::invokeMethod(d->header, "updateGeometries");
         d->updateScrollBars();
     }
     QAbstractItemView::updateGeometries();

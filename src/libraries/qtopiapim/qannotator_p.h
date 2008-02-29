@@ -28,15 +28,15 @@ public:
     QAnnotator();
     ~QAnnotator();
 
-    QLocalUniqueId add(const QByteArray &, const QString &mimetype = QString());
+    QUniqueId add(const QByteArray &, const QString &mimetype = QString());
 
-    bool set(const QLocalUniqueId &, const QByteArray &, const QString &mimetype = QString());
-    void remove(const QLocalUniqueId &);
+    bool set(const QUniqueId &, const QByteArray &, const QString &mimetype = QString());
+    void remove(const QUniqueId &);
 
-    bool contains(const QLocalUniqueId &) const;
+    bool contains(const QUniqueId &) const;
 
-    QString mimetype(const QLocalUniqueId &) const;
-    QByteArray blob(const QLocalUniqueId &) const;
+    QString mimetype(const QUniqueId &) const;
+    QByteArray blob(const QUniqueId &) const;
 
     /* add IO device functions later.
        Should be able to open an iodevice for append/create

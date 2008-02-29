@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/graphicsview/qgraphicsview.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/graphicsview/qgraphicsview.cpp -->
 <head>
   <title>Qt 4.2: QGraphicsView Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -125,7 +125,7 @@
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -302,7 +302,7 @@
 <h3 class="fn"><a name="sceneRect-prop"></a>sceneRect : <a href="qrectf.html">QRectF</a></h3>
 <p>This property holds the area of the scene visualized by this view.</p>
 <p>The scene rect defines the extent of the scene, and in the view's case, this means the area of the scene that you can navigate using the scroll bars.</p>
-<p>If unset, this property has the same value as <a href="qgraphicsscene.html#sceneRect-prop">QGraphicsScene::sceneRect</a>, and it changes with <a href="qgraphicsscene.html#sceneRect-prop">QGraphicsScene::sceneRect</a>. Otherwise, the view's scene rect is unaffected by the scene.</p>
+<p>If unset, or if a null <a href="qrectf.html">QRectF</a> is set, this property has the same value as <a href="qgraphicsscene.html#sceneRect-prop">QGraphicsScene::sceneRect</a>, and it changes with <a href="qgraphicsscene.html#sceneRect-prop">QGraphicsScene::sceneRect</a>. Otherwise, the view's scene rect is unaffected by the scene.</p>
 <p>Note: The maximum size of the view's scene rect is limited by the range of <a href="qabstractscrollarea.html">QAbstractScrollArea</a>'s scrollbars, which operate in integer coordinates.</p>
 <p>Access functions:</p>
 <ul>
@@ -367,7 +367,7 @@
 <p>Scrolls the contents of the viewport so that the center of item <i>item</i> is visible, with margins specified in pixels by <i>xmargin</i> and <i>ymargin</i>. If the specified point cannot be reached, the contents are scrolled to the nearest valid position. The default value for both margins is 50 pixels.</p>
 <p>See also <a href="qgraphicsview.html#centerOn">centerOn</a>().</p>
 <h3 class="fn"><a name="fitInView"></a>void QGraphicsView::fitInView ( const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i>, <a href="qt.html#AspectRatioMode-enum">Qt::AspectRatioMode</a> <i>aspectRatioMode</i> = Qt::IgnoreAspectRatio )</h3>
-<p>Scales the view matrix and scrolls the scroll bars to ensures that the scene rectangle <i>rect</i> fits inside the view.</p>
+<p>Scales the view matrix and scrolls the scroll bars to ensure that the scene rectangle <i>rect</i> fits inside the viewport. <i>rect</i> must be inside the scene rect; otherwise, fitInView() cannot guarantee that the whole rect is visible.</p>
 <p>This function keeps the view's rotation, translation, or shear. The view is scaled according to <i>aspectRatioMode</i>. <i>rect</i> will be centered in the view if it does not fit tightly.</p>
 <p>See also <a href="qgraphicsview.html#setMatrix">setMatrix</a>(), <a href="qgraphicsview.html#ensureVisible">ensureVisible</a>(), and <a href="qgraphicsview.html#centerOn">centerOn</a>().</p>
 <h3 class="fn"><a name="fitInView-2"></a>void QGraphicsView::fitInView ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>x</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>y</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>w</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>h</i>, <a href="qt.html#AspectRatioMode-enum">Qt::AspectRatioMode</a> <i>aspectRatioMode</i> = Qt::IgnoreAspectRatio )</h3>
@@ -550,6 +550,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

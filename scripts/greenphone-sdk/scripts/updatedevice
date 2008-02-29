@@ -6,78 +6,14 @@ QPEVER=`version`
 
 prepare_device()
 {
-    cd $TEMPDIR
-    
-    HELPER=updatedevice_helper.sh
-    cat >$HELPER <<EOF
-#!/bin/sh
-export PATH=/mnt/user/tools:/opt/Qtopia/bin:/usr/bin:/bin:/sbin:/usr/sbin
-killall qpe.sh qpe quicklauncher sipagent qss netsetup
-LIST=\`ps |sed -n -e '/Qtopia/ s/root.*//p'\`
-for i in \$LIST; do 
-    kill $i 2>/dev/null
-done
-sleep 5
-umount /opt/Qtopia.rom 2>/dev/null
-echo "">/etc/resolv.conf
-/usr/local/bin/gifanim /mnt/user/tools/splash.gif &
-sleep 5
-sync
-EOF
-
-    ftpput -u anonymous $PHONEIP / $HELPER
-    rm -f $HELPER
-
-    expect -c '
-        set timeout 300;
-        log_user 0;
-        
-        spawn telnet '$PHONEIP';
-        expect {
-            default {
-                send_user "Could not connect to Greenphone."
-                exit 1
-            } root@
-        }
-
-        send "chmod 555 /mnt/user_local/updatedevice_helper.sh\r";
-        expect root@;
-        
-        send "/mnt/user_local/updatedevice_helper.sh\r";
-        expect root@
-    '
+    ssh root@$PHONEIP 'updateqtopiahelper killqtopia'
+    ssh root@$PHONEIP 'updateqtopiahelper unmountqtopia'
+    ssh root@$PHONEIP 'gifanim /mnt/user/tools/splash.gif'
 }
 
 extract_image()
 {
     tar -C $TEMPDIR -xzf $QTOPIA_IMAGE
-}
-
-upload_image_tmpfs()
-{
-    expect -c '
-        set timeout 300;
-        log_user 0;
-        
-        spawn telnet '$PHONEIP';
-        expect {
-            default {
-                send_error "Could not connect to Greenphone."
-                exit 1
-            } root@
-        }
-
-        send "MNTPNT=`mktemp -d /mnt/user_local/updatedevice.XXXXXX`\r";
-        expect root@
-
-        send "mount -t tmpfs -o size='$IMAGE_SIZE' tmpfs \$MNTPNT\r";
-        expect root@
-        
-        send "echo \$MNTPNT\r";
-        expect -re "updatedevice\......." {
-            send_user "$expect_out(0,string)";
-        }
-    ' 
 }
 
 upload_image()
@@ -88,53 +24,18 @@ upload_image()
     done
     IMAGE_SIZE=$(( (1 + $IMAGE_SIZE / 1048576) * 1048576 ))
 
-    MNTPNT=`upload_image_tmpfs`
+    MNTPNT=$( ssh root@$PHONEIP "updateqtopiahelper createtemp $IMAGE_SIZE" )
 
-    cd $TEMPDIR
-    for i in * ; do
-        ftpput -u anonymous $PHONEIP /$MNTPNT $i
+    for i in $TEMPDIR/* ; do
+        scp $i root@$PHONEIP:$MNTPNT
     done
-
-    HELPER=updatedevice_helper.sh
-    cat >$HELPER <<EOF
-#!/bin/sh
-umount /mnt/sd
-mount -o bind /mnt/user_local/$MNTPNT /mnt/sd
-chmod 555 /mnt/sd/trolltech_flash.sh
-/mnt/sd/trolltech_flash.sh --dont-reboot
-sleep 5
-sync
-umount /mnt/sd
-umount /mnt/user_local/$MNTPNT
-rmdir /mnt/user_local/$MNTPNT
-echo "FLASHFINISHED!"
-EOF
-
-    ftpput -u anonymous $PHONEIP / $HELPER
-    rm -f $HELPER
 }
 
 install_image()
 {
-    expect -c '
-        set timeout 800;
-        log_user 0;
-        
-        spawn telnet '$PHONEIP';
-        expect root@;
-        
-        send "chmod 555 /mnt/user_local/updatedevice_helper.sh\r";
-        expect root@;
-        
-        send "/mnt/user_local/updatedevice_helper.sh\r";
-        expect FLASHFINISHED
-
-        send "rm -f /mnt/user_local/updatedevice_helper.sh ; sync\r";
-        expect root@;
-
-        send "reboot\r";
-        expect root@;
-    '
+    ssh root@$PHONEIP "updateqtopia --ignore-firstrun --dont-reboot $MNTPNT"
+    ssh root@$PHONEIP "updateqtopiahelper deletetemp $MNTPNT"
+    ssh root@$PHONEIP "reboot"
 }
 
 if [ $# -eq 0 ]; then
@@ -154,7 +55,6 @@ else
 fi
 
 TEMPDIR=`mktemp -d /tmp/updatedevice.XXXXXX`
-
 trap 'rm -rf $TEMPDIR' 0
 
 if gph -net; then

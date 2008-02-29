@@ -178,6 +178,7 @@ LauncherView::LauncherView( QWidget* parent, Qt::WFlags fl )
     icons->setResizeMode( QListView::Fixed );
     icons->setSelectionMode( QAbstractItemView::SingleSelection );
     icons->setSelectionBehavior( QAbstractItemView::SelectItems );
+    icons->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);    //workaround for Qt bug
     //icons->setUniformItemSizes( true );
     icons->setLayoutMode(QListView::Batched);
 //    icons->setWordWrap( true );

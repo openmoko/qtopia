@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QGlobalPixmapCache Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QGlobalPixmapCache Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QGlobalPixmapCache Class Reference</h1>
 <p>The QGlobalPixmapCache class provides a system-wide cache for pixmaps. <a href="#details">More...</a></p>
-<pre>    #include &lt;QGlobalPixmapCache&gt;</pre><ul>
+<pre>#include &lt;QGlobalPixmapCache&gt;</pre><ul>
 <li><a href="qglobalpixmapcache-members.html">List of all members, including inherited members</a></li>
 </ul>
 <a name="static-public-members"></a>
@@ -38,7 +37,7 @@
 <p>Looks for a cached pixmap associated with the <i>key</i> in the global cache. If the pixmap is found, the function sets <i>pm</i> to that pixmap and returns true; otherwise it leaves <i>pm</i> alone and returns false.</p>
 <p>Internally the global cache ensures that the pixmap is not removed until the <i>pm</i> is destroyed, therefore <i>pm</i> is directly associated with the <a href="qpixmap.html">QPixmap</a> in the global cache and should not be reused.</p>
 <p>Example of correct use:</p>
-<pre>    {
+<pre>&nbsp;   {
         QPixmap pm;
         if (!QGlobalPixmapCache::find(&quot;background_image&quot;, pm)) {
             pm.load(&quot;backgroundimage.png&quot;);
@@ -56,7 +55,7 @@
         painter-&gt;drawPixmap(0, 0, pm);
     }</pre>
 <p>Example of incorrect use:</p>
-<pre>    QPixmap pm;
+<pre>&nbsp;   QPixmap pm;
     if (!QGlobalPixmapCache::find(&quot;background_image&quot;, pm)) {
         pm.load(&quot;backgroundimage.png&quot;);
         QGlobalPixmapCache::insert(&quot;background_image&quot;, pm);
@@ -70,7 +69,7 @@
     painter-&gt;drawPixmap(0, 0, pm);</pre>
 <h3 class="fn"><a name="insert"></a>bool QGlobalPixmapCache::insert ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qpixmap.html">QPixmap</a> &amp; <i>pm</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Inserts a copy of the pixmap <i>pm</i> associated with the <i>key</i> into the global cache.</p>
-<p>All pixmaps inserted by Qtopia have a key starting with &quot;<a href="fd-WorldTime.html">_</a>$QTOPIA&quot;, so your own pixmap keys should never begin with &quot;<a href="fd-WorldTime.html">_</a>$QTOPIA&quot;.</p>
+<p>All pixmaps inserted by Qtopia have a key starting with &quot;_$QTOPIA&quot;, so your own pixmap keys should never begin with &quot;_$QTOPIA&quot;.</p>
 <p>The function returns true if the object was inserted into the global cache; otherwise it returns false.</p>
 <p>When the pixmap is no longer required in the global cache, <a href="qglobalpixmapcache.html#remove">remove</a>() must be called to free space in the global cache.</p>
 <p>If two pixmaps are inserted into the global cache using equal keys, then the last pixmap will hide the first pixmap, and the first pixmap will be removed from the global cache.</p>
@@ -83,6 +82,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

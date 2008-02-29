@@ -82,15 +82,14 @@ QVariant ContactSqlIO::key(int row) const
 
 QVariant ContactSqlIO::key(const QUniqueId &id) const
 {
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)id;
     QStringList keys = sortColumns();
     QString keystring = keys.join(", ");
-    QSqlQuery q;
+    QSqlQuery q(database());
     if (!q.prepare("SELECT " + keystring + " FROM contacts"
             " WHERE recid = :id"))
         qWarning("select record key failed: %s", (const char *)q.lastError().text().toLocal8Bit());
 
-    q.bindValue(":id", lid.toByteArray());
+    q.bindValue(":id", id.toUInt());
 
     if (q.exec() && q.next()) {
         QStringList sl;
@@ -263,17 +262,6 @@ ContactSqlIO::ContactSqlIO(QObject *parent, const QString &)
             removeAddressesQuery("DELETE from contactaddresses WHERE recid = :i"),
             removePhoneQuery("DELETE from contactphonenumbers WHERE recid = :i")
 {
-    QStringList tables;
-    tables << "sqlsources";
-    tables << "changelog";
-    tables << "categories";
-    tables << "contacts";
-    tables << "emailaddresses";
-    tables << "contactaddresses";
-    tables << "contactphonenumbers";
-    tables << "contactcategories";
-    tables << "contactcustom";
-    QtopiaSql::ensureSchema(tables, QtopiaSql::systemDatabase());
     QPimSqlIO::setOrderBy(sortColumns());
 
     sqlLabelCache = sqlLabel();
@@ -342,14 +330,12 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
     if (!contactQuery.isValid())
         return QContact();
 
-    const QLocalUniqueId &lid = (const QLocalUniqueId &)u;
-    QByteArray uid = lid.toByteArray();
-    contactQuery.bindValue(":i", uid);
+    contactQuery.bindValue(":i", u.toUInt());
 
     QContact t;
 
     // get common parts
-    retrieveRecord(uid, t);
+    retrieveRecord(u.toUInt(), t);
 
     if (!contactQuery.exec()) {
         contactByRowValid = false;
@@ -360,7 +346,7 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
 
     if ( contactQuery.next() ) {
         // XXX should check uid against u.
-        t.setUid(QUniqueId(contactQuery.value(0).toByteArray()));
+        t.setUid(QUniqueId::fromUInt(contactQuery.value(0).toUInt()));
         t.setNameTitle(contactQuery.value(1).toString());
         t.setFirstName(contactQuery.value(2).toString());
         t.setMiddleName(contactQuery.value(3).toString());
@@ -393,7 +379,7 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
         qLog(Sql) << "Read email addresses";
         emailsQuery.prepare();
         if(emailsQuery.isValid()) {
-            emailsQuery.bindValue(":id", uid);
+            emailsQuery.bindValue(":id", u.toUInt());
             if (!emailsQuery.exec()) {
                 qWarning("select email failed: %s", (const char *)emailsQuery.lastError().text().toLocal8Bit());
             }
@@ -408,7 +394,7 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
         // and contact addresses
         addressesQuery.prepare();
         if(addressesQuery.isValid()) {
-            addressesQuery.bindValue(":id", uid);
+            addressesQuery.bindValue(":id", u.toUInt());
             if (!addressesQuery.exec()) {
                 qWarning("select addresses failed: %s", (const char *)addressesQuery.lastError().text().toLocal8Bit());
             }
@@ -431,7 +417,7 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
         qLog(Sql) << "Read phone numbers";
         phoneQuery.prepare();
         if(phoneQuery.isValid()) {
-            phoneQuery.bindValue(":id", uid);
+            phoneQuery.bindValue(":id", u.toUInt());
             if (!phoneQuery.exec()) {
                 qWarning("select phone numbers failed: %s", (const char *)phoneQuery.lastError().text().toLocal8Bit());
             }
@@ -451,7 +437,7 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
         customQuery.prepare();
         if(customQuery.isValid()) {
         // custom fields for this appointment
-            customQuery.bindValue(":id", uid);
+            customQuery.bindValue(":id", u.toUInt());
             if (!customQuery.exec()) {
                 qWarning("select fieldname, fieldvalue failed: %s",
                         (const char *)customQuery.lastError().text().toLocal8Bit());
@@ -488,7 +474,7 @@ void ContactSqlIO::setCategoryFilter(const QCategoryFilter &f)
 {
     if (f != categoryFilter()) {
         QPimSqlIO::setCategoryFilter(f);
-        emit recordsUpdated();
+        emit filtersUpdated();
     }
 }
 
@@ -510,7 +496,7 @@ void ContactSqlIO::invalidateCache()
     QPimSqlIO::invalidateCache();
     contactByRowValid = false;
     contactCache.clear();
-    emit recordsUpdated();
+    emit filtersUpdated();
 }
 
 // if filtering/sorting/contacts doesn't change.
@@ -530,9 +516,9 @@ void ContactSqlIO::updateSqlLabel()
 // override if more efficient to grap partial contact.
 QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
 {
-    QLocalUniqueId u = recordId(row);
+    QUniqueId u = recordId(row);
     if (k == QContactModel::Identifier)
-        return QVariant(u.toByteArray());
+        return QVariant(u.toUInt());
     if (u.isNull())
         return QVariant();
 
@@ -542,7 +528,7 @@ QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
         if(!categoryQuery.isValid()) 
             return QVariant(QList<QString>());
 
-        categoryQuery.bindValue(":id", u.toByteArray());
+        categoryQuery.bindValue(":id", u.toUInt());
         if (!categoryQuery.exec()) {
             qWarning("select categoryid failed: %s", (const char *)categoryQuery.lastError().text().toLocal8Bit());
         }
@@ -556,7 +542,7 @@ QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
         if(!emailsQuery.isValid())
             return QVariant(QList<QString>());
 
-        emailsQuery.bindValue(":id", u.toByteArray());
+        emailsQuery.bindValue(":id", u.toUInt());
         if (!emailsQuery.exec()) {
             qWarning("select email failed: %s", (const char *)emailsQuery.lastError().text().toLocal8Bit());
         }
@@ -568,11 +554,11 @@ QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
         return QVariant(tlist);
     }
 
-    QSqlQuery q;
+    QSqlQuery q(database());
     QString column = sqlField(k);
 
     q.prepare("SELECT " + column + " FROM contacts WHERE recid = :id");
-    q.bindValue(":id", u.toByteArray());
+    q.bindValue(":id", u.toUInt());
     if (!q.exec() || !q.next()) {
         qWarning ("couldn't select for record %s, column %s : %s", (const char *)u.toString().toLatin1(), (const char *)column.toLocal8Bit(), (const char *)q.lastError().text().toLocal8Bit());
         return QVariant();
@@ -582,83 +568,82 @@ QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
 
 bool ContactSqlIO::setContactField(int row, QContactModel::Field k,  const QVariant &v)
 {
-    QLocalUniqueId u = recordId(row);
+    QUniqueId u = recordId(row);
     if (u.isNull() || k == QContactModel::Identifier)
         return false;
-    QByteArray uid = u.toByteArray();
 
     if (k == QContactModel::Categories) {
         if (!v.canConvert(QVariant::StringList))
             return false;
-        QSqlDatabase::database().transaction();
+        database().transaction();
         QList<QString> cats = v.toStringList();
-        QSqlQuery q;
+        QSqlQuery q(database());
         q.prepare(selectCategoriesText);
-        q.bindValue(":i", uid);
+        q.bindValue(":i", u.toUInt());
         q.exec();
         if(q.next() && q.value(0).toInt() > 0) {
             q.prepare(deleteCategoriesText);
-            q.bindValue(":i", uid);
+            q.bindValue(":i", u.toUInt());
             if (!q.exec()) {
                 qWarning("failed clean up: %s", (const char *)q.lastError().text().toLocal8Bit());
-                QSqlDatabase::database().rollback();
+                database().rollback();
                 return false;
             }
         }
         if (cats.count()) {
             q.prepare(insertCategoriesText);
-            q.bindValue(":i", uid);
+            q.bindValue(":i", u.toUInt());
             foreach(QString v, cats) {
                 q.bindValue(":v", v);
                 if (!q.exec()) {
                     qWarning("failed category table insert: %s", (const char *)q.lastError().text().toLocal8Bit());
-                    QSqlDatabase::database().rollback();
+                    database().rollback();
                     return false;
                 }
             }
         }
-        if (QSqlDatabase::database().commit()) {
+        if (database().commit()) {
             emit recordsUpdated();
             return true;
         } else {
-            QSqlDatabase::database().rollback();
+            database().rollback();
             return false;
         }
     } else if (k == QContactModel::Emails) {
         if (!v.canConvert(QVariant::StringList))
             return false;
-        QSqlDatabase::database().transaction();
+        database().transaction();
         QList<QString> emails = v.toStringList();
-        QSqlQuery q;
+        QSqlQuery q(database());
         q.prepare(selectCategoriesText);
-        q.bindValue(":i", uid);
+        q.bindValue(":i", u.toUInt());
         q.exec();
         if(q.next() && q.value(0).toInt() > 0) {
             q.prepare(deleteCategoriesText);
-            q.bindValue(":i", uid);
+            q.bindValue(":i", u.toUInt());
             if (!q.exec()) {
                 qWarning("failed clean up: %s", (const char *)q.lastError().text().toLocal8Bit());
-                QSqlDatabase::database().rollback();
+                database().rollback();
                 return false;
             }
         }
         if (emails.count()) {
             q.prepare(insertCategoriesText);
-            q.bindValue(":i", uid);
+            q.bindValue(":i", u.toUInt());
             foreach(QString v, emails) {
                 q.bindValue(":v", v);
                 if (!q.exec()) {
                     qWarning("failed category table insert: %s", (const char *)q.lastError().text().toLocal8Bit());
-                    QSqlDatabase::database().rollback();
+                    database().rollback();
                     return false;
                 }
             }
         }
-        if (QSqlDatabase::database().commit()) {
+        if (database().commit()) {
             emit recordsUpdated();
             return true;
         } else {
-            QSqlDatabase::database().rollback();
+            database().rollback();
             return false;
         }
 
@@ -667,21 +652,21 @@ bool ContactSqlIO::setContactField(int row, QContactModel::Field k,  const QVari
     QString column = sqlField(k);
 
     if (!column.isEmpty() && canUpdate(k)) {
-        QSqlDatabase::database().transaction();
-        QSqlQuery q;
+        database().transaction();
+        QSqlQuery q(database());
         q.prepare("UPDATE contacts SET " + column + " = :value WHERE recid = :id");
         q.bindValue(":value", v);
-        q.bindValue(":id", uid);
+        q.bindValue(":id", u.toUInt());
         if (q.exec()) {
-            if (QSqlDatabase::database().commit()) {
+            if (database().commit()) {
                 emit recordsUpdated();
                 return true;
             } else {
-                QSqlDatabase::database().rollback();
+                database().rollback();
                 return false;
             }
         } else {
-            QSqlDatabase::database().rollback();
+            database().rollback();
             return false;
         }
     }
@@ -815,7 +800,7 @@ bool ContactSqlIO::removeContacts(const QList<QUniqueId> &ids)
 bool ContactSqlIO::updateContact(const QContact &t)
 {
     if (QPimSqlIO::updateRecord(t)) {
-        notifyUpdated(t);
+        notifyUpdated(t.uid());
         emit recordsUpdated();
         return true;
     }
@@ -831,7 +816,7 @@ QUniqueId ContactSqlIO::addContact(const QContact &contact, const QPimSource &so
     if (!i.isNull()) {
         QContact added = contact;
         added.setUid(i);
-        notifyAdded(added);
+        notifyAdded(i);
         invalidateCache();
     }
     return i;
@@ -955,7 +940,7 @@ bool QContactDefaultContext::importContacts(const QPimSource &s, const QList<QCo
             return false;
         }
         if (importQuery.next()) {
-            QUniqueId u(importQuery.value(0).toByteArray());
+            QUniqueId u = QUniqueId::fromUInt(importQuery.value(0).toUInt());
             QContact current = mAccess->contact(u);
             mergeContact(current, c); // merges phone number information from sim to phone.  favours phone.
             importQuery.reset();
@@ -968,14 +953,14 @@ bool QContactDefaultContext::importContacts(const QPimSource &s, const QList<QCo
     return mAccess->commitSync();
 }
 
-bool ContactSqlIO::updateExtraTables(const QByteArray &uid, const QPimRecord &r)
+bool ContactSqlIO::updateExtraTables(uint uid, const QPimRecord &r)
 {
     if (!removeExtraTables(uid))
         return false;
     return insertExtraTables(uid, r);
 }
 
-bool ContactSqlIO::removeExtraTables(const QByteArray &uid)
+bool ContactSqlIO::removeExtraTables(uint uid)
 {
     removeEmailsQuery.prepare();
     removeAddressesQuery.prepare();
@@ -1002,7 +987,7 @@ bool ContactSqlIO::removeExtraTables(const QByteArray &uid)
     return true;
 }
 
-bool ContactSqlIO::insertExtraTables(const QByteArray &uid, const QPimRecord &r)
+bool ContactSqlIO::insertExtraTables(uint uid, const QPimRecord &r)
 {
     const QContact &c = (const QContact &)r;
 
@@ -1168,14 +1153,14 @@ void ContactSqlIO::setFilter(const QString &text, int flags)
         mSearchFilter = "(" + mSearchFilter + ")";
         QPimSqlIO::setFilter(mSearchFilter);
     }
-    emit recordsUpdated();
+    emit filtersUpdated();
 }
 
 void ContactSqlIO::clearFilter()
 {
     QPimSqlIO::setFilters(QStringList());
     QPimSqlIO::setJoins(QStringList());
-    emit recordsUpdated();
+    emit filtersUpdated();
 }
 
 int ContactSqlIO::predictedRow(const QVariant &k, const QUniqueId &id) const
@@ -1194,7 +1179,7 @@ int ContactSqlIO::predictedRow(const QVariant &k, const QUniqueId &id) const
             else
                 keys.append(QVariant());
         }
-        keys.append(((const QLocalUniqueId &)id).toByteArray());
+        keys.append(id.toUInt());
 
         return model.predictedRow(keys);
     }
@@ -1210,7 +1195,7 @@ QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch
     if (local.isEmpty())
         return QUniqueId();
 
-    QSqlQuery q;
+    QSqlQuery q(database());
     if (!q.prepare("SELECT recid, phone_number FROM contactphonenumbers WHERE phone_number LIKE '%" + local + "%'"))
     {
         qWarning("Failed to prepare phone number search: %s",
@@ -1228,7 +1213,7 @@ QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch
     bestMatch = 0;
     QUniqueId bestContact;
     while (q.next()) {
-        QUniqueId matchId(q.value(0).toByteArray());
+        QUniqueId matchId = QUniqueId::fromUInt(q.value(0).toUInt());
         QString matchPh(q.value(1).toString());
         if (!contains(matchId))
             continue;

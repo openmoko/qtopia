@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/graphicsview/qgraphicsitemanimation.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/graphicsview/qgraphicsitemanimation.cpp -->
 <head>
   <title>Qt 4.2: QGraphicsItemAnimation Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -108,9 +108,9 @@
 <h3 class="fn"><a name="dtor.QGraphicsItemAnimation"></a>QGraphicsItemAnimation::~QGraphicsItemAnimation ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the animation object.</p>
 <h3 class="fn"><a name="afterAnimationStep"></a>void QGraphicsItemAnimation::afterAnimationStep ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>step</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This method is meant to be overridden by subclassed that needs to execute additional code after a new step has taken place.</p>
+<p>This method is meant to be overridden in subclasses that need to execute additional code after a new step has taken place. The animation <i>step</i> is provided for use in cases where the action depends on its value.</p>
 <h3 class="fn"><a name="beforeAnimationStep"></a>void QGraphicsItemAnimation::beforeAnimationStep ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>step</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This method is meant to be overridden by subclassed that needs to execute additional code before a new step takes place.</p>
+<p>This method is meant to be overridden by subclassed that needs to execute additional code before a new step takes place. The animation <i>step</i> is provided for use in cases where the action depends on its value.</p>
 <h3 class="fn"><a name="clear"></a>void QGraphicsItemAnimation::clear ()</h3>
 <p>Clears the scheduled transformations used for the animation, but retains the item and timeline.</p>
 <h3 class="fn"><a name="horizontalScaleAt"></a><a href="qtglobal.html#qreal-typedef">qreal</a> QGraphicsItemAnimation::horizontalScaleAt ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>step</i> ) const</h3>
@@ -174,6 +174,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

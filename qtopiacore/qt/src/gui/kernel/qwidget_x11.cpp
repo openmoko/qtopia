@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -448,8 +458,16 @@ void QWidgetPrivate::create_sys(WId window, bool initializeWindow, bool destroyO
             qDebug() << "create child" << ++children;
 #endif
         QRect safeRect = data.crect; //##### must handle huge sizes as well.... i.e. wrect
-        if (safeRect.width() < 1|| safeRect.height() < 1)
-            safeRect = QRect(-1000,-1000,1,1);
+        if (safeRect.width() < 1|| safeRect.height() < 1) {
+            if (topLevel) {
+                // top-levels must be at least 1x1
+                safeRect.setSize(safeRect.size().expandedTo(QSize(1, 1)));
+            } else {
+                // create it way off screen, and rely on
+                // setWSGeometry() to do the right thing with it later
+                safeRect = QRect(-1000,-1000,1,1);
+            }
+        }
         if (xinfo.defaultVisual() && xinfo.defaultColormap()) {
             id = (WId)qt_XCreateSimpleWindow(q, dpy, parentw,
                                              safeRect.left(), safeRect.top(),
@@ -1861,6 +1879,7 @@ static void do_size_hints(QWidget* widget, QWExtra *x)
 void QWidgetPrivate::setWSGeometry(bool dontShow)
 {
     Q_Q(QWidget);
+    Q_ASSERT(q->testAttribute(Qt::WA_WState_Created));
 
     /*
       There are up to four different coordinate systems here:
@@ -2516,7 +2535,7 @@ void QWidget::setWindowOpacity(qreal opacity)
         return;
 
     Q_D(QWidget);
-    opacity = qBound(0.0, opacity, 1.0);
+    opacity = qBound(qreal(0.0), opacity, qreal(1.0));
     d->topData()->opacity = uint(opacity * 255);
     if (!testAttribute(Qt::WA_WState_Created))
         return;

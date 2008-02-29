@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qt4-sql.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qt4-sql.qdoc -->
 <head>
   <title>Qt 4.2: The Qt 4 Database GUI Layer</title>
   <link rel="prev" href="qt4-accessibility.html" />
@@ -61,11 +61,58 @@
  view.setModel(&amp;model);
  view.show();</pre>
 <p>In practice, it's common that we need to customize the rendering of a field in the database. In that case, we can create our own model based on <a href="qsqlquerymodel.html">QSqlQueryModel</a>. The next code snippet shows a custom model that prepends '#' to the value in field 0 and converts the value in field 2 to uppercase:</p>
-<pre></pre>
+<pre> class CustomSqlModel : public QSqlQueryModel
+ {
+     Q_OBJECT
+
+ public:
+     CustomSqlModel(QObject *parent = 0);
+
+     QVariant data(const QModelIndex &amp;item, int role) const;
+ };
+
+ QVariant CustomSqlModel::data(const QModelIndex &amp;index, int role) const
+ {
+     QVariant value = QSqlQueryModel::data(index, role);
+     if (value.isValid() &amp;&amp; role == Qt::DisplayRole) {
+         if (index.column() == 0)
+             return value.toString().prepend(&quot;#&quot;);
+         else if (index.column() == 2)
+             return value.toString().toUpper();
+     }
+     if (role == Qt::TextColorRole &amp;&amp; index.column() == 1)
+         return qVariantFromValue(QColor(Qt::blue));
+     return value;
+ }</pre>
 <p>It is also possible to subclass <a href="qsqlquerymodel.html">QSqlQueryModel</a> to add support for editing. This is done by reimplementing <a href="qabstractitemmodel.html#flags">QAbstractItemModel::flags</a>() to specify which database fields are editable and <a href="qabstractitemmodel.html#setData">QAbstractItemModel::setData</a>() to modify the database. Here's an example of a setData() reimplementation that changes the first or last name of a person:</p>
-<pre></pre>
+<pre> bool EditableSqlModel::setData(const QModelIndex &amp;index, const QVariant &amp;value, int /* role */</span>)
+ {
+     if (index.column() &lt; 1 || index.column() &gt; 2)
+         return false;
+
+     QModelIndex primaryKeyIndex = QSqlQueryModel::index(index.row(), 0);
+     int id = data(primaryKeyIndex).toInt();
+
+     clear();
+
+     bool ok;
+     if (index.column() == 1) {
+         ok = setFirstName(id, value.toString());
+     } else {
+         ok = setLastName(id, value.toString());
+     }
+     refresh();
+     return ok;
+ }</pre>
 <p>It relies on helper functions called <tt>setFirstName()</tt> and <tt>setLastName()</tt>, which execute an <tt>update</tt>. Here's <tt>setFirstName()</tt>:</p>
-<pre></pre>
+<pre> bool EditableSqlModel::setFirstName(int personId, const QString &amp;firstName)
+ {
+     QSqlQuery query;
+     query.prepare(&quot;update person set firstname = ? where id = ?&quot;);
+     query.addBindValue(firstName);
+     query.addBindValue(personId);
+     return query.exec();
+ }</pre>
 <p>See Qt's <tt>examples/sql</tt> directory for more examples.</p>
 <a name="comparison-with-qt-3"></a>
 <h2>Comparison with Qt 3</h2>
@@ -85,6 +132,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

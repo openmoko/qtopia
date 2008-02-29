@@ -32,6 +32,9 @@
 #include <qtopiaipcenvelope.h>
 #include <qtopiaservices.h>
 
+#include <QFontDatabase>
+#include <QFontMetrics>
+
 #ifdef Q_WS_QWS
 #include <qdawg.h>
 #endif
@@ -213,11 +216,11 @@ QString QtopiaPathHelper::packagePath() const
   which are returned by dawg(). Use addWords() to add words to the
   updateable copy of the global QDawg or to named application
   \l{QDawg}s.
-
-  \ingroup qtopiaemb
 */
 
 /*!
+   \fn QStringList Qtopia::installPaths()
+ 
    Returns the list of base directories into which Qtopia packages
    may have been installed.
 
@@ -237,7 +240,9 @@ QStringList Qtopia::installPaths()
     return QtopiaPathHelper::instance()->installPaths();
 }
 
-/*
+/*!
+   \fn QString Qtopia::packagePath()
+ 
    Returns the base directory in which downloaded 3rd party packages
    will be searched for.
 
@@ -255,6 +260,8 @@ QString Qtopia::packagePath()
 }
 
 /*!
+   \fn QString Qtopia::qtopiaDir()
+ 
    Returns the base directory into which Qtopia system packages
    are installed.
 
@@ -273,6 +280,8 @@ QString Qtopia::qtopiaDir()
 }
 
 /*!
+  \fn QString Qtopia::documentDir()
+ 
   Returns the user's current Document directory. There is a trailing "/".
 */
 QString Qtopia::documentDir()
@@ -281,6 +290,8 @@ QString Qtopia::documentDir()
 }
 
 /*!
+  \fn QString Qtopia::homePath()
+ 
   Returns the name of the directory to be used as the current
   users home directory.
 */
@@ -298,6 +309,8 @@ QString Qtopia::homePath()
 #error "Remove Qtopia::defaultButtonsFile"
 #endif
 /*!
+  \fn QString Qtopia::defaultButtonsFile()
+ 
   This function will change in the final Qtopia 4 release.
 
   \internal
@@ -317,6 +330,8 @@ QString Qtopia::defaultButtonsFile()
 }
 
 /*!
+  \fn QStringList Qtopia::helpPaths()
+ 
   Returns a list of directory names where help files are found.
 */
 QStringList Qtopia::helpPaths()
@@ -340,6 +355,8 @@ QStringList Qtopia::helpPaths()
 }
 
 /*!
+    \fn bool Qtopia::confirmDelete( QWidget *parent, const QString & caption, const QString & object )
+ 
     Shows a dialog with \a caption to confirm deletion of \a object with user.
 
     If \a parent is 0, the dialog becomes an application-global modal dialog
@@ -354,6 +371,8 @@ bool Qtopia::confirmDelete( QWidget *parent, const QString & caption, const QStr
 }
 
 /*!
+    \fn void Qtopia::actionConfirmation(const QPixmap &pixmap, const QString &text)
+ 
     Displays a message dialog containing the specified \a pixmap and \a text
     for a short time.
 */
@@ -368,6 +387,8 @@ void Qtopia::actionConfirmation(const QPixmap &pixmap, const QString &text)
 }
 
 /*!
+    \fn void Qtopia::soundAlarm()
+ 
     Sounds the audible system alarm. This is used for applications such
     as Calendar when it needs to inform the user of an event.
 */
@@ -378,6 +399,8 @@ void Qtopia::soundAlarm()
 }
 
 /*!
+  \fn void Qtopia::statusMessage(const QString& message)
+ 
   Displays a status \a message to the user. This usually appears
   in the taskbar for a short amount of time, then disappears.
 */
@@ -395,6 +418,8 @@ void Qtopia::statusMessage(const QString& message)
  */
 
 /*!
+  \fn QStringList Qtopia::languageList()
+ 
   Returns the list of language identifiers for the languages the user
   has selected as meaningful to them.
 
@@ -412,11 +437,11 @@ QStringList Qtopia::languageList()
     if (lang.isEmpty())
         lang = getenv("LANG");
 
-    int i  = lang.indexOf(".");
+    int i  = lang.indexOf(QLatin1Char('.'));
     if ( i > 0 )
         lang = lang.left( i );
     langs.append(lang);
-    i = lang.indexOf( "_" );
+    i = lang.indexOf(QLatin1Char('_'));
     if ( i > 0 )
         langs.append(lang.left(i));
 #endif
@@ -485,6 +510,8 @@ static QList<QTranslator*>* qLocalTranslations(const QString& key)
 }
 
 /*!
+\fn QString Qtopia::translate(const QString& key, const QString& c, const QString& str)
+ 
 Translate \a str in the context \a c, using only the translation files defined by \a key.
 The \a key may be either a single name, such as "QtopiaSettings", or it may be a
 'wildcard', such as "Categories-*". The \a key thus defines the set of translation files
@@ -514,8 +541,10 @@ String manipulation functions
 */
 
 /*!
+  \fn QString Qtopia::simplifyMultiLineSpace( const QString &multiLine )
+ 
   Returns the result of using QString::simplified() on \a multiLine, but with
-  linebreaks preserved.
+  line breaks preserved.
 */
 QString Qtopia::simplifyMultiLineSpace( const QString &multiLine )
 {
@@ -530,6 +559,8 @@ QString Qtopia::simplifyMultiLineSpace( const QString &multiLine )
 }
 
 /*!
+  \fn QString Qtopia::dehyphenate(const QString& s)
+ 
   Returns the string equivalent to \a s, but with any soft-hyphens removed.
 */
 QString Qtopia::dehyphenate(const QString& s)
@@ -552,7 +583,9 @@ QString Qtopia::dehyphenate(const QString& s)
 }
 
 /*!
-  System independant sleep. Suspend process for \a secs seconds.
+  \fn void Qtopia::sleep( unsigned long secs )
+ 
+  System independent sleep. Suspend process for \a secs seconds.
 
   \sa QThread::sleep()
  */
@@ -566,7 +599,9 @@ void Qtopia::sleep( unsigned long secs )
 }
 
 /*!
-  System independant sleep. Suspend process for \a msecs milliseconds.
+  \fn void Qtopia::msleep( unsigned long msecs )
+ 
+  System independent sleep. Suspend process for \a msecs milliseconds.
 
   \sa QThread::msleep()
  */
@@ -580,7 +615,9 @@ void Qtopia::msleep( unsigned long msecs )
 }
 
 /*!
-  System independant sleep. Suspend process for \a usecs microseconds.
+  \fn void Qtopia::usleep( unsigned long usecs )
+ 
+  System independent sleep. Suspend process for \a usecs microseconds.
 
   \sa QThread::usleep()
  */
@@ -598,6 +635,8 @@ void Qtopia::usleep( unsigned long usecs )
 #ifdef Q_WS_QWS
 
 /*!
+  \fn QString Qtopia::version()
+ 
   Returns the Qtopia version string. This is of the form:
   \i{major} .\i{minor} .\i{patchlevel}  (eg. "1.2.3"),
   possibly followed by a space and special information
@@ -609,6 +648,8 @@ QString Qtopia::version()
 }
 
 /*!
+  \fn QString Qtopia::architecture()
+ 
   Returns the device architecture string. This is a sequence
   of identifiers separated by "/", from most general to most
   specific (eg. "IBM/PC").
@@ -622,6 +663,8 @@ QString Qtopia::architecture()
 }
 
 /*!
+  \fn QString Qtopia::deviceId()
+ 
   Returns a unique ID for this device. The value can change, if
   for example, the device is reset.
 */
@@ -638,6 +681,8 @@ QString Qtopia::deviceId()
 }
 
 /*!
+  \fn QString Qtopia::ownerName()
+ 
   Returns the name of the owner of the device.
 */
 QString Qtopia::ownerName()
@@ -685,6 +730,8 @@ bool Qtopia::truncateFile(QFile &f, int size){
 #endif  // Q_OS_WIN32
 
 /*!
+  \fn QString Qtopia::tempDir()
+ 
   Returns the default system path for storing temporary files. The path is
   unique to the display to which the application is connected. The path has
   a trailing directory separator character.
@@ -695,27 +742,31 @@ bool Qtopia::truncateFile(QFile &f, int size){
  */
 QString Qtopia::tempDir()
 {
-    QString result;
+    static QString result;
 
+    if (result.isEmpty()) {
 #if defined(Q_OS_UNIX) && defined(Q_WS_QWS)
-    result = QString("/tmp/qtopia-%1/").arg(QString::number(qws_display_id));
+        result = QString("/tmp/qtopia-%1/").arg(QString::number(qws_display_id));
 #else
-    result = QDir::tempPath();
+        result = QDir::tempPath();
 #endif
 
-    QDir d( result );
-    if ( !d.exists() ) {
+        QDir d( result );
+        if ( !d.exists() ) {
 #ifndef Q_OS_WIN
-        mkdir(result.toLatin1(), 0700);
+            mkdir(result.toLatin1(), 0700);
 #else
-        d.mkdir(result);
+            d.mkdir(result);
 #endif
+        }
     }
 
     return result;
 }
 
 /*!
+  \fn QString Qtopia::tempName(const QString &fname)
+ 
   Returns a filename suitable for use as a temporary file using \a fname
   as a base. Currently returns the filename with "_new" inserted prior to
   the extension.
@@ -733,9 +784,12 @@ QString Qtopia::tempName(const QString &fname)
 }
 
 /*!
+  \fn QString Qtopia::applicationFileName(const QString& appname, const QString& filename)
+ 
   Returns the full path for the application called \a appname, with the
-  given \a filename. Returns QString() if there was a problem creating
-  the directory tree for \a appname.
+  given \a filename. The associated directory will be created if if does not exist yet.
+  It is a requirement that the user has write permissions for \l Qtopia::homePath().
+  
   If \a filename contains "/", it is the caller's responsibility to
   ensure that those directories exist.
 */
@@ -747,18 +801,24 @@ QString Qtopia::applicationFileName(const QString& appname, const QString& filen
     r += "/Applications/";
 #endif
     if ( !QFile::exists( r ) )
-    if ( d.mkdir(r) == false )
-        return QString();
+        if ( d.mkdir(r) == false ) {
+            qFatal( "Cannot write to %s", r.toLatin1().constData() );
+            return QString();
+        }
     r += appname;
     if ( !QFile::exists( r ) )
-        if ( d.mkdir(r) == false )
+        if ( d.mkdir(r) == false ) {
+            qFatal( "Cannot write to %s", r.toLatin1().constData() );
             return QString();
+        }
     r += "/"; r += filename;
 
     return r;
 }
 
 /*!
+  \fn bool Qtopia::isDocumentFileName(const QString& file)
+ 
   Returns true if \a file is the filename of a document.
 */
 bool Qtopia::isDocumentFileName(const QString& file)
@@ -775,7 +835,8 @@ bool Qtopia::isDocumentFileName(const QString& file)
     return false;
 }
 
-/*! \enum Qtopia::Lockflags
+/*! 
+\enum Qtopia::Lockflags
  This enum controls what type of locking is performed on a file.
 
  Current defined values are:
@@ -823,9 +884,9 @@ bool Qtopia::lockFile(QFile &f, int flags)
         else
             fileLock.l_type = F_RDLCK;
         if (flags & LockBlock)
-            lockCommand = F_SETLK;
-        else
             lockCommand = F_SETLKW; // block process if possible
+        else
+            lockCommand = F_SETLK;
     }
 
     if (::fcntl(f.handle(), lockCommand, &fileLock) != -1)
@@ -1067,6 +1128,52 @@ void Qtopia::setWeekStartsOnMonday(bool v)
     config.beginGroup( "Time" );
     config.setValue( "MONDAY", v );
 }
+
+
+
+static bool fontCanDisplayString(const QString &s, const QFont &f)
+{
+    QFontMetrics metrics(f);
+    for (int i=0; i<s.size(); i++) {
+        if (!metrics.inFont(s.at(i)))
+            return false;
+    }
+    return true;
+}
+
+/*!
+  Finds a font that can be used to display the string \a s and returns
+  a variant with this font value. If the string cannot be displayed by any of
+  Qtopia's installed fonts, an invalid variant is returned.
+
+  If \a s is empty, this returns a variant with the default font.
+*/
+QVariant Qtopia::findDisplayFont(const QString &s)
+{
+    QFont defaultFont;
+
+    if (s.isEmpty())
+        return QVariant(defaultFont);
+
+    // check the default font first
+    if (fontCanDisplayString(s, defaultFont)) 
+        return QVariant(defaultFont);
+
+    QString defaultFamily = defaultFont.family();
+    QFontDatabase fontDb;
+    QStringList families = fontDb.families();
+    for (int i=0; i<families.size(); i++) {
+        QString family = families.at(i);
+        QFont currentFont(family);
+        if (family != defaultFamily && fontCanDisplayString(s, currentFont)) {
+            // use this font 
+            return QVariant(currentFont);
+        }
+    }
+
+    return QVariant();
+}
+
 
 
 extern bool mkdirRecursive( QString path );

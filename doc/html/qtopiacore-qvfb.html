@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/emb-qvfb.qdoc -->
 <head>
   <title>Qt 4.2: Qtopia Core's Virtual Framebuffer</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -11,8 +12,9 @@
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Qtopia Core's Virtual Framebuffer<br /><small></small></h1>
-<p><a href="qtopiacore.html">Qtopia Core</a> applications write directly to the framebuffer, eliminating the need for the X Window System and saving memory. For development and debugging purposes, <a href="qtopiacore.html">Qtopia Core</a> provides a virtual framebuffer allowing <a href="qtopiacore.html">Qtopia Core</a> programs to be developed on a desktop machine, without switching between consoles and X11.</p>
-<p align="center"><img src="images/qtopiacore-virtualframebuffer.png" /></p><p>The virtual framebuffer emulates a framebuffer using a shared memory region and the <tt>qvfb</tt> tool to display the framebuffer in a window. The <tt>qvfb</tt> tool also supports a feature known as a skin which can be used to change the look and feel of the display. The tool is located in Qt's <tt>/tools/qvfb</tt> directory, and provides several additional features accessible through its <b>File</b> and <b>View</b> menus.</p>
+<p><a href="qtopiacore.html">Qtopia Core</a> applications write directly to the framebuffer, eliminating the need for the X Window System and saving memory. For development and debugging purposes, a virtual framebuffer can be used, allowing <a href="qtopiacore.html">Qtopia Core</a> programs to be developed on a desktop machine, without switching between consoles and X11.</p>
+<p>QVFb is an X11 application supplied with Qt/X11 that provides a virtual framebuffer for Qtopia Core to use. To use it, you need to <a href="install-x11.html">configure and install Qt/X11</a> according</p>
+<p align="center"><img src="images/qtopiacore-virtualframebuffer.png" /></p><p>The virtual framebuffer emulates a framebuffer using a shared memory region and the <tt>qvfb</tt> tool to display the framebuffer in a window. The <tt>qvfb</tt> tool also supports a feature known as a skin which can be used to change the look and feel of the display. The tool is located in Qt's <tt>tools/qvfb</tt> directory, and provides several additional features accessible through its <b>File</b> and <b>View</b> menus.</p>
 <p>Please note that the virtual framebuffer is a development tool only. No security issues have been considered in the virtual framebuffer design. It should be avoided in a production environment, i.e. do not configure production libraries with the <tt>-qvfb</tt> option.</p>
 <ul><li><a href="#displaying-the-virtual-framebuffer">Displaying the Virtual Framebuffer</a></li>
 <ul><li><a href="#skins">Skins</a></li>
@@ -147,6 +149,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

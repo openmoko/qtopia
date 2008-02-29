@@ -27,12 +27,11 @@
 #include <qvaluespace.h>
 #include <qtopialog.h>
 #include <qnetworkdevice.h>
+#include <QSignalSourceProvider>
+
+#include <QEventLoop>
 
 #include "wirelessscan.h"
-
-#include <sys/socket.h>
-#include <linux/wireless.h>
-
 
 /*!
   \internal
@@ -49,27 +48,34 @@
 RoamingMonitor::RoamingMonitor( QtopiaNetworkConfiguration* cfg, QObject* parent )
     :QObject( parent ), configIface( cfg ), activeHop( false )
 {
-#if WIRELESS_EXT > 13
-    scanner = 0;
+    scanner = new WirelessScan( QNetworkDevice(configIface->configFile()).interfaceName() );
+    connect( scanner, SIGNAL(scanningFinished()), this, SLOT(newScanResults()) );
     rescanTimer = new QTimer( this );
     connect( rescanTimer, SIGNAL(timeout()), this, SLOT(scanTimeout()) );
-    rescanTimer->start( 10000 );
 
     const int ident = qHash( configIface->configFile() );
     netSpace = new QValueSpaceItem( QString("/Network/Interfaces/%1/NetDevice").arg(ident), this );
     deviceName = netSpace->value().toString();
     connect( netSpace, SIGNAL(contentsChanged()), this, SLOT(deviceNameChanged()) );
+    //keep track of signal strength
+    signalProvider = new QSignalSourceProvider( "wlan", QString::number(qHash( configIface->configFile() )), this );
+#if WIRELESS_EXT > 11
+    signalProvider->setAvailability( QSignalSource::NotAvailable );
+    //polling is bad but there is no alternative to it right now.
+    signalTimer = new QTimer( this );
+    signalTimer->setInterval( 60000 ); 
+    connect( signalTimer, SIGNAL(timeout()), this, SLOT(updateSignalStrength()) );
+#else
+    //we need WE 11+ to detect signal strength
+    signalProvider->setAvailability( QSignalSource::Invalid );
 #endif
 }
 
 RoamingMonitor::~RoamingMonitor()
 {
-#if WIRELESS_EXT > 13
     if (scanner) {
         delete scanner;
-        scanner = 0;
     }
-#endif
 }
 
 /*!
@@ -80,6 +86,8 @@ RoamingMonitor::~RoamingMonitor()
 
   This function returns 0 if there is no network with name \a essid or none
   of the known networks is available/online.
+
+  This function performs an active scan and will block until the scan has completed.
 */
 int RoamingMonitor::selectWLAN( const QString& essid )
 {
@@ -120,6 +128,21 @@ int RoamingMonitor::selectWLAN( const QString& essid )
         //connect to first entry in list
         return 1; //there has to be at least one network ( numNets.toInt() > 0 )
     }
+
+    //do active scan and wait until we have new scan result
+    QEventLoop* loop = new QEventLoop();
+    if ( !scanner->isScanning() ) {
+        const bool hasStarted = scanner->startScanning();
+        if ( !hasStarted ) {
+            qLog(Network) << "Can not start scan. Attempting to start first configured network.";
+            return 1;
+            delete loop;
+        }
+    } // else { //already scanning}
+    connect( scanner, SIGNAL(scanningFinished()), loop, SLOT(quit()) );
+    loop->exec();
+    delete loop;
+    
     const QList<WirelessNetwork> results = scanner->results();
     if ( !results.count() ) {
         qLog(Network) << "Could not find any known WLAN that surrounds us";
@@ -159,6 +182,15 @@ int RoamingMonitor::selectWLAN( const QString& essid )
         }
     }
 
+    //we could have a case where the essid is hidden and we don't have 
+    //the MAC for the hidden network
+    if ( onlineEssids.contains("<hidden>") ) {
+        qLog(Network) << "Can not match any configured WLAN with environment. "
+                        "However there are hidden networks which might match anyway. "
+                        "Attempting to connect to first configured network.";
+        return 1;
+    }
+
 #else
     //we don't have a scanner and we haven't got a essid
     //just try to connect to the first wlan in list
@@ -173,18 +205,8 @@ void RoamingMonitor::scanTimeout()
 {
 #if WIRELESS_EXT > 13
     const bool autoConnect = configIface->property("WirelessNetworks/AutoConnect").toBool();
-    const int interval = configIface->property("WirelessNetworks/Timeout").toInt()*1000;
-
-    if ( !autoConnect ) {
-        if ( scanner ) {
-            delete scanner;
-            scanner = 0;
-        }
+    if ( !autoConnect ) 
         return;
-    }
-
-    if ( rescanTimer->interval() != interval )
-        rescanTimer->start( interval );
 
     //the scanner is attached to certain interface name. if the interface name changes
     //we have to reset the scanner
@@ -264,6 +286,15 @@ void RoamingMonitor::newScanResults()
 #endif
 }
 
+void RoamingMonitor::updateSignalStrength()
+{
+#if WIRELESS_EXT > 11
+    if ( scanner ) {
+        signalProvider->setSignalStrength( scanner->currentSignalStrength() );
+    }
+#endif
+}
+
 void RoamingMonitor::deviceNameChanged()
 {
 #if WIRELESS_EXT > 13
@@ -273,20 +304,41 @@ void RoamingMonitor::deviceNameChanged()
 
 QString RoamingMonitor::currentEssid() const
 {
+#if WIRELESS_EXT > 13
     if ( scanner )
         return scanner->currentESSID();
+#endif
     return QString();
 }
 
 QString RoamingMonitor::currentMAC() const
 {
+#if WIRELESS_EXT > 13
     if ( scanner )
         scanner->currentAccessPoint();
+#endif
     return QString();
 }
 
 void RoamingMonitor::activeNotification( bool enabled )
 {
     activeHop = enabled;
+    const bool autoConnect = configIface->property("WirelessNetworks/AutoConnect").toBool();
+    if ( activeHop ) {
+#if WIRELESS_EXT > 11
+        signalTimer->start();
+        signalProvider->setAvailability( QSignalSource::Available );
+        updateSignalStrength();
+#endif
+        const int interval = configIface->property("WirelessNetworks/Timeout").toInt()*1000;
+        if ( autoConnect )
+            rescanTimer->start( interval );
+    } else {
+#if WIRELESS_EXT > 11
+        signalTimer->stop();
+        signalProvider->setAvailability( QSignalSource::NotAvailable );
+#endif
+        rescanTimer->stop();
+    }
 }
 #endif // NO_WIRELESS_LAN

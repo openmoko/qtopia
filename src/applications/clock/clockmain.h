@@ -28,7 +28,6 @@ class Clock;
 class StopWatch;
 class Alarm;
 class QTabWidget;
-class QStackedWidget;
 class QMenu;
 class QAction;
 
@@ -41,8 +40,6 @@ public:
 
 private slots:
     void appMessage(const QString& msg, const QByteArray& data);
-    void raisePage(QAction *);
-    void pageRaised(int);
 
 public slots:
     void showClock();
@@ -55,16 +52,11 @@ protected:
 
 private:
     QTabWidget *tabWidget;
-    QStackedWidget *stack;
+
     Clock *clock;
     StopWatch *stopWatch;
     Alarm *alarm;
-#ifdef QTOPIA_PHONE
     QMenu *contextMenu;
-    QAction *actionClock;
-    QAction *actionStopWatch;
-    QAction *actionAlarm;
-#endif
 
     int clockIndex;
     int stopwatchIndex;

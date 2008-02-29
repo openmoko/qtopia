@@ -39,9 +39,6 @@ public:
     explicit QAppointmentIO(QObject *parent);
     virtual ~QAppointmentIO();
 
-    virtual void setCategoryFilter(const QCategoryFilter &) = 0;
-    virtual QCategoryFilter categoryFilter() const = 0;
-
     virtual void setRangeFilter(const QDateTime &earliest, const QDateTime &latest) = 0;
 
     virtual void setDurationType(QAppointmentModel::DurationType) = 0;
@@ -72,23 +69,23 @@ db systems do and refer to just one id for a series of split events.
     virtual bool removeOccurrence(const QUniqueId &original,
             const QDate &) = 0;
     virtual QUniqueId replaceOccurrence(const QUniqueId &original,
-            const QOccurrence &) = 0;
+            const QOccurrence &, const QDate&) = 0;
     /* modify remaining */
     virtual QUniqueId replaceRemaining(const QUniqueId &original,
-            const QAppointment &) = 0;
+            const QAppointment &, const QDate&) = 0;
 
 signals:
     void alarmTriggered(const QDateTime &when, const QUniqueId &);
 
 public slots:
-    virtual void checkAdded(const QAppointment &);
+    virtual void checkAdded(const QUniqueId &);
     virtual void checkRemoved(const QUniqueId &);
     virtual void checkRemoved(const QList<QUniqueId> &);
-    virtual void checkUpdated(const QAppointment &);
+    virtual void checkUpdated(const QUniqueId &);
 
 protected:
-    void notifyAdded(const QAppointment &);
-    void notifyUpdated(const QAppointment &);
+    void notifyAdded(const QUniqueId &);
+    void notifyUpdated(const QUniqueId &);
     void notifyRemoved(const QUniqueId &);
     void notifyRemoved(const QList<QUniqueId> &);
 

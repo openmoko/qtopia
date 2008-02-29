@@ -34,6 +34,7 @@ for(it,QTOPIA_DEPENDS) {
         file=$$root/$$it/$$tail($$it).pro
         echo(Trying $$file)
         exists($$file) {
+            profile=$$tail($$file)
             echo(Using $$file)
             found=1
             cmds=$$fromfile($$file,$$DEP_VAR)
@@ -47,6 +48,9 @@ for(it,QTOPIA_DEPENDS) {
                     c~=s/^"//
                     c~=s/"$//
                 }
+                # License info comes through with __SELF__ (because there's no way to check what
+                # $$self would be from the other side) so we need to replace __SELF__ with $$profile
+                c~=s/__SELF__/$$profile/qg
                 echo(dep: $$c)
                 eval($$c)
                 # Handle any nowarn dependencies

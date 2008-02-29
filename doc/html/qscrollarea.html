@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qscrollarea.cpp -->
 <head>
   <title>Qt 4.2: QScrollArea Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -48,7 +49,7 @@
 <li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -86,8 +87,8 @@
 <p>You can retrieve the child widget using the <a href="qscrollarea.html#widget">widget</a>() function. The view can be made to be resizable with the <a href="qscrollarea.html#widgetResizable-prop">setWidgetResizable</a>() function. The alignment of the widget can be specified with <a href="qscrollarea.html#alignment-prop">setAlignment</a>().</p>
 <p>When using a scroll area to display the contents of a custom widget, it is important to ensure that the <a href="qwidget.html#sizeHint-prop">size hint</a> of the child widget is set to a suitable value. If a standard <a href="qwidget.html">QWidget</a> is used for the child widget, it may be necessary to call <a href="qwidget.html#minimumSize-prop">QWidget::setMinimumSize</a>() to ensure that the contents of the widget are shown correctly within the scroll area.</p>
 <p>Two convenience functions <a href="qscrollarea.html#ensureVisible">ensureVisible</a>() and <a href="qscrollarea.html#ensureWidgetVisible">ensureWidgetVisible</a>() ensure a certain region of the contents is visible inside the viewport, by scrolling the contents if necessary.</p>
-<p>For a complete example using the QScrollArea class, see the Image Viewer example. The example shows how to combine <a href="qlabel.html">QLabel</a> and QScrollArea to display an image.</p>
-<p>See also <a href="qabstractscrollarea.html">QAbstractScrollArea</a>, <a href="qscrollbar.html">QScrollBar</a>, and Image Viewer Example.</p>
+<p>For a complete example using the QScrollArea class, see the <a href="widgets-imageviewer.html">Image Viewer</a> example. The example shows how to combine <a href="qlabel.html">QLabel</a> and QScrollArea to display an image.</p>
+<p>See also <a href="qabstractscrollarea.html">QAbstractScrollArea</a>, <a href="qscrollbar.html">QScrollBar</a>, and <a href="widgets-imageviewer.html">Image Viewer Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="alignment-prop"></a>alignment : <a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a></h3>
@@ -135,6 +136,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

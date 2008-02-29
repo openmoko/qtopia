@@ -62,7 +62,6 @@ export QTDIR=$QPEDIR
 export QTOPIA_PATH=/opt/Qtopia.user:/tmp/qpk_sd:/tmp/qpk_local
 export PATH=$QPEDIR/bin:/opt/Qtopia/bin:$QTOPIA_TOOLS:$PATH
 export LD_LIBRARY_PATH=$QPEDIR/lib:/opt/Qtopia/lib
-export SXE_DISCOVERY_MODE=1
 export TZDIR=/opt/Qtopia.user/etc/zoneinfo
 
 if [ -e $QTOPIA_IMAGE/qtopia.cramfs ] ; then

@@ -36,7 +36,6 @@ public:
                     const QByteArray &devId,
                     QObject *parent = 0);
     ~BtPowerService();
-    void initialize();
 
     virtual void bringUp();
     virtual void bringDown();

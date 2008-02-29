@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +48,21 @@ static const int QTEXTSTREAM_BUFFERSIZE = 16384;
             // writes "Result: 3.14      2.7       \n"
         }
     \endcode
+
+    It's also common to use QTextStream to read console input and write
+    console output. QTextStream is locale aware, and will automatically decode
+    standard input using the correct codec. Example:
+
+    \code
+        QTextStream stream(stdin);
+        QString line;
+        do {
+            line = stream.readLine();
+        } while (!line.isNull());
+    \endcode
+
+    Note that you cannot use QTextStream::atEnd(), which returns true when you
+    have reached the end of the data stream, with stdin.
 
     Besides using QTextStream's constructors, you can also set the
     device or string QTextStream operates on by calling setDevice() or
@@ -75,6 +100,12 @@ static const int QTEXTSTREAM_BUFFERSIZE = 16384;
     semantics. To skip white space, call skipWhiteSpace().
 
     \endlist
+
+    Since the text stream uses a buffer, you should not read from
+    the stream using the implementation of a superclass. For instance,
+    if you have a QFile and read from it directly using
+    QFile::readLine() instead of using the stream, the text stream's
+    internal position will be out of sync with the file's position.
 
     By default, when reading numbers from a stream of text,
     QTextStream will automatically detect the number's base
@@ -476,27 +507,6 @@ bool QTextStreamPrivate::fillReadBuffer(qint64 maxBytes)
     if (textModeEnabled)
         device->setTextModeEnabled(false);
 
-#ifndef QT_NO_TEXTCODEC
-    // codec auto detection, explicitly defaults to locale encoding if
-    // the codec has been set to 0.
-    if (!codec || autoDetectUnicode) {
-        autoDetectUnicode = false;
-
-        char bomBuffer[2];
-        if (device->peek(bomBuffer, 2) == 2 && (uchar(bomBuffer[0]) == 0xff && uchar(bomBuffer[1]) == 0xfe
-                                                || uchar(bomBuffer[0]) == 0xfe && uchar(bomBuffer[1]) == 0xff)) {
-            codec = QTextCodec::codecForName("UTF-16");
-        } else if (!codec) {
-            codec = QTextCodec::codecForLocale();
-            writeConverterState.flags |= QTextCodec::IgnoreHeader;
-        }
-    }
-#if defined (QTEXTSTREAM_DEBUG)
-    qDebug("QTextStreamPrivate::fillReadBuffer(), using %s codec",
-           codec->name().constData());
-#endif
-#endif
-
     // read raw data into a temporary buffer
     char buf[QTEXTSTREAM_BUFFERSIZE];
     qint64 bytesRead = 0;
@@ -523,6 +533,26 @@ bool QTextStreamPrivate::fillReadBuffer(qint64 maxBytes)
         else
             bytesRead = device->read(buf, sizeof(buf));
     }
+
+#ifndef QT_NO_TEXTCODEC
+    // codec auto detection, explicitly defaults to locale encoding if the
+    // codec has been set to 0.
+    if (!codec || autoDetectUnicode) {
+        autoDetectUnicode = false;
+        
+        if (bytesRead >= 2 && (uchar(buf[0]) == 0xff && uchar(buf[1]) == 0xfe
+                               || uchar(buf[0]) == 0xfe && uchar(buf[1]) == 0xff)) {
+            codec = QTextCodec::codecForName("UTF-16");
+        } else if (!codec) {
+            codec = QTextCodec::codecForLocale();
+            writeConverterState.flags |= QTextCodec::IgnoreHeader;
+        }
+    }
+#if defined (QTEXTSTREAM_DEBUG)
+    qDebug("QTextStreamPrivate::fillReadBuffer(), using %s codec",
+           codec->name().constData());
+#endif
+#endif
 
 #if defined (QTEXTSTREAM_DEBUG)
     qDebug("QTextStreamPrivate::fillReadBuffer(), device->read(\"%s\", %d) == %d",
@@ -1106,9 +1136,10 @@ bool QTextStream::seek(qint64 pos)
     stream, or -1 if an error occurs (e.g., if there is no device or string,
     or if there's a device error).
 
-    Because QTextStream is buffered, this function may have to rewind the
-    device to reconstruct a valid device position. This operation can be
-    expensive, so you may want to avoid calling this function in a tight loop.
+    Because QTextStream is buffered, this function may have to
+    seek the device to reconstruct a valid device position. This
+    operation can be expensive, so you may want to avoid calling this
+    function in a tight loop.
 
     \sa seek()
 */
@@ -1170,7 +1201,7 @@ qint64 QTextStream::pos() const
     Whitespace characters are all characters for which
     QChar::isSpace() returns true.
 
-    \sa operator>>(QChar &), operator>>(char &)
+    \sa operator>>()
 */
 void QTextStream::skipWhiteSpace()
 {
@@ -1537,11 +1568,11 @@ QString QTextStream::readAll()
     The returned line has no trailing end-of-line characters ("\\n"
     or "\\r\\n"), so calling QString::trimmed() is unnecessary.
 
-    If the stream has read to the end of the file, the returned string
-    will be an empty string. You can explicitly test for the end of the
-    file using atEnd().
+    If the stream has read to the end of the file, readLine() will return a
+    null QString. For strings, or for devices that support it, you can
+    explicitly test for the end of the stream using atEnd().
 
-    \sa readAll()
+    \sa readAll(), QIODevice::readLine()
 */
 QString QTextStream::readLine(qint64 maxlen)
 {

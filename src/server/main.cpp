@@ -20,7 +20,6 @@
 ****************************************************************************/
 
 #include "pda/taskbar.h"
-#include "stabmon.h"
 #include "qabstractserverinterface.h"
 
 #ifdef QTOPIA_PDA
@@ -78,48 +77,8 @@ QSXE_APP_KEY
 #include <QKeyEvent>
 #include <ThemedView>
 
-#ifdef QPE_OWNAPM
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <linux/ioctl.h>
-
 // Not currently supported, available for demonstration purposes.
 //#define QTOPIA_ANIMATED_SPLASH
-
-static void disableAPM()
-{
-
-    int fd, cur_val, ret;
-    char *device = "/dev/apm_bios";
-
-    fd = open (device, O_WRONLY);
-
-    if (fd ==  -1) {
-      perror(device);
-      return;
-    }
-
-    cur_val = ioctl(fd, APM_IOCGEVTSRC, 0);
-    if (cur_val == -1) {
-      perror("ioctl");
-      exit(errno);
-    }
-
-    ret = ioctl(fd, APM_IOCSEVTSRC, cur_val & ~APM_EVT_POWER_BUTTON);
-    if (ret == -1) {
-        perror("ioctl");
-        return;
-    }
-    close(fd);
-}
-
-static void initAPM()
-{
-    // So that we have to do it ourselves, but better.
-    disableAPM();
-}
-#endif
 
 static void refreshTimeZoneConfig()
 {
@@ -422,10 +381,6 @@ int initApplication( int argc, char ** argv )
     if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "prestartup"))
         qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
-#ifdef QPE_OWNAPM
-    initAPM();
-#endif
-
     refreshTimeZoneConfig();
     qLog(Performance) << "QtopiaServer : " << "Refresh time zone information : "
                       << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
@@ -451,7 +406,9 @@ int initApplication( int argc, char ** argv )
             delete bootCharger;
         }
     }
-    ::system( "touch " + warmBootFile );
+    QFile warmBootMarker(warmBootFile);
+    warmBootMarker.open( QIODevice::Append | QIODevice::Truncate );
+    warmBootMarker.close();
 
 #if defined(QTOPIA_ANIMATED_SPLASH)
     SplashScreen *splash = new SplashScreen;
@@ -572,7 +529,9 @@ int main( int argc, char ** argv )
     signal( SIGCHLD, SIG_IGN );
 
     const QByteArray restartFile = "/tmp/restart-qtopia";
-    ::system( "touch " + restartFile );
+    QFile restartMarker(restartFile);
+    restartMarker.open( QIODevice::Append | QIODevice::Truncate );
+    restartMarker.close();
 
     int retVal = initApplication( argc, argv );
 

@@ -23,6 +23,12 @@
 
 #ifndef NO_WIRELESS_LAN
 
+#include <errno.h>
+#include <math.h>
+#include <net/ethernet.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
 #ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <QAction>
 #endif
@@ -44,12 +50,16 @@
 #endif
 #include <qnetworkdevice.h>
 
-#include <errno.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
+
+//some wlan driver return "<hidden>" when the essid is hidden other drivers
+//just return an empty string. Qtopia assumes that a hidden essid is called "<hidden>"
+//change this function if there is yet another way of indicating the essid is hidden.
+static QString convertToHidden( const QString& essid )
+{
+    if ( essid.isEmpty() )
+        return QString("<hidden>");
+    return essid;
+}
 
 WirelessScan::WirelessScan( const QString& ifaceName, QObject* parent )
     : QObject( parent ), iface( ifaceName ), sockfd( -1 )
@@ -76,7 +86,7 @@ WirelessScan::~WirelessScan()
     simplicity this function does not return a valid range parameter if  \a weVersion < 16.
     You must check \a weVersion before \a range is used.
 */
-void WirelessScan::rangeInfo(iw_range* range, int* weVersion)
+void WirelessScan::rangeInfo(iw_range* range, int* weVersion) const
 {
     *weVersion = 0;
     int socket = ::socket( AF_INET, SOCK_DGRAM, 0 );
@@ -210,7 +220,46 @@ QString WirelessScan::currentESSID() const
         result = buffer;
     }
     ::close( fd );
+    
+    //some wlan driver return "<hidden>" when the essid is hidden other drivers
+    //just return an empty string. Qtopia assumes that a hidden essid is called "<hidden>"
+    result = convertToHidden( result );
     return result;
+}
+
+void WirelessScan::ensureScanESSID()
+{
+    QString currEssid = currentESSID();
+    if ( currEssid.isEmpty() )
+    {
+        //qLog(Network) << "Setting preliminary ESSID for scan";
+        char scanEssid[IW_ESSID_MAX_SIZE+1];
+        scanEssid[0]='\0';
+
+        struct iwreq rq;
+        rq.u.essid.flags = 0;
+        rq.u.essid.pointer = (caddr_t) scanEssid;
+        rq.u.essid.length = strlen( scanEssid );
+
+        struct iw_range range;
+        int weVersion;
+        rangeInfo( &range, &weVersion );
+        if ( weVersion <= 20 )
+            rq.u.essid.length++;
+
+        strncpy( rq.ifr_name, iface.toLatin1().constData(), IFNAMSIZ );
+        int fd = socket( AF_INET, SOCK_DGRAM, 0 );
+        if ( fd < 0 ) {
+            qWarning( "Cannot open socket for set essid: %s", strerror( errno ) );
+            return;
+        }
+        int retCode = ioctl( fd, SIOCSIWESSID, &rq );
+        if ( retCode < 0 ) {
+            qWarning( "Cannot set essid for scanning: %s %d", strerror( errno ), retCode );
+        }
+
+        ::close( fd );
+    }
 }
 
 const QList<WirelessNetwork> WirelessScan::results() const
@@ -242,6 +291,10 @@ bool WirelessScan::startScanning()
     }
 
     qLog(Network) << "Scanning for wireless networks...";
+
+    //some wlan drivers require an initial set essid before they work
+    ensureScanESSID();
+    
     //open socket
     sockfd = socket( AF_INET, SOCK_DGRAM, 0 );
     if ( sockfd < 0 )
@@ -272,7 +325,6 @@ bool WirelessScan::startScanning()
 void WirelessScan::checkResults()
 {
     unsigned char* buffer = 0;
-    int blength = IW_SCAN_MAX_DATA;
     struct iwreq wrq;
 
     struct iw_range range;
@@ -282,6 +334,7 @@ void WirelessScan::checkResults()
         return; //no scan support if WE version <14
 
 #if WIRELESS_EXT > 13
+    int blength = IW_SCAN_MAX_DATA;
     do {
         //we may have to allocate more memory later on
         unsigned char* temp = (unsigned char *)realloc( buffer, blength );
@@ -330,6 +383,9 @@ void WirelessScan::checkResults()
     ::close( sockfd );
     sockfd = -1;
     emit scanningFinished();
+#else
+    Q_UNUSED(buffer);
+    Q_UNUSED(wrq);
 #endif
 }
 
@@ -358,6 +414,56 @@ static const char* operationMode[] =
 #ifndef IW_QUAL_NOISE_INVALID
 #define IW_QUAL_NOISE_INVALID   0x40
 #endif
+
+/*!
+  Returns the signal quality as a percentage of the maximum quality.
+  This function returns -1 if the signal strength cannot be determined.
+  */
+int WirelessScan::currentSignalStrength() const
+{
+#if WIRELESS_EXT > 11
+    struct iwreq rq;
+    struct iw_statistics iwstats;
+    
+    rq.u.essid.flags = 0;
+    rq.u.essid.pointer = (caddr_t) (&iwstats);
+    rq.u.essid.length = sizeof( struct iw_statistics );
+    strncpy( rq.ifr_name, iface.toLatin1().constData(), IFNAMSIZ );
+
+    int fd = socket( AF_INET, SOCK_DGRAM, 0 );
+    if ( fd < 0 ) {
+        qLog(Network) << "Cannot open signal strength socket" << strerror(errno);
+        return -1;
+    }
+
+    int retCode = ioctl( fd, SIOCGIWSTATS, &rq );
+    if ( retCode < 0 ) {
+        qLog(Network) << "Cannot obtain wireless statistics" << strerror(errno);
+        ::close( fd );
+        return -1;
+    }
+    
+    ::close( fd );
+    
+    //we need the range to determine the upper boundaries 
+    struct iw_range range;
+    int weVersion;
+    rangeInfo( &range, &weVersion );
+
+    if ( !(iwstats.qual.updated & IW_QUAL_QUAL_INVALID) ) {
+        return (int) (iwstats.qual.qual*100/range.max_qual.qual);
+    } else {
+        return -1;
+    }
+    
+    
+#else
+    //read from /proc/net/wireless?
+    qLog(Network) << "Cannot determine signal quality (need WE version 12 or more)";
+    return -1;
+#endif
+}
+
 
 void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_range* range )
 {
@@ -469,6 +575,9 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
                             memcpy( essid, payload, iwevent.u.essid.length );
                             essid[iwevent.u.essid.length] = '\0';
                             ssid = QString(essid);
+                            //some wlan driver return "<hidden>" when the essid is hidden other drivers
+                            //just return an empty string. Qtopia assumes that a hidden essid is called "<hidden>"
+                            ssid = convertToHidden( ssid );
                             //qLog(Network) << "Discovered network on" << iface << ": " << ssid;
                         } else {
                             ssid = tr("off");
@@ -549,18 +658,21 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
                 if ( weVersion > 15 ) {
                     memcpy( iwp, value, IW_EV_QUAL_LEN-IW_EV_LCP_LEN );
                     struct iw_quality* qual = &iwevent.u.qual;
+                    //the quality is always a relative value
+                    if ( !(qual->updated & IW_QUAL_QUAL_INVALID) ) {
+                        net.setData( WirelessNetwork::Quality,
+                                QString().setNum( ((double) qual->qual)/((int)range->max_qual.qual), 'f', 2 ) );
+
+                    }
 
                     //the quality field is 8 bit integer
                     //we need range to work out whether we have dbm or percent value
                     //by comparing quality.qual with range->max_qual.value
                     //Percent -> use iw_quality.qual as signed integer ( iw_quality.qual < range->max_qual.value )
                     //dbm -> use iw_quality.qual as negative integer ( iw_quality.qual > range->max_qual.value )
+                    
+
                     if ( qual->level <= range->max_qual.level ){
-                        if ( !(qual->updated & IW_QUAL_QUAL_INVALID) ) {
-                            int range_max = qMax( (int)range->max_qual.qual, 255 );
-                            net.setData( WirelessNetwork::Quality,
-                                    QString().setNum( ((double) qual->qual)/range_max, 'f', 2 ) );
-                        }
                         //we have relative signal level
                         if ( !(qual->updated & IW_QUAL_LEVEL_INVALID) ) {
                             int range_max = qMax( (int)range->max_qual.level, 255 );
@@ -573,12 +685,6 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
                                     QString().setNum( ((double)qual->noise) / range_max, 'f', 2));
                         }
                     } else {
-                        //we have dbm signal level
-                        if ( !(qual->updated & IW_QUAL_QUAL_INVALID) ) {
-                            int range_max = qMax( (int)range->max_qual.qual, 255 );
-                            net.setData( WirelessNetwork::Quality,
-                                    QString().setNum( ((double) qual->qual - 0x100)/range_max, 'f', 2 ) );
-                        }
                         if ( !(qual->updated & IW_QUAL_LEVEL_INVALID) ) {
                             int range_max = qMax( (int)range->max_qual.level, 255 );
                             net.setData( WirelessNetwork::Signal,
@@ -637,6 +743,14 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
     foreach(WirelessNetwork n, entries )
         qLog(Network) << "#### Found" << n.data(WirelessNetwork::ESSID) << n.data(WirelessNetwork::AP) << n.data(WirelessNetwork::Security).toString();
     }
+#else
+    Q_UNUSED(data);
+    Q_UNUSED(length);
+    Q_UNUSED(weVersion);
+    Q_UNUSED(range);
+    Q_UNUSED(data);
+    Q_UNUSED(operationMode);
+
 #endif
 }
 
@@ -1512,4 +1626,4 @@ void ChooseNetworkUI::wlanSelected()
 }
 #include "wirelessscan.moc"
 
-#endif
+#endif //NO_WIRELESS_LAN

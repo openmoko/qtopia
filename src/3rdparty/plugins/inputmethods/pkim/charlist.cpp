@@ -26,16 +26,21 @@ CharList::~CharList()
 
 void CharList::setMicroFocus( int x, int y )
 {
+// TODO: these hardcoded values should be derived from something 
+// e.g. p.setX(4) could potentially use fm->minLeftBearing() 
+// (although this function can be expensive)
+
     QPoint p;
-    if (y < 30 + appFont.pointSize() + height() + 5)
-	p = QPoint(x, y+2);
+    if (y < cellHeight+5)
+        p = QPoint(x, y + cellHeight + fm->height() + 5);
     else
-	p = QPoint(x, y-appFont.pointSize()-4-height());
+        p = QPoint(x, y+2);
 
     int dw = QApplication::desktop()->availableGeometry().width();
     if (p.x() + width() > dw)
 	p.setX(dw-width());
-
+    else if (p.x() < 4)         p.setX(4);
+    
     move(p);
 }
 
@@ -59,7 +64,7 @@ void CharList::setCurrent(const QString &ch)
     update();
 }
 
-void CharList::paintEvent(QPaintEvent *)
+void CharList::paintEvent(QPaintEvent *e)
 {
     QPainter p(this);
     p.setBrush(Qt::NoBrush);

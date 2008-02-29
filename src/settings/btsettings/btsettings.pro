@@ -22,6 +22,7 @@ SOURCES		= mainwindow.cpp \
               main.cpp 
 
 depends(libraries/qtopiacomm)
+depends(libraries/qtopiabase)
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/btsettings.desktop
 desktop.path=/apps/Settings

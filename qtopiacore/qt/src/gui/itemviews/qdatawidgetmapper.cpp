@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -216,7 +226,7 @@ void QDataWidgetMapperPrivate::_q_modelDestroyed()
     Let us assume that we have an item model named \c{model} with the following contents:
 
     \table
-    \row \o 1 \o TROLLTECH ASA    \o Oslo
+    \row \o 1 \o Trolltech ASA    \o Oslo
     \row \o 2 \o Trolltech Pty   \o Brisbane
     \row \o 3 \o Trolltech Inc   \o Palo Alto
     \row \o 4 \o Trolltech China \o Beijing
@@ -236,7 +246,7 @@ void QDataWidgetMapperPrivate::_q_modelDestroyed()
     \endcode
 
     After the call to toFirst(), \c mySpinBox displays the value \c{1}, \c myLineEdit
-    displays \c {TROLLTECH ASA} and \c myCountryChooser displays \c{Oslo}. The
+    displays \c {Trolltech ASA} and \c myCountryChooser displays \c{Oslo}. The
     navigational functions toFirst(), toNext(), toPrevious(), toLast() and setCurrentIndex()
     can be used to navigate in the model and update the widgets with contents from
     the model.
@@ -397,7 +407,7 @@ void QDataWidgetMapper::setRootIndex(const QModelIndex &index)
 QModelIndex QDataWidgetMapper::rootIndex() const
 {
     Q_D(const QDataWidgetMapper);
-    return d->rootIndex;
+    return QModelIndex(d->rootIndex);
 }
 
 /*!
@@ -406,10 +416,10 @@ QModelIndex QDataWidgetMapper::rootIndex() const
     horizontal (the default), otherwise a row.
 
     For the following example, we assume a model \c myModel that
-    has two columns, the first one containing the name of a person,
-    the second column his age. The first column is mapped to the
-    QLineEdit \c nameLineEdit and the second to the QSpinBox
-    \c{ageSpinBox}:
+    has two columns: the first one contains the names of people in a
+    group, and the second column contains their ages. The first column
+    is mapped to the QLineEdit \c nameLineEdit, and the second is
+    mapped to the QSpinBox \c{ageSpinBox}:
 
     \code
     QDataWidgetMapper *mapper = new QDataWidgetMapper();
@@ -418,9 +428,14 @@ QModelIndex QDataWidgetMapper::rootIndex() const
     mapper->addMapping(ageSpinBox, 1);
     \endcode
 
-    Note: If the \a widget is already mapped to a section, the
-    old mapping will be replaced by the new one. A widget can never
-    be mapped to more than one section at a time.
+    \bold{Notes:}
+    \list
+    \o If the \a widget is already mapped to a section, the
+    old mapping will be replaced by the new one.
+    \o Only one-to-one mappings between sections and widgets are allowed.
+    It is not possible to map a single section to multiple widgets, or to
+    map a single widget to multiple sections.
+    \endlist
 
     \sa removeMapping(), mappedSection(), clearMapping()
  */
@@ -683,7 +698,7 @@ void QDataWidgetMapper::clearMapping()
     Use Qt::Horizontal for tabular data that looks like this:
 
     \table
-    \row \o 1 \o TROLLTECH ASA     \o Oslo
+    \row \o 1 \o Trolltech ASA     \o Oslo
     \row \o 2 \o Trolltech Pty   \o Brisbane
     \row \o 3 \o Trolltech Inc   \o Silicon Valley
     \row \o 4 \o Trolltech China \o Beijing
@@ -699,7 +714,7 @@ void QDataWidgetMapper::clearMapping()
 
     \table
     \row \o 1 \o 2 \o 3 \o 4 \o 5
-    \row \o TROLLTECH ASA \o Trolltech Pty \o Trolltech Inc \o Trolltech China \o Trolltech GmbH
+    \row \o Trolltech ASA \o Trolltech Pty \o Trolltech Inc \o Trolltech China \o Trolltech GmbH
     \row \o Oslo \o Brisbane \o Silicon Valley \o Beijing \i Berlin
     \endtable
 

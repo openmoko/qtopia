@@ -89,7 +89,8 @@ public:
 /*!
     \class QSerialPort
     \brief The QSerialPort class provides a simple serial device interface.
-    \ingroup communication
+    \ingroup io
+    \ingroup telephony::serial
 
     This class manages a very simple serial device, which is accessed
     at a specific baud rate with no parity, 8 data bits, and 1 stop bit.

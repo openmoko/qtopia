@@ -59,9 +59,9 @@ bool QAppointmentIO::setAppointmentField(int row, QAppointmentModel::Field k,  c
     return false;
 }
 
-void QAppointmentIO::checkAdded(const QAppointment &appointment)
+void QAppointmentIO::checkAdded(const QUniqueId &id)
 {
-    Q_UNUSED(appointment);
+    Q_UNUSED(id);
     emit recordsUpdated();
 }
 
@@ -77,47 +77,47 @@ void QAppointmentIO::checkRemoved(const QList<QUniqueId> &ids)
     emit recordsUpdated();
 }
 
-void QAppointmentIO::checkUpdated(const QAppointment &appointment)
+void QAppointmentIO::checkUpdated(const QUniqueId &id)
 {
-    Q_UNUSED(appointment);
+    Q_UNUSED(id);
     emit recordsUpdated();
 }
 
 
-void QAppointmentIO::notifyAdded(const QAppointment &appointment)
+void QAppointmentIO::notifyAdded(const QUniqueId &id)
 {
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "addedAppointment(int,QUuid,QAppointment)");
+        QtopiaIpcEnvelope e("QPE/PIM", "addedAppointment(int,QUuid,QUniqueId)");
         e << getpid();
         e << contextId();
-        e << appointment;
+        e << id;
     }
 
     foreach(QAppointmentIO *c, activeAppointments) {
         if (c != this && c->contextId() == contextId())
-            c->checkAdded(appointment);
+            c->checkAdded(id);
     }
 }
 
-void QAppointmentIO::notifyUpdated(const QAppointment &appointment)
+void QAppointmentIO::notifyUpdated(const QUniqueId &id)
 {
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "updatedAppointment(int,QUuid,QAppointment)");
+        QtopiaIpcEnvelope e("QPE/PIM", "updatedAppointment(int,QUuid,QUniqueId)");
         e << getpid();
         e << contextId();
-        e << appointment;
+        e << id;
     }
 
     foreach(QAppointmentIO *c, activeAppointments) {
         if (c != this && c->contextId() == contextId())
-            c->checkUpdated(appointment);
+            c->checkUpdated(id);
     }
 }
 
 void QAppointmentIO::notifyRemoved(const QUniqueId &id)
 {
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "removedAppointment(int,QUuid,QAppointment)");
+        QtopiaIpcEnvelope e("QPE/PIM", "removedAppointment(int,QUuid,QUniqueId)");
         e << getpid();
         e << contextId();
         e << id;
@@ -132,7 +132,7 @@ void QAppointmentIO::notifyRemoved(const QUniqueId &id)
 void QAppointmentIO::notifyRemoved(const QList<QUniqueId> &ids)
 {
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "removedAppointments(int,QUuid,QAppointment)");
+        QtopiaIpcEnvelope e("QPE/PIM", "removedAppointments(int,QUuid,QList<QUniqueId>)");
         e << getpid();
         e << contextId();
         e << ids;
@@ -191,13 +191,13 @@ void QAppointmentIO::addAlarm(const QAppointment &appointment)
 void QAppointmentIO::pimMessage(const QString &message, const QByteArray &data)
 {
     QDataStream ds(data);
-    if (message == "addedAppointment(int,QUuid,QAppointment)") {
+    if (message == "addedAppointment(int,QUuid,QUniqueId)") {
         int pid;
         QUuid u;
         ds >> pid;
         ds >> u;
         if (pid != getpid() && u == contextId()) {
-            QAppointment appointment;
+            QUniqueId appointment;
             ds >> appointment;
             checkAdded(appointment);
         }
@@ -221,13 +221,13 @@ void QAppointmentIO::pimMessage(const QString &message, const QByteArray &data)
             ds >> ids;
             checkRemoved(ids);
         }
-    } else if (message == "updatedAppointment(int,QUuid,QAppointment)") {
+    } else if (message == "updatedAppointment(int,QUuid,QUniqueId)") {
         int pid;
         QUuid u;
         ds >> pid;
         ds >> u;
         if (pid != getpid() && u == contextId()) {
-            QAppointment appointment;
+            QUniqueId appointment;
             ds >> appointment;
             checkUpdated(appointment);
         }

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QCommServiceManager Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QCommServiceManager Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QCommServiceManager Class Reference</h1>
 <p>The QCommServiceManager class provides a method to discover the active communications services and interfaces. <a href="#details">More...</a></p>
-<pre>    #include &lt;QCommServiceManager&gt;</pre><p>Inherits <a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a>.</p>
+<pre>#include &lt;QCommServiceManager&gt;</pre><p>Inherits <a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a>.</p>
 <ul>
 <li><a href="qcommservicemanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -53,7 +52,7 @@
 <h2>Detailed Description</h2>
 <p>The QCommServiceManager class provides a method to discover the active communications services and interfaces.</p>
 <p>The QCommServiceManager class provides a method to discover the communications services and interfaces that are active within the system.</p>
-<p>Each service has a unique name, such as <tt>GSM</tt>, <tt>VoIP</tt>, etc. Within each service is a list of interfaces for functionality areas, which have names such as <tt>QNetworkRegistration</tt>, <tt>QSMSSender</tt>, etc.</p>
+<p>Each service has a unique name, such as <tt>GSM</tt>, <tt>VoIP</tt>, etc. Within each service is a list of interfaces for functionality areas, which have names such as QNetworkRegistration, QSMSSender, etc.</p>
 <p>Interface names correspond to class names elsewhere in the Qtopia Communications and Telephony API's. To use an interface, the caller creates an instance of the corresponding class. The caller can specify an explicit service name, if more than one service implements the same interface, or leave the service name empty to use the default service for that interface.</p>
 <p>See the documentation for <a href="qabstractipcinterface.html">QAbstractIpcInterface</a> for more information on writing and using interface classes.</p>
 <p>See also <a href="qcomminterface.html">QCommInterface</a>.</p>
@@ -75,6 +74,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

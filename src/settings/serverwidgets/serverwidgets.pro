@@ -2,7 +2,6 @@ qtopia_project(qtopia app)
 TARGET=serverwidgets
 CONFIG+=qtopia_main
 
-FORMS           = mainwindow.ui
 HEADERS		= serverwidgets.h
 SOURCES		= serverwidgets.cpp main.cpp
 

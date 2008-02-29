@@ -1,10 +1,22 @@
 HOWTO update zoneinfo data
 
-- Ideally the system integrator should add the matching zoneinfo data to match the glibc version of the toolchain.
+- Ideally the system integrator should add the matching zoneinfo data to match the 
+glibc version of the toolchain.
   Root file system default zoneinfo directory (/usr/share/zoneinfo)
 
-- To update with new version of zoneinfo here:
-  +Remove all file in zoneinfo directory except this one
-  +Copy /usr/share/zoneinfo directory contents from host to this directory
-  +Remove right and posix directories from this location
-  +Estimated size 2M
+- An integrator can place these in a non default place, provided they set
+QTOPIA_ZONEINFO_PATH environmental variable to where the zoneinfo directory exists.
+
+- More information about zoneinfo can be found here:
+ http://en.wikipedia.org/wiki/Zoneinfo
+
+- To update with a new version of zoneinfo here:
+
+  + Remove all files in this zoneinfo directory except this zoneinfo.txt file.
+  + Download the tzdata and tzcode packages from ftp://elsie.nci.nih.gov/pub/
+  + Read the README file in tzcode.
+  + Place them in one directory where you build.
+  + Run something like 'make TOPDIR=$HOME/tzdir install'. 
+  + Copy the $HOME/tzdir/etc/zoneinfo directory contents to this directory, 
+or where they will exist on your system.
+  + Estimated size 2M

@@ -277,6 +277,13 @@ bool DrmContentPrivate::installContent( const QString &filePath, QContent *conte
     return p ? p->installContent( filePath, content ) : false;
 }
 
+bool DrmContentPrivate::updateContent( QContent *content )
+{
+    QDrmContentPlugin *p = plugin( content->file() );
+
+    return p ? p->updateContent( content ) : false;
+}
+
 QPixmap DrmContentPrivate::thumbnail( const QString &filePath, const QSize &size, Qt::AspectRatioMode mode )
 {
     QDrmContentPlugin *p = plugin( filePath );

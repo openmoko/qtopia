@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/emb-accel.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/emb-accel.qdoc -->
 <head>
   <title>Qt 4.2: Adding an Accelerated Graphics Driver in Qtopia Core</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -36,7 +36,7 @@
 <p>To activate your paint engine you must create a subclass of the <a href="qcustomrasterpaintdevice.html">QCustomRasterPaintDevice</a> class and reimplement its <a href="qpaintdevice.html#paintEngine">paintEngine()</a> function. Let this function return a pointer to your paint engine. In addition, the <a href="qcustomrasterpaintdevice.html#memory">QCustomRasterPaintDevice::memory</a>() function must be reimplemented to return a pointer to the buffer where the painting should be done.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Acceleration Without a Framebuffer</th></tr></thead>
-<tr valign="top" class="odd"><td>If you are writing a driver for a device with an graphic I/O controller but no framebuffer support, the <a href="qcustomrasterpaintdevice.html#memory">QCustomRasterPaintDevice::memory</a>() function must return 0 (meaning no buffer available). Then, whenever a color or buffer should be written into memory, the paint engine will call the <a href="qrasterpaintengine.html#drawColorSpans">QRasterPaintEngine::drawColorSpans</a>() and <a href="qrasterpaintengine.html#drawBufferSpan">QRasterPaintEngine::drawBufferSpan</a>() functions instead.<p>Note that the default implementations of these functions only calls <a href="qtglobal.html#qFatal">qFatal</a>() with an error message; reimplement the functions and let them do the appropriate communication with the I/O controller.</p>
+<tr valign="top" class="odd"><td>If you are writing a driver for a device with a graphic I/O controller but no framebuffer support, the <a href="qcustomrasterpaintdevice.html#memory">QCustomRasterPaintDevice::memory</a>() function must return 0 (meaning no buffer available). Then, whenever a color or buffer should be written into memory, the paint engine will call the <a href="qrasterpaintengine.html#drawColorSpans">QRasterPaintEngine::drawColorSpans</a>() and <a href="qrasterpaintengine.html#drawBufferSpan">QRasterPaintEngine::drawBufferSpan</a>() functions instead.<p>Note that the default implementations of these functions only calls <a href="qtglobal.html#qFatal">qFatal</a>() with an error message; reimplement the functions and let them do the appropriate communication with the I/O controller.</p>
 </td></tr>
 </table></p>
 <a name="step-4-make-the-window-surface-aware-of-your-paint-device"></a>
@@ -49,6 +49,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

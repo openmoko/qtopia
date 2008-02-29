@@ -43,7 +43,7 @@
 
 static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp );
 
-class QObexPushService_Private : public QObject
+class QObexPushServicePrivate : public QObject
 {
     Q_OBJECT
     friend void qobex_receiver_callback(obex_t *handle, obex_object_t *object,
@@ -52,28 +52,21 @@ class QObexPushService_Private : public QObject
 public slots:
     void processInput();
 
-    void deleteMeLater();
-    void deleteMe();
-
 signals:
     void putRequest(const QString &filename, const QString &mimetype);
     void getRequest(const QString &filename, const QString &mimetype);
     void requestComplete(bool error);
     void done(bool error);
     void progress(qint64, qint64);
-    void stateChanged(QObex::State state);
-    void aboutToDelete();
+    void stateChanged(QObexPushService::State state);
 
 public:
-    QObexPushService_Private(QObexSocket *socket, QObexPushService *parent);
-    ~QObexPushService_Private();
+    QObexPushServicePrivate(QObexSocket *socket, QObexPushService *parent);
+    ~QObexPushServicePrivate();
 
     void close();
-    void updateState(QObex::State state);
+    void updateState(QObexPushService::State state);
     void abortFileTransfer();
-
-    void setAutoDelete(bool enable);
-    bool autoDelete() const;
 
     void writeOut(int len, const char *buf);
     void readData(obex_object_t *object);
@@ -86,10 +79,8 @@ public:
     QObexPushService *m_parent;
     obex_t *m_self;
     QObexSocket *m_socket;
-    QObex::Error m_error;
-    QObex::State m_state;
-
-    bool m_autodelete;
+    QObexPushService::Error m_error;
+    QObexPushService::State m_state;
 
     int m_total;
     int m_bytes;
@@ -104,15 +95,14 @@ public:
     QSocketNotifier *m_notifier;
 };
 
-QObexPushService_Private::QObexPushService_Private(QObexSocket *socket, QObexPushService *parent)
+QObexPushServicePrivate::QObexPushServicePrivate(QObexSocket *socket, QObexPushService *parent)
     : QObject(parent)
 {
     m_socket = socket;
     m_self = static_cast<obex_t *>(socket->handle());
-    m_state = QObex::Connecting;
-    m_error = QObex::NoError;
+    m_state = QObexPushService::Ready;
+    m_error = QObexPushService::NoError;
 
-    m_autodelete = false;
     m_parent = parent;
 
     m_bytes = 0;
@@ -129,33 +119,8 @@ QObexPushService_Private::QObexPushService_Private(QObexSocket *socket, QObexPus
     connect( m_notifier, SIGNAL(activated(int)), this, SLOT(processInput()) );
 }
 
-QObexPushService_Private::~QObexPushService_Private()
+QObexPushServicePrivate::~QObexPushServicePrivate()
 {
-    if (m_socket)
-        delete m_socket;
-}
-
-void QObexPushService_Private::setAutoDelete(bool enable)
-{
-    m_autodelete = enable;
-}
-
-bool QObexPushService_Private::autoDelete() const
-{
-    return m_autodelete;
-}
-
-void QObexPushService_Private::deleteMeLater()
-{
-    if (m_parent->autoDelete()) {
-        QTimer::singleShot( 0, this, SLOT(deleteMe()) );
-    }
-}
-
-void QObexPushService_Private::deleteMe()
-{
-    emit aboutToDelete();
-    delete m_parent;
 }
 
 static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp )
@@ -163,8 +128,8 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int m
     Q_UNUSED(obex_rsp);
     Q_UNUSED(mode);
 
-    QObexPushService_Private* receiver =
-            (QObexPushService_Private*)OBEX_GetUserData( handle );
+    QObexPushServicePrivate* receiver =
+            (QObexPushServicePrivate*)OBEX_GetUserData( handle );
 
     switch (event)        {
     case OBEX_EV_PROGRESS: // Don't do anything
@@ -210,7 +175,7 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int m
             break;
         case OBEX_CMD_CONNECT:
             OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
-            receiver->updateState(QObex::Connecting);
+            receiver->updateState(QObexPushService::Connecting);
             break;
         case OBEX_CMD_ABORT:
             OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
@@ -218,7 +183,7 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int m
 
         case OBEX_CMD_DISCONNECT:
             OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
-            receiver->updateState(QObex::Disconnecting);
+            receiver->updateState(QObexPushService::Disconnecting);
             break;
         default:
             /* Reject any other commands */
@@ -230,24 +195,24 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int m
 
     case OBEX_EV_LINKERR:
         qLog(Obex) << "Got a Link Error";
-        if (receiver->m_state != QObex::Closed) {
+        if (receiver->m_state != QObexPushService::Closed) {
             // If we got a link error, and the received size != received length
             // treat it as an error, otherwise just assume it was finished correctly
             // Some mobile phones behave this way.
             if ( receiver->m_total && receiver->m_total != (int)receiver->m_outfile.size() )
-                receiver->m_error = QObex::LinkError;
-            receiver->updateState(QObex::Closed);
+                receiver->m_error = QObexPushService::LinkError;
+            receiver->updateState(QObexPushService::Closed);
         }
         break;
     case OBEX_EV_REQDONE:
         switch (obex_cmd) {
         case OBEX_CMD_CONNECT:
             qLog(Obex) << "Got a CONNECT";
-            receiver->updateState(QObex::Ready);
+            receiver->updateState(QObexPushService::Ready);
             break;
         case OBEX_CMD_DISCONNECT:
             qLog(Obex) << "Got a DISCONNECT";
-            receiver->updateState(QObex::Closed);
+            receiver->updateState(QObexPushService::Closed);
             break;
         }
         break;
@@ -259,17 +224,17 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, int m
     }
 }
 
-void QObexPushService_Private::processInput()
+void QObexPushServicePrivate::processInput()
 {
-    if (m_state == QObex::Closed)
+    if (m_state == QObexPushService::Closed)
         return;
 
     OBEX_HandleInput( m_self, 0 );
 }
 
-void QObexPushService_Private::feedStream( obex_object_t *object )
+void QObexPushServicePrivate::feedStream( obex_object_t *object )
 {
-    Q_ASSERT(m_state == QObex::Streaming);
+    Q_ASSERT(m_state == QObexPushService::Streaming);
 
     qLog(Obex) <<  "QObexPushService::Feeding Stream";
 
@@ -298,13 +263,14 @@ void QObexPushService_Private::feedStream( obex_object_t *object )
         hd.bs = 0;
         OBEX_ObjectAddHeader(m_self, object, OBEX_HDR_BODY,
                              hd, 0, OBEX_FL_STREAM_DATAEND);
+
+        updateState(QObexPushService::Ready);
         emit requestComplete(false);
-        updateState(QObex::Ready);
     }
 
 }
 
-void QObexPushService_Private::sendBusinessCard(obex_object_t *object)
+void QObexPushServicePrivate::sendBusinessCard(obex_object_t *object)
 {
     qLog(Obex) << "Client requesting my business card";
 
@@ -327,10 +293,10 @@ void QObexPushService_Private::sendBusinessCard(obex_object_t *object)
                          hd, 0, OBEX_FL_STREAM_START);
 
     emit getRequest(QString(), m_mimetype);
-    updateState(QObex::Streaming);
+    updateState(QObexPushService::Streaming);
 }
 
-void QObexPushService_Private::writeOut(int len, const char *buf)
+void QObexPushServicePrivate::writeOut(int len, const char *buf)
 {
     if ( len > 0 ) {
         if( m_outfile.isOpen() ) {// if unable to open outfile don't write to it
@@ -342,19 +308,19 @@ void QObexPushService_Private::writeOut(int len, const char *buf)
         qLog(Obex) << "Received an EOF";
         m_outfile.close();
 
-        if (m_state == QObex::Streaming) {
+        if (m_state == QObexPushService::Streaming) {
+            updateState(QObexPushService::Ready);
             emit requestComplete(false);
-            updateState(QObex::Ready);
         }
     } else {
         qLog(Obex) << "Unknown error during read";
-        m_error = QObex::UnknownError;
+        m_error = QObexPushService::UnknownError;
+        updateState(QObexPushService::Closed);
         emit requestComplete(true);
-        updateState(QObex::Closed);
     }
 }
 
-void QObexPushService_Private::readData( obex_object_t *object )
+void QObexPushServicePrivate::readData( obex_object_t *object )
 {
     const char* buf;
 
@@ -376,9 +342,9 @@ void QObexPushService_Private::readData( obex_object_t *object )
         // vcards
         if (len == 0) {
             handlePut(object);
-            if (m_state == QObex::Streaming) {
+            if (m_state == QObexPushService::Streaming) {
+                updateState(QObexPushService::Ready);
                 emit requestComplete(false);
-                updateState(QObex::Ready);
             }
             return;
         }
@@ -391,7 +357,7 @@ void QObexPushService_Private::readData( obex_object_t *object )
     writeOut(len, buf);
 }
 
-void QObexPushService_Private::handlePut(obex_object_t *object)
+void QObexPushServicePrivate::handlePut(obex_object_t *object)
 {
     qLog(Obex) << "in handleput";
     qLog(Obex) << "QObexPushService::getting headers";
@@ -409,19 +375,27 @@ void QObexPushService_Private::handlePut(obex_object_t *object)
         return;
     }
 
-    OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
-
     m_filename = hdr.name();
     m_mimetype = hdr.mimeType();
     m_total = hdr.length();
+
     emit putRequest(m_filename, m_mimetype);
 
     m_outfile.setFileName( m_incoming + m_filename );
     if (!m_outfile.open( QIODevice::WriteOnly )) {
-        qWarning("Unable to open file %s for OPUSH receive", m_filename.toLatin1().constData());
+        qWarning("Unable to open file %s for OPUSH receive",
+                 m_filename.toLatin1().constData());
+        OBEX_ObjectSetRsp(object, OBEX_RSP_INTERNAL_SERVER_ERROR,
+                          OBEX_RSP_INTERNAL_SERVER_ERROR);
+
+        m_error = QObexPushService::UnknownError;
+        updateState(QObexPushService::Ready);
+        emit requestComplete(true);
+        return;
     }
     else {
-        updateState(QObex::Streaming);
+        updateState(QObexPushService::Streaming);
+        OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
     }
 
     // This situation should be checked if we get a 1st packet with only headers
@@ -434,7 +408,7 @@ void QObexPushService_Private::handlePut(obex_object_t *object)
     m_first_packet = false;
 }
 
-void QObexPushService_Private::preparePut(obex_object_t *object)
+void QObexPushServicePrivate::preparePut(obex_object_t *object)
 {
     qLog(Obex) << "QObexPushService::preparePut()";
     m_first_packet = true;
@@ -442,79 +416,112 @@ void QObexPushService_Private::preparePut(obex_object_t *object)
     OBEX_ObjectReadStream( m_self, object, NULL );
 }
 
-void QObexPushService_Private::updateState(QObex::State state)
+void QObexPushServicePrivate::updateState(QObexPushService::State state)
 {
     qLog(Obex) << "Updating state to:" << state;
 
-    if ((m_state == QObex::Streaming) &&
-         ((state == QObex::Closed) ||
-         (state == QObex::Disconnecting))) {
+    if (m_state == state)
+        return;
+
+    if ((m_state == QObexPushService::Streaming) &&
+         ((state == QObexPushService::Closed) ||
+         (state == QObexPushService::Disconnecting))) {
+
+        // ensure an error is set
+        if (m_error == QObexPushService::NoError)
+            m_error = QObexPushService::UnknownError;
         emit requestComplete(true);
     }
 
     m_state = state;
     emit stateChanged(m_state);
-    if (m_state == QObex::Closed) {
-        OBEX_TransportDisconnect( m_self );
 
-        emit done(m_error);
+    if (m_state == QObexPushService::Closed) {
 
         m_filename = QString();
         m_mimetype = QString();
         if (m_outfile.isOpen())
             m_outfile.close();
 
-        deleteMeLater();
+        emit done(m_error);
     }
 }
 
 // changed abort() -> close() since it's a hard abort that just closes the
 // connection
-void QObexPushService_Private::close()
+void QObexPushServicePrivate::close()
 {
-    // just disconnect the connection
-    m_error = QObex::NoError;
-    updateState(QObex::Closed);
+    if (m_state == QObexPushService::Closed)
+        return;
+
+    if (m_state == QObexPushService::Ready)
+        m_error = QObexPushService::NoError;
+    else
+        m_error = QObexPushService::LinkError;
+
+    updateState(QObexPushService::Closed);
 }
 
-void QObexPushService_Private::abortFileTransfer()
+void QObexPushServicePrivate::abortFileTransfer()
 {
-    qLog(Bluetooth) << "Got Abort!";
+    qLog(Obex) << "QObexPushServicePrivate::abortFileTransfer()";
     m_outfile.close();
     ::unlink( m_filename.toLocal8Bit().data() ); // delete if exists
 
     m_filename = QString();
     m_mimetype = QString();
 
-    if (m_state == QObex::Streaming)
-        updateState(QObex::Ready);
+    if (m_state == QObexPushService::Streaming) {
+        m_error = QObexPushService::Aborted;
+        emit requestComplete(true);
+        updateState(QObexPushService::Ready);
+    }
 }
 
 /*!
     \class QObexPushService
     \brief The QObexPushService class encapsulates an OBEX PUSH service.
 
-    The QObexPushService class can be used to provide OBEX PUSH services
+    The QObexPushService class can be used to provide OBEX Push services
     over Bluetooth, Infrared or any other OBEX capable transport.
     This class implements the Bluetooth Object Push Profile, and can also
     be used to implement the Infrared IrXfer service.
 
+    \ingroup qtopiaobex
     \sa QObexServer
 */
 
 /*!
+    \enum QObexPushService::State
+    Defines the possible states for a push service.
+
+    \value Ready The service is ready to receive requests from an OBEX client. This is the default state.
+    \value Connecting A client is connecting.
+    \value Disconnecting A client is disconnecting.
+    \value Streaming A file transfer operation is in progress.
+    \value Closed The service has been closed and cannot process any more requests.
+ */
+
+/*!
+    \enum QObexPushService::Error
+    Defines the possible errors for a push service.
+
+    \value NoError No error has occurred.
+    \value LinkError The connection link has been interrupted.
+    \value Aborted The request was aborted by the client.
+    \value UnknownError An error other than those specified above occurred.
+ */
+
+/*!
     Constructor for QObexPushService.  The \a socket parameter specifies the
     OBEX socket to use.  The socket is assumed to have been obtained from a
-    \c QObexServer::nextPendingConnection call.  The \a parent specifies
+    \c QObexServer::nextPendingConnection() call.  The \a parent specifies
     the parent object.
-
-    Note that the QObexPushService takes ownership of the socket.  When
-    QObexPushService object is deleted, \c socket is deleted as well.
 */
 QObexPushService::QObexPushService(QObexSocket *socket, QObject *parent)
     : QObject(parent)
 {
-    m_data = new QObexPushService_Private(socket, this);
+    m_data = new QObexPushServicePrivate(socket, this);
 
     connect(m_data, SIGNAL(putRequest(const QString &, const QString &)),
             SIGNAL(putRequest(const QString &, const QString &)));
@@ -523,10 +530,8 @@ QObexPushService::QObexPushService(QObexSocket *socket, QObject *parent)
     connect(m_data, SIGNAL(requestComplete(bool)), SIGNAL(requestComplete(bool)));
     connect(m_data, SIGNAL(done(bool)), SIGNAL(done(bool)));
 
-    connect(m_data, SIGNAL(aboutToDelete()), SIGNAL(aboutToDelete()));
-
-    connect(m_data, SIGNAL(stateChanged(QObex::State)),
-            SIGNAL(stateChanged(QObex::State)));
+    connect(m_data, SIGNAL(stateChanged(QObexPushService::State)),
+            SIGNAL(stateChanged(QObexPushService::State)));
     connect(m_data, SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 }
 
@@ -540,8 +545,9 @@ QObexPushService::~QObexPushService()
 }
 
 /*!
-    Stops the operation currently in progress, sets the state to Unconnected and
-    if the autoDelete property is set to true, schedules deletion of the service.
+    Closes the service and sets the state to Closed. If an operation is in
+    progress, the commandFinished() and done() signals will be emitted with
+    their \c error arguments set to \c true.
 */
 void QObexPushService::close()
 {
@@ -549,31 +555,9 @@ void QObexPushService::close()
 }
 
 /*!
-    Sets the autoDelete property to \a enable.  If autoDelete is enabled, then the
-    object is automatically scheduled for deletion when the object next enters the
-    Unconnected state.
-
-    \sa autoDelete()
-*/
-void QObexPushService::setAutoDelete(bool enable)
-{
-    m_data->setAutoDelete(enable);
-}
-
-/*!
-    Returns true if autoDelete is enabled, returns false otherwise.
-
-    \sa setAutoDelete()
-*/
-bool QObexPushService::autoDelete() const
-{
-    return m_data->autoDelete();
-}
-
-/*!
     Returns the last error that has occurred.
 */
-QObex::Error QObexPushService::error() const
+QObexPushService::Error QObexPushService::error() const
 {
     return m_data->m_error;
 }
@@ -581,7 +565,7 @@ QObex::Error QObexPushService::error() const
 /*!
     Returns the current connection state of the object.
 */
-QObex::State QObexPushService::state() const
+QObexPushService::State QObexPushService::state() const
 {
     return m_data->m_state;
 }
@@ -663,16 +647,7 @@ QObexSocket *QObexPushService::socket()
  */
 
 /*!
-    \fn void QObexPushService::aboutToDelete()
-
-    This signal is emitted whenever an object is about to delete
-    itself.  This will only happen if the \c autoDelete property is set.
-
-    \sa setAutoDelete(), autoDelete()
- */
-
-/*!
-    \fn void QObexPushService::stateChanged(QObex::State state)
+    \fn void QObexPushService::stateChanged(QObexPushService::State state)
 
     This signal is emitted whenever a service object changes state.  The \a state
     parameter holds the current state.

@@ -29,9 +29,10 @@
 #include <fcntl.h>
 
 /*!
-    Constructs an new (invalid) Infrared OBEX socket.
+    Constructs an new (invalid) Infrared OBEX socket with parent object
+    \a parent.
  */
-QIrObexSocket::QIrObexSocket() : QObexSocket()
+QIrObexSocket::QIrObexSocket(QObject *parent) : QObexSocket(parent)
 {
     m_service = QString();
     m_addr = 0;
@@ -42,8 +43,9 @@ QIrObexSocket::QIrObexSocket() : QObexSocket()
     the service to connect to.  The \a addr specifies the address
     of the remote device to connect to. If the address is 0, all
     devices are searched and the first one found will be connected to.
+    The \a parent specifies the parent object.
 */
-QIrObexSocket::QIrObexSocket(const QString &service, uint addr) : QObexSocket()
+QIrObexSocket::QIrObexSocket(const QString &service, uint addr, QObject *parent) : QObexSocket(parent)
 {
     m_service = service;
     m_addr = addr;

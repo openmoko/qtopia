@@ -29,6 +29,7 @@
 
 class QComboBox;
 class CharacterView;
+class QScrollArea;
 
 class UniSelect : public QWidget
 {

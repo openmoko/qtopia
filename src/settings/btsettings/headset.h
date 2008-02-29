@@ -29,8 +29,8 @@
 
 class QBluetoothAudioGateway;
 class QWaitWidget;
-class QSDAP;
-class QSDAPSearchResult;
+class QBluetoothSdpQuery;
+class QBluetoothSdpQueryResult;
 
 class HeadsetDialog : public QDialog
 {
@@ -47,7 +47,7 @@ private slots:
     void microphoneVolumeChanged();
     void audioStateChanged();
 
-    void searchComplete(const QSDAPSearchResult &result);
+    void searchComplete(const QBluetoothSdpQueryResult &result);
 
     void doDisconnect();
     void disconnected();
@@ -62,7 +62,7 @@ private:
     Ui::MyHeadset *m_ui;
     QBluetoothAudioGateway *m_ag;
     QWaitWidget *m_waitWidget;
-    QSDAP *m_sdap;
+    QBluetoothSdpQuery *m_sdap;
     QBluetooth::SDPProfile m_profile;
     QBluetoothAddress m_addr;
 };

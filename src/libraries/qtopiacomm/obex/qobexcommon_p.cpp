@@ -54,12 +54,18 @@ void getHeaders( obex_t *self, obex_object_t *object, QObexHeader &header )
     QString mimetype;
     QString desc;
 
-    while(OBEX_ObjectGetNextHeader(self, object, &hi, &hv, &hv_size))   {
+    while (OBEX_ObjectGetNextHeader(self, object, &hi, &hv, &hv_size)) {
         switch ( hi ) {
             case OBEX_HDR_DESCRIPTION:
             {
-                desc.setUnicode((const QChar *)hv.bs, hv_size / 2 - 1);
-                convertNBOQString(desc);
+                if (hv_size > 0) {
+                    // strip null terminator if present (it should be there, but check)
+                    if (hv.bs[hv_size] == uint8_t('\0'))
+                        desc.setUnicode((const QChar *)hv.bs, hv_size / 2 - 1);
+                    else
+                        desc.setUnicode((const QChar *)hv.bs, hv_size / 2);
+                    convertNBOQString(desc);
+                }
                 break;
             }
             case OBEX_HDR_LENGTH:
@@ -68,17 +74,26 @@ void getHeaders( obex_t *self, obex_object_t *object, QObexHeader &header )
 
             case OBEX_HDR_NAME:
             {
-                name.setUnicode((const QChar*)hv.bs, hv_size / 2 - 1);
-                convertNBOQString(name);
+                if (hv_size > 0) {
+                    // strip null terminator if present (it should be there, but check)
+                    if (hv.bs[hv_size] == uint8_t('\0'))
+                        name.setUnicode((const QChar*)hv.bs, hv_size / 2 - 1);
+                    else
+                        name.setUnicode((const QChar*)hv.bs, hv_size / 2);
+                    convertNBOQString(name);
+                }
                 break;
             }
             case OBEX_HDR_TYPE:
-                // Grr Qt is weird
-                if ( (const char *)hv.bs[hv_size - 1] == '\0' )
-                    mimetype = QString::fromLatin1( (const char *) hv.bs ); // Null terminated
-                else
-                    mimetype = QString::fromLatin1((const char*)hv.bs, hv_size );  // Not
-
+                if (hv_size > 0) {
+                    if (hv.bs[hv_size - 1] == uint8_t('\0') ) {
+                        // Null terminated
+                        mimetype = QString::fromLatin1( (const char *) hv.bs ); 
+                    } else {
+                        // Not null terminated
+                        mimetype = QString::fromLatin1((const char*)hv.bs, hv_size ); 
+                    }
+                }
                 break;
         }
     }
@@ -133,7 +148,12 @@ void setHeaders( obex_t *self, obex_object_t *object, const QObexHeader &header 
     if (!header.name().isEmpty()) {
         qLog(Obex) << "Adding name header";
         /* Add unicode name header*/
-        QString uc = header.name() + QChar( 0x0 );
+
+        // Add a null terminator if there isn't one already
+        QString uc = header.name();
+        if (uc[uc.size() - 1] != QChar(0x0))
+            uc.append(QChar(0x0));
+
         uc = uc.mid( uc.lastIndexOf("/") + 1 );
         int name_size = uc.length() * 2;
 
@@ -147,7 +167,11 @@ void setHeaders( obex_t *self, obex_object_t *object, const QObexHeader &header 
     if (!header.description().isEmpty()) {
         qLog(Obex) << "Adding description header";
 
-        QString uc = header.description() + QChar( 0x0 );
+        // Add a null terminator if there isn't one already
+        QString uc = header.description();
+        if (uc[uc.size() - 1] != QChar(0x0))
+            uc.append(QChar(0x0));
+
         int desc_size = uc.length() * 2;
 
         convertHBOQString(uc);

@@ -521,6 +521,7 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
 
     int k = keycode( i2, j, (const uchar **)((useOptiKeys) ? keyboard_opti : keyboard_standard) );
     bool need_repaint = false;
+    bool key_down = false;
     unicode = -1;
     qkeycode = 0;
     if ( k >= 0x80 ) {
@@ -584,7 +585,6 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
 
         qwsServer->processKeyEvent( unicode, qkeycode, modifiers, true, false );
 
-        repeatTimer->start( 500 );
         need_repaint = shift || alt || ctrl;
         shift = alt = ctrl = false;
 
@@ -608,7 +608,7 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
         }
 
         picks->repaint();
-
+        key_down = true;
     }
     pressedKey = k;
     repaint();
@@ -624,19 +624,23 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
         killTimer(pressTid);
     pressTid = startTimer(80);
     pressed = true;
+    if(key_down)
+    {
+        repeatTimer->start( 500 );
+    };
     emit needsPositionConfirmation();
 }
 
 
 void KeyboardFrame::mouseReleaseEvent(QMouseEvent*)
 {
+    repeatTimer->stop();
     if ( pressTid == 0 )
         clearHighlight();
 #if defined(Q_WS_QWS) || defined(Q_WS_QWS)
     if ( unicode != -1 || qkeycode != 0) {
         qLog(Input) << "keyrelease: code=" << unicode;
         qwsServer->processKeyEvent( unicode, qkeycode, modifiers, false, false );
-        repeatTimer->stop();
     }
 #endif
     pressed = false;

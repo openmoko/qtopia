@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/painting/qpainter.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/painting/qpainter.cpp -->
 <head>
   <title>Qt 4.2: QPainter Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -266,13 +266,13 @@
 <p>The QPainter class also provides the <a href="qpainter.html#fillRect">fillRect</a>() function which fills the given <a href="qrect.html">QRect</a>, with the given <a href="qbrush.html">QBrush</a>, and the <a href="qpainter.html#eraseRect">eraseRect</a>() function that erases the area inside the given rectangle.</p>
 <p>All of these functions have both integer and floating point versions.</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><img src="images/qpainter-basicdrawing.png" /></td><td><b>Basic Drawing Example</b><p>The Basic Drawing example shows how to display basic graphics primitives in a variety of styles using the QPainter class.</p>
+<tr valign="top" class="odd"><td><img src="images/qpainter-basicdrawing.png" /></td><td><b>Basic Drawing Example</b><p>The <a href="painting-basicdrawing.html">Basic Drawing</a> example shows how to display basic graphics primitives in a variety of styles using the QPainter class.</p>
 </td></tr>
 </table></p>
 <p>If you need to draw a complex shape, especially if you need to do so repeatedly, consider creating a <a href="qpainterpath.html">QPainterPath</a> and drawing it using <a href="qpainter.html#drawPath">drawPath</a>().</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><b>Painter Paths example</b><p>The <a href="qpainterpath.html">QPainterPath</a> class provides a container for painting operations, enabling graphical shapes to be constructed and reused.</p>
-<p>The Painter Paths example shows how painter paths can be used to build complex shapes for rendering.</p>
+<p>The <a href="painting-painterpaths.html">Painter Paths</a> example shows how painter paths can be used to build complex shapes for rendering.</p>
 </td><td><img src="images/qpainter-painterpaths.png" /></td></tr>
 </table></p>
 <p>QPainter also provides the <a href="qpainter.html#fillPath">fillPath</a>() function which fills the given <a href="qpainterpath.html">QPainterPath</a> with the given <a href="qbrush.html">QBrush</a>, and the <a href="qpainter.html#strokePath">strokePath</a>() function that draws the outline of the given path (i.e. strokes the path).</p>
@@ -289,7 +289,7 @@
 <p>To get the optimal rendering result using QPainter, you should use the platform independent <a href="qimage.html">QImage</a> as paint device; i.e. using <a href="qimage.html">QImage</a> will ensure that the result has an identical pixel representation on any platform.</p>
 <p>The QPainter class also provides a means of controlling the rendering quality through its <a href="qpainter.html#RenderHint-enum">RenderHint</a> enum and the support for floating point precision: All the functions for drawing primitives has a floating point version. These are often used in combination with the <a href="qpainter.html#RenderHint-enum">QPainter::AntiAliasing</a> render hint.</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><img src="images/qpainter-concentriccircles.png" /></td><td><b>Concentric Circles Example</b><p>The Concentric Circles example shows the improved rendering quality that can be obtained using floating point precision and anti-aliasing when drawing custom widgets.</p>
+<tr valign="top" class="odd"><td><img src="images/qpainter-concentriccircles.png" /></td><td><b>Concentric Circles Example</b><p>The <a href="painting-concentriccircles.html">Concentric Circles</a> example shows the improved rendering quality that can be obtained using floating point precision and anti-aliasing when drawing custom widgets.</p>
 <p>The application's main window displays several widgets which are drawn using the various combinations of precision and anti-aliasing.</p>
 </td></tr>
 </table></p>
@@ -303,7 +303,7 @@
 <thead><tr valign="top" class="qt-style"><th>nop</th><th><a href="qpainter.html#rotate">rotate</a>()</th><th><a href="qpainter.html#scale">scale</a>()</th><th><a href="qpainter.html#translate">translate</a>()</th></tr></thead>
 </table></p>
 <p>The most commonly used transformations are scaling, rotation, translation and shearing. Use the <a href="qpainter.html#scale">scale</a>() function to scale the coordinate system by a given offset, the <a href="qpainter.html#rotate">rotate</a>() function to rotate it clockwise and <a href="qpainter.html#translate">translate</a>() to translate it (i.e. adding a given offset to the points). You can also twist the coordinate system around the origin using the <a href="qpainter.html#shear">shear</a>() function. See the <a href="demos-affine.html">Affine Transformations</a> demo for a visualization of a sheared coordinate system.</p>
-<p>See also the Transformations example which shows how transformations influence the way that QPainter renders graphics primitives. In particular it shows how the order of transformations affects the result.</p>
+<p>See also the <a href="painting-transformations.html">Transformations</a> example which shows how transformations influence the way that QPainter renders graphics primitives. In particular it shows how the order of transformations affects the result.</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><b>Affine Transformations Demo</b><p>The <a href="demos-affine.html">Affine Transformations</a> demo show Qt's ability to perform affine transformations on painting operations. The demo also allows the user to experiment with the transformation operations and see the results immediately.</p>
 </td><td><img src="images/qpainter-affinetransformations.png" /></td></tr>
@@ -325,7 +325,7 @@
 <tr valign="top" class="odd"><td><img src="images/qpainter-compositiondemo.png" /></td><td><b>Composition Modes Demo</b><p>The <a href="demos-composition.html">Composition Modes</a> demo, available in Qt's demo directory, allows you to experiment with the various composition modes and see the results immediately.</p>
 </td></tr>
 </table></p>
-<p>See also <a href="qpaintdevice.html">QPaintDevice</a>, <a href="qpaintengine.html">QPaintEngine</a>, <a href="qtsvg.html">QtSvg Module</a>, and Basic Drawing Example.</p>
+<p>See also <a href="qpaintdevice.html">QPaintDevice</a>, <a href="qpaintengine.html">QPaintEngine</a>, <a href="qtsvg.html">QtSvg Module</a>, and <a href="painting-basicdrawing.html">Basic Drawing Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="CompositionMode-enum"></a>enum QPainter::CompositionMode</h3>
@@ -348,7 +348,7 @@
 <tr><td valign="top"><tt>QPainter::CompositionMode_DestinationAtop</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The destination pixel is blended on top of the source, with the alpha of the destination pixel is reduced by the alpha of the destination pixel. This mode is the inverse of CompositionMode_SourceAtop.</td></tr>
 <tr><td valign="top"><tt>QPainter::CompositionMode_Xor</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top">The source, which alpha is reduced with the inverse of the destination alpha, is merged with the destination, which alpha is reduced by the inverse of the source alpha. CompositionMode_Xor is not the same as the bitwise Xor.</td></tr>
 </table></p>
-<p>See also <a href="qpainter.html#compositionMode">compositionMode</a>(), <a href="qpainter.html#setCompositionMode">setCompositionMode</a>(), <a href="qpainter.html#composition-modes">Composition Modes</a>, and Image Composition Example.</p>
+<p>See also <a href="qpainter.html#compositionMode">compositionMode</a>(), <a href="qpainter.html#setCompositionMode">setCompositionMode</a>(), <a href="qpainter.html#composition-modes">Composition Modes</a>, and <a href="painting-imagecomposition.html">Image Composition Example</a>.</p>
 <h3 class="flags"><a name="RenderHint-enum"></a>enum QPainter::RenderHint<br />flags QPainter::RenderHints</h3>
 <p>Renderhints are used to specify flags to <a href="qpainter.html">QPainter</a> that may or may not be respected by any given engine.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -358,7 +358,7 @@
 <tr><td valign="top"><tt>QPainter::SmoothPixmapTransform</tt></td><td align="center" valign="top"><tt>0x04</tt></td><td valign="top">Indicates that the engine should use a smooth pixmap transformation algorithm (such as bilinear) rather than nearest neighbor.</td></tr>
 </table></p>
 <p>The RenderHints type is a typedef for <a href="qflags.html">QFlags</a>&lt;RenderHint&gt;. It stores an OR combination of RenderHint values.</p>
-<p>See also <a href="qpainter.html#renderHints">renderHints</a>(), <a href="qpainter.html#setRenderHint">setRenderHint</a>(), <a href="qpainter.html#rendering-quality">Rendering Quality</a>, and Concentric Circles Example.</p>
+<p>See also <a href="qpainter.html#renderHints">renderHints</a>(), <a href="qpainter.html#setRenderHint">setRenderHint</a>(), <a href="qpainter.html#rendering-quality">Rendering Quality</a>, and <a href="painting-concentriccircles.html">Concentric Circles Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QPainter"></a>QPainter::QPainter ()</h3>
@@ -639,7 +639,7 @@
  painter.drawPath(path);</pre>
 </td></tr>
 </table></p>
-<p>See also the Painter Paths example and <a href="demos-deform.html">the Vector Deformation demo</a>.</p>
+<p>See also <a href="painting-painterpaths.html">the Painter Paths example</a> and <a href="demos-deform.html">the Vector Deformation demo</a>.</p>
 <h3 class="fn"><a name="drawPicture"></a>void QPainter::drawPicture ( const <a href="qpointf.html">QPointF</a> &amp; <i>point</i>, const <a href="qpicture.html">QPicture</a> &amp; <i>picture</i> )</h3>
 <p>Replays the given <i>picture</i> at the given <i>point</i>.</p>
 <p>The <a href="qpicture.html">QPicture</a> class is a paint device that records and replays <a href="qpainter.html">QPainter</a> commands. A picture serializes the painter commands to an IO device in a platform-independent format. Everything that can be painted on a widget or pixmap can also be stored in a picture.</p>
@@ -1485,6 +1485,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

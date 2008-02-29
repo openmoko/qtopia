@@ -87,7 +87,7 @@ QStorageMetaInfo::QStorageMetaInfo( QObject *parent )
 #ifdef Q_WS_QWS
     if ( qt_fbdpy )
     {
-        d->channel = new QtopiaChannel( "QPE/Card", this );
+        d->channel = new QtopiaChannel( "QPE/QStorage", this );
         connect( d->channel, SIGNAL(received(const QString&,const QByteArray&)),
                 this, SLOT(cardMessage(const QString&,const QByteArray&)) );
     }
@@ -180,7 +180,7 @@ const QFileSystem *QStorageMetaInfo::applicationsFileSystem()
 
 void QStorageMetaInfo::cardMessage( const QString& msg, const QByteArray& )
 {
-    if ( msg == "mtabChanged()" )
+    if ( msg == "updateStorage()" )
         update();
 }
 
@@ -430,6 +430,9 @@ QStringList QStorageMetaInfo::fileSystemNames( QFileSystemFilter *filter, bool c
 
 Q_GLOBAL_STATIC(QStorageMetaInfo,storageMetaInfoInstance);
 
+/*!
+    Returns a pointer to a static instance of QStorageMetaInfo.
+*/
 QStorageMetaInfo *QStorageMetaInfo::instance()
 {
     return storageMetaInfoInstance();

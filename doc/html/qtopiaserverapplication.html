@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QtopiaServerApplication Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QtopiaServerApplication Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QtopiaServerApplication Class Reference</h1>
 <p>The QtopiaServerApplication class provides additional <a href="qtopiaapplication.html">QtopiaApplication</a> functionality. <a href="#details">More...</a></p>
-<pre>    #include &lt;QtopiaServerApplication&gt;</pre><p>Inherits <a href="qtopiaapplication.html">QtopiaApplication</a>.</p>
+<pre>#include &lt;QtopiaServerApplication&gt;</pre><p>Inherits <a href="qtopiaapplication.html">QtopiaApplication</a>.</p>
 <ul>
 <li><a href="qtopiaserverapplication-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -30,7 +29,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>11 public functions inherited from <a href="qtopiaapplication.html#public-functions">QtopiaApplication</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qapplication.html#public-functions">QApplication</a></li>
+<li><div class="fn"/>13 public functions inherited from <a href="qapplication.html#public-functions">QApplication</a></li>
 <li><div class="fn"/>8 public functions inherited from <a href="qcoreapplication.html#public-functions">QCoreApplication</a></li>
 <li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
@@ -71,7 +70,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>18 static public members inherited from <a href="qtopiaapplication.html#static-public-members">QtopiaApplication</a></li>
-<li><div class="fn"/>90 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
+<li><div class="fn"/>89 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
 <li><div class="fn"/>37 static public members inherited from <a href="qcoreapplication.html#static-public-members">QCoreApplication</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
@@ -116,7 +115,7 @@
 <p>The Qtopia server is structured as a collection of largely independent <i>tasks</i>. Tasks are responsible for performing a small, well defined portion of work or functionality. Often tasks form the &quot;backend&quot; to other system capabilities. For example, Qtopia's network management APIs ultimately communicate with the <a href="qtopianetworkserver.html">QtopiaNetworkServer</a> task. Other tasks operate more independently. Tasks can be thought of as the building blocks that, when arranged appropriately, form the Qtopia server.</p>
 <p>Tasks are QObjects. Tasks may work together by exporting C++ interfaces. Other tasks or modules within the server may request tasks that support a particular interface. For example, when the system is shutting down, all the tasks that provide the <a href="systemshutdownhandler.html">SystemShutdownHandler</a> interface are invoked to perform all the necessary cleanup.</p>
 <p>The order in which the task objects are instantiated is configurable. Both the configurator and the task developer has a degree of control over the instantiation order. The configurator controls the start up order through the <tt>$QPEDIR/etc/Tasks.cfg</tt> file. The <tt>Tasks.cfg</tt> file has the following simple syntax:</p>
-<pre>    # Sample comment for TaskGroup1.  Comments may appear anywhere, as long as
+<pre>&nbsp;   # Sample comment for TaskGroup1.  Comments may appear anywhere, as long as
     # the first character in the line is a '#'
     [TaskGroup1]
     TaskName1
@@ -128,7 +127,7 @@
     TaskName2
     TaskName3</pre>
 <p>Task groups are free form descriptors used to collect related classes together. Task group names may only contain alphanumeric characters. In particular, they may <i>not</i> contain spaces. A task's name is the name given to the task when it is declared in code. Much like task group names, task names consist only of alphanumeric characters and, again, cannot contain spaces. Groups may be nested heirarchally as shown in the example. Nesting one group in another is <i>exactly</i> the same as pasting the body of the nested group into the parent group. The above <tt>Tasks.cfg</tt> file is equivalent to:</p>
-<pre>    [TaskGroup1]
+<pre>&nbsp;   [TaskGroup1]
     TaskName1
     TaskName2
     TaskName3
@@ -145,11 +144,11 @@
 <p>While the QtopiaServerApplication class itself is not strictly a task, it is instantiated during startup by the task system in the same way as other tasks under the special task name <tt>QtopiaApplication</tt>. The <tt>QtopiaApplication</tt> task should be instantiated immediately after any environment setup or cleanup type tasks as many other tasks have an implicit reliance on its existance.</p>
 <p>The order that the system will try and start preemptive tasks and the order in which tasks will be given interface preference can be read from the value space immediately followign the <tt>QtopiaApplication</tt> task executing. The exact schema is:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Item</th><th>Type</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>/System/Tasks/&lt;TaskName&gt;/Order/Static</tt></td><td>int</td><td>The preemptive order that the system determined it would launch tasks. This may be different from the actual order if one task demand loads another that would otherwise be loaded later.</td></tr>
-<tr valign="top" class="even"><td><tt>/System/Tasks/&lt;TaskName&gt;/Order/Launch</tt></td><td>int</td><td>The order that the tasks were actually launched in. This key will only exist if the task is active.</td></tr>
-<tr valign="top" class="odd"><td><tt>/System/Tasks/&lt;TaskName&gt;/Order/Interface</tt></td><td>int</td><td>The order that the task will be given when determining interface associations.</td></tr>
-<tr valign="top" class="even"><td><tt>/System/Tasks/&lt;TaskName&gt;/State</tt></td><td>String</td><td>&quot;Disable&quot; if the task was in the <tt>exclude</tt> list, &quot;Active&quot; if the task is running, or &quot;Inactive&quot; if not.</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Item</th><th>Type</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>/System/Tasks/&lt;TaskName&gt;/Order/Static</tt></td><td>int</td><td>The preemptive order that the system determined it would launch tasks. This may be different from the actual order if one task demand loads another that would otherwise be loaded later.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>/System/Tasks/&lt;TaskName&gt;/Order/Launch</tt></td><td>int</td><td>The order that the tasks were actually launched in. This key will only exist if the task is active.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>/System/Tasks/&lt;TaskName&gt;/Order/Interface</tt></td><td>int</td><td>The order that the task will be given when determining interface associations.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>/System/Tasks/&lt;TaskName&gt;/State</tt></td><td>String</td><td>&quot;Disable&quot; if the task was in the <tt>exclude</tt> list, &quot;Active&quot; if the task is running, or &quot;Inactive&quot; if not.</td></tr>
 </table></p>
 <a name="qtopia-server-widgets"></a>
 <h3>Qtopia Server Widgets</h3>
@@ -158,15 +157,15 @@
 <p>Rather than using the regular <tt>new ClassName(parent, flags)</tt> syntax for instantiating a widget, the special <a href="qtopiaserverapplication.html#qtopiaWidget">qtopiaWidget</a>() template method, parameterized on AbstractWidget, is provided. This method uses the server widgets replacement system to look up the ConcreteWidget instance type it should return.</p>
 <p>Developers use the <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET">QTOPIA_REPLACE_WIDGET</a>(), <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_WHEN">QTOPIA_REPLACE_WIDGET_WHEN</a>() and <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_OVERRIDE">QTOPIA_REPLACE_WIDGET_OVERRIDE</a>() macros to provide ConcreteWidget for a particular AbstractWidget. The server widget replacement system then resolves which ConcreteWidget to return by executing the following set of rules in order until a ConcreteWidget is determined.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Rule</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>Explicitly specified</td><td>The <tt>Trolltech/ServerWidgets</tt> configuration file is read to determine if the ConcreteWidget to use has been explicitly specified. The configuration file contains one group, <tt>Mapping</tt> that contains mappings between <i>AbstractName</i> and <i>ConcreteName</i>. How these two names are determined is discussed below. For example,<pre>    [Mapping]
+<tr valign="top" bgcolor="#a2c511"><th>Rule</th><th>Description</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Explicitly specified</td><td>The <tt>Trolltech/ServerWidgets</tt> configuration file is read to determine if the ConcreteWidget to use has been explicitly specified. The configuration file contains one group, <tt>Mapping</tt> that contains mappings between <i>AbstractName</i> and <i>ConcreteName</i>. How these two names are determined is discussed below. For example,<pre>&nbsp;   [Mapping]
     BrowserScreen=Wheel
     DialerScreen=Rotary</pre>
 <p>Unless the specified widget does not exist, the mapping is always honoured. That is, using <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_WHEN">QTOPIA_REPLACE_WIDGET_WHEN</a>() can not override explicitly specified widgets. The special name <tt>None</tt> will disable the widget, causing <a href="qtopiaserverapplication.html#qtopiaWidget">qtopiaWidget</a>() to always return null.</p>
 </td></tr>
-<tr valign="top" class="even"><td>Primary Default</td><td>The primary default is the value of the <tt>Mapping/Default</tt> key, or <tt>Default</tt> if not specified. The primary default name is tried as the <i>ConcreteName</i>. Feature dependencies are honoured.</td></tr>
-<tr valign="top" class="odd"><td>Other Defaults</td><td>All <i>ConcreteName</i>'s beginning with the primary default name are tried. Feature dependencies are honoured.</td></tr>
-<tr valign="top" class="even"><td>All Replacements</td><td>All available ConcreteWidgets are tried. Feature dependencies are honoured.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Primary Default</td><td>The primary default is the value of the <tt>Mapping/Default</tt> key, or <tt>Default</tt> if not specified. The primary default name is tried as the <i>ConcreteName</i>. Feature dependencies are honoured.</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Other Defaults</td><td>All <i>ConcreteName</i>'s beginning with the primary default name are tried. Feature dependencies are honoured.</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>All Replacements</td><td>All available ConcreteWidgets are tried. Feature dependencies are honoured.</td></tr>
 </table></p>
 <p>The <i>AbstractName</i> and <i>ConcreteName</i> names used to identify a server widget are derived from the widget class names. <i>AbstractName</i> is set to the AbstractWidget's full name, unless the name begins with <tt>QAbstract</tt> in which case it is set to the widget class name, minus the <tt>QAbstract</tt> prefix. The <i>ConcreteName</i> is set to the class name of the ConcreteWidget, unless the class name ends with the <i>AbstractName</i> of the widget it is replacing, in which case it is set to the widget class name minus the <i>AbstractName</i> suffix. These rules are designed to simplify writing mapping files - a class <tt>WheelBrowserScreen</tt> replacing <tt>QAbstractBrowserScreen</tt> is written as <tt>BrowserScreen=Wheel</tt> rather than <tt>QAbstractBrowserScreen=WheelBrowserScreen</tt>.</p>
 <hr />
@@ -185,12 +184,12 @@
 <h3 class="fn"><a name="addAggregateObject"></a>void QtopiaServerApplication::addAggregateObject ( <a href="qobject.html">QObject</a> * <i>me</i>, <a href="qobject.html">QObject</a> * <i>them</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Add an object <i>them</i> to <i>me</i> to create an &quot;aggregate&quot; task. Aggregate tasks are designed to work around the limitations in Qt's support for multiple interface inheritance by allowing multiple objects to be &quot;stuck together&quot; to form a single object from the task system's perspective.</p>
 <p>For example, consider the following interfaces:</p>
-<pre>    class ApplicationLauncherType : public QObject {};
+<pre>&nbsp;   class ApplicationLauncherType : public QObject {};
     QTOPIA_TASK_INTERFACE(ApplicationLauncherType);
     class SystemShutdownHandler : public QObject {};
     QTOPIA_TASK_INTERFACE(SystemShutdownHandler);</pre>
 <p>Using direct inheritance a single task could not implement both interfaces. Instead, a task can create one object that implements the <tt>ApplicationLauncherType</tt> interface and one that implements the <tt>SystemShutdownHandler</tt> interface and aggregate them together.</p>
-<pre>    class MyLauncherShutdown : public SystemShutdownHandler
+<pre>&nbsp;   class MyLauncherShutdown : public SystemShutdownHandler
     {
     public:
         MyLauncherShutdown(MyLauncherType *);
@@ -255,22 +254,22 @@
 <h3 class="fn"><a name="QTOPIA_REPLACE_WIDGET"></a>QTOPIA_REPLACE_WIDGET (  <i>AbstractWidget</i>,  <i>ConcreteWidget</i> )</h3>
 <p>Mark <i>ConcreteWidget</i> as a replacement for <i>AbstractWidget</i>. While <i>AbstractWidget</i> does not actually have to be abstract, it is generally an interface that <i>ConcreteWidget</i> implements. This macro should appear as part of the definition of <i>ConcreteWidget</i>.</p>
 <p>For example,</p>
-<pre><span class="comment">    // wheelbrowserscreen.h</span>
+<pre>&nbsp;   // wheelbrowserscreen.h
     class WheelBrowserScreen : public QAbstractBrowserScreen
     {
-        <span class="comment">// ...</span>
+        // ...
     };
 
-<span class="comment">    // wheelbrowserscreen.cpp</span>
+    // wheelbrowserscreen.cpp
     QTOPIA_REPLACE_WIDGET(QAbstractBrowserScreen, WheelBrowserScreen);</pre>
 <h3 class="fn"><a name="QTOPIA_REPLACE_WIDGET_OVERRIDE"></a>QTOPIA_REPLACE_WIDGET_OVERRIDE (  <i>AbstractWidget</i>,  <i>ConcreteWidget</i> )</h3>
 <p>Set <i>ConcreteWidget</i> as the <b>static</b> replacement for <i>AbstractWidget</i>.</p>
 <p>While as efficient as possible, use of the widget replacement system instead of explicitly instantiating concrete classes does introduce some indirection costs. For shipping software where this flexibility is not necessary, QTOPIA_REPLACE_WIDGET_OVERRIDE() can be used to force the selection of a specified <i>ConcreteWidget</i>. This eliminates the cost of the widget replacement system for the particular <i>AbstractWidget</i> by bypassing the replacement system. The macro should appear inline with the <i>AbstractWidget</i> declaration, and must have visibility of the <i>ConcreteWidget</i>'s declaration.</p>
 <p>For example,</p>
-<pre><span class="comment">    // qabstractbrowserscreen.h</span>
+<pre>&nbsp;   // qabstractbrowserscreen.h
     class QAbstractBrowserScreen : public QWidget
     {
-        <span class="comment">// ...</span>
+        // ...
     };
 
     #include &quot;wheelbrowserscreen.h&quot;
@@ -279,13 +278,13 @@
 <p>Mark <i>ConcreteWidget</i> as a replacement for <i>AbstractWidget</i>. While <i>AbstractWidget</i> does not actually have to be abstract, it is generally an interface that <i>ConcreteWidget</i> implements. This macro should appear as part of the definition of <i>ConcreteWidget</i>.</p>
 <p>Unless explicitly specified in the <tt>Trolltech/ServerWidgets</tt> file, a widget specified in this fashion if <i>Feature</i> is currently provided by Qtopia, as returned by the <a href="qtopiafeatures.html#hasFeature">QtopiaFeatures::hasFeature</a>() method.</p>
 <p>For example,</p>
-<pre><span class="comment">    // touchscreendialer.h</span>
+<pre>&nbsp;   // touchscreendialer.h
     class TouchscreenDialerScreen : public QAbstractDialerScreen
     {
-        <span class="comment">// ...</span>
+        // ...
     };
 
-<span class="comment">    // touchscreendialer.cpp</span>
+    // touchscreendialer.cpp
     QTOPIA_REPLACE_WIDGET_WHEN(QAbstractDialerScreen, TouchscreenDialerScreen, Touchscreen);</pre>
 <h3 class="fn"><a name="QTOPIA_STATIC_TASK"></a>QTOPIA_STATIC_TASK (  <i>TaskName</i>,  <i>Function</i> )</h3>
 <p>Install a functional task. A functional task is one that does not consist of an instantiable object, but is, instead, a simple function. Static tasks can obviously not provide interfaces.</p>
@@ -310,6 +309,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

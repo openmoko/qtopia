@@ -54,7 +54,7 @@ static const QString    DATA_FILE_EXTENSION = ".data";
 //
 // ============================================================================
 
-bool QDSDataStore::add( const QLocalUniqueId& id,
+bool QDSDataStore::add( const QUniqueId& id,
                         const QByteArray& data,
                         const QMimeType& type )
 {
@@ -94,7 +94,7 @@ bool QDSDataStore::add( const QLocalUniqueId& id,
     return true;
 }
 
-bool QDSDataStore::add( const QLocalUniqueId& id,
+bool QDSDataStore::add( const QUniqueId& id,
                         QFile& data,
                         const QMimeType& type )
 {
@@ -124,7 +124,7 @@ bool QDSDataStore::add( const QLocalUniqueId& id,
     return true;
 }
 
-bool QDSDataStore::add( const QLocalUniqueId& id )
+bool QDSDataStore::add( const QUniqueId& id )
 {
     // Update info file (in an atomic fashion)
     QDSLockedFile infoFile( infoFileName( id ) );
@@ -154,7 +154,7 @@ bool QDSDataStore::add( const QLocalUniqueId& id )
     return true;
 }
 
-bool QDSDataStore::set( const QLocalUniqueId& id, const QByteArray& data )
+bool QDSDataStore::set( const QUniqueId& id, const QByteArray& data )
 {
     // Open data file
     QDSLockedFile dataFile( dataFileName( id ) );
@@ -176,7 +176,7 @@ bool QDSDataStore::set( const QLocalUniqueId& id, const QByteArray& data )
 }
 
 
-bool QDSDataStore::set( const QLocalUniqueId& id, QFile& data )
+bool QDSDataStore::set( const QUniqueId& id, QFile& data )
 {
     // Overwrite old data file with new data file
     QDSLockedFile dataFile( dataFileName( id ) );
@@ -204,7 +204,7 @@ bool QDSDataStore::set( const QLocalUniqueId& id, QFile& data )
     return true;
 }
 
-bool QDSDataStore::set( const QLocalUniqueId& id,
+bool QDSDataStore::set( const QUniqueId& id,
                         const QByteArray& data,
                         const QMimeType& type )
 {
@@ -250,7 +250,7 @@ bool QDSDataStore::set( const QLocalUniqueId& id,
 }
 
 
-bool QDSDataStore::set( const QLocalUniqueId& id,
+bool QDSDataStore::set( const QUniqueId& id,
                         QFile& data,
                         const QMimeType& type )
 {
@@ -303,7 +303,7 @@ bool QDSDataStore::set( const QLocalUniqueId& id,
     return true;
 }
 
-bool QDSDataStore::remove( const QLocalUniqueId &id )
+bool QDSDataStore::remove( const QUniqueId &id )
 {
     if ( ( referenceCount( id ) <= 1 ) && ( transmitCount( id ) <= 0 ) ) {
         // Try removing the data file first as it is the most likely to be open
@@ -326,7 +326,7 @@ bool QDSDataStore::remove( const QLocalUniqueId &id )
     return true;
 }
 
-bool QDSDataStore::exists( const QLocalUniqueId &id )
+bool QDSDataStore::exists( const QUniqueId &id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
     QDSLockedFile dataFile( dataFileName( id ) );
@@ -334,7 +334,7 @@ bool QDSDataStore::exists( const QLocalUniqueId &id )
     return infoFile.exists() && dataFile.exists();
 }
 
-bool QDSDataStore::transmit( const QLocalUniqueId& id )
+bool QDSDataStore::transmit( const QUniqueId& id )
 {
     // Update info file (in an atomic fashion)
     QDSLockedFile infoFile( infoFileName( id ) );
@@ -364,7 +364,7 @@ bool QDSDataStore::transmit( const QLocalUniqueId& id )
     return true;
 }
 
-bool QDSDataStore::received( const QLocalUniqueId& id )
+bool QDSDataStore::received( const QUniqueId& id )
 {
     if ( ( referenceCount( id ) <= 0 ) && ( transmitCount( id ) <= 1 ) ) {
         // Try removing the data file first as it is the most likely to be open
@@ -387,7 +387,7 @@ bool QDSDataStore::received( const QLocalUniqueId& id )
     return true;
 }
 
-QMimeType QDSDataStore::type( const QLocalUniqueId &id )
+QMimeType QDSDataStore::type( const QUniqueId &id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
     if ( infoFile.exists() && infoFile.open( QIODevice::ReadOnly ) ) {
@@ -405,7 +405,7 @@ QMimeType QDSDataStore::type( const QLocalUniqueId &id )
     }
 }
 
-QByteArray QDSDataStore::data( const QLocalUniqueId &id )
+QByteArray QDSDataStore::data( const QUniqueId &id )
 {
     QDSLockedFile dataFile( dataFileName( id ) );
     if ( dataFile.exists() && dataFile.open( QIODevice::ReadOnly ) ) {
@@ -416,20 +416,20 @@ QByteArray QDSDataStore::data( const QLocalUniqueId &id )
     }
 }
 
-QString QDSDataStore::infoFileName( const QLocalUniqueId& id )
+QString QDSDataStore::infoFileName( const QUniqueId& id )
 {
     return Qtopia::applicationFileName( QDSDATASTORE_PATH,
                                         id.toString() + INFO_FILE_EXTENSION );
 }
 
-QString QDSDataStore::dataFileName( const QLocalUniqueId& id )
+QString QDSDataStore::dataFileName( const QUniqueId& id )
 {
     return Qtopia::applicationFileName( QDSDATASTORE_PATH,
                                         id.toString() + DATA_FILE_EXTENSION );
 }
 
 
-int QDSDataStore::referenceCount( const QLocalUniqueId &id )
+int QDSDataStore::referenceCount( const QUniqueId &id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
     if ( infoFile.exists() && infoFile.open( QIODevice::ReadOnly ) ) {
@@ -444,7 +444,7 @@ int QDSDataStore::referenceCount( const QLocalUniqueId &id )
     }
 }
 
-bool QDSDataStore::removeReference( const QLocalUniqueId& id )
+bool QDSDataStore::removeReference( const QUniqueId& id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
     if ( infoFile.exists() && infoFile.open( QIODevice::ReadWrite ) ) {
@@ -476,7 +476,7 @@ bool QDSDataStore::removeReference( const QLocalUniqueId& id )
     return true;
 }
 
-int QDSDataStore::transmitCount( const QLocalUniqueId& id )
+int QDSDataStore::transmitCount( const QUniqueId& id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
     if ( infoFile.exists() && infoFile.open( QIODevice::ReadOnly ) ) {
@@ -493,7 +493,7 @@ int QDSDataStore::transmitCount( const QLocalUniqueId& id )
     }
 }
 
-bool QDSDataStore::removeTransmit( const QLocalUniqueId& id )
+bool QDSDataStore::removeTransmit( const QUniqueId& id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
     if ( infoFile.exists() && infoFile.open( QIODevice::ReadWrite ) ) {
@@ -621,7 +621,7 @@ bool QDSLockedFile::lock( LockMode mode, bool block )
     else if ( mode == WriteLock )
         operation = Qtopia::LockWrite;
 
-    if ( !block )
+    if ( block )
         operation |= Qtopia::LockBlock;
 
     if ( !Qtopia::lockFile( *this, operation ) )
@@ -678,14 +678,14 @@ QDSDataPrivate::QDSDataPrivate()
 {
 }
 
-QDSDataPrivate::QDSDataPrivate( const QLocalUniqueId& dataId )
+QDSDataPrivate::QDSDataPrivate( const QUniqueId& dataId )
 :   mUsingLocalStore( false ),
     mId( dataId ),
     mLocalStore( 0 ),
     mType( 0 )
 {
     if ( !QDSDataStore::add( mId ) )
-        mId = QLocalUniqueId();
+        mId = QUniqueId();
 }
 
 QDSDataPrivate::QDSDataPrivate( const QByteArray& data, const QMimeType& type )
@@ -703,7 +703,7 @@ QDSDataPrivate::QDSDataPrivate( const QByteArray& data, const QMimeType& type )
         mType = new QMimeType( type );
     } else {
         if ( !QDSDataStore::add( mId, data, type ) )
-            mId = QLocalUniqueId();
+            mId = QUniqueId();
     }
 }
 
@@ -729,11 +729,11 @@ QDSDataPrivate::QDSDataPrivate( QFile& data, const QMimeType& type )
         mType = new QMimeType( type );
     } else {
         if ( !QDSDataStore::add( mId, data, type ) )
-            mId = QLocalUniqueId();
+            mId = QUniqueId();
     }
 }
 
-QDSDataPrivate::QDSDataPrivate( const QLocalUniqueId& dataId,
+QDSDataPrivate::QDSDataPrivate( const QUniqueId& dataId,
                                 const QByteArray& data,
                                 const QMimeType& type )
 :   mUsingLocalStore( false ),
@@ -748,13 +748,13 @@ QDSDataPrivate::QDSDataPrivate( const QLocalUniqueId& dataId,
         mType = new QMimeType( type );
     } else {
         if ( !QDSDataStore::add( mId, data, type ) )
-            mId = QLocalUniqueId();
+            mId = QUniqueId();
     }
 }
 
 QDSDataPrivate::~QDSDataPrivate()
 {
-    if ( !mUsingLocalStore && ( mId != QLocalUniqueId() ) )
+    if ( !mUsingLocalStore && ( mId != QUniqueId() ) )
         QDSDataStore::remove( mId );
 
     delete mLocalStore;
@@ -821,7 +821,7 @@ QDSData::QDSData( const QDSData& other )
 :   d( 0 )
 {
     // Create d pointer
-    if ( other.d->mId != QLocalUniqueId() ) {
+    if ( other.d->mId != QUniqueId() ) {
         if ( other.d != 0 ) {
             if ( other.d->mUsingLocalStore )
                 other.d->shiftToStore();
@@ -835,7 +835,7 @@ QDSData::QDSData( const QDSData& other )
 /*!
     Constructs a data object from the \a key created by QDSData::store().
 */
-QDSData::QDSData( const QLocalUniqueId& key )
+QDSData::QDSData( const QUniqueId& key )
 :   d( 0 )
 {
     // Construct the d pointer
@@ -890,7 +890,7 @@ const QDSData& QDSData::operator=( const QDSData& other )
     d = 0;
 
     // Copy other d pointer
-    if ( other.d->mId != QLocalUniqueId() ) {
+    if ( other.d->mId != QUniqueId() ) {
         if ( other.d->mUsingLocalStore )
             other.d->shiftToStore();
         d = new QDSDataPrivate( other.d->mId );
@@ -943,7 +943,7 @@ bool QDSData::operator!=( const QDSData& other ) const
 */
 bool QDSData::isValid() const
 {
-    if ( d->mId != QLocalUniqueId() )
+    if ( d->mId != QUniqueId() )
         return true;
     else
         return false;
@@ -1027,10 +1027,10 @@ QIODevice* QDSData::toIODevice() const
     The persistent data is reference counted so all applications who wish to
     access the data from the data store should call this method.
 */
-QLocalUniqueId QDSData::store()
+QUniqueId QDSData::store()
 {
     if ( !isValid() )
-        return QLocalUniqueId();
+        return QUniqueId();
 
     // If we are using the local store, shift the data into the persistent store
     if ( d->mUsingLocalStore )
@@ -1038,7 +1038,7 @@ QLocalUniqueId QDSData::store()
 
     // Increment the reference count
     if ( !QDSDataStore::add( d->mId ) )
-        return QLocalUniqueId();
+        return QUniqueId();
 
     // Return the unique id as the key
     return d->mId;
@@ -1245,7 +1245,7 @@ bool QDSData::modify( QFile& data, const QMimeType& type )
 
 template <typename Stream> void QDSData::deserialize(Stream &stream)
 {
-    QLocalUniqueId id;
+    QUniqueId id;
     bool usingLocalStore;
     QByteArray localdata;
     QString localtype;
@@ -1258,7 +1258,7 @@ template <typename Stream> void QDSData::deserialize(Stream &stream)
     // Remove old d pointer, and create a new one
     delete d;
 
-    if ( id != QLocalUniqueId() ) {
+    if ( id != QUniqueId() ) {
         if ( usingLocalStore ) {
             d = new QDSDataPrivate( id, localdata, QMimeType( localtype ) );
         } else {

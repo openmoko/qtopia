@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/kernel/qkeysequence.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/kernel/qkeysequence.cpp -->
 <head>
   <title>Qt 4.2: QKeySequence Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -58,17 +58,30 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qkeysequence.html#operator-lt-lt-77">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QKeySequence &amp; <i>sequence</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qkeysequence.html#operator-gt-gt-45">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QKeySequence &amp; <i>sequence</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qkeysequence.html#operator-lt-lt-78">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QKeySequence &amp; <i>sequence</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qkeysequence.html#operator-gt-gt-46">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QKeySequence &amp; <i>sequence</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QKeySequence class encapsulates a key sequence as used by shortcuts.</p>
-<p>A key sequence consists of up to four keyboard codes, each optionally combined with modifiers, such as <a href="qt.html#Modifier-enum">Qt::SHIFT</a>, <a href="qt.html#Modifier-enum">Qt::CTRL</a>, <a href="qt.html#Modifier-enum">Qt::ALT</a> or <a href="qt.html#Modifier-enum">Qt::META</a>. For example, <a href="qt.html#Modifier-enum">Qt::CTRL</a> + <a href="qt.html#Key-enum">Qt::Key_P</a> might be a sequence used as a shortcut for printing a document. Valid codes for keys and modifiers are listed in <a href="qt.html#Key-enum">Qt::Key</a> and <a href="qt.html#Modifier-enum">Qt::Modifier</a>. As an alternative, use the unicode code point of the character; for example, 'A' gives the same key sequence as <a href="qt.html#Key-enum">Qt::Key_A</a>.</p>
-<p>Key sequences can be constructed either from an integer key code, or from a human readable translatable string such as &quot;Ctrl+X,Alt+Space&quot;. A key sequence can be cast to a <a href="qstring.html">QString</a> to obtain a human readable translated version of the sequence. Translations are done in the &quot;<a href="qshortcut.html">QShortcut</a>&quot; context.</p>
+<p>In its most common form, a key sequence describes a combination of keys that must be used together to perform some action. Key sequences are used with <a href="qaction.html">QAction</a> objects to specify which keyboard shortcuts can be used to trigger actions.</p>
+<p>Key sequences can be constructed for use as keyboard shortcuts in three different ways:</p>
+<ul>
+<li>For standard shortcuts, a <a href="qkeysequence.html#StandardKey-enum">standard key</a> can be used to request the platform-specific key sequence associated with each shortcut.</li>
+<li>For custom shortcuts, human-readable strings such as &quot;Ctrl+X&quot; can be used, and these can be translated into the appropriate shortcuts for users of different languages. Translations are made in the &quot;<a href="qshortcut.html">QShortcut</a>&quot; context.</li>
+<li>For hard-coded shortcuts, integer key codes can be specified with a combination of values defined by the <a href="qt.html#Key-enum">Qt::Key</a> and <a href="qt.html#Modifier-enum">Qt::Modifier</a> enum values. Each key code consists of a single <a href="qt.html#Key-enum">Qt::Key</a> value and zero or more modifiers, such as <a href="qt.html#Modifier-enum">Qt::SHIFT</a>, <a href="qt.html#Modifier-enum">Qt::CTRL</a>, <a href="qt.html#Modifier-enum">Qt::ALT</a> and <a href="qt.html#Modifier-enum">Qt::META</a>.</li>
+</ul>
+<p>For example, <b>Ctrl P</b> might be a sequence used as a shortcut for printing a document, and can be specified in any of the following ways:</p>
+<pre> QKeySequence(QKeySequence::Print}
+ QKeySequence(tr(&quot;Ctrl+P&quot;))
+ QKeySequence(tr(&quot;Ctrl+p&quot;))
+ QKeySequence(Qt::CTRL + Qt::Key_P)</pre>
+<p>Note that, for letters, the case used in the specification string does not matter. In the above examples, the user does not need to hold down the <b>Shift</b> key to activate a shortcut specified with &quot;Ctrl+P&quot;. However, for other keys, the use of <b>Shift</b> as an unspecified extra modifier key can lead to confusion for users of an application whose keyboards have different layouts to those used by the developers. See the <a href="#keyboard-layout-issues">Keyboard Layout Issues</a> section below for more details.</p>
+<p>It is preferable to use standard shortcuts where possible. When creating key sequences for non-standard shortcuts, you should use human-readable strings in preference to hard-coded integer values.</p>
+<p>QKeySequence objects can be cast to a <a href="qstring.html">QString</a> to obtain a human-readable translated version of the sequence. Similarly, the <a href="qkeysequence.html#toString">toString</a>() function produces human-readable strings for use in menus. On Mac OS X, the appropriate symbols are used to describe keyboard shortcuts using special keys on the Macintosh keyboard.</p>
+<p>An alternative way to specify hard-coded key codes is to use the Unicode code point of the character; for example, 'A' gives the same key sequence as <a href="qt.html#Key-enum">Qt::Key_A</a>.</p>
 <p><b>Note:</b> On Mac OS X, references to &quot;Ctrl&quot;, <a href="qt.html#Modifier-enum">Qt::CTRL</a>, Qt::Control and <a href="qt.html#KeyboardModifier-enum">Qt::ControlModifier</a> correspond to the <b>Command</b> keys on the Macintosh keyboard, and references to &quot;Meta&quot;, <a href="qt.html#Modifier-enum">Qt::META</a>, Qt::Meta and <a href="qt.html#KeyboardModifier-enum">Qt::MetaModifier</a> correspond to the <b>Control</b> keys. Developers on Mac OS X can use the same shortcut descriptions across all platforms, and their applications will automatically work as expected on Mac OS X.</p>
-<p>The <a href="qkeysequence.html#toString">toString</a>() function produces human-readable strings for use in menus. On Mac OS X, the appropriate symbols are used to describe keyboard shortcuts using special keys on the Macintosh keyboard.</p>
 <a name="standard-shortcuts"></a>
 <h3>Standard Shortcuts</h3>
 <p>QKeySequence defines many <a href="qkeysequence.html#StandardKey-enum">StandardKey</a> standard keyboard shortcuts to reduce the amount of effort required when setting up actions in a typical application. The table below shows some common key sequences that are often used for these standard shortcuts by applications on four widely-used platforms. Note that on Mac OS X, the <b>Ctrl</b> value corresponds to the <b>Command</b> keys on the Macintosh keyboard, and the <b>Meta</b> value corresponds to the <b>Control</b> keys.</p>
@@ -136,6 +149,20 @@
 <tr valign="top" class="even"><td><a href="qkeysequence.html#StandardKey-enum">DeleteEndOfLine</a></td><td>(none)</td><td>(none)</td><td>Ctrl+K</td><td>Ctrl+K</td></tr>
 </table></p>
 <p>Note that, since the key sequences used for the standard shortcuts differ between platforms, you still need to test your shortcuts on each platform to ensure that you do not unintentionally assign the same key sequence to many actions.</p>
+<a name="keyboard-layout-issues"></a>
+<h3>Keyboard Layout Issues</h3>
+<p>Many key sequence specifications are chosen by developers based on the layout of certain types of keyboard, rather than choosing keys that represent the first letter of an action's name, such as <b>Ctrl S</b> (&quot;Ctrl+S&quot;) or <b>Ctrl C</b> (&quot;Ctrl+C&quot;). Additionally, because certain symbols can only be entered with the help of modifier keys on certain keyboard layouts, key sequences intended for use with one keyboard layout may map to a different key, map to no keys at all, or require an additional modifier key to be used on different keyboard layouts.</p>
+<p>For example, the shortcuts, <b>Ctrl plus</b> and <b>Ctrl minus</b>, are often used as shortcuts for zoom operations in graphics applications, and these may be specified as &quot;Ctrl++&quot; and &quot;Ctrl+-&quot; respectively. However, the way these shortcuts are specified and interpreted depends on the keyboard layout. Users of Norwegian keyboards will note that the <b>+</b> and <b>-</b> keys are not adjacent on the keyboard, but will still be able to activate both shortcuts without needing to press the <b>Shift</b> key. However, users with British keyboards will need to hold down the <b>Shift</b> key to enter the <b>+</b> symbol, making the shortcut effectively the same as &quot;Ctrl+Shift+=&quot;.</p>
+<p>Although some developers might resort to fully specifying all the modifiers they use on their keyboards to activate a shortcut, this will also result in unexpected behavior for users of different keyboard layouts.</p>
+<p>For example, a developer using a British keyboard may decide to specify &quot;Ctrl+Shift+=&quot; as the key sequence in order to create a shortcut that coincidentally behaves in the same way as <b>Ctrl plus</b>. However, the <b>=</b> key needs to be accessed using the <b>Shift</b> key on Norwegian keyboard, making the required shortcut effectively <b>Ctrl Shift Shift =</b> (an impossible key combination).</p>
+<p>As a result, both human-readable strings and hard-coded key codes can both be problematic to use when specifying a key sequence that can be used on a variety of different keyboard layouts. Only the use of <a href="qkeysequence.html#StandardKey-enum">standard shortcuts</a> guarantees that the user will be able to use the shortcuts that the developer intended.</p>
+<p>Despite this, we can address this issue by ensuring that human-readable strings are used, making it possible for translations of key sequences to be made for users of different languages. This approach will be successful for users whose keyboards have the most typical layout for the language they are using.</p>
+<a name="gnu-emacs-style-key-sequences"></a>
+<h3>GNU Emacs Style Key Sequences</h3>
+<p>Key sequences similar to those used in <a href="http://www.gnu.org/software/emacs/">GNU Emacs</a>, allowing up to four key codes, can be created by using the multiple argument constructor, or by passing a human-readable string of comma-separated key sequences.</p>
+<p>For example, the key sequence, <b>Ctrl X</b> followed by <b>Ctrl C</b>, can be specified using either of the following ways:</p>
+<pre> QKeySequence(tr(&quot;Ctrl+X, Ctrl+C&quot;))
+ QKeySequence(Qt::CTRL + Qt::Key_X, Qt::CTRL + Qt::Key_C)</pre>
 <p>See also <a href="qshortcut.html">QShortcut</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -292,11 +319,11 @@
 <p>Returns a reference to the element at position <i>index</i> in the key sequence. This can only be used to read an element.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-77"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QKeySequence &amp; <i>sequence</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-78"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QKeySequence &amp; <i>sequence</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the key <i>sequence</i> to the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-45"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QKeySequence &amp; <i>sequence</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-46"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QKeySequence &amp; <i>sequence</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a key sequence from the <i>stream</i> into the key <i>sequence</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -304,6 +331,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

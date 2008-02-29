@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtNetwork module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1510,13 +1520,16 @@ bool QSocks5SocketEngine::waitForRead(int msecs, bool *timedOut) const
         if (d->data->controlSocket->bytesAvailable())
             const_cast<QSocks5SocketEnginePrivate*>(d)->_q_controlSocketReadNotification();
 
-        while (!d->readNotificationActivated && d->data->controlSocket->waitForReadyRead(qt_timeout_value(msecs, stopWatch.elapsed()))) {
+        bool success = true;
+        while (!d->readNotificationActivated && (success = d->data->controlSocket->waitForReadyRead(qt_timeout_value(msecs, stopWatch.elapsed())))) {
             QSOCKS5_DEBUG << "looping";
         }
-        if (d->data->controlSocket->error() != QAbstractSocket::UnknownSocketError) {
+        if (!success) {
             setError(d->data->controlSocket->error(), d->data->controlSocket->errorString());
             if (timedOut && d->data->controlSocket->error() == QAbstractSocket::SocketTimeoutError)
                 *timedOut = true;
+            if (d->data->controlSocket->state() == QAbstractSocket::UnconnectedState)
+                d->readNotificationActivated = true;
         }
 #ifndef QT_NO_UDPSOCKET
     } else {

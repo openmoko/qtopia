@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qtdesigner.qdoc -->
 <head>
   <title>Qt 4.2: QtDesigner Module</title>
   <link rel="prev" href="qtxml.html" />
@@ -61,7 +62,7 @@
 <p>To provide your custom widget plugin with the expected behavior and functionality within <i>Qt Designer</i>'s workspace you can subclass the associated extension classes:</p>
 <p>The <a href="qdesignercontainerextension.html">QDesignerContainerExtension</a> class allows you to add pages to a custom multi-page container. The <a href="qdesignertaskmenuextension.html">QDesignerTaskMenuExtension</a> class allows you to add custom menu entries to <i>Qt Designer</i>'s task menu. The <a href="qdesignermembersheetextension.html">QDesignerMemberSheetExtension</a> class allows you to manipulate a widget's member functions which is displayed when configuring connections using <i>Qt Designer</i>'s mode for editing signals and slots. And finally, the <a href="qdesignerpropertysheetextension.html">QDesignerPropertySheetExtension</a> class allows you to manipulate a widget's properties which is displayed in <i>Qt Designer</i>'s property editor.</p>
 <p align="center"><img src="images/qtdesignerextensions.png" /></p><p>In <i>Qt Designer</i> the extensions are not created until they are required. For that reason, when implementing extensions, you must also subclass <a href="qextensionfactory.html">QExtensionFactory</a>, i.e create a class that is able to make instances of your extensions. In addition, you must make <i>Qt Designer</i>'s extension manager register your factory; the extension manager controls the construction of extensions as they are required, and you can access it through <a href="qdesignerformeditorinterface.html">QDesignerFormEditorInterface</a> and <a href="qextensionmanager.html">QExtensionManager</a>.</p>
-<p>For a complete example creating a custom widget plugin with an extension, see the Task Menu Extension or Container Extension examples.</p>
+<p>For a complete example creating a custom widget plugin with an extension, see the <a href="designer-taskmenuextension.html">Task Menu Extension</a> or <a href="designer-containerextension.html">Container Extension</a> examples.</p>
 <a name="retrieving-access-to-qt-designer-components"></a>
 <h3>Retrieving Access to <i>Qt Designer</i> Components</h3>
 <p>The purpose of the classes mentioned in this section is to provide access to <i>Qt Designer</i>'s components, managers and workspace, and they are not intended to be instantiated directly.</p>
@@ -78,7 +79,7 @@
 <a name="creating-user-interfaces-at-run-time"></a>
 <h3>Creating User Interfaces at Run-Time</h3>
 <p>The <tt>QtDesigner</tt> module contains the <a href="qformbuilder.html">QFormBuilder</a> class that provides a mechanism for dynamically creating user interfaces at run-time, based on <tt>.ui</tt> files created with <i>Qt Designer</i>. This class is typically used by custom components and applications that embed <i>Qt Designer</i>. Standalone applications that need to dynamically generate user interfaces at run-time use the <a href="quiloader.html">QUiLoader</a> class, found in the <a href="qtuitools.html">QtUiTools</a> module.</p>
-<p>For a complete example using <a href="quiloader.html">QUiLoader</a>, see the Calculator Builder example.</p>
+<p>For a complete example using <a href="quiloader.html">QUiLoader</a>, see the <a href="designer-calculatorbuilder.html">Calculator Builder example</a>.</p>
 <p>See also <a href="designer-manual.html">Qt Designer Manual</a> and <a href="qtuitools.html">QtUiTools Module</a>.</p>
 <p>
 [Previous: <a href="qtxml.html">QtXml Module</a>]
@@ -89,6 +90,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

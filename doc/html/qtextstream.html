@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/io/qtextstream.cpp -->
 <head>
   <title>Qt 4.2: QTextStream Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -148,6 +149,13 @@
      out &lt;&lt; &quot;Result: &quot; &lt;&lt; qSetFieldWidth(10) &lt;&lt; left &lt;&lt; 3.14 &lt;&lt; 2.7 &lt;&lt; endl;
      <span class="comment">// writes &quot;Result: 3.14      2.7       \n&quot;</span>
  }</pre>
+<p>It's also common to use QTextStream to read console input and write console output. QTextStream is locale aware, and will automatically decode standard input using the correct codec. Example:</p>
+<pre> QTextStream stream(stdin);
+ QString line;
+ do {
+     line = stream.readLine();
+ } while (!line.isNull());</pre>
+<p>Note that you cannot use <a href="qtextstream.html#atEnd">QTextStream::atEnd</a>(), which returns true when you have reached the end of the data stream, with stdin.</p>
 <p>Besides using QTextStream's constructors, you can also set the device or string QTextStream operates on by calling <a href="qtextstream.html#setDevice">setDevice</a>() or <a href="qtextstream.html#setString">setString</a>(). You can seek to a position by calling <a href="qtextstream.html#seek">seek</a>(), and <a href="qtextstream.html#atEnd">atEnd</a>() will return true when there is no data left to be read. If you call <a href="qtextstream.html#flush">flush</a>(), QTextStream will empty all data from its write buffer into the device and call <a href="qtextstream.html#flush">flush</a>() on the device.</p>
 <p>Internally, QTextStream uses a Unicode based buffer, and <a href="qtextcodec.html">QTextCodec</a> is used by QTextStream to automatically support different character sets. By default, <a href="qtextcodec.html#codecForLocale">QTextCodec::codecForLocale</a>() is used for reading and writing, but you can also set the codec by calling <a href="qtextstream.html#setCodec">setCodec</a>(). Automatic Unicode detection is also supported. When this feature is enabled (the default behavior), QTextStream will detect the UTF-16 BOM (Byte Order Mark) and switch to the appropriate UTF-16 codec when reading. QTextStream does not write a BOM by default, but you can enable this by calling setGenerateByteOrderMark(true). When QTextStream operates on a <a href="qstring.html">QString</a> directly, the codec is disabled.</p>
 <p>There are three general ways to use QTextStream when reading text files:</p>
@@ -156,6 +164,7 @@
 <li>Word by word. QTextStream supports streaming into QStrings, QByteArrays and char* buffers. Words are delimited by space, and leading white space is automatically skipped.</li>
 <li>Character by character, by streaming into <a href="qchar.html">QChar</a> or char types. This method is often used for convenient input handling when parsing files, independent of character encoding and end-of-line semantics. To skip white space, call <a href="qtextstream.html#skipWhiteSpace">skipWhiteSpace</a>().</li>
 </ul>
+<p>Since the text stream uses a buffer, you should not read from the stream using the implementation of a superclass. For instance, if you have a <a href="qfile.html">QFile</a> and read from it directly using <a href="qiodevice.html#readLine">QFile::readLine</a>() instead of using the stream, the text stream's internal position will be out of sync with the file's position.</p>
 <p>By default, when reading numbers from a stream of text, QTextStream will automatically detect the number's base representation. For example, if the number starts with &quot;0x&quot;, it is assumed to be in hexadecimal form. If it starts with the digits 1-9, it is assumed to be in decimal form, and so on. You can set the integer base, thereby disabling the automatic detection, by calling <a href="qtextstream.html#setIntegerBase">setIntegerBase</a>(). Example:</p>
 <pre> QTextStream in(&quot;0x50 0x20&quot;);
  int firstNumber, secondNumber;
@@ -195,7 +204,7 @@
 <tr valign="top" class="even"><td><tt>bom</tt></td><td>Same as setGenerateByteOrderMark(true).</td></tr>
 </table></p>
 <p>In addition, Qt provides three global manipulators that take a parameter: <a href="qtextstream.html#qSetFieldWidth">qSetFieldWidth</a>(), <a href="qtextstream.html#qSetPadChar">qSetPadChar</a>(), and <a href="qtextstream.html#qSetRealNumberPrecision">qSetRealNumberPrecision</a>().</p>
-<p>See also <a href="qdatastream.html">QDataStream</a>, <a href="qiodevice.html">QIODevice</a>, <a href="qfile.html">QFile</a>, <a href="qbuffer.html">QBuffer</a>, <a href="qtcpsocket.html">QTcpSocket</a>, and Codecs Example.</p>
+<p>See also <a href="qdatastream.html">QDataStream</a>, <a href="qiodevice.html">QIODevice</a>, <a href="qfile.html">QFile</a>, <a href="qbuffer.html">QBuffer</a>, <a href="qtcpsocket.html">QTcpSocket</a>, and <a href="tools-codecs.html">Codecs Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="FieldAlignment-enum"></a>enum QTextStream::FieldAlignment</h3>
@@ -305,7 +314,7 @@
 <p>See also <a href="qtextstream.html#setPadChar">setPadChar</a>() and <a href="qtextstream.html#setFieldWidth">setFieldWidth</a>().</p>
 <h3 class="fn"><a name="pos"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QTextStream::pos () const</h3>
 <p>Returns the device position corresponding to the current position of the stream, or -1 if an error occurs (e.g., if there is no device or string, or if there's a device error).</p>
-<p>Because <a href="qtextstream.html">QTextStream</a> is buffered, this function may have to rewind the device to reconstruct a valid device position. This operation can be expensive, so you may want to avoid calling this function in a tight loop.</p>
+<p>Because <a href="qtextstream.html">QTextStream</a> is buffered, this function may have to seek the device to reconstruct a valid device position. This operation can be expensive, so you may want to avoid calling this function in a tight loop.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qtextstream.html#seek">seek</a>().</p>
 <h3 class="fn"><a name="read"></a><a href="qstring.html">QString</a> QTextStream::read ( <a href="qtglobal.html#qint64-typedef">qint64</a> <i>maxlen</i> )</h3>
@@ -320,8 +329,8 @@
 <p>Reads one line of text from the stream, and returns it as a <a href="qstring.html">QString</a>. The maximum allowed line length is set to <i>maxlen</i>. If the stream contains lines longer than this, then the lines will be split after <i>maxlen</i> characters and returned in parts.</p>
 <p>If <i>maxlen</i> is 0, the lines can be of any length. A common value for <i>maxlen</i> is 75.</p>
 <p>The returned line has no trailing end-of-line characters (&quot;\n&quot; or &quot;\r\n&quot;), so calling <a href="qstring.html#trimmed">QString::trimmed</a>() is unnecessary.</p>
-<p>If the stream has read to the end of the file, the returned string will be an empty string. You can explicitly test for the end of the file using <a href="qtextstream.html#atEnd">atEnd</a>().</p>
-<p>See also <a href="qtextstream.html#readAll">readAll</a>().</p>
+<p>If the stream has read to the end of the file, readLine() will return a null <a href="qstring.html">QString</a>. For strings, or for devices that support it, you can explicitly test for the end of the stream using <a href="qtextstream.html#atEnd">atEnd</a>().</p>
+<p>See also <a href="qtextstream.html#readAll">readAll</a>() and <a href="qiodevice.html#readLine">QIODevice::readLine</a>().</p>
 <h3 class="fn"><a name="realNumberNotation"></a><a href="qtextstream.html#RealNumberNotation-enum">RealNumberNotation</a> QTextStream::realNumberNotation () const</h3>
 <p>Returns the current real number notation.</p>
 <p>See also <a href="qtextstream.html#setRealNumberNotation">setRealNumberNotation</a>(), <a href="qtextstream.html#realNumberPrecision">realNumberPrecision</a>(), <a href="qtextstream.html#numberFlags">numberFlags</a>(), and <a href="qtextstream.html#integerBase">integerBase</a>().</p>
@@ -397,7 +406,7 @@
 <h3 class="fn"><a name="skipWhiteSpace"></a>void QTextStream::skipWhiteSpace ()</h3>
 <p>Reads and discards whitespace from the stream until either a non-space character is detected, or until <a href="qtextstream.html#atEnd">atEnd</a>() returns true. This function is useful when reading a stream character by character.</p>
 <p>Whitespace characters are all characters for which <a href="qchar.html#isSpace">QChar::isSpace</a>() returns true.</p>
-<p>See also operator&gt;&gt;(QChar &amp;) and operator&gt;&gt;(char &amp;).</p>
+<p>See also <a href="qtextstream.html#operator-gt-gt">operator&gt;&gt;</a>().</p>
 <h3 class="fn"><a name="status"></a><a href="qtextstream.html#Status-enum">Status</a> QTextStream::status () const</h3>
 <p>Returns the status of the text stream.</p>
 <p>See also <a href="qtextstream.html#Status-enum">QTextStream::Status</a>, <a href="qtextstream.html#setStatus">setStatus</a>(), and <a href="qtextstream.html#resetStatus">resetStatus</a>().</p>
@@ -688,6 +697,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

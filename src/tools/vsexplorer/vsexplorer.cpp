@@ -49,9 +49,11 @@
 
 static bool terminateRequested = false;
 
+#ifndef SINGLE_EXEC
 //we cannot dump QCallBroadcast info without these macros
 Q_DECLARE_USER_METATYPE_NO_OPERATORS(QList<int>);
 Q_IMPLEMENT_USER_METATYPE_NO_OPERATORS(QList<int>);
+#endif
 
 //needed to dump QPhoneRfFunctinality::Level in qtopiaphone/qphonerffunctionality.h
 //we don't include the header as we want to avoid that vsexplorer depends on the phone library.
@@ -69,8 +71,10 @@ public:
     };
 };
 
+#ifndef SINGLE_EXEC
 Q_DECLARE_USER_METATYPE_ENUM(QPhoneRfFunctionality::Level);
 Q_IMPLEMENT_USER_METATYPE_ENUM(QPhoneRfFunctionality::Level);
+#endif
 
 class VSExplorer : public QObject
 {
@@ -765,9 +769,16 @@ void dodump(QValueSpaceItem * item)
 }
 
 
+#ifdef SINGLE_EXEC
+QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,vsexplorer)
+#define MAIN_FUNC main_vsexplorer
+#else
+#define MAIN_FUNC main
+#endif
+
 QSXE_APP_KEY
 
-int main(int argc, char ** argv)
+int MAIN_FUNC(int argc, char ** argv)
 {
     QSXE_SET_APP_KEY(argv[0])
     QApplication app(argc, argv, true);

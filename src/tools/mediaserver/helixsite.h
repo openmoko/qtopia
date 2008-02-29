@@ -22,7 +22,7 @@
 #ifndef HELIXSITE_H
 #define HELIXSITE_H
 
-#include <observer.h>
+#include "observer.h"
 #include <helixvideosurface.h>
 
 #include <config.h>

@@ -48,8 +48,7 @@ SOURCES		+= dayview.cpp \
 FORMS	+=        repeatentry.ui \
                    #datebookweekheader.ui \
 		   findwidgetbase_p.ui \
-		   exceptiondialogbase.ui \
-		   alarmdialogbase.ui
+		   exceptiondialogbase.ui
 
 PHONE_FORMS    += entrydetails_phone.ui \
                        datebooksettingsbase_phone.ui

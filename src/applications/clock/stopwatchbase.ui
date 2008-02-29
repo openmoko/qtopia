@@ -164,6 +164,14 @@
      </item>
      <item>
       <widget class="QPushButton" name="reset" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>1</hsizetype>
+         <vsizetype>5</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="whatsThis" >
         <string>Resets the stopwatch.</string>
        </property>

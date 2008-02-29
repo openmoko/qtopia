@@ -330,7 +330,12 @@ public:
 
     QString mAuth;
 };
-
+/*!
+  \internal
+  \class QtopiaHttp
+  \brief The QtopiaHttp class provides a wrapper around QHttp to make fetching redirected urls
+  easier
+*/
 QtopiaHttp::QtopiaHttp(QObject *parent)
     : QHttp(parent)
 {

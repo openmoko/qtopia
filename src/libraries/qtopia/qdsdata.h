@@ -34,7 +34,7 @@
 // ============================================================================
 
 class QDSDataPrivate;
-class QLocalUniqueId;
+class QUniqueId;
 class QByteArray;
 class QMimeType;
 class QString;
@@ -52,7 +52,7 @@ class QTOPIA_EXPORT QDSData
 public:
     QDSData();
     QDSData( const QDSData& other );
-    explicit QDSData( const QLocalUniqueId& key );
+    explicit QDSData( const QUniqueId& key );
     QDSData( const QByteArray& data, const QMimeType& type );
     QDSData( const QString& data, const QMimeType& type );
     QDSData( QFile& data, const QMimeType& type );
@@ -72,7 +72,7 @@ public:
     QIODevice* toIODevice() const;
 
     // Modification
-    QLocalUniqueId store();
+    QUniqueId store();
     bool remove();
     bool modify( const QByteArray& data );
     bool modify( const QString& data );

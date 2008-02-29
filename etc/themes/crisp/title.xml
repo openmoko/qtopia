@@ -21,8 +21,8 @@
 	<status name="roaming" rect="-80,2,14x14" imageon="roaming" onclick="coloron=#72715a" interactive="yes" on="expr:@/Telephony/Status/Roaming"/>
 	<status name="messages" rect="-64,4,14x9" imageon="mailalert" onclick="coloron=#72715a" imageoff="mailalert" alphaoff="64" interactive="yes" on="expr:@/Communications/Messages/NewMessages > 0"/>
 	<status name="call_active" rect="-46,2,11x14" imageon="call" onclick="coloron=#72715a" imageoff="call" alphaoff="64" interactive="yes" on="expr:@/Communications/Calls/ActiveCalls > 0"/>
-    <level name="signal" rect="-31,2,13x13" src="signal" count="5" width="13" onclick="color=#72715a" interactive="yes" min="0" max="100" active="expr:@/Telephony/Status/SignalLevel/modem">
-	    expr:@/Telephony/Status/SignalLevel/modem
+    <level name="signal" rect="-31,2,13x13" src="signal" count="5" width="13" onclick="color=#72715a" interactive="yes" min="0" max="100" active="expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength">
+            expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength
 	</level>
 	<level name="battery" rect="-16,1,12x14" src="battery" count="5" width="12" onclick="color=#72715a" interactive="yes" min="0" max="100" delay="1000" loop="0" play="expr:@/Accessories/Battery/Charging == true">
 	    expr:@/Accessories/Battery/VisualCharge

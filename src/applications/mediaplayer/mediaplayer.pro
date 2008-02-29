@@ -29,9 +29,13 @@ pics.files=$$QTOPIA_DEPOT_PATH/pics/mediaplayer/*
 pics.path=/pics/mediaplayer
 pics.hint=pics
 
-INSTALLS+=desktop pics
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=mediaplayer*
+help.hint=help
+
+INSTALLS+=desktop pics help
 
 pkg.desc=Qtopia media player.
-pkg.domain=mediasession,window,graphics,docapi,launcher,drm,cardreader
+pkg.domain=mediasession,window,graphics,docapi,launcher,drm,cardreader,lightandpower
 
 depends(libraries/qtopiamedia)

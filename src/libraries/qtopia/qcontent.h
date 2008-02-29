@@ -193,6 +193,7 @@ private:
     void init( const QFileInfo &fi, bool store=true );
 
     bool installContent( const QString &filePath = QString() );
+    bool updateContent();
 
     static ContentLinkSql *database();
     static void invalidate(QContentId id);

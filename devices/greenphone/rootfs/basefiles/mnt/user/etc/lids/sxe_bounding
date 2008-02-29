@@ -1,0 +1,225 @@
+#!/bin/sh
+
+# This script defines the system-wide rules to secure the
+# SXE linux operating system.  The rules go from most general
+# (at the beginning) to most specific (at the end).
+
+# LIDS will complain with a "you must protect your object|subject"
+# error if a specific rule is not preceded by a general rule.
+
+# Note:  the env vars $BASE_DIR, $QTOPIA_DIR and the $PATH
+# are set by the "sxe_boot" script which calls this script.
+
+# The base CAP capabilities are set in the files in the 
+# /etc/lids/lids.*.cap
+
+#  Make sure that you have compiled the kernel with
+# CONFIG_SECURITY_NETWORK on for the LIDS_SOCKET* rules
+# to work
+
+# Globally disable outbound connections and new sockets
+# lidsconf -A -o LIDS_SOCKET_CREATE -j DISABLE
+# lidsconf -A -o LIDS_SOCKET_CONNECT -j DISABLE
+
+# Protect main system directories
+lidsconf -A -o /proc -j READONLY
+lidsconf -A -o /proc/lids -j DENY
+#lidsconf -A -o /dev -j READONLY    # DENY
+
+lidsconf -A -o /dev.tgz -j DENY
+lidsconf -A -o /home_default.tgz -j DENY
+lidsconf -A -o /user_default.tgz -j DENY
+lidsconf -A -o /user_tools.tgz -j DENY
+lidsconf -A -o /var.tgz -j DENY
+lidsconf -A -o /fs.ver -j READONLY
+
+lidsconf -A -o /etc -j READONLY
+#lidsconf -A -o /etc/lids -j DENY
+#lidsconf -A -o /etc/lids -j READONLY
+
+lidsconf -A -o /bin -j READONLY
+lidsconf -A -o /lib -j READONLY
+lidsconf -A -o /lost+found -j READONLY
+lidsconf -A -o /mnt/user -j READONLY
+lidsconf -A -o /sbin -j READONLY
+lidsconf -A -o /usr -j READONLY
+lidsconf -A -o /var/log -j READONLY
+lidsconf -A -o /dev/log -j DENY
+
+lidsconf -A POSTBOOT -s /mnt/user/etc/trolltech_startup.sh -o /home_default.tgz -j READONLY
+lidsconf -A POSTBOOT -s /mnt/user/etc/trolltech_startup.sh -o /bin/mount -j READONLY
+lidsconf -A POSTBOOT -s /mnt/user/etc/trolltech_startup.sh -o /bin/umount -j READONLY
+
+# Protect the init scripts - these generally have special privileges
+# and should not be read or executed after boot
+lidsconf -A POSTBOOT -o /sbin/busybox-secure -j DENY
+lidsconf -A POSTBOOT -o /etc/rc.d -j READONLY
+lidsconf -A POSTBOOT -s /sbin/init -o /bin/kill -j READONLY
+lidsconf -A POSTBOOT -s /bin/sh -o /sbin/busybox-secure -j READONLY
+
+lidsconf -A SHUTDOWN -s /sbin/busybox-secure -o CAP_SYS_BOOT -j GRANT
+
+for i in /etc/usbnet_services/*; do
+  if [ "$i" != "/etc/usbnet_services/*" ]; then
+    lidsconf -A POSTBOOT -s "$i" -o CAP_KILL -j GRANT
+  fi
+done
+                
+for i in /etc/rc.d/*.sh; do
+  if [ "$i" != "/etc/rc.d/*.sh" ]; then
+    lidsconf -A POSTBOOT -s "$i" -o CAP_KILL -j GRANT
+  fi
+done
+
+
+# lids tools need access
+lidsconf -A -s /sbin/lidsadm -o /proc/sys/lids/locks -j WRITE
+lidsconf -A -s /sbin/lidsadm -o /etc/lids -j WRITE
+lidsconf -A -s /sbin/lidsconf -o /etc/lids -j WRITE
+
+# Busybox if used should be compiled in two or possibly more
+# seperate units, since lids applies rules to the targets of
+# symlinks, not the symlinks themselves.  This means that if eg
+# CAP_SYS_RAWIO is given to /sbin/fsck then /bin/ls also gets
+# that privilege; since both point to /bin/busybox.  Non-privileged
+# busybox applets should be compiled into a seperate binary.
+
+# Grant init scripts access to /sbin progs
+#lidsconf -A BOOT -s /etc/init.d/mount -o /sbin/fsck.ext2 -j READONLY
+#lidsconf -A BOOT -s /etc/init.d/mount -o /bin/mount -j READONLY
+#lidsconf -A BOOT -s /etc/init.d/modules -o /sbin/insmod -j READONLY
+#lidsconf -A BOOT -s /etc/init.d/modules -o /sbin/rmmod -j READONLY
+#lidsconf -A BOOT -s /etc/init.d/syslog -o /sbin/syslogd -j READONLY
+#lidsconf -A BOOT -s /etc/init.d/syslog -o /sbin/klogd -j READONLY
+#lidsconf -A BOOT -s /etc/init.d/network -o /sbin/ifup -j READONLY
+#/bin/touch /etc/network/interfaces
+#lidsconf -A BOOT -s /etc/init.d/network -o /etc/network/interfaces -i 2 -j WRITE
+#lidsconf -A -s /etc/init.d/halt -o CAP_KILL -i 2 -j GRANT
+
+# Load modules
+lidsconf -A BOOT -s /sbin/insmod -o CAP_SYS_MODULE -j GRANT
+lidsconf -A BOOT -s /sbin/insmod -o CAP_KILL -i 1 -j GRANT
+lidsconf -A SHUTDOWN -s /sbin/rmmod -o CAP_SYS_MODULE -j GRANT
+lidsconf -A SHUTDOWN -s /sbin/rmmod -o CAP_KILL -i 1 -j GRANT
+
+# Ensure this works for whatever file-systems are used
+lidsconf -A POSTBOOT -s /sbin/fsck -o CAP_SYS_RAWIO -i 1 -j GRANT
+lidsconf -A -s /bin/mount -o CAP_SYS_ADMIN -j GRANT
+lidsconf -A -s /bin/umount -o CAP_SYS_ADMIN -j GRANT
+
+# Protect lids password file
+lidsconf -A POSTBOOT -o /etc/lids/lids.secret -j DENY
+lidsconf -A -s /etc/rc.d/rc.lids -o /etc/lids/lids.secret -j READONLY
+
+# HWClock
+lidsconf -A SHUTDOWN -s /sbin/hwclock -o /etc -j WRITE
+
+# su - also likely not used on a device
+lidsconf -A -s /bin/su -o CAP_SETUID -j GRANT
+lidsconf -A -s /bin/su -o CAP_SETGID -j GRANT
+lidsconf -A -s /bin/su -o CAP_SYS_RESOURCE -j GRANT
+
+# Protect the logs
+# syslogd uses the -s SIZE and -b NUM options to rotate the logs so therefore
+# needs WRITE permission and not just APPEND.  Note also that since
+# /var/log/messages is rotated its inode number changes, and thus protections
+# must be applied to the directory as a whole.
+lidsconf -A -s /sbin/syslogd -o /var/log -j WRITE
+
+# On a device there is usually not an interactive shell.  These
+# rules are therefore only required in the VTE for use with an
+# interactive shell and can probably be removed for a device.
+
+# Make sure bash can work
+lidsconf -A -s /bin/sh -o /dev/tty -j WRITE
+lidsconf -A -s /bin/sh -o /dev/tty1 -j WRITE
+lidsconf -A -s /bin/sh -o /dev/tty2 -j WRITE
+# lidsconf -A -s /bin/sh -o /dev/tty3 -j WRITE
+# lidsconf -A -s /bin/sh -o /dev/tty4 -j WRITE
+# lidsconf -A -s /bin/sh -o /dev/pts/1 -j WRITE
+# lidsconf -A -s /bin/sh -o /dev/pts/2 -j WRITE
+#/bin/touch /.ash_history
+#lidsconf -A -s /bin/sh -o /.ash_history -j WRITE
+
+# Getty - probably not required on actual devices
+lidsconf -A -s /sbin/getty -o CAP_DAC_OVERRIDE -j GRANT
+lidsconf -A -s /sbin/getty -o CAP_DAC_READ_SEARCH -j GRANT
+lidsconf -A -s /sbin/getty -o CAP_CHOWN -j GRANT
+lidsconf -A -s /sbin/getty -o CAP_FOWNER -j GRANT
+
+# Networking
+lidsconf -A POSTBOOT -s /sbin/ifconfig -o CAP_NET_ADMIN -j GRANT
+
+# Bluetooth
+lidsconf -A POSTBOOT -s /usr/sbin/hcid -o CAP_NET_RAW -j GRANT
+lidsconf -A POSTBOOT -s /usr/sbin/hcid -o CAP_NET_ADMIN -j GRANT
+lidsconf -A POSTBOOT -s /usr/sbin/hcid -o /mnt/user/lib -j WRITE
+
+# ftpd
+lidsconf -A POSTBOOT -s /usr/sbin/ftpd -o CAP_NET_BIND_SERVICE 21 -j GRANT
+
+# telnetd
+lidsconf -A POSTBOOT -s /usr/sbin/telnetd -o CAP_NET_BIND_SERVICE 23 -j GRANT
+
+# samba
+lidsconf -A POSTBOOT -s /usr/local/samba/bin/smbd -o CAP_SYS_RESOURCE -j GRANT
+lidsconf -A POSTBOOT -s /usr/local/samba/bin/smbd -o CAP_NET_BIND_SERVICE 139 -j GRANT
+/bin/touch /etc/samba/secrets.tdb
+lidsconf -A POSTBOOT -s /usr/local/samba/bin/smbd -o /etc/samba/secrets.tdb -j WRITE
+lidsconf -A POSTBOOT -s /usr/local/samba/bin/smbd -o /usr/local/samba/private -j WRITE
+lidsconf -A POSTBOOT -s /usr/local/samba/bin/nmbd -o CAP_NET_BIND_SERVICE 137-138 -j GRANT
+
+# sshd
+lidsconf -A POSTBOOT -s /etc/usbnet_services/sshd.sh -o /mnt/user/etc/dropbear -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/dropbear -o /mnt/user/etc/dropbear -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/dropbear -o CAP_NET_BIND_SERVICE 22 -j GRANT
+
+# atd
+lidsconf -A POSTBOOT -s /usr/sbin/atd -o /proc/pcf/RTCSCA -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/atd -o /proc/pcf/RTCMNA -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/atd -o /proc/pcf/RTCHRA -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/atd -o /proc/pcf/RTCWDA -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/atd -o /proc/pcf/RTCDTA -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/atd -o /proc/pcf/RTCMTA -j WRITE
+lidsconf -A POSTBOOT -s /usr/sbin/atd -o /proc/pcf/RTCYRA -j WRITE
+
+# kill/killall
+lidsconf -A POSTBOOT -s /bin/kill -o CAP_KILL -j GRANT
+lidsconf -A POSTBOOT -s /usr/bin/killall -o CAP_KILL -j GRANT
+
+# shutdown
+lidsconf -A -o /mnt/user/tools/shutdown -j READONLY
+lidsconf -A -s /mnt/user/tools/shutdown -o /sbin/poweroff -j READONLY
+lidsconf -A -s /mnt/user/tools/shutdown -o /sbin/reboot -j READONLY
+
+# updateqtopia and updateqtopiahelper
+lidsconf -A -o /opt/Qtopia -j READONLY
+lidsconf -A -o /bin/updateqtopia -j READONLY
+lidsconf -A -s /bin/updateqtopia -o /mnt/user/tools -i 1 -j WRITE
+lidsconf -A -s /bin/updateqtopia -o /bin/umount -j READONLY
+lidsconf -A -s /bin/updateqtopia -o /bin/mount -j READONLY
+lidsconf -A -o /bin/updateqtopiahelper -j READONLY
+lidsconf -A -s /bin/updateqtopiahelper -o /sbin/fsck -j READONLY
+lidsconf -A -s /bin/updateqtopiahelper -o /bin/umount -j READONLY
+lidsconf -A -s /bin/updateqtopiahelper -o /mnt/user/tools -i 1 -j WRITE
+lidsconf -A -s /bin/updateqtopiahelper -o /dev/tffsa2 -i 1 -j WRITE
+lidsconf -A -s /bin/updateqtopiahelper -o /opt/Qtopia -i 1 -j WRITE
+lidsconf -A -s /bin/updateqtopiahelper -o /etc/ld.so.conf -j WRITE
+lidsconf -A -s /bin/updateqtopiahelper -o CAP_SYS_RAWIO -i 1 -j GRANT
+lidsconf -A -s /bin/updateqtopiahelper -o CAP_KILL -i 1 -j GRANT
+
+# udhcpc
+lidsconf -A -o /sbin/udhcpc -j READONLY
+lidsconf -A -s /sbin/udhcpc -o CAP_NET_RAW -j GRANT
+lidsconf -A -s /sbin/udhcpc -o CAP_NET_BIND_SERVICE 68 -j GRANT
+lidsconf -A -o /usr/share/udhcpc/default.script -j READONLY
+lidsconf -A -s /usr/share/udhcpc/default.script -o /etc/resolvconf -j WRITE
+
+# ldcofig
+lidsconf -A -o /sbin/ldconfig -j READONLY
+lidsconf -A -s /sbin/ldconfig -o /etc/ld.so.conf -j WRITE
+lidsconf -A -s /sbin/ldconfig -o /etc/ld.so.cache -j WRITE
+
+# proc_keys test program
+lidsconf -A -o /mnt/user/tools/proc_keys -j READONLY
+lidsconf -A -s /mnt/user/tools/proc_keys -o /proc/lids/keys -j READONLY

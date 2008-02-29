@@ -31,15 +31,18 @@ class QBluetoothObexSocketPrivate;
 
 class QTOPIACOMM_EXPORT QBluetoothObexSocket : public QObexSocket
 {
+    Q_OBJECT
+
 public:
-    QBluetoothObexSocket();
+    QBluetoothObexSocket(QObject *parent = 0);
     QBluetoothObexSocket(const QBluetoothAddress &remote,
                          quint8 rfcomm_channel,
-                         const QBluetoothAddress &local = QBluetoothAddress::any);
+                         const QBluetoothAddress &local = QBluetoothAddress::any,
+                         QObject *parent = 0);
     virtual ~QBluetoothObexSocket();
 
-    bool encrypted() const;
-    bool authenticated() const;
+    bool isEncrypted() const;
+    bool isAuthenticated() const;
     QBluetooth::SecurityOptions securityOptions() const;
 
     qint16 channel() const;

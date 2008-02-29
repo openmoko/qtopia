@@ -10,12 +10,7 @@ TRANSLATABLES += fixbdaddr.cpp
 desktop.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/fixbdaddr/fixbdaddr.desktop
 desktop.path=/apps/Devtools
 desktop.hint=desktop
-
-help.source=$$QTOPIA_DEPOT_PATH/help
-help.files=*.html
-help.hint=help
-
-INSTALLS+=desktop help
+INSTALLS+=desktop
 
 pkg.desc=Greenphone unique bdaddr fixer
 pkg.domain=window

@@ -1,6 +1,7 @@
 [allow]
 RegionName
 SetProperty
+GetProperty
 AddProperty
 Region
 RegionMove
@@ -8,8 +9,8 @@ RepaintRegion
 Identify
 RequestFocus
 QCopSend/QCop/QPE/QtopiaApplication/available(QString,int)
-QCopSend/QCop/QPE/System/notBusy(QString)
-QCopSend/QCop/QPE/System/closing(QString)
+QCopSend/QCop/QPE/QtopiaApplication/notBusy(QString)
+QCopSend/QCop/QPE/QtopiaApplication/closing(QString)
 QCopSend/QCop//detach()
 ValueSpace/Sync
 #
@@ -37,7 +38,9 @@ QCopSend/QCop/QPE/Application/qpe/InfraredBeaming::beamBusinessCard(QContact)
 QCopRegisterChannel/QCop/RegisterChannel/QPE/Application/btsettings
 QCopSend/QCop/QPE/DocAPI/registerCLS(QString,QStringList,int)
 QCopSend/QCop/QPE/DocAPI/unregisterCLS(QString,int)
+QCopSend/QCop/QPE/BluetoothServiceProviders/*
 QCopSend/QCop/QPE/BluetoothServiceListeners/*
+QCopRegisterChannel/QCop/RegisterChannel/QPE/BluetoothServiceProviders
 QCopRegisterChannel/QCop/RegisterChannel/QPE/BluetoothServiceListeners
 QCopRegisterChannel/QCop/RegisterChannel/QPE/BluetoothHandsfree
 QCopSend/QCop/QPE/BluetoothHandsfree/*
@@ -48,10 +51,10 @@ QCopSend/QCop/QPE/Application/qpe/BluetoothPush::pushBusinessCard(QContact)
 QCopSend/QCop/QPE/Application/qpe/BluetoothPush::pushCalendar(QDSActionRequest)
 QCopSend/QCop/QPE/Application/qpe/BluetoothPush::pushFile(QString,QString,bool)
 QCopSend/QCop/QPE/Application/qpe/BluetoothPush::pushFile(QContentId)
-
+QCopSend/QCop/QPE/Application/qpe/BluetoothPush::pushFile(QBluetoothAddress,QContentId)
 #
 [cardreader]
-QCopRegisterChannel/QCop/RegisterChannel/QPE/Card
+QCopRegisterChannel/QCop/RegisterChannel/QPE/QStorage
 #
 [camera]
 QCopSend/QCop/QPE/Application/camera/*
@@ -71,6 +74,10 @@ QCopSend/QCop/QPE/System/categoriesChanged()
 QCopSend/QCop/QPE/DocAPI/reflectMirror(QContentId,QContent::ChangeType)
 QCopSend/QCop/QPE/System/contentChanged(QContentIdList,QContent::ChangeType)
 QCopSend/QCop/QPE/System/addInstallPath(QString)
+QCopSend/QCop/QPE/QDSResponse/*
+QCopSend/QCop/QPE/QDSResponse/*
+QCopRegisterChannel/QCop/RegisterChannel/QPE/System
+QCopRegisterChannel/QCop/RegisterChannel/QPE/pid/*
 #
 [drm]
 QCopSend/QCop/QPE/Application/drmbrowser/OmaDrmAgent::activate(QContentId)
@@ -104,11 +111,24 @@ QCopSend/QCop/QPE/Application/qpe/ContentSetView::showContentSet(QString,QConten
 #
 [lightandpower]
 QCopSend/QCop/QPE/System/setBacklight(int)
-
+QCopSend/QCop/QPE/Application/qpe/QtopiaPowerManager::setConstraint(int,QString)
+QCopRegisterChannel/QCop/RegisterChannel/Qtopia/PowerStatus
+#
+[volumemanager]
+QCopSend/QCop/QPE/AudioVolumeManager/setVolume(int)
+QCopSend/QCop/QPE/AudioVolumeManager/increaseVolume(int)
+QCopSend/QCop/QPE/AudioVolumeManager/decreaseVolume(int)
+QCopSend/QCop/QPE/AudioVolumeManager/setMuted(bool)
+QCopSend/QCop/QPE/AudioVolumeManager/registerHandler(QString,QString)
+QCopSend/QCop/QPE/AudioVolumeManager/unregisterHandler(QString,QString)
+QCopSend/QCop/QPE/AudioVolumeManager/setActiveDomain(QString)
+QCopSend/QCop/QPE/AudioVolumeManager/resetActiveDomain(QString)
 #
 [mediaserver]
 QCopSend/QCop/QPE/MediaLibrary/*
 QCopSend/QCop/QPE/MediaServer/MediaControl/Response/*
+QCopSend/QCop/QPE/MediaServer/VideoControl/Response/*
+QCopSend/QCop/QPE/MediaServer/MediaHelixSettingsControl/*
 QCopSend/QCop/QPE/QSound/*
 QCopRegisterChannel/QCop/RegisterChannel/QPE/MediaServer*
 
@@ -125,14 +145,17 @@ QCopSend/QCop/QPE/MediaServer/MediaControl/Request/*
 QCopSend/QCop/QPE/Application/sipagent/*
 QCopSend/QCop/QPE/MediaSession/*
 QCopSend/QCop/QPE/Application/mediaserver/*
+QCopSend/QCop/QPE/MediaServer/MediaHelixSettingsControl/*
 QCopRegisterChannel/QCop/RegisterChannel/QPE/MediaSession
 QCopRegisterChannel/QCop/RegisterChannel/QPE/MediaLibrary/*
 QCopRegisterChannel/QCop/RegisterChannel/QPE/MediaServer/MediaControl/Response/*
+QCopRegisterChannel/QCop/RegisterChannel/QPE/MediaServer/MediaHelixSettingsControl/Response/*
 QCopRegisterChannel/QCop/RegisterChannel/QPE/QSound/*
 
 #
 [mediarecorder]
 QCopSend/QCop/QPE/Application/mediarecorder/*
+QCopRegisterChannel/QCop/RegisterChannel/Qt/Tray
 
 #
 [msg]
@@ -161,6 +184,9 @@ QCopSend/QCop/QPE/Network/stopInterface(QString,QString,bool)
 QCopSend/QCop/QPE/Network/setDefaultGateway(QString,bool)
 QCopSend/QCop/QPE/VPNManager/connectVPN(uint)
 QCopSend/QCop/QPE/VPNManager/disconnectVPN(uint)
+#
+[netadmin]
+# activates CAP_NET_ADMIN mac rules
 #
 [netconfig]
 QCopSend/QCop/QPE/Network/setExtendedInterfaceLifetime(QString,bool)
@@ -204,6 +230,12 @@ QCopSend/QCop/QPE/Application/addressbook/Contacts::setContactImage(QDSActionReq
 QCopSend/QCop/QPE/Application/addressbook/Contacts::beamVCard(QDSActionRequest)
 QCopSend/QCop/QPE/Application/addressbook/Contacts::beamVCardBluetooth(QDSActionRequest)
 #
+[policy]
+# access to the SXE policy files in the Qtopia/etc directory
+#
+[prefix]
+# access to the prefix directory for writing qtopia_db.sqlite, the system database
+#
 [libs]
 #
 [qdl]
@@ -217,6 +249,9 @@ QCopSend/QCop/QPE/Application/todolist/Tasks::activateLink(QDSActionRequest)
 [qds]
 QCopSend/QCop/QPE/QDSResponse*
 QCopRegisterChannel/QCop/RegisterChannel/QPE/QDSResponse*
+#
+[launcher]
+# gives access to launch programs from shell
 #
 [quicklauncher]
 QCopRegisterChannel/QCop/RegisterChannel/QPE/pid/*
@@ -240,6 +275,7 @@ QCopSend/QCop/QPE/Application/profileedit/Profiles::setProfile(int)
 QCopSend/QCop/QPE/System/applyStyle()
 QCopSend/QCop/QPE/System/applyStyleSplash()
 QCopSend/QCop/QPE/System/applyStyleNoSplash()
+QCopSend/QCop/QPE/System/applyBackgroundImage()
 QCopSend/QCop/QPE/Application/appearance/Settings::pullSettingStatus()
 QCopSend/QCop/QPE/Application/appearance/Settings::activateDefault()
 QCopSend/QCop/QPE/Application/appearance/Settings::activateSettings(QString)
@@ -252,15 +288,13 @@ QCopSend/QCop/QPE/Application/callforwarding/Settings::pullSettingStatus()
 QCopSend/QCop/QPE/Application/callforwarding/Settings::activateDefault()
 QCopSend/QCop/QPE/Application/callforwarding/Settings::activateSettings(QString)
 QCopSend/QCop/QPE/Application/callforwarding/Settings::setStatus(bool,QString)
-
 #
 [rotation]
 QCopSend/QCop/QPE/System/setDefaultRotation(int)
-
 #
 [screensaver]
 QCopSend/QCop/QPE/Application/qpe/ScreenSaver::setTemporaryMode(int,QString)
-
+#
 [screensaverconfig]
 QCopSend/QCop/QPE/Application/qpe/ScreenSaver::setIntervals(int,int,int)
 QCopSend/QCop/QPE/Application/qpe/ScreenSaver::setDefaultIntervals()
@@ -273,9 +307,11 @@ QCopSend/QCop/QPE/System/securityChanged()
 [sxemonitor]
 QCopSend/QCop/QPE/Application/sysmessages/SystemMessages::showDialog(QString,QString)
 QCopSend/QCop/QPE/Application/sysmessages/SystemMessages::sendMessage(QString,QString)
-
 QCopRegisterChannel/QCop/RegisterChannel/QPE/System
 QCopRegisterChannel/QCop/RegisterChannel/QPE/pid/*
+#
+[syslog]
+# gives access to the /dev/log socket for syslog() calls
 #
 [window]
 Create
@@ -296,7 +332,8 @@ QCopSend/QCop/QPE/InputMethod/*
 QCopSend/QCop/QPE/System/updateContextLabels()
 QCopSend/QCop/QPE/System/serverKey(int,int)
 QCopSend/QCop/QPE/Application/helpbrowser/Help::setDocument(QString)
-QCopSend/QCop/QPE/System/appRaised(QString)
+QCopSend/QCop/QPE/QtopiaApplication/appRaised(QString)
+QCopRegisterChannel/QCop/RegisterChannel/QPE/QStorage
 #
 [words]
 QCopSend/QCop/QPE/System/wordsChanged(QString,int)

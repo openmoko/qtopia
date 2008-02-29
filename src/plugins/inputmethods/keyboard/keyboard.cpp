@@ -104,20 +104,21 @@ void Keyboard::menuActionActivated(int v)
 {
     qLog(Input) << "void Keyboard::menuItemActivated("<<v<<")";
     switch(v){
-        case 1:
+        case SwapPosition:
             qLog(Input) << "Keyboard received and recognized menu action";
             keyboardFrame->swapPosition();
-        break;
-        case 2:
+            break;
+        case ShowKeyboard:
             qLog(Input) << "Keyboard received activation from show menu action";
             // this will cause stateChanged to be emitted when the frame is shown
             frame()->show();
-        break;
-        case 3:
+            break;
+        case HideKeyboard:
             qLog(Input) << "Keyboard received activation from hide menu action";
             // this will cause stateChanged to be emitted when the frame hides
             frame()->hide();
-        break;
+            break;
+        case Unknown:
         default:
             qLog(Input) << "Keyboard IM recieved unrecognised menu action";
     };

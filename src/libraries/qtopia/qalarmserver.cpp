@@ -30,6 +30,8 @@
 #include "qtopiaipcenvelope.h"
 #include "qtopiaservices.h"
 
+#include "qalarmserver_p.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -75,22 +77,6 @@ private:
 TimerReceiverObject *timerEventReceiver = NULL;
 QList<timerEventItem*> timerEventList;
 timerEventItem *nearestTimerEvent = NULL;
-
-class AlarmServerService : public QtopiaIpcAdaptor
-{
-    Q_OBJECT
-public:
-    AlarmServerService( QObject *parent = 0 )
-        : QtopiaIpcAdaptor( "QPE/AlarmServer", parent ) { publishAll( Slots ); }
-    ~AlarmServerService() {}
-
-public slots:
-    void addAlarm( QDateTime when, const QString& channel,
-                   const QString& msg, int data );
-    void deleteAlarm( QDateTime when, const QString& channel,
-                      const QString& msg, int data );
-    void dailyAlarmEnabled( bool flag );
-};
 
 static AlarmServerService *alarmServer = 0;
 
@@ -447,8 +433,20 @@ void Qtopia::writeHWClock()
 */
 
 /*!
+  \fn AlarmServerService::AlarmServerService( QObject *parent = 0 )
+
+  Create an AlarmServerService instance with the passed \a parent.
+*/
+
+/*!
+  \fn AlarmServerService::~AlarmServerService()
+
+  Destroy the AlarmServerService instance.
+*/
+
+/*!
   Schedules an alarm to go off at (or soon after) time \a when. When
-  the alarm goes off, the \l {Qtopia IPC Layer}{Qtopia IPC} \a message will
+  the alarm goes off, the \l {Qtopia IPC Layer}{Qtopia IPC} message \a msg will
   be sent to \a channel, with \a data as a parameter.
 
   This slot corresponds to the QCop message
@@ -465,7 +463,7 @@ void AlarmServerService::addAlarm
 
 /*!
   Deletes previously scheduled alarms which match \a when, \a channel,
-  \a message, and \a data.
+  \a msg, and \a data.
 
   This slot corresponds to the QCop message
   \c{deleteAlarm(QDateTime,QString,QString,int)} on the

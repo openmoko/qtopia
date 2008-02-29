@@ -27,7 +27,6 @@
 #include <qtopiaservices.h>
 #include "drmcontent_p.h"
 #include <qmimetype.h>
-#include <QLocalUniqueId>
 #include <QPointer>
 
 #include <QAbstractFileEngineHandler>
@@ -121,7 +120,7 @@ void QDrmContentPrivate::rightsExpired( const QContent &content, QDrmRights::Per
 
     bool MediaPlayer::open( const QContent &content )
     {
-        if( openContent.requestLicense( content, QDrmContent::Play ) )
+        if( openContent.requestLicense( content ) )
         {
             // Open file as normal.
 

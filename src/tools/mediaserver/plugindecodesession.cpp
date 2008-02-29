@@ -21,6 +21,7 @@
 
 #include <qstring.h>
 #include <qiodevice.h>
+#include <qdebug.h>
 
 #include <qcontent.h>
 
@@ -44,6 +45,7 @@ struct PluginDecodeSession::PluginDecodeSessionPrivate
     QMediaDevice*       outputDevice;
     QString             domain;
     quint32             position;
+    QtopiaMedia::State  state;
 };
 
 PluginDecodeSession::PluginDecodeSession
@@ -129,6 +131,7 @@ void PluginDecodeSession::suspend()
 
 void PluginDecodeSession::resume()
 {
+    qDebug() << "plugindecodesession::resume";
     d->mediaDecoder->start();
 }
 
@@ -162,6 +165,11 @@ bool PluginDecodeSession::isMuted() const
     return d->mediaDecoder->isMuted();
 }
 
+QtopiaMedia::State PluginDecodeSession::playerState() const
+{
+    return d->state;
+}
+
 QString PluginDecodeSession::errorString()
 {
     return QString();
@@ -188,6 +196,8 @@ QStringList PluginDecodeSession::interfaces()
 
 void PluginDecodeSession::stateChanged(QtopiaMedia::State state)
 {
+    d->state = state;
+
     if (state == QtopiaMedia::Stopped ||
         state == QtopiaMedia::Error)
     {

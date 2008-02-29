@@ -1,6 +1,6 @@
 qtopia_project(qtopia app)
 TARGET=vsexplorer
-CONFIG+=no_tr
+CONFIG+=no_tr singleexec_main
 
 SOURCES		= vsexplorer.cpp
 

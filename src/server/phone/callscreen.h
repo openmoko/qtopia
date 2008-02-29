@@ -26,11 +26,11 @@
 
 #include <QListWidget>
 #include "phonethemeview.h"
+#include <QPhoneCall>
 
 class DialerControl;
 class QMenu;
 class CallItemEntry;
-class QPhoneCall;
 class QAction;
 class QLineEdit;
 class QVBoxLayout;
@@ -70,6 +70,7 @@ signals:
 
 public slots:
     void stateChanged();
+    void requestFailed(const QPhoneCall &,QPhoneCall::Request);
     CallItemEntry *findCall(const QPhoneCall &call, CallItemModel *model);
 
 protected slots:

@@ -1,6 +1,6 @@
 #!/bin/sh
 DEVNAME=eth1
-/sbin/ifconfig $DEVNAME 10.10.10.21 up
+/sbin/ifconfig $DEVNAME 10.10.10.21 netmask 255.255.255.0 up
 
 # The commands below set up IP forwarding between the greenphone and the local network
 # Enabling these will place the Greenphone on local network as 10.10.10.20.

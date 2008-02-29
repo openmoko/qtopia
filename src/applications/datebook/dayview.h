@@ -37,7 +37,7 @@ class DayView : public QWidget
     Q_OBJECT
 
 public:
-    DayView(QWidget *parent = 0);
+    DayView(QWidget *parent = 0, const QCategoryFilter& c = QCategoryFilter());
 
     QModelIndex currentIndex() const;
     QAppointment currentAppointment() const;

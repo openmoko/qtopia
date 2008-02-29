@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/dialogs/qdialog.cpp -->
 <head>
   <title>Qt 4.2: QDialog Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -48,7 +49,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -106,7 +107,7 @@
 <p>If the user presses the Esc key in a dialog, <a href="qdialog.html#reject">QDialog::reject</a>() will be called. This will cause the window to close: The <a href="qcloseevent.html">close event</a> cannot be <a href="qevent.html#ignore">ignored</a>.</p>
 <a name="extensibility"></a>
 <h3>Extensibility</h3>
-<p>Extensibility is the ability to show the dialog in two ways: a partial dialog that shows the most commonly used options, and a full dialog that shows all the options. Typically an extensible dialog will initially appear as a partial dialog, but with a <b>More</b> toggle button. If the user presses the <b>More</b> button down, the dialog is expanded. The Extension Example shows how to achieve extensible dialogs using Qt.</p>
+<p>Extensibility is the ability to show the dialog in two ways: a partial dialog that shows the most commonly used options, and a full dialog that shows all the options. Typically an extensible dialog will initially appear as a partial dialog, but with a <b>More</b> toggle button. If the user presses the <b>More</b> button down, the dialog is expanded. The <a href="dialogs-extension.html">Extension Example</a> shows how to achieve extensible dialogs using Qt.</p>
 <a name="return"></a><a name="return-value-modal-dialogs"></a>
 <h3>Return Value (Modal Dialogs)</h3>
 <p>Modal dialogs are often used in situations where a return value is required, e.g. to indicate whether the user pressed <b>OK</b> or <b>Cancel</b>. A dialog can be closed by calling the <a href="qdialog.html#accept">accept</a>() or the <a href="qdialog.html#reject">reject</a>() slots, and <a href="qdialog.html#exec">exec</a>() will return <tt>Accepted</tt> or <tt>Rejected</tt> as appropriate. The <a href="qdialog.html#exec">exec</a>() call returns the result of the dialog. The result is also available from <a href="qdialog.html#result">result</a>() if the dialog has not been destroyed.</p>
@@ -131,7 +132,7 @@
      findDialog-&gt;raise();
      findDialog-&gt;activateWindow();
  }</pre>
-<p>See also <a href="qdialogbuttonbox.html">QDialogButtonBox</a>, <a href="porting4.html#qtabdialog">QTabDialog</a>, <a href="qwidget.html">QWidget</a>, <a href="qprogressdialog.html">QProgressDialog</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Dialogs, Standard</a>, Extension Example, and Standard Dialogs Example.</p>
+<p>See also <a href="qdialogbuttonbox.html">QDialogButtonBox</a>, <a href="porting4.html#qtabdialog">QTabDialog</a>, <a href="qwidget.html">QWidget</a>, <a href="qprogressdialog.html">QProgressDialog</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Dialogs, Standard</a>, <a href="dialogs-extension.html">Extension Example</a>, and <a href="dialogs-standarddialogs.html">Standard Dialogs Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="DialogCode-enum"></a>enum QDialog::DialogCode</h3>
@@ -213,6 +214,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -128,7 +128,7 @@ void MonthView::paintCell(QPainter *p, const QRect &cr, const QDate &cDay) const
     }
 }
 
-MonthView::MonthView(QWidget *parent)
+MonthView::MonthView(QWidget *parent, const QCategoryFilter& c)
     : QCalendarWidget(parent), line_height(5)
 {
     setObjectName("monthview");
@@ -142,8 +142,10 @@ MonthView::MonthView(QWidget *parent)
     QDate end = start.addDays(start.daysInMonth() - 1);
 
     model = new QOccurrenceModel(QDateTime(start, QTime(0, 0, 0)), QDateTime(end.addDays(1), QTime(0, 0)), this);
-
     connect(model, SIGNAL(modelReset()), this, SLOT(rebuildCache()));
+
+    model->setCategoryFilter(c);
+
     connect(this, SIGNAL(currentPageChanged(int, int)), this, SLOT(updateModelRange(int, int)));
 }
 
@@ -158,10 +160,13 @@ void MonthView::rebuildCache()
     paintCache.clear();
 
     for (int i = 0; i < model->rowCount(); ++i) {
-        QOccurrence o = model->occurrence(i);
-        QAppointment a = o.appointment();
+        // get just the data needed for drawing.
+        QAppointment::RepeatRule repeat = (QAppointment::RepeatRule)model->data(model->index(i, QAppointmentModel::RepeatRule), Qt::EditRole).toInt();
+        QDateTime f = model->data(model->index(i, QAppointmentModel::Start), Qt::EditRole).toDateTime();
+        QDateTime t = model->data(model->index(i, QAppointmentModel::End), Qt::EditRole).toDateTime();
+        bool isAllDay = model->data(model->index(i, QAppointmentModel::AllDay), Qt::EditRole).toBool();
 
-        if (a.hasRepeat()) {
+        if (repeat != QAppointment::NoRepeat) {
             if (!foundRColor) {
                 repeatColor = qvariant_cast<QColor>(model->data(model->index(i, 0), Qt::BackgroundColorRole));
                 repeatBgColor = repeatColor.light(160);
@@ -177,24 +182,21 @@ void MonthView::rebuildCache()
             }
         }
 
-        QDate f = o.startInCurrentTZ().date();
-        QDate t = o.endInCurrentTZ().date();
-
         bool normalAllDay = false;
         bool repeatAllDay = false;
         int startPos = 0;
         int endPos = 24;
-        if (a.isAllDay()) {
-            if (a.repeatRule() == QAppointment::NoRepeat)
+        if (isAllDay) {
+            if (repeat == QAppointment::NoRepeat)
                 normalAllDay = true;
             else
                 repeatAllDay = true;
         } else {
-            startPos =  a.startInCurrentTZ().time().hour();
-            endPos = a.endInCurrentTZ().time().hour();
+            startPos =  f.time().hour();
+            endPos = t.time().hour();
         }
 
-        for (QDate i = f; i <= t; i = i.addDays(1)) {
+        for (QDate i = f.date(); i <= t.date(); i = i.addDays(1)) {
 
             // get item.
             DayPaintCache *dpc;
@@ -210,18 +212,21 @@ void MonthView::rebuildCache()
             else if (repeatAllDay)
                 dpc->rAllDay = true;
             else {
-                int sp = startPos;
-                int ep = endPos;
-                if (i != f)
-                    sp = 0;
-                if (i != t)
-                    ep = 24;
-                if (a.repeatRule() == QAppointment::NoRepeat) {
-                    dpc->nLine.append(sp);
-                    dpc->nLine.append(ep);
-                } else {
-                    dpc->rLine.append(sp);
-                    dpc->rLine.append(ep);
+                // Weed out things that end at midnight (e.g should be previous day)
+                if (t != QDateTime(t.date()) || i != t.date()) {
+                    int sp = startPos;
+                    int ep = endPos;
+                    if (i != f.date())
+                        sp = 0;
+                    if (i != t.date())
+                        ep = 24;
+                    if (repeat == QAppointment::NoRepeat) {
+                        dpc->nLine.append(sp);
+                        dpc->nLine.append(ep);
+                    } else {
+                        dpc->rLine.append(sp);
+                        dpc->rLine.append(ep);
+                    }
                 }
             }
         }

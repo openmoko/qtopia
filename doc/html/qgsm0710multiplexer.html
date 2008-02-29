@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QGsm0710Multiplexer Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QGsm0710Multiplexer Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QGsm0710Multiplexer Class Reference</h1>
 <p>The QGsm0710Multiplexer class provides a multiplexing implementation based on GSM 07.10 <a href="#details">More...</a></p>
-<pre>    #include &lt;QGsm0710Multiplexer&gt;</pre><p>Inherits <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a>.</p>
+<pre>#include &lt;QGsm0710Multiplexer&gt;</pre><p>Inherits <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a>.</p>
 <p>Inherited by <a href="qgsm0710multiplexerserver.html">QGsm0710MultiplexerServer</a>.</p>
 <ul>
 <li><a href="qgsm0710multiplexer-members.html">List of all members, including inherited members</a></li>
@@ -70,12 +69,12 @@
 <h3 class="fn"><a name="channelNumber"></a>int QGsm0710Multiplexer::channelNumber ( const <a href="qstring.html">QString</a> &amp; <i>name</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Get the GSM 07.10 channel number associated with the channel <i>name</i>. Returns -1 if the channel name is not recognized. The default channel assignment is as follows:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><p><i>Name</i> <i>Number</i> </tr></thead>
-<tr valign="top" class="odd"> <i>c{primary}</i> <i>1</i> </tr>
-<tr valign="top" class="even"> <i>c{secondary}</i> <i>2</i> </tr>
-<tr valign="top" class="odd"> <i>c{data}</i> <i>3</i> </tr>
-<tr valign="top" class="even"> <i>c{datasetup}</i> <i>3</i> </tr>
-<tr valign="top" class="odd"> <i>c{aux*}</i> <i>4</i> </tr>
+<tr valign="top" bgcolor="#a2c511"><p><i>Name</i> <i>Number</i> </tr>
+<tr valign="top" bgcolor="#f0f0f0"> <i>c{primary}</i> <i>1</i> </tr>
+<tr valign="top" bgcolor="#e0e0e0"> <i>c{secondary}</i> <i>2</i> </tr>
+<tr valign="top" bgcolor="#f0f0f0"> <i>c{data}</i> <i>3</i> </tr>
+<tr valign="top" bgcolor="#e0e0e0"> <i>c{datasetup}</i> <i>3</i> </tr>
+<tr valign="top" bgcolor="#f0f0f0"> <i>c{aux*}</i> <i>4</i> </tr>
 </table></p>
 </p>
 <p>This assignment causes data call setup commands to be sent on the data channel. If a modem needs data call setup on the primary AT command channel, then it should override this method and return 1 for <tt>datasetup</tt>.</p>
@@ -91,6 +90,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

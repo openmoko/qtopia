@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Network Services</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Network Services</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -100,7 +99,7 @@
 <p>The Dialup plug-in:</p>
 <ul>
 <li>recognizes/configures the following types of modems for dialup/GPRS:<ul>
-<li>internal modems in mobil phones (QtopiaNetwork::PhoneModem)</li>
+<li>internal modems in mobil phones (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::PhoneModem</a>)</li>
 <li>any arbitrary serial device attached to a device, e.g. /dev/ttySx (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::NamedModem</a>)</li>
 <li>PCMCIA modem cards (<a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::PCMCIA</a>)</li>
 </ul>
@@ -152,17 +151,17 @@
 <ul>
 <li>The Qtopia Network Server is a server task and is started during the startup phase of the Qtopia server. File location: <tt>$QPEDIR/src/server/networkserver.cpp</tt></li>
 <li>The network server initiates all network devices for which it can find a valid configuration ( see <tt>NetworkServer::updateNetwork()</tt> ). File location: $QPEDIR/src/server/networkserver.cpp</li>
-<li>Each network interface is started via<pre>    QtopiaNetwork::startInterface( ifaceHandle, param )</pre>
+<li>Each network interface is started via<pre>&nbsp;   QtopiaNetwork::startInterface( ifaceHandle, param )</pre>
 <p>which sends a QCop message on the QPE/Network channel. The param parameter is optional and can be used to pass additional startup parameter to the network plug-in. Note that not all network plug-ins support additional parameter and will simply ignore them.</p>
 </li>
-<li><tt>NetworkServer</tt> will receive this QCop msg and calls:<pre>        QtopiaNetworkServer::activateInterface( appName, ifaceHandle, options )</pre>
+<li><tt>NetworkServer</tt> will receive this QCop msg and calls:<pre>&nbsp;       QtopiaNetworkServer::activateInterface( appName, ifaceHandle, options )</pre>
 <p>The appName represents the name of the application that requested the start of the interface. This information is used for network session management.</p>
 </li>
-<li>Loads plug-in, tests the interface's availability and starts the interface:<pre>        QtopiaNetworkInterface* plugin = QtopiaNetwork::loadPlugin( ifaceHandle );
+<li>Loads plug-in, tests the interface's availability and starts the interface:<pre>&nbsp;       QtopiaNetworkInterface* plugin = QtopiaNetwork::loadPlugin( ifaceHandle );
         plugin-&gt;status()
         plugin-&gt;start( param );</pre>
 </li>
-<li><tt>DialupImpl::start(...)</tt> prepares the pppd command line options. If the serial network device is the internal GSM modem, Qtopia checks that the phone modem has a valid GSM network registration and starts the connection by calling:<pre>        QDialOptions pppd;
+<li><tt>DialupImpl::start(...)</tt> prepares the pppd command line options. If the serial network device is the internal GSM modem, Qtopia checks that the phone modem has a valid GSM network registration and starts the connection by calling:<pre>&nbsp;       QDialOptions pppd;
         pppd.setIpModule( true );
         pppd.setIpProgramName( &quot;/sbin/sbin/pppd&quot; );
 
@@ -174,10 +173,10 @@
         QPhoneCall dataCall = callManager-&gt;create(&quot;IP&quot;);
         dataCall.dial( pppd );</pre>
 <p>If the serial network device is an external device, the Dialup plug-in will directly start pppd directly by calling</p>
-<pre>        QProcess::execute(Qtopia::qtopiaDir()+&quot;bin/ppp-network&quot;, pppdArgs)</pre>
+<pre>&nbsp;       QProcess::execute(Qtopia::qtopiaDir()+&quot;bin/ppp-network&quot;, pppdArgs)</pre>
 <p>File location: $QPEDIR/src/plugins/network/dialing/dialup.cpp</p>
 </li>
-<li><tt>phoneServer</tt> calls<pre>        pppdManager-&gt;start( dataCall )</pre>
+<li><tt>phoneServer</tt> calls<pre>&nbsp;       pppdManager-&gt;start( dataCall )</pre>
 <p>File location: <tt>$QPEDIR/src/libraries/qtopiaphone/qpppdmanager.cpp</tt>.</p>
 </li>
 </ul>
@@ -185,7 +184,7 @@
 <a name="gprs-at-dial-string"></a>
 <h5>GPRS AT dial string</h5>
 <p>By default the Dialup plug-in uses the following minimal dial string for GPRS connections:</p>
-<pre>        dialstring = &quot;AT+CGDCONT=1,\&quot;IP\&quot;,\&quot;&quot; + &lt;provider APN&gt; + &quot;\&quot;&quot; + &quot; OK &quot;
+<pre>&nbsp;       dialstring = &quot;AT+CGDCONT=1,\&quot;IP\&quot;,\&quot;&quot; + &lt;provider APN&gt; + &quot;\&quot;&quot; + &quot; OK &quot;
                &quot;AT+CGATT=1 OK &quot;
                &quot;OK ATD*99***1#&quot;;</pre>
 <p>This string is not necessarily suitable for all modems. If a GPRS data connection cannot be started this string has to be adjusted to the requirements of the particular modem. It may be necessary to contact the modem manufacturer to determine the dial string that should be used. The dialstring can be customized in <tt>$QPEDIR/src/plugins/network/dialing/dialstring.cpp</tt>.</p>
@@ -227,11 +226,12 @@
 </ul>
 </li>
 <li>provides active scanning for WLAN networks ( requires Wireless Extension v14+ ) and roaming</li>
+<li>provides WLAN signal source for VoIP implementations (see <a href="qsignalsource.html">QSignalSource</a> and <a href="qsignalsourceprovider.html">QSignalSourceProvider</a>)</li>
 <li>supports WEP, WPA and WPA-EAP</li>
 <li>is implemented in <tt>$QPEDIR/src/plugins/network/lan/</tt></li>
 </ul>
 <p>If wireless support is not required the define <tt>NO_WIRELESS_LAN</tt> can be used to exclude the feature (see <a href="syscust-hardware.html">Hardware Configuration</a>).</p>
-<p>The LAN plug-in makes use of the following keys in the Network Service configuration file. Please note that these entries are stored using <a href="qsettings.html">QSettings</a>' read/write array support (<a href="qsettings.html#beginReadArray">QSettings::beginReadArray</a>()).</p>
+<p>The (W)LAN plug-in makes use of the following keys in the Network Service configuration file. Please note that these entries are stored using <a href="qsettings.html">QSettings</a>' read/write array support (<a href="qsettings.html#beginReadArray">QSettings::beginReadArray</a>()).</p>
 <ul>
 <li>[WirelessNetworks]<ul>
 <li><tt>ESSID</tt></li>
@@ -423,7 +423,7 @@
 <h3>Example connect,disconnect scripts</h3>
 <p>The dial-up process uses chat files. These chat files may need some customization in order to work flawless with particular modems. The chat files are stored in <tt>$HOME/Applications/Network/chat</tt>. Each interface has a connect and a disconnect chat file. The following two chat files represent rather generic chat files for a GPRS connection.</p>
 <ul>
-<li>Connect chat (<tt>$HOME/Applications/Network/chat/connect-&lt;peerID&gt;</tt>)<pre>      ABORT &quot;NO CARRIER&quot;
+<li>Connect chat (<tt>$HOME/Applications/Network/chat/connect-&lt;peerID&gt;</tt>)<pre>&nbsp;     ABORT &quot;NO CARRIER&quot;
       ABORT &quot;NO DIALTONE&quot;
       ABORT BUSY
       # Change the word internet to the name of your providers APN
@@ -431,10 +431,10 @@
       OK &quot;AT+CGATT=1&quot;
       OK &quot;ATDT*99***1#&quot;</pre>
 </li>
-<li>Disconnect Chat (<tt>$HOME/Applications/Network/chat/disconnect-&lt;peerID&gt;</tt>)<pre>      \d+++\d\c OK
+<li>Disconnect Chat (<tt>$HOME/Applications/Network/chat/disconnect-&lt;peerID&gt;</tt>)<pre>&nbsp;     \d+++\d\c OK
       ATH0 OK</pre>
 </li>
-<li>If there are difficulties establishing the GPRS connection it may be helpful to use an approach which would temporarily circumvent Qtopia's network code. The following script could be used to debug the connection process manually.<pre>     #!/bin/sh
+<li>If there are difficulties establishing the GPRS connection it may be helpful to use an approach which would temporarily circumvent Qtopia's network code. The following script could be used to debug the connection process manually.<pre>&nbsp;    #!/bin/sh
      #
      # Start a pppd session via GPRS
      #
@@ -507,7 +507,7 @@
 <li>AT+CGDCONT=1,&quot;PPP&quot; ...</li>
 </ol>
 </li>
-<li>update the /etc/ppp/options file to enable debugging and record ALL traffic. eg add<pre>    debug
+<li>update the /etc/ppp/options file to enable debugging and record ALL traffic. eg add<pre>&nbsp;   debug
     record /tmp/ppp-all-text.log</pre>
 </li>
 <li>modify the connect-chat, disconnect-chat and startpppd.sh to suit your modem and internet provider : at least<ul>
@@ -521,7 +521,7 @@
 <ol type="1">
 <li>Ensure that Qtopia and pppd are not running</li>
 <li>Start pppd via running startpppd.sh</li>
-<li>Ping an non-local address : eg<pre>    ping 216.239.39.99</pre>
+<li>Ping an non-local address : eg<pre>&nbsp;   ping 216.239.39.99</pre>
 </li>
 <li>Confirm that pppd attempts to start the link and review the content of /tmp/ppp-all-text.log</li>
 <li>If needed send the recorded traffic as setup in step 2 in a tar.gz to support</li>
@@ -530,7 +530,7 @@
 <h3>Network testing</h3>
 <p>The following can help to isolate any GPRS issues.</p>
 <p>Run the following commands to ping local and non-local resources:</p>
-<pre>         ping &lt;some IP address on your local network&gt;
+<pre>&nbsp;        ping &lt;some IP address on your local network&gt;
 
          ping 66.102.7.99
 
@@ -538,9 +538,9 @@
 
          ping www.google.com</pre>
 <p>It might be necessary to specify the network interface that the ping command should use. If you have more than one network interface and suspect routing issues use:</p>
-<pre>         ping -I &lt;iface-name&gt; &lt;host&gt;</pre>
+<pre>&nbsp;        ping -I &lt;iface-name&gt; &lt;host&gt;</pre>
 <p>If one or less of the above tests fail then provide the output of the following commands :</p>
-<pre>         /sbin/ifconfig -a
+<pre>&nbsp;        /sbin/ifconfig -a
 
          /sbin/ifstatus eth0
 
@@ -564,6 +564,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

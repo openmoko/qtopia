@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -162,16 +172,19 @@ static void qt_showYellowThing(QWidget *widget, const QRegion &toBePainted, int 
 }
 #endif
 
+static int test_qt_flushPaint()
+{
+    static int flush_paint = qgetenv("QT_FLUSH_PAINT").toInt();
+    return flush_paint;
+}
+
 static bool qt_flushPaint(QWidget *widget, const QRegion &toBePainted)
 {
-    static int checked_env = -1;
-    if(checked_env == -1)
-        checked_env = qgetenv("QT_FLUSH_PAINT").toInt();
-
-    if (checked_env == 0)
+    static int flush_paint = test_qt_flushPaint();
+    if (!flush_paint)
         return false;
 
-    qt_showYellowThing(widget, toBePainted, checked_env*10, true);
+    qt_showYellowThing(widget, toBePainted, flush_paint * 10, true);
 
     return true;
 }
@@ -559,6 +572,7 @@ void QWidgetBackingStore::cleanRegion(const QRegion &rgn, QWidget *widget, bool 
 
 #ifdef Q_WS_QWS
         if (!static_cast<QWSWindowSurface*>(windowSurface)->isValidFor(tlw)) {
+//            windowSurface->release();
             delete windowSurface;
             windowSurface = qt_default_window_surface(tlw);
         }
@@ -586,14 +600,22 @@ void QWidgetBackingStore::cleanRegion(const QRegion &rgn, QWidget *widget, bool 
             if (tlw->updatesEnabled()) {
                 // Pre render config
                 windowSurface->paintDevice()->paintEngine()->setSystemClip(toClean);
-                windowSurface->beginPaint(toClean);
+
+// Avoid deadlock with QT_FLUSH_PAINT: the server will wait for
+// the BackingStore lock, so if we hold that, the server will
+// never release the Communication lock that we are waiting for in
+// sendSynchronousCommand
+                const bool flushing = (test_qt_flushPaint() > 0);
+                if (!flushing)
+                    windowSurface->beginPaint(toClean);
                 windowSurface->paintDevice()->paintEngine()->setSystemClip(QRegion());
 
                 tlw->d_func()->drawWidget(windowSurface->paintDevice(), toClean, tlwOffset);
 
                 // Drawing the overlay...
                 windowSurface->paintDevice()->paintEngine()->setSystemClip(toClean);
-                windowSurface->endPaint(toClean);
+                if (!flushing)
+                    windowSurface->endPaint(toClean);
                 windowSurface->paintDevice()->paintEngine()->setSystemClip(QRegion());
             }
         }

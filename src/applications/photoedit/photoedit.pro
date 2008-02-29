@@ -50,4 +50,4 @@ qdsservice.path=/etc/qds
 INSTALLS+=help desktop pics service qdsservice
 
 pkg.desc=An image manager for Qtopia.
-pkg.domain=window,qds,beaming,cardreader,drm,docapi{image/*},pictures,print
+pkg.domain=window,qds,beaming,cardreader,drm,docapi{image/*},lightandpower,pictures,print

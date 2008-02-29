@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/network/qhostaddress.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/network/qhostaddress.cpp -->
 <head>
   <title>Qt 4.2: QHostAddress Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -58,8 +58,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qhostaddress.html#operator-lt-lt-104">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QHostAddress &amp; <i>address</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qhostaddress.html#operator-gt-gt-60">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QHostAddress &amp; <i>address</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qhostaddress.html#operator-lt-lt-105">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QHostAddress &amp; <i>address</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qhostaddress.html#operator-gt-gt-61">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QHostAddress &amp; <i>address</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -77,7 +77,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QHostAddress::Null</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The null address object. Equivalent to <a href="qhostaddress.html#QHostAddress">QHostAddress</a>().</td></tr>
 <tr><td valign="top"><tt>QHostAddress::LocalHost</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The IPv4 localhost address. Equivalent to <a href="qhostaddress.html">QHostAddress</a>(&quot;127.0.0.1&quot;).</td></tr>
-<tr><td valign="top"><tt>QHostAddress::LocalHostIPv6</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The IPv6 localhost address. Equivalent to <a href="qhostaddress.html">QHostAddress</a>(&quot;::1&quot;).</td></tr>
+<tr><td valign="top"><tt>QHostAddress::LocalHostIPv6</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The IPv6 localhost address. Equivalent to <a href="qhostaddress.html">QHostAddress</a>(&quot;<a href="atomic-operations.html#1">::1</a>&quot;).</td></tr>
 <tr><td valign="top"><tt>QHostAddress::Broadcast</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The IPv4 broadcast address. Equivalent to <a href="qhostaddress.html">QHostAddress</a>(&quot;255.255.255.255&quot;).</td></tr>
 <tr><td valign="top"><tt>QHostAddress::Any</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The IPv4 any-address. Equivalent to <a href="qhostaddress.html">QHostAddress</a>(&quot;0.0.0.0&quot;).</td></tr>
 <tr><td valign="top"><tt>QHostAddress::AnyIPv6</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The IPv6 any-address. Equivalent to <a href="qhostaddress.html">QHostAddress</a>(&quot;::&quot;).</td></tr>
@@ -117,7 +117,7 @@
 <p>The IPv6 scope ID specifies the scope of <i>reachability</i> for non-global IPv6 addresses, limiting the area in which the address can be used. All IPv6 addresses are associated with such a reachability scope. The scope ID is used to disambiguate addresses that are not guaranteed to be globally unique.</p>
 <p>IPv6 specifies the following four levels of reachability:</p>
 <ul>
-<li>Node-local: Addresses that are only used for communicating with services on the same interface (e.g., the loopback interface &quot;::1&quot;).</li>
+<li>Node-local: Addresses that are only used for communicating with services on the same interface (e.g., the loopback interface &quot;<a href="atomic-operations.html#1">::1</a>&quot;).</li>
 <li>Link-local: Addresses that are local to the network interface (<i>link</i>). There is always one link-local address for each IPv6 interface on your host. Link-local addresses (&quot;fe80...&quot;) are generated from the MAC address of the local network adaptor, and are not guaranteed to be unique.</li>
 <li>Site-local: Addresses that are local to the site / private network (e.g., the company intranet). Site-local addresses (&quot;fec0...&quot;) are usually distributed by the site router, and are not guaranteed to be unique outside of the local site.</li>
 <li>Global: For globally routable addresses, such as public servers on the Internet.</li>
@@ -182,11 +182,11 @@
 <p>Returns true if this host address is the same as the <i>other</i> address given; otherwise returns false.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-104"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QHostAddress &amp; <i>address</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-105"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QHostAddress &amp; <i>address</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes host address <i>address</i> to the stream <i>out</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-60"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QHostAddress &amp; <i>address</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-61"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QHostAddress &amp; <i>address</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a host address into <i>address</i> from the stream <i>in</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
@@ -204,6 +204,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

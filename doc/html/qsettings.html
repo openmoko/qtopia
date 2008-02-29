@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/io/qsettings.cpp -->
 <head>
   <title>Qt 4.2: QSettings Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -177,7 +178,7 @@
 <p>If you want to use INI files on all platforms instead of the native API, you can pass <a href="qsettings.html#Format-enum">QSettings::IniFormat</a> as the first argument to the QSettings constructor, followed by the scope, the organization name, and the application name:</p>
 <pre>     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                         &quot;MySoft&quot;, &quot;Star Runner&quot;);</pre>
-<p>The Settings Editor example lets you experiment with different settings location and with fallbacks turned on or off.</p>
+<p>The <a href="tools-settingseditor.html">Settings Editor</a> example lets you experiment with different settings location and with fallbacks turned on or off.</p>
 <a name="restoring-the-state-of-a-gui-application"></a>
 <h3>Restoring the State of a GUI Application</h3>
 <p>QSettings is often used to store the state of a GUI application. The following example illustrates how to use we will use QSettings to save and restore the geometry of an application's main window.</p>
@@ -217,7 +218,7 @@
          event-&gt;ignore();
      }
  }</pre>
-<p>See the Application example for a self-contained example that uses QSettings.</p>
+<p>See the <a href="mainwindows-application.html">Application</a> example for a self-contained example that uses QSettings.</p>
 <a name="accessing-settings-from-multiple-threads-or-processes-simultaneously"></a>
 <h3>Accessing Settings from Multiple Threads or Processes Simultaneously</h3>
 <p>QSettings is <a href="threads.html#reentrant">reentrant</a>. This means that you can use distinct QSettings object in different threads simultaneously. This guarantee stands even when the QSettings objects refer to the same files on disk (or to the same entries in the system registry). If a setting is modified through one QSettings object, the change will immediately be visible in any other QSettings objects that operate on the same location and that live in the same process.</p>
@@ -293,7 +294,7 @@
  #endif</pre>
 </li>
 </ul>
-<p>See also <a href="qvariant.html">QVariant</a>, <a href="qsessionmanager.html">QSessionManager</a>, Settings Editor Example, and Application Example.</p>
+<p>See also <a href="qvariant.html">QVariant</a>, <a href="qsessionmanager.html">QSessionManager</a>, <a href="tools-settingseditor.html">Settings Editor Example</a>, and <a href="mainwindows-application.html">Application Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Format-enum"></a>enum QSettings::Format</h3>
@@ -798,6 +799,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

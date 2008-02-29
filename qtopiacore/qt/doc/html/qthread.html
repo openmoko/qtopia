@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/thread/qthread.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/thread/qthread.cpp -->
 <head>
   <title>Qt 4.2: QThread Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -116,7 +116,7 @@
 <p>In extreme cases, you may want to forcibly <a href="qthread.html#terminate">terminate</a>() an executing thread. However, doing so is dangerous and discouraged. Please read the documentation for <a href="qthread.html#terminate">terminate</a>() and <a href="qthread.html#setTerminationEnabled">setTerminationEnabled</a>() for detailed information.</p>
 <p>The static functions <a href="qthread.html#currentThreadId">currentThreadId</a>() and <a href="qthread.html#currentThread">currentThread</a>() return identifiers for the currently executing thread. The former returns a platform specific ID for the thread; the latter returns a QThread pointer.</p>
 <p>QThread also provides platform independent sleep functions in varying resolutions. Use <a href="qthread.html#sleep">sleep</a>() for full second resolution, <a href="qthread.html#msleep">msleep</a>() for millisecond resolution, and <a href="qthread.html#usleep">usleep</a>() for microsecond resolution.</p>
-<p>See also <a href="threads.html">Thread Support in Qt</a>, <a href="qthreadstorage.html">QThreadStorage</a>, <a href="qmutex.html">QMutex</a>, <a href="qsemaphore.html">QSemaphore</a>, <a href="qwaitcondition.html">QWaitCondition</a>, Mandelbrot Example, Semaphores Example, and Wait Conditions Example.</p>
+<p>See also <a href="threads.html">Thread Support in Qt</a>, <a href="qthreadstorage.html">QThreadStorage</a>, <a href="qmutex.html">QMutex</a>, <a href="qsemaphore.html">QSemaphore</a>, <a href="qwaitcondition.html">QWaitCondition</a>, <a href="threads-mandelbrot.html">Mandelbrot Example</a>, <a href="threads-semaphores.html">Semaphores Example</a>, and <a href="threads-waitconditions.html">Wait Conditions Example</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Priority-enum"></a>enum QThread::Priority</h3>
@@ -146,7 +146,7 @@
 <p>Returns the thread handle of the currently executing thread.</p>
 <p><b>Warning:</b> The handle returned by this function is used for internal purposes and should not be used in any application code. On Windows, the returned value is a pseudo-handle for the current thread that cannot be used for numerical comparison.</p>
 <h3 class="fn"><a name="exec"></a>int QThread::exec ()&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Enters the event loop and waits until <a href="qthread.html#exit">exit</a>() is called or the main widget is destroyed, and returns the value that was set to <a href="qthread.html#exit">exit</a>() (which is 0 if <a href="qthread.html#exit">exit</a>() is called via <a href="qthread.html#quit">quit</a>()).</p>
+<p>Enters the event loop and waits until <a href="qthread.html#exit">exit</a>() is called, returning the value that was passed to <a href="qthread.html#exit">exit</a>(). The value returned is 0 if <a href="qthread.html#exit">exit</a>() is called via <a href="qthread.html#quit">quit</a>().</p>
 <p>It is necessary to call this function to start event handling.</p>
 <p>See also <a href="qthread.html#quit">quit</a>() and <a href="qthread.html#exit">exit</a>().</p>
 <h3 class="fn"><a name="exit"></a>void QThread::exit ( int <i>returnCode</i> = 0 )</h3>
@@ -236,6 +236,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

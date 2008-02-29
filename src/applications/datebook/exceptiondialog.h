@@ -43,7 +43,7 @@ public:
         NotLater = Earlier | Selected,
     };
 
-    int exec();
+    int exec(bool editmode);
     int result() const;
 };
 

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/installation.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/installation.qdoc -->
 <head>
   <title>Qt 4.2: Installing Qt/Mac</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -17,14 +17,14 @@
 <ol type="1">
 <li>If you have the commercial edition of Qt, install your license file as <tt>$HOME/.qt-license</tt>.<p>For the open source version you do not need a license file.</p>
 </li>
-<li>Unpack the archive if you have not done so already. For example, if you have the <tt>qt-mac-opensource-desktop-%VERSION%.tar.gz</tt> package, type the following commands at a command line prompt:<pre> cd /tmp
- gunzip qt-mac-opensource-desktop-%VERSION%.tar.gz        # uncompress the archive
- tar xvf qt-mac-opensource-desktop-%VERSION%.tar          # unpack it</pre>
-<p>This creates the directory <tt>/tmp/qt-mac-opensource-desktop-%VERSION%</tt> containing the files from the archive.</p>
+<li>Unpack the archive if you have not done so already. For example, if you have the <tt>qt-mac-opensource-desktop-4.2.3.tar.gz</tt> package, type the following commands at a command line prompt:<pre> cd /tmp
+ gunzip qt-mac-opensource-desktop-4.2.3.tar.gz        # uncompress the archive
+ tar xvf qt-mac-opensource-desktop-4.2.3.tar          # unpack it</pre>
+<p>This creates the directory <tt>/tmp/qt-mac-opensource-desktop-4.2.3</tt> containing the files from the archive.</p>
 </li>
 <li>Building<p>To configure the Qt library for your machine type, run the <tt>./configure</tt> script in the package directory.</p>
-<p>By default, Qt is configured for installation in the <tt>/usr/local/Trolltech/Qt-%VERSION%</tt> directory, but this can be changed by using the <tt>-prefix</tt> option. Alternatively, the <tt>-prefix-install</tt> option can be used to specify a &quot;local&quot; installation within the source directory.</p>
-<pre> cd /tmp/qt-mac-opensource-desktop-%VERSION%
+<p>By default, Qt is configured for installation in the <tt>/usr/local/Trolltech/Qt-4.2.3</tt> directory, but this can be changed by using the <tt>-prefix</tt> option. Alternatively, the <tt>-prefix-install</tt> option can be used to specify a &quot;local&quot; installation within the source directory.</p>
+<pre> cd /tmp/qt-mac-opensource-desktop-4.2.3
  ./configure</pre>
 <p>Type <tt>./configure -help</tt> to get a list of all available options.</p>
 <p>Note that you will need to specify <tt>-universal</tt> if you want to build universal binaries, and also supply a path to the <tt>-sdk</tt> option if your development machine has a PowerPC CPU. By default, Qt is built as a framework, but you can built it as a set of dynamic libraries (dylibs) by specifying the <tt>-no-framework</tt> option.</p>
@@ -39,17 +39,17 @@
 <pre> PATH               - to locate qmake, moc and other Qt tools</pre>
 <p>This is done like this:</p>
 <p>In <tt>.profile</tt> (if your shell is bash), add the following lines:</p>
-<pre> PATH=/usr/local/Trolltech/Qt-%VERSION%/bin:$PATH
+<pre> PATH=/usr/local/Trolltech/Qt-4.2.3/bin:$PATH
  export PATH</pre>
 <p>In <tt>.login</tt> (in case your shell is csh or tcsh), add the following line:</p>
-<pre> setenv PATH /usr/local/Trolltech/Qt-%VERSION%/bin:$PATH</pre>
+<pre> setenv PATH /usr/local/Trolltech/Qt-4.2.3/bin:$PATH</pre>
 <p>If you use a different shell, please modify your environment variables accordingly.</p>
 </li>
 <li>That's all. Qt is now installed.<p>If you are new to Qt, we suggest that you take a look at the demos and examples to see Qt in action. Run the Qt Examples and Demos either by typing <tt>qtdemo</tt> on the command line or through the desktop's Start menu.</p>
 <p>You might also want to try the following links:</p>
 <ul>
 <li><a href="how-to-learn-qt.html">How to Learn Qt</a></li>
-<li>Qt Tutorial</li>
+<li><a href="tutorial.html">Qt Tutorial</a></li>
 <li><a href="http://www.trolltech.com/developer">Developer Zone</a></li>
 <li><a href="deployment.html">Deploying Qt Applications</a></li>
 </ul>
@@ -60,6 +60,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

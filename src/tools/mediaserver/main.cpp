@@ -25,10 +25,17 @@
 #include "qtopiamediaprovider.h"
 #include "qsoundprovider.h"
 
+#ifdef SINGLE_EXEC
+QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,mediaserver)
+#define MAIN_FUNC main_mediaserver
+#else
+#define MAIN_FUNC main
+#endif
+
 using namespace mediaserver;
 
 QSXE_APP_KEY
-int main(int argc, char** argv)
+int MAIN_FUNC(int argc, char** argv)
 {
     QSXE_SET_APP_KEY(argv[0])
 

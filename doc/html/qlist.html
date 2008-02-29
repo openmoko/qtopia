@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/tools/qlistdata.cpp -->
 <head>
   <title>Qt 4.2: QList Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -110,8 +111,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-lt-lt-5">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-gt-gt-5">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-lt-lt-6">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-gt-gt-6">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -304,7 +305,7 @@
 <p>See also <a href="qlist.html#append">append</a>(), <a href="qlist.html#prepend">prepend</a>(), <a href="qlist.html#replace">replace</a>(), and <a href="qlist.html#removeAt">removeAt</a>().</p>
 <h3 class="fn"><a name="insert-2"></a><a href="qlist-iterator.html">iterator</a> QList::insert ( <a href="qlist-iterator.html">iterator</a> <i>before</i>, const T &amp; <i>value</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Inserts <i>value</i> in front of the item pointed to by the iterator <i>before</i>. Returns an iterator pointing at the inserted item.</p>
+<p>Inserts <i>value</i> in front of the item pointed to by the iterator <i>before</i>. Returns an iterator pointing at the inserted item. Note that the iterator passed to the function will be invalid after the call; the returned iterator should be used instead.</p>
 <h3 class="fn"><a name="isEmpty"></a>bool QList::isEmpty () const</h3>
 <p>Returns true if the list contains no items; otherwise returns false.</p>
 <p>See also <a href="qlist.html#size">size</a>().</p>
@@ -479,12 +480,12 @@
 <p>Same as <a href="qlist.html#at">at</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-5"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-6"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the list <i>list</i> to stream <i>out</i>.</p>
 <p>This function requires the value type to implement <tt>operator&lt;&lt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-5"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-6"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a list from stream <i>in</i> into <i>list</i>.</p>
 <p>This function requires the value type to implement <tt>operator&gt;&gt;()</tt>.</p>
@@ -513,6 +514,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

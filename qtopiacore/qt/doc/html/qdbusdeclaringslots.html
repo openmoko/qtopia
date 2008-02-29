@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qdbusadaptors.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qdbusadaptors.qdoc -->
 <head>
   <title>Qt 4.2: Declaring Slots in D-BUS Adaptors</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -25,7 +25,7 @@
 <h2>Asynchronous Slots</h2>
 <p>Asynchronous slots are those that do not normally return any reply to the caller. For that reason, they cannot take any output parameters. In most cases, by the time the first line of the slot is run, the caller function has already resumed working.</p>
 <p>However, slots must rely on that behavior. Scheduling and message-dispatching issues could change the order in which the slot is run. Code intending to synchronize with the caller should provide its own method of synchronization.</p>
-<p>Asynchronous slots are marked by the keyword <a href="qdbusabstractadaptor.html#Q_ASYNC">Q_ASYNC</a> in the method signature, before the <tt>void</tt> return type and the slot name. (See the <tt>quit()</tt> slot in the <a href="qdbusadaptorexample.html">D-BUS Adaptor Example</a>).</p>
+<p>Asynchronous slots are marked by the keyword <a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a> in the method signature, before the <tt>void</tt> return type and the slot name. (See the <tt>quit()</tt> slot in the <a href="qdbusadaptorexample.html">D-BUS Adaptor Example</a>).</p>
 <a name="input-only-slots"></a>
 <h2>Input-Only Slots</h2>
 <p>Input-only slots are normal slots that take parameters passed by value or by constant reference. However, unlike asynchronous slots, the caller is usually waiting for completion of the callee before resuming operation. Therefore, non-asynchronous slots should not block or should state it its documentation that they may do so.</p>
@@ -83,6 +83,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

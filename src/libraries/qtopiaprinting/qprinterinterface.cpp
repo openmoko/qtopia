@@ -29,46 +29,58 @@
 
 
 /*!
-    Destructor
+    Destorys the printer object.
  */
 QtopiaPrinterInterface::~QtopiaPrinterInterface()
 {
 }
 
 /*!
-    \fn void print( QMap<QString, QVariant> options )
+    \fn void QtopiaPrinterInterface::print( QMap<QString, QVariant> options )
 
     Sends a print data to a printer. Values in \a options are used to configure the printer.
     Values are consist of a QString form of QPrintEngine::PrintEnginePropertyKey and its value.
 */
 
 /*!
-    \fn void printFile( const QString &fileName, const QString &mimeType = QString() )
+    \fn void QtopiaPrinterInterface::printFile( const QString &fileName, const QString &mimeType = QString() )
     Prints \a fileName. \a mimeType is optional.
 */
 
 /*!
-    \fn void printHtml( const QString &html )
+    \fn void QtopiaPrinterInterface::printHtml( const QString &html )
     Prints \a html.
 */
 
 /*!
-    \fn bool abort()
+    \fn bool QtopiaPrinterInterface::abort()
     Attempts to stop the printing. Sends true if printing is successfully interrupted.
 */
 
 /*!
-    \fn QString name()
+    \fn QString QtopiaPrinterInterface::name()
     Returns a name of the printing mechanism.
 */
 
 /*!
-    \fn bool isAvailable()
+    \fn bool QtopiaPrinterInterface::isAvailable()
     Returns true if the printing is currently supported.
 */
 
+
 /*!
-    Constructor
+    \class QtopiaPrinterPlugin
+    \brief The QtopiaPrinterPlugin class provides an abstract base for QtopiaPrinterInterface plugins.
+
+    Create a new printing mechanism by subclassing this base class and reimplementing the pure virtual functions.
+
+    \ingroup multimedia
+    \sa QtopiaPrinterInterface
+
+*/
+
+/*!
+    Constructs a printer plugin with the given \a parent.
  */
 QtopiaPrinterPlugin::QtopiaPrinterPlugin( QObject *parent )
     :QObject( parent )
@@ -76,7 +88,7 @@ QtopiaPrinterPlugin::QtopiaPrinterPlugin( QObject *parent )
 }
 
 /*!
-    Destructor
+    Destroys the printer plugin.
  */
 QtopiaPrinterPlugin::~QtopiaPrinterPlugin()
 {

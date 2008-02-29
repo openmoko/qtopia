@@ -81,6 +81,7 @@ private:
     PhoneMessageBox *addContactMsg;
     NumberDisplayMultiTap *tap;
     QChar composeKey;
+    bool delayEmitNumberChanged;
 };
 
 #endif

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/designer-manual.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/designer-manual.qdoc -->
 <head>
   <title>Qt 4.2: Using a Component in Your Application</title>
   <link rel="prev" href="designer-using-custom-widgets.html" />
@@ -64,7 +64,7 @@
 <a name="thesingleinheritanceapproach"></a><a name="the-single-inheritance-approach"></a>
 <h2>The Single Inheritance Approach</h2>
 <p>In this approach, we use the <tt>Ui::ImageDialog</tt> object as we did in the simple case, but instead of setting up the dialog from the application's main function, we subclass <a href="qdialog.html">QDialog</a> and set up the user interface from within the constructor. Components used in this way expose the widgets and layouts used in the form to the <a href="qdialog.html">QDialog</a> subclass, and provide a standard system for making signal and slot connections between the user interface and other objects in your application.</p>
-<p>This approach is used in the Calculator Form example.</p>
+<p>This approach is used in the <a href="designer-calculatorform.html">Calculator Form</a> example.</p>
 <p>To ensure that we can use the user interface, we need to include the header file that <tt>uic</tt> generates before referring to <tt>Ui::ImageDialog</tt>:</p>
 <pre> #include &quot;ui_imagedialog.h&quot;</pre>
 <p>The subclass is defined in the following way:</p>
@@ -191,6 +191,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

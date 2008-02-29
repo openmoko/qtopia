@@ -45,18 +45,14 @@ private slots:
 #ifndef QT_NO_SXE
     void sxeMonitorProcessError(QProcess::ProcessError);
     void sxeMonitorProcessExited(int);
+    void startNewSxeMonitor();
 #endif
 
 private:
     void doShutdown();
 
-    SecurityMonitor *m_monitor;
-    bool m_finished;
-
-
 #ifndef QT_NO_SXE
     static QString sxemonitorExecutable();
-    void startNewSxeMonitor();
     QProcess *m_sxeMonitorProcess;
 #endif
 

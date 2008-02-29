@@ -78,6 +78,9 @@ private:
     virtual void timerEvent(QTimerEvent *e);
     void startRinging(RingType);
     void initSound();
+    void setSoundPriority(bool priorityPlay);
+
+
     QString findRingTone();
 
     RingControlPrivate *d;

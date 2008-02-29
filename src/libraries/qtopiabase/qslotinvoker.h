@@ -42,7 +42,7 @@ public:
     QObject *receiver() const;
     QByteArray member() const;
     int *parameterTypes() const;
-    int numParameterTypes() const;
+    int parameterTypesCount() const;
 
 public slots:
     QVariant invoke( const QList<QVariant>& args );

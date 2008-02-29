@@ -52,6 +52,7 @@ public:
     QSet<QPimSource> sources() const;
     QUuid id() const;
 
+    using QContactContext::exists;
     bool exists(const QUniqueId &) const;
     QPimSource source(const QUniqueId &) const;
 

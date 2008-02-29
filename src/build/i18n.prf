@@ -55,25 +55,35 @@ linstall_template=$$COMMAND_HEADER\
 for(it,INSTALLS) {
     hint=$$eval($${it}.hint)
     contains(hint,nct) {
-        # Convert the non-code .ts file to .qm
-        commands="$$linstall_template"
-        contains(QMAKE_BEHAVIORS,keep_quotes) {
-            commands~=s/^"//
-            commands~=s/"$//
+        trtarget=$$eval($${it}.trtarget)
+        !contains(hint,content)|!containsre($$trtarget,^Qtopia) {
+            # Convert the non-code .ts file to .qm
+            commands="$$linstall_template"
+            contains(QMAKE_BEHAVIORS,keep_quotes) {
+                commands~=s/^"//
+                commands~=s/"$//
+            }
+            commands~=s,TRTARGET,$$eval($${it}.trtarget),gq
+            outdir=$$eval($${it}.outdir)
+            isEmpty(outdir):outdir=$$SRCDIR
+            commands~=s,SRCDIR,$$outdir,gq
+            eval(nct_linstall_$${it}.commands=\$$commands)
+            eval(nct_linstall_$${it}.CONFIG=no_path)
+            INSTALLS+=nct_linstall_$$it
         }
-        commands~=s,TRTARGET,$$eval($${it}.trtarget),gq
-        outdir=$$eval($${it}.outdir)
-        isEmpty(outdir):outdir=$$SRCDIR
-        commands~=s,SRCDIR,$$outdir,gq
-        eval(nct_linstall_$${it}.commands=\$$commands)
-        eval(nct_linstall_$${it}.CONFIG=no_path)
-        INSTALLS+=nct_linstall_$$it
 
         # Update the non-code .ts file
         eval(nct_lupdate_$${it}.CONFIG=no_link no_dependencies combine ignore_no_exist no_clean)
         commands=$$COMMAND_HEADER\
             cd $$outdir $$COMMAND_SEP\
-            $$fixpath($$QPEDIR/bin/nct_lupdate)\
+            $$fixpath($$QPEDIR/bin/nct_lupdate)
+        contains(hint,content) {
+            containsre($$trtarget,^Qtopia):commands+=\
+                -depot $$fixpath($$QTOPIA_DEPOT_PATH)
+            commands+=\
+                -content $$trtarget
+        }
+        commands+=\
                 $$DQTDIR\
                 $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
                 ${QMAKE_FILE_IN}

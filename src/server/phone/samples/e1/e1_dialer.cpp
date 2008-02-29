@@ -80,7 +80,9 @@ void E1DialerButton::generateBgPixmap( const E1DialerButton::State& st )
 {
     QPixmap pm;
     if( !m_bgImage.isNull() && m_colorForState[st].isValid() ) {
-        pm = pm.fromImage( ThemePixmapItem::colorizeImage( m_bgImage, m_colorForState[st], 255, true) );
+        QImage tmpImg = m_bgImage.copy();
+        ThemePixmapItem::colorizeImage(tmpImg, m_colorForState[st], 255, true);
+        pm = pm.fromImage(tmpImg);
         m_bgForState[st] = pm;
     } else if( !m_bgImage.isNull() ) {
         pm = pm.fromImage( m_bgImage );

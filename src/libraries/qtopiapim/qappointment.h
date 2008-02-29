@@ -38,6 +38,7 @@
 class QDataStream;
 class QAppointmentData;
 class QOccurrence;
+class QFile;
 class VObject;
 class QTOPIAPIM_EXPORT QAppointment : public QPimRecord
 {
@@ -152,8 +153,14 @@ public:
 
     static void writeVCalendar( const QString &, const QList<QAppointment> & );
     static void writeVCalendar( const QString &, const QAppointment & );
+
+    void writeVCalendar( const QString &filename ) const;
+    void writeVCalendar( QFile &file ) const;
+    void writeVCalendar( QDataStream *stream ) const;
+
     static QList<QAppointment> readVCalendar( const QString & );
     static QList<QAppointment> readVCalendarData( const char *, unsigned long );
+    static QList<QAppointment> readVCalendar( const QByteArray &vcard );
 
     template <typename Stream> void serialize(Stream &stream) const;
     template <typename Stream> void deserialize(Stream &stream);

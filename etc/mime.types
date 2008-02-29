@@ -96,6 +96,7 @@ image/ief			ief
 image/jpeg			jpeg jpg jpe
 image/png			png
 image/mng			mng
+image/svg+xml			svg svgz
 image/tiff			tiff tif
 image/x-bmp			bmp
 image/x-cmu-raster		ras

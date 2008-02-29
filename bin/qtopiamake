@@ -47,7 +47,9 @@ if ( @ARGV && $ARGV[0] =~ /-(release|debug)/ ) {
 
 if ( @ARGV && $ARGV[0] eq "-makemakefile" ) {
     shift(@ARGV);
-    processProFile(@ARGV, 1);
+    my $proFile = shift(@ARGV);
+    @CONFIG = @ARGV;
+    processProFile($proFile, 1);
     exit 0;
 }
 
@@ -423,7 +425,10 @@ sub processProFile
     }
 
     if ( $run_qmake ) {
-        system($qmake_cmd);
+        unlink "$targetDir/Makefile.target" if ( -f "$targetDir/Makefile.target" );
+        print "$qmake_cmd\n";
+        my $ret = system($qmake_cmd);
+        die if ( $ret != 0 || ! -f "$targetDir/Makefile.target");
     }
     makeMakefile($targetDir, $qmake_cmd, $projectRoot, $proFile, $qtdir, !$run_qmake);
 }
@@ -452,14 +457,14 @@ sub makeMakefile
     # We want a minimal set of targets defined even if the Makefile.target doesn't contain them
     # Because when the Makefile.target is built correctly it will include them and it's better
     # not to require re-configuring just because a Makefile.target was rebuilt.
-    my @targets = qw(all install uninstall install_target packages lupdate sdk cleaninstall cinstall syncqtopia
+    my @targets = qw(all install install_target packages lupdate sdk cleaninstall cinstall syncqtopia
                      first_syncqtopia test checkp4 remove_target relink printdependrules qmake_check);
     # Ignore these targets becase we have our own implementation for them
     my @extra_targets = qw(qmake qmake-debug regenerate regenerate_all nodeps);
     # This list must match the list in src/build/subdirs.prf
-    my @qmake_targets = qw(first all clean distclean install uninstall);
+    my @qmake_targets = qw(first all clean distclean install);
     map { push(@targets, "qtopia_$_"); } @qmake_targets;
-    my @ignored_targets = qw(FORCE);
+    my @ignored_targets = qw(FORCE uninstall);
     # This lets me override behaviours (eg. for qtopiacore)
     my @redirected_targets;
     # This lets me override silent mode later
@@ -611,7 +616,11 @@ sub makeMakefile
     # The rule to (re)create Makefile and Makefile.target
     # For syncqtopia projects, also call "make syncqtopia" so that the include directory is correctly populated
     $contents .= "regenerate:".$PRINT_DIR.(opt("silent")?"":"\@echo $qmake_cmd $proFile\n\t").
-                 "\@$make_prefix $QPEDIR/bin/qtopiamake -makemakefile \"$proFile\"\n".
+                 "\@$make_prefix $QPEDIR/bin/qtopiamake -makemakefile \"$proFile\"";
+    if ( @CONFIG ) {
+        $contents .= " \"".join("\" \"", @CONFIG)."\"";
+    }
+    $contents .= "\n".
                  ($$CONFIG{syncqtopia}?"\t\@$make_prefix $MAKE $MAKE_F Makefile.target ".($fastmake?"first_":"")."syncqtopia $make_suffix\n":"").
                  ($$PROJECT_TYPE{subdirs}?"":"\t\@$make_prefix $MAKE $MAKE_F Makefile.target \$\@ $make_suffix\n");
 
@@ -623,7 +632,7 @@ sub makeMakefile
     $contents .= "qmake: regenerate_all\n";
 
     # Run qmake with debug output
-    $contents .= "qmake-debug:\n\t\@$make_prefix $qmake_cmd_debug $proFile\n";
+    $contents .= "qmake-debug:\n\t\@$make_prefix QMAKEPATH=$qt_depot_path $qmake_cmd_debug $proFile\n";
 
     # Some gmake stuff
     if ( !$isWindows ) {

@@ -195,7 +195,7 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
             return true;
 
     bool wildcard = false;
-    QString dtype = type;
+    QString dtype = type.toLower();
     if ( type.right( 1 ) == "*" ) {
         wildcard = true;
         dtype = dtype.left( dtype.count() - 1 );
@@ -215,7 +215,7 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
             // no wildcard in stype - do quick comparison.
             if ( wildcard && stype.toLower().startsWith( dtype.toLower() ) )
                 return true;
-            else if (stype == dtype)
+            else if (stype.toLower() == dtype)
                 return true;
         }
     }

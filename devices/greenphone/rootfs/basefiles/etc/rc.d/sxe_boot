@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# This is the base script which initializes all the rules for the
+# SXE file-system.
+
+# This script should only need to be run on first-boot, not every boot.
+
+# Once the rules are initialized (written in coded form to the *.conf
+# files in /etc/lids) subsequent boots do *not require this script*
+# (or the scripts called from it).
+
+# Change this value for install location
+export QTOPIA_DIR=/opt/Qtopia
+
+# This should be correct for base scripts, change if not
+export BASE_DIR=/etc/lids
+
+# Other scripts called need to be able to find the lidsconf/lidsadm binaries
+# This should never need to be changed, as this location is hard-coded into
+# the lids kernel module.
+export PATH=/sbin
+
+# Zero out any rules currently in force
+lidsconf -Z
+lidsconf -Z BOOT
+lidsconf -Z POSTBOOT
+lidsconf -Z SHUTDOWN
+
+# Build the bounding set
+$BASE_DIR/sxe_bounding
+
+# Add the qtopia specific rules
+$QTOPIA_DIR/etc/sxe_qtopia/sxe_qtopia
+
+# Add the qtopia specific capabilities
+#/bin/cp -fp $QTOPIA_DIR/etc/sxe_qtopia/*.cap /etc/lids/.
+
+# Run the qtopia SXE domain scripts
+$QTOPIA_DIR.rom/bin/sxe_policy_runner $QTOPIA_DIR:$QTOPIA_DIR.rom
+

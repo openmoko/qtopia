@@ -114,6 +114,11 @@ bool FullDuplexPluginSession::isMuted() const
     return d->decodeSession->isMuted();
 }
 
+QtopiaMedia::State FullDuplexPluginSession::playerState() const
+{
+    return d->decodeSession->playerState();
+}
+
 QString FullDuplexPluginSession::errorString()
 {
     return QString();

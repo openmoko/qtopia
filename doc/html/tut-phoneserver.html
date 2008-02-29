@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: Phone Server</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Tutorial: Phone Server</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -14,20 +13,20 @@
 <a name="top"></a><a name="wtphoneserver"></a><p>This section provides an example of the methods to route applications requests through the phone server to the AT command handlers and describes how the responses are returned to the application.</p>
 <p>Using the <tt>SIMIdentity</tt> query type, which returns the IMSI number of the SIM the method is as follows:</p>
 <ol type="1">
-<li>create <tt>PhoneLine</tt> object to handle the request:<pre>    PhoneLine *line = new PhoneLine();</pre>
+<li>create <tt>PhoneLine</tt> object to handle the request:<pre>&nbsp;   PhoneLine *line = new PhoneLine();</pre>
 </li>
 <li>create the <tt>PhoneLineQCop</tt> object to transmit requests from the application to the phone server.</li>
 <li>return responses to queries via the <tt>queryResult</tt> signal</li>
-<li>A slot is created and the signal is connected:<pre>    connect( line, SIGNAL(queryResult(PhoneLine::QueryType, const QString&amp;)),
+<li>A slot is created and the signal is connected:<pre>&nbsp;   connect( line, SIGNAL(queryResult(PhoneLine::QueryType, const QString&amp;)),
              this, SLOT(simIdResult(PhoneLine::QueryType, const QString&amp;)) );
     ...
     void AppClass::simIdResult( PhoneLine::QueryType type, const QString&amp; value )
     {
-        <span class="comment">// Process the result &quot;value&quot;.</span>
+        // Process the result &quot;value&quot;.
         ...
     }</pre>
 </li>
-<li>Once the signal has been connected, the application issues the query as follows:<pre>    line-&gt;query( PhoneLine::SIMIdentity );</pre>
+<li>Once the signal has been connected, the application issues the query as follows:<pre>&nbsp;   line-&gt;query( PhoneLine::SIMIdentity );</pre>
 </li>
 <li><tt>PhoneLine::query</tt> calls the private phone handler method <tt>query</tt>.<p>For this example the query method is <tt>PhoneLineQCop::query</tt> which sends a Qtopia IPC message to the phone server on the <tt>QPE/Phone</tt> channel.</p>
 </li>
@@ -43,6 +42,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

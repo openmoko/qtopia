@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -41,13 +41,6 @@
 // hardware:
 //
 //#define QTOPIA_PHONE_DEVICE "/dev/ttyS1"
-//
-// The baud rate for the serial connection:
-//
-//#define QTOPIA_PHONE_RATE 115200
-
-// Sets the phone vendor plugin to load (normally all plugins are loaded).
-//#define QTOPIA_PRELOAD_PHONE_PLUGIN "examplevendor"
 
 // Define this to use the "advanced" GSM 07.10 CMUX mode instead of "basic".
 //#define QTOPIA_ADVANCED_CMUX

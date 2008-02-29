@@ -18,6 +18,11 @@ set_optvar( "help", +{
     "set" => [ "%", "hidden" ],
 });
 
+set_optvar( "remote", +{
+    "set" => [ "%=s", "Specify the remote host to connect to." ],
+    "arg" => "ip:port",
+});
+
 set_optvar( "display", +{
     "set" => [ "%=s", "Use display number <num>" ],
     "arg" => "num",
@@ -118,7 +123,7 @@ set_optvar( "qvfb_only", +{
     "default" => 0,
 });
 
-add_note("For arguments to the 'runqpe' part of this script, use [script arguemnts] -- [runqpe arguments]");
+add_note("For arguments to the 'runqpe' part of this script, use [script arguments] -- [runqpe arguments]");
 
 opt_get_options();
 opt_apply_defaults();
@@ -178,12 +183,14 @@ exit 0;
 sub run_qvfb
 {
     if ( -e "/tmp/.qtvfb_mouse-".opt("display") ) {
+        print "WARNING: QVFb display ".opt("display")." is already running (see /tmp/.qtvfb_*-".opt("display").")\n";
         return;
     }
     my $qvfb_path = "$DQTDIR/bin/qvfb";
     my $skin_path = "$qt_depot_path/tools/qvfb";
 
-    my $qvfb_command = "$qvfb_path -qwsdisplay :".opt("display")." -skin $skin ".opt("qvfb")." >/dev/null 2>&1 &";
+    print "Saving QVFb output to /tmp/.qtvfb_log-".opt("display")."\n";
+    my $qvfb_command = "$qvfb_path -qwsdisplay :".opt("display")." -skin $skin ".opt("qvfb")." >/tmp/.qtvfb_log-".opt("display")." 2>&1 &";
     my $mapfile = "/tmp/.qtvfb_mouse-".opt("display");
     # we'll wait for this file so remove it now (if it exists)
     if ( -e $mapfile ) {
@@ -239,6 +246,17 @@ ulimit -Sd 100000          # max data size of a program is 100 MB
 ulimit -Ss 4000            # max stack size of a program is 4 MB
 ulimit -Sm 100000          # max resident set size is 100 MB
 
+run_until_no_restart(){
+    touch /tmp/restart-qtopia
+    while [ -f /tmp/restart-qtopia ]; do
+        echo "$@"
+        eval "$@"
+        if [ "$?" != 0 ]; then
+            break
+        fi
+    done
+}
+
 if [ -f bin/qtopia-dbus-daemon ]; then
    echo "Killing all previous qtopia-dbus-daemons..."
    killall qtopia-dbus-daemon
@@ -257,10 +275,10 @@ elif [ "$1" = "-gdb" ]; then
         shift
         shift
         export PATH=$QTOPIA_PREFIX/bin:$PATH
-        echo gdb "$@"
-        gdb "$@"
+        echo ddd "$@"
+        ddd "$@"
     else
-        gdb bin/qpe
+        ddd bin/qpe
     fi
 elif [ "$1" = "-profile" ]; then
     LD_PRELOAD=$PREFIX/lib/gprof-helper.so bin/qpe
@@ -268,6 +286,10 @@ elif [ "$1" = "-callgrind" ]; then
     shift
     echo callgrind "$@" bin/qpe
     callgrind "$@" bin/qpe
+elif [ "$1" = "-qtopiatest-overrides" ]; then
+    shift
+    rm -f /tmp/qtopiatest_cmds
+    run_until_no_restart 'eval `cat /tmp/qtopiatest_cmds 2>/dev/null`; LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so eval bin/qpe' "$@"
 elif [ "$1" = "-valgrind" ]; then
     shift
     echo valgrind --tool=memcheck "$@" bin/qpe
@@ -288,18 +310,21 @@ elif [ "$1" = "-performance" ]; then
     echo "Performance :  runqpe :  Starting qpe... :  $TIME"
     exec bin/qpe "$@"    
 else
-    touch /tmp/restart-qtopia
-    while [ -f /tmp/restart-qtopia ]; do
-        bin/qpe "$@"
-        if [ "$?" != 0 ]; then
-            break
-        fi
-    done
+    run_until_no_restart bin/qpe "$@"
 fi
 END
     close OUT;
     chmod 0755, $script;
-    system($script." ".join(" ", @ARGV));
+    my @args = @ARGV;
+    my $remote = opt("remote");
+    Qtopia::Opt::read_config_cache();
+    if ( opt("test") ) {
+        push(@args, "-qtopiatest-overrides");
+    }
+    if ( $remote ) {
+        push(@args, "-remote", $remote);
+    }
+    system($script." ".join(" ", @args));
     unlink $script;
 }
 

@@ -25,18 +25,25 @@
 
 #include <qimage.h>
 #include <qpainter.h>
+#include <qevent.h>
 
-
+#include <qdebug.h>
 
 VideoCaptureView::VideoCaptureView(QWidget *parent, Qt::WFlags fl):
     QWidget(parent, fl),
+    m_cleared(false),
     m_tidUpdate(0)
 {
     m_capture = camera::VideoCaptureDeviceFactory::createVideoCaptureDevice();
 
-    QSizePolicy sp(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    setSizePolicy(sp);
+    // Optimize paint event
+    setAttribute(Qt::WA_NoSystemBackground);
+
+    QPalette    pal(palette());
+    pal.setBrush(QPalette::Window, Qt::black);
+    setPalette(pal);
 
     setLive();
 }
@@ -110,17 +117,44 @@ bool VideoCaptureView::available() const
     return m_capture->hasCamera();
 }
 
-void VideoCaptureView::paintEvent(QPaintEvent*)
+void VideoCaptureView::moveEvent(QMoveEvent*)
 {
+    m_cleared = false;
+}
+
+void VideoCaptureView::resizeEvent(QResizeEvent*)
+{
+    m_cleared = false;
+}
+
+void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
+{
+    QPainter    painter(this);
+
+    if (!m_cleared)
+    {
+        QPoint      brushOrigin = painter.brushOrigin();
+
+        // Paint window background
+        painter.setBrushOrigin(-mapToGlobal(QPoint(0, 0)));
+        painter.fillRect(paintEvent->rect(), window()->palette().brush(QPalette::Window));
+
+        // Reset origin
+        painter.setBrushOrigin(brushOrigin);
+
+        m_cleared = true;
+    }
+
     if (m_tidUpdate && !available()) {
 
-        QPainter(this).drawText(rect(), Qt::AlignCenter | Qt::TextWordWrap, tr("No Camera"));
+        painter.drawText(rect(), Qt::AlignCenter | Qt::TextWordWrap, tr("No Camera"));
 
         killTimer(m_tidUpdate);
     }
     else
     {
-        m_capture->getCameraImage(m_image);
+        if (m_tidUpdate > 0)
+            m_capture->getCameraImage(m_image);
 
         int w = m_image.width();
         int h = m_image.height();

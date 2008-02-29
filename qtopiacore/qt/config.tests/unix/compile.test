@@ -10,22 +10,22 @@ TEST=$5
 EXE=`basename "$5"`
 DESCRIPTION=$6
 shift 6
-LIBPATH=""
+LFLAGS=""
 INCLUDEPATH=""
 CXXFLAGS=""
 while [ "$#" -gt 0 ]; do
     PARAM=$1
     case $PARAM in
     -framework)
-        LIBPATH="$LIBPATH -framework \"$2\""
+        LFLAGS="$LFLAGS -framework \"$2\""
         shift
         ;;
     -F*)
-        LIBPATH="$LIBPATH $PARAM"
+        LFLAGS="$LFLAGS $PARAM"
         CXXFLAGS="$CXXFLAGS $PARAM"
         ;;
-    -L*|-l*)
-	LIBPATH="$LIBPATH $PARAM"
+    -L*|-l*|-pthread)
+	LFLAGS="$LFLAGS $PARAM"
 	;;
     -I*)
         INC=`echo $PARAM | sed -e 's/^-I//'`
@@ -46,7 +46,7 @@ test -d "$OUTDIR/$TEST" || mkdir -p "$OUTDIR/$TEST"
 
 cd "$OUTDIR/$TEST"
 
-"$OUTDIR/bin/qmake" -nocache -spec "$QMKSPEC" "LIBS*=$LIBPATH" "INCLUDEPATH*=$INCLUDEPATH" "QMAKE_CXXFLAGS*=$CXXFLAGS" "$SRCDIR/$TEST/$EXE.pro" -o "$OUTDIR/$TEST/Makefile" >/dev/null 2>&1
+"$OUTDIR/bin/qmake" -nocache -spec "$QMKSPEC" "LIBS*=$LFLAGS" "INCLUDEPATH*=$INCLUDEPATH" "QMAKE_CXXFLAGS*=$CXXFLAGS" "$SRCDIR/$TEST/$EXE.pro" -o "$OUTDIR/$TEST/Makefile" >/dev/null 2>&1
 
 if [ "$VERBOSE" = "yes" ]; then
     make

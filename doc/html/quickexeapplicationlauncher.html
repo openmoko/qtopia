@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>QuickExeApplicationLauncher Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>QuickExeApplicationLauncher Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QuickExeApplicationLauncher Class Reference</h1>
 <p>The QuickExeApplicationLauncher class supports launching &quot;quicklaunched&quot; <a href="qtopiaapplication.html">QtopiaApplication</a> applications. <a href="#details">More...</a></p>
-<pre>    #include &lt;QuickExeApplicationLauncher&gt;</pre><p>Inherits <a href="exeapplicationlauncher.html">ExeApplicationLauncher</a>.</p>
+<pre>#include &lt;QuickExeApplicationLauncher&gt;</pre><p>Inherits <a href="exeapplicationlauncher.html">ExeApplicationLauncher</a>.</p>
 <ul>
 <li><a href="quickexeapplicationlauncher-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -51,7 +50,7 @@
 <p>When the user attempts to launch an application with the <tt>quicklauncher</tt> running, the QuickExeApplicationLauncher class checks to see whether the application was compiled to support Quicklaunching. An application that supports Quicklaunching is compiled as a shared library, not an executable. This shared library has a well known entry point that can be called to run application specific code. The build system documentation contains more information on compiling an application to support Quicklaunching.</p>
 <p>If the application does support Quicklaunching, a message is sent to the idle <tt>quicklauncher</tt> instance. This instance then loads the application shared library and immediately begins executing application specific code, bypassing the non-application-specific portions that it executed earlier in anticipation of an application launch.</p>
 <p>Once a <tt>quicklauncher</tt> instance has transformed itself into a running application, the QuickExeApplicationLauncher class starts another.</p>
-<p>Both the QuickExeApplicationLauncher and the <tt>quicklauncher</tt> itself search the paths returned by the Qtopia::installPaths() method for the <tt>plugins/application/lib&lt;application name&gt;.so</tt> application plugin.</p>
+<p>Both the QuickExeApplicationLauncher and the <tt>quicklauncher</tt> itself search the paths returned by the <a href="qtopia.html#installPaths">Qtopia::installPaths</a>() method for the <tt>plugins/application/lib&lt;application name&gt;.so</tt> application plugin.</p>
 <p>XXX - <tt>quicklauncher</tt> itself does not search correctly.</p>
 <p>The QuickExeApplicationLauncher class provides the <tt>QuickExeApplicationLauncher</tt> task.</p>
 <hr />
@@ -64,6 +63,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

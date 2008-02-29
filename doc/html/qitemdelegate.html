@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/itemviews/qitemdelegate.cpp -->
 <head>
   <title>Qt 4.2: QItemDelegate Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -96,8 +97,8 @@
 <a name="subclassing"></a>
 <h3>Subclassing</h3>
 <p>When subclassing QItemDelegate to create a delegate that displays items using a custom renderer, it is important to ensure that the delegate can render items suitably for all the required states; e.g. selected, disabled, checked. The documentation for the <a href="qitemdelegate.html#paint">paint</a>() function contains some hints to show how this can be achieved.</p>
-<p>Custom editing features for can be added by subclassing QItemDelegate and reimplementing <a href="qitemdelegate.html#createEditor">createEditor</a>(), <a href="qitemdelegate.html#setEditorData">setEditorData</a>(), <a href="qitemdelegate.html#setModelData">setModelData</a>(), and <a href="qitemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>(). This process is described in the Spin Box Delegate example.</p>
-<p>See also <a href="model-view-delegate.html">Delegate Classes</a>, <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, Spin Box Delegate Example, Settings Editor Example, and Icons Example.</p>
+<p>Custom editing features for can be added by subclassing QItemDelegate and reimplementing <a href="qitemdelegate.html#createEditor">createEditor</a>(), <a href="qitemdelegate.html#setEditorData">setEditorData</a>(), <a href="qitemdelegate.html#setModelData">setModelData</a>(), and <a href="qitemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>(). This process is described in the <a href="itemviews-spinboxdelegate.html">Spin Box Delegate example</a>.</p>
+<p>See also <a href="model-view-delegate.html">Delegate Classes</a>, <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, <a href="itemviews-spinboxdelegate.html">Spin Box Delegate Example</a>, <a href="tools-settingseditor.html">Settings Editor Example</a>, and <a href="widgets-icons.html">Icons Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="clipping-prop"></a>clipping : bool</h3>
@@ -150,7 +151,22 @@
 <p>Renders the delegate using the given <i>painter</i> and style <i>option</i> for the item specified by <i>index</i>.</p>
 <p>When reimplementing this function in a subclass, you should update the area held by the option's <a href="qstyleoption.html#rect-var">rect</a> variable, using the option's <a href="qstyleoption.html#state-var">state</a> variable to determine the state of the item to be displayed, and adjust the way it is painted accordingly.</p>
 <p>For example, a selected item may need to be displayed differently to unselected items, as shown in the following code:</p>
-<pre>     ...</pre>
+<pre>     if (option.state &amp; QStyle::State_Selected)
+         painter-&gt;fillRect(option.rect, option.palette.highlight());
+
+     int size = qMin(option.rect.width(), option.rect.height());
+     int brightness = index.model()-&gt;data(index, Qt::DisplayRole).toInt();
+     double radius = (size/2.0) - (brightness/255.0 * size/2.0);
+     if (radius == 0.0)
+         return;
+
+     painter-&gt;save();
+     painter-&gt;setRenderHint(QPainter::Antialiasing, true);
+     painter-&gt;setPen(Qt::NoPen);
+     if (option.state &amp; QStyle::State_Selected)
+         painter-&gt;setBrush(option.palette.highlightedText());
+     else
+     ...</pre>
 <p>After painting, you should ensure that the painter is returned to its the state it was supplied in when this function was called. For example, it may be useful to call <a href="qpainter.html#save">QPainter::save</a>() before painting and <a href="qpainter.html#restore">QPainter::restore</a>() afterwards.</p>
 <p>Reimplemented from <a href="qabstractitemdelegate.html#paint">QAbstractItemDelegate</a>.</p>
 <p>See also <a href="qstyle.html#StateFlag-enum">QStyle::State</a>.</p>
@@ -178,6 +194,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

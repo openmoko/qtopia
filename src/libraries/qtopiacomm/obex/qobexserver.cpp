@@ -39,12 +39,19 @@
 
 /*!
     \class QObexServer
-    \brief The QObexServer class is an abstract class that listens for OBEX client connections.
+    \brief The QObexServer class provides an abstract class for OBEX servers.
 
-The QObexServer class can be used to listen for new OBEX client connections.  This class
-does not implement an actual transport (e.g. Bluetooth, IRDA, HTTP, etc.)  Instead it is used
-as an abstract interface class for other classes that will impelement transport specific
-functionality. Once a client is connected, server reports a new connection, which should then be handled by the individual service implementation, e.g. OBEX Push Service, OBEX FTP Service, etc.
+    This class makes it possible to accept incoming OBEX client connections.
+    The class does not implement an OBEX server for any particular transport; 
+    it provides an abstract interface for OBEX servers, and subclasses must 
+    provide the implementation for their own specific OBEX transports (such
+    as Bluetooth or IRDA).
+
+    When a client connects, the newConnection() signal is emitted. The 
+    nextPendingConnection() method can then be called to retrieve the new
+    connection as a QObexSocket object. This socket object can then be 
+    used to run an OBEX client or service, such as QObexPushClient and
+    QObexPushService.
 
     \ingroup qtopiaobex
  */
@@ -157,14 +164,16 @@ void QObexServer_Private::newConnectionHint()
 
 void QObexServer_Private::close()
 {
-    OBEX_Cleanup(m_self);
-    m_self = 0;
+    if (m_self) {
+        OBEX_Cleanup(m_self);
+        m_self = 0;
+    }
 }
 
 obex_t *QObexServer_Private::spawnReceiver()
 {
     if (m_pending == 0)
-        return NULL;
+        return 0;
 
     m_pending--;
 
@@ -176,7 +185,7 @@ obex_t *QObexServer_Private::spawnReceiver()
 }
 
 /*!
-    Constructs a new Bluetooth OBEX Server.  The \a parent parameter specifies
+    Constructs a new OBEX Server.  The \a parent parameter specifies
     the \c QObject parent of the server.
  */
 QObexServer::QObexServer(QObject *parent)
@@ -196,7 +205,8 @@ QObexServer::~QObexServer()
 }
 
 /*!
-    Does the server have pending connections?
+    Returns true if the server has a pending connection; otherwise returns 
+    false.
  */
 bool QObexServer::hasPendingConnections() const
 {
@@ -204,18 +214,25 @@ bool QObexServer::hasPendingConnections() const
 }
 
 /*!
-    Returns the next pending connection if there are pending connections, otherwise
-    returns NULL value.
+    Returns the next pending connection as a QObexSocket object.
+
+    The socket is created as a child of the server, which means that it is
+    automatically deleted when the server object is destroyed. It is still a
+    good idea to delete the object explicitly when you are done with it, to
+    avoid wasting memory.
+
+    Returns 0 if there are no pending connections.
  */
 QObexSocket *QObexServer::nextPendingConnection()
 {
-    return NULL;
+    return 0;
 }
 
 /*!
-    Returns NULL if there are no pending connections.  Otherwise returns an
-    implementation dependent handle.  The current implementation returns an OpenOBEX handle
-    of \c obex_t
+    Returns an implementation dependent handle for the next pending 
+    connection. 
+
+    Returns 0 if there are no pending connections.
 */
 void *QObexServer::spawnReceiver()
 {
@@ -223,7 +240,8 @@ void *QObexServer::spawnReceiver()
 }
 
 /*!
-    Close the server socket
+    Closes the server. The server will no longer listen for incoming 
+    connections.
  */
 void QObexServer::close()
 {
@@ -239,11 +257,9 @@ bool QObexServer::isListening() const
 }
 
 /*!
-    Attempts to register a local server socket in order to listen for connections.
-    Internally this function calls the registerServer() function.  Subclasses must
-    provide an implementation of this function for the specific transport protocol.
+    Tells the server to listen for incoming connections.
 
-    \sa registerServer()
+    Returns true on success; otherwise returns false.
 */
 bool QObexServer::listen()
 {
@@ -253,9 +269,11 @@ bool QObexServer::listen()
 /*!
     \fn void *QObexServer::registerServer()
 
-    Abstract function that provides an implementation dependent OBEX handle to a server
-    socket.  Subclasses of the QObexServer class must implement this function.  If the
-    socket could not be bound, the function must return a NULL value.
+    Sets up the server and returns an implementation dependent handle to a server
+    socket. Returns 0 if the server could not be set up appropriately.
+
+    Subclasses must implement this function according to their own specific 
+    transport protocols.
 */
 
 /*!

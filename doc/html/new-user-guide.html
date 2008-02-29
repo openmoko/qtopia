@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>The New User's Guide to Configuring and Building Qtopia</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>The New User's Guide to Configuring and Building Qtopia</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -36,17 +35,17 @@
 <a name="prepare-the-source-tree"></a>
 <h3>Prepare the Source Tree</h3>
 <p>Your downloaded source package should have a name such as:</p>
-<pre>    qtopia-phone-commercial-src-4.1.3.tar.gz</pre>
-<p>The <tt>.tar.gz</tt> indicates that the file is a gzip-compressed <tt>tarball</tt> thatt can be extracted using the command :</p>
-<pre>    tar zxf &lt;file&gt;</pre>
+<pre>&nbsp;   qtopia-phone-commercial-src-4.1.3.tar.gz</pre>
+<p>The <tt>.tar.gz</tt> indicates that the file is a gzip-compressed <tt>tarball</tt> that can be extracted using the command:</p>
+<pre>&nbsp;   tar zxf &lt;file&gt;</pre>
 <p>This will provide a directory named <tt>qtopia-phone-4.1.3</tt> (for this example).</p>
 <p>Additional packages should be unpacked <i>inside</i> the source tree. For example, to unpack the GB language pack you would do the following:</p>
-<pre>    $ cd ~/build/qtopia/qtopia-phone-4.1.3
+<pre>&nbsp;   $ cd ~/build/qtopia/qtopia-phone-4.1.3
     $ tar zxf ../qtopia-language-en_GB-4.1.3.tar.gz</pre>
-<p>If you are not sure where a tarball should be unpacked, you can use the command</p>
-<pre>        tar ztf</pre>
+<p>If you are not sure where a tarball should be unpacked, you can use the command:</p>
+<pre>&nbsp;       tar ztf</pre>
 <p>which lists the contents instead of extracting them. The following is an example of what it will display:</p>
-<pre>    $ tar ztf qtopia-phone-commercial-src-4.1.3.tar.gz
+<pre>&nbsp;   $ tar ztf qtopia-phone-commercial-src-4.1.3.tar.gz
     qtopia-phone-4.1.3/
     qtopia-phone-4.1.3/bin/
     qtopia-phone-4.1.3/bin/at
@@ -59,7 +58,7 @@
     qtopia-phone-4.1.3/bin/installpic
     ...</pre>
 <p>As you can see, everything will be unpacked to the <tt>qtopia-phone-4.1.3</tt> directory. In contrast, the GB language pack:</p>
-<pre>    $ tar ztf qtopia-language-en_GB-4.1.3.tar.gz
+<pre>&nbsp;   $ tar ztf qtopia-language-en_GB-4.1.3.tar.gz
     etc/
     etc/dict/
     etc/dict/en_GB/
@@ -73,14 +72,14 @@
     ...</pre>
 <p>has no <tt>qtopia-phone-4.1.3</tt> directory and so you should extract the files from inside the <tt>qtopia-phone-4.1.3</tt> directory.</p>
 <p>The rest of this document needs to refer to the source tree and so assumes for ease of use that you have set an environment variable as follows:</p>
-<pre>    export QTOPIA_DEPOT_PATH=~/build/qtopia/qtopia-phone-4.1.3</pre>
+<pre>&nbsp;   export QTOPIA_DEPOT_PATH=~/build/qtopia/qtopia-phone-4.1.3</pre>
 <a name="prepare-the-build-tree"></a>
 <h3>Prepare the Build Tree</h3>
 <p>While it is possible to build in the source tree it is not recommended. If you build in a separate directory you can easily remove the build without deleting the sources. There is even a facility to make it easier when you are changing code. For this example, we will build in a directory called <tt>build</tt>:</p>
-<pre>    cd ~/build/qtopia
+<pre>&nbsp;   cd ~/build/qtopia
     mkdir build</pre>
 <p>The use of the <tt>QPEDIR</tt> environment variable is optional when only running <tt>configure</tt>, <tt>make</tt> or <tt>qtopiamake</tt>, but it is required to run scripts or perform depot hopping so it is a good idea to set it anyway.</p>
-<pre>    export QPEDIR=~/build/qtopia/build</pre>
+<pre>&nbsp;   export QPEDIR=~/build/qtopia/build</pre>
 <a name="create-device-specific-files"></a>
 <h2>Create Device-specific Files</h2>
 <p>If you are building on a PC you can most likely skip this step. When building for a device, there are a number device-specific files that Qtopia requires and there are two ways to handle them:</p>
@@ -93,10 +92,10 @@
 <h2>Taming the Configuration Explosion</h2>
 <p>Qtopia has many configuration options and Qtopia Core also has its own set of options. If you are building on a PC you will probably not need to use many of them but they are required when building for a device. Determining which options are required can be difficult; the following table indicates how to obtain configuration help from the source:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Software</th><th>Command</th></tr></thead>
-<tr valign="top" class="odd"><td>Qt</td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -help</tt></td></tr>
-<tr valign="top" class="even"><td>Qtopia Core</td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -embedded -help</tt></td></tr>
-<tr valign="top" class="odd"><td>Qtopia</td><td><tt>$QTOPIA_DEPOT_PATH/configure -verbose -help</tt></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Software</th><th>Command</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Qt</td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -help</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>Qtopia Core</td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -embedded -help</tt></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td>Qtopia</td><td><tt>$QTOPIA_DEPOT_PATH/configure -verbose -help</tt></td></tr>
 </table></p>
 <p><b>Note:</b> These commands will output copious amounts of information so it is advised to use a pager such as <tt>less</tt> or <tt>more</tt>, or even pipe the output into a file for perusal with a text editor using a command such as: <tt>configure -help &gt; output.txt</tt>.</p>
 <p>The following are some common items to set:</p>
@@ -117,8 +116,12 @@
 <li>If the external dependencies are not located in a location that your compiler searches, you will need these arguments to locate the headers. Typically, it is Qtopia Core that requires them so you will need to wrap them in <tt>-extra-qtopiacore-config</tt>. For example, <tt>configure -extra-qtopiacore-config '-I /path/to/libjpeg/include' -extra-qtopiacore-config '-L /path/libjpeg/lib'</tt>.</li>
 </ul>
 </li>
-<li><tt>-prefix &lt;path&gt;</tt><ul>
-<li>By default, Qtopia expects to run from <tt>$QPEDIR/image/Qtopia</tt>. This is clearly not suitable for a device so you will need to use this option. The recommended location to run Qtopia from is <tt>/opt/Qtopia</tt>.</li>
+<li><tt>-image &lt;path&gt;</tt><ul>
+<li>Allows you to set the install location at configure-time. This path is then used as the default value for the <tt>-prefix</tt> option.</li>
+<li><tt>-prefix &lt;path&gt;</tt></li>
+</ul>
+<ul>
+<li>Specifies the runtime location. The default is the path set by the <tt>-image</tt> option.</li>
 </ul>
 </li>
 <li><tt>-R &lt;path&gt;</tt><ul>
@@ -150,6 +153,7 @@
 </ul>
 </li>
 </ul>
+<p>A complete list of <tt>configure</tt> options is available at: <a href="configopts.html">Configuration Options</a>.</p>
 <a name="build-steps"></a>
 <h2>Build Steps</h2>
 <a name="configure"></a>
@@ -158,17 +162,17 @@
 <a name="make"></a>
 <h3>make</h3>
 <p>Once Qtopia is configured, building is just a matter of running <tt>make</tt>. It is possible that you will receive compile errors if you are not using a GCC-based compiler. If this happens you'll need to modify the code to work with your compiler or try another compiler.</p>
-<p><b>Note:</b> <tt>make</tt> cannot be run from within the <tt>&lt;source_tree&gt;/qtopiacore</tt> or <tt>&lt;build_tree&gt;/qtopiacore</tt> directories. Qtopia manages these directories and when running <tt>make</tt> manually, environment variables may not be set correctly resulting in incorrect directories being used for the build.</p>
+<p><b>Note:</b> <tt>make</tt> cannot be run from within the <tt>&lt;source_tree&gt;/qtopiacore</tt> or <tt>&lt;build_tree&gt;/qtopiacore</tt> directories. Qtopia manages these directories and when running make manually, environment variables may not be set correctly resulting in incorrect directories being used for the build.</p>
 <a name="make-install"></a>
 <h3>make install</h3>
-<p><tt>make install</tt> does not really install Qtopia, it sets up the <tt>image</tt> directory. This directory contains everything required to run Qtopia (except for external dependencies) and unless you passed <tt>-prefix</tt> to configure, this is also the directory from where Qtopia expects to be run.</p>
-<p>If you have used previous versions of Qtopia, the handling of <tt>-prefix</tt> may seem strange. Previously it determined where Qtopia was installed to, while the <tt>QPEDIR</tt> environment variable determined where it was run from. Qtopia has changed to reflect a similar change in Qt. Now <tt>-prefix</tt> specifies the location that Qtopia will be run from. This location is hard-coded into <tt>libQtCore.so</tt>, but unlike Qt, Qtopia does not install to the directory you specified with <tt>-prefix</tt>. This is because unlike Qt, Qtopia is generally built for a device and the files will be moved onto a flash file system before running. You can still relocate the files at install time if <tt>$QPEDIR/image/Qtopia</tt> is not suitable for your purposes.</p>
-<pre>    make install PREFIX=/path/to/opt/Qtopia</pre>
+<p><tt>make install</tt> does not really install Qtopia, it sets up the <tt>image</tt> directory. This directory contains everything required to run Qtopia (except for external dependencies) and unless you passed <tt>-image</tt> to configure, this is also the directory from where Qtopia expects to be run.</p>
+<p>If you have used previous versions of Qtopia, the handling of <tt>-image</tt> and <tt>-prefix</tt> may seem strange. Now <tt>-image</tt> specifies the install location <tt>-prefix</tt> and is passed to <tt>-prefix</tt> to specify the runtime location. This location is hard-coded into <tt>libQtCore.so</tt>, but unlike Qt, Qtopia does not install to the directory you specified with <tt>-image</tt> and <tt>-prefix</tt>. This is because unlike Qt, Qtopia is generally built for a device and the files will be moved onto a flash file system before running. You can still relocate the files at install time if <tt>$QPEDIR/image/Qtopia</tt> is not suitable for your purposes.</p>
+<pre>&nbsp;   make install IMAGE=/path/to/opt/Qtopia</pre>
 <p>If you have re-run <tt>configure</tt>, you should use <tt>make cleaninstall</tt> so that the image is removed before being re-populated. If you do not do this you may end up with files from a previous configuration that are not suitable. This is especially noticeable if you have reduced the files installed (eg. passing <tt>-displayrot 0</tt> to keep rotated fonts out of the image).</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

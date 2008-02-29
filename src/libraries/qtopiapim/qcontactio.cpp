@@ -157,13 +157,13 @@ QContactIO::QContactIO(QObject *parent)
 void QContactIO::pimMessage(const QString &message, const QByteArray &data)
 {
     QDataStream ds(data);
-    if (message == "addedContact(int,QUuid,QContact)") {
+    if (message == "addedContact(int,QUuid,QUniqueId)") {
         int pid;
         QUuid u;
         ds >> pid;
         ds >> u;
         if (pid != getpid() && u == contextId()) {
-            QContact contact;
+            QUniqueId contact;
             ds >> contact;
             checkAdded(contact);
         }
@@ -187,13 +187,13 @@ void QContactIO::pimMessage(const QString &message, const QByteArray &data)
             ds >> ids;
             checkRemoved(ids);
         }
-    } else if (message == "updatedContact(int,QUuid,QContact)") {
+    } else if (message == "updatedContact(int,QUuid,QUniqueId)") {
         int pid;
         QUuid u;
         ds >> pid;
         ds >> u;
         if (pid != getpid() && u == contextId()) {
-            QContact contact;
+            QUniqueId contact;
             ds >> contact;
             checkUpdated(contact);
         }
@@ -217,16 +217,16 @@ QContactIO::~QContactIO()
 
 /*!
   \internal
-  Checks store for the added \a contact.
+  Checks store for the added contact with identifer \a id.
 
   By default only calls the recordsUpdated() signal.
 
   Reimplement this function if the subclass caches data to force reload or if more efficient
-  adding \a contact to cache.
+  adding the contact for \a id to cache.
 */
-void QContactIO::checkAdded(const QContact &contact)
+void QContactIO::checkAdded(const QUniqueId &id)
 {
-    Q_UNUSED(contact);
+    Q_UNUSED(id);
     emit recordsUpdated();
 }
 
@@ -258,16 +258,16 @@ void QContactIO::checkRemoved(const QList<QUniqueId> &) { emit recordsUpdated();
 
 /*!
   \internal
-  Checks store for updates to \a contact.
+  Checks store for updates to contact with identifer \a id.
 
   By default only calls the recordsUpdated() signal.
 
   Reimplement this function if the subclass caches data to force reload or if more efficient
   to update \a contact in the cache.
 */
-void QContactIO::checkUpdated(const QContact &contact)
+void QContactIO::checkUpdated(const QUniqueId &id)
 {
-    Q_UNUSED(contact);
+    Q_UNUSED(id);
     emit recordsUpdated();
 }
 
@@ -287,20 +287,20 @@ void QContactIO::ensureDataCurrent(bool force)
   \internal
 
   Sends a message on the QPE/Pim QtopiaChannel indicating that this process has added the
-  \a contact to the data store.
+  contact with identifer \a id to the data store.
 */
-void QContactIO::notifyAdded(const QContact &contact)
+void QContactIO::notifyAdded(const QUniqueId &id)
 {
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "addedContact(int,QUuid,QContact)");
+        QtopiaIpcEnvelope e("QPE/PIM", "addedContact(int,QUuid,QUniqueId)");
         e << getpid();
         e << contextId();
-        e << contact;
+        e << id;
     }
 
     foreach(QContactIO *c, activeContacts) {
         if (c != this && c->contextId() == contextId())
-            c->checkAdded(contact);
+            c->checkAdded(id);
     }
 }
 
@@ -308,20 +308,20 @@ void QContactIO::notifyAdded(const QContact &contact)
   \internal
 
   Sends a message on the QPE/Pim QtopiaChannel indicating that this process has updated the
-  \a contact in the data store.
+  contact with identifer \a id in the data store.
 */
-void QContactIO::notifyUpdated(const QContact &contact)
+void QContactIO::notifyUpdated(const QUniqueId &id)
 {
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "updatedContact(int,QUuid,QContact)");
+        QtopiaIpcEnvelope e("QPE/PIM", "updatedContact(int,QUuid,QUniqueId)");
         e << getpid();
         e << contextId();
-        e << contact;
+        e << id;
     }
 
     foreach(QContactIO *c, activeContacts) {
         if (c != this && c->contextId() == contextId())
-            c->checkUpdated(contact);
+            c->checkUpdated(id);
     }
 }
 

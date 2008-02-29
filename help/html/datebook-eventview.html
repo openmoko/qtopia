@@ -1,6 +1,3 @@
-<!--#if expr="$TOUCH"-->
-<!--#set var="or" value="or"-->
-<!--#endif-->
 <html>
 <head><title>Event View</title></head>
 <body>
@@ -21,8 +18,11 @@
 <!--#endif-->
 </p>
 <p><b>To select a link:</b>
-<!--#if expr="$PDASTYLE || $TOUCH"-->
-click the link <!--#echo var="or"-->
+<!--#if expr="$PDASTYLE"-->
+click the link
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
+click the link or
 <!--#endif-->
 <!--#if expr="$PHONESTYLE"-->
 scroll with <img src=":icon/up">/<img src=":icon/down"> </img> and press <img src=":icon/select"> </img> to activate the link.</p>

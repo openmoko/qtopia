@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Themed Views</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Themed Views</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -58,12 +57,12 @@
 </ol>
 <p>If any of the top or left coordinates are negative, they are relative to the right/bottom of the parent element. If bottom or right coordinates are less than or equal to zero, they are relative to the right/bottom of the parent element. This allows a theme to scale.</p>
 <p>For example, to place a rect element that scales as the view gets wider:</p>
-<pre>    &lt;rect rect=&quot;20,10,-20,50&quot; color=&quot;Highlight&quot; brush=&quot;Highlight&quot;/&gt;</pre>
+<pre>&nbsp;   &lt;rect rect=&quot;20,10,-20,50&quot; color=&quot;Highlight&quot; brush=&quot;Highlight&quot;/&gt;</pre>
 <p>This places a rectangle, using the Highlight color, at 20,10 with height of 40 pixels and the y2 coordinate 20 pixels from the parent element's right side.</p>
 <a name="showing-hiding-elements"></a>
 <h3>Showing/Hiding Elements</h3>
 <p>Attributes to show or hide and elements are available to all elements. The <tt>transient</tt> and <tt>active</tt> attributes control the visibility of an element. Both the <tt>transient</tt> and <tt>active</tt> attributes can have literal values of <tt>yes</tt> or <tt>no</tt>, with the default value for <tt>transient</tt> being <tt>no</tt> and the default value of <tt>active</tt> being yes. The active attribute only has effect when <tt>transient=&quot;yes&quot;</tt>. In addition to a literal value, a boolean expression can also be specified for the value of the <tt>active</tt> attribute. This allows the visibility of a theme element to be controlled by the valuespace.</p>
-<pre>    &lt;rect name=&quot;newmessages&quot; transient=&quot;yes&quot; active=&quot;expr:@/Communications/Messages/NewMessages &gt; 0&quot;/&gt;</pre>
+<pre>&nbsp;   &lt;rect name=&quot;newmessages&quot; transient=&quot;yes&quot; active=&quot;expr:@/Communications/Messages/NewMessages &gt; 0&quot;/&gt;</pre>
 <p>In the above example the &quot;newmessages&quot; rect element will only be active(visible) when the valuespace key /Communications/Messages/NewMessages returns a value &gt; 0.</p>
 <a name="specifying-colors"></a>
 <h3>Specifying Colors</h3>
@@ -115,7 +114,7 @@
 <h3>Interactive Elements</h3>
 <p>In order to allow feedback when elements are pressed on touch screen phones the <tt>interactive</tt> attribute can be set to &quot;yes&quot;. This allows alternative attribute values to be defined when the element (and it's children) is clicked.</p>
 <p>For example, the following code changes the graphic and text color when any element in the group is clicked (the group element ensures that clicking on any child affects all children).</p>
-<pre>    &lt;group name=&quot;profile&quot; rect=&quot;0,0,98x14&quot; interactive=&quot;yes&quot; transient=&quot;yes&quot; active=&quot;no&quot;&gt;
+<pre>&nbsp;   &lt;group name=&quot;profile&quot; rect=&quot;0,0,98x14&quot; interactive=&quot;yes&quot; transient=&quot;yes&quot; active=&quot;no&quot;&gt;
         &lt;image name=&quot;profile&quot; rect=&quot;0,0,98x14&quot; src=&quot;profile&quot; onclick=&quot;src=profile-pressed;color=Highlight&quot;/&gt;
         &lt;text name=&quot;profile&quot; size=&quot;10&quot; rect=&quot;4,0,90x12&quot; align=&quot;hcenter&quot; onclick=&quot;color=HighlightedText&quot;/&gt;
     &lt;/group&gt;</pre>
@@ -133,7 +132,7 @@
 <li><a href="themed-view-elements.html#themeimageelement">an image element's image file</a></li>
 </ul>
 <p>Base valuespace paths for expressions can be specified using the <tt>vspath</tt> attribute. Whenever an expression is specified, any valuespace keys it contains will be considered relative to the item's base valuespace path. An item's base valuespace path is the sum of its own and its parents' <tt>vspath</tt> attributes. For example:</p>
-<pre>    &lt;rect vspath=&quot;/Level1&quot;&gt;
+<pre>&nbsp;   &lt;rect vspath=&quot;/Level1&quot;&gt;
         &lt;rect vspath=&quot;/Level2&quot;&gt;
             &lt;rect vspath=&quot;/Level3&quot;&gt;
                 &lt;text&gt;expr:@Text&lt;/text&gt; &lt;-- @Text expands to /Level1/Level2/Level3/Text
@@ -145,7 +144,7 @@
 <a name="templates"></a><p>Templates allow an abstract 'visual look' to be declared in theme XML and then factorized and drawn to a custom user interface component.</p>
 <p>Consider an example where we would like to theme the look of button. We can use templates to define the look of the button and then draw an instance of that look to the button.</p>
 <p>First we define the template in Theme XML.</p>
-<pre>    &lt;page vspath=&quot;/UIComponents&quot;&gt;
+<pre>&nbsp;   &lt;page vspath=&quot;/UIComponents&quot;&gt;
         &lt;template name=&quot;buttonnormal&quot;&gt;
             &lt;image rect=&quot;0,0,0,0&quot; src=&quot;buttonnormalbg&quot;/&gt;
             &lt;text rect=&quot;0,0,0,0&quot; align=&quot;hcenter,vcenter&quot;&gt;expr:@NormalText&lt;/text&gt;
@@ -156,26 +155,26 @@
         &lt;/template&gt;
     &lt;/page&gt;</pre>
 <p>Then assuming the theme XML has been loaded into a <a href="themedview.html">ThemedView</a>, we create a instance of the template and use it to draw our button.</p>
-<pre>    class ThemedButton : public QPushButton
+<pre>&nbsp;   class ThemedButton : public QPushButton
     {
     private:
-        ThemedView* view; <span class="comment">// contains the loaded theme</span>
-        bool buttonPressed; <span class="comment">// contains a flag indicating whether the button is currently pressed or not</span>
+        ThemedView* view; // contains the loaded theme
+        bool buttonPressed; // contains a flag indicating whether the button is currently pressed or not
     protected:
         void paintEvent(QPaintEvent* e)
         {
-            <span class="comment">// find our template</span>
+            // find our template
             QString templateName = buttonPressed ? &quot;buttonnormal&quot; : &quot;buttonclicked&quot;;
             ThemeTemplateItem* template = (ThemeTemplateItem*)view-&gt;findItem(templateName, ThemedView::Template);
             Q_ASSERT(template != 0);
 
-            <span class="comment">// create an instance of the template</span>
-            ThemeTemplateInstanceItem* instance = template-&gt;createInstance(QString::number( (int)this )); <span class="comment">// pass a uid to createInstace, used as value for vspath</span>
-            <span class="comment">// paint the template instance to this widget</span>
+            // create an instance of the template
+            ThemeTemplateInstanceItem* instance = template-&gt;createInstance(QString::number( (int)this )); // pass a uid to createInstace, used as value for vspath
+            // paint the template instance to this widget
             QPainter p(this);
             view-&gt;paint(&amp;p, e-&gt;rect(), instance);
 
-            <span class="comment">// cleaup</span>
+            // cleaup
             delete instance;
         }
     };</pre>
@@ -188,6 +187,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

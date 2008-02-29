@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -17,6 +27,7 @@
 #include <qdebug.h>
 #include <qstring.h>
 #include <ctype.h>
+#include <errno.h>
 
 /*
     Returns a human readable representation of the first \a len
@@ -38,7 +49,7 @@ static QByteArray qt_prettyDebug(const char *data, int len, int maxSize)
             char buf[5];
             qsnprintf(buf, sizeof(buf), "\\%3o", c);
             buf[4] = '\0';
-            out += QString::fromLatin1(buf);
+            out += QByteArray(buf);
         }
     }
 
@@ -360,6 +371,7 @@ QProcessPrivate::QProcessPrivate()
     deathPipe[1] = INVALID_Q_PIPE;
     exitCode = 0;
     crashed = false;
+    dying = false;
     emittedReadyRead = false;
     emittedBytesWritten = false;
 #ifdef Q_WS_WIN
@@ -402,6 +414,7 @@ void QProcessPrivate::cleanup()
 #endif
     pid = 0;
     sequenceNumber = 0;
+    dying = false;
 
     if (stdoutChannel.notifier) {
         stdoutChannel.notifier->setEnabled(false);
@@ -611,6 +624,15 @@ bool QProcessPrivate::_q_processDied()
             return true;
     }
 
+    if (dying) {
+        // at this point we know the process is dead. prevent
+        // reentering this slot recursively by calling waitForFinished()
+        // or opening a dialog inside slots connected to the readyRead
+        // signals emitted below.
+        return true;
+    }
+    dying = true;
+    
     // in case there is data in the pipe line and this slot by chance
     // got called before the read notifications, call these two slots
     // so the data is made available before the process dies.
@@ -1081,7 +1103,11 @@ qint64 QProcess::bytesAvailable() const
 qint64 QProcess::bytesToWrite() const
 {
     Q_D(const QProcess);
-    return d->writeBuffer.size();
+    qint64 size = d->writeBuffer.size();
+#ifdef Q_OS_WIN
+    size += d->pipeWriterBytesToWrite();
+#endif
+    return size;
 }
 
 /*!

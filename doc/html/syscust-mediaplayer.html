@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qtopia Helix Integration</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Qtopia Helix Integration</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -22,21 +21,21 @@
 <h3>Building Qtopia with the Helix Source Package</h3>
 <p>To build Qtopia with Helix support enabled, follow these steps:</p>
 <p><i>extract</i> the Helix Integration Package into a fresh extraction of the Qtopia Phone source package. For example run:</p>
-<pre>    cd &lt;qtopia-root-dir&gt;
+<pre>&nbsp;   cd &lt;qtopia-root-dir&gt;
     tar -xzvf qtopia-helix-commercial-src-&lt;version&gt;.tar.gz</pre>
 <p><i>configure</i> Qtopia via running :</p>
-<pre>    configure -helix-system-id &lt;SYSTEM_ID&gt; &lt;other configure options&gt;</pre>
+<pre>&nbsp;   configure -helix-system-id &lt;SYSTEM_ID&gt; &lt;other configure options&gt;</pre>
 <p>To see the possible values of &lt;SYSTEM_ID&gt; to suit Linux systems run the following commands :</p>
-<pre>    cd &lt;qtopia-root-dir&gt;
+<pre>&nbsp;   cd &lt;qtopia-root-dir&gt;
     find src/3rdparty/libraries/helix/src/build/umakecf -name &quot;linux*.cf&quot; -printf &quot;%f\n&quot; | sed &quot;s/\(.*\).cf/\1/&quot;</pre>
 <p><i>after</i> starting configuring Qtopia check that you see the following <tt>configure</tt> output :</p>
-<pre>    Testing for helix: PRESENT</pre>
+<pre>&nbsp;   Testing for helix: PRESENT</pre>
 <p><i>make</i> and make install Qtopia</p>
 <p><b>Note:</b> The Helix engine is published under a number of licenses, ranging from Research and Development to commercial. For further information please refer to: <a href="https://helixcommunity.org">Helix Community</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

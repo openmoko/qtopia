@@ -24,6 +24,7 @@
 #include <qtimestring.h>
 #include <qtopia/pim/qappointment.h>
 #include <qtopia/pim/qappointmentmodel.h>
+#include <qappointmentview.h>
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -32,8 +33,8 @@
 #include <QItemDelegate>
 #include <QItemSelectionModel>
 
-DayView::DayView(QWidget *parent)
-    : QWidget(parent)
+DayView::DayView(QWidget *parent, const QCategoryFilter& c)
+    : QWidget(parent), timedModel(0), allDayModel(0)
 {
     mWeekdayLabel = new QLabel();
     mDateLabel = new QLabel();
@@ -57,18 +58,20 @@ DayView::DayView(QWidget *parent)
 
     timedModel = new QOccurrenceModel(start, end, this);
     timedModel->setDurationType(QAppointmentModel::TimedDuration);
+    timedModel->setCategoryFilter(c);
     mTimedView->setModel(timedModel);
     mTimedView->setItemDelegate(id);
 
-    connect(mTimedView, SIGNAL(selectionChanged(const QModelIndex&)), this, SLOT(timedSelectionChanged(const QModelIndex&)));
-    connect(timedModel, SIGNAL(modelReset()), this, SLOT(modelsReset()));
-
     allDayModel = new QOccurrenceModel(start, end, this);
     allDayModel->setDurationType(QAppointmentModel::AllDayDuration);
+    allDayModel->setCategoryFilter(c);
     mAllDayList = new AppointmentList();
     mAllDayList->setModel(allDayModel);
     mAllDayList->setItemDelegate(id);
     mAllDayList->setFolded(true);
+
+    connect(mTimedView, SIGNAL(selectionChanged(const QModelIndex&)), this, SLOT(timedSelectionChanged(const QModelIndex&)));
+    connect(timedModel, SIGNAL(modelReset()), this, SLOT(modelsReset()));
     connect(mAllDayList, SIGNAL(changeHiddenCount(int)), this, SLOT(updateHiddenIndicator(int)));
     connect(mAllDayList, SIGNAL(activated(const QModelIndex &)), this, SLOT(allDayOccurrenceActivated(const QModelIndex &)));
     connect(mAllDayList->selectionModel(), SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(allDayOccurrenceChanged(const QModelIndex &)));
@@ -281,14 +284,18 @@ void DayView::setAllDayFolded(bool f)
 void DayView::updateHeaderText()
 {
     QDate cDate = currentDate();
-    mWeekdayLabel->setText(QTimeString::localDayOfWeek(cDate, QTimeString::Long));
+
+    if (cDate == QDate::currentDate())
+        mWeekdayLabel->setText(tr("Today (%1)", "Today (Fri)").arg(QTimeString::localDayOfWeek(cDate, QTimeString::Medium)));
+    else
+        mWeekdayLabel->setText(QTimeString::localDayOfWeek(cDate, QTimeString::Long));
 
     mDateLabel->setText(QTimeString::localYMD(cDate));
 }
 
 void DayView::setDaySpan( int starthour, int endhour )
 {
-    mTimedView->timeManager()->setDaySpan(starthour*60, endhour*60);
+    mTimedView->setDaySpan(starthour*60, endhour*60);
 }
 
 void DayView::firstTimed()
@@ -418,15 +425,15 @@ void DayView::resizeEvent(QResizeEvent *)
 
 void DayView::timedSelectionChanged(const QModelIndex &index)
 {
-    QRect r = mTimedView->occurrenceRect(index);
-
-    mScrollArea->ensureVisible( 0, r.bottom(), 10, 10 );
-    mScrollArea->ensureVisible( 0, r.top(), 10, 10 );
-
     // Save the last selected occurrence, too
     if (index.isValid()) {
         lastSelectedTimedId = timedModel->id(index);
         lastSelectedAllDayId = QUniqueId();
+
+        QRect r = mTimedView->occurrenceRect(index);
+
+        mScrollArea->ensureVisible( 0, r.bottom(), 10, 10 );
+        mScrollArea->ensureVisible( 0, r.top(), 10, 10 );
     } else {
         lastSelectedTimedId = QUniqueId();
     }

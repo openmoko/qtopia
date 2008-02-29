@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -690,8 +700,13 @@ void QLayout::deleteAllItems()
 #endif
 
 /*!
-    This function is called from \c addLayout() functions in
+    This function is called from \c addLayout() or \c insertLayout() functions in
     subclasses to add layout \a l as a sub-layout.
+
+    The only scenario in which you need to call it directly is if you
+    implement a custom layout that supports nested layouts.
+
+    \sa QBoxLayout::addLayout(), QBoxLayout::insertLayout(), QGridLayout::addLayout()
 */
 void QLayout::addChildLayout(QLayout *l)
 {
@@ -793,7 +808,7 @@ void QLayout::addChildWidget(QWidget *w)
   \compat
 
     Sets this layout's parent widget to a fixed size with width \a w
-    and height \a h, stopping the user form resizing it, and also
+    and height \a h, stopping the user from resizing it, and also
     prevents the layout from resizing it, even if the layout's size
     hint should change. Does nothing if this is not a top-level
     layout (i.e., if parent()->isWidgetType()).
@@ -1046,7 +1061,7 @@ bool QLayout::activate()
                 for (int i = 0; i < layout->count(); ++i)
                     paintLayout(painter, layout->itemAt(i));
             }
-            painter->drawRect(lay->geometry());
+            painter->drawRect(layout->geometry());
         }
 
         void MyWidget::paintEvent(QPaintEvent *)

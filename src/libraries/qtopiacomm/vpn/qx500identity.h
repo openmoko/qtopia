@@ -26,7 +26,7 @@
 #include <QHash>
 #include <qtopiaglobal.h>
 
-class QTOPIACOMM_EXPORT QX500Identity {
+class QX500Identity {
 public:
     enum Attribute {            // see RFC 1779
         CommonName = 0,         // CN

@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Document System: Document Server</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>Document System: Document Server</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -30,23 +29,23 @@
 <p>Metadata records are stored in an embedded SQL database. The database backing store is in the main storage on the device, not on removable media. A server process monitors changes in storage and updates the SQL database as required.</p>
 <p>The database schema is as follows:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th colspan="3">ContentTable</th></tr>
-<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>id</tt></td><td><tt>int</tt></td><td>autoincrement unique key</td></tr>
-<tr valign="top" class="even"><td><tt>uiName</tt></td><td><tt>varchar 100</tt></td><td>indexed</td></tr>
-<tr valign="top" class="odd"><td><tt>mimeType</tt></td><td><tt>varchar 50</tt></td><td>indexed</td></tr>
-<tr valign="top" class="even"><td><tt>size</tt></td><td><tt>int</tt></td><td></td></tr>
-<tr valign="top" class="odd"><td><tt>drmStatus</tt></td><td><tt>enum</tt> one of: <tt>plain</tt> <tt>controlled</tt> <tt>unrenderable</tt></td><td></td></tr>
-<tr valign="top" class="even"><td>docStatus</td><td>enum one of: <tt>doc</tt> <tt>dat</tt></td><td>indexed</td></tr>
-<tr valign="top" class="odd"><td><tt>icon</tt></td><td><tt>blob</tt> (binary large object)</td><td></td></tr>
-<tr valign="top" class="even"><td><tt>thumbnail</tt></td><td><tt>blob</tt></td><td></td></tr>
-<tr valign="top" class="odd"><td><tt>owner</tt></td><td><tt>int</tt></td><td>index (foreign key)</td></tr>
+<tr valign="top" bgcolor="#a2c511"><th colspan="3">ContentTable</th></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Field</th><th>Type</th><th>Details/Index</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>id</tt></td><td><tt>int</tt></td><td>autoincrement unique key</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>uiName</tt></td><td><tt>varchar 100</tt></td><td>indexed</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>mimeType</tt></td><td><tt>varchar 50</tt></td><td>indexed</td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>size</tt></td><td><tt>int</tt></td><td></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>drmStatus</tt></td><td><tt>enum</tt> one of: <tt>plain</tt> <tt>controlled</tt> <tt>unrenderable</tt></td><td></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td>docStatus</td><td>enum one of: <tt>doc</tt> <tt>dat</tt></td><td>indexed</td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>icon</tt></td><td><tt>blob</tt> (binary large object)</td><td></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>thumbnail</tt></td><td><tt>blob</tt></td><td></td></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>owner</tt></td><td><tt>int</tt></td><td>index (foreign key)</td></tr>
 </table></p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th colspan="3">CategoryMapTable</th></tr>
-<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>contentId</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>ContentTable</tt></td></tr>
-<tr valign="top" class="even"><td><tt>category</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>Categories</tt></td></tr>
+<tr valign="top" bgcolor="#a2c511"><th colspan="3">CategoryMapTable</th></tr>
+<tr valign="top" bgcolor="#a2c511"><th>Field</th><th>Type</th><th>Details/Index</th></tr>
+<tr valign="top" bgcolor="#f0f0f0"><td><tt>contentId</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>ContentTable</tt></td></tr>
+<tr valign="top" bgcolor="#e0e0e0"><td><tt>category</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>Categories</tt></td></tr>
 </table></p>
 <p><b>Note:</b></p>
 <ul>
@@ -77,6 +76,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

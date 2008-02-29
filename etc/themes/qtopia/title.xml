@@ -7,8 +7,8 @@
           <level name="battery" rect="2.27%,19.04%,25%x52.38%" src="battery-big.svg" count="6" min="0" max="100" scale="yes" delay="1000" loop="0" play="expr:@/Accessories/Battery/Charging == true">
             expr:@/Accessories/Battery/VisualCharge
           </level>
-          <level name="signal" rect="-27.27%,19.04%,25%x52.38%" scale="yes" src="signal-big.svg" count="6" min="0" max="100" active="expr:@/Telephony/Status/SignalLevel/modem">
-				expr:@/Telephony/Status/SignalLevel/modem
+          <level name="signal" rect="-27.27%,19.04%,25%x52.38%" scale="yes" src="signal-big.svg" count="6" min="0" max="100" active="expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength">
+				expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength
 		  </level>
 		<image rect="28.41%,14.29%,-28.97%,80.95%" src="statusbar.svg" scale="yes">
 			<status name="alarm" rect="3,17.65%,9x9" imageon="bell_on" on="expr:@/UI/DailyAlarm"/>
@@ -41,8 +41,8 @@
 			<level name="battery" rect="-12%,12.5%,4.5%x70%" src="battery-small.svg" scale="yes" count="6" min="0" max="100" delay="1000" loop="0" play="expr:@/Accessories/Battery/Charging == true">
 			    expr:@/Accessories/Battery/VisualCharge
 			</level>
-            <level name="signal" rect="-6%,12.5%,4.5%x70%" src="signal-small.svg" scale="yes" count="6" min="0" max="100" active="expr:@/Telephony/Status/SignalLevel/modem">
-			    expr:@/Telephony/Status/SignalLevel/modem
+            <level name="signal" rect="-6%,12.5%,4.5%x70%" src="signal-small.svg" scale="yes" count="6" min="0" max="100" active="expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength">
+			    expr:@/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength
 			</level>
 		    </group>
 		    <widget name="inputmethod" rect="-12%,4.76%,12%x90.48%" transient="yes" active="expr:@/UI/IMVisible"/>

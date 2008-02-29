@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/io/qfile.cpp -->
 <head>
   <title>Qt 4.2: QFile Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -279,7 +280,9 @@
  }</pre>
 <p>When a <a href="qfile.html">QFile</a> is opened using this function, <a href="qiodevice.html#close">close</a>() does not actually close the file, but only flushes it.</p>
 <p><b>Warning:</b> If <i>fh</i> is <tt>stdin</tt>, <tt>stdout</tt>, or <tt>stderr</tt>, you may not be able to <a href="qiodevice.html#seek">seek</a>(). See <a href="qiodevice-qt3.html#isSequentialAccess">QIODevice::isSequentialAccess</a>() for more information.</p>
-<p>See also <a href="qiodevice.html#close">close</a>().</p>
+<p><b>Note:</b> On Windows, you need to enable support for console applications in order to use the stdin, stdout and stderr streams at the console. To do this, add the following declaration to your application's project file:</p>
+<pre> CONFIG += console</pre>
+<p>See also <a href="qiodevice.html#close">close</a>() and <a href="qmake-variable-reference.html#config">qmake Variable Reference</a>.</p>
 <h3 class="fn"><a name="open-5"></a>bool QFile::open ( int <i>fd</i>, <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>mode</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Opens the existing file descripter <i>fd</i> in the given <i>mode</i>. Returns true if successful; otherwise returns false.</p>
@@ -380,6 +383,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -451,7 +451,7 @@ QRegion QtopiaDecoration::region(const QWidget *widget, const QRect &rect, int t
     QRegion region;
 
     Qt::WindowFlags wf = widget ? widget->windowFlags() : (Qt::WindowFlags)0;
-    if ( !helpExists() )
+    if (helpWidth > 0 && !helpExists())
         helpWidth = 0;
 
     switch ((int)type) {
@@ -653,7 +653,11 @@ bool QtopiaDecoration::paint(QPainter *painter, const QWidget *widget, int decRe
 
 #ifndef QT_NO_PALETTE
     if (paintAll || decRegion & Borders) {
-        wdiface->drawArea( QWindowDecorationInterface::Border, painter, &wd );
+        int lb = wdiface->metric(QWindowDecorationInterface::LeftBorder,&wd);
+        int rb = wdiface->metric(QWindowDecorationInterface::RightBorder,&wd);
+        int bb = wdiface->metric(QWindowDecorationInterface::BottomBorder,&wd);
+        if (titleHeight > 0 && lb > 0 && rb > 0 && bb > 0)
+            wdiface->drawArea( QWindowDecorationInterface::Border, painter, &wd );
         handled |= true;
     }
 
@@ -708,6 +712,10 @@ bool QtopiaDecoration::paint(QPainter *painter, const QWidget *widget, int decRe
 void QtopiaDecoration::paintButton(QPainter *painter, const QWidget *w,
                         int type, int state)
 {
+    QWindowDecorationInterface::WindowData wd;
+    windowData( w, wd );
+
+    int helpWidth = wdiface->metric(QWindowDecorationInterface::HelpWidth,&wd);
     QWindowDecorationInterface::Button b;
     switch ((int)type) {
         case Close:
@@ -716,13 +724,13 @@ void QtopiaDecoration::paintButton(QPainter *painter, const QWidget *w,
         case Minimize:
             if ( ((DecorHackWidget *)w)->needsOk() )
                 b = QWindowDecorationInterface::OK;
-            else if ( helpExists() )
+            else if ( helpWidth > 0 && helpExists() )
                 b = QWindowDecorationInterface::Help;
             else
                 return;
             break;
         case Help:
-            if ( helpExists() )
+            if ( helpWidth > 0 && helpExists() )
                 b = QWindowDecorationInterface::Help;
             else
                 return;
@@ -733,9 +741,6 @@ void QtopiaDecoration::paintButton(QPainter *painter, const QWidget *w,
         default:
             return;
     }
-
-    QWindowDecorationInterface::WindowData wd;
-    windowData( w, wd );
 
     int titleHeight = wdiface->metric(QWindowDecorationInterface::TitleHeight,&wd);
     QRect rect(w->rect());

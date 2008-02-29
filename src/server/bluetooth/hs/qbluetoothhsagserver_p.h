@@ -25,7 +25,7 @@
 #include <qtopia/comm/qbluetoothaudiogateway.h>
 #include <qtopiaglobal.h>
 
-class QBluetoothHeadsetService;
+class QBluetoothHeadsetCommInterface;
 
 class QBluetoothHeadsetAudioGatewayServer : public QBluetoothAudioGateway
 {
@@ -33,7 +33,7 @@ class QBluetoothHeadsetAudioGatewayServer : public QBluetoothAudioGateway
     friend class QBluetoothHeadsetAudioGatewayServerPrivate;
 
 public:
-    QBluetoothHeadsetAudioGatewayServer(QBluetoothHeadsetService *parent,
+    QBluetoothHeadsetAudioGatewayServer(QBluetoothHeadsetCommInterface *parent,
                                         const QString &audioDev,
                                         const QString& service);
     ~QBluetoothHeadsetAudioGatewayServer();
@@ -49,7 +49,7 @@ public slots:
     void connectAudio();
 
 private:
-    QBluetoothHeadsetService *m_parent;
+    QBluetoothHeadsetCommInterface *m_parent;
 };
 
 #endif

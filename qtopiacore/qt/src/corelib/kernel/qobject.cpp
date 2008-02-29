@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1200,7 +1210,7 @@ bool QObject::eventFilter(QObject * /* watched */, QEvent * /* event */)
 */
 
 /*!
-    If \a block is true, signals emitted by this object is blocked
+    If \a block is true, signals emitted by this object are blocked
     (i.e., emitted signals disappear into hyperspace). If \a block is
     false, no such blocking will occur.
 
@@ -1607,7 +1617,7 @@ QObjectList QObject::queryList(const char *inheritsClass,
 
     Returns the child of this object that can be casted into type T and
     that is called \a name, or 0 if there is no such object.
-    An empty string matches all object names.
+    Omitting the \a name argument causes all object names to be matched.
     The search is performed recursively.
 
     If there is more than one child matching the search, the most
@@ -1640,7 +1650,7 @@ QObjectList QObject::queryList(const char *inheritsClass,
 
     Returns all children of this object with the given \a name that can be
     cast to type T, or an empty list if there are no such objects.
-    An empty string matches all object names.
+    Omitting the \a name argument causes all object names to be matched.
     The search is performed recursively.
 
     The following example shows how to find a list of child \l{QWidget}s of

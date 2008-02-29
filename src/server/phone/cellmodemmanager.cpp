@@ -787,6 +787,7 @@ void CellModemManager::updateStatus()
     d->m_status->setAttribute("OperatorCountry", networkOperatorCountry());
     d->m_status->setAttribute("CallDivert", callForwardingEnabled());
     d->m_status->setAttribute("SimToolkitAvailable", simToolkitAvailable());
+    d->m_status->setAttribute("CellModemAvailable", cellModemAvailable());
     d->m_status->setAttribute("PlaneModeAvailable", planeModeSupported()?"Yes":"No");
 }
 
@@ -952,6 +953,14 @@ QString CellModemManager::cellLocation() const
 bool CellModemManager::simToolkitAvailable() const
 {
     return d->m_simToolkitAvailable;
+}
+
+/*!
+  Returns true if a cell modem is available, otherwise false.
+*/
+bool CellModemManager::cellModemAvailable() const
+{
+    return d->m_state != NoCellModem;
 }
 
 /*!

@@ -79,8 +79,31 @@ QSize StorageInfoView::sizeHint() const
 void StorageInfoView::updateMounts()
 {
     QList<QFileSystem*> sifs = sinfo->fileSystems( 0 );
+    QList<QFileSystem*> newfs; 
+
+    //find new/added file systems
+    QList<QFileSystem*> newFs;
+    foreach( QFileSystem* f, sifs ) {
+        if ( !fsHash.contains( f ) ) {
+            newFs.append( f );
+        }
+    }
+
+    //find old/removed file systems
+    QList<QFileSystem*> oldFs;
+    QList<QFileSystem*> keys = fsHash.keys();
+    foreach( QFileSystem* fsHashKey, keys ) {
+        if ( !sifs.contains( fsHashKey ) )
+            oldFs.append( fsHashKey );
+    }
+
+    //don't redraw entire widget if there are no new file systems
+    if ( oldFs.count() == 0 && newFs.count() == 0 )
+        return;
+   
     if ( area->widget() )
         delete area->takeWidget();
+    fsHash.clear();
     QWidget *vb = new QWidget;
     area->setWidget( vb );
     area->setWidgetResizable( true );
@@ -94,6 +117,7 @@ void StorageInfoView::updateMounts()
         mi->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Fixed );
         vLayout->addWidget(mi);
         connect(this, SIGNAL(updated()), mi, SLOT(refresh()));
+        fsHash.insert( fs, mi ); 
     }
     vLayout->addStretch( 1 );
     vb->updateGeometry();

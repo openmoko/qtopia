@@ -20,20 +20,28 @@
 ****************************************************************************/
 
 #include "qbluetoothservicecontroller.h"
-#include <qtopialog.h>
 
-#include <QList>
 #include <QtopiaIpcAdaptor>
 #include <QValueSpaceItem>
+#include <qtopialog.h>
 
-class QBluetoothServiceController_Private : public QtopiaIpcAdaptor
+/*
+    \internal
+    \class QBluetoothServiceControllerPrivate
+
+    This receives IPC messages from the BluetoothServiceManager when a service
+    is registered, modified, etc. It's enabled the "other end" of the messages
+    to and from ServiceUserMessenger in src/server/bluetoothservicemanager.cpp.
+ */
+
+class QBluetoothServiceControllerPrivate : public QtopiaIpcAdaptor
 {
     friend class QBluetoothServiceController;
     Q_OBJECT
 
 public:
-    QBluetoothServiceController_Private(QBluetoothServiceController *parent);
-    ~QBluetoothServiceController_Private();
+    QBluetoothServiceControllerPrivate(QBluetoothServiceController *parent);
+    ~QBluetoothServiceControllerPrivate();
 
     void start(const QString &name);
     void stop(const QString &name);
@@ -43,17 +51,13 @@ public:
                             QBluetooth::SecurityOptions options);
     QBluetooth::SecurityOptions securityOptions(const QString &name);
 
-    QString translatableDisplayName(const QString &name);
-    QList<QString> registeredServices();
-    bool isRegistered(const QString &name) const;
+    QString displayName(const QString &name);
+    QStringList services();
 
 public slots:
-    void serviceStarted(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc);
-    void serviceStopped(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc);
+    void serviceStarted(const QString &name, bool error, const QString &desc);
+    void serviceStopped(const QString &name);
 
-    void serviceError(const QString &name,
-                      QBluetooth::ServiceError error,
-                      const QString &errorDesc);
 signals:
     void startService(const QString &name);
     void stopService(const QString &name);
@@ -67,54 +71,42 @@ private:
 };
 
 
-/*
-    This receives IPC messages from the BluetoothServiceManager when a service
-    is registered, modified, etc. It's enabled the "other end" of the messages
-    to/from ServiceListenerController in src/server/bluetoothservicemanager.cpp.
- */
 
-const QString QBluetoothServiceController_Private::VALUE_SPACE_PATH = "Communications/Bluetooth/Services";
+const QString QBluetoothServiceControllerPrivate::VALUE_SPACE_PATH = "Communications/Bluetooth/Services";
 
-QBluetoothServiceController_Private::QBluetoothServiceController_Private(QBluetoothServiceController *parent)
+QBluetoothServiceControllerPrivate::QBluetoothServiceControllerPrivate(QBluetoothServiceController *parent)
     : QtopiaIpcAdaptor("QPE/BluetoothServiceListeners", parent),
       m_parent(parent)
 {
     publishAll(SignalsAndSlots);
 }
 
-QBluetoothServiceController_Private::~QBluetoothServiceController_Private()
+QBluetoothServiceControllerPrivate::~QBluetoothServiceControllerPrivate()
 {
 }
 
-void QBluetoothServiceController_Private::start(const QString &name)
+void QBluetoothServiceControllerPrivate::start(const QString &name)
 {
     emit startService(name);
 }
 
-void QBluetoothServiceController_Private::stop(const QString &name)
+void QBluetoothServiceControllerPrivate::stop(const QString &name)
 {
     emit stopService(name);
 }
 
-QBluetoothServiceController::ServiceState QBluetoothServiceController_Private::state(const QString &name) const
+QBluetoothServiceController::ServiceState QBluetoothServiceControllerPrivate::state(const QString &name) const
 {
-    bool started = serviceValue(name, "Enabled").toBool();
-
-    if (serviceValue(name, "ChangingState").toBool()) {
-        return ( started ? QBluetoothServiceController::Stopping :
-                    QBluetoothServiceController::Starting );
-    } else {
-        return ( started ? QBluetoothServiceController::Started :
-                    QBluetoothServiceController::Stopped );
-    }
+    return QBluetoothServiceController::ServiceState(
+                    serviceValue(name, "State").toInt());
 }
 
-void QBluetoothServiceController_Private::setSecurityOptions(const QString &name, QBluetooth::SecurityOptions options)
+void QBluetoothServiceControllerPrivate::setSecurityOptions(const QString &name, QBluetooth::SecurityOptions options)
 {
     emit setServiceSecurity(name, options);
 }
 
-QBluetooth::SecurityOptions QBluetoothServiceController_Private::securityOptions(const QString &name)
+QBluetooth::SecurityOptions QBluetoothServiceControllerPrivate::securityOptions(const QString &name)
 {
     QVariant options = serviceValue(name, "Security");
     if (options.isValid())
@@ -124,45 +116,27 @@ QBluetooth::SecurityOptions QBluetoothServiceController_Private::securityOptions
     return 0;
 }
 
-QString QBluetoothServiceController_Private::translatableDisplayName(const QString &name)
+QString QBluetoothServiceControllerPrivate::displayName(const QString &name)
 {
     return serviceValue(name, "DisplayName").toString();
 }
 
-QList<QString> QBluetoothServiceController_Private::registeredServices()
+QStringList QBluetoothServiceControllerPrivate::services()
 {
-    QList<QString> services;
-    foreach (QString name, QValueSpaceItem(VALUE_SPACE_PATH).subPaths()) {
-        if (isRegistered(name))
-            services.append(name);
-    }
-    return services;
+    return QValueSpaceItem(VALUE_SPACE_PATH).subPaths();
 }
 
-bool QBluetoothServiceController_Private::isRegistered(const QString &name) const
+void QBluetoothServiceControllerPrivate::serviceStarted(const QString &name, bool error, const QString &desc)
 {
-    QVariant registered = serviceValue(name, "Registered");
-    return (registered.isValid() && registered.toBool());
+    emit m_parent->started(name, error, desc);
 }
 
-void QBluetoothServiceController_Private::serviceStarted(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc)
+void QBluetoothServiceControllerPrivate::serviceStopped(const QString &name)
 {
-    emit m_parent->started(name, error, errorDesc);
+    emit m_parent->stopped(name);
 }
 
-void QBluetoothServiceController_Private::serviceStopped(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc)
-{
-    emit m_parent->stopped(name, error, errorDesc);
-}
-
-void QBluetoothServiceController_Private::serviceError(const QString &name,
-                                QBluetooth::ServiceError error,
-                                const QString &errorDesc)
-{
-    emit m_parent->error(name, error, errorDesc);
-}
-
-QVariant QBluetoothServiceController_Private::serviceValue(const QString &name, const QString &attr) const
+QVariant QBluetoothServiceControllerPrivate::serviceValue(const QString &name, const QString &attr) const
 {
     return QValueSpaceItem(VALUE_SPACE_PATH + "/" + name).value(attr);
 }
@@ -170,14 +144,12 @@ QVariant QBluetoothServiceController_Private::serviceValue(const QString &name, 
 
 /*!
     \class QBluetoothServiceController
-    \brief The QBluetoothServiceController class provides access to information about Bluetooth services within the Qtopia Bluetooth services framework.
+    \brief The QBluetoothServiceController class provides a means to control and access information about Bluetooth services in Qtopia.
 
-    The QBluetoothServiceController class provides access to information about
-    Bluetooth services within the Qtopia Bluetooth services framework (i.e.
-    services that are subclasses of QBluetoothAbstractService). It allows the
-    settings for these services to be set and retrieved, and emits signals when
-    any settings are changed.
+    To create a Bluetooth service that can be accessed by instances of
+    QBluetoothServiceController, simply subclass QBluetoothAbstractService.
 
+    \sa QBluetoothAbstractService
     \ingroup qtopiabluetooth
  */
 
@@ -186,10 +158,9 @@ QVariant QBluetoothServiceController_Private::serviceValue(const QString &name, 
 
     Defines the service state of the service.
 
-    \value Stopped The service is stopped.
-    \value Started The service is started.
-    \value Stopping The service is transitioning from the Started to Stopped state.
-    \value Starting The service is transitioning from the Stopped to Started state.
+    \value NotRunning The service is not running.
+    \value Starting The service is starting.
+    \value Running The service is running.
 */
 
 /*!
@@ -197,39 +168,39 @@ QVariant QBluetoothServiceController_Private::serviceValue(const QString &name, 
  */
 QBluetoothServiceController::QBluetoothServiceController(QObject *parent)
     : QObject(parent),
-      m_private(new QBluetoothServiceController_Private(this))
+      m_data(new QBluetoothServiceControllerPrivate(this))
 {
 }
 
 /*!
-    Deconstructs a QBluetoothServiceController.
+    Destroys a QBluetoothServiceController.
  */
 QBluetoothServiceController::~QBluetoothServiceController()
 {
 }
 
 /*!
-    Starts the service with name \a name.
+    Starts the service named \a name.
  */
 void QBluetoothServiceController::start(const QString &name)
 {
-    m_private->start(name);
+    m_data->start(name);
 }
 
 /*!
-    Stops the service with name \a name.
+    Stops the service named \a name.
  */
 void QBluetoothServiceController::stop(const QString &name)
 {
-    m_private->stop(name);
+    m_data->stop(name);
 }
 
 /*!
-    Returns the state of the service \a name.
+    Returns the state of the service named \a name.
  */
 QBluetoothServiceController::ServiceState QBluetoothServiceController::state(const QString &name) const
 {
-    return m_private->state(name);
+    return m_data->state(name);
 }
 
 /*!
@@ -238,65 +209,48 @@ QBluetoothServiceController::ServiceState QBluetoothServiceController::state(con
  */
 void QBluetoothServiceController::setSecurityOptions(const QString &name, QBluetooth::SecurityOptions options)
 {
-    m_private->setSecurityOptions(name, options);
+    m_data->setSecurityOptions(name, options);
 }
 
 /*!
-    Returns the security options for the service with name \a name.
+    Returns the security options for the service named \a name.
  */
 QBluetooth::SecurityOptions QBluetoothServiceController::securityOptions(const QString &name) const
 {
-    return m_private->securityOptions(name);
+    return m_data->securityOptions(name);
 }
 
 /*!
-    Returns the translatable display name for the service with name \a name.
+    Returns the user-friendly, internationalized display name for the service
+    named \a name.
  */
-QString QBluetoothServiceController::translatableDisplayName(const QString &name) const
+QString QBluetoothServiceController::displayName(const QString &name) const
 {
-    return m_private->translatableDisplayName(name);
+    return m_data->displayName(name);
 }
 
 /*!
-    Returns a list of the names of all known services within the Qtopia
-    Bluetooth framework.
+    Returns a list of the names of all known Bluetooth services within Qtopia.
  */
-QList<QString> QBluetoothServiceController::registeredServices() const
+QStringList QBluetoothServiceController::services() const
 {
-    return m_private->registeredServices();
+    return m_data->services();
 }
 
-/*!
-    Returns whether a service with the name \a name exists within the Qtopia
-    Bluetooth framework.
- */
-bool QBluetoothServiceController::isRegistered(const QString &name) const
-{
-    return m_private->isRegistered(name);
-}
 
 /*!
-    \fn void QBluetoothServiceController::started(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc)
+    \fn void QBluetoothServiceController::started(const QString &name, bool error, const QString &description)
 
     This signal is emitted when the service named \a name has started or
-    failed while attempting to start. If there was a failure, the error details
-    are provided with the \a error identifier and \a errorDesc description.
+    failed while attempting to start. If there was a failure, \a error is \c true
+    and \a description provides the human-readable error description.
  */
 
 /*!
-    \fn void QBluetoothServiceController::stopped(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc)
+    \fn void QBluetoothServiceController::stopped(const QString &name)
 
-    This signal is emitted when the service named \a name has stopped or
-    failed while attempting to stop. If there was a failure, the error details
-    are provided with the \a error identifier and \a errorDesc description.
- */
+    This signal is emitted when the service named \a name has stopped.
+*/
 
-/*!
-    \fn void QBluetoothServiceController::error(const QString &name, QBluetooth::ServiceError error, const QString &errorDesc)
-
-    This signal is emitted when the service named \a name has encountered a
-    fatal error while running. The error details are provided with the \a error
-    identifier and \a errorDesc description.
- */
 
 #include "qbluetoothservicecontroller.moc"

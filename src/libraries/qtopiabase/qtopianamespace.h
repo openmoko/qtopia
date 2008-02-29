@@ -67,7 +67,6 @@ public:
     QTOPIABASE_EXPORT QString applicationFileName(const QString& appname, const QString& filename);
 
     QTOPIABASE_EXPORT bool isDocumentFileName(const QString& file);
-    QTOPIABASE_EXPORT bool isApplicationFileName(const QString& file);
 
     enum Lockflags {LockShare = 1, LockWrite = 2, LockBlock = 4};
     QTOPIABASE_EXPORT bool lockFile(QFile &f, int flags = -1);
@@ -103,6 +102,8 @@ public:
 
     QTOPIABASE_EXPORT bool weekStartsOnMonday();
     QTOPIABASE_EXPORT void setWeekStartsOnMonday(bool );
+    
+    QTOPIABASE_EXPORT QVariant findDisplayFont(const QString &s);
 
     /*
 

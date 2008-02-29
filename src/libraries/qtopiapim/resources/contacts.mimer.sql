@@ -1,5 +1,5 @@
 CREATE TABLE contacts (
-        recid BINARY(8) NOT NULL PRIMARY KEY,
+        recid INTEGER NOT NULL PRIMARY KEY,
         title NVARCHAR(16),
         firstname NVARCHAR(32),
         middlename NVARCHAR(32),

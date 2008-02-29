@@ -24,6 +24,10 @@
 #include "packagecontroller.h"
 #include "packageview.h"
 #include "sandboxinstall.h"
+#include "version.h"
+#ifndef QT_NO_SXE
+#include "qpackageregistry.h"
+#endif
 #include "targz.h"
 
 #include <QDir>
@@ -44,6 +48,35 @@
 #ifdef Q_OS_UNIX
 #include <unistd.h>
 #endif
+
+SimpleErrorReporter::SimpleErrorReporter( ReporterType type, const QString &pkgName )
+{
+    packageName = pkgName;
+    switch ( type )
+    {
+        case ( Install ):
+            prefix = QObject::tr("<b>Install Failed</b> for %1: ", "%1 = package name")
+                       .arg( packageName ); 
+            break;
+        case ( Uninstall ):
+            prefix = QObject::tr("b>Uninstall Failed</b> for %1: ", "%1 = package name" ) 
+                        .arg( packageName ); 
+            break;
+        case ( Other ):
+        default: 
+            prefix = "";
+     }
+
+}
+
+void SimpleErrorReporter::doReportError( const QString &simpleError, const QString &detailedError )
+{
+   
+    QString userVisibleError = prefix + simpleError;
+    QString logError = userVisibleError + "\n" + detailedError;  
+    PackageView::displayMessage( userVisibleError );
+    qLog( Package ) << logError;
+}
 
 /**
   \internal
@@ -75,21 +108,64 @@ InstallControl::~InstallControl()
   system package verification has been done.  This includes certificate
   validation and other checks.
 */
-bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, ErrorReporter *reporter ) const
+bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, const QString &md5Sum, ErrorReporter *reporter ) const
 {
+    if( pkg.md5Sum != md5Sum || md5Sum.length() != 32 )
+    {
+        qLog(Package) << "MD5 Sum mismatch! Header MD5:" << pkg.md5Sum << "Package MD5:" << md5Sum;
+
+        QString simpleError = PackageView::tr( "Invalid package or package was corrupted. "
+                                            "Re-download or contact package supplier");
+        QString detailedError = PackageView::tr( "InstallControl::installPackage:- MD5 Sum mismatch, "
+                                                    "Descriptor MD5: %1, Package MD5: %2")
+                                .arg( pkg.md5Sum ).arg( md5Sum ); 
+        if( reporter )
+            reporter->reportError( simpleError, detailedError );
+
+        return false;
+    }
+
     SandboxInstallJob job( &pkg, m_installMedia, reporter );
     if ( job.isAborted() )
         return false;
+
+#ifndef QT_NO_SXE
+    QObject::connect( &job, SIGNAL(newBinary(SxeProgramInfo &)),
+            QPackageRegistry::getInstance(), SLOT(registerBinary(SxeProgramInfo &)) );
+#endif
 
     QString dataTarGz = job.destinationPath() + "/data.tar.gz";
 
     // install to directory
     QString packageFile = pkg.packageFile;
-    packageFile.prepend( Qtopia::tempDir() );
-    targz_extract_all( packageFile, job.destinationPath() );
+    packageFile.prepend( Qtopia::packagePath() + "tmp/" );
+
+    if( !targz_extract_all( packageFile, job.destinationPath() ) )
+    {
+        if( reporter )
+        {
+            reporter->reportError( QObject::tr( "Unable to unpack package" ), 
+                        QString( "InstallControl::installPackage:- Could not untar %1 to %2" )
+                            .arg( packageFile ) 
+                            .arg( job.destinationPath() ));
+        }
+        job.removeDestination();
+        return false;
+    }
 
     // extract data part
-    targz_extract_all( dataTarGz, job.destinationPath() );
+    if( !targz_extract_all( dataTarGz, job.destinationPath() ) )
+    {
+        if( reporter )
+        {
+            reporter->reportError( QObject::tr( "Unable to unpack package" ), 
+                        QString( "InstallControl::installPackage:- Could not untar %1 to %2" )
+                            .arg( dataTarGz )
+                            .arg( job.destinationPath() ));
+        }
+        job.removeDestination();
+        return false;
+    }
 
     // remove data package
     QFile dataPackage( dataTarGz );
@@ -99,7 +175,10 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, Err
     tmpPackage.remove();
 
     if ( !verifyPackage( job.destinationPath(), pkg, reporter ))
+    {
+        job.removeDestination();
         return false;
+    }
 
     job.registerPackageFiles();
 
@@ -117,7 +196,12 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, Err
         if ( systemRootPath.isEmpty() )
         {
             qWarning( "******* No writeable system path for system package *******" );
-            job.setupSandbox();
+            if ( !job.setupSandbox() )
+            {
+                job.removeDestination();
+
+                return false;
+            }
         }
         else
         {
@@ -125,20 +209,44 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, Err
                 << "to" << systemRootPath;
             if ( !targz_extract_all( dataTarGz, systemRootPath ))
             {
-                PackageView::displayMessage( QObject::tr( "<font color=\"#CC0000\">System Package Error</font> "
-                            "possible file name collision %1", "%1 = file name" ).arg( pkg.name ));
+                if( reporter )
+                {
+                    reporter->reportError( QObject::tr( "Unable to unpack package" ),
+                                QString( "InstallControl::installPackage:- Could not untar %1 to %2" )
+                                    .arg( dataTarGz )
+                                    .arg( job.destinationPath() ));
+                }
+                job.removeDestination();
+                return false;
             }
             job.removeDestination();
         }
     }
     else
     {
-        job.setupSandbox();
+        if (!job.setupSandbox())
+        {
+            job.removeDestination();
+            return false;
+        }
     }
 
-    job.installContent();
+    if( !job.installContent() )
+    {
+        job.removeDestination();
+        return false;        
+    }
 
     return true;
+}
+/*!
+  Uninstall the package \a pkg off the device.
+*/
+void InstallControl::uninstallPackage( const InstallControl::PackageInfo &pkg, ErrorReporter *reporter ) const
+{
+    SandboxUninstallJob job( &pkg, m_installMedia, reporter );
+    job.unregisterPackageFiles();
+    job.dismantleSandbox();
 }
 
 /*!
@@ -162,31 +270,51 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
             AbstractPackageController::INFORMATION_FILE );
     if ( infoReader.getIsError() )
     {
-        QString message = PackageView::tr( "<font color=\"#CC0000\">Package Error</font> "
-                    "Package %1 info corrupted, will be disabled."
-                    "Re-download, or contact the supplier" ).arg( pkg.name );
-
         if( reporter )
-            reporter->reportError( message );
-        else
-            PackageView::displayMessage( message );
-
+        {
+            QString simpleError = PackageView::tr("Invalid package, contact package supplier");
+            QString detailedError = "InstallControl::verifyPackage:- Error during reading of packgae information file"; 
+            reporter->reportError( simpleError, detailedError );
+        }
         return false;
     }
+
     if ( infoReader.domain() != pkg.domain )
     {
-        QString message = PackageView::tr( "<font color=\"#CC0000\">Domain Error</font> "
-                    "Package %1 has security problem, will be disabled. "
-                    "Contact supplier. (Declared: %2, Install: %3)", "%1 = package name, %2 = declared domain, %3 = install domain" )
-                .arg( pkg.name ).arg( pkg.domain ).arg( infoReader.domain() );
-
         if( reporter )
-            reporter->reportError( message );
-        else
-            PackageView::displayMessage( message );
-
+        {
+            QString simpleError = PackageView::tr( "Package security domains inconsistent with declared domains,"
+                                           "Contact package supplier");
+            QString detailedError("InstallControl::verifyPackage:- Declared domain(s): %1, Install domain(s): %2");
+            detailedError.arg( pkg.domain ).arg( infoReader.domain() );
+            reporter->reportError( simpleError, detailedError );
+        }
         return false;
     }
+
+    if ( !infoReader.md5Sum().isEmpty() )
+    {
+        if ( reporter )
+        {
+           reporter->reportError( PackageView::tr( "Invalid package, contact package supplier" ),
+                PackageView::tr( "InstallControl::verifyPackage:- Control file should not contain md5" ));  
+        }
+        return false;
+    }
+       
+    if ( !VersionUtil::checkVersion( infoReader.qtopiaVersion() ) )
+    {
+        if ( reporter )
+        {
+            QString detailedError( "InstallControl::verifyPackage:- Control file's qtopia version incompatible. "
+                                   "Package's compatible Qtopia Versions %1, Qtopia Version %2");
+            detailedError = detailedError.arg( infoReader.qtopiaVersion(), Qtopia::version() );
+            reporter->reportError( PackageView::tr( "Invalid package, contact package supplier" ),
+                            detailedError );
+        }
+        return false;
+    }
+       
     QString certPath = infoReader.trust();
     if ( certPath.isEmpty() || certPath == "Untrusted" ) // untrusted package
         return true;

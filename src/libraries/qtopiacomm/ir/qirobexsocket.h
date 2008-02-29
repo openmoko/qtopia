@@ -29,9 +29,11 @@
 
 class QTOPIACOMM_EXPORT QIrObexSocket : public QObexSocket
 {
+    Q_OBJECT
 public:
-    QIrObexSocket();
-    explicit QIrObexSocket(const QString &service, uint addr = 0);
+
+    QIrObexSocket(QObject *parent = 0);
+    explicit QIrObexSocket(const QString &service, uint addr = 0, QObject *parent = 0);
     virtual ~QIrObexSocket();
 
     const QString &service() const;

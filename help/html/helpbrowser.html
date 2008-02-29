@@ -1,8 +1,12 @@
 <html>
 <head><title>Help Browser</title></head>
 <body>
-<h3>Help Browser</h3>
-<p><img  src=":image/helpbrowser/HelpBrowser"></p>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Help Browser</h2>
+<!--#else -->
+   <h3>Help Browser</h3>
+<!--#endif -->
+<p><img src=":image/helpbrowser/HelpBrowser"></p>
 <p>You're using it! The Help Browser is a hypertext help system that works in a similar way to a web browser. Hypertext links appear in colored underlined text.</p>
 <p><b>To get help within an application:</b></p>
 <!--#if expr="$PDASTYLE"-->
@@ -15,7 +19,6 @@
 <ul>
 <li>Press <img src=":icon/options"> </img> and select <b>Help</b> by highlighting (use <img src=":image/help/dpad">) it and pressing <img src=":icon/select">.</li>
 </ul>
-<p><b>To quickly exit from help:</b> press and hold <img src=":icon/i18n/previous"> </img> until <img src=":icon/i18n/back"> </img> appears.
 <!--#endif-->
 <p>See Also: <a href="help.html">Help</a> </p>
 </body>

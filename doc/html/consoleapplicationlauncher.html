@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>ConsoleApplicationLauncher Class Reference</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>ConsoleApplicationLauncher Class Reference</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -12,7 +11,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ConsoleApplicationLauncher Class Reference</h1>
 <p>The ConsoleApplicationLauncher class supports launching console applications. <a href="#details">More...</a></p>
-<pre>    #include &lt;ConsoleApplicationLauncher&gt;</pre><p>Inherits <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> and <a href="applicationipcrouter-routedestination.html">ApplicationIpcRouter::RouteDestination</a>.</p>
+<pre>#include &lt;ConsoleApplicationLauncher&gt;</pre><p>Inherits <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> and <a href="applicationipcrouter-routedestination.html">ApplicationIpcRouter::RouteDestination</a>.</p>
 <ul>
 <li><a href="consoleapplicationlauncher-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -21,11 +20,6 @@
 <ul>
 <li><div class="fn"/><b><a href="consoleapplicationlauncher.html#ConsoleApplicationLauncher">ConsoleApplicationLauncher</a></b> ()</li>
 <li><div class="fn"/>virtual <b><a href="consoleapplicationlauncher.html#dtor.ConsoleApplicationLauncher">~ConsoleApplicationLauncher</a></b> ()</li>
-<li><div class="fn"/>virtual ApplicationState <b><a href="consoleapplicationlauncher.html#applicationState">applicationState</a></b> ( const QString &amp; )</li>
-<li><div class="fn"/>virtual bool <b><a href="consoleapplicationlauncher.html#canLaunch">canLaunch</a></b> ( const QString &amp; )</li>
-<li><div class="fn"/>virtual void <b><a href="consoleapplicationlauncher.html#kill">kill</a></b> ( const QString &amp; )</li>
-<li><div class="fn"/>virtual void <b><a href="consoleapplicationlauncher.html#launch">launch</a></b> ( const QString &amp; )</li>
-<li><div class="fn"/>virtual void <b><a href="consoleapplicationlauncher.html#routeMessage">routeMessage</a></b> ( const QString &amp;, const QString &amp;, const QByteArray &amp; )</li>
 </ul>
 <ul>
 <li><div class="fn"/>4 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
@@ -51,16 +45,13 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="ConsoleApplicationLauncher"></a>ConsoleApplicationLauncher::ConsoleApplicationLauncher ()</h3>
+<p>Constructs a new <a href="consoleapplicationlauncher.html">ConsoleApplicationLauncher</a> instance.</p>
 <h3 class="fn"><a name="dtor.ConsoleApplicationLauncher"></a>ConsoleApplicationLauncher::~ConsoleApplicationLauncher ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="applicationState"></a><a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationState</a> ConsoleApplicationLauncher::applicationState ( const <a href="qstring.html">QString</a> &amp; )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="canLaunch"></a>bool ConsoleApplicationLauncher::canLaunch ( const <a href="qstring.html">QString</a> &amp; )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="kill"></a>void ConsoleApplicationLauncher::kill ( const <a href="qstring.html">QString</a> &amp; )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="launch"></a>void ConsoleApplicationLauncher::launch ( const <a href="qstring.html">QString</a> &amp; )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<h3 class="fn"><a name="routeMessage"></a>void ConsoleApplicationLauncher::routeMessage ( const <a href="qstring.html">QString</a> &amp;, const <a href="qstring.html">QString</a> &amp;, const <a href="qbytearray.html">QByteArray</a> &amp; )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroys the <a href="consoleapplicationlauncher.html">ConsoleApplicationLauncher</a> instance.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

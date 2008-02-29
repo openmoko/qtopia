@@ -71,8 +71,12 @@ void AppointmentList::recalculateHeight()
     }
 }
 
-void AppointmentList::setModel(QOccurrenceModel *model)
+void AppointmentList::setModel(QAbstractItemModel *absModel)
 {
+    QOccurrenceModel *model = qobject_cast<QOccurrenceModel*>(absModel);
+    if (!model)
+        return;
+
     occurrenceModel = model;
     connect(model, SIGNAL(modelReset()), this, SLOT(recalculateHeight()));
     QListView::setModel(model);

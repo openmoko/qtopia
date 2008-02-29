@@ -2,13 +2,32 @@
 <head><title>Calendar Help</title></head>
 <body>
 <!--#if expr="$USERGUIDE"-->
-   <h1>Calendar <img src=":image/datebook/DateBook"></h1>
+   <h1>Calendar</h1>
 <!--#else -->
    <h3>Calendar help</h3>
-   <p><img src=":image/datebook/DateBook"></p>
 <!--#endif -->
+<p><img src=":image/datebook/DateBook"></p>
 <p>The <b>Calendar</b> is used to store events and set reminders.
 The default view shows the current day in one hour intervals.</p>
-<p><a href="datebook-index.html">More Calendar Help</a></p>
+<p>More Calendar Help:</p>
+<ul>
+<li><a href="datebook-categories.html">Calendar Categories</a></li>
+<li><a href="datebook-settings.html">Calendar Settings</a></li>
+<li><a href="datebook-views.html">Calendar Views</a></li>
+<!--#if expr="$PDASTYLE"-->
+<li><a href="popup-calendar.html">Pop-Up Calendar</a></li>
+<!--#endif-->
+<!--#if expr="$PDASTYLE || $TOUCH"-->
+<li><a href="datebook-eventview.html">Event View</a></li>
+<!--#endif-->
+<li><a href="datebook-adding.html">Adding Events</a></li>
+<li><a href="datebook-edit-event.html">Edit an Event</a></li>
+<li><a href="datebook-event-alarm.html">Event Alarm</a></li>
+<li><a href="datebook-event-repeat.html">Repeating Events</a></li>
+<li><a href="datebook-purge.html">Purge Events</a></li>
+</ul>
+<!--#if expr="$PDASTYLE"-->
+<p>See Also: <a href="today.html">Today Help</a></p>
+<!--#endif-->
 </body>
 </html>

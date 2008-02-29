@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -80,40 +90,42 @@ public:
     \ingroup qws
 
     \brief The QCopChannel class provides communication capabilities
-    between clients.
+    between clients in Qtopia Core.
+
+    Note that this class is only available in \l {Qtopia Core}.
 
     QCOP is a many-to-many communication protocol for transferring
     messages on various channels. A channel is identified by a name,
-    and anyone who wants to can listen to it. The QCOP protocol allows
-    clients to communicate both within the same address space and
-    between different processes, but it is currently only available
-    for \l {Qtopia Core} (on X11 and Windows we are exploring the use
-    of existing standards such as DCOP and COM).
+    and anyone who wants to can listen to it as well as send messages
+    to it. The QCOP protocol allows clients to communicate both within
+    the same address space and between different processes.
 
-    Typically, QCopChannel is either used to send messages to a
-    channel using the provided static functions, or to listen to the
-    traffic on a channel by deriving from the class to take advantage
-    of the provided functionality for receiving messages.
+    To send messages to a given channel, QCopChannel provides the
+    static send() function. Using this function alone, the messages
+    are queued until Qt re-enters the event loop. To immediately flush
+    all queued messages to the registered listeners, call the static
+    flush() function.
 
-    QCopChannel provides a couple of static functions which are usable
-    without an object: The send() function, which sends the given
-    message and data on the specified channel, and the isRegistered()
-    function which queries the server for the existence of the given
-    channel.
+    To listen to the traffic on a given channel, you typically
+    instantiate a QCopChannel object for the given channel and connect
+    to its received() signal that is emitted whenever there is
+    incoming data.  Use the static isRegistered() function to query
+    the server for the existence of a given channel. QCopChannel
+    provides the channel() function returning the name of this
+    QCopChannel object's channel.
 
-    In addition, the QCopChannel class provides the channel() function
-    which returns the name of the object's channel, the virtual
-    receive() function which allows subclasses to process data
-    received from their channel, and the received() signal which is
-    emitted with the given message and data when a QCopChannel
-    subclass receives a message from its channel.
+    In additon, QCopChannel provides the virtual receive() function
+    that can be reimplemented to filter the incoming messages and
+    data. The default implementation simply emits the received()
+    signal.
 
-    \sa QWSClient, {Running Qtopia Core Applications}
+    \sa QWSServer, QWSClient, {Qtopia Core Architecture}
 */
 
 /*!
-    Constructs a QCop channel with the given \a parent, and registers it
-    with the server using the given \a channel name.
+    Constructs a QCopChannel object for the specified \a channel, with
+    the given \a parent. Once created, the channel is registered by
+    the server.
 
     \sa isRegistered(), channel()
 */
@@ -126,8 +138,8 @@ QCopChannel::QCopChannel(const QString& channel, QObject *parent) :
 
 #ifdef QT3_SUPPORT
 /*!
-    Use the two argument overload, and call setObjectName() to \a name
-    the instance, instead.
+    Use the two argument overload instead, and call the
+    QObject::setObjectName() function to \a name the instance.
 */
 QCopChannel::QCopChannel(const QString& channel, QObject *parent, const char *name) :
     QObject(parent)
@@ -184,11 +196,13 @@ void QCopChannel::reregisterAll()
 }
 
 /*!
-    Destroys the client's end of the channel and notifies the server
-    that the client has closed its connection. The server will keep
-    the channel open until the last registered client detaches.
+    Destroys this QCopChannel object.
 
-    \sa QCopChannel()
+    The server is notified that this particular listener has closed
+    its connection. The server will keep the channel open until the
+    last registered listener detaches.
+
+    \sa isRegistered(), channel()
 */
 
 QCopChannel::~QCopChannel()
@@ -211,9 +225,9 @@ QCopChannel::~QCopChannel()
 }
 
 /*!
-    Returns the name of the channel.
+    Returns the name of this object's channel.
 
-    \sa QCopChannel()
+    \sa isRegistered()
 */
 
 QString QCopChannel::channel() const
@@ -224,17 +238,18 @@ QString QCopChannel::channel() const
 /*!
     \fn void QCopChannel::receive(const QString& message, const QByteArray &data)
 
-    This virtual function allows subclasses of QCopChannel to process
-    the given \a message and \a data received from their channel. The default
-    implementation emits the received() signal.
+    Processes the incoming \a message and \a data.
+
+    This function is called by the server when this object's channel
+    receives new messages. Note that the default implementation simply
+    emits the received() signal; reimplement this funtion to process
+    the incoming \a message and \a data.
 
     Note that the format of the given \a data has to be well defined
     in order to extract the information it contains. In addition, it
     is recommended to use the DCOP convention. This is not a
     requirement, but you must ensure that the sender and receiver
-    agree on the argument types.
-
-    Example:
+    agree on the argument types. For example:
 
     \code
         void MyClass::receive(const QString &message, const QByteArray &data)
@@ -255,10 +270,11 @@ QString QCopChannel::channel() const
         }
     \endcode
 
-    This example assumes that the \c message is a DCOP-style function
-    signature and the \c data contains the function's arguments.
+    The above code assumes that the \c message is a DCOP-style
+    function signature and the \c data contains the function's
+    arguments.
 
-    \sa send()
+    \sa send(), channel(), received()
  */
 void QCopChannel::receive(const QString& msg, const QByteArray &data)
 {
@@ -268,17 +284,18 @@ void QCopChannel::receive(const QString& msg, const QByteArray &data)
 /*!
     \fn void QCopChannel::received(const QString& message, const QByteArray &data)
 
-    This signal is emitted with the given \a message and \a data whenever the
-    receive() function gets incoming data.
+    This signal is emitted whenever this object's channel receives new
+    messages (i.e., it is emitted by the receive() function), passing
+    the incoming \a message and \a data as parameters.
 
-    \sa receive()
+    \sa receive(), channel()
 */
 
 /*!
     Queries the server for the existence of the given \a channel. Returns true
     if the channel is registered; otherwise returns false.
 
-    \sa channel(), QCopChannel()
+    \sa channel(), send()
 */
 
 bool QCopChannel::isRegistered(const QString&  channel)
@@ -298,10 +315,6 @@ bool QCopChannel::isRegistered(const QString&  channel)
 /*!
     \fn bool QCopChannel::send(const QString& channel, const QString& message)
     \overload
-
-    Sends the given \a message on the specified \a channel.  The
-    message will be distributed to all clients subscribed to the
-    channel.
 */
 
 bool QCopChannel::send(const QString& channel, const QString& msg)
@@ -315,7 +328,7 @@ bool QCopChannel::send(const QString& channel, const QString& msg)
                        const QByteArray &data)
 
     Sends the given \a message on the specified \a channel with the
-    given \a data.  The message will be distributed to all clients
+    given \a data. The message will be distributed to all clients
     subscribed to the channel. Returns true if the message is sent
     successfully; otherwise returns false.
 
@@ -324,9 +337,7 @@ bool QCopChannel::send(const QString& channel, const QString& msg)
     agree on the argument types.
 
     Note that QDataStream provides a convenient way to fill the byte
-    array with auxiliary data.
-
-    Example:
+    array with auxiliary data. For example:
 
     \code
         QByteArray data;
@@ -335,14 +346,14 @@ bool QCopChannel::send(const QString& channel, const QString& msg)
         QCopChannel::send("System/Shell", "execute(QString,QString)", data);
     \endcode
 
-    Here the channel is \c "System/Shell". The \c message is an
-    arbitrary string, but in the example we've used the DCOP
+    In the code above the channel is \c "System/Shell". The \c message
+    is an arbitrary string, but in the example we've used the DCOP
     convention of passing a function signature. Such a signature is
     formatted as \c "functionname(types)" where \c types is a list of
     zero or more comma-separated type names, with no whitespace, no
     consts and no pointer or reference marks, i.e. no "*" or "&".
 
-    \sa receive()
+    \sa receive(), isRegistered()
 */
 
 bool QCopChannel::send(const QString& channel, const QString& msg,
@@ -362,11 +373,13 @@ bool QCopChannel::send(const QString& channel, const QString& msg,
 /*!
     \since 4.2
 
-    Flushes any pending messages queued through QCopChannel::send() to any subscribed clients.
-    Returns false if no QApplication has been constructed, otherwise returns true.
-    When using QCopChannel::send(), messages are queued and actually sent when Qt re-enters the event loop.
-    By using this function, an application can immediately flush these queued messages,
-    and therefore reliably know that any subscribed clients will receive them.
+    Flushes all queued messages to the registered listeners.
+
+    Note that this function returns false if no QApplication has been
+    constructed, otherwise it returns true.
+
+    \sa send()
+
 */
 bool QCopChannel::flush()
 {

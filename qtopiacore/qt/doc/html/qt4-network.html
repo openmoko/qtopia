@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qt4-network.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qt4-network.qdoc -->
 <head>
   <title>Qt 4.2: The Network Module in Qt 4</title>
   <link rel="prev" href="qt4-sql.html" />
@@ -59,28 +59,122 @@
 <a name="tcp-client"></a>
 <h3>TCP Client</h3>
 <p>The first example illustrates how to write a TCP client using <a href="qtcpsocket.html">QTcpSocket</a>. The client talks to a fortune server that provides fortune to the user. Here's how to set up the socket:</p>
-<pre></pre>
+<pre>     tcpSocket = new QTcpSocket(this);
+
+     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readFortune()));
+     connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+             this, SLOT(displayError(QAbstractSocket::SocketError)));</pre>
 <p>When the user requests a new fortune, the client establishes a connection to the server:</p>
-<pre></pre>
+<pre>     tcpSocket-&gt;connectToHost(hostLineEdit-&gt;text(),
+                              portLineEdit-&gt;text().toInt());</pre>
 <p>When the server answers, the following code is executed to read the data from the socket:</p>
-<pre></pre>
+<pre>     QDataStream in(tcpSocket);
+     in.setVersion(QDataStream::Qt_4_0);
+
+     if (blockSize == 0) {
+         if (tcpSocket-&gt;bytesAvailable() &lt; (int)sizeof(quint16))
+             return;
+
+         in &gt;&gt; blockSize;
+     }
+
+     if (tcpSocket-&gt;bytesAvailable() &lt; blockSize)
+         return;
+
+     QString nextFortune;
+     in &gt;&gt; nextFortune;
+
+     if (nextFortune == currentFortune) {
+         QTimer::singleShot(0, this, SLOT(requestNewFortune()));
+         return;
+     }
+
+     currentFortune = nextFortune;</pre>
 <p>The server's answer starts with a <i>size</i> field (which we store in <tt>blockSize</tt>), followed by <i>size</i> bytes of data. If the client hasn't received all the data yet, it waits for the server to send more.</p>
 <p>An alternative approach is to use a blocking socket. The code can then be concentrated in one function:</p>
-<pre></pre>
+<pre>         const int Timeout = 5 * 1000;
+
+         QTcpSocket socket;
+         socket.connectToHost(serverName, serverPort);
+
+         if (!socket.waitForConnected(Timeout)) {
+             emit error(socket.error(), socket.errorString());
+             return;
+         }
+
+         while (socket.bytesAvailable() &lt; (int)sizeof(quint16)) {
+             if (!socket.waitForReadyRead(Timeout)) {
+                 emit error(socket.error(), socket.errorString());
+                 return;
+             }
+         }
+
+         quint16 blockSize;
+         QDataStream in(&amp;socket);
+         in.setVersion(QDataStream::Qt_4_0);
+         in &gt;&gt; blockSize;
+
+         while (socket.bytesAvailable() &lt; blockSize) {
+             if (!socket.waitForReadyRead(Timeout)) {
+                 emit error(socket.error(), socket.errorString());
+                 return;
+             }
+         }
+
+         QMutexLocker locker(&amp;mutex);
+
+         QString fortune;
+         in &gt;&gt; fortune;
+         emit newFortune(fortune);</pre>
 <a name="tcp-server"></a>
 <h3>TCP Server</h3>
 <p>The following code snippets illustrate how to write a TCP server using <a href="qtcpserver.html">QTcpServer</a> and <a href="qtcpsocket.html">QTcpSocket</a>. Here's how to set up a TCP server:</p>
-<pre></pre>
+<pre>     tcpServer = new QTcpServer(this);
+     if (!tcpServer-&gt;listen()) {
+         QMessageBox::critical(this, tr(&quot;Fortune Server&quot;),
+                               tr(&quot;Unable to start the server: %1.&quot;)
+                               .arg(tcpServer-&gt;errorString()));
+         close();
+         return;
+     }
+
+     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendFortune()));</pre>
 <p>When a client tries to connect to the server, the following code in the sendFortune() slot is executed:</p>
-<pre></pre>
+<pre>     QByteArray block;
+     QDataStream out(&amp;block, QIODevice::WriteOnly);
+     out.setVersion(QDataStream::Qt_4_0);
+     out &lt;&lt; (quint16)0;
+     out &lt;&lt; fortunes.at(qrand() % fortunes.size());
+     out.device()-&gt;seek(0);
+     out &lt;&lt; (quint16)(block.size() - sizeof(quint16));
+
+     QTcpSocket *clientConnection = tcpServer-&gt;nextPendingConnection();
+     connect(clientConnection, SIGNAL(disconnected()),
+             clientConnection, SLOT(deleteLater()));
+
+     clientConnection-&gt;write(block);
+     clientConnection-&gt;disconnectFromHost();</pre>
 <a name="udp-senders-and-receivers"></a>
 <h3>UDP Senders and Receivers</h3>
 <p>Here's how to broadcast a UDP datagram:</p>
-<pre></pre>
+<pre>     udpSocket = new QUdpSocket(this);
+     QByteArray datagram = &quot;Broadcast message &quot; + QByteArray::number(messageNo);
+     udpSocket-&gt;writeDatagram(datagram.data(), datagram.size(),
+                              QHostAddress::Broadcast, 45454);</pre>
 <p>Here's how to receive a UDP datagram:</p>
-<pre></pre>
+<pre>     udpSocket = new QUdpSocket(this);
+     udpSocket-&gt;bind(45454);
+
+     connect(udpSocket, SIGNAL(readyRead()),
+             this, SLOT(processPendingDatagrams()));</pre>
 <p>Then in the processPendingDatagrams() slot:</p>
-<pre></pre>
+<pre>     while (udpSocket-&gt;hasPendingDatagrams()) {
+         QByteArray datagram;
+         datagram.resize(udpSocket-&gt;pendingDatagramSize());
+         udpSocket-&gt;readDatagram(datagram.data(), datagram.size());
+         statusLabel-&gt;setText(tr(&quot;Received datagram: \&quot;%1\&quot;&quot;)
+                              .arg(datagram.data()));
+     }</pre>
 <a name="comparison-with-qt-3"></a>
 <h2>Comparison with Qt 3</h2>
 <p>The main difference between Qt 3 and Qt 4 is that the very high level <a href="porting4.html#qnetworkprotocol">QNetworkProtocol</a> and <a href="porting4.html#qurloperator">QUrlOperator</a> abstraction has been eliminated. These classes attempted the impossible (unify FTP and HTTP under one roof), and unsurprisingly failed at that. Qt 4 still provides <a href="qftp.html">QFtp</a> and <a href="qhttp.html">QHttp</a> classes, but only with the more mature API that appeared in Qt 3.1.</p>
@@ -99,6 +193,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

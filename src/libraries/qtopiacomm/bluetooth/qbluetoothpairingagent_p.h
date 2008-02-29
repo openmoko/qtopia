@@ -18,8 +18,8 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#ifndef __QBLUETOOTHQBluetoothPairingAgent_P_H__
-#define __QBLUETOOTHQBluetoothPairingAgent_P_H__
+#ifndef __QBLUETOOTHPAIRINGAGENT_P_H__
+#define __QBLUETOOTHPAIRINGAGENT_P_H__
 
 #include <qbluetoothaddress.h>
 

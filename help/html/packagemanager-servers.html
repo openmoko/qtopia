@@ -2,6 +2,7 @@
 <head><title>Package Servers</title></head>
 <body>
 <h3>Package Servers</h3>
+<!--#if expr="$PDASTYLE"-->
 <p><b>To add a new server:</b>
 <ul>
 <li>Tap <b>New</b>, then tap the <b>Name</b> field and enter a name.</li>
@@ -11,5 +12,20 @@
 <ul>
 <li>Tap its name in the Servers list, then tap <b>Remove</b>.</li>
 </ul>
+<!--#endif -->
+<!--#if expr="$PHONESTYLE"-->
+<p><b>To add a new package server:</b>
+<ul>
+<li>Press <img src=":icon/options"> </img> and then select <b>Servers->Edit Servers...</b> from the menu.</li>
+<li>Press <img src=":icon/options"> </img> and then select <b>New</.b> from the menu.</li>
+<li>Enter a name and URL for the server.</li>
+</ul>
+<p><b>To remove a package server:</b>
+<ul>
+<li>Press <img src=":icon/options"> </img> and then select <b>Servers->Edit Servers...</b> from the menu.</li>
+<li>Use <img src=":image/help/dpad"> </img> to select a server.</li>
+<li>Press <img src=":icon/options"> </img> and then select <b>Remove</b> from the menu.</li>
+</ul>
+<!--#endif -->
 </body>
 </html>

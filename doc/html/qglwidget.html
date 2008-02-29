@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/opengl/qgl.cpp -->
 <head>
   <title>Qt 4.2: QGLWidget Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -52,7 +53,7 @@
 <ul>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -187,9 +188,9 @@
 <li>Draw primitives using <a href="qpainter.html">QPainter</a>'s member functions.</li>
 <li>Call <a href="qpainter.html#end">QPainter::end</a>() to finish painting.</li>
 </ul>
-<p>Overpainting 2D content on top of 3D content takes a little more effort. One approach to doing this is shown in the Overpainting example.</p>
+<p>Overpainting 2D content on top of 3D content takes a little more effort. One approach to doing this is shown in the <a href="opengl-overpainting.html">Overpainting</a> example.</p>
 <p><i>OpenGL is a trademark of Silicon Graphics, Inc. in the United States and other countries.</i></p>
-<p>See also <a href="qglpixelbuffer.html">QGLPixelBuffer</a>, Hello GL Example, 2D Painting Example, Overpainting Example, and Grabber Example.</p>
+<p>See also <a href="qglpixelbuffer.html">QGLPixelBuffer</a>, <a href="opengl-hellogl.html">Hello GL Example</a>, <a href="opengl-2dpainting.html">2D Painting Example</a>, <a href="opengl-overpainting.html">Overpainting Example</a>, and <a href="opengl-grabber.html">Grabber Example</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QGLWidget"></a>QGLWidget::QGLWidget ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const QGLWidget * <i>shareWidget</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
@@ -198,7 +199,7 @@
 <p>The <i>parent</i> and widget flag, <i>f</i>, arguments are passed to the <a href="qwidget.html">QWidget</a> constructor.</p>
 <p>If the <i>shareWidget</i> parameter points to a valid <a href="qglwidget.html">QGLWidget</a>, this widget will share OpenGL display lists with <i>shareWidget</i>. If this widget and <i>shareWidget</i> have different <a href="qglwidget.html#format">formats</a>, display list sharing may fail. You can check whether display list sharing succeeded by calling <a href="qglwidget.html#isSharing">isSharing</a>().</p>
 <p>The initialization of OpenGL rendering state, etc. should be done by overriding the <a href="qglwidget.html#initializeGL">initializeGL</a>() function, rather than in the constructor of your <a href="qglwidget.html">QGLWidget</a> subclass.</p>
-<p>See also <a href="qglformat.html#defaultFormat">QGLFormat::defaultFormat</a>() and Textures Example.</p>
+<p>See also <a href="qglformat.html#defaultFormat">QGLFormat::defaultFormat</a>() and <a href="opengl-textures.html">Textures Example</a>.</p>
 <h3 class="fn"><a name="QGLWidget-2"></a>QGLWidget::QGLWidget ( <a href="qglcontext.html">QGLContext</a> * <i>context</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const QGLWidget * <i>shareWidget</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
 <p>Constructs an OpenGL widget with parent <i>parent</i>.</p>
 <p>The <i>context</i> argument is a pointer to the <a href="qglcontext.html">QGLContext</a> that you wish to be bound to this widget. This allows you to pass in your own <a href="qglcontext.html">QGLContext</a> sub-classes.</p>
@@ -356,6 +357,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

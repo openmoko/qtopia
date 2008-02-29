@@ -28,7 +28,7 @@
 /*!
     \class QAbstractIpcInterfaceGroupManager
     \brief The QAbstractIpcInterfaceGroupManager class provides a method to discover the active IPC interfaces and server interface groups.
-    \ingroup communication
+    \ingroup ipc
 
     The QAbstractIpcInterfaceGroupManager class provides a method to discover
     the IPC interfaces and server interface groups that are active within
@@ -37,7 +37,7 @@
     Each server interface group has a unique name, such as \c{GSM},
     \c{VoIP}, etc.  Within each group is a list of interfaces for
     functionality areas, which have names such as
-    \c{QNetworkRegistration}, \c{QSMSSender}, etc.
+    QNetworkRegistration, QSMSSender, etc.
 
     Interface names correspond to class names elsewhere in the Qtopia
     Communications and Telephony API's.  To use an interface, the caller

@@ -3,7 +3,7 @@ This patch includes the changes to Helix for supporting various arm devices.
 
 --- helix/src/build/lib/sysinfo.py	Tue Jun 13 05:59:35 2006
 +++ helix/src/build/lib/sysinfo.py	Tue Jun 13 05:59:35 2006
-@@ -1068,6 +1068,30 @@
+@@ -1068,6 +1068,38 @@
                     'linux-arm',
                     'linux-2.2-libc6-armv4l-zaurus'] ))
  
@@ -30,6 +30,14 @@ This patch includes the changes to Helix for supporting various arm devices.
 +    distribution_id = 'linux-2.2-libc6-armv5te-cross-gcc3.3-softfloat',
 +    family_list = ['unix', 'linux', 'linux2', 'linux-glibc-2.0',
 +                   'linux-arm', 'linux-2.2-libc6-armv5te-gcc3.3-softfloat'] ))
++
++AddPlatform(Platform(
++    id = 'linux-2.2-libc6-gcc32-i586-gcc4',
++    platform = 'linux2',
++    arch = 'i386',
++    distribution_id = 'linux-2.2-libc6-gcc32-i586',
++    family_list = ['unix', 'linux', 'linux2','gcc3', 'linux-glibc-2.0',
++                   'linux-2.2-libc6-i386'] ))
 +
  ## returns the output of uname stripped
  def uname_output(options = ''):

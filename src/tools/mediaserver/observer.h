@@ -61,8 +61,10 @@ inline void Subject::detach( Observer* observer )
 
 inline void Subject::notify()
 {
-    foreach( Observer *observer, m_observers ) {
-        observer->update( this );
+    QList<Observer*>::iterator it = m_observers.begin();
+    for (;it != m_observers.end(); ++it)
+    {
+        (*it)->update( this );
     }
 }
 

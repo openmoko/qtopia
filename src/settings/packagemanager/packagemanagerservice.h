@@ -31,17 +31,16 @@
 #include <QtopiaAbstractService>
 
 #include "installcontrol.h"
+#include "md5file.h"
 
 class PackageServiceInstaller;
 class PackageView;
 class QDSActionRequest;
+class InstalledPackageScanner;
 
 class PackageManagerService : public QtopiaAbstractService
 {
     Q_OBJECT
-public:
-    PackageManagerService( PackageView *parent );
-
 public slots:
     void installPackageConfirm( const QString &url );
     void installPackage( const QDSActionRequest &request );
@@ -49,11 +48,13 @@ public slots:
 private slots:
     void installFinished();
 private:
+    PackageManagerService( PackageView *parent );
 
     PackageServiceInstaller *m_installer;
     PackageView *m_packageView;
     QStringList m_pendingUrls;
     QStringList m_pendingDescriptors;
+    friend class PackageView;
 };
 
 class ServicePackageDetails;
@@ -62,11 +63,10 @@ class PackageServiceInstaller : public QDialog, public ErrorReporter
 {
     Q_OBJECT
 public:
-    PackageServiceInstaller( QWidget *parent = 0, Qt::WindowFlags flags = 0 );
+    PackageServiceInstaller( PackageView *parent, Qt::WindowFlags flags = 0 );
 
     bool installActive() const{ return m_installActive; }
 
-    void reportError( const QString &error );
 
 public slots:
     void installPackage( const QString &url );
@@ -76,24 +76,32 @@ public slots:
     virtual void reject();
 
 private slots:
-    void confirmInstall( InstallControl::PackageInfo package );
+    void confirmInstall( const InstallControl::PackageInfo &package );
     void installPendingPackage();
     void headerDownloadDone( bool error );
     void packageDownloadDone( bool error );
 
-    void updateProgress( int done, int total );
+    void updateHeaderProgress( int done, int total );
+    void updatePackageProgress( int done, int total );
 
 private:
     QHttp m_http;
     QBuffer m_headerBuffer;
-    QFile m_packageFile;
+    Md5File m_packageFile;
     InstallControl::PackageInfo m_pendingPackage;
     InstallControl m_installer;
+    InstalledPackageScanner *m_scanner;
 
     QLabel *m_progressLabel;
     QProgressBar *m_progressBar;
     ServicePackageDetails *m_packageDetails;
     bool m_installActive;
+    PackageView *m_packageView;
+
+    int m_expectedPackageSize;
+
+    bool packageInstalled( const QString &md5Sum );
+    void doReportError( const QString &error, const QString &detailedError );
 };
 
 #endif

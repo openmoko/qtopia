@@ -1,11 +1,6 @@
 qtopia_project(qtopia app)
-
-
 TARGET=mediaserver
-CONFIG+=no_tr
-
-QMAKE_CXXFLAGS_WARN_ON+=-Wno-non-virtual-dtor
-
+CONFIG+=no_tr singleexec_main
 
 HEADERS =   \
             helixengine.h \
@@ -24,7 +19,9 @@ HEADERS =   \
             pluginencodesession.h \
             fullduplexpluginsession.h \
             devicemanager.h \
-            contentdevice.h 
+            contentdevice.h \
+            mediavolumecontrol.h \
+            observer.h
 
 HEADERS +=  \
             helixutil.h \
@@ -51,7 +48,8 @@ SOURCES =   \
             pluginencodesession.cpp \
             fullduplexpluginsession.cpp \
             devicemanager.cpp \
-            contentdevice.cpp
+            contentdevice.cpp \
+            mediavolumecontrol.cpp
 
 SOURCES +=  \
             helixutil.cpp \
@@ -73,11 +71,10 @@ dbg=$$HELIX_OUT_DIR
 idep(DEFINES+=CONFIG_H_FILE=\$$LITERAL_ESCAPED_QUOTE$$HELIX_PATH/$$dbg/makefile_ribodefs.h\$$LITERAL_ESCAPED_QUOTE,DEFINES)
 
 pkg.desc=Media Server
-pkg.domain=mediaserver,window,graphics,docapi,launcher,drm,cardreader
+pkg.domain=volumemanager,mediaserver,window,graphics,docapi,launcher,drm,cardreader
 
 mediaserverservice.files=$$QTOPIA_DEPOT_PATH/services/MediaServer/mediaserver
 mediaserverservice.path=/services/MediaServer
-
 INSTALLS += mediaserverservice
 
 depends(libraries/qtopiamedia)

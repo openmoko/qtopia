@@ -28,7 +28,7 @@
 #include <QModelIndex>
 #include <QSize>
 #include <QMap>
-
+#include <QSignalMapper>
 #include "installcontrol.h"
 
 class QProgressDialog;
@@ -62,7 +62,7 @@ public:
     virtual QVariant data( int ) const;
     virtual QVariant data( int, int, int ) const;
 
-    virtual QIcon dataIcon() const = 0;
+    QIcon dataIcon( int pkgId = -1 ) const { return getDataIcon( pkgId ); }
     virtual QString controllerName() const = 0;
     virtual QString controllerDescription() const = 0;
     virtual QIcon controllerIcon() const = 0;
@@ -74,7 +74,7 @@ public slots:
     virtual void addPackage( const InstallControl::PackageInfo & );
 signals:
     void packageMessage( const QString & );
-    void packageInstalled( const InstallControl::PackageInfo & );
+    void packageInstalled( const InstallControl::PackageInfo &, bool );
     void rowsAboutToBeRemoved( const QModelIndex &, int, int );
     void rowsRemoved( const QModelIndex &, int, int );
     void updated();
@@ -86,6 +86,9 @@ protected:
     QList<InstallControl::PackageInfo> filteredOutPkgList;
     QProgressDialog *progressDisplay;
     InstallControl *installControl;
+
+private:
+    virtual QIcon getDataIcon( int pkgId ) const = 0;
 };
 
 class PackageInformationReader;
@@ -102,7 +105,6 @@ class LocalPackageController : public AbstractPackageController
 {
     Q_OBJECT
 public:
-    virtual QIcon dataIcon() const;
     virtual QString controllerName() const;
     virtual QIcon controllerIcon() const;
     virtual QString controllerDescription() const;
@@ -114,6 +116,8 @@ protected:
 private slots:
     void packageComplete();
 private:
+    virtual QIcon getDataIcon( int pkgId ) const;
+
     static const QString LOCAL_PACKAGE_DIRECTORY;
 
     QString currentPackageDirectory;
@@ -135,7 +139,6 @@ class NetworkPackageController : public AbstractPackageController
 {
     Q_OBJECT
 public:
-    virtual QIcon dataIcon() const;
     virtual QString controllerName() const;
     virtual QIcon controllerIcon() const;
     virtual QString controllerDescription() const;
@@ -154,7 +157,10 @@ private slots:
     void listFetchComplete();
 
 private:
+    virtual QIcon getDataIcon( int pkgId ) const;
+    
     QString currentNetworkServer;
+    QSignalMapper *signalMapper;
     HttpFetcher *hf;
     friend class AbstractPackageController;
 };
@@ -170,13 +176,19 @@ class InstalledPackageController : public AbstractPackageController
 {
     Q_OBJECT
 public:
-    virtual QIcon dataIcon() const;
     virtual QString controllerName() const;
     virtual QIcon controllerIcon() const;
     virtual QString controllerDescription() const;
     virtual QString packageInstallInfo( int pkgId ) const;
     virtual QString operationName() const;
     virtual void install(int packageI);
+    virtual QVariant data( int ) const;
+    virtual QVariant data( int, int, int ) const;
+    
+
+    bool reenable( int pkgId );
+
+    static const QString DISABLED_TAG;
 public slots:
     void reloadInstalledLocations( const QStringList & );
 protected:
@@ -185,6 +197,7 @@ protected:
 private slots:
     void initialize();
 private:
+    virtual QIcon getDataIcon( int pkgId ) const;
     friend class AbstractPackageController;
     InstalledPackageScanner *installedScanner;
 };
@@ -244,7 +257,7 @@ inline QVariant AbstractPackageController::data( int role ) const
         return controllerName();
     if ( role == Qt::DecorationRole )
         return controllerIcon();
-    if ( role == Qt::UserRole )
+    if ( role == Qt::WhatsThisRole )
         return controllerDescription();
     return QVariant();
 }
@@ -252,18 +265,21 @@ inline QVariant AbstractPackageController::data( int role ) const
 inline QVariant AbstractPackageController::data( int row, int column, int role ) const
 {
     InstallControl::PackageInfo pi = packageInfo( row );
-    if ( role == Qt::DisplayRole )
+    if ( role == Qt::DisplayRole )  
         return ( column == 0 ) ? pi.name : pi.description;
-    if ( role == Qt::DecorationRole )
-        return dataIcon();
-    if ( role == Qt::UserRole )
-        return packageInstallInfo(row);
+    if ( role == Qt::DecorationRole )  
+        return dataIcon( row ); 
+    if ( role == Qt::WhatsThisRole )//package domain is returned
+        return packageInstallInfo(row); 
+    if ( role == Qt::StatusTipRole )//is packge enabled
+        return true; //always true for general case
     return QVariant();
 }
 
 inline void AbstractPackageController::addPackage( const InstallControl::PackageInfo &pkg )
 {
     pkgList.append( pkg );
+    qSort( pkgList );
     emit updated();
 }
 
@@ -277,8 +293,9 @@ inline QString AbstractPackageController::operationName() const
 /////  LocalPackageController inline method implementations
 /////
 
-inline QIcon LocalPackageController::dataIcon() const
+inline QIcon LocalPackageController::getDataIcon( int pkgId ) const
 {
+    Q_UNUSED( pkgId );
     return QIcon( ":icon/uninstalled" );
 }
 
@@ -307,8 +324,9 @@ inline QString LocalPackageController::packageInstallInfo( int pkgId ) const
 /////  NetworkPackageController inline method implementations
 /////
 
-inline QIcon NetworkPackageController::dataIcon() const
+inline QIcon NetworkPackageController::getDataIcon( int pkgId ) const
 {
+    Q_UNUSED( pkgId );
     return QIcon( ":icon/uninstalled" );
 }
 
@@ -351,11 +369,6 @@ inline QString NetworkPackageController::packageInstallInfo( int pkgId ) const
 /////  InstalledPackageController inline method implementations
 /////
 
-inline QIcon InstalledPackageController::dataIcon() const
-{
-    return QIcon( ":icon/installed" );
-}
-
 inline QString InstalledPackageController::controllerName() const
 {
     return tr( "Installed" );
@@ -381,6 +394,19 @@ inline QString InstalledPackageController::packageInstallInfo( int pkgId ) const
 inline QString InstalledPackageController::operationName() const
 {
     return tr( "Uninstall" );
+}
+
+inline QVariant InstalledPackageController::data( int role ) const
+{
+    return AbstractPackageController::data( role ); 
+}
+
+inline QVariant InstalledPackageController::data( int row, int column, int role ) const
+{
+    if ( role == Qt::StatusTipRole )
+        return packageInfo( row ).isEnabled;
+    else
+        return AbstractPackageController::data( row, column, role );
 }
 
 #endif

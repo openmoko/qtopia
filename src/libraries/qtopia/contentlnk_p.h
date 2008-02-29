@@ -74,6 +74,7 @@ public:
     virtual const QString &iconName() const;
     virtual void setProperty(const QString& key, const QString& value, const QString& group=QString());
     virtual QString property(const QString& key, const QString& group=QString()) const;
+    virtual const QStringList &categories() const;
 
     virtual void removeFiles();
 
@@ -87,7 +88,8 @@ public:
     {
         New,
         Edited,
-        Committed
+        Committed,
+        Uncommited
     };
 
     virtual ContentState contentState() const;
@@ -97,6 +99,7 @@ public:
     static QList< QDrmRights::Permission > extractPermissions( const QString &permissionList );
     static QString packPermissions( const QList< QDrmRights::Permission > &permissions );
 
+    inline bool operator==(const ContentLinkPrivate &) const;
 protected:
 
 
@@ -149,6 +152,31 @@ private:
     friend class ContentLinkSql;
     friend QDebug &operator<<(QDebug &debug, const ContentLinkPrivate *contentLink);
 };
+
+inline bool ContentLinkPrivate::operator==(const ContentLinkPrivate &other) const
+{
+    return cName == other.cName &&
+           cIconPath == other.cIconPath &&
+           cType == other.cType &&
+           cComment == other.cComment &&
+           cPath == other.cPath &&
+           valid == other.valid &&
+           cRotation == other.cRotation &&
+           cMimeTypes == other.cMimeTypes &&
+           cMimeTypeIcons == other.cMimeTypeIcons &&
+           cMimeTypePermissions == other.cMimeTypePermissions &&
+           cLinkFile == other.cLinkFile &&
+           cPropertyList == other.cPropertyList &&
+           cCategories == other.cCategories &&
+           cSize == other.cSize &&
+           cLastUpdated == other.cLastUpdated &&
+           cMedia == other.cMedia &&
+           cPermissions == other.cPermissions &&
+           cContentState == other.cContentState &&
+           cId == other.cId &&
+           um == other.um &&
+           drm == other.drm;
+}
 
 /*!
   \class ContentLinkPrivateDRM

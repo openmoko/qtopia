@@ -35,7 +35,7 @@
   the SystemSuspendHandler interface that will be called before the system
   enters suspend and after the system leaves it.
 
-  While the SystemSuspend class is an abstract interfaces - that conceivably
+  While the SystemSuspend class is an abstract interface - that conceivably
   allows replacement of the suspend sub-system - a default implementation is
   provided under the task name \c SystemSuspend which should generally be
   adequate.
@@ -44,9 +44,10 @@
  */
 
 /*!
-  \fn SystemSuspend::SystemSuspend()
-  \internal
-  */
+  \fn SystemSuspend::SystemSuspend(QObject *parent = 0)
+
+  Construct a new SystemSuspend instance with the given \a parent.
+ */
 
 /*!
   \fn bool SystemSuspend::suspendSystem()

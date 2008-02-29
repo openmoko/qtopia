@@ -292,7 +292,8 @@ void QtopiaSessionManager::stopSession( const QByteArray& ifaceHandle, const QSt
 void QtopiaSessionManager::setExtendedLifetime( const QByteArray& ifaceHandle, bool isExtended )
 {
     if ( !sessions.contains( ifaceHandle ) ) {
-        qWarning() << ifaceHandle << "is doesn't have an attached session";
+        qWarning() << ifaceHandle << "is doesn't have an attached session. Cannot extend life time.";
+        return;
     }
     QtopiaNetworkSession* s = sessions.value( ifaceHandle );
     s->setExtendedLife( isExtended );
@@ -559,6 +560,7 @@ QtopiaNetworkServer::StartCode QtopiaNetworkServer::activateInterface( const QSt
                         sessionManager->registerSession( handle.toLatin1().constData(), appName );
                         return Success;
                     } else {
+                        qLog(Network) << "QNS::startInterface: interface start was not successful";
                         return NotReady;
                     }
                 } else {

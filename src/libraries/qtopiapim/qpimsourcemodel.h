@@ -51,6 +51,7 @@ public:
 
     QPimSource source(const QModelIndex &) const;
     QPimContext *context(const QModelIndex &) const;
+    using QAbstractListModel::index;
     QModelIndex index(const QPimSource &) const;
 
     // for normal model work.

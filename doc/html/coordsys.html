@@ -1,6 +1,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/coordsys.qdoc -->
 <head>
   <title>Qt 4.2: The Coordinate System</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -95,21 +96,53 @@
 <tr valign="top" class="odd"><td><img src="images/coordinatesystem-analogclock.png" /></td><td>The Analog Clock example shows how to draw the contents of a custom widget using <a href="qpainter.html">QPainter</a>'s transformation matrix.<p>Qt's example directory provides a complete walk-through of the example. Here, we will only review the example's <a href="qwidget.html#paintEvent">paintEvent()</a> function to see how we can use the transformation matrix (i.e. <a href="qpainter.html">QPainter</a>'s matrix functions) to draw the clock's face.</p>
 <p>We recommend compiling and running this example before you read any further. In particular, try resizing the window to different sizes.</p>
 </td></tr>
-<tr valign="top" class="even"><td colspan="2"><pre></pre>
+<tr valign="top" class="even"><td colspan="2"><pre> void AnalogClock::paintEvent(QPaintEvent *)
+ {
+     static const QPoint hourHand[3] = {
+         QPoint(7, 8),
+         QPoint(-7, 8),
+         QPoint(0, -40)
+     };
+     static const QPoint minuteHand[3] = {
+         QPoint(7, 8),
+         QPoint(-7, 8),
+         QPoint(0, -70)
+     };
+
+     QColor hourColor(127, 0, 127);
+     QColor minuteColor(0, 127, 127, 191);
+
+     int side = qMin(width(), height());
+     QTime time = QTime::currentTime();
+
+     QPainter painter(this);
+     painter.setRenderHint(QPainter::Antialiasing);
+     painter.translate(width() / 2, height() / 2);
+     painter.scale(side / 200.0, side / 200.0);</pre>
 <p>First, we set up the painter. We translate the coordinate system so that point (0, 0) is in the widget's center, instead of being at the top-left corner. We also scale the system by <tt>side</tt> / 100, where <tt>side</tt> is either the widget's width or the height, whichever is shortest. We want the clock to be square, even if the device isn't.</p>
 <p>This will give us a 200 x 200 square area, with the origin (0, 0) in the center, that we can draw on. What we draw will show up in the largest possible square that will fit in the widget.</p>
 <p>See also the <a href="#window-viewport-conversion">Window-Viewport Conversion</a> section.</p>
-<pre></pre>
+<pre>     painter.save();
+     painter.rotate(30.0 * ((time.hour() + time.minute() / 60.0)));
+     painter.drawConvexPolygon(hourHand, 3);
+     painter.restore();</pre>
 <p>We draw the clock's hour hand by rotating the coordinate system and calling <a href="qpainter.html#drawConvexPolygon">QPainter::drawConvexPolygon</a>(). Thank's to the rotation, it's drawn pointed in the right direction.</p>
 <p>The polygon is specified as an array of alternating <i>x</i>, <i>y</i> values, stored in the <tt>hourHand</tt> static variable (defined at the beginning of the function), which corresponds to the four points (2, 0), (0, 2), (-2, 0), and (0, -25).</p>
 <p>The calls to <a href="qpainter.html#save">QPainter::save</a>() and <a href="qpainter.html#restore">QPainter::restore</a>() surrounding the code guarantees that the code that follows won't be disturbed by the transformations we've used.</p>
-<pre></pre>
+<pre>     painter.save();
+     painter.rotate(6.0 * (time.minute() + time.second() / 60.0));
+     painter.drawConvexPolygon(minuteHand, 3);
+     painter.restore();</pre>
 <p>We do the same for the clock's minute hand, which is defined by the four points (1, 0), (0, 1), (-1, 0), and (0, -40). These coordinates specify a hand that is thinner and longer than the minute hand.</p>
-<pre></pre>
+<pre>     for (int j = 0; j &lt; 60; ++j) {
+         if ((j % 5) != 0)
+             painter.drawLine(92, 0, 96, 0);
+         painter.rotate(6.0);
+     }</pre>
 <p>Finally, we draw the clock face, which consists of twelve short lines at 30-degree intervals. At the end of that, the painter is rotated in a way which isn't very useful, but we're done with painting so that doesn't matter.</p>
 </td></tr>
 </table></p>
-<p>For a demonstation of Qt's ability to perform affine transformations on painting operations, see the <a href="demos-affine.html">Affine Transformations</a> demo which allows the user to experiment with the transformation operations. See also the Transformations example which shows how transformations influence the way that <a href="qpainter.html">QPainter</a> renders graphics primitives. In particular, it shows how the order of transformations affects the result.</p>
+<p>For a demonstation of Qt's ability to perform affine transformations on painting operations, see the <a href="demos-affine.html">Affine Transformations</a> demo which allows the user to experiment with the transformation operations. See also the <a href="painting-transformations.html">Transformations</a> example which shows how transformations influence the way that <a href="qpainter.html">QPainter</a> renders graphics primitives. In particular, it shows how the order of transformations affects the result.</p>
 <p>For more information about the transformation matrix, see the <a href="qmatrix.html">QMatrix</a> documentation.</p>
 <a name="window-viewport-conversion"></a>
 <h2>Window-Viewport Conversion</h2>
@@ -128,11 +161,11 @@
 <p>If we make the logical coordinate system a square, we should also make the viewport a square using the <a href="qpainter.html#setViewport">QPainter::setViewport</a>() function. In the example above we make it equivalent to the largest square that fit into the paint device's rectangle. By taking the paint device's size into consideration when setting the window or viewport, it is possible to keep the drawing code independent of the paint device.</p>
 <p>Note that the window-viewport conversion is only a linear transformation, i.e. it does not perform clipping. This means that if you paint outside the currently set &quot;window&quot;, your painting is still transformed to the viewport using the same linear algebraic approach.</p>
 <p align="center"><img src="images/coordinatesystem-transformations.png" /></p><p>The viewport, &quot;window&quot; and transformation matrix determine how logical <a href="qpainter.html">QPainter</a> coordinates map to the paint device's physical coordinates. By default the world transformation matrix is the identity matrix, and the &quot;window&quot; and viewport settings are equivalent to the paint device's settings, i.e. the world, &quot;window&quot; and device coordinate systems are equivalent, but as we have seen, the systems can be manipulated using transformation operations and window-viewport conversion. The illustration above describes the process.</p>
-<p>See also Analog Clock Example and Transformations Example.</p>
+<p>See also <a href="widgets-analogclock.html">Analog Clock Example</a> and <a href="painting-transformations.html">Transformations Example</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

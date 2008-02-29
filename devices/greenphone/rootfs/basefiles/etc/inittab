@@ -14,11 +14,13 @@
 # process   == program to run
 
 # Startup the system
+::sysinit:/etc/rc.d/rc.modules boot
 ::sysinit:/etc/rc.d/rc.filesystems
 ::sysinit:/etc/rc.d/rc.newrootfs
 ::sysinit:/etc/rc.d/rc.modules
 ::sysinit:/etc/rc.d/rc.sysinit
-::sysinit:/etc/rc.d/rc.services
+::sysinit:/etc/rc.d/rc.lids start
+::sysinit:/etc/rc.d/rc.services start
 
 # Start serial console
 ttyS2::respawn:-/bin/sh
@@ -29,5 +31,13 @@ ttyS2::respawn:-/bin/sh
 ::sysinit:/mnt/user/etc/trolltech_startup.sh
 
 # Shutdown the system
-::shutdown:/etc/rc.d/rc.shutdown
+::shutdown:/bin/echo 0 > /tmp/progress
+::shutdown:/etc/rc.d/rc.lids stop
+::shutdown:/etc/rc.d/rc.services stop
+::shutdown:/bin/splash -now -p + "Shutting down" "system"
+::shutdown:/bin/kill -SIGTERM -1
+::shutdown:/bin/sleep 1
+::shutdown:/bin/kill -SIGKILL -1
+::shutdown:/bin/sleep 1
+::shutdown:/bin/umount -a -r
 

@@ -26,10 +26,14 @@
 #include <qtopia/comm/qbluetoothrfcommsocket.h>
 #include <qtopia/comm/qbluetoothscosocket.h>
 #include <qtopia/comm/qbluetoothlocaldevice.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include <QBluetoothSdpRecord>
+#include <qtopiacomm/private/qsdpxmlparser_p.h>
+#include <qtopianamespace.h>
 #include <qtopialog.h>
 #include <qtopia/comm/qbluetoothaddress.h>
 #include <qcommdevicesession.h>
+
+#include <QFile>
 
 #include <bluetooth/bluetooth.h>
 #include <sys/socket.h>
@@ -43,9 +47,10 @@ class QBluetoothHeadsetServicePrivate
 {
 public:
     QBluetoothRfcommServer *m_server;
+    quint32 m_sdpRecordHandle;
     QBluetooth::SecurityOptions m_securityOptions;
     QBluetoothRfcommSocket *m_client;
-    QBluetoothHeadsetAudioGatewayServer *m_interface;
+    QBluetoothHeadsetCommInterface *m_interface;
     QBluetoothScoSocket *m_scoSocket;
     int m_scofd;
     bool m_connectInProgress;
@@ -60,9 +65,8 @@ public:
     int m_channel;
 };
 
-QBluetoothHeadsetService::QBluetoothHeadsetService(const QString &service,
-                                                   QObject *parent)
-    : QBluetoothAbstractService(service, parent)
+QBluetoothHeadsetService::QBluetoothHeadsetService(const QString &service, const QString &displayName, QObject *parent)
+    : QBluetoothAbstractService(service, displayName, parent)
 {
     m_data = new QBluetoothHeadsetServicePrivate();
 
@@ -83,6 +87,20 @@ QBluetoothHeadsetService::QBluetoothHeadsetService(const QString &service,
     m_data->m_scofd = -1;
 
     m_data->m_session = 0;
+    m_data->m_interface = 0;
+
+
+    QByteArray audioDev = find_btsco_device("Headset");
+    if (audioDev.isEmpty()) {
+        qWarning("No headset audio devices available...");
+    }
+    else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData())) {
+        qWarning("Unable to open audio device: %s", audioDev.constData());
+    }
+    else {
+        m_data->m_interface = new QBluetoothHeadsetCommInterface(audioDev, this);
+        m_data->m_interface->initialize();
+    }
 }
 
 QBluetoothHeadsetService::~QBluetoothHeadsetService()
@@ -97,88 +115,63 @@ QBluetoothHeadsetService::~QBluetoothHeadsetService()
     }
 }
 
-void QBluetoothHeadsetService::initialize()
-{
-    QByteArray audioDev = find_btsco_device("Headset");
-
-    if (audioDev.isEmpty()) {
-        qWarning("No headset audio devices available...");
-    }
-    else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData())) {
-        qWarning("Unable to open audio device: %s", audioDev.constData());
-    }
-    else if ( !supports<QBluetoothAudioGateway>() ) {
-        m_data->m_interface =
-                new QBluetoothHeadsetAudioGatewayServer( this, audioDev, groupName() );
-        addInterface( m_data->m_interface );
-    }
-
-    QBluetoothAbstractService::initialize();
-}
-
 // Methods from the Control Interface
-void QBluetoothHeadsetService::start(int channel)
+void QBluetoothHeadsetService::start()
 {
     qLog(Bluetooth) << "QBluetoothHeadsetService::start";
 
     if (!m_data->m_interface) {
-        emit started(QBluetooth::UnknownError, tr("No suitable audio devices found!"));
+        emit started(true, tr("No suitable audio devices found!"));
         return;
     }
 
     if (m_data->m_server->isListening()) {
-        emit started(QBluetooth::AlreadyRunning,
+        emit started(true,
                      tr("Headset Audio Gateway already running."));
         return;
     }
 
-    QBluetoothLocalDevice defaultDevice;
-
-    bool ret = sdpRegister(defaultDevice.address(),
-                           QBluetooth::HeadsetAudioGatewayProfile,
-                           channel);
-    if (!ret) {
-        emit started(QBluetooth::SDPServerError,
+    // register the SDP service
+    m_data->m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/hs.xml");
+    if (m_data->m_sdpRecordHandle == 0) {
+        emit started(true,
                      tr("Error registering with SDP server"));
         return;
     }
 
+    // For now, hard code in the channel, which has to be the same channel as
+    // the one in the XML file passed in the registerRecord() call above
+    int channel = 1;
+
+    // start the server
     if (!m_data->m_server->listen(QBluetoothAddress::any, channel)) {
-        emit started(QBluetooth::UnknownError,
-                     tr("Could not listen on channel."));
+        unregisterRecord(m_data->m_sdpRecordHandle);
+        emit started(true, tr("Could not listen on channel."));
         return;
     }
 
     m_data->m_server->setSecurityOptions(m_data->m_securityOptions);
 
-    emit started(QBluetooth::NoError, QString());
+    emit started(false, QString());
 }
 
 void QBluetoothHeadsetService::stop()
 {
     qLog(Bluetooth) << "QBluetoothHeadsetService::stop";
 
-    if (!m_data->m_server->isListening()) {
-        emit stopped(QBluetooth::NotRunning,
-                     tr("Headset Audio Gateway is not running"));
-        return;
+    if (m_data->m_server->isListening()) {
+        m_data->m_server->close();
+        disconnect();
     }
 
-    m_data->m_server->close();
-    disconnect();
+    if (!unregisterRecord(m_data->m_sdpRecordHandle))
+        qLog(Bluetooth) << "QBluetoothHeadsetService::stop() error unregistering SDP service";
 
-    if (!sdpUnregister()) {
-        emit stopped(QBluetooth::SDPServerError,
-                     tr("Error unregistering from SDP server"));
-        return;
-    }
-
-    emit stopped(QBluetooth::NoError, QString());
+    emit stopped();
 }
 
 void QBluetoothHeadsetService::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
-    // TODO emit error if can't set security options
     m_data->m_securityOptions = options;
     if (m_data->m_server->isListening())
         m_data->m_server->setSecurityOptions(options);
@@ -586,7 +579,82 @@ bool QBluetoothHeadsetService::canConnectAudio()
     return true;
 }
 
-QString QBluetoothHeadsetService::translatableDisplayName() const
+
+//==========================================================
+
+class QBluetoothHeadsetCommInterfacePrivate
 {
-    return tr("Headset Audio Gateway");
+public:
+    QBluetoothHeadsetService *m_service;
+    QBluetoothHeadsetAudioGatewayServer *m_gatewayServer;
+};
+
+
+
+QBluetoothHeadsetCommInterface::QBluetoothHeadsetCommInterface(const QByteArray &audioDev, QBluetoothHeadsetService *parent)
+    : QAbstractIpcInterfaceGroup(parent->name(), parent),
+      m_data(new QBluetoothHeadsetCommInterfacePrivate)
+{
+    m_data->m_service = parent;
+    m_data->m_gatewayServer = new QBluetoothHeadsetAudioGatewayServer(this, audioDev,
+            parent->name());
+
+    QObject::connect(parent, SIGNAL(connectResult(bool, const QString &)),
+                     SIGNAL(connectResult(bool, const QString &)));
+    QObject::connect(parent, SIGNAL(newConnection(const QBluetoothAddress &)),
+                     SIGNAL(newConnection(const QBluetoothAddress &)));
+    QObject::connect(parent, SIGNAL(disconnected()),
+                     SIGNAL(disconnected()));
+    QObject::connect(parent, SIGNAL(speakerVolumeChanged()),
+                     SIGNAL(speakerVolumeChanged()));
+    QObject::connect(parent, SIGNAL(microphoneVolumeChanged()),
+                     SIGNAL(microphoneVolumeChanged()));
+    QObject::connect(parent, SIGNAL(audioStateChanged()),
+                     SIGNAL(audioStateChanged()));
+}
+
+QBluetoothHeadsetCommInterface::~QBluetoothHeadsetCommInterface()
+{
+    delete m_data;
+}
+
+void QBluetoothHeadsetCommInterface::initialize()
+{
+    if ( !supports<QBluetoothAudioGateway>() )
+        addInterface(m_data->m_gatewayServer);
+}
+
+void QBluetoothHeadsetCommInterface::setValue(const QString &key, const QVariant &value)
+{
+    m_data->m_gatewayServer->setValue(key, value);
+}
+
+void QBluetoothHeadsetCommInterface::connect(const QBluetoothAddress &addr, int rfcomm_channel)
+{
+    m_data->m_service->connect(addr, rfcomm_channel);
+}
+
+void QBluetoothHeadsetCommInterface::disconnect()
+{
+    m_data->m_service->disconnect();
+}
+
+void QBluetoothHeadsetCommInterface::setSpeakerVolume(int volume)
+{
+    m_data->m_service->setSpeakerVolume(volume);
+}
+
+void QBluetoothHeadsetCommInterface::setMicrophoneVolume(int volume)
+{
+    m_data->m_service->setMicrophoneVolume(volume);
+}
+
+void QBluetoothHeadsetCommInterface::releaseAudio()
+{
+    m_data->m_service->releaseAudio();
+}
+
+void QBluetoothHeadsetCommInterface::connectAudio()
+{
+    m_data->m_service->connectAudio();
 }

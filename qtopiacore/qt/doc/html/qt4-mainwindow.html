@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qt4-mainwindow.qdoc -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/doc/src/qt4-mainwindow.qdoc -->
 <head>
   <title>Qt 4.2: The Qt 4 Main Window Classes</title>
   <link rel="prev" href="qt4-scribe.html" />
@@ -26,13 +26,14 @@
 <li><a href="#the-main-window-classes">The Main Window Classes</a></li>
 <li><a href="#example-code">Example Code</a></li>
 <li><a href="#what-s-changed-since-qt-3">What's Changed since Qt 3?</a></li>
+<ul><li><a href="#new-functionality">New Functionality</a></li>
+<li><a href="#independent-qdockwidget-and-qtoolbar-classes">Independent QDockWidget And QToolBar Classes</a></li>
+<li><a href="#code-change-examples">Code Change Examples</a></li>
+</ul>
 </ul>
 <a name="overview-of-the-main-window-classes"></a>
 <h2>Overview of the Main Window Classes</h2>
 <p>The main window-related classes have been redesigned to satisfy a number of requirements, addressing issues raised by our customers and internal developers. The aim of this redesign is to provide a more consistent and efficient framework for main window management.</p>
-<p>Toolbar and dock window functionality is provided by two independent classes: <a href="qtoolbar.html">QToolBar</a> and <a href="qdockwidget.html">QDockWidget</a>. Toolbars and dock widgets reside in separate areas, with toolbars outside the dock widget area. This behavior differs from the Qt 3 behavior, where <a href="qtoolbar.html">QToolBar</a> inherited functionality from <a href="qdockwidget.html">QDockWidget</a>, and both types of component shared the same areas. The result is a more consistent and predictable experience for users. Toolbars and dock widgets provide feedback while being dragged into their new positions.</p>
-<p align="center"><img src="images/mainwindow-docks.png" /></p><p>The diagram above shows the layout of a main window that contains both toolbars and dock widgets. Each corner area can be used by either of the adjacent dock widget areas, allowing dock widget behavior and main window layout to be specified precisely.</p>
-<p>Toolbars and dock widgets are child widgets of the main window. They are no longer reparented into a dock area widget by the main window. Instead, layouts are used to manage the placement of toolbars and dock widgets. One consequence is that the old <a href="porting4.html#qdockarea">QDockArea</a> class is no longer required in Qt 4.</p>
 <a name="the-main-window-classes"></a>
 <h2>The Main Window Classes</h2>
 <p>Qt 4 provides the following classes for managing main windows and associated user interface components:</p>
@@ -49,13 +50,29 @@
      : QMainWindow(parent)
  {
      ...
+     newAct = new QAction(tr(&quot;&amp;New&quot;), this);
+     newAct-&gt;setShortcut(tr(&quot;Ctrl+N&quot;));
+     newAct-&gt;setStatusTip(tr(&quot;Create a new file&quot;));
+     connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
+
+     openAct = new QAction(tr(&quot;&amp;Open...&quot;), this);
+     openAct-&gt;setShortcut(tr(&quot;Ctrl+O&quot;));
+     openAct-&gt;setStatusTip(tr(&quot;Open an existing file&quot;));
+     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
      ...</pre>
 <p>Once actions have been created, we can add them to the main window components. To begin with, we add them to the popup menus:</p>
-<pre>     ...
+<pre>     fileMenu = menuBar()-&gt;addMenu(tr(&quot;&amp;File&quot;));
+     fileMenu-&gt;addAction(newAct);
+     fileMenu-&gt;addAction(openAct);
+     ...
+     fileMenu-&gt;addSeparator();
      ...</pre>
 <p>The <a href="qtoolbar.html">QToolBar</a> and <a href="qmenu.html">QMenu</a> classes use Qt's action system to provide a consistent API. In the above code, some existing actions were added to the file menu with the <a href="qmenu.html#addAction">QMenu::addAction</a>() function. <a href="qtoolbar.html">QToolBar</a> also provides this function, making it easy to reuse actions in different parts of the main window. This avoids unnecessary duplication of work.</p>
 <p>We create a toolbar as a child of the main window, and add the desired actions to it:</p>
-<pre>     ...</pre>
+<pre>     fileToolBar = addToolBar(tr(&quot;File&quot;));
+     fileToolBar-&gt;addAction(newAct);
+     fileToolBar-&gt;addAction(openAct);
+     ...</pre>
 <pre>     fileToolbar-&gt;setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
      addToolBar(Qt::TopToolBarArea, fileToolbar);</pre>
 <p>In this example, the toolbar is restricted to the top and bottom toolbar areas of the main window, and is initially placed in the top tool bar area. We can see that the actions specified by <tt>newAct</tt> and <tt>openAct</tt> will be displayed both on the toolbar and in the file menu.</p>
@@ -80,7 +97,22 @@
 <p>The central widget can be any subclass of <a href="qwidget.html">QWidget</a>.</p>
 <a name="what-s-changed-since-qt-3"></a>
 <h2>What's Changed since Qt 3?</h2>
-<p>Although the <a href="qmainwindow.html">QMainWindow</a> class in Qt 3 provided support for toolbars, dock widgets, and other standard user interface components, its design meant that these items were managed through a large number of <a href="qmainwindow.html">QMainWindow</a> member functions. In Qt 4, the <a href="qmainwindow.html">QMainWindow</a> class delegates many of the management tasks to <a href="qdockwidget.html">QDockWidget</a> and <a href="qtoolbar.html">QToolBar</a>. As a result, these classes are used in a slightly different way in Qt 4.</p>
+<p>The main window classes in Qt 4 adds new functionality, mainly to the dock widgets and toolbars. We have also made changes to the design of the framework.</p>
+<p>Although the <a href="qmainwindow.html">QMainWindow</a> class in Qt 3 provided support for toolbars, dock widgets, and other standard user interface components, its design meant that these items were managed through a large number of <a href="qmainwindow.html">QMainWindow</a> member functions. In Qt 4, the <a href="qmainwindow.html">QMainWindow</a> class delegates many of the management tasks to <a href="qdockwidget.html">QDockWidget</a> and <a href="qtoolbar.html">QToolBar</a> (allowing more consistent behavior to be defined and implemented).</p>
+<p>The dock widget and toolbar classes are now separated into independent classes. (write some more here)</p>
+<p>(It is intended that these changes allow more consistent behavior to be defined and implemented (which? example). In response to feedback from customers, we hope to improve these classes even further.)</p>
+<a name="new-functionality"></a>
+<h3>New Functionality</h3>
+<p>Dock widgets are animated when docking or detaching from a dock area. The dock areas will also adjust their size to show where the dock widget will dock when it hovers over it. This animation can be turned off with <tt>setAnimated()</tt>.</p>
+<p>By default, dock widgets are added to the dock areas in a single row. By setting nesting enabled with <tt>setDockNestingEnabled()</tt>, the widgets can be added both vertically and horizontally.</p>
+<p>Two dock widgets can occupy the same space in a dock area. The user can then choose which widget that is visible with a tab bar that is located below the widgets. The <a href="qmainwindow.html#tabifyDockWidget">QMainWindow::tabifyDockWidget</a>() joins two tab widgets in such a tabbed dock area. (revise the entire paragraph)</p>
+<a name="independent-qdockwidget-and-qtoolbar-classes"></a>
+<h3>Independent QDockWidget And QToolBar Classes</h3>
+<p>Toolbar and dock window functionality is provided by two independent classes: <a href="qtoolbar.html">QToolBar</a> and <a href="qdockwidget.html">QDockWidget</a>. Toolbars and dock widgets reside in separate areas, with toolbars outside the dock widget area. This behavior differs from the Qt 3 behavior, where <a href="qtoolbar.html">QToolBar</a> inherited functionality from <a href="qdockwidget.html">QDockWidget</a>, and both types of component shared the same areas. The result is a more consistent and predictable experience for users. Toolbars and dock widgets provide feedback while being dragged into their new positions.</p>
+<p align="center"><img src="images/mainwindow-docks.png" /></p><p>The diagram above shows the layout of a main window that contains both toolbars and dock widgets. Each corner area can be used by either of the adjacent dock widget areas, allowing dock widget behavior and main window layout to be specified precisely.</p>
+<p>Toolbars and dock widgets are child widgets of the main window. They are no longer reparented into a dock area widget by the main window. Instead, layouts are used to manage the placement of toolbars and dock widgets. One consequence is that the old <a href="porting4.html#qdockarea">QDockArea</a> class is no longer required in Qt 4.</p>
+<a name="code-change-examples"></a>
+<h3>Code Change Examples</h3>
 <p><a href="qmainwindow.html">QMainWindow</a> retains the menuBar() function, but menus are always constructed using <a href="qaction.html">QAction</a> objects. All kinds of menus are constructed using the general <a href="qmenu.html">QMenu</a> class.</p>
 <p>Qt 3:</p>
 <pre> QPopupMenu *fileMenu = new QPopupMenu(this);
@@ -111,7 +143,6 @@
 <p>In Qt 4:</p>
 <pre> QDockWidget *dockWidget = new QDockWidget(mainWindow);
  mainWindow-&gt;addDockWidget(Qt::LeftDockWidgetArea, dockWidget);</pre>
-<p>These changes provide more than a cosmetic improvement to Qt's API. They allow more consistent behavior to be defined and implemented. In response to feedback from customers, we hope to improve these classes even further.</p>
 <p>
 [Previous: <a href="qt4-scribe.html">The Scribe Classes</a>]
 [<a href="qt4-intro.html">Home</a>]
@@ -121,6 +152,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

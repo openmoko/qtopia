@@ -106,7 +106,8 @@ QTOPIA_HEADERS+=\
     qspeakerphoneaccessory.h\
     qkeypadlightaccessory.h\
     qtopiasendvia.h\
-    qanalogclock.h
+    qanalogclock.h\
+    qsignalsource.h
 
 QTOPIA_PRIVATE_HEADERS+=\
     qimagedocumentselector_p.h\
@@ -135,7 +136,8 @@ QTOPIA_PRIVATE_HEADERS+=\
     qhardwareinterface_p.h\
     qworldmap_sun_p.h\
     qworldmap_stylusnorm_p.h \
-    qdateparser_p.h
+    qdateparser_p.h \
+    qalarmserver_p.h
 
 QTOPIA_SOURCES+=\
     qtopialog.cpp\
@@ -234,7 +236,8 @@ QTOPIA_SOURCES+=\
     qkeypadlightaccessory.cpp\
     qtopiasendvia.cpp\
     qanalogclock.cpp\
-    qdateparser.cpp
+    qdateparser.cpp\
+    qsignalsource.cpp
 
 phone:QTOPIA_SOURCES+=\
     themedview.cpp\
@@ -373,6 +376,7 @@ depends(tools/qt/lupdate)
 depends(tools/qt/lrelease)
 enable_sxe:depends(libraries/qtopiasecurity)
 !enable_qtopiabase:enable_dbusipc:depends(3rdparty/libraries/qtdbus)
+depends(3rdparty/libraries/sqlite)
 
 sdk_qtopia_headers.files=$${QTOPIA_HEADERS}
 sdk_qtopia_headers.path=/include/qtopia
@@ -406,26 +410,44 @@ bins.hint=script
     quitdesktop.hint=desktop
     INSTALLS+=quitdesktop
 }
-pics.files=$$QTOPIA_DEPOT_PATH/pics/icons \
-           $$QTOPIA_DEPOT_PATH/pics/drm
+
+pics.files=$$QTOPIA_DEPOT_PATH/pics/icons
 pics.path=/pics
 pics.hint=pics
+INSTALLS+=pics
+
+drmpics.files=$$QTOPIA_DEPOT_PATH/pics/drm/*
+drmpics.path=/pics/drm
+drmpics.hint=pics
+INSTALLS+=drmpics
+
 # WorldTime conf is used by qtimezonewidget.
 defaults.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/presstick.conf\
                $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/SpeedDial.conf\
                $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/WorldTime.conf\
                $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Log.conf
 defaults.path=/etc/default/Trolltech
-textcodecs.files=$$QTOPIA_DEPOT_PATH/plugins/textcodecs/.directory
-textcodecs.path=/plugins/textcodecs/
-imagecodecs.files=$$QTOPIA_DEPOT_PATH/plugins/imagecodecs/.directory
-imagecodecs.path=/plugins/imagecodecs/
-decorations.files=$$QTOPIA_DEPOT_PATH/plugins/decorations/.directory
-decorations.path=/plugins/decorations/
-styles.files=$$QTOPIA_DEPOT_PATH/plugins/styles/.directory
-styles.path=/plugins/styles/
 INSTALLS+=\
-    etc bins pics defaults textcodecs imagecodecs decorations styles
+    etc bins defaults
+
+!enable_singleexec {
+    textcodecs.files=$$QTOPIA_DEPOT_PATH/plugins/textcodecs/.directory
+    textcodecs.path=/plugins/textcodecs/
+    INSTALLS+=textcodecs
+
+    imagecodecs.files=$$QTOPIA_DEPOT_PATH/plugins/imagecodecs/.directory
+    imagecodecs.path=/plugins/imagecodecs/
+    INSTALLS+=imagecodecs
+
+    decorations.files=$$QTOPIA_DEPOT_PATH/plugins/decorations/.directory
+    decorations.path=/plugins/decorations/
+    INSTALLS+=decorations
+
+    styles.files=$$QTOPIA_DEPOT_PATH/plugins/styles/.directory
+    styles.path=/plugins/styles/
+    INSTALLS+=styles
+}
+
 !isEmpty(STORAGE_CONF_FILE) {
     storage_conf.files=$$STORAGE_CONF_FILE
     storage_conf.path=/etc/default/Trolltech

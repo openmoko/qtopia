@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/io/qiodevice.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/corelib/io/qiodevice.cpp -->
 <head>
   <title>Qt 4.2: QIODevice Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -145,7 +145,7 @@
 <tr><td valign="top"><tt>QIODevice::Text</tt></td><td align="center" valign="top"><tt>0x0010</tt></td><td valign="top">When reading, the end-of-line terminators are translated to '\n'. When writing, the end-of-line terminators are translated to the local encoding, for example '\r\n' for Win32.</td></tr>
 <tr><td valign="top"><tt>QIODevice::Unbuffered</tt></td><td align="center" valign="top"><tt>0x0020</tt></td><td valign="top">Any buffer in the device is bypassed.</td></tr>
 </table></p>
-<p>Certain flags, such as QIODevice::Unbuffered and QIODevice::Truncate, might be meaningless for some subclasses. (For example, access to a <a href="qbuffer.html">QBuffer</a> is always unbuffered.)</p>
+<p>Certain flags, such as <tt>Unbuffered</tt> and <tt>Truncate</tt>, are meaningless when used with some subclasses. Some of these restrictions are implied by the type of device that is represented by a subclass; for example, access to a <a href="qbuffer.html">QBuffer</a> is always unbuffered. In other cases, the restriction may be due to the implementation, or may be imposed by the underlying platform; for example, <a href="qtcpsocket.html">QTcpSocket</a> does not support <tt>Unbuffered</tt> mode.</p>
 <p>The OpenMode type is a typedef for <a href="qflags.html">QFlags</a>&lt;OpenModeFlag&gt;. It stores an OR combination of OpenModeFlag values.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -284,7 +284,7 @@
          <span class="comment">// the line is available in buf</span>
      }
  }</pre>
-<p>If the '\n' character is the 1023th character read then it will be inserted into the buffer; if it occurs after the 1023 character then it is not read.</p>
+<p>The newline character ('\n') is included in the buffer. If a newline is not encountered before maxSize - 1 bytes are read, a newline will not be inserted into the buffer. On windows newline characters are replaced with '\n'.</p>
 <p>This function calls <a href="qiodevice.html#readLineData">readLineData</a>(), which is implemented using repeated calls to <a href="qiodevice.html#getChar">getChar</a>(). You can provide a more efficient implementation by reimplementing <a href="qiodevice.html#readLineData">readLineData</a>() in your own subclass.</p>
 <p>See also <a href="qiodevice.html#getChar">getChar</a>(), <a href="qiodevice.html#read">read</a>(), and <a href="qiodevice.html#write">write</a>().</p>
 <h3 class="fn"><a name="readLine-2"></a><a href="qbytearray.html">QByteArray</a> QIODevice::readLine ( <a href="qtglobal.html#qint64-typedef">qint64</a> <i>maxSize</i> = 0 )</h3>
@@ -410,6 +410,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

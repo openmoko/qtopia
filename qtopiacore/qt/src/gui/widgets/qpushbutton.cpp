@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtGui module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -143,6 +153,12 @@ public:
     \table 100%
     \row \o \inlineimage macintosh-pushbutton.png Screenshot of a Macintosh style push button
          \o A push button shown in the \l{Macintosh Style Widget Gallery}{Macintosh widget style}.
+
+         Note that when a button's width becomes smaller than 50 or
+         its height becomes smaller than 30, the button's corners are
+         changed from round to square. Use the setMinimumSize()
+         function to prevent this behavior.
+
     \row \o \inlineimage windowsxp-pushbutton.png Screenshot of a Windows XP style push button
          \o A push button shown in the \l{Windows XP Style Widget Gallery}{Windows XP widget style}.
     \row \o \inlineimage plastique-pushbutton.png Screenshot of a Plastique style push button
@@ -457,6 +473,14 @@ void QPushButton::focusOutEvent(QFocusEvent *e)
     produce a small triangle to the right of the button's text.
 
     Ownership of the menu is \e not transferred to the push button.
+
+    \table 100%
+    \row
+    \o \inlineimage plastique-pushbutton-menu.png Screenshot of a Plastique style push button with popup menu.
+    \o \inlineimage cleanlooks-pushbutton-menu.png Screenshot of a Cleanlooks style push button with popup menu.
+    \o Push buttons with popup menus shown in the \l{Plastique Style Widget Gallery}{Plastique widget style}
+    (left) and \l{Cleanlooks Style Widget Gallery}{Cleanlooks widget style} (right).
+    \endtable
 
     \sa menu()
 */

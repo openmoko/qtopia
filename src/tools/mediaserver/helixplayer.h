@@ -105,7 +105,12 @@ public:
     // Observer
     void update( Subject* subject );
 
+    void hasStopped();
+
 private:
+    void timerEvent(QTimerEvent* timerEvent);
+
+    int                 m_stopTimerId;
     IHXClientEngine*    m_engine;
     IHXPlayer *m_player;
     IHXVolume *m_volume;

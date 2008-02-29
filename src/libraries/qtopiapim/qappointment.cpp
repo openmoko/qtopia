@@ -28,6 +28,7 @@
 
 #include <qbuffer.h>
 #include <qtextcodec.h>
+#include <QFile>
 
 #include <QDebug>
 
@@ -741,7 +742,7 @@ bool QAppointment::isValid() const
   If the appointment only occurs once (no repeat) will return the date of the
   start of the appointment if the start of the appointment is on or after \a from.
 
-  If the appointment does not occur on or after \a from then a null date is returned.
+  If the appointment does not occur on or after \a from then a null occurrence is returned.
 */
 QOccurrence QAppointment::nextOccurrence( const QDate &from) const
 {
@@ -1354,6 +1355,7 @@ static QAppointment parseVObject( VObject *obj )
                 value = value.mid(sepIndex+1);
             }
             if (value.endsWith("Z")) {
+                e.setTimeZone( QTimeZone::utc() );
                 // time is given in utc, not local TODO, timezone implications.
                 value = value.left(value.length()-1);
             }
@@ -1374,14 +1376,17 @@ static QAppointment parseVObject( VObject *obj )
                 // can't store end timezone in qappointment
             }
             if (value.endsWith("Z")) {
+                e.setTimeZone( QTimeZone::utc() );
                 // time is given in utc, not local TODO, timezone implications.
                 value = value.left(value.length()-1);
             }
             // check string-length.  if no time, its an allday.
-            if (value.length() == 8)
+            if (value.length() == 8) {
                 e.setEnd( QDateTime(QDate::fromString(value, vCalDateFormat)));
-            else
-                e.setEnd (QDateTime::fromString(value, vCalDateTimeFormat));
+            } else {
+                QDateTime endTime = QDateTime::fromString(value, vCalDateTimeFormat);
+                e.setEnd (endTime);
+            }
             haveEnd = true;
         }
         else if (name == "DURATION") {
@@ -1639,6 +1644,50 @@ void QAppointment::writeVCalendar( const QString &filename, const QList<QAppoint
 }
 
 /*!
+   Writes the appointment as a vCalendar object to the file specified
+   by \a filename.
+
+   Returns true on success, false on fail.
+
+   \sa readVCalendar()
+*/
+void QAppointment::writeVCalendar( const QString &filename ) const
+{
+    writeVCalendar(filename, *this);
+}
+
+/*!
+   \overload
+
+   Writes the appointment as a vCalendar object to the given \a file,
+   which must be already open for writing.
+
+   \sa readVCalendar()
+*/
+void QAppointment::writeVCalendar( QFile &file ) const
+{
+    QDataStream stream( &file );
+    writeVCalendar( &stream );
+
+}
+
+/*!
+   \overload
+
+   Writes the appointment as a vCalendar object to the given \a stream,
+   which must be writable.
+
+   \sa readVCalendar()
+*/
+void QAppointment::writeVCalendar( QDataStream *stream ) const
+{
+    VObject *obj = createVObject(*this);
+    writeVObject( stream, obj );
+    cleanVObject( obj );
+    cleanStrTbl();
+}
+
+/*!
    Write the \a appointment as a vCalendar to the file specified by \a filename.
 
    \sa readVCalendar()
@@ -1683,6 +1732,16 @@ QList<QAppointment> QAppointment::readVCalendarData( const char *data, unsigned 
     return readVCalendarData(obj);
 }
 
+/*!
+  Reads the given VCalendar data in \a vcal and returns the list of
+  near equivalent appointments.
+
+  \sa writeVCalendar()
+*/
+QList<QAppointment> QAppointment::readVCalendar( const QByteArray &vcal )
+{
+    return readVCalendarData( Parse_MIME( (const char*)vcal, vcal.count() ) );
+}
 
 /*!
   Reads the file specified by \a filename as a list of vCalendar objects

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/network/qabstractsocket.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/network/qabstractsocket.cpp -->
 <head>
   <title>Qt 4.2: QAbstractSocket Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -128,7 +128,21 @@
 <li><a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>() blocks until one payload of data has been written to the socket.</li>
 <li><a href="qabstractsocket.html#waitForDisconnected">waitForDisconnected</a>() blocks until the connection has closed.</li>
 </ul>
-<p>Programming with a blocking socket is radically different from programming with a non-blocking socket. A blocking socket doesn't require an event loop and typically leads to simpler code. However, in a GUI application, blocking sockets should only be used in non-GUI threads, to avoid freezing the user interface. See the network/fortuneclient and network/blockingfortuneclient examples for an overview of both approaches.</p>
+<p>We show an example:</p>
+<pre>     int numRead = 0, numReadTotal = 0;
+     char buffer[50];
+
+     forever {
+         numRead  = socket.read(buffer, 50);
+
+         <span class="comment">// do whatever with array</span>
+
+         numReadTotal += numRead;
+         if (numRead == 0 &amp;&amp; !socket.waitForReadyRead())
+             break;
+     }</pre>
+<p>If <a href="qiodevice.html#waitForReadyRead">waitForReadyRead()</a> returns false, the connection has been closed or an error has occurred.</p>
+<p>Programming with a blocking socket is radically different from programming with a non-blocking socket. A blocking socket doesn't require an event loop and typically leads to simpler code. However, in a GUI application, blocking sockets should only be used in non-GUI threads, to avoid freezing the user interface. See the <a href="network-fortuneclient.html">network/fortuneclient</a> and <a href="network-blockingfortuneclient.html">network/blockingfortuneclient</a> examples for an overview of both approaches.</p>
 <p>QAbstractSocket can be used with <a href="qtextstream.html">QTextStream</a> and <a href="qdatastream.html">QDataStream</a>'s stream operators (operator&lt;&lt;() and operator&gt;&gt;()). There is one issue to be aware of, though: You must make sure that enough data is available before attempting to read it using operator&gt;&gt;().</p>
 <p>See also <a href="qftp.html">QFtp</a>, <a href="qhttp.html">QHttp</a>, and <a href="qtcpserver.html">QTcpServer</a>.</p>
 <hr />
@@ -402,6 +416,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

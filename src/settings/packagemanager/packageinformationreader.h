@@ -45,6 +45,8 @@ public:
     QString domain() const { return pkg.domain; }
     QString trust() const { return pkg.trust; }
     QString url() const { return pkg.url; }
+    QString md5Sum() const { return pkg.md5Sum; }
+    QString qtopiaVersion() const { return pkg.qtopiaVersion; }
 
     const InstallControl::PackageInfo &package() const { return pkg; }
     bool getIsError() const { return isError; }

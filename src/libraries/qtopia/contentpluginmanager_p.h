@@ -39,6 +39,7 @@ public:
     virtual QStringList keys() const;
 
     virtual bool installContent( const QString &filePath, QContent *content );
+    virtual bool updateContent( QContent *content );
 };
 
 class DotDesktopContentPlugin : public QContentPlugin
@@ -50,6 +51,7 @@ public:
     virtual QStringList keys() const;
 
     virtual bool installContent( const QString &filePath, QContent *content );
+    virtual bool updateContent( QContent *content );
 };
 
 

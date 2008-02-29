@@ -23,31 +23,28 @@
 
 #include <qtopia/pim/qcontact.h>
 #include <qtopia/pim/qcontactmodel.h>
+#include <qtopia/pim/qpimdelegate.h>
 
 #include <QListView>
-#include <QAbstractItemDelegate>
 #include <QMap>
 #include <QDialog>
 
 class QFont;
 class QKeyEvent;
 
-class QTOPIAPIM_EXPORT QContactDelegate : public QAbstractItemDelegate
+class QTOPIAPIM_EXPORT QContactDelegate : public QPimDelegate
 {
 public:
     explicit QContactDelegate( QObject * parent = 0 );
     virtual ~QContactDelegate();
 
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem & option,
-            const QModelIndex & index ) const;
+    BackgroundStyle backgroundStyle(const QStyleOptionViewItem &option, const QModelIndex& index) const;
+    SubTextAlignment subTextAlignment(const QStyleOptionViewItem &option, const QModelIndex& index) const;
+    QList<StringPair> subTexts(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    int subTextsCountHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
-    virtual QSize sizeHint(const QStyleOptionViewItem & option,
-            const QModelIndex &index) const;
-
-    virtual QFont mainFont(const QStyleOptionViewItem &) const;
-    virtual QFont secondaryFont(const QStyleOptionViewItem &) const;
-private:
-    QFont differentFont(const QFont& start, int step) const;
+    void drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index, QList<QRect>& leadingFloats, QList<QRect>& trailingFloats) const;
+    QSize decorationsSizeHint(const QStyleOptionViewItem& option, const QModelIndex& index, const QSize& textSize) const;
 };
 
 class QTOPIAPIM_EXPORT QContactListView : public QListView
@@ -74,8 +71,8 @@ public:
 
     QContactDelegate *contactDelegate() const { return qobject_cast<QContactDelegate *>(itemDelegate()); }
 
-protected slots:
-    void slotCurrentChanged(const QModelIndex& newIdx);
+private slots:
+    void currentContactChanged(const QModelIndex& newIdx);
 
 protected:
 

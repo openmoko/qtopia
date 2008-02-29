@@ -33,6 +33,11 @@
 */
 
 /*!
+    \fn DialerService::DialerService( QObject *parent )
+    \internal
+*/
+
+/*!
     \internal
 */
 DialerService::~DialerService()
@@ -40,7 +45,7 @@ DialerService::~DialerService()
 }
 
 /*!
-    \fn void DialerServer::dialVoiceMail()
+    \fn void DialerService::dialVoiceMail()
 
     Dial the user's voice mail service.
 

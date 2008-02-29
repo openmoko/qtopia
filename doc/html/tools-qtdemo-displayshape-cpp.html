@@ -1,0 +1,465 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: displayshape.cpp Example File (tools/qtdemo/displayshape.cpp)</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">displayshape.cpp Example File<br /><sup><sup>tools/qtdemo/displayshape.cpp</sup></sup></h1>
+<pre><span class="comment"> /****************************************************************************
+ **
+ ** Copyright (C) 2005-2007 Trolltech ASA. All rights reserved.
+ **
+ ** This file is part of the example classes of the Qt Toolkit.
+ **
+ ** This file may be used under the terms of the GNU General Public
+ ** License version 2.0 as published by the Free Software Foundation
+ ** and appearing in the file LICENSE.GPL included in the packaging of
+ ** this file.  Please review the following information to ensure GNU
+ ** General Public Licensing requirements will be met:
+ ** http://www.trolltech.com/products/qt/opensource.html
+ **
+ ** If you are unsure which license is appropriate for your use, please
+ ** review the following information:
+ ** http://www.trolltech.com/products/qt/licensing.html or contact the
+ ** sales department at sales@trolltech.com.
+ **
+ ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ **
+ ****************************************************************************/</span>
+
+ #include &lt;math.h&gt;
+ #include &lt;QtGui&gt;
+
+ #include &quot;displayshape.h&quot;
+
+ DisplayShape::DisplayShape(const QPointF &amp;position, const QSizeF &amp;maxSize)
+     : pos(position), maxSize(maxSize), interactive(false)
+ {
+ }
+
+ bool DisplayShape::animate()
+ {
+     if (!targetPos.isNull()) {
+         QLineF displacement(pos, targetPos);
+         QPointF newPosition = displacement.pointAt(0.15);
+         if (displacement.length() &lt;= 1.0) {
+             pos = targetPos;
+             targetPos = QPointF();
+         } else {
+             pos = newPosition;
+         }
+         return true;
+     }
+
+     return false;
+ }
+
+ bool DisplayShape::contains(const QString &amp;key) const
+ {
+     return meta.contains(key);
+ }
+
+ bool DisplayShape::isInteractive() const
+ {
+     return interactive;
+ }
+
+ QVariant DisplayShape::metaData(const QString &amp;key) const
+ {
+     return meta.value(key);
+ }
+
+ void DisplayShape::paint(QPainter *painter) const
+ {
+     painter-&gt;save();
+     painter-&gt;drawImage(pos, image);
+     painter-&gt;restore();
+ }
+
+ QPointF DisplayShape::position() const
+ {
+     return pos;
+ }
+
+ QRectF DisplayShape::rect() const
+ {
+     return QRectF(pos, image.size());
+ }
+
+ void DisplayShape::removeMetaData(const QString &amp;key)
+ {
+     meta.remove(key);
+ }
+
+ void DisplayShape::setInteractive(bool enable)
+ {
+     interactive = enable;
+ }
+
+ void DisplayShape::setMetaData(const QString &amp;key, const QVariant &amp;value)
+ {
+     meta[key] = value;
+ }
+
+ void DisplayShape::setPosition(const QPointF &amp;position)
+ {
+     pos = position;
+ }
+
+ void DisplayShape::setSize(const QSizeF &amp;size)
+ {
+     maxSize = size;
+ }
+
+ void DisplayShape::setTarget(const QPointF &amp;position)
+ {
+     targetPos = position;
+ }
+
+ QSizeF DisplayShape::size() const
+ {
+     return maxSize;
+ }
+
+ QPointF DisplayShape::target() const
+ {
+     return targetPos;
+ }
+
+ PanelShape::PanelShape(const QPainterPath &amp;path, const QBrush &amp;normal,
+                        const QBrush &amp;highlighted, const QPen &amp;pen,
+                        const QPointF &amp;position, const QSizeF &amp;maxSize)
+     : DisplayShape(position, maxSize), highlightedBrush(highlighted),
+       normalBrush(normal), path(path), pen(pen)
+ {
+     brush = normalBrush;
+ }
+
+ bool PanelShape::animate()
+ {
+     bool updated = false;
+
+     if (!meta.contains(&quot;destroy&quot;)) {
+         if (meta.contains(&quot;fade&quot;)) {
+             QColor penColor = pen.color();
+             QColor brushColor = brush.color();
+             int penAlpha = penColor.alpha();
+             int brushAlpha = brushColor.alpha();
+             int fadeMinimum = meta.value(&quot;fade minimum&quot;).toInt();
+
+             if (penAlpha != fadeMinimum || brushAlpha != fadeMinimum
+                 || meta.value(&quot;fade&quot;).toInt() &gt; 0) {
+
+                 penAlpha = qBound(fadeMinimum,
+                                   penAlpha + meta.value(&quot;fade&quot;).toInt(), 255);
+                 brushAlpha = qBound(fadeMinimum,
+                                   brushAlpha + meta.value(&quot;fade&quot;).toInt(), 255);
+
+                 penColor.setAlpha(penAlpha);
+                 brushColor.setAlpha(brushAlpha);
+                 pen.setColor(penColor);
+                 brush.setColor(brushColor);
+
+                 if (penAlpha == 0 &amp;&amp; brushAlpha == 0) {
+                     meta[&quot;destroy&quot;] = true;
+                     meta.remove(&quot;fade&quot;);
+                 } else if (penAlpha == 255 &amp;&amp; brushAlpha == 255)
+                     meta.remove(&quot;fade&quot;);
+
+                 updated = true;
+             }
+         } else if (meta.contains(&quot;highlight&quot;)) {
+             qreal scale = meta.value(&quot;highlight scale&quot;).toDouble();
+             QColor color = brush.color();
+
+             if (meta.value(&quot;highlight&quot;).toBool())
+                 scale = qBound(0.0, scale + 0.5, 1.0);
+             else
+                 scale = qBound(0.0, scale - 0.2, 1.0);
+
+             if (scale == 0.0) {
+                 brush = normalBrush;
+                 meta.remove(&quot;highlight&quot;);
+                 meta.remove(&quot;highlight scale&quot;);
+                 updated = true;
+             } else if (scale != meta[&quot;highlight scale&quot;]) {
+                 meta[&quot;highlight scale&quot;] = scale;
+
+                 if (scale == 1.0)
+                     brush = highlightedBrush;
+                 else {
+                     QColor normal = normalBrush.color();
+                     QColor highlighted = highlightedBrush.color();
+
+                     color.setRedF((1.0-scale) * normal.redF()
+                                   + scale*highlighted.redF());
+                     color.setGreenF((1.0-scale) * normal.greenF()
+                                     + scale*highlighted.greenF());
+                     color.setBlueF((1.0-scale) * normal.blueF()
+                                    + scale*highlighted.blueF());
+                     brush.setColor(color);
+                 }
+                 updated = true;
+             }
+         }
+     }
+
+     return DisplayShape::animate() || updated;
+ }
+
+ void PanelShape::paint(QPainter *painter) const
+ {
+     painter-&gt;save();
+     painter-&gt;setRenderHint(QPainter::Antialiasing);
+     painter-&gt;setBrush(brush);
+     painter-&gt;setPen(pen);
+     painter-&gt;translate(pos);
+     painter-&gt;drawPath(path);
+     painter-&gt;restore();
+ }
+
+ QRectF PanelShape::rect() const
+ {
+     return QRectF(pos + path.boundingRect().topLeft(),
+                   path.boundingRect().size());
+ }
+
+ TitleShape::TitleShape(const QString &amp;text, const QFont &amp;f,
+                        const QPen &amp;pen, const QPointF &amp;position,
+                        const QSizeF &amp;maxSize, Qt::Alignment alignment)
+     : DisplayShape(position, maxSize), font(f), text(text), pen(pen),
+       alignment(alignment)
+ {
+     QFontMetricsF fm(font);
+     textRect = fm.boundingRect(QRectF(QPointF(0, 0), maxSize), alignment, text);
+
+     qreal textWidth = qMax(fm.width(text), textRect.width());
+     qreal textHeight = qMax(fm.height(), textRect.height());
+
+     qreal scale = qMin(maxSize.width()/textWidth,
+                        maxSize.height()/textHeight);
+
+     font.setPointSizeF(font.pointSizeF() * scale);
+     fm = QFontMetricsF(font);
+     textRect = fm.boundingRect(QRectF(QPointF(0, 0), maxSize), alignment, text);
+     baselineStart = QPointF(textRect.left(), textRect.bottom() - fm.descent());
+ }
+
+ bool TitleShape::animate()
+ {
+     bool updated = false;
+
+     if (!meta.contains(&quot;destroy&quot;)) {
+         if (meta.contains(&quot;fade&quot;)) {
+             QColor penColor = pen.color();
+             int penAlpha = penColor.alpha();
+
+             penAlpha = qBound(meta.value(&quot;fade minimum&quot;).toInt(),
+                               penAlpha + meta.value(&quot;fade&quot;).toInt(), 255);
+
+             penColor.setAlpha(penAlpha);
+             pen.setColor(penColor);
+
+             if (penAlpha == 0) {
+                 meta[&quot;destroy&quot;] = true;
+                 meta.remove(&quot;fade&quot;);
+             } else if (penAlpha == 255)
+                 meta.remove(&quot;fade&quot;);
+
+             updated = true;
+         }
+     }
+
+     return DisplayShape::animate() || updated;
+ }
+
+ void TitleShape::paint(QPainter *painter) const
+ {
+     QRectF rect(textRect);
+     rect.translate(pos);
+     painter-&gt;save();
+     painter-&gt;setRenderHint(QPainter::TextAntialiasing);
+     painter-&gt;setPen(pen);
+     painter-&gt;setFont(font);
+     painter-&gt;drawText(pos + baselineStart, text);
+     painter-&gt;restore();
+ }
+
+ QRectF TitleShape::rect() const
+ {
+     QRectF rect(textRect);
+     return rect.translated(pos);
+ }
+
+ ImageShape::ImageShape(const QImage &amp;original, const QPointF &amp;position,
+                        const QSizeF &amp;maxSize, int alpha,
+                        Qt::Alignment alignment)
+     : DisplayShape(position, maxSize), alpha(alpha), alignment(alignment)
+ {
+     source = original.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+     qreal scale = qMin(qMin(maxSize.width()/source.width(),
+                             maxSize.height()/source.height()), qreal(1.0));
+
+     source = source.scaled(int(ceil(source.width() * scale)),
+                            int(ceil(source.height() * scale)),
+                            Qt::KeepAspectRatio,
+                            Qt::SmoothTransformation);
+
+     image = QImage(source.size(), QImage::Format_ARGB32_Premultiplied);
+
+     offset = QPointF(0.0, 0.0);
+
+     if (alignment &amp; Qt::AlignHCenter)
+         offset.setX((maxSize.width() - image.width())/2);
+     else if (alignment &amp; Qt::AlignRight)
+         offset.setX(maxSize.width() - image.width());
+
+     if (alignment &amp; Qt::AlignVCenter)
+         offset.setY((maxSize.height() - image.height())/2);
+     else if (alignment &amp; Qt::AlignBottom)
+         offset.setY(maxSize.height() - image.height());
+
+     redraw();
+ }
+
+ void ImageShape::redraw()
+ {
+     image.fill(qRgba(alpha, alpha, alpha, alpha));
+
+     QPainter painter;
+     painter.begin(&amp;image);
+     painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+     painter.drawImage(0, 0, source);
+     painter.end();
+ }
+
+ void ImageShape::paint(QPainter *painter) const
+ {
+     painter-&gt;drawImage(pos + offset, image);
+ }
+
+ QRectF ImageShape::rect() const
+ {
+     return QRectF(pos, maxSize);
+ }
+
+ bool ImageShape::animate()
+ {
+     bool updated = false;
+
+     if (!meta.contains(&quot;destroy&quot;)) {
+         if (meta.contains(&quot;fade&quot;)) {
+             alpha = qBound(meta.value(&quot;fade minimum&quot;).toInt(),
+                            alpha + meta.value(&quot;fade&quot;).toInt(), 255);
+             redraw();
+
+             if (alpha == 0) {
+                 meta[&quot;destroy&quot;] = true;
+                 meta.remove(&quot;fade&quot;);
+             } else if (alpha == 255)
+                 meta.remove(&quot;fade&quot;);
+
+             updated = true;
+         }
+     }
+
+     return DisplayShape::animate() || updated;
+ }
+
+ DocumentShape::DocumentShape(const QString &amp;text, const QFont &amp;font,
+                              const QPointF &amp;position, const QSizeF &amp;maxSize,
+                              int alpha)
+     : DisplayShape(position, maxSize), alpha(alpha)
+ {
+     textDocument.setHtml(text);
+     textDocument.setDefaultFont(font);
+     textDocument.setPageSize(maxSize);
+     QSizeF documentSize = textDocument.documentLayout()-&gt;documentSize();
+     setSize(QSizeF(maxSize.width(),
+                       qMin(maxSize.height(), documentSize.height())));
+
+     source = QImage(int(ceil(documentSize.width())),
+                     int(ceil(documentSize.height())),
+                     QImage::Format_ARGB32_Premultiplied);
+     source.fill(qRgba(255, 255, 255, 255));
+
+     QAbstractTextDocumentLayout::PaintContext context;
+     textDocument.documentLayout()-&gt;setPaintDevice(&amp;source);
+
+     QPainter painter;
+     painter.begin(&amp;source);
+     painter.setRenderHint(QPainter::TextAntialiasing);
+     painter.setRenderHint(QPainter::Antialiasing);
+     textDocument.documentLayout()-&gt;draw(&amp;painter, context);
+     painter.end();
+
+     source = source.scaled(int(ceil(maxSize.width())),
+                            int(ceil(maxSize.height())),
+                            Qt::KeepAspectRatio,
+                            Qt::SmoothTransformation);
+
+     image = QImage(source.size(), source.format());
+     redraw();
+ }
+
+ DocumentShape::~DocumentShape()
+ {
+ }
+
+ bool DocumentShape::animate()
+ {
+     bool updated = false;
+
+     if (!meta.contains(&quot;destroy&quot;)) {
+         if (meta.contains(&quot;fade&quot;)) {
+             alpha = qBound(meta.value(&quot;fade minimum&quot;).toInt(),
+                            alpha + meta.value(&quot;fade&quot;).toInt(), 255);
+             redraw();
+
+             if (alpha == 0) {
+                 meta[&quot;destroy&quot;] = true;
+                 meta.remove(&quot;fade&quot;);
+             } else if (alpha == 255)
+                 meta.remove(&quot;fade&quot;);
+
+             updated = true;
+         }
+     }
+
+     return DisplayShape::animate() || updated;
+ }
+
+ void DocumentShape::redraw()
+ {
+     image.fill(qRgba(alpha, alpha, alpha, alpha));
+
+     QPainter painter;
+     painter.begin(&amp;image);
+     painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+     painter.drawImage(0, 0, source);
+     painter.end();
+ }
+
+ void DocumentShape::paint(QPainter *painter) const
+ {
+     painter-&gt;drawImage(pos, image);
+ }
+
+ QRectF DocumentShape::rect() const
+ {
+     return QRectF(pos, maxSize);
+ }</pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
+</tr></table></div></address></body>
+</html>

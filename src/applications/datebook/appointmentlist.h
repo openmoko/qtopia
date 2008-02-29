@@ -37,7 +37,7 @@ public:
     virtual ~AppointmentList();
 
     void setFolded(bool f = true);
-    void setModel(QOccurrenceModel *model);
+    void setModel(QAbstractItemModel *model);
     void setMaximumFoldedHeight(int height);
 
     bool isFolded() const;

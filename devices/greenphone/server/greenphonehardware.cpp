@@ -40,6 +40,7 @@
 #include <qtopiaipcadaptor.h>
 #include <qspeakerphoneaccessory.h>
 #include <qbootsourceaccessory.h>
+#include <qtopiaipcenvelope.h>
 
 #include <qtopiaserverapplication.h>
 #include <standarddevicefeatures.h>
@@ -100,23 +101,23 @@ void GreenphoneHardware::mountSD()
     if (!partitions.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
 
-    QString partition;
+    sdCardDevice.clear();
 
     QList<QByteArray> lines = partitions.readAll().split('\n');
     for (int i = 2; i < lines.count(); i++) {
         QStringList fields = QString(lines.at(i)).split(' ', QString::SkipEmptyParts);
 
         if (fields.count() == 4) {
-            if (partition.isEmpty() && fields.at(3) == "mmca") {
-                partition = "/dev/" + fields.at(3);
+            if (sdCardDevice.isEmpty() && fields.at(3) == "mmca") {
+                sdCardDevice = "/dev/" + fields.at(3);
             } else if (fields.at(3).startsWith("mmca")) {
-                partition = "/dev/" + fields.at(3);
+                sdCardDevice = "/dev/" + fields.at(3);
                 break;
             }
         }
     }
 
-    if (partition.isEmpty())
+    if (sdCardDevice.isEmpty())
         return;
 
     if (!mountProc)
@@ -125,10 +126,14 @@ void GreenphoneHardware::mountSD()
     if (mountProc->state() != QProcess::NotRunning)
         return;
 
-    QStringList arguments;
-    arguments << partition << "/mnt/sd";
+    connect(mountProc, SIGNAL(finished(int,QProcess::ExitStatus)),
+                       SLOT(fsckFinished(int,QProcess::ExitStatus)));
 
-    mountProc->start("mount", arguments);
+    QStringList arguments;
+    arguments << "-a" << sdCardDevice;
+
+    qLog(Hardware) << "Checking filesystem on" << sdCardDevice;
+    mountProc->start("fsck", arguments);
 }
 
 void GreenphoneHardware::unmountSD()
@@ -141,7 +146,40 @@ void GreenphoneHardware::unmountSD()
         mountProc->kill();
     }
 
+    connect(mountProc, SIGNAL(finished(int,QProcess::ExitStatus)),
+                       SLOT(mountFinished(int,QProcess::ExitStatus)));
+
+    qLog(Hardware) << "Unmounting /mnt/sd";
     mountProc->start("umount -l /mnt/sd");
+}
+
+void GreenphoneHardware::fsckFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    if (exitStatus == QProcess::NormalExit && exitCode != 0)
+        qLog(Hardware) << "Filesystem errors detected on" << sdCardDevice;
+
+    disconnect(mountProc, SIGNAL(finished(int,QProcess::ExitStatus)),
+               this, SLOT(fsckFinished(int,QProcess::ExitStatus)));
+
+    connect(mountProc, SIGNAL(finished(int,QProcess::ExitStatus)),
+                       SLOT(mountFinished(int,QProcess::ExitStatus)));
+
+    QStringList arguments;
+    arguments << sdCardDevice << "/mnt/sd";
+
+    qLog(Hardware) << "Mounting" << sdCardDevice << "on /mnt/sd";
+    mountProc->start("mount", arguments);
+}
+
+void GreenphoneHardware::mountFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    if (exitStatus == QProcess::NormalExit && exitCode != 0)
+        qLog(Hardware) << "Failed to (u)mount" << sdCardDevice << "on /mnt/sd";
+
+    mountProc->deleteLater();
+    mountProc = NULL;
+
+    QtopiaIpcEnvelope msg("QPE/Card", "mtabChanged()");
 }
 
 void GreenphoneHardware::setCharging(bool charge)

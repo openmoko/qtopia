@@ -32,7 +32,7 @@ E2TelephonyBar::E2TelephonyBar(QWidget *parent, Qt::WFlags flags)
   signalPix(":image/samples/e1_signal"),
   time("/UI/DisplayTime/Time"),
   battery("/Accessories/Battery/VisualCharge"),
-  signal("/Telephony/Status/SignalLevel/modem")
+  signal("/Hardware/Accessories/SignalSources/DefaultSignal/Values/SignalStrength")
 {
     setFixedHeight(fillBrush.height());
 

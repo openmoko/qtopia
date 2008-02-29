@@ -3,7 +3,7 @@ license(FREEWARE)
 TARGET          =   qtdbus
 CONFIG+=no_tr
 
-DEFINES += QT_NO_CAST_TO_ASCII QT_NO_CAST_FROM_ASCII QDBUS_MAKEDLL DBUS_API_SUBJECT_TO_CHANGE QDBUS_NO_SPECIALTYPES
+DEFINES += QT_NO_CAST_TO_ASCII QT_NO_CAST_FROM_ASCII QDBUS_MAKEDLL DBUS_API_SUBJECT_TO_CHANGE
 
 depends(libraries/qt/xml)
 depends(3rdparty/libraries/dbus)
@@ -73,5 +73,4 @@ SOURCES += qdbusabstractadaptor.cpp \
            qdbusxmlparser.cpp 
 
 idep(LIBS+=-l$$TARGET)
-idep(DEFINES+=QDBUS_NO_SPECIALTYPES)
 qt_inc($$TARGET)

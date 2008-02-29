@@ -423,6 +423,7 @@ void NetworkUI::init()
 
     if ( table->rowCount() )
         table->selectRow( 0 );
+    table->setEditFocus( true );
 }
 
 void NetworkUI::updateConfig()
@@ -475,10 +476,8 @@ void NetworkUI::updateConfig()
         table->setItem(rowCount-1, 1, statusItem);
         table->resizeRowToContents( rowCount - 1 );
     }
-
     table->sortItems( 0 );
     table->resizeColumnToContents(1);
-    table->setEditFocus( true );
 
     updateActions();
 }
@@ -624,7 +623,6 @@ void NetworkUI::updateExtraActions( const QString& config, QtopiaNetworkInterfac
             }
         }
     }
-    table->setEditFocus( true );
 #else
     //TODO
 #endif
@@ -738,13 +736,14 @@ void NetworkUI::doProperties()
         return;
 
     dialog->showMaximized();
-    if ( dialog->exec() == QDialog::Accepted ) {
+    if ( QtopiaApplication::execDialog( dialog ) == QDialog::Accepted ) {
         qLog(Network) << "Network interface has been configured.";
         QTimer::singleShot(500, this, SLOT(updateIfaceStates()));
     }
 
     if ( dialog )
         delete dialog;
+    table->setEditFocus( true );
 }
 
 void NetworkUI::setGateway()

@@ -343,7 +343,7 @@ bool QtopiaIpcAdaptor::isConnected( const QByteArray& signal )
     Convert a signal or slot \a member name into a Qtopia IPC message name.
     The default implementation strips the signal or slot prefix number
     from \a member and then normalizes the name to convert types
-    such as \c{const QString&} into \c{QString}.
+    such as \c{const QString&} into QString.
 */
 QString QtopiaIpcAdaptor::memberToMessage( const QByteArray& member )
 {
@@ -384,7 +384,7 @@ void QtopiaIpcAdaptor::received( const QString& msg, const QByteArray& data )
           iter != priv->invokers.end() && iter.key() == msg; ++iter ) {
         QSlotInvoker *invoker = iter.value();
         int *params = invoker->parameterTypes();
-        int numParams = invoker->numParameterTypes();
+        int numParams = invoker->parameterTypesCount();
         QDataStream stream( data );
         QList<QVariant> args;
         for ( int param = 0; param < numParams; ++param ) {

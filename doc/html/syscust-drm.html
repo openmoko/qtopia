@@ -2,8 +2,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>DRM Agent Integration</title>
-  <link href="classic.css" rel="stylesheet" type="text/css" />
+    <title>DRM Agent Integration</title>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -27,12 +26,12 @@
 <h3>License Management and Settings Application</h3>
 <p>Qtopia includes the 'Licenses' application as a common utility for DRM agents to host license management and settings widgets. It is composed of a single <a href="qtabwidget.html">QTabWidget</a> in which each tab contains a different widget from the set created by a calls to <a href="qdrmagentplugin.html#createManagerWidgets">QDrmAgentPlugin::createManagerWidgets</a>() for each loaded agent plug-in. Widgets are grouped according to the agent which created them and in the order returned.</p>
 <p>The source for the Licenses application is located at:</p>
-<pre>    src/settings/drmbrowser/</pre>
+<pre>&nbsp;   src/settings/drmbrowser/</pre>
 <a name="drm-services"></a>
 <h3>DRM Services</h3>
 <p>Qtopia utilises <a href="datasharing.html">Qtopia Data Sharing (QDS)</a> services to process data received through WAP Push, web download and MMS. Agents that wish to handle data received through these channels should provide a QDS service for each mime type handled. Data received through WAP push will be delivered to a service with the &quot;push&quot; attribute and a request data type matching the mime type of the data, web browsers and MMS clients will search for services with the &quot;handle&quot; attribute and possibly also the &quot;drm&quot; attribute. Services with the &quot;handle&quot; attribute (but not the &quot;push&quot; attribute) may also specify a response data type allowing conversion of some data types to a device localised format.</p>
 <p>The QDS definition for a service which installs an OMA DRM v1 XML rights objects may be:</p>
-<pre>    [handleXmlRightsObject]
+<pre>&nbsp;   [handleXmlRightsObject]
     RequestDataType=application/vnd.oma.drm.rights+xml
     ResponseDataType=
     Attributes=&quot;drm;handle;push&quot;
@@ -42,16 +41,16 @@
 <a name="installation"></a>
 <h3>Installation</h3>
 <p>Agents that don't require a license management application or service, or wish to implement that functionality in their own application should create a plug-in library for a <a href="qdrmcontentplugin.html">QDrmContentPlugin</a> and install it to:</p>
-<pre>    $QPEDIR/plugins/drmcontent/</pre>
+<pre>&nbsp;   $QPEDIR/plugins/drmcontent/</pre>
 <p>Agents that wish to utilise the common license management and settings application or expose a service in the DRM server process should should create a plug-in library for a <a href="qdrmagentplugin.html">QDrmAgentPlugin</a> and install it to:</p>
-<pre>    $QPEDIR/plugins/drmagent/</pre>
+<pre>&nbsp;   $QPEDIR/plugins/drmagent/</pre>
 <a name="oma-drm"></a>
 <h2>OMA DRM</h2>
 <p>A number of classes are provided in libqtopiaomadrm to assist in developing a drm agent plugin for OMA DRM v2. These classes provide a partial implementation of the <a href="qdrmcontentplugin.html">QDrmContentPlugin</a> interface, define the <tt>OmaDrmAgent</tt> service and include license management and settings widgets.</p>
 <p>The libqtopiaomadrm library is located in:</p>
-<pre>    src/libraries/qtopiaomadrm/</pre>
+<pre>&nbsp;   src/libraries/qtopiaomadrm/</pre>
 <p>The service and QDS definition files for the OmaDrmAgent service are:</p>
-<pre>    etc/qds/OmaDrmAgent
+<pre>&nbsp;   etc/qds/OmaDrmAgent
     services/OmaDrmAgent</pre>
 <a name="beep-science-oma-drm-agent"></a>
 <h2>Beep Science OMA DRM Agent</h2>
@@ -61,11 +60,11 @@
 <p>A device key and certificate are required by the Beep Science DRM plugin in order to authenticate the device during ROAP transactions, the plugin imports the the key file <tt>BSCI_Device.pem.key</tt> and the certificate file <tt>BSCI_Device.pem.crt</tt> from the <tt>&lt;Qtopia Runtime Prefix&gt;/etc/bscidrm</tt> directory when the agent is first initialized.</p>
 <p>The Beep Science DRM agent libraries can be acquired by contacting <a href="http://www.beepscience.com">Beep Science</a>.</p>
 <p>The source for the Beep Science DRM agent plugin is located in:</p>
-<pre>    src/plugins/drmagent/bscidrmagent</pre>
+<pre>&nbsp;   src/plugins/drmagent/bscidrmagent</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.2</div></td>
 </tr></table></div></address></body>
 </html>

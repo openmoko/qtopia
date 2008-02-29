@@ -19,6 +19,8 @@
 **
 ****************************************************************************/
 
+#include <QApplication>
+#include <QPalette>
 #include "data.h"
 
 Data::Data(){
@@ -49,7 +51,7 @@ QString Data::getFormattedOutput() {
 
 QPixmap* Data::draw() {
     QString currentOutput = getFormattedOutput();
-    static QFont myFont = QFont( "helvetica", 11, QFont::Bold );
+    static QFont myFont = QFont( "dejavu", 9, QFont::Bold );
     if (cachedOutput != currentOutput) {
         delete cache;
         cache = 0;
@@ -57,10 +59,10 @@ QPixmap* Data::draw() {
     if (!cache) {
         cachedOutput = currentOutput;
         QRect bRect = QFontMetrics(myFont).boundingRect(0,0,240,20,Qt::AlignLeft,cachedOutput);
-        cache = new QBitmap(bRect.size());
-        cache->clear();
+        cache = new QPixmap(bRect.size());
+        cache->fill(Qt::transparent);
         QPainter p(cache);
-        p.setPen(Qt::color1);
+        p.setPen(QApplication::palette().color(QPalette::Text));
         p.setFont(myFont);
         p.drawText(0,0,bRect.width(),bRect.height(),Qt::AlignRight,cachedOutput);
     }

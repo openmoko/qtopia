@@ -10,6 +10,7 @@ use lib ( dirname($0) );
 use Qtopia::Paths;
 use Qtopia::Vars;
 use Qtopia::File;
+use Qtopia::Opt;
 
 Qtopia::Paths::get_paths();
 
@@ -18,6 +19,7 @@ if ( $isWindows ) {
     check_script("$0", "$depotpath/bin", $ARGV[0]);
 }
 
+Qtopia::Opt::read_config_cache();
 
 use constant DEBUG => 0;
 
@@ -210,6 +212,7 @@ sub make_pkg
         if ( $format eq "qpk" )
         {
             print OUT "Domain: $domain\n";
+            print OUT "QtopiaVersion: ".opt("version", "qtopia")."\n";
         }
         print OUT "Files: ".join(" ", @files)."\n";
         print OUT "Installed-Size: ".`du -sh $path | awk '{print \$1}'`;

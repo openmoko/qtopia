@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/gui/widgets/qdial.cpp -->
+<!-- /home/qt/tmp/qt-4.2.3-qt-1176773594180/qtopia-core-opensource-src-4.2.3/src/gui/widgets/qdial.cpp -->
 <head>
   <title>Qt 4.2: QDial Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -47,7 +47,7 @@
 <li><div class="fn"/>22 public functions inherited from <a href="qabstractslider.html#public-functions">QAbstractSlider</a></li>
 <li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -88,17 +88,17 @@
 <tr valign="top" class="odd"><td><img src="images/plastique-dial.png" alt="Screenshot of a dial in the Plastique widget style" /></td><td><img src="images/windowsxp-dial.png" alt="Screenshot of a dial in the Windows XP widget style" /></td><td><img src="images/macintosh-dial.png" alt="Screenshot of a dial in the Macintosh widget style" /></td></tr>
 <tr valign="top" class="even"><td colspan="3">Dials shown in various widget styles (from left to right): <a href="gallery-plastique.html">Plastique</a>, <a href="gallery-windowsxp.html">Windows XP</a>, <a href="gallery-macintosh.html">Macintosh</a>.</td></tr>
 </table></p>
-<p>See also <a href="qscrollbar.html">QScrollBar</a>, <a href="qspinbox.html">QSpinBox</a>, <a href="qslider.html">QSlider</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Slider</a>, and Sliders Example.</p>
+<p>See also <a href="qscrollbar.html">QScrollBar</a>, <a href="qspinbox.html">QSpinBox</a>, <a href="qslider.html">QSlider</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Slider</a>, and <a href="widgets-sliders.html">Sliders Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="notchSize-prop"></a>notchSize : const int</h3>
 <p>This property holds the current notch size.</p>
-<p>The notch size is in range control units, not pixels, and if possible it is a multiple of <a href="qabstractslider-qt3.html#lineStepx">lineStep</a>() that results in an on-screen notch size near <a href="qdial.html#notchTarget-prop">notchTarget</a>().</p>
+<p>The notch size is in range control units, not pixels, and if possible it is a multiple of <a href="qabstractslider.html#singleStep-prop">singleStep</a>() that results in an on-screen notch size near <a href="qdial.html#notchTarget-prop">notchTarget</a>().</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>int notchSize () const</b></li>
 </ul>
-<p>See also <a href="qdial.html#notchTarget-prop">notchTarget</a> and <a href="qabstractslider-qt3.html#lineStepx">lineStep</a>().</p>
+<p>See also <a href="qdial.html#notchTarget-prop">notchTarget</a>() and <a href="qabstractslider.html#singleStep-prop">singleStep</a>().</p>
 <h3 class="fn"><a name="notchTarget-prop"></a>notchTarget : <a href="qtglobal.html#qreal-typedef">qreal</a></h3>
 <p>This property holds the target number of pixels between notches.</p>
 <p>The notch target is the number of pixels <a href="qdial.html">QDial</a> attempts to put between each notch.</p>
@@ -151,6 +151,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.3</div></td>
 </tr></table></div></address></body>
 </html>

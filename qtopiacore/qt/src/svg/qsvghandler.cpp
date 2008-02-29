@@ -1,10 +1,20 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** This file is part of the QtSVG module of the Qt Toolkit.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** This file may be used under the terms of the GNU General Public
+** License version 2.0 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of
+** this file.  Please review the following information to ensure GNU
+** General Public Licensing requirements will be met:
+** http://www.trolltech.com/products/qt/opensource.html
+**
+** If you are unsure which license is appropriate for your use, please
+** review the following information:
+** http://www.trolltech.com/products/qt/licensing.html or contact the
+** sales department at sales@trolltech.com.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -175,7 +185,7 @@ public:
         if (!n)
             return false;
         QString name = nodeToName(n);
-        return (name == nodeName);
+        return QString::compare(name, nodeName, Qt::CaseInsensitive) == 0;
     }
     virtual QString attribute(NodePtr node, const QString &name) const
     {
@@ -2989,7 +2999,7 @@ QHash<QString, StyleParseMethod>   QSvgHandler::s_styleUtilFactory;
 //static const char *SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 QSvgHandler::QSvgHandler()
-    : m_doc(0), m_style(0), m_defaultCoords(PX)
+    : m_doc(0), m_style(0), m_defaultCoords(PX), m_animEnd(0)
 {
     if (s_groupFactory.isEmpty()) {
         defaultPen.setMiterLimit(4);
@@ -3325,9 +3335,8 @@ bool QSvgHandler::processingInstruction(const QString &target, const QString &da
     return true;
 }
 
-void QSvgHandler::setAnimPeriod(int start, int end)
+void QSvgHandler::setAnimPeriod(int /* start */, int end)
 {
-    m_animStart = qMax(qMin(start, m_animStart), 0);
     m_animEnd   = qMax(end, m_animEnd);
 }
 

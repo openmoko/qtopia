@@ -23,11 +23,11 @@
 #define __REMOTEDEVICEPROPERTIESDIALOG_P_H__
 
 #include <qbluetoothremotedevice.h>
-#include <qsdap.h>
+#include <qbluetoothsdpquery.h>
 
 #include <QDialog>
 
-class QSDAPSearchResult;
+class QBluetoothSdpQueryResult;
 class QWaitWidget;
 class QBluetoothAddress;
 class QBluetoothLocalDevice;
@@ -52,21 +52,21 @@ public:
                           const QPixmap &icon );
 
 private slots:
-    void foundServices( const QSDAPSearchResult &result );
+    void foundServices( const QBluetoothSdpQueryResult &result );
+    void serviceSearchCancelled();
+    void cancelSearch();
     void showServices();
-    void checkAliasEdit();
     void setDeviceAlias();
 
 private:
     void initMainInfo();
-    void resetMainInfo( const QString &displayName, const QPixmap &pixmap );
 
     static const QString SERVICE_ERROR_MSG;
 
     QBluetoothRemoteDevice m_remote;
     QBluetoothLocalDevice *m_local;
 
-    QSDAP m_sdap;
+    QBluetoothSdpQuery m_sdap;
     QWaitWidget *m_waitWidget;
     QDialog *m_servicesDialog;
     QTextEdit *m_servicesText;
@@ -78,6 +78,8 @@ private:
 
     QLabel *m_icon;
     QList<QLineEdit *> m_devAttrs;
+
+    bool m_cancellingSearch;
 };
 
 #endif
